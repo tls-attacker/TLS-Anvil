@@ -6,6 +6,8 @@ import com.beust.jcommander.ParameterException;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestRunner;
 import de.rub.nds.tlstest.framework.config.TestConfig;
+import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
+import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,25 +15,41 @@ public class Main {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static void main(String[] args) {
-        TestConfig testConfig = new TestConfig();
+        TestClientDelegate testClientDelegate = new TestClientDelegate();
+        TestServerDelegate testServerDelegate = new TestServerDelegate();
 
-        JCommander commander = new JCommander(testConfig);
+        TestConfig testConfig = new TestConfig();
+        testConfig.setTestClientDelegate(testClientDelegate);
+        testConfig.setTestServerDelegate(testServerDelegate);
+
+
+        JCommander jc = JCommander.newBuilder()
+                .addObject(testConfig)
+                .addCommand("client", testClientDelegate)
+                .addCommand("server", testServerDelegate)
+                .build();
 
         try {
-//            commander.parse(args);
-//            if (testConfig.getGeneralDelegate().isHelp()) {
-//                commander.usage();
-//                return;
-//            }
+            jc.parse(args);
+            if (jc.getParsedCommand() == null) {
+                throw new ParameterException("You have to use the client or server command");
+            }
 
-            Config config = testConfig.createConfig(Config.createConfig());
+            testConfig.setTestEndpointMode(jc.getParsedCommand());
+
+            if (testConfig.getGeneralDelegate().isHelp()) {
+                jc.usage();
+                return;
+            }
+
+            Config config = testConfig.createConfig();
 
             TestRunner runner = new TestRunner(config);
             runner.runTests(Main.class);
         }
         catch (ParameterException E) {
             LOGGER.error("Could not parse provided parameters", E);
-            commander.usage();
+            jc.usage();
         }
     }
 }

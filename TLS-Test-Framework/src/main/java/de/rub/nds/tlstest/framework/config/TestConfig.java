@@ -1,24 +1,33 @@
 package de.rub.nds.tlstest.framework.config;
 
+import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bouncycastle.util.IPAddress;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class TestConfig extends TLSDelegateConfig {
-
+    private static final Logger LOGGER = LogManager.getLogger();
     private TestClientDelegate testClientDelegate = null;
     private TestServerDelegate testServerDelegate = null;
 
+    private JCommander argParser = null;
+
     private TestEndpointType testEndpointMode = null;
+    private boolean parsedArgs = false;
 
 
     @Parameter(names = "-tags", description = "Run only tests containing on of the specified tags", variableArity = true)
@@ -30,28 +39,56 @@ public class TestConfig extends TLSDelegateConfig {
 
     public TestConfig() {
         super(new GeneralDelegate());
+        this.testServerDelegate = new TestServerDelegate();
+        this.testClientDelegate = new TestClientDelegate();
     }
 
 
-    public TestEndpointType getTestEndpointMode() {
-        return testEndpointMode;
-    }
-
-    public void setTestEndpointMode(TestEndpointType testEndpointMode) {
-        this.testEndpointMode = testEndpointMode;
-    }
-
-    public void setTestEndpointMode(String testEndpointMode) {
-        if (testEndpointMode.toLowerCase().equals("client")) {
-            this.testEndpointMode = TestEndpointType.CLIENT;
+    /**
+     * This function parses the COMMAND environment variable which can be used
+     * as alternative to the default arguments passed to the program.
+     * This is needed to be able to run TLS-Tests directly from the IDE via GUI.
+     *
+     * @return arguments parsed from the COMMAND environment variable
+     */
+    @Nonnull
+    private String[] argsFromEnvironment() {
+        String env = System.getenv("COMMAND");
+        if (env == null) {
+            throw new ParameterException("No args could be found");
         }
-        else if (testEndpointMode.toLowerCase().equals("server")) {
-            this.testEndpointMode = TestEndpointType.SERVER;
-        }
-        else {
-            throw new RuntimeException("Invalid testEndpointMode");
-        }
+
+        return env.split("\\s");
     }
+
+
+    public void parse(@Nullable String[] args) {
+        if (argParser == null) {
+            argParser = JCommander.newBuilder()
+                    .addObject(this)
+                    .addCommand("client", testClientDelegate)
+                    .addCommand("server", testServerDelegate)
+                    .build();
+        }
+
+        if (args == null) {
+            args = argsFromEnvironment();
+        }
+
+        this.argParser.parse(args);
+        if (argParser.getParsedCommand() == null) {
+            throw new ParameterException("You have to use the client or server command");
+        }
+
+        this.setTestEndpointMode(argParser.getParsedCommand());
+
+        if (getGeneralDelegate().isHelp()) {
+            argParser.usage();
+        }
+
+        parsedArgs = true;
+    }
+
 
     @Override
     public Config createConfig() {
@@ -77,6 +114,22 @@ public class TestConfig extends TLSDelegateConfig {
         return config;
     }
 
+
+    public TestEndpointType getTestEndpointMode() {
+        return testEndpointMode;
+    }
+
+
+    private void setTestEndpointMode(@Nonnull String testEndpointMode) {
+        if (testEndpointMode.toLowerCase().equals(TestEndpointType.CLIENT.toString())) {
+            this.testEndpointMode = TestEndpointType.CLIENT;
+        } else if (testEndpointMode.toLowerCase().equals(TestEndpointType.SERVER.toString())) {
+            this.testEndpointMode = TestEndpointType.SERVER;
+        } else {
+            throw new RuntimeException("Invalid testEndpointMode");
+        }
+    }
+
     public String getTestPackage() {
         return testPackage;
     }
@@ -89,15 +142,19 @@ public class TestConfig extends TLSDelegateConfig {
         return testServerDelegate;
     }
 
-    public void setTestServerDelegate(TestServerDelegate testServerDelegate) {
-        this.testServerDelegate = testServerDelegate;
-    }
-
     public TestClientDelegate getTestClientDelegate() {
         return testClientDelegate;
     }
 
-    public void setTestClientDelegate(TestClientDelegate testClientDelegate) {
-        this.testClientDelegate = testClientDelegate;
+    public void setArgParser(JCommander argParser) {
+        if (parsedArgs) {
+            LOGGER.warn("Args are already parsed, setting the argParse requires calling parse() again.");
+        }
+        this.argParser = argParser;
     }
+
+    public JCommander getArgParser() {
+        return argParser;
+    }
+
 }

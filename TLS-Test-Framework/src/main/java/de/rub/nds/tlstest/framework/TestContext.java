@@ -1,35 +1,52 @@
 package de.rub.nds.tlstest.framework;
 
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import org.junit.jupiter.api.extension.ExtensionContext;
-
-import java.lang.reflect.Method;
+import de.rub.nds.tlstest.framework.config.TestConfig;
 
 public class TestContext {
 
-    private TestEndpointType testEndpointType;
+    private TestConfig config;
 
-    public TestContext(ExtensionContext context) {
+    private static TestContext instance = null;
+    private TestRunner testRunner = null;
 
-        Method testMethod = context.getRequiredTestMethod();
-        Class<?> testClass = context.getRequiredTestClass();
-
-        if (testMethod.isAnnotationPresent(ClientTest.class)) {
-            testEndpointType = TestEndpointType.CLIENT;
-        } else if (testMethod.isAnnotationPresent(ServerTest.class)) {
-            testEndpointType = TestEndpointType.SERVER;
-        } else if (testClass.isAnnotationPresent(ClientTest.class)) {
-            testEndpointType = TestEndpointType.CLIENT;
-        } else if (testClass.isAnnotationPresent(ServerTest.class)) {
-            testEndpointType = TestEndpointType.SERVER;
-        } else {
-            testEndpointType = TestEndpointType.BOTH;
+    public static TestContext getInstance() {
+        if (TestContext.instance == null) {
+            TestContext.instance = new TestContext();
+            TestContext.instance.config.parse(null);
         }
+        return TestContext.instance;
     }
 
-    public TestEndpointType getTestEndpointType() {
-        return testEndpointType;
+    public TestContext() {
+        super();
+        this.config = new TestConfig();
+        this.testRunner = new TestRunner(this.config);
+    }
+
+    public TestContext(TestConfig config) {
+        super();
+        this.config = config;
+    }
+
+
+
+
+
+
+
+    public TestConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(TestConfig config) {
+        this.config = config;
+    }
+
+    public TestRunner getTestRunner() {
+        return testRunner;
+    }
+
+    public void setTestRunner(TestRunner testRunner) {
+        this.testRunner = testRunner;
     }
 }

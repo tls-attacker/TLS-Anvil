@@ -7,49 +7,49 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TestContextTest {
+class TestContextTest extends TlsBaseTest {
 
     @ServerTest
-    void testServerTest(TestContext context) {
-        assertEquals(context.getTestEndpointType(), TestEndpointType.SERVER);
+    void testServerTest() {
+        assertEquals(context.getConfig().getTestEndpointMode(), TestEndpointType.SERVER);
     }
 
     @ClientTest
-    void testClientTest(TestContext context) {
-        assertEquals(context.getTestEndpointType(), TestEndpointType.CLIENT);
+    void testClientTest() {
+        assertEquals(context.getConfig().getTestEndpointMode(), TestEndpointType.CLIENT);
     }
 
     @Test
-    void testBothTest(TestContext context) {
-        assertEquals(context.getTestEndpointType(), TestEndpointType.BOTH);
+    void testBothTest() {
+        assertEquals(context.getConfig().getTestEndpointMode(), TestEndpointType.BOTH);
     }
 }
 
 @ServerTest
-class TestServerClassContext {
+class TestServerClassContext extends TlsBaseTest {
 
     @Test
-    void testServerTest(TestContext context) {
-        assertEquals(context.getTestEndpointType(), TestEndpointType.SERVER);
+    void testServerTest() {
+        assertEquals(context.getConfig().getTestEndpointMode(), TestEndpointType.SERVER);
     }
 
     @ClientTest
-    void testClientTest(TestContext context) {
-        assertEquals(context.getTestEndpointType(), TestEndpointType.CLIENT);
+    void testClientTest() {
+        assertEquals(context.getConfig().getTestEndpointMode(), TestEndpointType.CLIENT);
     }
 }
 
 
 @ClientTest
-class TestClientClassContext {
+class TestClientClassContext extends TlsBaseTest {
 
     @Test
-    void testServerTest(TestContext context) {
-        assertEquals(context.getTestEndpointType(), TestEndpointType.CLIENT);
+    void testServerTest() {
+        assertEquals(context.getConfig().getTestEndpointMode(), TestEndpointType.CLIENT);
     }
 
     @ServerTest
-    void testClientTest(TestContext context) {
-        assertEquals(context.getTestEndpointType(), TestEndpointType.SERVER);
+    void testClientTest() {
+        assertEquals(context.getConfig().getTestEndpointMode(), TestEndpointType.SERVER);
     }
 }

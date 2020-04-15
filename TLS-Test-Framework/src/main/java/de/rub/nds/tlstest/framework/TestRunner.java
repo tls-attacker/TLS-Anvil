@@ -1,6 +1,10 @@
 package de.rub.nds.tlstest.framework;
 
+import de.rub.nds.tlsscanner.TlsScanner;
+import de.rub.nds.tlsscanner.config.ScannerConfig;
+import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
+import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.platform.launcher.Launcher;
@@ -24,7 +28,32 @@ public class TestRunner {
         this.testConfig = testConfig;
     }
 
+
+    public void serverTestPreparation() {
+        ScannerConfig scannerConfig = new ScannerConfig(testConfig.getGeneralDelegate(), testConfig.getTestServerDelegate());
+        int cores = Runtime.getRuntime().availableProcessors();
+        scannerConfig.setOverallThreads(cores);
+
+        TlsScanner scanner = new TlsScanner(scannerConfig);
+        SiteReport report = scanner.scan();
+        testConfig.setSiteReport(report);
+    }
+
+
+    public void clientTestPreparation() {
+
+    }
+
+
     public void runTests(Class<?> mainClass) {
+        if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
+            clientTestPreparation();
+        }
+        else if (this.testConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
+            serverTestPreparation();
+        }
+        else throw new RuntimeException("Invalid TestEndpointMode");
+
         String packageName = mainClass.getPackage().getName();
         LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()
             .selectors(

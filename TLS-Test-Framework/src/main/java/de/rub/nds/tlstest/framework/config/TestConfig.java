@@ -6,6 +6,7 @@ import com.beust.jcommander.ParameterException;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
+import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
@@ -27,6 +28,7 @@ public class TestConfig extends TLSDelegateConfig {
     private JCommander argParser = null;
 
     private TestEndpointType testEndpointMode = null;
+    private SiteReport siteReport = null;
     private boolean parsedArgs = false;
 
 
@@ -157,4 +159,11 @@ public class TestConfig extends TLSDelegateConfig {
         return argParser;
     }
 
+    public SiteReport getSiteReport() {
+        return siteReport;
+    }
+
+    public void setSiteReport(SiteReport siteReport) {
+        this.siteReport = siteReport;
+    }
 }

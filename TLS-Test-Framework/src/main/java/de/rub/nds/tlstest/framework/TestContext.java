@@ -21,14 +21,13 @@ public class TestContext {
         super();
         this.config = new TestConfig();
         this.testRunner = new TestRunner(this.config);
+        TestContext.instance = this;
     }
 
     public TestContext(TestConfig config) {
         super();
         this.config = config;
     }
-
-
 
 
 

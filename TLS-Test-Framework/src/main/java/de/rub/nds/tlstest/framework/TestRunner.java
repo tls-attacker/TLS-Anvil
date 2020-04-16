@@ -46,6 +46,9 @@ public class TestRunner {
 
 
     public void runTests(Class<?> mainClass) {
+
+        this.testConfig.createConfig();
+
         if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
             clientTestPreparation();
         }

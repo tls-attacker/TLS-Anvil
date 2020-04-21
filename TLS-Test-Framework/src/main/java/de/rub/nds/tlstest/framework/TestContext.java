@@ -9,7 +9,7 @@ public class TestContext {
     private static TestContext instance = null;
     private TestRunner testRunner = null;
 
-    public static TestContext getInstance() {
+    synchronized public static TestContext getInstance() {
         if (TestContext.instance == null) {
             TestContext.instance = new TestContext();
             TestContext.instance.config.parse(null);

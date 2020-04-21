@@ -2,24 +2,42 @@
 <Configuration status="WARN">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout pattern="%highlight{%d{HH:mm:ss}{GMT+0} [%t] %-5level: %c{1} - %msg%n%throwable}"/>
+            <PatternLayout pattern="%highlight{%d{HH:mm:ss}{GMT+0} [%t] %-5level: %c{1} - %msg%n%throwable}"/>
+        </Console>
+        <Console name="ConsoleLibrary" target="SYSTEM_OUT">
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%highlight{%d{HH:mm:ss}{GMT+0} [%t] %-5level: %c{1} - %msg%n%throwable}"/>
         </Console>
         <Console name="Info" target="SYSTEM_OUT">
-			<PatternLayout pattern="%highlight{%d{HH:mm:ss}{GMT+0} [%t] %-5level: %c{1}} - %msg%n%highlight{%throwable}"/>
+            <PatternLayout pattern="%highlight{%d{HH:mm:ss}{GMT+0} [%t] %-5level: %c{1}} - %msg%n%highlight{%throwable}"/>
         </Console>
         <Console name="Direct" target="SYSTEM_OUT">
-			<PatternLayout pattern="%msg%n"/>
+            <PatternLayout pattern="%msg%n"/>
         </Console>
     </Appenders>
     <Loggers>
-		<Logger name="DirectLOgger" level="ALL">
-			<AppenderRef ref="Direct"/>
-		</Logger>
-        
+        <Logger name="DirectLOgger" level="ALL">
+            <AppenderRef ref="Direct"/>
+        </Logger>
 
-        
-        <Root level="INFO">
+        <Root level="trace">
             <AppenderRef ref="Console"/>
         </Root>
+
+        <Logger name="de.rub.nds.tlsscanner" level="trace" additivity="false">
+            <AppenderRef ref="ConsoleLibrary"/>
+        </Logger>
+        <Logger name="de.rub.nds.tlsattacker" level="trace" additivity="false">
+            <AppenderRef ref="ConsoleLibrary"/>
+        </Logger>
+        <Logger name="de.rub.nds.modifiablevariable" level="trace" additivity="false">
+            <AppenderRef ref="ConsoleLibrary"/>
+        </Logger>
+        <Logger name="Direct" level="trace" additivity="false">
+            <AppenderRef ref="ConsoleLibrary"/>
+        </Logger>
+        <Logger name="DirectLogger" level="trace" additivity="false">
+            <AppenderRef ref="ConsoleLibrary"/>
+        </Logger>
     </Loggers>
 </Configuration>

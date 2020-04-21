@@ -13,6 +13,7 @@ public class TestContext {
         if (TestContext.instance == null) {
             TestContext.instance = new TestContext();
             TestContext.instance.config.parse(null);
+            TestContext.instance.getTestRunner().prepareTestExecution();
         }
         return TestContext.instance;
     }

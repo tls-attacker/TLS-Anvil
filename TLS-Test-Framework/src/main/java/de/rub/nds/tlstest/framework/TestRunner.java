@@ -29,7 +29,7 @@ public class TestRunner {
     }
 
 
-    public void serverTestPreparation() {
+    private void serverTestPreparation() {
         ScannerConfig scannerConfig = new ScannerConfig(testConfig.getGeneralDelegate(), testConfig.getTestServerDelegate());
         int cores = Runtime.getRuntime().availableProcessors();
         scannerConfig.setOverallThreads(cores);
@@ -40,13 +40,12 @@ public class TestRunner {
     }
 
 
-    public void clientTestPreparation() {
+    private void clientTestPreparation() {
 
     }
 
-
-    public void runTests(Class<?> mainClass) {
-
+    public void prepareTestExecution() {
+        LOGGER.info("Prepare Test execution - Starting TLS Scanner");
         this.testConfig.createConfig();
 
         if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
@@ -56,6 +55,11 @@ public class TestRunner {
             serverTestPreparation();
         }
         else throw new RuntimeException("Invalid TestEndpointMode");
+    }
+
+
+    public void runTests(Class<?> mainClass) {
+        prepareTestExecution();
 
         String packageName = mainClass.getPackage().getName();
         LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()

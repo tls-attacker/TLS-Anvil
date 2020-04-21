@@ -97,12 +97,6 @@ class KeyX implements KeyExchange {
         }
 
 
-        if (Arrays.asList(this.supported()).contains(KeyExchangeType.ALL12)) {
-            filtered.add(KeyExchangeType.DH);
-            filtered.add(KeyExchangeType.ECDH);
-            filtered.add(KeyExchangeType.RSA);
-        }
-
         KeyExchangeType[] filteredA = new KeyExchangeType[filtered.size()];
         filtered.toArray(filteredA);
         setSupportedKxs(filteredA);
@@ -165,13 +159,20 @@ public enum KeyExchangeType {
             LOGGER.error("No KeyExchange annotation could not be found on class or method level for " + identifier + ", thus the test is disabled.");
         }
 
-        if (resolvedKeyExchange.provided() == KeyExchangeType.NOT_SPECIFIED && resolvedKeyExchange.supported().length == 1) {
+        boolean supportsAll = Arrays.asList(resolvedKeyExchange.supported()).contains(KeyExchangeType.ALL12);
+        if (supportsAll || resolvedKeyExchange.provided() == KeyExchangeType.ALL12) {
+            resolvedKeyExchange.setSupportedKxs(new KeyExchangeType[]{KeyExchangeType.DH, KeyExchangeType.ECDH, KeyExchangeType.RSA});
+        }
+
+        if (resolvedKeyExchange.provided() == KeyExchangeType.NOT_SPECIFIED &&
+                resolvedKeyExchange.supported().length == 1 &&
+                resolvedKeyExchange.supported()[0] != KeyExchangeType.ALL12) {
             resolvedKeyExchange.setProvidedKx(resolvedKeyExchange.supported()[0]);
         }
 
-        if ((testClass.isAnnotationPresent(KeyExchange.class) || testMethod.isAnnotationPresent(KeyExchange.class))
-                && resolvedKeyExchange.provided() == KeyExchangeType.NOT_SPECIFIED) {
-            LOGGER.warn("KeyExchange annotation used on method or class of " + identifier + ", but KeyExchange property 'provided' is not set, thus cannot transform.");
+        if ((testClass.isAnnotationPresent(KeyExchange.class) || testMethod.isAnnotationPresent(KeyExchange.class)) &&
+                (resolvedKeyExchange.provided() == KeyExchangeType.NOT_SPECIFIED || resolvedKeyExchange.provided() == KeyExchangeType.ALL12)) {
+            LOGGER.warn("KeyExchange annotation used on method or class of " + identifier + ", but KeyExchange property 'provided' is not set or set to ALL12, thus cannot transform.");
         }
 
         if (resolvedKeyExchange.supported().length > 0 || resolvedKeyExchange.provided() != KeyExchangeType.NOT_SPECIFIED) {

@@ -6,12 +6,11 @@ import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.lang.reflect.Method;
 
-public class EndpointCondition implements ExecutionCondition {
+public class EndpointCondition extends BaseCondition {
 
     private TestEndpointType endpointOfMethod(ExtensionContext context) {
         Method testMethod = context.getRequiredTestMethod();

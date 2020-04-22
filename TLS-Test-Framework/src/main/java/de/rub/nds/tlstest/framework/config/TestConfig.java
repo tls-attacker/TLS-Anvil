@@ -107,7 +107,9 @@ public class TestConfig extends TLSDelegateConfig {
 
         Config config = super.createConfig();
 
-        if (!IPAddress.isValid(config.getDefaultClientConnection().getHostname()) || this.getTestServerDelegate().getSniHostname() != null) {
+
+        if ((!IPAddress.isValid(config.getDefaultClientConnection().getHostname()) || this.getTestServerDelegate().getSniHostname() != null)
+                && this.testEndpointMode == TestEndpointType.SERVER) {
             config.setAddServerNameIndicationExtension(true);
         } else {
             config.setAddServerNameIndicationExtension(false);

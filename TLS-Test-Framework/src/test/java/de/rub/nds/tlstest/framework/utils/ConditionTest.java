@@ -40,7 +40,7 @@ public class ConditionTest implements ExecutionCondition {
             throw new RuntimeException(e);
         }
 
-        if (result.isDisabled() && context.getRequiredTestMethod().getName().startsWith("execute")) {
+        if (result.isDisabled() && context.getTestMethod().isPresent() && context.getRequiredTestMethod().getName().startsWith("execute")) {
             throw new RuntimeException("This test should be executed");
         }
 

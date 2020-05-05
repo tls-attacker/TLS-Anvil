@@ -1,4 +1,4 @@
-package de.rub.nds.tlstest.framework;
+package de.rub.nds.tlstest.framework.execution;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -12,6 +12,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.TlsScanner;
 import de.rub.nds.tlsscanner.config.ScannerConfig;
 import de.rub.nds.tlsscanner.report.SiteReport;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import org.apache.logging.log4j.LogManager;
@@ -24,7 +25,7 @@ import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -47,12 +48,33 @@ public class TestRunner {
 
 
     private void serverTestPreparation() {
+        File f = new File(testConfig.getTestServerDelegate().getHost());
+        if (f.exists() && !testConfig.isIgnoreCache()) {
+            try (FileInputStream fis = new FileInputStream (testConfig.getTestServerDelegate().getHost());
+                 ObjectInputStream ois = new ObjectInputStream (fis)) {
+                final TestSiteReport report = (TestSiteReport) ois.readObject ();
+                testConfig.setSiteReport(report.getSiteReport());
+                LOGGER.info("Using cached siteReport");
+                return;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         ScannerConfig scannerConfig = new ScannerConfig(testConfig.getGeneralDelegate(), testConfig.getTestServerDelegate());
         int cores = Runtime.getRuntime().availableProcessors();
         scannerConfig.setOverallThreads(cores);
 
         TlsScanner scanner = new TlsScanner(scannerConfig);
         SiteReport report = scanner.scan();
+        TestSiteReport smallReport = new TestSiteReport(report);
+        try (FileOutputStream fos = new FileOutputStream (testConfig.getTestServerDelegate().getHost());
+             ObjectOutputStream oos = new ObjectOutputStream (fos)) {
+            oos.writeObject (smallReport);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         testConfig.setSiteReport(report);
     }
 

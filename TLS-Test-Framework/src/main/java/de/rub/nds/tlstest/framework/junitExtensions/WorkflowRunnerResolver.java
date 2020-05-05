@@ -1,9 +1,10 @@
 package de.rub.nds.tlstest.framework.junitExtensions;
 
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.WorkflowRunner;
+import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.KeyX;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
@@ -27,9 +28,16 @@ public class WorkflowRunnerResolver implements ParameterResolver {
 
         Method testM = method.get();
         if (testM.isAnnotationPresent(KeyExchange.class)) {
-            KeyExchange annotation = KeyExchangeType.resolveKexAnnotation(extensionContext);
-            param.setKeyExchange(annotation);
+            KeyExchange annotation = KeyX.resolveKexAnnotation(extensionContext);
+            param.setKeyExchange(new KeyX(annotation));
         }
+
+        if (testM.isAnnotationPresent(TlsTest.class)) {
+            TlsTest annotation = testM.getAnnotation(TlsTest.class);
+            param.setTestDescription(annotation.description());
+        }
+
+        param.setTestMethodName(testM.getName());
 
         return param;
     }

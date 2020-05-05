@@ -2,6 +2,7 @@ package de.rub.nds.tlstest.framework.junitExtensions;
 
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.KeyX;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -18,7 +19,7 @@ public class KexCondition extends BaseCondition {
             return ConditionEvaluationResult.enabled("Class annotations are not relevant.");
         }
 
-        KeyExchange resolvedKeyExchange = KeyExchangeType.resolveKexAnnotation(extensionContext);
+        KeyExchange resolvedKeyExchange = KeyX.resolveKexAnnotation(extensionContext);
 
         if (resolvedKeyExchange.supported().length > 0) {
             return ConditionEvaluationResult.enabled("Target supports Ciphersuites that are supported by the test.");

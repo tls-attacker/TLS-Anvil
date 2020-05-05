@@ -12,5 +12,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Test
 public @interface TlsTest {
-
+    String description() default "";
 }

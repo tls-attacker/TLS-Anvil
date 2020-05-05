@@ -38,6 +38,9 @@ public class TestConfig extends TLSDelegateConfig {
     @Parameter(names = "-testPackage", description = "Run only tests included in the specified package")
     private String testPackage = null;
 
+    @Parameter(names = "-ignoreCache", description = "Discovering supported TLS-Features takes time, thus they are cached. Using this flag, the cache is ignored.")
+    private boolean ignoreCache = false;
+
 
     public TestConfig() {
         super(new GeneralDelegate());
@@ -167,5 +170,13 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setSiteReport(SiteReport siteReport) {
         this.siteReport = siteReport;
+    }
+
+    public boolean isIgnoreCache() {
+        return ignoreCache;
+    }
+
+    public void setIgnoreCache(boolean ignoreCache) {
+        this.ignoreCache = ignoreCache;
     }
 }

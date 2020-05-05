@@ -5,6 +5,8 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.ServerDelegate;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
@@ -15,6 +17,7 @@ interface ScriptFunction {
 
 @Parameters(commandDescription = "Test a client implementation, thus start TLS-Attacker in server mode")
 public class TestClientDelegate extends ServerDelegate {
+    private static final Logger LOGGER = LogManager.getLogger();
 
     @Parameter(names = "-script", description = "The script is executed after the receiving port for the TLS Messages is opened. " +
             "This is inteded to trigger the client under test to initiate a TLS-Connection.")

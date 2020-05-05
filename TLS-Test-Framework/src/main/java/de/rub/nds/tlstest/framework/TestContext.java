@@ -1,9 +1,12 @@
 package de.rub.nds.tlstest.framework;
 
 import de.rub.nds.tlstest.framework.config.TestConfig;
+import de.rub.nds.tlstest.framework.execution.TestRunner;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TestContext {
-
+    private static final Logger LOGGER = LogManager.getLogger();
     private TestConfig config;
 
     private static TestContext instance = null;

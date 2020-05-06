@@ -31,6 +31,8 @@ public class TestConfig extends TLSDelegateConfig {
     private SiteReport siteReport = null;
     private boolean parsedArgs = false;
 
+    Config cachedConfig = null;
+
 
     @Parameter(names = "-tags", description = "Run only tests containing on of the specified tags", variableArity = true)
     private List<String> tags = new ArrayList<>();
@@ -96,7 +98,11 @@ public class TestConfig extends TLSDelegateConfig {
 
 
     @Override
-    public Config createConfig() {
+    synchronized public Config createConfig() {
+        if (cachedConfig != null) {
+            return cachedConfig.createCopy();
+        }
+
         switch (this.testEndpointMode) {
             case CLIENT:
                 addDelegate(this.testClientDelegate);
@@ -118,6 +124,7 @@ public class TestConfig extends TLSDelegateConfig {
             config.setAddServerNameIndicationExtension(false);
         }
 
+        cachedConfig = config;
         return config;
     }
 

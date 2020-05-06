@@ -1,10 +1,12 @@
 package de.rub.nds.tlstest.framework.junitExtensions;
 
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.constants.KeyX;
+import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
@@ -27,17 +29,31 @@ public class WorkflowRunnerResolver implements ParameterResolver {
         if (!method.isPresent()) return param;
 
         Method testM = method.get();
+        Class<?> testClass = extensionContext.getRequiredTestClass();
+
+        TestMethodConfig testMethodConfig = new TestMethodConfig();
+        param.setTestMethodConfig(testMethodConfig);
+
         if (testM.isAnnotationPresent(KeyExchange.class)) {
             KeyExchange annotation = KeyX.resolveKexAnnotation(extensionContext);
-            param.setKeyExchange(new KeyX(annotation));
+            testMethodConfig.setKeyExchange(new KeyX(annotation));
         }
 
         if (testM.isAnnotationPresent(TlsTest.class)) {
             TlsTest annotation = testM.getAnnotation(TlsTest.class);
-            param.setTestDescription(annotation.description());
+            testMethodConfig.setTlsTest(annotation);
         }
 
-        param.setTestMethodName(testM.getName());
+        if (testM.isAnnotationPresent(RFC.class)) {
+            testMethodConfig.setRfc(testM.getAnnotation(RFC.class));
+        }
+        else if (testClass.isAnnotationPresent(RFC.class)) {
+            testMethodConfig.setRfc(testClass.getAnnotation(RFC.class));
+        }
+
+        testMethodConfig.setMethodName(testM.getName());
+        testMethodConfig.setDisplayName(extensionContext.getDisplayName());
+        param.setExtensionContext(extensionContext);
 
         return param;
     }

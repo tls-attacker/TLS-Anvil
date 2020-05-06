@@ -64,7 +64,7 @@ public class AnnotatedStateContainer {
            for (Throwable i: errors) {
                LOGGER.error("\n" + ExecptionPrinter.stacktraceToString(i));
            }
-           throw new AssertionError("Test failed");
+           throw new AssertionError(String.format("%d/%d tests failed", errors.size(), states.size()));
         }
     }
 

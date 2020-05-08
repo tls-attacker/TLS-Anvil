@@ -4,13 +4,26 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.KeyX;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.NONE)
 public class TestMethodConfig {
     private KeyX keyExchange = null;
     private TlsTest tlsTest = null;
     private RFC rfc = null;
 
+    @XmlElement(name = "MethodName")
     private String methodName = null;
+
+    @XmlElement(name = "DisplayName")
     private String displayName = null;
+
+    @XmlElement(name = "ClassName")
+    private String className = null;
 
     public TestMethodConfig() {
 
@@ -56,5 +69,13 @@ public class TestMethodConfig {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
     }
 }

@@ -5,32 +5,23 @@ import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.KeyExchangeAlgorithm;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.state.State;
-import de.rub.nds.tlsattacker.core.util.CipherSuiteFilter;
-import de.rub.nds.tlsattacker.core.workflow.DefaultWorkflowExecutor;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
-import de.rub.nds.tlsattacker.core.workflow.task.ITask;
-import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.KeyX;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.util.*;
-import java.util.concurrent.Future;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class WorkflowRunner {
@@ -67,13 +58,12 @@ public class WorkflowRunner {
     }
 
     public AnnotatedStateContainer prepare(WorkflowTrace trace, Config config) {
-        AnnotatedState annotatedState = new AnnotatedState(new State(config, trace), testMethodConfig);
-        return new AnnotatedStateContainer(this.transformState(annotatedState));
+        AnnotatedState annotatedState = new AnnotatedState(new State(config, trace));
+        return new AnnotatedStateContainer(extensionContext.getUniqueId(), testMethodConfig, this.transformState(annotatedState));
     }
 
     public AnnotatedStateContainer prepare(WorkflowTrace trace) {
-        AnnotatedState annotatedState = new AnnotatedState(new State(this.context.getConfig().createConfig(), trace), testMethodConfig);
-        return new AnnotatedStateContainer(this.transformState(annotatedState));
+        return this.prepare(trace, this.context.getConfig().createConfig());
     }
 
     private List<AnnotatedState> transformStateClientTest(AnnotatedState annotatedState) {
@@ -81,7 +71,7 @@ public class WorkflowRunner {
         List<CipherSuite> supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
         State state = annotatedState.getState();
 
-        // supported only contains CipherSuites that are compatible with to
+        // supported only contains CipherSuites that are compatible with the keyExchange annotation
         supported.removeIf((CipherSuite i) -> !testMethodConfig.getKeyExchange().compatibleWithCiphersuite(i));
 
         KeyExchangeType from = testMethodConfig.getKeyExchange().provided();
@@ -89,6 +79,7 @@ public class WorkflowRunner {
             Config config = state.getConfig().createCopy();
             WorkflowTrace trace = state.getWorkflowTraceCopy();
             KeyExchangeType to = KeyExchangeType.forCipherSuite(i);
+            AnnotatedState newState = new AnnotatedState(annotatedState, new State(config, trace));
 
             if (replaceSupportedCiphersuites) {
                 config.setDefaultServerSupportedCiphersuites(i);
@@ -103,7 +94,11 @@ public class WorkflowRunner {
                 config.setDefaultSelectedCipherSuite(i);
             }
 
-            result.add(new AnnotatedState(annotatedState, new State(config, trace)));
+            if (replaceSupportedCiphersuites || appendEachSupportedCiphersuiteToSupported) {
+                newState.setInspectedCipherSuite(i);
+            }
+
+            result.add(newState);
         }
 
         return result;
@@ -115,7 +110,7 @@ public class WorkflowRunner {
         List<CipherSuite> supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
         State state = annotatedState.getState();
 
-        // supported only contains CipherSuites that are compatible with to
+        // supported only contains CipherSuites that are compatible with the keyExchange annotation
         supported.removeIf((CipherSuite i) -> !testMethodConfig.getKeyExchange().compatibleWithCiphersuite(i));
 
         KeyExchangeType from = testMethodConfig.getKeyExchange().provided();
@@ -124,6 +119,7 @@ public class WorkflowRunner {
             WorkflowTrace trace = state.getWorkflowTraceCopy();
             KeyExchangeType to = KeyExchangeType.forCipherSuite(i);
             KeyExchangeAlgorithm toKxAlg = AlgorithmResolver.getKeyExchangeAlgorithm(i);
+            AnnotatedState newState = new AnnotatedState(annotatedState, new State(config, trace));
 
             if (replaceSupportedCiphersuites) {
                 config.setDefaultClientSupportedCiphersuites(i);
@@ -135,11 +131,12 @@ public class WorkflowRunner {
             }
 
             if (replaceSupportedCiphersuites || appendEachSupportedCiphersuiteToSupported) {
+                newState.setInspectedCipherSuite(i);
                 List<ReceivingAction> rAction = WorkflowTraceUtil.getReceivingActionsForMessage(HandshakeMessageType.SERVER_KEY_EXCHANGE, trace);
                 ServerKeyExchangeMessage skx = new WorkflowConfigurationFactory(config).createServerKeyExchangeMessage(toKxAlg);
             }
 
-            result.add(new AnnotatedState(annotatedState, new State(config, trace)));
+            result.add(newState);
         }
 
         return result;

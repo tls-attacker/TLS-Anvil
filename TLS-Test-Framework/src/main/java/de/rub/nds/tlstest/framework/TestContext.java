@@ -1,9 +1,13 @@
 package de.rub.nds.tlstest.framework;
 
 import de.rub.nds.tlstest.framework.config.TestConfig;
+import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.TestRunner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestContext {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -11,6 +15,8 @@ public class TestContext {
 
     private static TestContext instance = null;
     private TestRunner testRunner = null;
+
+    private final Map<String, AnnotatedStateContainer> testResults = new HashMap<>();
 
     synchronized public static TestContext getInstance() {
         if (TestContext.instance == null) {
@@ -51,5 +57,13 @@ public class TestContext {
 
     public void setTestRunner(TestRunner testRunner) {
         this.testRunner = testRunner;
+    }
+
+    public Map<String, AnnotatedStateContainer> getTestResults() {
+        return testResults;
+    }
+
+    public void addTestResult(AnnotatedStateContainer result) {
+        testResults.put(result.getUniqueId(), result);
     }
 }

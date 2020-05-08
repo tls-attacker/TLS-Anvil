@@ -1,30 +1,55 @@
 package de.rub.nds.tlstest.framework.execution;
 
 import de.rub.nds.tlsattacker.core.state.State;
+import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
+import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class AnnotatedStateContainer {
+
+@XmlAccessorType(XmlAccessType.NONE)
+public class  AnnotatedStateContainer {
     private static final Logger LOGGER = LogManager.getLogger();
 
+    @XmlElement(name = "TestMethod")
+    private TestMethodConfig testMethodConfig;
+
+    @XmlElement(name = "Status")
+    private TestStatus status = TestStatus.NOT_SPECIFIED;
+
+    @XmlElement(name = "SkipReason")
+    private String reason;
+
+
+    @XmlElementWrapper(name = "States")
+    @XmlElement(name = "State")
     private List<AnnotatedState> states = new ArrayList<>();
 
-    AnnotatedStateContainer(List<AnnotatedState> states) {
+    private String uniqueId;
+
+    AnnotatedStateContainer(String uniqueId, TestMethodConfig tmc, List<AnnotatedState> states) {
         this.states = states;
+        this.uniqueId = uniqueId;
+        this.testMethodConfig = tmc;
     }
 
     public AnnotatedStateContainer() { }
 
-    AnnotatedStateContainer(AnnotatedState... states) {
-        this(Arrays.asList(states));
+    AnnotatedStateContainer(String uniqueId, TestMethodConfig tmc, AnnotatedState... states) {
+        this(uniqueId, tmc, Arrays.asList(states));
     }
 
 
@@ -53,18 +78,34 @@ public class AnnotatedStateContainer {
             try {
                 state = state.getFinishedFuture().get(0, TimeUnit.MILLISECONDS);
                 f.accept(state);
+                i.setStatus(TestStatus.SUCCEEDED);
+                stateFinished(TestStatus.SUCCEEDED);
             } catch (Throwable error) {
                 failed = true;
                 i.setFailedReason(error);
                 errors.add(error);
+                stateFinished(TestStatus.FAILED);
             }
         }
 
-        if (failed && finalValidation) {
-           for (Throwable i: errors) {
-               LOGGER.error("\n" + ExecptionPrinter.stacktraceToString(i));
-           }
-           throw new AssertionError(String.format("%d/%d tests failed", errors.size(), states.size()));
+        if (finalValidation) {
+            TestContext.getInstance().addTestResult(this);
+            if (failed) {
+                for (Throwable i: errors) {
+                    LOGGER.error("\n" + ExecptionPrinter.stacktraceToString(i));
+                }
+                throw new AssertionError(String.format("%d/%d tests failed", errors.size(), states.size()));
+            }
+        }
+    }
+
+    private void stateFinished(TestStatus stateStatus) {
+        if (status == TestStatus.NOT_SPECIFIED) {
+            this.status = stateStatus;
+        }
+        else if ((status == TestStatus.FAILED && stateStatus == TestStatus.SUCCEEDED) ||
+                (status == TestStatus.SUCCEEDED && stateStatus == TestStatus.FAILED)) {
+            status = TestStatus.PARTIALLY_FAILED;
         }
     }
 
@@ -82,5 +123,37 @@ public class AnnotatedStateContainer {
 
     public void setStates(List<AnnotatedState> states) {
         this.states = states;
+    }
+
+    public String getUniqueId() {
+        return uniqueId;
+    }
+
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
+    }
+
+    public TestStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TestStatus status) {
+        this.status = status;
+    }
+
+    public TestMethodConfig getTestMethodConfig() {
+        return testMethodConfig;
+    }
+
+    public void setTestMethodConfig(TestMethodConfig testMethodConfig) {
+        this.testMethodConfig = testMethodConfig;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 }

@@ -16,8 +16,13 @@ import org.bouncycastle.util.IPAddress;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 
 public class TestConfig extends TLSDelegateConfig {
@@ -42,6 +47,9 @@ public class TestConfig extends TLSDelegateConfig {
 
     @Parameter(names = "-ignoreCache", description = "Discovering supported TLS-Features takes time, thus they are cached. Using this flag, the cache is ignored.")
     private boolean ignoreCache = false;
+
+    @Parameter(names = "-outputFile", description = "Filepath where the test results should be store, defaults to `pwd/results.xml`")
+    private String outputFile = Paths.get(System.getProperty("user.dir"), "testResults.xml").toString();
 
 
     public TestConfig() {
@@ -92,6 +100,24 @@ public class TestConfig extends TLSDelegateConfig {
         if (getGeneralDelegate().isHelp()) {
             argParser.usage();
         }
+
+        try {
+            Path outputFile = Paths.get(this.outputFile);
+            if (this.outputFile.endsWith("/") || this.outputFile.endsWith("\\")) {
+                outputFile = Paths.get(this.outputFile, "testResults.xml");
+            }
+
+            outputFile = outputFile.toAbsolutePath();
+
+            if (Files.isDirectory(outputFile)) {
+                outputFile = Paths.get(outputFile.toString(), "testResults.xml");
+            }
+            this.outputFile = outputFile.toString();
+        } catch (Exception e) {
+            throw new ParameterException(e);
+        }
+
+
 
         parsedArgs = true;
     }
@@ -185,5 +211,13 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setIgnoreCache(boolean ignoreCache) {
         this.ignoreCache = ignoreCache;
+    }
+
+    public String getOutputFile() {
+        return outputFile;
+    }
+
+    public void setOutputFile(String outputFile) {
+        this.outputFile = outputFile;
     }
 }

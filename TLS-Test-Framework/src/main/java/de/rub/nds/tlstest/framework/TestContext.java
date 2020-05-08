@@ -17,12 +17,21 @@ public class TestContext {
     private TestRunner testRunner = null;
 
     private final Map<String, AnnotatedStateContainer> testResults = new HashMap<>();
+    private boolean initializationFailed = false;
 
     synchronized public static TestContext getInstance() {
         if (TestContext.instance == null) {
             TestContext.instance = new TestContext();
-            TestContext.instance.config.parse(null);
-            TestContext.instance.getTestRunner().prepareTestExecution();
+            try {
+                TestContext.instance.config.parse(null);
+                TestContext.instance.getTestRunner().prepareTestExecution();
+            } catch(Exception e) {
+                TestContext.instance.initializationFailed = true;
+                throw new RuntimeException(e);
+            }
+        }
+        if (TestContext.instance.initializationFailed) {
+            throw new RuntimeException();
         }
         return TestContext.instance;
     }
@@ -43,27 +52,27 @@ public class TestContext {
 
 
 
-    public TestConfig getConfig() {
+    synchronized public TestConfig getConfig() {
         return config;
     }
 
-    public void setConfig(TestConfig config) {
+    synchronized public void setConfig(TestConfig config) {
         this.config = config;
     }
 
-    public TestRunner getTestRunner() {
+    synchronized public TestRunner getTestRunner() {
         return testRunner;
     }
 
-    public void setTestRunner(TestRunner testRunner) {
+    synchronized public void setTestRunner(TestRunner testRunner) {
         this.testRunner = testRunner;
     }
 
-    public Map<String, AnnotatedStateContainer> getTestResults() {
+    synchronized public Map<String, AnnotatedStateContainer> getTestResults() {
         return testResults;
     }
 
-    public void addTestResult(AnnotatedStateContainer result) {
+    synchronized public void addTestResult(AnnotatedStateContainer result) {
         testResults.put(result.getUniqueId(), result);
     }
 }

@@ -1,10 +1,15 @@
 package de.rub.nds.tlstest.framework.execution;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceSerializer;
 import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,18 +20,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class AnnotatedState {
-
+    private static final Logger LOGGER = LogManager.getLogger();
     private State state;
 
     @XmlElement(name = "TransformationDescription")
+    @JsonProperty("TransformationDescription")
     private String transformDescription = null;
 
     private Throwable failedReason;
 
     @XmlElement(name = "Status")
+    @JsonProperty("Status")
     private TestStatus status;
 
     @XmlElement(name = "InspectedCiphersuite")
+    @JsonProperty("InspectedCiphersuite")
     private CipherSuite inspectedCipherSuite;
 
     public AnnotatedState() {}
@@ -92,6 +100,7 @@ public class AnnotatedState {
     }
 
     @XmlElement(name = "Stacktrace")
+    @JsonProperty("Stacktrace")
     public String getStacktrace() {
         if (failedReason != null) {
             return ExecptionPrinter.stacktraceToString(failedReason);
@@ -105,6 +114,18 @@ public class AnnotatedState {
             return state.getWorkflowTrace();
         }
         return null;
+    }
+
+    @JsonProperty("WorkflowTrace")
+    public String getSerializedWorkflowTrace() {
+        try {
+            return WorkflowTraceSerializer.write(state.getWorkflowTrace());
+        }
+        catch (Exception e) {
+            LOGGER.error("Could not serialize WorkflowTrace");
+            return null;
+        }
+
     }
 
 }

@@ -48,8 +48,11 @@ public class TestConfig extends TLSDelegateConfig {
     @Parameter(names = "-ignoreCache", description = "Discovering supported TLS-Features takes time, thus they are cached. Using this flag, the cache is ignored.")
     private boolean ignoreCache = false;
 
-    @Parameter(names = "-outputFile", description = "Filepath where the test results should be store, defaults to `pwd/results.xml`")
-    private String outputFile = Paths.get(System.getProperty("user.dir"), "testResults.xml").toString();
+    @Parameter(names = "-outputFile", description = "Filepath where the test results should be store, defaults to `pwd/results.json`")
+    private String outputFile = Paths.get(System.getProperty("user.dir"), "testResults.json").toString();
+
+    @Parameter(names = "-outputFormat", description = "Defines the format of the output. Supported: xml or json")
+    private String outputFormat = "";
 
 
     public TestConfig() {
@@ -101,18 +104,40 @@ public class TestConfig extends TLSDelegateConfig {
             argParser.usage();
         }
 
+        if (!this.outputFormat.equals("json") && !this.outputFormat.equals("xml") && !this.outputFormat.isEmpty()) {
+            throw new ParameterException("-outputFormat must be 'json' or 'xml'");
+        }
+
         try {
             Path outputFile = Paths.get(this.outputFile);
             if (this.outputFile.endsWith("/") || this.outputFile.endsWith("\\")) {
-                outputFile = Paths.get(this.outputFile, "testResults.xml");
+                outputFile = Paths.get(this.outputFile, "testResults.json");
             }
 
             outputFile = outputFile.toAbsolutePath();
 
             if (Files.isDirectory(outputFile)) {
-                outputFile = Paths.get(outputFile.toString(), "testResults.xml");
+                outputFile = Paths.get(outputFile.toString(), "testResults.json");
             }
+
             this.outputFile = outputFile.toString();
+            if (!this.outputFile.endsWith(".xml") && !this.outputFile.endsWith(".json")) {
+                throw new ParameterException("Invalid outputFile, only 'json' and 'xml' files are supported");
+            }
+
+            if (this.outputFormat.isEmpty()) {
+                this.outputFormat = "json";
+                if (this.outputFile.endsWith("xml")) {
+                    this.outputFormat = "xml";
+                }
+            }
+            else {
+                if ((this.outputFile.endsWith(".xml") && this.outputFormat.equals("json")) ||
+                        (this.outputFile.endsWith(".json") && this.outputFormat.equals("xml"))) {
+                    throw new ParameterException("-outputFile file extension does not match -outputFormat");
+                }
+            }
+
         } catch (Exception e) {
             throw new ParameterException(e);
         }
@@ -219,5 +244,13 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setOutputFile(String outputFile) {
         this.outputFile = outputFile;
+    }
+
+    public String getOutputFormat() {
+        return outputFormat;
+    }
+
+    public void setOutputFormat(String outputFormat) {
+        this.outputFormat = outputFormat;
     }
 }

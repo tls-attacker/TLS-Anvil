@@ -1,5 +1,9 @@
 package de.rub.nds.tlstest.framework.reporting;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import org.junit.platform.launcher.TestIdentifier;
 
@@ -13,12 +17,12 @@ import java.util.Map;
 @XmlAccessorType(XmlAccessType.NONE)
 public class TestResultContainer {
     @XmlElement(name = "DisplayName")
+    @JsonProperty("DisplayName")
     private String displayName;
 
     private Map<String, AnnotatedStateContainer> results = new HashMap<>();
     private Map<String, TestResultContainer> children = new HashMap<>();
 
-    @XmlTransient
     private String uniqueId;
 
     public TestResultContainer(TestIdentifier identifier) {
@@ -109,6 +113,7 @@ public class TestResultContainer {
 
 
     @XmlElement(name = "TestResult")
+    @JsonProperty("TestResults")
     public List<AnnotatedStateContainer> getResultsList() {
         if (results.size() > 0) {
             return new ArrayList<>(results.values());
@@ -117,6 +122,7 @@ public class TestResultContainer {
     }
 
     @XmlElement(name = "TestClass")
+    @JsonProperty("TestClasses")
     public List<TestResultContainer> getChildrenList() {
         if (children.size() > 0) {
             return new ArrayList<>(children.values());

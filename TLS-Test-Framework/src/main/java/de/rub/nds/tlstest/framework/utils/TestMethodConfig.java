@@ -1,5 +1,7 @@
 package de.rub.nds.tlstest.framework.utils;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.KeyX;
@@ -17,12 +19,15 @@ public class TestMethodConfig {
     private RFC rfc = null;
 
     @XmlElement(name = "MethodName")
+    @JsonProperty("MethodName")
     private String methodName = null;
 
     @XmlElement(name = "DisplayName")
+    @JsonProperty("DisplayName")
     private String displayName = null;
 
     @XmlElement(name = "ClassName")
+    @JsonProperty("ClassName")
     private String className = null;
 
     public TestMethodConfig() {

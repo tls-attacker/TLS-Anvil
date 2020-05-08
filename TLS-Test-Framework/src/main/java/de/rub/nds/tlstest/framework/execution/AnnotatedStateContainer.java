@@ -1,5 +1,7 @@
 package de.rub.nds.tlstest.framework.execution;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestStatus;
@@ -25,17 +27,21 @@ public class  AnnotatedStateContainer {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @XmlElement(name = "TestMethod")
+    @JsonProperty("TestMethod")
     private TestMethodConfig testMethodConfig;
 
     @XmlElement(name = "Status")
+    @JsonProperty("Status")
     private TestStatus status = TestStatus.NOT_SPECIFIED;
 
-    @XmlElement(name = "SkipReason")
+    @XmlElement(name = "DisabledReason")
+    @JsonProperty("DisabledReason")
     private String reason;
 
 
     @XmlElementWrapper(name = "States")
     @XmlElement(name = "State")
+    @JsonProperty("States")
     private List<AnnotatedState> states = new ArrayList<>();
 
     private String uniqueId;

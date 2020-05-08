@@ -1,5 +1,7 @@
 package de.rub.nds.tlstest.framework.reporting;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
@@ -56,19 +58,33 @@ public class ExecutionListener implements TestExecutionListener {
             }
         }
 
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(TestResultContainer.class);
-            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        if (TestContext.getInstance().getConfig().getOutputFormat().equals("json")) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+                        .withFieldVisibility(JsonAutoDetect.Visibility.NONE)
+                        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                        .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                        .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+                mapper.writeValue(new File(TestContext.getInstance().getConfig().getOutputFile()), rootContainers.get(0));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
 
-            StringWriter sw = new StringWriter();
-            File f = new File(TestContext.getInstance().getConfig().getOutputFile());
-            f.getParentFile().mkdirs();
-            jaxbMarshaller.marshal(rootContainers.get(0), f);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
+        else {
+            try {
+                JAXBContext jaxbContext = JAXBContext.newInstance(TestResultContainer.class);
+                Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+                jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 
+                File f = new File(TestContext.getInstance().getConfig().getOutputFile());
+                f.getParentFile().mkdirs();
+                jaxbMarshaller.marshal(rootContainers.get(0), f);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
 
     }
 

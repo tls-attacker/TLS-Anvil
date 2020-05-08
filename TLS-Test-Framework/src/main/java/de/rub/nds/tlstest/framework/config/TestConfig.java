@@ -49,7 +49,7 @@ public class TestConfig extends TLSDelegateConfig {
     private boolean ignoreCache = false;
 
     @Parameter(names = "-outputFile", description = "Filepath where the test results should be store, defaults to `pwd/results.json`")
-    private String outputFile = Paths.get(System.getProperty("user.dir"), "testResults.json").toString();
+    private String outputFile = "";
 
     @Parameter(names = "-outputFormat", description = "Defines the format of the output. Supported: xml or json")
     private String outputFormat = "";
@@ -108,17 +108,22 @@ public class TestConfig extends TLSDelegateConfig {
             throw new ParameterException("-outputFormat must be 'json' or 'xml'");
         }
 
+        String ext = "json";
+        if (!this.outputFormat.isEmpty()) {
+            ext = this.outputFormat;
+        }
+
+        if (this.outputFile.isEmpty()) {
+            this.outputFile = Paths.get(System.getProperty("user.dir"), "testResults." + ext).toString();
+        }
+
         try {
             Path outputFile = Paths.get(this.outputFile);
             if (this.outputFile.endsWith("/") || this.outputFile.endsWith("\\")) {
-                outputFile = Paths.get(this.outputFile, "testResults.json");
+                outputFile = Paths.get(this.outputFile, "testResults." + ext);
             }
 
             outputFile = outputFile.toAbsolutePath();
-
-            if (Files.isDirectory(outputFile)) {
-                outputFile = Paths.get(outputFile.toString(), "testResults.json");
-            }
 
             this.outputFile = outputFile.toString();
             if (!this.outputFile.endsWith(".xml") && !this.outputFile.endsWith(".json")) {

@@ -1,5 +1,6 @@
 package de.rub.nds.tlstest.framework;
 
+import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.TestRunner;
@@ -18,6 +19,7 @@ public class TestContext {
 
     private final Map<String, AnnotatedStateContainer> testResults = new HashMap<>();
     private boolean initializationFailed = false;
+    private ClientHelloMessage receivedClientHelloMessage;
 
     synchronized public static TestContext getInstance() {
         if (TestContext.instance == null) {
@@ -74,5 +76,13 @@ public class TestContext {
 
     synchronized public void addTestResult(AnnotatedStateContainer result) {
         testResults.put(result.getUniqueId(), result);
+    }
+
+    public ClientHelloMessage getReceivedClientHelloMessage() {
+        return receivedClientHelloMessage;
+    }
+
+    public void setReceivedClientHelloMessage(ClientHelloMessage receivedClientHelloMessage) {
+        this.receivedClientHelloMessage = receivedClientHelloMessage;
     }
 }

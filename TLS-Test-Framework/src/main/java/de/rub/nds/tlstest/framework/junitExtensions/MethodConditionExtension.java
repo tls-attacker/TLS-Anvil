@@ -22,7 +22,12 @@ public class MethodConditionExtension extends BaseCondition {
                 Arrays.asList(annotation.clazz().getDeclaredMethods()).forEach((Method i) -> {
                     i.setAccessible(true);
                 });
-                result = annotation.clazz().getDeclaredMethod(annotation.method(), ExtensionContext.class);
+                try {
+                    result = annotation.clazz().getDeclaredMethod(annotation.method(), ExtensionContext.class);
+                }
+                catch (NoSuchMethodException e) {
+                    result = annotation.clazz().getDeclaredMethod(annotation.method());
+                }
             } catch (Exception ignored) {
 
             }
@@ -32,7 +37,12 @@ public class MethodConditionExtension extends BaseCondition {
                 Arrays.asList(testClass.getDeclaredMethods()).forEach((Method i) -> {
                     i.setAccessible(true);
                 });
-                result = testClass.getDeclaredMethod(annotation.method(), ExtensionContext.class);
+                try {
+                    result = testClass.getDeclaredMethod(annotation.method(), ExtensionContext.class);
+                }
+                catch (NoSuchMethodException e) {
+                    result = testClass.getDeclaredMethod(annotation.method());
+                }
             } catch (Exception ignored) {
                 LOGGER.error("Method of MethodCondition annotation could not be found");
                 return null;
@@ -47,7 +57,7 @@ public class MethodConditionExtension extends BaseCondition {
         try {
             m.setAccessible(true);
             Optional<Object> testInstanceOpt = context.getTestInstance();
-            Object testInstance = null;
+            Object testInstance;
             if (testInstanceOpt.isPresent() && m.getDeclaringClass().equals(testInstanceOpt.get().getClass())) {
                 testInstance = testInstanceOpt.get();
             } else {
@@ -57,7 +67,14 @@ public class MethodConditionExtension extends BaseCondition {
                 testInstance = c.newInstance();
             }
 
-            Object result = m.invoke(testInstance, context);
+            Object result;
+            if (m.getParameterCount() > 0) {
+                result = m.invoke(testInstance, context);
+            }
+            else {
+                result = m.invoke(testInstance);
+            }
+
             if (result.getClass().equals(ConditionEvaluationResult.class)) {
                 return (ConditionEvaluationResult)result;
             }
@@ -90,7 +107,7 @@ public class MethodConditionExtension extends BaseCondition {
             MethodCondition clzzAnnotation = clzz.getAnnotation(MethodCondition.class);
             clzzCondMethod = getMethodForAnnoation(clzzAnnotation, clzz);
             if (clzzCondMethod == null) {
-                return ConditionEvaluationResult.disabled("Method of MethodCondition annotation could not be found");
+                throw new RuntimeException("Method of class (" + identifier + ") MethodCondition annotation could not be found");
             }
         }
 
@@ -99,7 +116,7 @@ public class MethodConditionExtension extends BaseCondition {
             MethodCondition methAnotation = testM.get().getAnnotation(MethodCondition.class);
             methCondMethod = getMethodForAnnoation(methAnotation, clzz);
             if (methCondMethod == null) {
-                return ConditionEvaluationResult.disabled("Method of MethodCondition annotation could not be found");
+                throw new RuntimeException("Method of MethodCondition (" + identifier + ") annotation could not be found");
             }
         }
 
@@ -114,8 +131,7 @@ public class MethodConditionExtension extends BaseCondition {
             return executeMethod(clzzCondMethod, context);
         }
         else {
-            LOGGER.error("MethodCondition is specified for " + identifier + " but the specified method could not be found.");
-            return ConditionEvaluationResult.disabled("MethodCondition is specified for " + identifier + " but the specified method could not be found.");
+            return ConditionEvaluationResult.enabled("MethodCondition not present");
         }
     }
 }

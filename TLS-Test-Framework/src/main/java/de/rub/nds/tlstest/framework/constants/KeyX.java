@@ -156,8 +156,6 @@ public class KeyX implements KeyExchange {
         } else if (testClass.isAnnotationPresent(KeyExchange.class)) {
             KeyExchange existing = testClass.getAnnotation(KeyExchange.class);
             resolvedKeyExchange = new KeyX(existing);
-        } else {
-            LOGGER.error("No KeyExchange annotation could not be found on class or method level for " + identifier + ", thus the test is disabled.");
         }
 
         boolean supportsAll = Arrays.asList(resolvedKeyExchange.supported()).contains(KeyExchangeType.ALL12);

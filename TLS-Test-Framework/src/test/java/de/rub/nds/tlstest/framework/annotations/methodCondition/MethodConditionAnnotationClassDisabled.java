@@ -29,6 +29,10 @@ public class MethodConditionAnnotationClassDisabled {
         return ConditionEvaluationResult.disabled("disabled");
     }
 
+    public ConditionEvaluationResult noParameter() {
+        return ConditionEvaluationResult.enabled("");
+    }
+
 
     @Test
     @MethodCondition(method="test2")
@@ -39,6 +43,7 @@ public class MethodConditionAnnotationClassDisabled {
     public void not_execute_validMethod_disabled() { }
 
     @Test
-    @MethodCondition(method="asfoij3e")
-    public void not_execute_invalidMethod() { }
+    @MethodCondition(method="noParameter")
+    public void not_execute_noParameter() { }
+
 }

@@ -9,6 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.ServerSocket;
 
 @FunctionalInterface
 interface ScriptFunction {
@@ -24,6 +26,7 @@ public class TestClientDelegate extends ServerDelegate {
     protected String script = null;
 
     private ScriptFunction wakeupScript;
+    private ServerSocket serverSocket;
 
     @Override
     public void applyDelegate(Config config) {
@@ -44,8 +47,14 @@ public class TestClientDelegate extends ServerDelegate {
                     LOGGER.error("Script crashed", e);
                 }
             };
-
         }
+
+        try {
+            serverSocket = new ServerSocket(this.port);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 
@@ -57,4 +66,11 @@ public class TestClientDelegate extends ServerDelegate {
         this.wakeupScript = wakeupScript;
     }
 
+    public ServerSocket getServerSocket() {
+        return serverSocket;
+    }
+
+    public void setServerSocket(ServerSocket serverSocket) {
+        this.serverSocket = serverSocket;
+    }
 }

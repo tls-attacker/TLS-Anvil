@@ -21,7 +21,6 @@ public class ConditionTest implements ExecutionCondition {
     @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
 
-        List<ConditionEvaluationResult> results = new ArrayList<>();
         ConditionEvaluationResult result = ConditionEvaluationResult.enabled("");
 
         try {
@@ -35,7 +34,6 @@ public class ConditionTest implements ExecutionCondition {
             }
         }
         catch (Exception e) {
-            result = ConditionEvaluationResult.enabled("error thrown...");
             LOGGER.warn("Error was thrown in ConditionTest", e);
             throw new RuntimeException(e);
         }

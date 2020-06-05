@@ -27,7 +27,6 @@ public class MethodConditionAnnotationOtherClass {
     }
 
     @Test
-    @MethodCondition(clazz = OtherClassCondition.class, method="asfokop")
-    public void not_execute_invalidMethod() { }
+    public void execute_noAnnotation() { }
 
 }

@@ -4,6 +4,7 @@ public enum TestStatus {
     NOT_SPECIFIED,
     SUCCEEDED,
     PARTIALLY_FAILED,
+    PARTIALLY_SUCCEEDED,
     FAILED,
     DISABLED,
 }

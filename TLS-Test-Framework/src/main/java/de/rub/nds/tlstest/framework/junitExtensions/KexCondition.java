@@ -19,6 +19,10 @@ public class KexCondition extends BaseCondition {
             return ConditionEvaluationResult.enabled("Class annotations are not relevant.");
         }
 
+        if (!extensionContext.getRequiredTestMethod().isAnnotationPresent(KeyExchange.class)) {
+            return ConditionEvaluationResult.enabled("No KeyExchange annotation is present.");
+        }
+
         KeyExchange resolvedKeyExchange = KeyX.resolveKexAnnotation(extensionContext);
 
         if (resolvedKeyExchange.supported().length > 0) {

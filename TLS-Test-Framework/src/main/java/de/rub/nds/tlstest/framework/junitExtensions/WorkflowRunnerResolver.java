@@ -28,35 +28,9 @@ public class WorkflowRunnerResolver implements ParameterResolver {
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         WorkflowRunner param = new WorkflowRunner(TestContext.getInstance());
-        Optional<Method> method = extensionContext.getTestMethod();
-        if (!method.isPresent()) return param;
+        if (!extensionContext.getTestMethod().isPresent()) return param;
 
-        Method testM = method.get();
-        Class<?> testClass = extensionContext.getRequiredTestClass();
-
-        TestMethodConfig testMethodConfig = new TestMethodConfig();
-        param.setTestMethodConfig(testMethodConfig);
-
-        if (testM.isAnnotationPresent(KeyExchange.class)) {
-            KeyExchange annotation = KeyX.resolveKexAnnotation(extensionContext);
-            testMethodConfig.setKeyExchange(new KeyX(annotation));
-        }
-
-        if (testM.isAnnotationPresent(TlsTest.class)) {
-            TlsTest annotation = testM.getAnnotation(TlsTest.class);
-            testMethodConfig.setTlsTest(annotation);
-        }
-
-        if (testM.isAnnotationPresent(RFC.class)) {
-            testMethodConfig.setRfc(testM.getAnnotation(RFC.class));
-        }
-        else if (testClass.isAnnotationPresent(RFC.class)) {
-            testMethodConfig.setRfc(testClass.getAnnotation(RFC.class));
-        }
-
-        testMethodConfig.setMethodName(testM.getName());
-        testMethodConfig.setClassName(testClass.getName());
-        testMethodConfig.setDisplayName(extensionContext.getDisplayName());
+        param.setTestMethodConfig(new TestMethodConfig(extensionContext));
         param.setExtensionContext(extensionContext);
 
         return param;

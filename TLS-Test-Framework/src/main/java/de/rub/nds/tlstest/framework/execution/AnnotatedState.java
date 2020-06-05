@@ -1,7 +1,7 @@
 package de.rub.nds.tlstest.framework.execution;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -16,6 +16,9 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
@@ -23,25 +26,29 @@ public class AnnotatedState {
     private static final Logger LOGGER = LogManager.getLogger();
     private State state;
 
-    @XmlElement(name = "TransformationDescription")
-    @JsonProperty("TransformationDescription")
-    private String transformDescription = null;
+    private List<String> transformationDescription = null;
 
     private Throwable failedReason;
 
     @XmlElement(name = "Status")
     @JsonProperty("Status")
-    private TestStatus status;
+    private TestStatus status = TestStatus.NOT_SPECIFIED;
 
     @XmlElement(name = "InspectedCiphersuite")
     @JsonProperty("InspectedCiphersuite")
     private CipherSuite inspectedCipherSuite;
 
+    private UUID uuid = UUID.randomUUID();
+    private UUID parentUUID;
+
+
+    private List<String> additionalResultInformation = null;
+    private List<String> additionalTestInformation = null;
+
     public AnnotatedState() {}
 
-    AnnotatedState(@Nonnull State state) {
+    public AnnotatedState(@Nonnull State state) {
         this.state = state;
-        this.status = TestStatus.NOT_SPECIFIED;
 
         if (state.getFinishedFuture().isDone()) {
             this.status = TestStatus.SUCCEEDED;
@@ -52,9 +59,22 @@ public class AnnotatedState {
     }
 
     AnnotatedState(AnnotatedState aState, State mutated) {
-        this.status = TestStatus.NOT_SPECIFIED;
         this.state = mutated;
         this.inspectedCipherSuite = aState.inspectedCipherSuite;
+
+        if (aState.additionalTestInformation != null)
+            this.additionalTestInformation = new ArrayList<>(aState.additionalTestInformation);
+
+        if (aState.additionalResultInformation != null)
+            this.additionalResultInformation = new ArrayList<>(aState.additionalResultInformation);
+    }
+
+    AnnotatedState(AnnotatedState aState) {
+        this(aState, null);
+
+        WorkflowTrace trace = aState.getState().getWorkflowTraceCopy();
+        Config config = aState.getState().getConfig().createCopy();
+        this.setState(new State(config, trace));
     }
 
     public State getState() {
@@ -72,14 +92,6 @@ public class AnnotatedState {
 
     public void setStatus(TestStatus status) {
         this.status = status;
-    }
-
-    public String getTransformDescription() {
-        return transformDescription;
-    }
-
-    public void setTransformDescription(String transformDescription) {
-        this.transformDescription = transformDescription;
     }
 
     public Throwable getFailedReason() {
@@ -128,4 +140,72 @@ public class AnnotatedState {
 
     }
 
+    @XmlElement(name = "AdditionalResultInformation")
+    @JsonProperty("AdditionalResultInformation")
+    public String getAdditionalResultInformation() {
+        if (additionalResultInformation == null) return "";
+        return String.join("\n", additionalResultInformation);
+    }
+
+    public void addAdditionalResultInfo(String info) {
+        if (additionalResultInformation == null) {
+            additionalResultInformation = new ArrayList<>();
+        }
+
+        additionalResultInformation.add(info);
+    }
+
+    @XmlElement(name = "AdditionalTestInformation")
+    @JsonProperty("AdditionalTestInformation")
+    public String getAdditionalTestInformation() {
+        if (additionalTestInformation == null) return "";
+        return String.join("\n", additionalTestInformation);
+    }
+
+    public void addAdditionalTestInfo(String info) {
+        if (additionalTestInformation == null) {
+            additionalTestInformation = new ArrayList<>();
+        }
+
+        additionalTestInformation.add(info);
+    }
+
+    @XmlElement(name = "TransformationDescription")
+    @JsonProperty("TransformationDescription")
+    public String getTransformationDescription() {
+        if (transformationDescription == null) return "";
+        return String.join(", ", transformationDescription);
+    }
+
+    public void addTransformationDescription(String info) {
+        if (transformationDescription == null) {
+            transformationDescription = new ArrayList<>();
+        }
+
+        transformationDescription.add(info);
+    }
+
+    @XmlElement(name = "uuid")
+    @JsonProperty("uuid")
+    public String getStringUuid() {
+        return uuid.toString();
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    @XmlElement(name = "TransformationParentUuid")
+    @JsonProperty("TransformationParentUuid")
+    public UUID getParentUUID() {
+        return parentUUID;
+    }
+
+    public void setParentUUID(UUID parentUUID) {
+        this.parentUUID = parentUUID;
+    }
 }

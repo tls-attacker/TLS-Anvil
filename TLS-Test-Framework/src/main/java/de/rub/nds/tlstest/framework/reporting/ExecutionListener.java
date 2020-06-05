@@ -90,12 +90,7 @@ public class ExecutionListener implements TestExecutionListener {
 
     @Override
     public void executionSkipped(TestIdentifier testIdentifier, String reason) {
-        String uid = testIdentifier.getUniqueId();
-        AnnotatedStateContainer result = new AnnotatedStateContainer();
-        result.setStatus(TestStatus.DISABLED);
-        result.setReason(reason);
-        result.setUniqueId(uid);
-        TestContext.getInstance().addTestResult(result);
+        LOGGER.info(testIdentifier.getDisplayName() + " skipped, due to " + reason);
     }
 
     @Override

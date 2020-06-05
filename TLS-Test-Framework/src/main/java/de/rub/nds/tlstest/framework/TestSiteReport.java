@@ -30,6 +30,8 @@ public class TestSiteReport implements Serializable {
     private Set<CipherSuite> cipherSuites = null;
     private List<CipherSuite> supportedTls13CipherSuites = null;
 
+    private List<VersionSuiteListPair> versionSuiteListPairs = null;
+
     public TestSiteReport(SiteReport report) {
         this.versions = report.getVersions();
 
@@ -42,6 +44,7 @@ public class TestSiteReport implements Serializable {
 
         this.cipherSuites = report.getCipherSuites();
         this.supportedTls13CipherSuites = report.getSupportedTls13CipherSuites();
+        this.versionSuiteListPairs = report.getVersionSuitePairs();
     }
 
     public SiteReport getSiteReport() {
@@ -58,6 +61,7 @@ public class TestSiteReport implements Serializable {
 
         report.setCipherSuites(this.getCipherSuites());
         report.setSupportedTls13CipherSuites(this.getSupportedTls13CipherSuites());
+        report.setVersionSuitePairs(this.getVersionSuiteListPairs());
 
         return report;
     }
@@ -125,5 +129,13 @@ public class TestSiteReport implements Serializable {
 
     public void setSupportedTls13CipherSuites(List<CipherSuite> supportedTls13CipherSuites) {
         this.supportedTls13CipherSuites = supportedTls13CipherSuites;
+    }
+
+    public List<VersionSuiteListPair> getVersionSuiteListPairs() {
+        return versionSuiteListPairs;
+    }
+
+    public void setVersionSuiteListPairs(List<VersionSuiteListPair> versionSuiteListPairs) {
+        this.versionSuiteListPairs = versionSuiteListPairs;
     }
 }

@@ -6,6 +6,8 @@ import com.beust.jcommander.ParameterException;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
+import de.rub.nds.tlsattacker.core.constants.NameType;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.SNIEntry;
 import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
@@ -83,9 +85,10 @@ public class TestConfig extends TLSDelegateConfig {
     public void parse(@Nullable String[] args) {
         if (argParser == null) {
             argParser = JCommander.newBuilder()
-                    .addObject(this)
                     .addCommand("client", testClientDelegate)
                     .addCommand("server", testServerDelegate)
+                    .addObject(this)
+                    .addObject(this.getGeneralDelegate())
                     .build();
         }
 
@@ -147,8 +150,6 @@ public class TestConfig extends TLSDelegateConfig {
             throw new ParameterException(e);
         }
 
-
-
         parsedArgs = true;
     }
 
@@ -176,6 +177,12 @@ public class TestConfig extends TLSDelegateConfig {
         if ((!IPAddress.isValid(config.getDefaultClientConnection().getHostname()) || this.getTestServerDelegate().getSniHostname() != null)
                 && this.testEndpointMode == TestEndpointType.SERVER) {
             config.setAddServerNameIndicationExtension(true);
+            config.setDefaultClientSNIEntries(new SNIEntry(config.getDefaultClientConnection().getHostname(), NameType.HOST_NAME));
+
+            config.getDefaultClientConnection().setFirstTimeout(100 * 1000);
+            config.getDefaultClientConnection().setTimeout(100 * 1000);
+            config.setWorkflowExecutorShouldClose(true);
+            config.setEarlyStop(true);
         } else {
             config.setAddServerNameIndicationExtension(false);
         }

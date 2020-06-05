@@ -1,10 +1,10 @@
 package de.rub.nds.tlstest.framework.execution;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestStatus;
+import de.rub.nds.tlstest.framework.exceptions.TransportHandlerExpection;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
 import org.apache.logging.log4j.LogManager;
@@ -36,8 +36,13 @@ public class  AnnotatedStateContainer {
 
     @XmlElement(name = "DisabledReason")
     @JsonProperty("DisabledReason")
-    private String reason;
+    private String disabledReason;
 
+    private Throwable failedStacktrace;
+
+    @XmlElement(name = "FailedReason")
+    @JsonProperty("FailedReason")
+    private String failedReason;
 
     @XmlElementWrapper(name = "States")
     @XmlElement(name = "State")
@@ -75,17 +80,25 @@ public class  AnnotatedStateContainer {
         this.states.add(state);
     }
 
-    public void validate(boolean finalValidation, Consumer<State> f) {
+    public void validate(boolean finalValidation, Consumer<AnnotatedState> f) {
         boolean failed = false;
         List<Throwable> errors = new ArrayList<>();
 
         for (AnnotatedState i : states) {
             State state = i.getState();
             try {
-                state = state.getFinishedFuture().get(0, TimeUnit.MILLISECONDS);
-                f.accept(state);
-                i.setStatus(TestStatus.SUCCEEDED);
-                stateFinished(TestStatus.SUCCEEDED);
+                state.getFinishedFuture().get(0, TimeUnit.MILLISECONDS);
+                if (i.getState().getTlsContext().isReceivedTransportHandlerException()) {
+                    throw new TransportHandlerExpection("Received transportHandler excpetion");
+                }
+                f.accept(i);
+                if (i.getStatus() == TestStatus.NOT_SPECIFIED) {
+                    i.setStatus(TestStatus.SUCCEEDED);
+                    stateFinished(TestStatus.SUCCEEDED);
+                }
+                else {
+                    stateFinished(i.getStatus());
+                }
             } catch (Throwable error) {
                 failed = true;
                 i.setFailedReason(error);
@@ -100,7 +113,9 @@ public class  AnnotatedStateContainer {
                 for (Throwable i: errors) {
                     LOGGER.error("\n" + ExecptionPrinter.stacktraceToString(i));
                 }
-                throw new AssertionError(String.format("%d/%d tests failed", errors.size(), states.size()));
+                AssertionError error = new AssertionError(String.format("%d/%d tests failed", errors.size(), states.size()));
+                this.setFailedStacktrace(error);
+                throw error;
             }
         }
     }
@@ -115,11 +130,11 @@ public class  AnnotatedStateContainer {
         }
     }
 
-    public void validateFinal(Consumer<State> f) {
+    public void validateFinal(Consumer<AnnotatedState> f) {
         this.validate(true, f);
     }
 
-    public void validate(Consumer<State> f) {
+    public void validate(Consumer<AnnotatedState> f) {
         this.validate(false, f);
     }
 
@@ -155,11 +170,37 @@ public class  AnnotatedStateContainer {
         this.testMethodConfig = testMethodConfig;
     }
 
-    public String getReason() {
-        return reason;
+    public String getDisabledReason() {
+        return disabledReason;
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
+    public void setDisabledReason(String disabledReason) {
+        this.disabledReason = disabledReason;
+    }
+
+    public Throwable getFailedStacktrace() {
+        return failedStacktrace;
+    }
+
+    public void setFailedStacktrace(Throwable failedStacktrace) {
+        this.failedReason = failedStacktrace.getMessage();
+        this.failedStacktrace = failedStacktrace;
+    }
+
+    @XmlElement(name = "FailedStacktrace")
+    @JsonProperty("FailedStacktrace")
+    public String getStacktrace() {
+        if (failedStacktrace != null) {
+            return ExecptionPrinter.stacktraceToString(failedStacktrace);
+        }
+        return null;
+    }
+
+    public String getFailedReason() {
+        return failedReason;
+    }
+
+    public void setFailedReason(String failedReason) {
+        this.failedReason = failedReason;
     }
 }

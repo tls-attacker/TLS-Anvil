@@ -58,7 +58,7 @@ public class KexAnnotationMethodTest {
 
 
     @TlsTest
-    public void not_execute_noKexAnnotationSpecified() { }
+    public void execute_noKexAnnotationSpecified() { }
 
     @TlsTest
     @KeyExchange(provided = KeyExchangeType.DH)

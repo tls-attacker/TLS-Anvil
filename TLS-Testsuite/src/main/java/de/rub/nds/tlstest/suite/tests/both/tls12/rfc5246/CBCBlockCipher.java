@@ -49,6 +49,7 @@ public class CBCBlockCipher extends Tls12Test {
     public void invalidCBCPadding(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
         runner.respectConfigSupportedCiphersuites = true;
 
         List<CipherSuite> suites = CipherSuite.getImplemented();
@@ -91,6 +92,7 @@ public class CBCBlockCipher extends Tls12Test {
     public void invalidPaddingLength(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
         runner.respectConfigSupportedCiphersuites = true;
         c.setHighestProtocolVersion(ProtocolVersion.TLS12);
 

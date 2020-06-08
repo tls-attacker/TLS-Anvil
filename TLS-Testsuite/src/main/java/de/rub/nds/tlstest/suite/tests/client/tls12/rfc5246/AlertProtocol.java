@@ -37,7 +37,7 @@ public class AlertProtocol extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void close_notify(WorkflowRunner runner) {
         Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));
@@ -71,7 +71,7 @@ public class AlertProtocol extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void abortAfterFatalAlert(WorkflowRunner runner) {
         Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
         runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_HELLO_DONE);
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();

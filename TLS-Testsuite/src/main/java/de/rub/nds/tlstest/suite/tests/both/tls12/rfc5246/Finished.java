@@ -30,6 +30,7 @@ public class Finished extends Tls12Test {
     public void verifyFinishedMessageCorrect(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         FinishedMessage finishedMessage = new FinishedMessage();
         finishedMessage.setVerifyData(Modifiable.xor(new byte[]{0x01}, 0));
@@ -53,6 +54,7 @@ public class Finished extends Tls12Test {
     public void invalidPRF(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
         workflowTrace.addTlsActions(
@@ -83,6 +85,7 @@ public class Finished extends Tls12Test {
     public void omitCCS(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         workflowTrace.addTlsActions(

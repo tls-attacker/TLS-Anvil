@@ -34,7 +34,7 @@ public class TLSExtensionForECC extends Tls12Test {
     private static final Logger LOGGER = LogManager.getLogger();
 
     private void execute(WorkflowRunner runner, Config config) {
-        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(

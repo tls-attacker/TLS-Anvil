@@ -36,7 +36,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void versionGreaterThanSupportedByServer(WorkflowRunner runner) {
         Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         ModifiableByteArray protocolVersionSend = Modifiable.explicit(new byte[]{0x03, 0x0F});
 

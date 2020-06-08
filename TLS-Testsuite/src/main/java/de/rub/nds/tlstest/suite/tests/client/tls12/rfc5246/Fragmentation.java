@@ -35,7 +35,7 @@ public class Fragmentation extends Tls12Test {
         Config c = this.getConfig();
         c.setDefaultClientSupportedCiphersuites(CipherSuite.getImplemented());
         c.setUseAllProvidedRecords(true);
-        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.HANDSHAKE);
@@ -61,7 +61,7 @@ public class Fragmentation extends Tls12Test {
         Config c = this.getConfig();
         c.setDefaultClientSupportedCiphersuites(CipherSuite.getImplemented());
         c.setUseAllProvidedRecords(true);
-        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         AlertMessage alertMsg = new AlertMessage(c);
         alertMsg.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));

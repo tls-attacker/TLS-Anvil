@@ -30,7 +30,7 @@ public class MaximumFragmentLength extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void invalidMaximumFragmentLength(WorkflowRunner runner) {
         Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         c.setAddMaxFragmentLengthExtension(true);
         ServerHelloMessage serverHello = new ServerHelloMessage(c);

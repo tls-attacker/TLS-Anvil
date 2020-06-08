@@ -46,6 +46,7 @@ public class AEADCiphers extends Tls12Test {
     public void inalidAuthTag(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
         runner.respectConfigSupportedCiphersuites = true;
 
         List<CipherSuite> suites = CipherSuite.getImplemented();
@@ -83,6 +84,7 @@ public class AEADCiphers extends Tls12Test {
     public void inalidCiphertext(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
         runner.respectConfigSupportedCiphersuites = true;
 
         List<CipherSuite> suites = CipherSuite.getImplemented();

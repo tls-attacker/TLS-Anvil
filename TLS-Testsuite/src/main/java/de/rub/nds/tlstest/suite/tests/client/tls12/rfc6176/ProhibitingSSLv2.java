@@ -29,7 +29,7 @@ public class ProhibitingSSLv2 extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendSSL2CompatibleClientHello(WorkflowRunner runner) {
         Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(

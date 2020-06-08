@@ -27,6 +27,7 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
     public void contentOfCCS(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
 
         ChangeCipherSpecMessage changeCipherSpecMessage = new ChangeCipherSpecMessage(c);

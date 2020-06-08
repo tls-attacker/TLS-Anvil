@@ -33,7 +33,7 @@ public class TLSRecordProtocol extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendNotDefinedRecordTypesWithClientHello(WorkflowRunner runner) {
         Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         Record record = new Record();
         record.setContentType(Modifiable.explicit((byte) 0xFF));

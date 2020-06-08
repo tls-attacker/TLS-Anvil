@@ -37,7 +37,7 @@ public class ServerHello extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendAdditionalExtension(WorkflowRunner runner) {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
-        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         List<ExtensionMessage> receivedExtensions = clientHello.getExtensions();
         List<ExtensionType> types = new ArrayList<>();

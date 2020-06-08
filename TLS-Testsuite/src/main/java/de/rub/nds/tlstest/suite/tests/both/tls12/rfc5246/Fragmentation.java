@@ -38,6 +38,7 @@ public class Fragmentation extends Tls12Test {
         c.setDefaultClientSupportedCiphersuites(CipherSuite.getImplemented());
         c.setUseAllProvidedRecords(true);
         runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -64,6 +65,7 @@ public class Fragmentation extends Tls12Test {
     public void sendZeroLengthApplicationRecord(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         ApplicationMessage appMsg = new ApplicationMessage(c);
         appMsg.setData(Modifiable.explicit(new byte[3]));
@@ -96,6 +98,7 @@ public class Fragmentation extends Tls12Test {
     public void sendRecordWithLengthOver2pow14plus1(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
 
         ApplicationMessage msg = new ApplicationMessage(c);
         msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));

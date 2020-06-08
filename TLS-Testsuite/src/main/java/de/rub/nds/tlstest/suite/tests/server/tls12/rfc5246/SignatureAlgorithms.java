@@ -74,7 +74,7 @@ public class SignatureAlgorithms extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "rsaCiphersuitesSupported")
     public void rsaNoSignatureAlgorithmsExtension(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         c.setAddSignatureAndHashAlgorithmsExtension(false);
 
         runner.replaceSupportedCiphersuites = true;
@@ -97,7 +97,7 @@ public class SignatureAlgorithms extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "dssCiphersuitesSupported")
     public void dssNoSignatureAlgorithmsExtension(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         c.setAddSignatureAndHashAlgorithmsExtension(false);
 
         runner.replaceSupportedCiphersuites = true;
@@ -119,7 +119,7 @@ public class SignatureAlgorithms extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "ecdsaCiphersuitesSupported")
     public void ecdsaNoSignatureAlgorithmsExtension(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         c.setAddSignatureAndHashAlgorithmsExtension(false);
 
         runner.replaceSupportedCiphersuites = true;

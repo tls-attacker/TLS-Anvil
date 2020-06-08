@@ -36,7 +36,7 @@ public class RespectClientExtensions extends Tls12Test {
     // TODO: Client test missing
     public void RespectChosenCurve(WorkflowRunner runner) {
         runner.replaceSupportedCiphersuites = true;
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);

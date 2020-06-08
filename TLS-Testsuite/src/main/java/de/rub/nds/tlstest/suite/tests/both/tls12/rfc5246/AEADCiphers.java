@@ -44,7 +44,7 @@ public class AEADCiphers extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "supportsAEADCiphers")
     public void inalidAuthTag(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
         runner.respectConfigSupportedCiphersuites = true;
 
@@ -81,7 +81,7 @@ public class AEADCiphers extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "supportsAEADCiphers")
     public void inalidCiphertext(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
         runner.respectConfigSupportedCiphersuites = true;
 

@@ -34,7 +34,7 @@ public class Fragmentation extends Tls12Test {
             "traffic analysis countermeasure.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendZeroLengthRecord_CCS(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         c.setDefaultClientSupportedCiphersuites(CipherSuite.getImplemented());
         c.setUseAllProvidedRecords(true);
         runner.replaceSupportedCiphersuites = true;
@@ -62,7 +62,7 @@ public class Fragmentation extends Tls12Test {
             "traffic analysis countermeasure.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendZeroLengthApplicationRecord(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         ApplicationMessage appMsg = new ApplicationMessage(c);
@@ -94,7 +94,7 @@ public class Fragmentation extends Tls12Test {
             "length MUST NOT exceed 2^14.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendRecordWithLengthOver2pow14plus1(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         ApplicationMessage msg = new ApplicationMessage(c);

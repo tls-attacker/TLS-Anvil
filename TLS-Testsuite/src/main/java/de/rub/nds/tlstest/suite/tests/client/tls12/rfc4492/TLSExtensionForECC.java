@@ -56,7 +56,7 @@ public class TLSExtensionForECC extends Tls12Test {
             "   message if it does not propose any ECC cipher suites.", securitySeverity = SeverityLevel.INFORMATIONAL)
     @KeyExchange(provided = KeyExchangeType.DH, supported = KeyExchangeType.RSA)
     public void BothECExtensions_WithoutECCCipher(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
@@ -88,7 +88,7 @@ public class TLSExtensionForECC extends Tls12Test {
             " as one of the items in the list of point formats.")
     @KeyExchange(provided = KeyExchangeType.ECDH)
     public void InvalidPointFormat(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(

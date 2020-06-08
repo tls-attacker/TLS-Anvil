@@ -32,7 +32,7 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
             "randomly generated premaster secret.", securitySeverity = SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.RSA)
     public void PMWithWrongClientVersion(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -59,7 +59,7 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
             "randomly generated premaster secret.")
     @KeyExchange(supported = KeyExchangeType.RSA)
     public void PMWithWrongPKCS1Padding(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);

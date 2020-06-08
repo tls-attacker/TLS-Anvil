@@ -42,7 +42,7 @@ public class RC4Ciphersuites extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(clazz = RC4Ciphersuites.class, method = "supportsRC4")
     public void offerRC4AndOtherCiphers(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.appendEachSupportedCiphersuiteToClientSupported = true;
 
         List<CipherSuite> implemented = CipherSuite.getImplemented();
@@ -71,7 +71,7 @@ public class RC4Ciphersuites extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(clazz = RC4Ciphersuites.class, method = "supportsRC4")
     public void onlyRC4Suites(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
 
         List<CipherSuite> implemented = CipherSuite.getImplemented();
         implemented.removeIf(i -> !i.toString().contains("RC4"));

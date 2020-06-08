@@ -47,7 +47,7 @@ public class CBCBlockCipher extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "supportsCBCCipherSuites")
     public void invalidCBCPadding(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
         runner.respectConfigSupportedCiphersuites = true;
 
@@ -89,7 +89,7 @@ public class CBCBlockCipher extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(clazz = CBCBlockCipher.class, method = "supportsCBCCipherSuites")
     public void invalidPaddingLength(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
         runner.respectConfigSupportedCiphersuites = true;
         c.setHighestProtocolVersion(ProtocolVersion.TLS12);

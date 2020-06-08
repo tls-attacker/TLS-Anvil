@@ -32,7 +32,7 @@ public class Fragmentation extends Tls12Test {
             "traffic analysis countermeasure.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendZeroLengthRecord_SH(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         c.setDefaultClientSupportedCiphersuites(CipherSuite.getImplemented());
         c.setUseAllProvidedRecords(true);
         runner.replaceSupportedCiphersuites = true;
@@ -58,7 +58,7 @@ public class Fragmentation extends Tls12Test {
             "traffic analysis countermeasure.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendZeroLengthRecord_Alert(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         c.setDefaultClientSupportedCiphersuites(CipherSuite.getImplemented());
         c.setUseAllProvidedRecords(true);
         runner.replaceSupportedCiphersuites = true;

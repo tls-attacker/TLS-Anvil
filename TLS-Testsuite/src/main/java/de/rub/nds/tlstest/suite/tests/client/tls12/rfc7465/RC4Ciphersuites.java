@@ -55,7 +55,7 @@ public class RC4Ciphersuites extends Tls12Test {
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();
         for (CipherSuite i : supported) {
-            Config config = context.getConfig().createConfig();
+            Config config = this.getConfig();
             config.setDefaultServerSupportedCiphersuites(i);
             config.setDefaultSelectedCipherSuite(i);
 

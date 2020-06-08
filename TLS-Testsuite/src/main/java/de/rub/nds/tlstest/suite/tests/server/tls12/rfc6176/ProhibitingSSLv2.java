@@ -28,7 +28,7 @@ public class ProhibitingSSLv2 extends Tls12Test {
             "HELLO message format.", securitySeverity = SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendSSL2CompatibleClientHello(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -46,7 +46,7 @@ public class ProhibitingSSLv2 extends Tls12Test {
             "abort the connection")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendClientHelloVersionLower0300(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
         clientHelloMessage.setProtocolVersion(Modifiable.explicit(ProtocolVersion.SSL2.getValue()));

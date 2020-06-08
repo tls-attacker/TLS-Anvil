@@ -36,7 +36,7 @@ public class PointFormatExtension extends Tls12Test {
             " as one of the items in the list of point formats.")
     @KeyExchange(provided = KeyExchangeType.ECDH)
     public void serverSupportsUncompressPointFormat(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
@@ -77,7 +77,7 @@ public class PointFormatExtension extends Tls12Test {
             "as one of the items in the list of point formats. ")
     @KeyExchange(provided = KeyExchangeType.ECDH)
     public void InvalidPointFormat(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);

@@ -36,7 +36,7 @@ public class AlertProtocol extends Tls12Test {
             "discarding any pending writes.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void close_notify(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         AlertMessage alert = new AlertMessage();
@@ -70,7 +70,7 @@ public class AlertProtocol extends Tls12Test {
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void abortAfterFatalAlert(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
         runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_HELLO_DONE);
 

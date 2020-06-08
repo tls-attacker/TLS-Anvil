@@ -22,7 +22,7 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 @RFC(number = 5246, section = "7.4.8. Certificate Verify")
 public class CertificateVerify extends Tls12Test {
     public ConditionEvaluationResult clientAuth() {
-        if (context.getConfig().createConfig().isClientAuthentication()) {
+        if (this.getConfig().isClientAuthentication()) {
             return ConditionEvaluationResult.enabled("");
         }
         return ConditionEvaluationResult.disabled("No client auth required");
@@ -35,7 +35,7 @@ public class CertificateVerify extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "clientAuth")
     public void invalidCertificateVerify(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);

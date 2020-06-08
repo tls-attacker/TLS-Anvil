@@ -26,7 +26,7 @@ public class ServerNameIndication extends Tls12Test {
             "name_type.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void moreThanOneNameOfTheSameType(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         c.setAddServerNameIndicationExtension(true);
 
         runner.replaceSupportedCiphersuites = true;

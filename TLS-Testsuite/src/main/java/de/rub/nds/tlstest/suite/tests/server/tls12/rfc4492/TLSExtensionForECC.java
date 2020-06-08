@@ -51,7 +51,7 @@ public class TLSExtensionForECC extends Tls12Test {
             "   message if it does not propose any ECC cipher suites.", securitySeverity = SeverityLevel.INFORMATIONAL)
     @KeyExchange(provided = KeyExchangeType.RSA, supported = KeyExchangeType.DH)
     public void BothECExtensions_WithoutECCCipher(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
@@ -64,7 +64,7 @@ public class TLSExtensionForECC extends Tls12Test {
             "   message if it does not propose any ECC cipher suites.")
     @KeyExchange(provided = KeyExchangeType.RSA, supported = KeyExchangeType.DH)
     public void ECExtension_WithoutECCCipher(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(false);
@@ -77,7 +77,7 @@ public class TLSExtensionForECC extends Tls12Test {
             "   message if it does not propose any ECC cipher suites.")
     @KeyExchange(provided = KeyExchangeType.RSA, supported = KeyExchangeType.DH)
     public void ECPointFormatExtension_WithoutECCCipher(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
 
         c.setAddEllipticCurveExtension(false);
         c.setAddECPointFormatExtension(true);
@@ -93,7 +93,7 @@ public class TLSExtensionForECC extends Tls12Test {
             "it MUST NOT negotiate the use of an ECC cipher suite.", interoperabilitySeverity = SeverityLevel.LOW)
     @KeyExchange(provided = KeyExchangeType.ECDH)
     public void InvalidEllipticCurve(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         c.setAddEllipticCurveExtension(true);
@@ -120,7 +120,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @KeyExchange(provided = KeyExchangeType.ECDH, supported = KeyExchangeType.ALL12)
     public void InvalidEllipticCurve_WithNonECCCiphersuite(WorkflowRunner runner) {
         runner.appendEachSupportedCiphersuiteToClientSupported = true;
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);

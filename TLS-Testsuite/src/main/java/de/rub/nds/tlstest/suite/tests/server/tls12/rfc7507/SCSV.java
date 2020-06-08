@@ -54,7 +54,7 @@ public class SCSV extends Tls12Test {
 
         for (VersionSuiteListPair versionSuite : olderCipherSuites) {
             for (CipherSuite cipherSuite : versionSuite.getCiphersuiteList()) {
-                Config c = context.getConfig().createConfig();
+                Config c = this.getConfig();
                 c.setDefaultSelectedCipherSuite(cipherSuite);
                 c.setDefaultClientSupportedCiphersuites(cipherSuite, CipherSuite.TLS_FALLBACK_SCSV);
                 c.setDefaultSelectedProtocolVersion(versionSuite.getVersion());
@@ -99,7 +99,7 @@ public class SCSV extends Tls12Test {
 
         for (VersionSuiteListPair versionSuite : olderCipherSuites) {
             for (CipherSuite cipherSuite : versionSuite.getCiphersuiteList()) {
-                Config c = context.getConfig().createConfig();
+                Config c = this.getConfig();
                 c.setDefaultSelectedCipherSuite(cipherSuite);
                 c.setDefaultClientSupportedCiphersuites(CipherSuite.TLS_FALLBACK_SCSV, cipherSuite);
                 c.setDefaultSelectedProtocolVersion(versionSuite.getVersion());

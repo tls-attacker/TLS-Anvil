@@ -28,7 +28,7 @@ public class ClientHello extends Tls12Test {
             "or wish to use, the server MUST ignore those cipher suites, and process the remaining ones as usual.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void unknownCipherSuite(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.appendEachSupportedCiphersuiteToClientSupported = true;
 
         c.setDefaultClientSupportedCiphersuites();
@@ -49,7 +49,7 @@ public class ClientHello extends Tls12Test {
             "Thus, a client and server will always be able to agree on a compression method.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void unknownCompressionMethod(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);

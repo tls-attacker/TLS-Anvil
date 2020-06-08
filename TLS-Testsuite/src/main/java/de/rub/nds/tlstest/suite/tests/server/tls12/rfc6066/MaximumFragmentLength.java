@@ -26,7 +26,7 @@ public class MaximumFragmentLength extends Tls12Test {
             "a value other than the allowed values, it MUST abort the handshake with an \"illegal_parameter\" alert.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void invalidMaximumFragmentLength(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         c.setAddMaxFragmentLengthExtension(true);

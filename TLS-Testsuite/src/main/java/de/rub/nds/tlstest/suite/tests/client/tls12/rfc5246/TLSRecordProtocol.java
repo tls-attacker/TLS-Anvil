@@ -32,7 +32,7 @@ public class TLSRecordProtocol extends Tls12Test {
             "record type, it MUST send an unexpected_message alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendNotDefinedRecordTypesWithClientHello(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         Record record = new Record();
@@ -63,7 +63,7 @@ public class TLSRecordProtocol extends Tls12Test {
             "record type, it MUST send an unexpected_message alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendNotDefinedRecordTypesWithCCSAndFinished(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         Record record = new Record();
         record.setContentType(Modifiable.explicit((byte) 0xFF));
 

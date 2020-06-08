@@ -28,7 +28,7 @@ public class Finished extends Tls12Test {
     @TlsTest(description = "Recipients of Finished messages MUST verify that the contents are correct.", securitySeverity = SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void verifyFinishedMessageCorrect(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         FinishedMessage finishedMessage = new FinishedMessage();
@@ -51,7 +51,7 @@ public class Finished extends Tls12Test {
     @TlsTest(description = "For the PRF defined in Section 5, the Hash MUST be the Hash used as the basis for the PRF.", securitySeverity = SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void invalidPRF(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -81,7 +81,7 @@ public class Finished extends Tls12Test {
             "message at the appropriate point in the handshake.", securitySeverity = SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void omitCCS(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);

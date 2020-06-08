@@ -30,7 +30,7 @@ public class PaddingExtension extends Tls12Test {
             "   bytes, although the padding extension_data field may be empty.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void paddingWithNonZero(WorkflowRunner runner) {
-        Config config = context.getConfig().createConfig();
+        Config config = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         config.setAddPaddingExtension(true);

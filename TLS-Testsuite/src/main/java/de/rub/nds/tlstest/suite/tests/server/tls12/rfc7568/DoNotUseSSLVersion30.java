@@ -41,7 +41,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
             "message and close the connection.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendClientHelloVersion0300(WorkflowRunner runner) {
-        Config config = context.getConfig().createConfig();
+        Config config = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(config);
@@ -74,7 +74,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
             "ClientHello, but they MUST NOT negotiate SSLv3.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendClientHelloVersion0300WithDifferentVersionInTheRecord(WorkflowRunner runner) {
-        Config config = context.getConfig().createConfig();
+        Config config = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();

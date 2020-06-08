@@ -28,7 +28,7 @@ public class CertificateStatusRequest extends Tls12Test {
             "received a \"status_request\" extension in the client hello message and sent a \"status_request\" extension in the server hello message.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void moreThanOneNameOfTheSameType(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
         c.setAddCertificateStatusRequestExtension(false);
 

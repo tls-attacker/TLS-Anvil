@@ -34,7 +34,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             "reply according to the highest version supported by the server.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void versionGreaterThanSupportedByServer(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         ModifiableByteArray protocolVersionSend = Modifiable.explicit(new byte[]{0x03, 0x0F});
@@ -65,7 +65,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             "record layer version number for ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void acceptAnyRecordVersionNumber(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         Record record = new Record();

@@ -33,7 +33,7 @@ public class Fragmentation extends Tls12Test {
             "traffic analysis countermeasure.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendZeroLengthRecord_CH(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         c.setDefaultClientSupportedCiphersuites(CipherSuite.getImplemented());
         c.setUseAllProvidedRecords(true);
         runner.replaceSupportedCiphersuites = true;
@@ -59,7 +59,7 @@ public class Fragmentation extends Tls12Test {
             "traffic analysis countermeasure.")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendZeroLengthRecord_Alert(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         c.setDefaultClientSupportedCiphersuites(CipherSuite.getImplemented());
         c.setUseAllProvidedRecords(true);
         runner.replaceSupportedCiphersuites = true;
@@ -89,7 +89,7 @@ public class Fragmentation extends Tls12Test {
     @TlsTest(description = "")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCS_F(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         c.getDefaultClientConnection().setTransportHandlerType(TransportHandlerType.TCP_NO_DELAY);
         runner.replaceSupportedCiphersuites = true;
 
@@ -115,7 +115,7 @@ public class Fragmentation extends Tls12Test {
     @TlsTest(description = "")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCSF(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
+        Config c = this.getConfig();
         c.getDefaultClientConnection().setTransportHandlerType(TransportHandlerType.TCP_NO_DELAY);
         runner.replaceSupportedCiphersuites = true;
 

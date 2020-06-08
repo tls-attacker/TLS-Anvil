@@ -34,7 +34,7 @@ public class KexAnnotationTLS13 {
 
 
     @TlsTest
-    @KeyExchange(provided = KeyExchangeType.TLS13)
+    @KeyExchange(provided = KeyExchangeType.ALL13)
     public void execute_supported() {}
 
     @TlsTest

@@ -102,10 +102,10 @@ public class KeyX implements KeyExchange {
             }
         }
 
-        if (Arrays.asList(this.supported()).contains(KeyExchangeType.TLS13) &&
+        if (Arrays.asList(this.supported()).contains(KeyExchangeType.ALL13) &&
                 report.getSupportedTls13CipherSuites() != null &&
                 report.getSupportedTls13CipherSuites().size() > 0) {
-            filtered.add(KeyExchangeType.TLS13);
+            filtered.add(KeyExchangeType.ALL13);
         }
 
 
@@ -211,7 +211,7 @@ public class KeyX implements KeyExchange {
                 case ALL12:
                     compatible |= AlgorithmResolver.getKeyExchangeAlgorithm(i) != null && (!this.requiresServerKeyExchMsg || skxm != null);
                     break;
-                case TLS13:
+                case ALL13:
                     compatible |= AlgorithmResolver.getKeyExchangeAlgorithm(i) == null;
                     break;
                 case NOT_SPECIFIED:

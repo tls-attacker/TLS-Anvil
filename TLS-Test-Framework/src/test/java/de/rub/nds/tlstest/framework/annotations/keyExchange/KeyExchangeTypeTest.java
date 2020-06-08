@@ -76,7 +76,7 @@ public class KeyExchangeTypeTest {
     }
 
     @Test
-    @KeyExchange(provided = KeyExchangeType.DH, supported = { KeyExchangeType.TLS13, KeyExchangeType.ECDH })
+    @KeyExchange(provided = KeyExchangeType.DH, supported = { KeyExchangeType.ALL13, KeyExchangeType.ECDH })
     public void test_resolve_providedUnsupportedUnsupportedSupported(ExtensionContext context) {
         KeyExchange resolved = KeyX.resolveKexAnnotation(context);
 

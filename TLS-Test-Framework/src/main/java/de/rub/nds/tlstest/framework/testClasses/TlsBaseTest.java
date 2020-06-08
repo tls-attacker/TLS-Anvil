@@ -1,5 +1,6 @@
 package de.rub.nds.tlstest.framework.testClasses;
 
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.junitExtensions.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
         MethodConditionExtension.class,
         WorkflowRunnerResolver.class
 })
-public class TlsBaseTest {
+public abstract class TlsBaseTest {
 
     protected TestContext context;
 
@@ -27,5 +28,7 @@ public class TlsBaseTest {
     public TestContext getTestContext() {
         return context;
     }
+
+    public abstract Config getConfig();
 }
 

@@ -1,11 +1,8 @@
 package de.rub.nds.tlstest.framework.utils;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.*;
 import de.rub.nds.tlstest.framework.constants.KeyX;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -13,12 +10,15 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
 public class TestMethodConfig {
     private KeyX keyExchange = null;
+    private Method testMethod = null;
+    private Class<?> testClass = null;
 
     @JsonProperty("RFC")
     private RFC rfc = null;
@@ -44,28 +44,34 @@ public class TestMethodConfig {
     }
 
     public TestMethodConfig(ExtensionContext extensionContext) {
-        Method testM = extensionContext.getRequiredTestMethod();
-        Class<?> testClass = extensionContext.getRequiredTestClass();
+        testMethod = extensionContext.getRequiredTestMethod();
+        testClass = extensionContext.getRequiredTestClass();
 
-        if (testM.isAnnotationPresent(KeyExchange.class)) {
+        if (testMethod.isAnnotationPresent(KeyExchange.class) || testClass.isAnnotationPresent(KeyExchange.class)) {
             KeyExchange annotation = KeyX.resolveKexAnnotation(extensionContext);
             this.keyExchange = new KeyX(annotation);
         }
 
-        if (testM.isAnnotationPresent(TlsTest.class)) {
-            this.tlsTest = testM.getAnnotation(TlsTest.class);;
+        if (testMethod.isAnnotationPresent(TlsTest.class)) {
+            this.tlsTest = testMethod.getAnnotation(TlsTest.class);;
         }
 
-        if (testM.isAnnotationPresent(RFC.class)) {
-            this.rfc = testM.getAnnotation(RFC.class);
-        }
-        else if (testClass.isAnnotationPresent(RFC.class)) {
-            this.rfc = testClass.getAnnotation(RFC.class);
-        }
+        this.rfc = this.resolveAnnotation(RFC.class);
 
-        this.setMethodName(testM.getName());
+        this.setMethodName(testMethod.getName());
         this.setClassName(testClass.getName());
         this.setDisplayName(extensionContext.getDisplayName());
+    }
+
+    private <T extends Annotation> T resolveAnnotation(Class<T> clazz) {
+        if (testMethod.isAnnotationPresent(clazz)) {
+            return testMethod.getAnnotation(clazz);
+        }
+        else if (testClass.isAnnotationPresent(clazz)) {
+            return testClass.getAnnotation(clazz);
+        }
+
+        return null;
     }
 
 

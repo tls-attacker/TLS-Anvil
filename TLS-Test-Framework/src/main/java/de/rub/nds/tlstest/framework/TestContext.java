@@ -41,7 +41,7 @@ public class TestContext {
     public TestContext() {
         super();
         this.config = new TestConfig();
-        this.testRunner = new TestRunner(this.config);
+        this.testRunner = new TestRunner(this.config, this);
         TestContext.instance = this;
     }
 

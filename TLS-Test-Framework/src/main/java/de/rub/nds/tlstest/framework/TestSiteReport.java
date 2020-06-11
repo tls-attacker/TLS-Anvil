@@ -1,6 +1,7 @@
 package de.rub.nds.tlstest.framework;
 
 import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsscanner.probe.certificate.CertificateChain;
 import de.rub.nds.tlsscanner.probe.mac.CheckPattern;
 import de.rub.nds.tlsscanner.report.SiteReport;
@@ -31,6 +32,9 @@ public class TestSiteReport implements Serializable {
     private List<CipherSuite> supportedTls13CipherSuites = null;
 
     private List<VersionSuiteListPair> versionSuiteListPairs = null;
+
+
+    private ClientHelloMessage receivedClientHello = null;
 
     public TestSiteReport(SiteReport report) {
         this.versions = report.getVersions();
@@ -137,5 +141,13 @@ public class TestSiteReport implements Serializable {
 
     public void setVersionSuiteListPairs(List<VersionSuiteListPair> versionSuiteListPairs) {
         this.versionSuiteListPairs = versionSuiteListPairs;
+    }
+
+    public ClientHelloMessage getReceivedClientHello() {
+        return receivedClientHello;
+    }
+
+    public void setReceivedClientHello(ClientHelloMessage receivedClientHello) {
+        this.receivedClientHello = receivedClientHello;
     }
 }

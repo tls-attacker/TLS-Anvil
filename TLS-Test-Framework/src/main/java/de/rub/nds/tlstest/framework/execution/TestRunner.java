@@ -1,20 +1,24 @@
 package de.rub.nds.tlstest.framework.execution;
 
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
+import de.rub.nds.tlsattacker.core.constants.RunningModeType;
+import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlsattacker.core.workflow.ThreadedServerWorkflowQueueExecutor;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
-import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsscanner.TlsScanner;
 import de.rub.nds.tlsscanner.config.ScannerConfig;
 import de.rub.nds.tlsscanner.report.SiteReport;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
@@ -28,39 +32,74 @@ import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.*;
 import java.util.*;
-import java.util.concurrent.*;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
 
 public class TestRunner {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private TestConfig testConfig;
-    private ParallelExecutor executor;
-    private ThreadedServerWorkflowQueueExecutor server;
+    private final TestConfig testConfig;
+    private final TestContext testContext;
+    private final ParallelExecutor executor;
 
-    public TestRunner(TestConfig testConfig) {
+    public TestRunner(TestConfig testConfig, TestContext testContext) {
         this.testConfig = testConfig;
         executor = new ParallelExecutor(5, 2);
+        this.testContext = testContext;
     }
 
-    private boolean finishedPrepartion = false;
 
+    private void saveToCache(@Nonnull TestSiteReport smallReport) {
+        String fileName;
+        if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
+            fileName = testConfig.getTestClientDelegate().getPort().toString();
+        } else {
+            fileName = testConfig.getTestServerDelegate().getHost();
+        }
 
-    private void serverTestPreparation() {
-        File f = new File(testConfig.getTestServerDelegate().getHost());
+        try {
+            FileOutputStream fos = new FileOutputStream(fileName);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(smallReport);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Nullable
+    private TestSiteReport loadFromCache() {
+        String fileName;
+        if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
+            fileName = testConfig.getTestClientDelegate().getPort().toString();
+        } else {
+            fileName = testConfig.getTestServerDelegate().getHost();
+        }
+
+        File f = new File(fileName);
         if (f.exists() && !testConfig.isIgnoreCache()) {
-            try (FileInputStream fis = new FileInputStream(testConfig.getTestServerDelegate().getHost());
-                 ObjectInputStream ois = new ObjectInputStream(fis)) {
-                final TestSiteReport report = (TestSiteReport) ois.readObject ();
-                testConfig.setSiteReport(report.getSiteReport());
+            try {
+                FileInputStream fis = new FileInputStream(fileName);
+                ObjectInputStream ois = new ObjectInputStream(fis);
                 LOGGER.info("Using cached siteReport");
-                return;
+                return (TestSiteReport)ois.readObject();
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+
+        return null;
+    }
+
+
+    private void serverTestPreparation() {
+        TestSiteReport cachedReport = loadFromCache();
+        if (cachedReport != null) {
+            testConfig.setSiteReport(cachedReport.getSiteReport());
+            return;
         }
 
         ScannerConfig scannerConfig = new ScannerConfig(testConfig.getGeneralDelegate(), testConfig.getTestServerDelegate());
@@ -69,27 +108,26 @@ public class TestRunner {
 
         TlsScanner scanner = new TlsScanner(scannerConfig);
         SiteReport report = scanner.scan();
-        TestSiteReport smallReport = new TestSiteReport(report);
-        try (FileOutputStream fos = new FileOutputStream (testConfig.getTestServerDelegate().getHost());
-             ObjectOutputStream oos = new ObjectOutputStream (fos)) {
-            oos.writeObject (smallReport);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        saveToCache(new TestSiteReport(report));
 
         testConfig.setSiteReport(report);
     }
 
 
     private void clientTestPreparation() {
+        TestSiteReport cachedReport = loadFromCache();
+        if (cachedReport != null) {
+            testContext.setReceivedClientHelloMessage(cachedReport.getReceivedClientHello());
+            testConfig.setSiteReport(cachedReport.getSiteReport());
+            return;
+        }
+
         List<TlsTask> tasks = new ArrayList<>();
         List<State> states = new ArrayList<>();
 
         List<CipherSuite> cipherList = CipherSuite.getImplemented();
-        cipherList.removeIf(i -> !i.isTLS13());
-        while (cipherList.size() > 1) {
-            cipherList.remove(0);
-        }
+        //List<CipherSuite> cipherList = new ArrayList<>();
+        //cipherList.add(CipherSuite.TLS_AES_128_GCM_SHA256);
 
         for (CipherSuite i: cipherList) {
             Config config = this.testConfig.createConfig();
@@ -97,7 +135,6 @@ public class TestRunner {
             config.setDefaultSelectedCipherSuite(i);
             config.setEnforceSettings(true);
             config.setWriteKeylogFile(true);
-            config.setKeylogFilePath("/Users/philipp/");
 
             if (i.isTLS13()) {
                 config.setHighestProtocolVersion(ProtocolVersion.TLS13);
@@ -107,17 +144,17 @@ public class TestRunner {
                 config.setAddSignatureAndHashAlgorithmsExtension(true);
                 config.setAddSupportedVersionsExtension(true);
                 config.setAddRenegotiationInfoExtension(false);
+                config.setDefaultServerSupportedSignatureAndHashAlgorithms(SignatureAndHashAlgorithm.RSA_PSS_RSAE_SHA384);
             }
 
             try {
                 WorkflowConfigurationFactory configurationFactory = new WorkflowConfigurationFactory(config);
                 WorkflowTrace trace = configurationFactory.createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER);
-                WorkflowTraceMutator.truncateAfter(trace, HandshakeMessageType.CERTIFICATE_VERIFY);
                 State s = new State(config, trace);
                 StateExecutionServerTask task = new StateExecutionServerTask(s, testConfig.getTestClientDelegate().getServerSocket(), 2);
-//                task.setBeforeAcceptCallback(() -> {
-//                    testConfig.getTestClientDelegate().executeWakeupScript();
-//                });
+                task.setBeforeAcceptCallback(() -> {
+                    testConfig.getTestClientDelegate().executeWakeupScript();
+                });
                 tasks.add(task);
                 states.add(s);
             }
@@ -127,18 +164,21 @@ public class TestRunner {
         }
 
 
-        ParallelExecutor executor = new ParallelExecutor(1, 2);
+        ParallelExecutor executor = new ParallelExecutor(50, 2);
         executor.bulkExecuteTasks(tasks);
-        finishedPrepartion = true;
 
         Set<CipherSuite> tls12CipherSuites = new HashSet<>();
         Set<CipherSuite> tls13CipherSuites = new HashSet<>();
+        ClientHelloMessage clientHello = null;
         for (State s: states) {
             try {
                 if (s.getWorkflowTrace().executedAsPlanned()) {
-                    if (s.getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS12)
+                    if (clientHello == null) {
+                        clientHello = s.getWorkflowTrace().getFirstReceivedMessage(ClientHelloMessage.class);
+                    }
+                    if (s.getTlsContext().getSelectedProtocolVersion() == ProtocolVersion.TLS12)
                         tls12CipherSuites.add(s.getConfig().getDefaultSelectedCipherSuite());
-                    else if (s.getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13)
+                    else if (s.getTlsContext().getSelectedProtocolVersion() == ProtocolVersion.TLS13)
                         tls13CipherSuites.add(s.getConfig().getDefaultSelectedCipherSuite());
                 }
 
@@ -149,14 +189,23 @@ public class TestRunner {
                 LOGGER.error(e);
                 throw new RuntimeException(e);
             }
-
-
         }
 
-        SiteReport report = new SiteReport("", new ArrayList<>());
+        TestSiteReport report = new TestSiteReport(new SiteReport("", new ArrayList<>()));
         report.setCipherSuites(tls12CipherSuites);
         report.setSupportedTls13CipherSuites(new ArrayList<>(tls13CipherSuites));
-        testConfig.setSiteReport(report);
+        SupportedVersionsExtensionMessage msg = clientHello.getExtension(SupportedVersionsExtensionMessage.class);
+        report.setReceivedClientHello(clientHello);
+
+        if (msg != null) {
+            report.setVersions(ProtocolVersion.getProtocolVersions(msg.getSupportedVersions().getValue()));
+        }
+
+        saveToCache(report);
+
+        testContext.setReceivedClientHelloMessage(clientHello);
+        testConfig.setSiteReport(report.getSiteReport());
+
     }
 
     public void prepareTestExecution() {

@@ -7,6 +7,8 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
+import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsattacker.transport.TransportHandlerType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
@@ -17,6 +19,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,16 +55,19 @@ public class WorkflowRunner {
     }
 
     public AnnotatedStateContainer execute(WorkflowTrace trace) {
-        return this.execute(trace, this.context.getConfig().createConfig());
+        return this.execute(this.prepare(trace));
     }
 
     public AnnotatedStateContainer execute(WorkflowTrace trace, Config config) {
-        AnnotatedStateContainer container = this.prepare(trace, config);
-        return this.execute(container);
+        return this.execute(this.prepare(trace, config));
     }
 
     public AnnotatedStateContainer execute(AnnotatedStateContainer container) {
         List<AnnotatedState> toAdd = new ArrayList<>();
+
+        if (container.getStates().size() == 0) {
+            LOGGER.warn("AnnotatedStateContainer does not contain any state. No Handshake will be performed...");
+        }
 
         for (AnnotatedState i : container.getStates()) {
             if (!useTCPFragmentationDerivation && !useRecordFragmentationDerivation)
@@ -98,7 +105,19 @@ public class WorkflowRunner {
         container.setTestMethodConfig(testMethodConfig);
 
         List<State> states = container.getStates().parallelStream().map(AnnotatedState::getState).collect(Collectors.toList());
-        context.getTestRunner().getExecutor().bulkExecuteStateTasks(states);
+        if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
+            context.getTestRunner().getExecutor().bulkExecuteStateTasks(states);
+        } else {
+            List<TlsTask> tasks = states.stream().map(i -> {
+                StateExecutionServerTask task = new StateExecutionServerTask(i, context.getConfig().getTestClientDelegate().getServerSocket(), 2);
+                task.setBeforeAcceptCallback(() -> {
+                    context.getConfig().getTestClientDelegate().executeWakeupScript();
+                });
+                return task;
+            }).collect(Collectors.toList());
+            context.getTestRunner().getExecutor().bulkExecuteTasks(tasks);
+        }
+
 
         return container;
     }
@@ -106,7 +125,11 @@ public class WorkflowRunner {
 
 
     public AnnotatedStateContainer prepare(WorkflowTrace trace) {
-        return this.prepare(trace, this.context.getConfig().createConfig());
+        Config config = this.context.getConfig().createConfig();
+        if (testMethodConfig.getTlsVersion().supported() == ProtocolVersion.TLS13) {
+            config = this.context.getConfig().createTls13Config();
+        }
+        return this.prepare(trace, config);
     }
 
     public AnnotatedStateContainer prepare(WorkflowTrace trace, Config config) {
@@ -174,9 +197,16 @@ public class WorkflowRunner {
 
     private List<AnnotatedState> transformStateClientTest(AnnotatedState annotatedState) {
         List<AnnotatedState> result = new ArrayList<AnnotatedState>(){};
-        List<CipherSuite> supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> supported;
         State state = annotatedState.getState();
         Config inputConfig = annotatedState.getState().getConfig();
+
+        if (inputConfig.getHighestProtocolVersion() != ProtocolVersion.TLS13) {
+            supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        }
+        else {
+            supported = new ArrayList<>(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
+        }
 
         // supported only contains CipherSuites that are compatible with the keyExchange annotation
         supported.removeIf((CipherSuite i) -> !testMethodConfig.getKeyExchange().compatibleWithCiphersuite(i));
@@ -235,10 +265,17 @@ public class WorkflowRunner {
 
 
     private List<AnnotatedState> transformStateServerTest(AnnotatedState annotatedState) {
-        List<AnnotatedState> result = new ArrayList<AnnotatedState>(){};
-        List<CipherSuite> supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
-        State state = annotatedState.getState();
+        List<AnnotatedState> result = new ArrayList<>();
         Config inputConfig = annotatedState.getState().getConfig();
+        State state = annotatedState.getState();
+        List<CipherSuite> supported;
+
+        if (inputConfig.getHighestProtocolVersion() != ProtocolVersion.TLS13) {
+            supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        }
+        else {
+            supported = new ArrayList<>(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
+        }
 
         // supported only contains CipherSuites that are compatible with the keyExchange annotation
         supported.removeIf((CipherSuite i) -> !testMethodConfig.getKeyExchange().compatibleWithCiphersuite(i));

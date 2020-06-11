@@ -7,6 +7,8 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
 import de.rub.nds.tlsattacker.core.constants.NameType;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
+import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.SNIEntry;
 import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
@@ -18,13 +20,10 @@ import org.bouncycastle.util.IPAddress;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 
 public class TestConfig extends TLSDelegateConfig {
@@ -201,19 +200,45 @@ public class TestConfig extends TLSDelegateConfig {
                 && this.testEndpointMode == TestEndpointType.SERVER) {
             config.setAddServerNameIndicationExtension(true);
             config.setDefaultClientSNIEntries(new SNIEntry(config.getDefaultClientConnection().getHostname(), NameType.HOST_NAME));
-
-            config.getDefaultClientConnection().setFirstTimeout(100 * 1000);
-            config.getDefaultClientConnection().setTimeout(100 * 1000);
-            config.setWorkflowExecutorShouldClose(true);
-            config.setEarlyStop(true);
         } else {
             config.setAddServerNameIndicationExtension(false);
         }
+
+        config.getDefaultClientConnection().setFirstTimeout(100 * 1000);
+        config.getDefaultClientConnection().setTimeout(100 * 1000);
+        config.getDefaultServerConnection().setFirstTimeout(100 * 1000);
+        config.getDefaultServerConnection().setTimeout(100 * 1000);
+        config.setWorkflowExecutorShouldClose(true);
+        config.setEarlyStop(true);
 
         cachedConfig = config;
         return config;
     }
 
+    synchronized public Config createTls13Config() {
+        Config config = this.createConfig();
+
+        config.setHighestProtocolVersion(ProtocolVersion.TLS13);
+        config.setAddEllipticCurveExtension(true);
+        config.setAddECPointFormatExtension(true);
+        config.setAddKeyShareExtension(true);
+        config.setAddSignatureAndHashAlgorithmsExtension(true);
+        config.setAddSupportedVersionsExtension(true);
+        config.setAddRenegotiationInfoExtension(false);
+        config.setDefaultServerSupportedSignatureAndHashAlgorithms(
+                SignatureAndHashAlgorithm.RSA_PSS_RSAE_SHA384,
+                SignatureAndHashAlgorithm.RSA_PSS_RSAE_SHA256,
+                SignatureAndHashAlgorithm.RSA_PSS_RSAE_SHA512,
+                SignatureAndHashAlgorithm.RSA_SHA1,
+                SignatureAndHashAlgorithm.RSA_SHA256,
+                SignatureAndHashAlgorithm.RSA_SHA384,
+                SignatureAndHashAlgorithm.RSA_SHA512,
+                SignatureAndHashAlgorithm.ED25519
+        );
+
+        config.setSupportedSignatureAndHashAlgorithms(config.getDefaultServerSupportedSignatureAndHashAlgorithms());
+        return config;
+    }
 
     public TestEndpointType getTestEndpointMode() {
         return testEndpointMode;

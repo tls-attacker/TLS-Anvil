@@ -160,6 +160,10 @@ public class TestRunner {
     }
 
     public void prepareTestExecution() {
+        if (!testConfig.isParsedArgs()) {
+            return;
+        }
+
         LOGGER.info("Prepare Test execution - Starting TLS Scanner");
         this.testConfig.createConfig();
 

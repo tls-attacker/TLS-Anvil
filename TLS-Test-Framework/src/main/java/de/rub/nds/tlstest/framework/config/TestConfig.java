@@ -71,18 +71,39 @@ public class TestConfig extends TLSDelegateConfig {
      *
      * @return arguments parsed from the COMMAND environment variable
      */
-    @Nonnull
+    @Nullable
     private String[] argsFromEnvironment() {
-        String env = System.getenv("COMMAND");
-        if (env == null) {
+        String clientEnv = System.getenv("COMMAND_CLIENT");
+        String serverEnv = System.getenv("COMMAND_SERVER");
+        if (clientEnv == null && serverEnv == null) {
             throw new ParameterException("No args could be found");
         }
+        if (testEndpointMode == null && clientEnv != null && serverEnv != null) {
+            return null;
+        }
+        if (testEndpointMode == TestEndpointType.SERVER) {
+            if (serverEnv == null)
+                throw new ParameterException("SERVER_COMMAND is missing");
+            clientEnv = null;
+        }
+        if (testEndpointMode == TestEndpointType.CLIENT) {
+            if (clientEnv == null)
+                throw new ParameterException("CLIENT_COMMAND is missing");
+            serverEnv = null;
+        }
 
-        return env.split("\\s");
+        if (clientEnv != null) {
+            return clientEnv.split("\\s");
+        } else {
+            return serverEnv.split("\\s");
+        }
     }
 
 
     public void parse(@Nullable String[] args) {
+        if (parsedArgs)
+            return;
+
         if (argParser == null) {
             argParser = JCommander.newBuilder()
                     .addCommand("client", testClientDelegate)
@@ -94,6 +115,8 @@ public class TestConfig extends TLSDelegateConfig {
 
         if (args == null) {
             args = argsFromEnvironment();
+            if (args == null)
+                return;
         }
 
         this.argParser.parse(args);
@@ -196,6 +219,9 @@ public class TestConfig extends TLSDelegateConfig {
         return testEndpointMode;
     }
 
+    public void setTestEndpointMode(TestEndpointType testEndpointMode) {
+        this.testEndpointMode = testEndpointMode;
+    }
 
     private void setTestEndpointMode(@Nonnull String testEndpointMode) {
         if (testEndpointMode.toLowerCase().equals(TestEndpointType.CLIENT.toString())) {
@@ -264,5 +290,9 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setOutputFormat(String outputFormat) {
         this.outputFormat = outputFormat;
+    }
+
+    public boolean isParsedArgs() {
+        return parsedArgs;
     }
 }

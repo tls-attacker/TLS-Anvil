@@ -30,14 +30,23 @@ public class EndpointCondition extends BaseCondition {
     }
 
     @Override
-    public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
-        if (!context.getTestMethod().isPresent()) {
+    public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext extensionContext) {
+        if (!extensionContext.getTestMethod().isPresent()) {
             return ConditionEvaluationResult.enabled("Class annotations are not relevant.");
         }
 
-        TestConfig config = TestContext.getInstance().getConfig();
+        TestContext context = TestContext.getInstance();
+        TestConfig config = context.getConfig();
+        TestEndpointType mode = endpointOfMethod(extensionContext);
+        synchronized (TestContext.getInstance()) {
+            if (!config.isParsedArgs()) {
+                config.setTestEndpointMode(mode);
+                config.parse(null);
+                context.getTestRunner().prepareTestExecution();
+            }
+        }
 
-        if (endpointOfMethod(context) == config.getTestEndpointMode() || endpointOfMethod(context) == TestEndpointType.BOTH) {
+        if (mode == config.getTestEndpointMode() || mode == TestEndpointType.BOTH) {
             return ConditionEvaluationResult.enabled("TestEndpointMode matches");
         }
 

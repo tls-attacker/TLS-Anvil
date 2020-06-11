@@ -26,7 +26,6 @@ public class ClientHello extends Tls12Test {
 
     @TlsTest(description = "If the list contains cipher suites the server does not recognize, support, " +
             "or wish to use, the server MUST ignore those cipher suites, and process the remaining ones as usual.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void unknownCipherSuite(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.appendEachSupportedCiphersuiteToClientSupported = true;
@@ -47,7 +46,6 @@ public class ClientHello extends Tls12Test {
 
     @TlsTest(description = "This vector MUST contain, and all implementations MUST support, CompressionMethod.null. " +
             "Thus, a client and server will always be able to agree on a compression method.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void unknownCompressionMethod(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;

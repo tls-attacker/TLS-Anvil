@@ -45,7 +45,6 @@ public class SCSV extends Tls12Test {
             "(as it would for the Server Hello message if the server was continuing the handshake) " +
             "or to the record layer version number used by the client.", securitySeverity = SeverityLevel.MEDIUM)
     @MethodCondition(method = "supportsOtherTlsVersions")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void includeFallbackSCSV(WorkflowRunner runner) {
         List<VersionSuiteListPair> olderCipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getVersionSuitePairs());
         olderCipherSuites.removeIf(i -> i.getVersion() != ProtocolVersion.TLS10 && i.getVersion() != ProtocolVersion.TLS11);
@@ -90,7 +89,6 @@ public class SCSV extends Tls12Test {
             "(as it would for the Server Hello message if the server was continuing the handshake) " +
             "or to the record layer version number used by the client.", securitySeverity = SeverityLevel.MEDIUM)
     @MethodCondition(method = "supportsOtherTlsVersions")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void includeFallbackSCSV_nonRecommendedCipherSuiteOrder(WorkflowRunner runner) {
         List<VersionSuiteListPair> olderCipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getVersionSuitePairs());
         olderCipherSuites.removeIf(i -> i.getVersion() != ProtocolVersion.TLS10 && i.getVersion() != ProtocolVersion.TLS11);

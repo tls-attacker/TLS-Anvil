@@ -26,7 +26,6 @@ import static org.junit.Assert.assertTrue;
 public class Finished extends Tls12Test {
 
     @TlsTest(description = "Recipients of Finished messages MUST verify that the contents are correct.", securitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void verifyFinishedMessageCorrect(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
@@ -50,7 +49,6 @@ public class Finished extends Tls12Test {
     }
 
     @TlsTest(description = "For the PRF defined in Section 5, the Hash MUST be the Hash used as the basis for the PRF.", securitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void invalidPRF(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
@@ -81,7 +79,6 @@ public class Finished extends Tls12Test {
 
     @TlsTest(description = "It is a fatal error if a Finished message is not preceded by a ChangeCipherSpec " +
             "message at the appropriate point in the handshake.", securitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void omitCCS(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;

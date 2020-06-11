@@ -36,7 +36,6 @@ public class RC4Ciphersuites extends Tls12Test {
     }
 
     @TlsTest(description = "TLS clients MUST NOT include RC4 cipher suites in the ClientHello message.", securitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void offersRC4Ciphersuites(WorkflowRunner runner) {
         List<CipherSuite> supported = new ArrayList<>(this.context.getConfig().getSiteReport().getCipherSuites());
         supported.removeIf(i -> !i.toString().contains("RC4"));
@@ -47,7 +46,6 @@ public class RC4Ciphersuites extends Tls12Test {
 
     @TlsTest(description = "TLS servers MUST NOT select an RC4 cipher suite when a TLS client sends such " +
             "a cipher suite in the ClientHello message.", securitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(clazz = RC4Ciphersuites.class, method = "supportsRC4")
     public void selectRC4CipherSuite(WorkflowRunner runner) {
         List<CipherSuite> supported = new ArrayList<>(this.context.getConfig().getSiteReport().getCipherSuites());

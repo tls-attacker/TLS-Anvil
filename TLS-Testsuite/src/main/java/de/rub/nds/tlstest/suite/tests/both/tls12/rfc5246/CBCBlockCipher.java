@@ -44,7 +44,6 @@ public class CBCBlockCipher extends Tls12Test {
             "vector MUST be filled with the padding length value. The receiver " +
             "MUST check this padding and MUST use the bad_record_mac alert to " +
             "indicate padding errors.", securitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "supportsCBCCipherSuites")
     public void invalidCBCPadding(WorkflowRunner runner) {
         Config c = this.getConfig();
@@ -87,7 +86,6 @@ public class CBCBlockCipher extends Tls12Test {
             "length. Legal values range from zero to 255, inclusive. This " +
             "length specifies the length of the padding field exclusive of the " +
             "padding_length field itself.", securitySeverity = SeverityLevel.MEDIUM)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(clazz = CBCBlockCipher.class, method = "supportsCBCCipherSuites")
     public void invalidPaddingLength(WorkflowRunner runner) {
         Config c = this.getConfig();

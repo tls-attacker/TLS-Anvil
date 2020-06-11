@@ -39,7 +39,6 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
             "{03,00}. Any party receiving a Hello message with the protocol " +
             "version set to {03,00} MUST respond with a \"protocol_version\" alert " +
             "message and close the connection.")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendClientHelloVersion0300(WorkflowRunner runner) {
         Config config = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
@@ -72,7 +71,6 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
     @TlsTest(description = "TLS servers MUST accept any value " +
             "{03,XX} (including {03,00}) as the record layer version number for " +
             "ClientHello, but they MUST NOT negotiate SSLv3.")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendClientHelloVersion0300WithDifferentVersionInTheRecord(WorkflowRunner runner) {
         Config config = this.getConfig();
         runner.replaceSupportedCiphersuites = true;

@@ -12,7 +12,6 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 public class MandatoryCipherSuites extends Tls12Test {
 
     @TlsTest(description = "A TLS-compliant application MUST implement the cipher suite TLS_RSA_WITH_AES_128_CBC_SHA")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void verify() {
         if (!context.getConfig().getSiteReport().getCipherSuites().contains(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA)) {
             throw new AssertionError("Target does not support mandatory ciphersuite TLS_RSA_WITH_AES_128_CBC_SHA");

@@ -32,7 +32,6 @@ public class CertificateVerify extends Tls12Test {
             "starting at client hello and up to, but not including, this message, including the " +
             "type and length fields of the handshake messages. This is the concatenation of all " +
             "the Handshake structures (as defined in Section 7.4) exchanged thus far.", securitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "clientAuth")
     public void invalidCertificateVerify(WorkflowRunner runner) {
         Config c = this.getConfig();

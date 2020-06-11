@@ -71,7 +71,6 @@ public class SignatureAlgorithms extends Tls12Test {
     @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
             "If the negotiated key exchange algorithm is one of (RSA, DHE_RSA, DH_RSA, RSA_PSK, ECDH_RSA, ECDHE_RSA), " +
             "behave as if client had sent the value {sha1,rsa}.", interoperabilitySeverity = SeverityLevel.MEDIUM)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "rsaCiphersuitesSupported")
     public void rsaNoSignatureAlgorithmsExtension(WorkflowRunner runner) {
         Config c = this.getConfig();
@@ -94,7 +93,6 @@ public class SignatureAlgorithms extends Tls12Test {
     @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
             "If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), " +
             "behave as if the client had sent the value {sha1,dsa}.", interoperabilitySeverity = SeverityLevel.MEDIUM)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "dssCiphersuitesSupported")
     public void dssNoSignatureAlgorithmsExtension(WorkflowRunner runner) {
         Config c = this.getConfig();
@@ -116,7 +114,6 @@ public class SignatureAlgorithms extends Tls12Test {
     @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
             "If the negotiated key exchange algorithm is one of (ECDH_ECDSA, ECDHE_ECDSA), " +
             "behave as if the client had sent value {sha1,ecdsa}.", interoperabilitySeverity = SeverityLevel.MEDIUM)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "ecdsaCiphersuitesSupported")
     public void ecdsaNoSignatureAlgorithmsExtension(WorkflowRunner runner) {
         Config c = this.getConfig();

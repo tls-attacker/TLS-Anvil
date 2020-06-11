@@ -32,7 +32,6 @@ public class Fragmentation extends Tls12Test {
             "Alert, or ChangeCipherSpec content types. Zero-length fragments of " +
             "Application data MAY be sent as they are potentially useful as a " +
             "traffic analysis countermeasure.")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendZeroLengthRecord_CCS(WorkflowRunner runner) {
         Config c = this.getConfig();
         c.setDefaultClientSupportedCiphersuites(CipherSuite.getImplemented());
@@ -61,7 +60,6 @@ public class Fragmentation extends Tls12Test {
             "Alert, or ChangeCipherSpec content types. Zero-length fragments of " +
             "Application data MAY be sent as they are potentially useful as a " +
             "traffic analysis countermeasure.")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendZeroLengthApplicationRecord(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
@@ -94,7 +92,6 @@ public class Fragmentation extends Tls12Test {
 
     @TlsTest(description = "The length (in bytes) of the following TLSPlaintext.fragment. The\n" +
             "length MUST NOT exceed 2^14.")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendRecordWithLengthOver2pow14plus1(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;

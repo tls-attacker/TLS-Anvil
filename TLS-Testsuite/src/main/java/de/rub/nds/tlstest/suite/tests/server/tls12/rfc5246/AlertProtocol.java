@@ -34,7 +34,6 @@ public class AlertProtocol extends Tls12Test {
             "alert of its own and close down the connection immediately, " +
             "discarding any pending writes.")
     @RFC(number = 5264, section = "7.2.1 Closure Alerts")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void close_notify(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
@@ -71,7 +70,6 @@ public class AlertProtocol extends Tls12Test {
 
     @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void abortAfterFatalAlert(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;

@@ -24,7 +24,6 @@ public class ServerNameIndication extends Tls12Test {
 
     @TlsTest(description = "The ServerNameList MUST NOT contain more than one name of the same " +
             "name_type.")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void moreThanOneNameOfTheSameType(WorkflowRunner runner) {
         Config c = this.getConfig();
         c.setAddServerNameIndicationExtension(true);

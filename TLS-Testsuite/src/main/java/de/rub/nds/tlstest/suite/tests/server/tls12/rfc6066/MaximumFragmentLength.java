@@ -24,7 +24,6 @@ public class MaximumFragmentLength extends Tls12Test {
 
     @TlsTest(description = "If a server receives a maximum fragment length negotiation request for "+
             "a value other than the allowed values, it MUST abort the handshake with an \"illegal_parameter\" alert.")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void invalidMaximumFragmentLength(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;

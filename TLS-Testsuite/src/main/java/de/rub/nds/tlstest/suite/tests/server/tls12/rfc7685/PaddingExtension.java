@@ -28,7 +28,6 @@ public class PaddingExtension extends Tls12Test {
 
     @TlsTest(description = "The client MUST fill the padding extension completely with zero" +
             "   bytes, although the padding extension_data field may be empty.")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void paddingWithNonZero(WorkflowRunner runner) {
         Config config = this.getConfig();
         runner.replaceSupportedCiphersuites = true;

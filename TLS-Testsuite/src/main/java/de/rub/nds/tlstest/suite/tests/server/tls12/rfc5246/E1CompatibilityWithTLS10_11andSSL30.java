@@ -32,7 +32,6 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     @TlsTest(description = "If a TLS server receives a ClientHello containing a version number " +
             "greater than the highest version supported by the server, it MUST " +
             "reply according to the highest version supported by the server.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void versionGreaterThanSupportedByServer(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
@@ -63,7 +62,6 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
     @TlsTest(description = "Thus, TLS server compliant with this specification MUST accept any value {03,XX} as the " +
             "record layer version number for ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void acceptAnyRecordVersionNumber(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;

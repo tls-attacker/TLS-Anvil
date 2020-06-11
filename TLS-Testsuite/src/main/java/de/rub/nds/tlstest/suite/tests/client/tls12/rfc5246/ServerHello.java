@@ -34,7 +34,6 @@ public class ServerHello extends Tls12Test {
     @RFC(number = 5246, section = "7.4.1.4. Hello Extensions")
     @TlsTest(description = "If a client receives an extension type in ServerHello that it did "+
             "not request in the associated ClientHello, it MUST abort the handshake with an unsupported_extension fatal alert.")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendAdditionalExtension(WorkflowRunner runner) {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
         runner.replaceSelectedCiphersuite = true;

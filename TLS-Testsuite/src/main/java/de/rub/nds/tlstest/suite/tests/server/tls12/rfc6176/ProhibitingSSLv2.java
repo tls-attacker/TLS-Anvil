@@ -26,7 +26,6 @@ public class ProhibitingSSLv2 extends Tls12Test {
 
     @TlsTest(description = "TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT-" +
             "HELLO message format.", securitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendSSL2CompatibleClientHello(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
@@ -44,7 +43,6 @@ public class ProhibitingSSLv2 extends Tls12Test {
     @TlsTest(description = "TLS servers MUST NOT reply with an SSL 2.0 SERVER-HELLO with a " +
             "protocol version that is less than { 0x03, 0x00 } and instead MUST " +
             "abort the connection")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendClientHelloVersionLower0300(WorkflowRunner runner) {
         Config c = this.getConfig();
 

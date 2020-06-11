@@ -23,7 +23,6 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 public class ChangeCipherSpecProtocol extends Tls12Test {
 
     @TlsTest(description = "The message consists of a single byte of value 1.")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void contentOfCCS(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;

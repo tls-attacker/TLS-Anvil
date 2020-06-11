@@ -41,7 +41,6 @@ public class AEADCiphers extends Tls12Test {
     }
 
     @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.", securitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "supportsAEADCiphers")
     public void inalidAuthTag(WorkflowRunner runner) {
         Config c = this.getConfig();
@@ -79,7 +78,6 @@ public class AEADCiphers extends Tls12Test {
     }
 
     @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.", securitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     @MethodCondition(method = "supportsAEADCiphers")
     public void inalidCiphertext(WorkflowRunner runner) {
         Config c = this.getConfig();

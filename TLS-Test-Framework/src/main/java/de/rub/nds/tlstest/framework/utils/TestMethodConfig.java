@@ -39,6 +39,10 @@ public class TestMethodConfig {
     @JsonProperty("ClassName")
     private String className = null;
 
+    @XmlElement(name = "TlsVersion")
+    @JsonUnwrapped
+    private TlsVersion tlsVersion = null;
+
     public TestMethodConfig() {
 
     }
@@ -57,6 +61,7 @@ public class TestMethodConfig {
         }
 
         this.rfc = this.resolveAnnotation(RFC.class);
+        this.tlsVersion = this.resolveAnnotation(TlsVersion.class);
 
         this.setMethodName(testMethod.getName());
         this.setClassName(testClass.getName());
@@ -122,5 +127,13 @@ public class TestMethodConfig {
 
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    public TlsVersion getTlsVersion() {
+        return tlsVersion;
+    }
+
+    public void setTlsVersion(TlsVersion tlsVersion) {
+        this.tlsVersion = tlsVersion;
     }
 }

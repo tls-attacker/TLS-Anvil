@@ -2,7 +2,7 @@
 <Configuration status="WARN">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%highlight{%d{HH:mm:ss}{GMT+0} [%t] %-5level: %c{1} - %msg%n%throwable}"/>
+            <PatternLayout pattern="%highlight{%d{HH:mm:ss}{GMT+0} [%t] %-5level: %c{1}.%M(%F:%L) - %msg%n%throwable}"/>
         </Console>
         <Console name="ConsoleLibrary" target="SYSTEM_OUT">
             <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
@@ -27,8 +27,8 @@
         <Logger name="de.rub.nds.tlsscanner" level="trace" additivity="false">
             <AppenderRef ref="ConsoleLibrary"/>
         </Logger>
-        <Logger name="de.rub.nds.tlsattacker" level="trace" additivity="false">
-            <AppenderRef ref="ConsoleLibrary"/>
+        <Logger name="de.rub.nds.tlsattacker" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
         </Logger>
         <Logger name="de.rub.nds.modifiablevariable" level="trace" additivity="false">
             <AppenderRef ref="ConsoleLibrary"/>

@@ -12,4 +12,5 @@ public class AssertMsgs {
     public final static String NoFatalAlert = "No fatal alert received!";
     public final static String NoWarningAlert = "No warning alert received!";
     public final static String UnexpectedCipherSuite = "Received unexpected ciphersuite!";
+    public final static String UnexpectedAlertDescription = "Received unexpected alert description";
 }

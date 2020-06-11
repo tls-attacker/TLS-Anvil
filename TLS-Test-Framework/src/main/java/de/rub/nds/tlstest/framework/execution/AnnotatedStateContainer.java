@@ -121,7 +121,7 @@ public class  AnnotatedStateContainer {
     }
 
     private void stateFinished(TestStatus stateStatus) {
-        if (status == TestStatus.NOT_SPECIFIED) {
+        if (status == TestStatus.NOT_SPECIFIED || stateStatus == TestStatus.PARTIALLY_FAILED) {
             this.status = stateStatus;
         }
         else if ((status == TestStatus.FAILED && stateStatus == TestStatus.SUCCEEDED) ||

@@ -5,6 +5,7 @@ import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
+import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +22,7 @@ public class Validator {
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
         if (msg == null) {
             i.addAdditionalResultInfo("Timeout");
+            i.setStatus(TestStatus.PARTIALLY_FAILED);
             LOGGER.warn("Timeout");
             return;
         }

@@ -229,11 +229,13 @@ public class TestConfig extends TLSDelegateConfig {
                 SignatureAndHashAlgorithm.RSA_PSS_RSAE_SHA384,
                 SignatureAndHashAlgorithm.RSA_PSS_RSAE_SHA256,
                 SignatureAndHashAlgorithm.RSA_PSS_RSAE_SHA512,
-                SignatureAndHashAlgorithm.RSA_SHA1,
                 SignatureAndHashAlgorithm.RSA_SHA256,
                 SignatureAndHashAlgorithm.RSA_SHA384,
                 SignatureAndHashAlgorithm.RSA_SHA512,
-                SignatureAndHashAlgorithm.ED25519
+                SignatureAndHashAlgorithm.ED25519,
+                SignatureAndHashAlgorithm.ECDSA_SHA256,
+                SignatureAndHashAlgorithm.ECDSA_SHA384,
+                SignatureAndHashAlgorithm.ECDSA_SHA512
         );
 
         config.setSupportedSignatureAndHashAlgorithms(config.getDefaultServerSupportedSignatureAndHashAlgorithms());

@@ -6,40 +6,48 @@ import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher {
 
-    @Override
-    public void testFailed(ExtensionContext context, Throwable cause) {
+    private AnnotatedStateContainer createResult(ExtensionContext context, TestStatus status) {
         if (!context.getTestMethod().isPresent()) {
-            return;
+            return null;
         }
 
         String uniqueId = context.getUniqueId();
         if (TestContext.getInstance().getTestResults().get(uniqueId) != null) {
-            return;
+            return null;
         }
 
         TestMethodConfig testMethodConfig = new TestMethodConfig(context);
-        AnnotatedStateContainer result = new AnnotatedStateContainer();
-        result.setUniqueId(uniqueId);
-        result.setStatus(TestStatus.FAILED);
-        result.setFailedStacktrace(cause);
-        result.setTestMethodConfig(testMethodConfig);
+        AnnotatedStateContainer result = new AnnotatedStateContainer(uniqueId, testMethodConfig, new ArrayList<>());
+        result.setStatus(status);
 
         TestContext.getInstance().addTestResult(result);
+        return result;
+    }
+
+
+    @Override
+    public void testSuccessful(ExtensionContext context) {
+        createResult(context, TestStatus.SUCCEEDED);
+    }
+
+    @Override
+    public void testFailed(ExtensionContext context, Throwable cause) {
+        AnnotatedStateContainer result = createResult(context, TestStatus.FAILED);
+        if (result != null) {
+            result.setFailedStacktrace(cause);
+        }
     }
 
     @Override
     public void testDisabled(ExtensionContext context, Optional<String> reason) {
-        if (!context.getTestMethod().isPresent()) return;
-
-        String uid = context.getUniqueId();
-        AnnotatedStateContainer result = new AnnotatedStateContainer();
-        result.setStatus(TestStatus.DISABLED);
-        result.setDisabledReason(reason.orElse("No reason"));
-        result.setUniqueId(uid);
-        TestContext.getInstance().addTestResult(result);
+        AnnotatedStateContainer result = createResult(context, TestStatus.DISABLED);
+        if (result != null) {
+            result.setDisabledReason(reason.orElse("No reason"));
+        }
     }
 }

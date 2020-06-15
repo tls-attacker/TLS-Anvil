@@ -51,7 +51,7 @@ public class  AnnotatedStateContainer {
 
     private String uniqueId;
 
-    AnnotatedStateContainer(String uniqueId, TestMethodConfig tmc, List<AnnotatedState> states) {
+    public AnnotatedStateContainer(String uniqueId, TestMethodConfig tmc, List<AnnotatedState> states) {
         this.states = states;
         this.uniqueId = uniqueId;
         this.testMethodConfig = tmc;
@@ -59,7 +59,7 @@ public class  AnnotatedStateContainer {
 
     public AnnotatedStateContainer() { }
 
-    AnnotatedStateContainer(String uniqueId, TestMethodConfig tmc, AnnotatedState... states) {
+    public AnnotatedStateContainer(String uniqueId, TestMethodConfig tmc, AnnotatedState... states) {
         this(uniqueId, tmc, Arrays.asList(states));
     }
 

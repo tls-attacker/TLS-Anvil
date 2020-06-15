@@ -8,6 +8,8 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendDynamicServerKeyExchangeAction;
+import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.*;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -48,46 +50,20 @@ public class RC4Ciphersuites extends Tls12Test {
             "a cipher suite in the ClientHello message.", securitySeverity = SeverityLevel.CRITICAL)
     @MethodCondition(clazz = RC4Ciphersuites.class, method = "supportsRC4")
     public void selectRC4CipherSuite(WorkflowRunner runner) {
+        runner.replaceSelectedCiphersuite = true;
+        runner.respectConfigSupportedCiphersuites = true;
+
         List<CipherSuite> supported = new ArrayList<>(this.context.getConfig().getSiteReport().getCipherSuites());
         supported.removeIf(i -> !i.toString().contains("RC4"));
 
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
-        for (CipherSuite i : supported) {
-            Config config = this.getConfig();
-            config.setDefaultServerSupportedCiphersuites(i);
-            config.setDefaultSelectedCipherSuite(i);
+        Config config = this.getConfig();
+        config.setDefaultServerSupportedCiphersuites(supported);
 
-            WorkflowTrace trace = new WorkflowTrace();
-            trace.addTlsActions(
-                    new ReceiveAction(new ClientHelloMessage(config)),
-                    new SendAction(
-                            new ServerHelloMessage(config),
-                            new CertificateMessage(config)
-                    ),
-                    new SendDynamicServerKeyExchangeAction(),
-                    new SendAction(
-                            new ServerHelloDoneMessage(config)
-                    ),
-                    new ReceiveAction(new AlertMessage())
-            );
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        workflowTrace.addTlsActions(
+                new ReceiveAction(new AlertMessage())
+        );
 
-            container.addAll(runner.prepare(trace, config));
-        }
-
-        runner.execute(container).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.smartExecutedAsPlanned());
-
-            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            if (msg == null) {
-                i.addAdditionalResultInfo("Timeout");
-                return;
-            }
-
-            assertEquals(AssertMsgs.NoFatalAlert, AlertLevel.FATAL.getValue(), msg.getLevel().getValue().byteValue());
-        });
-
+        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
-
-
 }

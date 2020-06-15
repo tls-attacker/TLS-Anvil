@@ -31,15 +31,13 @@ public class TLSRecordProtocol extends Tls12Test {
             "unless negotiated by some extension. If a TLS implementation receives an unexpected " +
             "record type, it MUST send an unexpected_message alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
     public void sendNotDefinedRecordTypesWithClientHello(WorkflowRunner runner) {
-        Config c = this.getConfig();
         runner.replaceSelectedCiphersuite = true;
 
         Record record = new Record();
         record.setContentType(Modifiable.explicit((byte) 0xFF));
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_HELLO_DONE);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
-                new SendAction(new ServerHelloDoneMessage(c)),
                 new ReceiveAction(new AlertMessage())
         );
 
@@ -61,6 +59,8 @@ public class TLSRecordProtocol extends Tls12Test {
             "unless negotiated by some extension. If a TLS implementation receives an unexpected " +
             "record type, it MUST send an unexpected_message alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
     public void sendNotDefinedRecordTypesWithCCSAndFinished(WorkflowRunner runner) {
+        runner.replaceSelectedCiphersuite = true;
+
         Config c = this.getConfig();
         Record record = new Record();
         record.setContentType(Modifiable.explicit((byte) 0xFF));

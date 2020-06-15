@@ -2,7 +2,6 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
@@ -14,16 +13,13 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RFC(number = 5264, section = "6.2.1 Fragmentation")
 public class Fragmentation extends Tls12Test {
@@ -34,7 +30,6 @@ public class Fragmentation extends Tls12Test {
             "traffic analysis countermeasure.")
     public void sendZeroLengthRecord_CCS(WorkflowRunner runner) {
         Config c = this.getConfig();
-        c.setDefaultClientSupportedCiphersuites(CipherSuite.getImplemented());
         c.setUseAllProvidedRecords(true);
         runner.replaceSupportedCiphersuites = true;
         runner.replaceSelectedCiphersuite = true;
@@ -52,7 +47,11 @@ public class Fragmentation extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.executedAsPlanned(i);
+
+            Validator.receivedFatalAlert(i);
+        });
     }
 
 
@@ -66,7 +65,6 @@ public class Fragmentation extends Tls12Test {
         runner.replaceSelectedCiphersuite = true;
 
         ApplicationMessage appMsg = new ApplicationMessage(c);
-        appMsg.setData(Modifiable.explicit(new byte[3]));
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
@@ -82,7 +80,7 @@ public class Fragmentation extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.smartExecutedAsPlanned());
+            assertFalse(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             assertNull("Received alert message", msg);
@@ -96,6 +94,7 @@ public class Fragmentation extends Tls12Test {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
         runner.replaceSelectedCiphersuite = true;
+        runner.useRecordFragmentationDerivation = false;
 
         ApplicationMessage msg = new ApplicationMessage(c);
         msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));

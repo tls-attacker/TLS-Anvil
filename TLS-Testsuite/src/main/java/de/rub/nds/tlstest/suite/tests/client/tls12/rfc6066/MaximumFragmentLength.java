@@ -12,17 +12,15 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendDynamicServerCertificateAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendDynamicServerKeyExchangeAction;
+import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.*;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 @RFC(number = 6066, section = "4. Maximum Fragment Length Negotiation")
-@ServerTest
+@ClientTest
 public class MaximumFragmentLength extends Tls12Test {
 
     @TlsTest(description = "Similarly, if a client receives a maximum fragment length negotiation " +
@@ -32,7 +30,6 @@ public class MaximumFragmentLength extends Tls12Test {
         runner.replaceSelectedCiphersuite = true;
 
         c.setAddMaxFragmentLengthExtension(true);
-        ServerHelloMessage serverHello = new ServerHelloMessage(c);
         MaxFragmentLengthExtensionMessage maxFLEM = context.getReceivedClientHelloMessage().getExtension(MaxFragmentLengthExtensionMessage.class);
         MaxFragmentLength length = MaxFragmentLength.TWO_11;
 
@@ -42,22 +39,26 @@ public class MaximumFragmentLength extends Tls12Test {
             }
         }
 
-        serverHello.getExtension(MaxFragmentLengthExtensionMessage.class).setMaxFragmentLength(Modifiable.explicit(new byte[]{length.getValue()}));
-
-        WorkflowTrace workflowTrace = new WorkflowTrace();
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
-                new ReceiveAction(serverHello),
-                new SendAction(serverHello),
-                new SendDynamicServerCertificateAction(),
-                new SendDynamicServerKeyExchangeAction(),
                 new ReceiveAction(new AlertMessage())
         );
+
+        MaxFragmentLength finalLength = length;
+        runner.setStateModifier(i -> {
+            WorkflowTrace trace = i.getWorkflowTrace();
+            ServerHelloMessage serverHello = trace.getFirstSendMessage(ServerHelloMessage.class);
+            serverHello.getExtension(MaxFragmentLengthExtensionMessage.class).setMaxFragmentLength(Modifiable.explicit(new byte[]{finalLength.getValue()}));
+            return null;
+        });
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
 
             WorkflowTrace trace = i.getWorkflowTrace();
             AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
+            if (alert == null) return;
+
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }

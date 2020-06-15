@@ -31,55 +31,23 @@ import static org.junit.Assert.*;
 @RFC(number = 4492, section = "4. TLS Extensions for ECC")
 @ClientTest
 public class TLSExtensionForECC extends Tls12Test {
-    private static final Logger LOGGER = LogManager.getLogger();
-
-    private void execute(WorkflowRunner runner, Config config) {
-        runner.replaceSelectedCiphersuite = true;
-
-        WorkflowTrace workflowTrace = new WorkflowTrace();
-        workflowTrace.addTlsActions(
-                new SendAction(new ClientHelloMessage(config)),
-                new ReceiveAction(new AlertMessage(config))
-        );
-
-        runner.execute(workflowTrace, config).validateFinal(i -> {
-            assertTrue(i.getWorkflowTrace().executedAsPlanned());
-
-            WorkflowTrace trace = i.getWorkflowTrace();
-            AlertMessage message = trace.getFirstReceivedMessage(AlertMessage.class);
-            assertNotNull(message);
-            assertEquals(AlertLevel.FATAL.getValue(), message.getLevel().getValue().byteValue());
-        });
-    }
 
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello\n" +
             "   message if it does not propose any ECC cipher suites.", securitySeverity = SeverityLevel.INFORMATIONAL)
     @KeyExchange(provided = KeyExchangeType.DH, supported = KeyExchangeType.RSA)
-    public void BothECExtensions_WithoutECCCipher(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    public void BothECExtensions_WithoutECCCipher() {
+        ClientHelloMessage msg = context.getReceivedClientHelloMessage();
+        assertNotNull(msg);
+        byte[] ciphers = msg.getCipherSuites().getValue();
+        List<CipherSuite> suites = CipherSuite.getCiphersuites(ciphers);
+        suites.removeIf(cs -> !KeyExchangeType.ECDH.compatibleWithCiphersuite(cs));
 
-        WorkflowTrace workflowTrace = new WorkflowTrace();
-        workflowTrace.addTlsActions(
-                new ReceiveAction(new ClientHelloMessage(c))
-        );
-
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
-
-            ClientHelloMessage msg = trace.getFirstReceivedMessage(ClientHelloMessage.class);
-            assertNotNull(msg);
-            byte[] ciphers = msg.getCipherSuites().getValue();
-            List<CipherSuite> suites = CipherSuite.getCiphersuites(ciphers);
-            suites.removeIf(cs -> !KeyExchangeType.ECDH.compatibleWithCiphersuite(cs));
-
-            if (suites.size() == 0) {
-                ECPointFormatExtensionMessage poinfmtExt = msg.getExtension(ECPointFormatExtensionMessage.class);
-                EllipticCurvesExtensionMessage ecExt = msg.getExtension(EllipticCurvesExtensionMessage.class);
-                assertNull("ECPointFormatExtension should be null", poinfmtExt);
-                assertNull("EllipticCurveExtension should be null", ecExt);
-            }
-        });
+        if (suites.size() == 0) {
+            ECPointFormatExtensionMessage poinfmtExt = msg.getExtension(ECPointFormatExtensionMessage.class);
+            EllipticCurvesExtensionMessage ecExt = msg.getExtension(EllipticCurvesExtensionMessage.class);
+            assertNull("ECPointFormatExtension should be null", poinfmtExt);
+            assertNull("EllipticCurveExtension should be null", ecExt);
+        }
     }
 
 
@@ -87,32 +55,20 @@ public class TLSExtensionForECC extends Tls12Test {
             " it MUST contain the value 0 (uncompressed)" +
             " as one of the items in the list of point formats.")
     @KeyExchange(provided = KeyExchangeType.ECDH)
-    public void InvalidPointFormat(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    public void InvalidPointFormat() {
+        ClientHelloMessage msg = context.getReceivedClientHelloMessage();
+        assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
+        ECPointFormatExtensionMessage poinfmtExt = msg.getExtension(ECPointFormatExtensionMessage.class);
+        assertNotNull("No ECPointFormatExtension in ClientHello", poinfmtExt);
 
-        WorkflowTrace workflowTrace = new WorkflowTrace();
-        workflowTrace.addTlsActions(
-                new ReceiveAction(new ClientHelloMessage(c))
-        );
-
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
-
-            ClientHelloMessage msg = trace.getFirstReceivedMessage(ClientHelloMessage.class);
-            assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
-            ECPointFormatExtensionMessage poinfmtExt = msg.getExtension(ECPointFormatExtensionMessage.class);
-            assertNotNull("No ECPointFormatExtension in ClientHello", poinfmtExt);
-
-            boolean contains_zero = false;
-            for (byte b : poinfmtExt.getPointFormats().getValue()) {
-                if (b == ECPointFormat.UNCOMPRESSED.getValue()) {
-                    contains_zero = true;
-                    break;
-                }
+        boolean contains_zero = false;
+        for (byte b : poinfmtExt.getPointFormats().getValue()) {
+            if (b == ECPointFormat.UNCOMPRESSED.getValue()) {
+                contains_zero = true;
+                break;
             }
-            assertTrue("ECPointFormatExtension does not contain uncompressed format", contains_zero);
-        });
+        }
+        assertTrue("ECPointFormatExtension does not contain uncompressed format", contains_zero);
     }
 
 }

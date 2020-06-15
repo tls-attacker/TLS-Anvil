@@ -23,28 +23,18 @@ public class PaddingExtension extends Tls12Test {
 
     @TlsTest(description = "The client MUST fill the padding extension completely with zero\n" +
             "   bytes, although the padding extension_data field may be empty.")
-    public void paddingWithNonZero(WorkflowRunner runner) {
-        Config config = this.getConfig();
+    public void paddingWithNonZero() {
+        ClientHelloMessage msg = context.getReceivedClientHelloMessage();
+        assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
 
-        WorkflowTrace workflowTrace = new WorkflowTrace();
-        workflowTrace.addTlsActions(
-                new ReceiveAction(new ClientHelloMessage(config))
-        );
+        PaddingExtensionMessage paddingExt = msg.getExtension(PaddingExtensionMessage.class);
+        if (paddingExt == null) {
+            return;
+        }
 
-        runner.execute(workflowTrace, config).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            ClientHelloMessage msg = trace.getFirstReceivedMessage(ClientHelloMessage.class);
-            assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
-
-            PaddingExtensionMessage paddingExt = msg.getExtension(PaddingExtensionMessage.class);
-            if (paddingExt == null) {
-                return;
-            }
-
-            byte[] receivedPaddingExt = paddingExt.getPaddingBytes().getValue();
-            byte[] expected = new byte[receivedPaddingExt.length];
-            assertArrayEquals("Padding extension padding bytes not zero", expected, receivedPaddingExt);
-        });
+        byte[] receivedPaddingExt = paddingExt.getPaddingBytes().getValue();
+        byte[] expected = new byte[receivedPaddingExt.length];
+        assertArrayEquals("Padding extension padding bytes not zero", expected, receivedPaddingExt);
 
     }
 

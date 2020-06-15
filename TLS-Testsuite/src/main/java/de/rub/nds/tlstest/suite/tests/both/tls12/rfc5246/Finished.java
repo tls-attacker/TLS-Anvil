@@ -11,11 +11,9 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -74,7 +72,12 @@ public class Finished extends Tls12Test {
             return null;
         });
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            WorkflowTrace trace = i.getWorkflowTrace();
+            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
+
+            Validator.receivedFatalAlert(i);
+        });
     }
 
     @TlsTest(description = "It is a fatal error if a Finished message is not preceded by a ChangeCipherSpec " +
@@ -90,7 +93,12 @@ public class Finished extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            WorkflowTrace trace = i.getWorkflowTrace();
+            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
+
+            Validator.receivedFatalAlert(i);
+        });
     }
 
 }

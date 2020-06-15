@@ -72,9 +72,8 @@ public class ServerHello extends Tls12Test {
             throw new AssertionError("Every extension was sent by the client...");
         }
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_HELLO_DONE);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
-                new SendAction(new ServerHelloDoneMessage()),
                 new ReceiveAction(new AlertMessage())
         );
 

@@ -67,16 +67,14 @@ public class AlertProtocol extends Tls12Test {
 
     @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
-    public void abortAfterFatalAlert(WorkflowRunner runner) {
+    public void abortAfterFatalAlertServerHello(WorkflowRunner runner) {
         Config c = this.getConfig();
-        runner.replaceSelectedCiphersuite = true;
-        runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_HELLO_DONE);
+        runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
-                new SendAction(new ServerHelloDoneMessage()),
                 new ReceiveAction(new AlertMessage())
         );
 
@@ -88,6 +86,36 @@ public class AlertProtocol extends Tls12Test {
             runner.setStateModifier(t -> {
                 SendAction serverHelloAction = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, t.getWorkflowTrace());
                 serverHelloAction.getSendMessages().add(0, alert);
+                return null;
+            });
+
+            container.addAll(runner.prepare(workflowTrace, c));
+        }
+
+        runner.execute(container).validateFinal(Validator::receivedFatalAlert);
+    }
+
+    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
+    @RFC(number = 5264, section = "7.2.2 Error Alerts")
+    public void abortAfterFatalAlertServerHelloDone(WorkflowRunner runner) {
+        Config c = this.getConfig();
+        runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+
+        AnnotatedStateContainer container = new AnnotatedStateContainer();
+
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        workflowTrace.addTlsActions(
+                new ReceiveAction(new AlertMessage())
+        );
+
+        for (AlertDescription i : AlertDescription.values()) {
+            AlertMessage alert = new AlertMessage();
+            alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
+            alert.setDescription(Modifiable.explicit(i.getValue()));
+
+            runner.setStateModifier(t -> {
+                SendAction serverHelloAction = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, t.getWorkflowTrace());
+                serverHelloAction.getSendMessages().add(serverHelloAction.getSendMessages().size() - 1, alert);
                 return null;
             });
 

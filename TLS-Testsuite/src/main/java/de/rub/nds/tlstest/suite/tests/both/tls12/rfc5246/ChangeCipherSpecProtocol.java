@@ -11,12 +11,13 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+
+import static org.junit.Assert.assertTrue;
 
 
 @RFC(number = 5264, section = "7.1 Change Cipher Spec Protocol")
@@ -38,6 +39,11 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            WorkflowTrace trace = i.getWorkflowTrace();
+            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
+
+            Validator.receivedFatalAlert(i);
+        });
     }
 }

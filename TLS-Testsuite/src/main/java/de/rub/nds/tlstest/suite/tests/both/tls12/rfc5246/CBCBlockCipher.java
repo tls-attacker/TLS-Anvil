@@ -14,8 +14,9 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
+import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -28,7 +29,6 @@ import static org.junit.Assert.assertTrue;
 
 
 @RFC(number = 5264, section = "6.2.3.2 CBC Block Cipher")
-@ServerTest
 public class CBCBlockCipher extends Tls12Test {
 
     private ConditionEvaluationResult supportsCBCCipherSuites() {
@@ -53,6 +53,7 @@ public class CBCBlockCipher extends Tls12Test {
 
         List<CipherSuite> suites = CipherSuite.getImplemented();
         suites.removeIf(i -> !i.isCBC());
+        c.setDefaultServerSupportedCiphersuites(suites);
         c.setDefaultClientSupportedCiphersuites(suites);
 
         Record record = new Record();
@@ -96,6 +97,7 @@ public class CBCBlockCipher extends Tls12Test {
 
         List<CipherSuite> suites = CipherSuite.getImplemented();
         suites.removeIf(i -> !i.isCBC());
+        c.setDefaultServerSupportedCiphersuites(suites);
         c.setDefaultClientSupportedCiphersuites(suites);
 
         ApplicationMessage applicationMessage = new ApplicationMessage();

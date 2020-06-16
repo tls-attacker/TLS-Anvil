@@ -1,15 +1,13 @@
 package de.rub.nds.tlstest.framework.execution;
 
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsattacker.core.constants.RunningModeType;
-import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
-import de.rub.nds.tlsattacker.core.workflow.ThreadedServerWorkflowQueueExecutor;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -36,6 +34,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
 
@@ -131,21 +130,14 @@ public class TestRunner {
 
         for (CipherSuite i: cipherList) {
             Config config = this.testConfig.createConfig();
+            if (i.isTLS13()) {
+                config = this.testConfig.createTls13Config();
+            }
+
             config.setDefaultServerSupportedCiphersuites(Collections.singletonList(i));
             config.setDefaultSelectedCipherSuite(i);
             config.setEnforceSettings(true);
             config.setWriteKeylogFile(true);
-
-            if (i.isTLS13()) {
-                config.setHighestProtocolVersion(ProtocolVersion.TLS13);
-                config.setAddEllipticCurveExtension(true);
-                config.setAddECPointFormatExtension(true);
-                config.setAddKeyShareExtension(true);
-                config.setAddSignatureAndHashAlgorithmsExtension(true);
-                config.setAddSupportedVersionsExtension(true);
-                config.setAddRenegotiationInfoExtension(false);
-                config.setDefaultServerSupportedSignatureAndHashAlgorithms(SignatureAndHashAlgorithm.RSA_PSS_RSAE_SHA384);
-            }
 
             try {
                 WorkflowConfigurationFactory configurationFactory = new WorkflowConfigurationFactory(config);
@@ -194,12 +186,27 @@ public class TestRunner {
         TestSiteReport report = new TestSiteReport(new SiteReport("", new ArrayList<>()));
         report.setCipherSuites(tls12CipherSuites);
         report.setSupportedTls13CipherSuites(new ArrayList<>(tls13CipherSuites));
-        SupportedVersionsExtensionMessage msg = clientHello.getExtension(SupportedVersionsExtensionMessage.class);
         report.setReceivedClientHello(clientHello);
 
+        EllipticCurvesExtensionMessage ecExt = clientHello.getExtension(EllipticCurvesExtensionMessage.class);
+        if (ecExt != null) {
+            report.setSupportedNamedGroups(NamedGroup.namedGroupsFromByteArray(ecExt.getSupportedGroups().getValue()));
+        }
+
+        SupportedVersionsExtensionMessage msg = clientHello.getExtension(SupportedVersionsExtensionMessage.class);
         if (msg != null) {
             report.setVersions(ProtocolVersion.getProtocolVersions(msg.getSupportedVersions().getValue()));
         }
+
+        SignatureAndHashAlgorithmsExtensionMessage sahExt = clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
+        if (sahExt != null) {
+            report.setSupportedSignatureAndHashAlgorithms(SignatureAndHashAlgorithm.getSignatureAndHashAlgorithms(sahExt.getSignatureAndHashAlgorithms().getValue()));
+        }
+
+        List<ExtensionType> extensions = clientHello.getExtensions().stream()
+                .map(i -> ExtensionType.getExtensionType(i.getExtensionType().getValue()))
+                .collect(Collectors.toList());
+        report.setSupportedExtensions(extensions);
 
         saveToCache(report);
 

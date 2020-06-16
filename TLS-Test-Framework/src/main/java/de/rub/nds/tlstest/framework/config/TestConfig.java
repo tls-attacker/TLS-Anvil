@@ -6,6 +6,7 @@ import com.beust.jcommander.ParameterException;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
+import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NameType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
@@ -24,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class TestConfig extends TLSDelegateConfig {
@@ -205,9 +207,9 @@ public class TestConfig extends TLSDelegateConfig {
         }
 
         config.getDefaultClientConnection().setFirstTimeout(100 * 1000);
-        config.getDefaultClientConnection().setTimeout(100 * 1000);
+        config.getDefaultClientConnection().setTimeout(3000);
         config.getDefaultServerConnection().setFirstTimeout(100 * 1000);
-        config.getDefaultServerConnection().setTimeout(100 * 1000);
+        config.getDefaultServerConnection().setTimeout(3000);
         config.setWorkflowExecutorShouldClose(true);
         config.setEarlyStop(true);
 
@@ -237,8 +239,10 @@ public class TestConfig extends TLSDelegateConfig {
                 SignatureAndHashAlgorithm.ECDSA_SHA384,
                 SignatureAndHashAlgorithm.ECDSA_SHA512
         );
-
         config.setSupportedSignatureAndHashAlgorithms(config.getDefaultServerSupportedSignatureAndHashAlgorithms());
+
+        config.setDefaultServerSupportedCiphersuites(CipherSuite.getImplemented().stream().filter(CipherSuite::isTLS13).collect(Collectors.toList()));
+        config.setDefaultClientSupportedCiphersuites(config.getDefaultServerSupportedCiphersuites());
         return config;
     }
 

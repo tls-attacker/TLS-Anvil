@@ -193,26 +193,31 @@ public class KeyX implements KeyExchange {
     }
 
     public boolean compatibleWithCiphersuite(CipherSuite i) {
+        if (i.isTLS13()) {
+            return  Arrays.asList(this.supported()).contains(KeyExchangeType.ALL13);
+        }
+
         KeyExchangeAlgorithm alg = AlgorithmResolver.getKeyExchangeAlgorithm(i);
+        // TLS 1.3 is handled above
+        assert alg != null;
+
         ServerKeyExchangeMessage skxm = new WorkflowConfigurationFactory(Config.createConfig()).createServerKeyExchangeMessage(alg);
 
         boolean compatible = false;
         for (KeyExchangeType kext : this.supported()) {
             switch (kext) {
                 case RSA:
-                    compatible |= alg != null && alg.isKeyExchangeRsa() && !this.requiresServerKeyExchMsg;
+                    compatible |= alg.isKeyExchangeRsa() && !this.requiresServerKeyExchMsg;
                     break;
                 case DH:
-                    compatible |= alg != null && alg.isKeyExchangeDh() && (!this.requiresServerKeyExchMsg || skxm != null);
+                    // equivalent to alg.isKeyExchangeDh() && ((this.requiresServerKeyExchMsg && skxm != null) || !this.requiresServerKeyExchMsg)
+                    compatible |= alg.isKeyExchangeDh() && (!this.requiresServerKeyExchMsg || skxm != null);
                     break;
                 case ECDH:
-                    compatible |= alg != null && alg.isKeyExchangeEcdh() && (!this.requiresServerKeyExchMsg || skxm != null);
+                    compatible |= alg.isKeyExchangeEcdh() && (!this.requiresServerKeyExchMsg || skxm != null);
                     break;
                 case ALL12:
                     compatible |= AlgorithmResolver.getKeyExchangeAlgorithm(i) != null && (!this.requiresServerKeyExchMsg || skxm != null);
-                    break;
-                case ALL13:
-                    compatible |= AlgorithmResolver.getKeyExchangeAlgorithm(i) == null;
                     break;
                 case NOT_SPECIFIED:
                     break;

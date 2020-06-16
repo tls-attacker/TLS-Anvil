@@ -19,8 +19,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -195,68 +193,72 @@ public class WorkflowRunner {
         return generateWorkflowTrace(type);
     }
 
+    private AnnotatedState buildFinalState(AnnotatedState annotatedState, Config newConfig) {
+        WorkflowTrace trace;
+        State state = annotatedState.getState();
+        if (traceType == null) {
+            trace = state.getWorkflowTraceCopy();
+        } else {
+            RunningModeType runningMode = RunningModeType.CLIENT;
+            if (context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
+                runningMode = RunningModeType.SERVER;
+            }
+            trace = new WorkflowConfigurationFactory(newConfig).createWorkflowTrace(traceType, runningMode);
+            if (this.untilHandshakeMessage != null)
+                WorkflowTraceMutator.truncateAt(trace, this.untilHandshakeMessage, this.untilSendingMessage);
+            if (this.untilProtocolMessage != null)
+                WorkflowTraceMutator.truncateAt(trace, this.untilProtocolMessage, this.untilSendingMessage);
+            WorkflowTrace tmpTrace = state.getWorkflowTraceCopy();
+            trace.addTlsActions(tmpTrace.getTlsActions());
+        }
+
+        AnnotatedState result = new AnnotatedState(annotatedState, new State(newConfig, trace));
+        if (replaceSupportedCiphersuites || appendEachSupportedCiphersuiteToClientSupported || replaceSelectedCiphersuite) {
+            result.setInspectedCipherSuite(newConfig.getDefaultSelectedCipherSuite());
+        }
+
+        if (stateModifier != null) {
+            AnnotatedState ret = stateModifier.apply(result);
+            if (ret != null)
+                result = ret;
+        }
+
+        return result;
+    }
+
     private List<AnnotatedState> transformStateClientTest(AnnotatedState annotatedState) {
         List<AnnotatedState> result = new ArrayList<AnnotatedState>(){};
-        List<CipherSuite> supported;
-        State state = annotatedState.getState();
+        List<CipherSuite> supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
         Config inputConfig = annotatedState.getState().getConfig();
 
-        if (inputConfig.getHighestProtocolVersion() != ProtocolVersion.TLS13) {
-            supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
-        }
-        else {
-            supported = new ArrayList<>(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
+        if (inputConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13) {
+            supported.addAll(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
         }
 
         // supported only contains CipherSuites that are compatible with the keyExchange annotation
         supported.removeIf((CipherSuite i) -> !testMethodConfig.getKeyExchange().compatibleWithCiphersuite(i));
 
+        if (respectConfigSupportedCiphersuites) {
+            List<CipherSuite> configCiphersuites = inputConfig.getDefaultServerSupportedCiphersuites();
+            supported.removeIf(i -> !configCiphersuites.contains(i));
+        }
 
         if (!replaceSelectedCiphersuite) {
-            if (stateModifier != null) {
-                AnnotatedState ret = stateModifier.apply(annotatedState);
-                if (ret != null)
-                    annotatedState = ret;
-            }
-            List<AnnotatedState> ret = new ArrayList<>();
-            ret.add(annotatedState);
-            return ret;
+            return new ArrayList<AnnotatedState>(){{
+                add(buildFinalState(annotatedState, inputConfig.createCopy()));
+            }};
         }
 
         for (CipherSuite i: supported) {
-            Config config = state.getConfig().createCopy();
+            Config config = inputConfig.createCopy();
 
             if (replaceSelectedCiphersuite) {
+                // always true
                 config.setDefaultServerSupportedCiphersuites(i);
                 config.setDefaultSelectedCipherSuite(i);
             }
 
-            WorkflowTrace trace;
-            if (traceType != null) {
-                config.setDefaultSelectedCipherSuite(i);
-                trace = new WorkflowConfigurationFactory(config).createWorkflowTrace(traceType, RunningModeType.SERVER);
-                if (this.untilHandshakeMessage != null)
-                    WorkflowTraceMutator.truncateAt(trace, this.untilHandshakeMessage, this.untilSendingMessage);
-                if (this.untilProtocolMessage != null)
-                    WorkflowTraceMutator.truncateAt(trace, this.untilProtocolMessage, this.untilSendingMessage);
-                WorkflowTrace tmpTrace = state.getWorkflowTraceCopy();
-                trace.addTlsActions(tmpTrace.getTlsActions());
-            }
-            else {
-                trace = state.getWorkflowTraceCopy();
-            }
-
-            AnnotatedState newState = new AnnotatedState(annotatedState, new State(config, trace));
-            if (replaceSelectedCiphersuite) {
-                newState.setInspectedCipherSuite(i);
-            }
-
-            if (stateModifier != null) {
-                AnnotatedState ret = stateModifier.apply(newState);
-                if (ret != null)
-                    newState = ret;
-            }
-
+            AnnotatedState newState = buildFinalState(annotatedState, config);
             result.add(newState);
         }
 
@@ -267,14 +269,10 @@ public class WorkflowRunner {
     private List<AnnotatedState> transformStateServerTest(AnnotatedState annotatedState) {
         List<AnnotatedState> result = new ArrayList<>();
         Config inputConfig = annotatedState.getState().getConfig();
-        State state = annotatedState.getState();
-        List<CipherSuite> supported;
+        List<CipherSuite> supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
 
-        if (inputConfig.getHighestProtocolVersion() != ProtocolVersion.TLS13) {
-            supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
-        }
-        else {
-            supported = new ArrayList<>(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
+        if (inputConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13) {
+            supported.addAll(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
         }
 
         // supported only contains CipherSuites that are compatible with the keyExchange annotation
@@ -295,18 +293,14 @@ public class WorkflowRunner {
         }
 
         if (!replaceSupportedCiphersuites && !appendEachSupportedCiphersuiteToClientSupported) {
-            if (stateModifier != null) {
-                AnnotatedState ret = stateModifier.apply(annotatedState);
-                if (ret != null)
-                    annotatedState = ret;
-            }
-            List<AnnotatedState> ret = new ArrayList<>();
-            ret.add(annotatedState);
-            return ret;
+            return new ArrayList<AnnotatedState>(){{
+                add(buildFinalState(annotatedState, inputConfig.createCopy()));
+            }};
         }
 
         for (CipherSuite i: supported) {
-            Config config = state.getConfig().createCopy();
+            Config config = inputConfig.createCopy();
+            config.setDefaultSelectedCipherSuite(i);
 
             if (replaceSupportedCiphersuites) {
                 config.setDefaultClientSupportedCiphersuites(i);
@@ -317,33 +311,7 @@ public class WorkflowRunner {
                 config.setDefaultClientSupportedCiphersuites(ciphersuites);
             }
 
-            WorkflowTrace trace;
-            if (traceType != null) {
-                config.setDefaultSelectedCipherSuite(i);
-                trace = new WorkflowConfigurationFactory(config).createWorkflowTrace(traceType, RunningModeType.CLIENT);
-                if (this.untilHandshakeMessage != null)
-                    WorkflowTraceMutator.truncateAt(trace, this.untilHandshakeMessage, this.untilSendingMessage);
-                if (this.untilProtocolMessage != null)
-                    WorkflowTraceMutator.truncateAt(trace, this.untilProtocolMessage, this.untilSendingMessage);
-                WorkflowTrace tmpTrace = state.getWorkflowTraceCopy();
-                trace.addTlsActions(tmpTrace.getTlsActions());
-            }
-            else {
-                trace = state.getWorkflowTraceCopy();
-            }
-
-
-            AnnotatedState newState = new AnnotatedState(annotatedState, new State(config, trace));
-            if (replaceSupportedCiphersuites || appendEachSupportedCiphersuiteToClientSupported) {
-                newState.setInspectedCipherSuite(i);
-            }
-
-            if (stateModifier != null) {
-                AnnotatedState ret = stateModifier.apply(newState);
-                if (ret != null)
-                    newState = ret;
-            }
-
+            AnnotatedState newState = buildFinalState(annotatedState, config);
             result.add(newState);
         }
 

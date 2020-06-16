@@ -32,10 +32,10 @@ import static org.junit.Assert.*;
 @ClientTest
 public class TLSExtensionForECC extends Tls12Test {
 
-    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello\n" +
-            "   message if it does not propose any ECC cipher suites.", securitySeverity = SeverityLevel.INFORMATIONAL)
+    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
+            "message if it does not propose any ECC cipher suites.")
     @KeyExchange(provided = KeyExchangeType.DH, supported = KeyExchangeType.RSA)
-    public void BothECExtensions_WithoutECCCipher() {
+    public void bothECExtensions_WithoutECCCipher() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertNotNull(msg);
         byte[] ciphers = msg.getCipherSuites().getValue();
@@ -51,11 +51,11 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
 
-    @TlsTest(description = "If the Supported Point Formats Extension is indeed sent, "+
-            " it MUST contain the value 0 (uncompressed)" +
-            " as one of the items in the list of point formats.")
+    @TlsTest(description = "If the Supported Point Formats Extension is indeed sent, " +
+            "it MUST contain the value 0 (uncompressed) " +
+            "as one of the items in the list of point formats.")
     @KeyExchange(provided = KeyExchangeType.ECDH)
-    public void InvalidPointFormat() {
+    public void invalidPointFormat() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
         ECPointFormatExtensionMessage poinfmtExt = msg.getExtension(ECPointFormatExtensionMessage.class);

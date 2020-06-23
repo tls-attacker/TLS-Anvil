@@ -97,7 +97,7 @@ public class WorkflowRunner {
 
         }
 
-        container.getStates().addAll(toAdd);
+        container.addAll(toAdd);
 
         container.setUniqueId(extensionContext.getUniqueId());
         container.setTestMethodConfig(testMethodConfig);

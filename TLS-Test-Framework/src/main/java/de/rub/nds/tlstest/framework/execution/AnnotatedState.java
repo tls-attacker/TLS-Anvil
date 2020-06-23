@@ -12,13 +12,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nonnull;
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
@@ -29,6 +31,7 @@ public class AnnotatedState {
     private List<String> transformationDescription = null;
 
     private Throwable failedReason;
+    private AnnotatedStateContainer associatedContainer;
 
     @XmlElement(name = "Status")
     @JsonProperty("Status")
@@ -38,9 +41,7 @@ public class AnnotatedState {
     @JsonProperty("InspectedCiphersuite")
     private CipherSuite inspectedCipherSuite;
 
-    private UUID uuid = UUID.randomUUID();
-    private UUID parentUUID;
-
+    private String parentUUID;
 
     private List<String> additionalResultInformation = null;
     private List<String> additionalTestInformation = null;
@@ -128,7 +129,7 @@ public class AnnotatedState {
         return null;
     }
 
-    @JsonProperty("WorkflowTrace")
+//    @JsonProperty("WorkflowTrace")
     public String getSerializedWorkflowTrace() {
         try {
             return WorkflowTraceSerializer.write(state.getWorkflowTrace());
@@ -187,25 +188,39 @@ public class AnnotatedState {
 
     @XmlElement(name = "uuid")
     @JsonProperty("uuid")
-    public String getStringUuid() {
-        return uuid.toString();
-    }
+    public String getUuid() {
+        StringBuilder toHash = new StringBuilder();
+        if (this.getInspectedCipherSuite() != null)
+            toHash.append(this.getInspectedCipherSuite().toString());
+        toHash.append(this.getTransformationDescription());
+        toHash.append(this.getAdditionalTestInformation());
+        toHash.append(associatedContainer.getTestMethodConfig().getClassName());
+        toHash.append(associatedContainer.getTestMethodConfig().getMethodName());
 
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(UUID uuid) {
-        this.uuid = uuid;
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(toHash.toString().getBytes(StandardCharsets.UTF_8));
+            return DatatypeConverter.printHexBinary(hash);
+        } catch (Exception e) {
+            throw new RuntimeException("SHA-256 not possible...");
+        }
     }
 
     @XmlElement(name = "TransformationParentUuid")
     @JsonProperty("TransformationParentUuid")
-    public UUID getParentUUID() {
+    public String getParentUUID() {
         return parentUUID;
     }
 
-    public void setParentUUID(UUID parentUUID) {
+    public void setParentUUID(String parentUUID) {
         this.parentUUID = parentUUID;
+    }
+
+    public AnnotatedStateContainer getAssociatedContainer() {
+        return associatedContainer;
+    }
+
+    public void setAssociatedContainer(AnnotatedStateContainer associatedContainer) {
+        this.associatedContainer = associatedContainer;
     }
 }

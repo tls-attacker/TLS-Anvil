@@ -52,9 +52,9 @@ public class  AnnotatedStateContainer {
     private String uniqueId;
 
     public AnnotatedStateContainer(String uniqueId, TestMethodConfig tmc, List<AnnotatedState> states) {
-        this.states = states;
         this.uniqueId = uniqueId;
         this.testMethodConfig = tmc;
+        this.addAll(states);
     }
 
     public AnnotatedStateContainer() { }
@@ -65,18 +65,22 @@ public class  AnnotatedStateContainer {
 
 
     public void addAll(@Nonnull AnnotatedStateContainer container) {
+        List<AnnotatedState> states = container.getStates();
+        states.parallelStream().forEach(i -> i.setAssociatedContainer(this));
         this.states.addAll(container.getStates());
     }
 
     public void addAll(List<AnnotatedState> states) {
+        states.parallelStream().forEach(i -> i.setAssociatedContainer(this));
         this.states.addAll(states);
     }
 
     public void addAll(AnnotatedState... states) {
-        this.states.addAll(Arrays.asList(states));
+        this.addAll(Arrays.asList(states));
     }
 
     public void add(AnnotatedState state) {
+        state.setAssociatedContainer(this);
         this.states.add(state);
     }
 

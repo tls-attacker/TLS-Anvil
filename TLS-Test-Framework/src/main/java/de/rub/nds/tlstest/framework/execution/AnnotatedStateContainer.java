@@ -111,7 +111,7 @@ public class  AnnotatedStateContainer {
             TestContext.getInstance().addTestResult(this);
             if (failed) {
                 for (Throwable i: errors) {
-                    LOGGER.error("\n" + ExecptionPrinter.stacktraceToString(i));
+                    LOGGER.warn("\n" + ExecptionPrinter.stacktraceToString(i));
                 }
                 AssertionError error = new AssertionError(String.format("%d/%d tests failed", errors.size(), states.size()));
                 this.setFailedStacktrace(error);

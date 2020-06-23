@@ -12,6 +12,8 @@ import java.util.Optional;
 public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher {
 
     private AnnotatedStateContainer createResult(ExtensionContext context, TestStatus status) {
+        TestContext.getInstance().testFinished();
+
         if (!context.getTestMethod().isPresent()) {
             return null;
         }

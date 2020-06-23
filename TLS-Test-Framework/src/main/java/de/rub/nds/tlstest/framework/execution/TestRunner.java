@@ -25,6 +25,8 @@ import org.apache.logging.log4j.Logger;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.TagFilter;
+import org.junit.platform.launcher.TestIdentifier;
+import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
@@ -255,11 +257,16 @@ public class TestRunner {
 
         SummaryGeneratingListener listener = new SummaryGeneratingListener();
         launcher.registerTestExecutionListeners(listener);
+        TestPlan testplan = launcher.discover(request);
+        long testcases = testplan.countTestIdentifiers(TestIdentifier::isTest);
+        testContext.setTotalTests(testcases);
 
         launcher.execute(request);
 
         TestExecutionSummary summary = listener.getSummary();
         summary.printTo(new PrintWriter(System.out));
+
+        executor.shutdown();
     }
 
     public ParallelExecutor getExecutor() {

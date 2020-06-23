@@ -44,7 +44,7 @@ public class TestClientDelegate extends ServerDelegate {
                     processBuilder.start();
                 }
                 catch (Exception e) {
-                    LOGGER.error("Script crashed", e);
+                    LOGGER.error("TLS-Client wakeup script crashed", e);
                 }
             };
         }

@@ -4,6 +4,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.TestRunner;
+import me.tongfei.progressbar.ProgressBar;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,6 +21,12 @@ public class TestContext {
     private final Map<String, AnnotatedStateContainer> testResults = new HashMap<>();
     private boolean initializationFailed = false;
     private ClientHelloMessage receivedClientHelloMessage;
+
+    private long totalTests = 0;
+    private long testsDone = 0;
+
+    private ProgressBar proggressBar = null;
+
 
     synchronized public static TestContext getInstance() {
         if (TestContext.instance == null) {
@@ -84,5 +91,33 @@ public class TestContext {
 
     public void setReceivedClientHelloMessage(ClientHelloMessage receivedClientHelloMessage) {
         this.receivedClientHelloMessage = receivedClientHelloMessage;
+    }
+
+    public long getTotalTests() {
+        return totalTests;
+    }
+
+    public void setTotalTests(long totalTests) {
+        proggressBar = new ProgressBar("Progress", totalTests);
+        this.totalTests = totalTests;
+    }
+
+    public long getTestsDone() {
+        return testsDone;
+    }
+
+    public void testFinished() {
+        testsDone += 1;
+        if (proggressBar != null) {
+            proggressBar.stepBy(1);
+
+            if (proggressBar.getMax() <= proggressBar.getCurrent()) {
+                proggressBar.close();
+            }
+        }
+    }
+
+    public ProgressBar getProggressBar() {
+        return proggressBar;
     }
 }

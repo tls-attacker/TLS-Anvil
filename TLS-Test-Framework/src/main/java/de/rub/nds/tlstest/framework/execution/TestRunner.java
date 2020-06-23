@@ -104,10 +104,10 @@ public class TestRunner {
         }
 
         ScannerConfig scannerConfig = new ScannerConfig(testConfig.getGeneralDelegate(), testConfig.getTestServerDelegate());
-        int cores = Runtime.getRuntime().availableProcessors();
-        scannerConfig.setOverallThreads(cores);
+        scannerConfig.setOverallThreads(50);
 
         TlsScanner scanner = new TlsScanner(scannerConfig);
+
         SiteReport report = scanner.scan();
         saveToCache(new TestSiteReport(report));
 
@@ -127,8 +127,6 @@ public class TestRunner {
         List<State> states = new ArrayList<>();
 
         List<CipherSuite> cipherList = CipherSuite.getImplemented();
-        //List<CipherSuite> cipherList = new ArrayList<>();
-        //cipherList.add(CipherSuite.TLS_AES_128_GCM_SHA256);
 
         for (CipherSuite i: cipherList) {
             Config config = this.testConfig.createConfig();
@@ -139,7 +137,6 @@ public class TestRunner {
             config.setDefaultServerSupportedCiphersuites(Collections.singletonList(i));
             config.setDefaultSelectedCipherSuite(i);
             config.setEnforceSettings(true);
-            config.setWriteKeylogFile(true);
 
             try {
                 WorkflowConfigurationFactory configurationFactory = new WorkflowConfigurationFactory(config);
@@ -156,7 +153,6 @@ public class TestRunner {
 
             }
         }
-
 
         ParallelExecutor executor = new ParallelExecutor(50, 2);
         executor.bulkExecuteTasks(tasks);

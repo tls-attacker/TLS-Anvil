@@ -1,6 +1,5 @@
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
-import com.sun.security.ntlm.Client;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;

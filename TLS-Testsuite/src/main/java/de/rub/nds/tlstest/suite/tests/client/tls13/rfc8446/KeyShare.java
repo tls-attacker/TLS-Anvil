@@ -1,6 +1,5 @@
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;

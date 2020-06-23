@@ -18,7 +18,6 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import javafx.scene.control.TextFormatter;
 import static org.junit.Assert.*;
 
 @RFC(number = 5264, section = "6.2.1 Fragmentation")

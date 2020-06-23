@@ -28,16 +28,22 @@
             <AppenderRef ref="ConsoleLibrary"/>
         </Logger>
         <Logger name="de.rub.nds.tlsattacker" level="warn" additivity="false">
-            <AppenderRef ref="Console"/>
+            <AppenderRef ref="ConsoleLibrary"/>
         </Logger>
         <Logger name="de.rub.nds.modifiablevariable" level="trace" additivity="false">
             <AppenderRef ref="ConsoleLibrary"/>
         </Logger>
-        <Logger name="Direct" level="trace" additivity="false">
+        <Logger name="de.rub.nds.tlstest.suite" level="trace" additivity="false">
             <AppenderRef ref="ConsoleLibrary"/>
         </Logger>
-        <Logger name="DirectLogger" level="trace" additivity="false">
+        <Logger name="de.rub.nds.tlstest.framework" level="trace" additivity="false">
             <AppenderRef ref="ConsoleLibrary"/>
+        </Logger>
+        <Logger name="Direct" level="trace" additivity="false">
+            <AppenderRef ref="Direct"/>
+        </Logger>
+        <Logger name="DirectLogger" level="trace" additivity="false">
+            <AppenderRef ref="Direct"/>
         </Logger>
     </Loggers>
 </Configuration>

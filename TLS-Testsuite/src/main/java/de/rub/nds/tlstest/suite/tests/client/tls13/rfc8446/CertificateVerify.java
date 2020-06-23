@@ -107,11 +107,9 @@ public class CertificateVerify extends Tls13Test {
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();
 
-        Config c = this.getConfig();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         for (CertificateKeyType keyType : certificateKeyTypes) {
-            c.setPreferedCertificateSignatureType(keyType);
             List<SignatureAndHashAlgorithm> algorithms = context.getConfig().getSiteReport().getSupportedSignatureAndHashAlgorithms().stream()
                     .filter(i -> i.getSignatureAlgorithm().toString().contains(keyType.toString()) &&
                             i.getHashAlgorithm() != HashAlgorithm.SHA1 &&
@@ -121,6 +119,10 @@ public class CertificateVerify extends Tls13Test {
             if (algorithms.size() == 0) continue;
 
             for (SignatureAndHashAlgorithm sigHashAlg : algorithms) {
+                Config c = this.getConfig();
+                c.setPreferedCertificateSignatureType(keyType);
+                c.setDefaultServerSupportedSignatureAndHashAlgorithms(sigHashAlg);
+
                 runner.setStateModifier(i -> {
                     WorkflowTrace trace = i.getWorkflowTrace();
                     CertificateVerifyMessage msg = trace.getFirstSendMessage(CertificateVerifyMessage.class);

@@ -20,34 +20,43 @@ public enum KeyExchangeType {
 
 
     public boolean compatibleWithCiphersuite(CipherSuite i) {
-        KeyExchangeAlgorithm alg = AlgorithmResolver.getKeyExchangeAlgorithm(i);
-        switch (this) {
-            case RSA:
-                return alg != null && alg.isKeyExchangeRsa();
-            case DH:
-                return alg != null && alg.isKeyExchangeDh();
-            case ECDH:
-                return alg != null && alg.isKeyExchangeEcdh();
-            case ALL12:
-                return AlgorithmResolver.getKeyExchangeAlgorithm(i) != null;
-            case ALL13:
-                return AlgorithmResolver.getKeyExchangeAlgorithm(i) == null;
-            case NOT_SPECIFIED:
-                return false;
+        try {
+            KeyExchangeAlgorithm alg = AlgorithmResolver.getKeyExchangeAlgorithm(i);
+            switch (this) {
+                case RSA:
+                    return alg != null && alg.isKeyExchangeRsa();
+                case DH:
+                    return alg != null && alg.isKeyExchangeDh();
+                case ECDH:
+                    return alg != null && alg.isKeyExchangeEcdh();
+                case ALL12:
+                    return AlgorithmResolver.getKeyExchangeAlgorithm(i) != null;
+                case ALL13:
+                    return AlgorithmResolver.getKeyExchangeAlgorithm(i) == null;
+                case NOT_SPECIFIED:
+                    return false;
+            }
+        } catch (UnsupportedOperationException ignored) {
+
         }
+
         return false;
     }
 
     @Nonnull
     public static KeyExchangeType forCipherSuite(CipherSuite i) {
-        KeyExchangeAlgorithm alg = AlgorithmResolver.getKeyExchangeAlgorithm(i);
-        if (alg == null) {
-            return KeyExchangeType.ALL13;
-        }
+        try {
+            KeyExchangeAlgorithm alg = AlgorithmResolver.getKeyExchangeAlgorithm(i);
+            if (alg == null) {
+                return KeyExchangeType.ALL13;
+            }
 
-        if (alg.isKeyExchangeEcdh()) return KeyExchangeType.ECDH;
-        if (alg.isKeyExchangeRsa()) return KeyExchangeType.RSA;
-        if (alg.isKeyExchangeDh()) return KeyExchangeType.DH;
+            if (alg.isKeyExchangeEcdh()) return KeyExchangeType.ECDH;
+            if (alg.isKeyExchangeRsa()) return KeyExchangeType.RSA;
+            if (alg.isKeyExchangeDh()) return KeyExchangeType.DH;
+        } catch (UnsupportedOperationException ignored) {
+
+        }
 
         return KeyExchangeType.NOT_SPECIFIED;
     }

@@ -61,6 +61,9 @@ public class WorkflowRunner {
     }
 
     public AnnotatedStateContainer execute(AnnotatedStateContainer container) {
+        container.setUniqueId(extensionContext.getUniqueId());
+        container.setTestMethodConfig(testMethodConfig);
+
         List<AnnotatedState> toAdd = new ArrayList<>();
 
         if (container.getStates().size() == 0) {
@@ -98,9 +101,6 @@ public class WorkflowRunner {
         }
 
         container.addAll(toAdd);
-
-        container.setUniqueId(extensionContext.getUniqueId());
-        container.setTestMethodConfig(testMethodConfig);
 
         List<State> states = container.getStates().parallelStream().map(AnnotatedState::getState).collect(Collectors.toList());
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {

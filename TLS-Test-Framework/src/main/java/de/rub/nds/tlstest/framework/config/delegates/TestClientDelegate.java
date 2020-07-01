@@ -1,51 +1,40 @@
 package de.rub.nds.tlstest.framework.config.delegates;
 
 import com.beust.jcommander.Parameter;
-import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.ServerDelegate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
-@FunctionalInterface
-interface ScriptFunction {
-    void run();
-}
 
 @Parameters(commandDescription = "Test a client implementation, thus start TLS-Attacker in server mode")
 public class TestClientDelegate extends ServerDelegate {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    @Parameter(names = "-script", description = "The script is executed after the receiving port for the TLS Messages is opened. " +
-            "This is inteded to trigger the client under test to initiate a TLS-Connection.")
-    protected String script = null;
+    @Parameter(names = "-wakeupScript", description = "The script is executed before each TLS Handshake to trigger the client under test. " +
+            "This command takes a variable number of arguments.", variableArity = true)
+    protected List<String> wakeupScriptCommand = new ArrayList<>();
 
-    private ScriptFunction wakeupScript;
+    private Callable<Integer> wakeupScript;
     private ServerSocket serverSocket;
 
     @Override
     public void applyDelegate(Config config) {
         super.applyDelegate(config);
 
-        if (this.script != null) {
-            File script = new File(this.script);
-            if (!script.exists()) {
-                throw new ParameterException("Wakeup script does not exist!");
-            }
-
+        if (this.wakeupScriptCommand.size() > 0) {
             wakeupScript = () -> {
-                ProcessBuilder processBuilder = new ProcessBuilder(this.script);
-                try {
-                    processBuilder.start();
-                }
-                catch (Exception e) {
-                    LOGGER.error("TLS-Client wakeup script crashed", e);
-                }
+                ProcessBuilder processBuilder = new ProcessBuilder(wakeupScriptCommand);
+                Process p = processBuilder.start();
+                p.waitFor();
+                return p.exitValue();
             };
         }
 
@@ -58,11 +47,15 @@ public class TestClientDelegate extends ServerDelegate {
     }
 
 
-    public void executeWakeupScript() {
-        this.wakeupScript.run();
+    public int executeWakeupScript() throws Exception {
+        return this.wakeupScript.call();
     }
 
-    public void setWakeupScript(ScriptFunction wakeupScript) {
+    public Callable<Integer> getWakeupScript() {
+        return wakeupScript;
+    }
+
+    public void setWakeupScript(Callable<Integer> wakeupScript) {
         this.wakeupScript = wakeupScript;
     }
 

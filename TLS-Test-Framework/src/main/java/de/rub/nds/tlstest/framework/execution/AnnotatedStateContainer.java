@@ -44,6 +44,10 @@ public class  AnnotatedStateContainer {
     @JsonProperty("FailedReason")
     private String failedReason;
 
+    @XmlElement(name = "ElapsedTime")
+    @JsonProperty("ElapsedTime")
+    private long elapsedTime = 0;
+
     @XmlElementWrapper(name = "States")
     @XmlElement(name = "State")
     @JsonProperty("States")
@@ -67,7 +71,7 @@ public class  AnnotatedStateContainer {
     public void addAll(@Nonnull AnnotatedStateContainer container) {
         List<AnnotatedState> states = container.getStates();
         states.parallelStream().forEach(i -> i.setAssociatedContainer(this));
-        this.states.addAll(container.getStates());
+        this.states.addAll(states);
     }
 
     public void addAll(List<AnnotatedState> states) {
@@ -92,9 +96,6 @@ public class  AnnotatedStateContainer {
             State state = i.getState();
             try {
                 state.getFinishedFuture().get(0, TimeUnit.MILLISECONDS);
-                if (i.getState().getTlsContext().isReceivedTransportHandlerException()) {
-                    throw new TransportHandlerExpection("Received transportHandler excpetion");
-                }
                 f.accept(i);
                 if (i.getStatus() == TestStatus.NOT_SPECIFIED) {
                     i.setStatus(TestStatus.SUCCEEDED);
@@ -103,8 +104,13 @@ public class  AnnotatedStateContainer {
                 else {
                     stateFinished(i.getStatus());
                 }
-            } catch (Throwable error) {
+            } catch (Throwable err) {
                 failed = true;
+                Throwable error = err;
+                if (i.getState().getTlsContext().isReceivedTransportHandlerException()) {
+                    error = new TransportHandlerExpection("Received transportHandler excpetion", err);
+                }
+
                 i.setFailedReason(error);
                 errors.add(error);
                 stateFinished(TestStatus.FAILED);
@@ -115,7 +121,7 @@ public class  AnnotatedStateContainer {
             TestContext.getInstance().addTestResult(this);
             if (failed) {
                 for (Throwable i: errors) {
-                    LOGGER.warn("\n" + ExecptionPrinter.stacktraceToString(i));
+                    LOGGER.debug("\n" + ExecptionPrinter.stacktraceToString(i));
                 }
                 AssertionError error = new AssertionError(String.format("%d/%d tests failed", errors.size(), states.size()));
                 this.setFailedStacktrace(error);
@@ -206,5 +212,13 @@ public class  AnnotatedStateContainer {
 
     public void setFailedReason(String failedReason) {
         this.failedReason = failedReason;
+    }
+
+    public Long getElapsedTime() {
+        return elapsedTime;
+    }
+
+    public void setElapsedTime(Long elapsedTime) {
+        this.elapsedTime = elapsedTime;
     }
 }

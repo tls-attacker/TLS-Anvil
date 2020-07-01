@@ -1,13 +1,14 @@
 package de.rub.nds.tlstest.framework.reporting;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import org.junit.platform.launcher.TestIdentifier;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,12 +26,33 @@ public class TestResultContainer {
 
     private String uniqueId;
 
+    @XmlElement(name = "ElapsedTime")
+    @JsonProperty("ElapsedTime")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Long elapsedTime = null;
+
+    @XmlElement(name = "FailedTests")
+    @JsonProperty("FailedTests")
+    private long testsFailed = 0;
+
+    @XmlElement(name = "SucceededTests")
+    @JsonProperty("SucceededTests")
+    private long testsSucceeded = 0;
+
+    @XmlElement(name = "DisabledTests")
+    @JsonProperty("DisabledTests")
+    private long testsDisabled = 0;
+
+    private TestResultContainer parent = null;
+
+
     public TestResultContainer(TestIdentifier identifier) {
         this.uniqueId = identifier.getUniqueId();
         this.displayName = identifier.getDisplayName();
     }
 
-    public TestResultContainer() { }
+    public TestResultContainer() {
+    }
 
     public String getDisplayName() {
         return displayName;
@@ -52,9 +74,22 @@ public class TestResultContainer {
         this.results.put(result.getUniqueId(), result);
     }
 
+    public Long getElapsedTime() {
+        return elapsedTime;
+    }
+
+    public void setElapsedTime(Long elapsedTime) {
+        this.elapsedTime = elapsedTime;
+    }
+
     public void addResultWithParent(String parentId, AnnotatedStateContainer result) {
         TestResultContainer container = this.getContainerWithId(parentId);
         container.addResult(result);
+
+        while (container != null) {
+            container.updateTestStats(result);
+            container = container.parent;
+        }
     }
 
     public Map<String, TestResultContainer> getChildren() {
@@ -65,19 +100,16 @@ public class TestResultContainer {
         this.children = children;
     }
 
-    public void addChildContainer(String uniqueId, TestResultContainer container) {
-        this.children.put(uniqueId, container);
-    }
-
-    public void addChildContainer(TestIdentifier container) {
+    public TestResultContainer addChildContainer(TestIdentifier container) {
         if (!container.getParentId().isPresent()) {
             throw new RuntimeException("Could not add child container");
         }
         String parentId = container.getParentId().get();
         if (parentId.equals(uniqueId)) {
             TestResultContainer c = new TestResultContainer(container);
+            c.parent = this;
             this.children.put(container.getUniqueId(), c);
-            return;
+            return c;
         }
 
         TestResultContainer parentContainer = getContainerWithId(parentId);
@@ -85,7 +117,7 @@ public class TestResultContainer {
             throw new RuntimeException("Could not add child container");
         }
 
-        parentContainer.addChildContainer(container);
+        return parentContainer.addChildContainer(container);
     }
 
     public String getUniqueId() {
@@ -111,7 +143,6 @@ public class TestResultContainer {
     }
 
 
-
     @XmlElement(name = "TestResult")
     @JsonProperty("TestResults")
     public List<AnnotatedStateContainer> getResultsList() {
@@ -128,5 +159,45 @@ public class TestResultContainer {
             return new ArrayList<>(children.values());
         }
         return null;
+    }
+
+    private void updateTestStats(AnnotatedStateContainer result) {
+        switch (result.getStatus()) {
+            case PARTIALLY_FAILED:
+            case PARTIALLY_SUCCEEDED:
+            case FAILED:
+                this.testsFailed++;
+                break;
+            case SUCCEEDED:
+                this.testsSucceeded++;
+                break;
+            case DISABLED:
+                this.testsDisabled++;
+                break;
+        }
+    }
+
+    public long getTestsFailed() {
+        return testsFailed;
+    }
+
+    public void setTestsFailed(long testsFailed) {
+        this.testsFailed = testsFailed;
+    }
+
+    public long getTestsSucceeded() {
+        return testsSucceeded;
+    }
+
+    public void setTestsSucceeded(long testsSucceeded) {
+        this.testsSucceeded = testsSucceeded;
+    }
+
+    public long getTestsDisabled() {
+        return testsDisabled;
+    }
+
+    public void setTestsDisabled(long testsDisabled) {
+        this.testsDisabled = testsDisabled;
     }
 }

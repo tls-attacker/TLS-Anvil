@@ -24,6 +24,9 @@ public class TestContext {
 
     private long totalTests = 0;
     private long testsDone = 0;
+    private long testsDisabled = 0;
+    private long testsFailed = 0;
+    private long testsSucceeded = 0;
 
     private ProgressBar proggressBar = null;
 
@@ -117,7 +120,33 @@ public class TestContext {
         }
     }
 
+    public void testDisabled() {
+        testsDisabled++;
+    }
+
+    public void testSucceeded() {
+        testsSucceeded++;
+    }
+
+    public void testFailed() {
+        testsFailed++;
+    }
+
+
+
     public ProgressBar getProggressBar() {
         return proggressBar;
+    }
+
+    public long getTestsDisabled() {
+        return testsDisabled;
+    }
+
+    public long getTestsFailed() {
+        return testsFailed;
+    }
+
+    public long getTestsSucceeded() {
+        return testsSucceeded;
     }
 }

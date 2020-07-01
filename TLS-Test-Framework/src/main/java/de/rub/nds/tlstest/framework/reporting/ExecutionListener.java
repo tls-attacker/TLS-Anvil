@@ -3,7 +3,6 @@ package de.rub.nds.tlstest.framework.reporting;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,20 +15,31 @@ import org.junit.platform.launcher.TestPlan;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import java.io.File;
-import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class ExecutionListener implements TestExecutionListener {
     private static final Logger LOGGER = LogManager.getLogger();
 
+    private long start;
+
+    private Map<String, Long> testElapsedTimes = new HashMap<>();
+    private Map<String, Long> containerElapsedTimes = new HashMap<>();
+
     @Override
     public void testPlanExecutionStarted(TestPlan testPlan) {
-        LOGGER.info(testPlan.toString() + " started");
+        start = System.currentTimeMillis();
+        LOGGER.trace(testPlan.toString() + " started");
     }
 
     @Override
     public void testPlanExecutionFinished(TestPlan testPlan) {
-        LOGGER.info(testPlan.toString() + " finished");
+        LOGGER.trace(testPlan.toString() + " finished");
+        long elapsedTime = System.currentTimeMillis() - start;
 
         Set<TestIdentifier> roots = testPlan.getRoots();
         List<TestResultContainer> rootContainers = new ArrayList<>();
@@ -39,12 +49,14 @@ public class ExecutionListener implements TestExecutionListener {
             if (identifiers.size() == 0) continue;
 
             TestResultContainer root = new TestResultContainer(rootIdentifier);
+            root.setElapsedTime(elapsedTime);
             rootContainers.add(root);
 
             Set<TestIdentifier> containers = new HashSet<>(identifiers);
             containers.removeIf(i -> !i.isContainer());
             for (TestIdentifier container : containers) {
-                root.addChildContainer(container);
+                TestResultContainer child = root.addChildContainer(container);
+                child.setElapsedTime(containerElapsedTimes.get(container.getUniqueId()));
             }
 
             Set<TestIdentifier> tests = new HashSet<>(identifiers);
@@ -66,6 +78,11 @@ public class ExecutionListener implements TestExecutionListener {
                         .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
                         .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                         .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+
+                File f = new File(TestContext.getInstance().getConfig().getOutputFile());
+                f.getParentFile().mkdirs();
+                f.createNewFile();
+
                 mapper.writeValue(new File(TestContext.getInstance().getConfig().getOutputFile()), rootContainers.get(0));
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -90,17 +107,40 @@ public class ExecutionListener implements TestExecutionListener {
 
     @Override
     public void executionSkipped(TestIdentifier testIdentifier, String reason) {
-        LOGGER.info(testIdentifier.getDisplayName() + " skipped, due to " + reason);
+        LOGGER.trace(testIdentifier.getDisplayName() + " skipped, due to " + reason);
     }
 
     @Override
     public void executionStarted(TestIdentifier testIdentifier) {
-        LOGGER.info(testIdentifier.getDisplayName() + " started");
+        LOGGER.trace(testIdentifier.getDisplayName() + " started");
+        if (testIdentifier.isTest()) {
+            testElapsedTimes.put(testIdentifier.getUniqueId(), System.currentTimeMillis());
+        } else if (testIdentifier.isContainer()) {
+            containerElapsedTimes.put(testIdentifier.getUniqueId(), System.currentTimeMillis());
+        }
     }
 
     @Override
     public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-        LOGGER.info(testIdentifier.getDisplayName() + " finished");
+        LOGGER.trace(testIdentifier.getDisplayName() + " finished");
+        if (testIdentifier.isTest()) {
+            Long startTime = testElapsedTimes.get(testIdentifier.getUniqueId());
+            if (startTime != null) {
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                AnnotatedStateContainer result = TestContext.getInstance().getTestResults().get(testIdentifier.getUniqueId());
+                if (result != null)
+                    result.setElapsedTime(elapsedTime);
+
+                testElapsedTimes.remove(testIdentifier.getUniqueId());
+            }
+        } else if (testIdentifier.isContainer()) {
+            Long startTime = containerElapsedTimes.get(testIdentifier.getUniqueId());
+            if (startTime != null) {
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                containerElapsedTimes.put(testIdentifier.getUniqueId(), elapsedTime);
+            }
+        }
+
     }
 
     @Override

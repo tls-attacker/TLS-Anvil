@@ -171,7 +171,7 @@ public class KeyX implements KeyExchange {
 
         if ((testClass.isAnnotationPresent(KeyExchange.class) || testMethod.isAnnotationPresent(KeyExchange.class)) &&
                 (resolvedKeyExchange.provided() == KeyExchangeType.NOT_SPECIFIED || resolvedKeyExchange.provided() == KeyExchangeType.ALL12)) {
-            LOGGER.warn("KeyExchange annotation used on method or class of " + identifier + ", but KeyExchange property 'provided' is not set or set to ALL12, thus cannot transform.");
+            LOGGER.debug("KeyExchange annotation used on method or class of " + identifier + ", but KeyExchange property 'provided' is not set or set to ALL12, thus cannot transform.");
         }
 
         if (resolvedKeyExchange.supported().length > 0 || resolvedKeyExchange.provided() != KeyExchangeType.NOT_SPECIFIED) {

@@ -23,7 +23,7 @@ public class Validator {
         if (msg == null) {
             i.addAdditionalResultInfo("Timeout");
             i.setStatus(TestStatus.PARTIALLY_FAILED);
-            LOGGER.warn("Timeout");
+            LOGGER.debug("Timeout");
             return;
         }
         assertEquals(AssertMsgs.NoFatalAlert, AlertLevel.FATAL.getValue(), msg.getLevel().getValue().byteValue());
@@ -53,7 +53,7 @@ public class Validator {
             i.addAdditionalResultInfo("Unexpected Alert Description");
             i.addAdditionalResultInfo(String.format("Expected: %s", expexted));
             i.addAdditionalResultInfo(String.format("Received: %s", received));
-            LOGGER.warn(i.getAdditionalResultInformation());
+            LOGGER.debug(i.getAdditionalResultInformation());
         }
     }
 

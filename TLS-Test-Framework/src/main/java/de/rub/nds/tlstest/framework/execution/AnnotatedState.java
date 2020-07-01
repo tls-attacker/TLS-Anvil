@@ -19,8 +19,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
@@ -215,6 +218,31 @@ public class AnnotatedState {
     public void setParentUUID(String parentUUID) {
         this.parentUUID = parentUUID;
     }
+
+    @JsonProperty("StartTimestamp")
+    public String getStartTimestamp() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return format.format(new Date(state.getStartTimestamp()));
+    }
+
+    @JsonProperty("EndTimestamp")
+    public String getEndTimestamp() {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return format.format(new Date(state.getEndTimestamp()));
+    }
+
+    @JsonProperty("SrcPort")
+    public int getSrcPort() {
+        return state.getTlsContext().getTransportHandler().getSrcPort();
+    }
+
+    @JsonProperty("DstPort")
+    public int getDstPort() {
+        return state.getTlsContext().getTransportHandler().getDstPort();
+    }
+
 
     public AnnotatedStateContainer getAssociatedContainer() {
         return associatedContainer;

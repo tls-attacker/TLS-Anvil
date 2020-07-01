@@ -212,6 +212,7 @@ public class TestConfig extends TLSDelegateConfig {
         config.getDefaultServerConnection().setTimeout(3000);
         config.setWorkflowExecutorShouldClose(true);
         config.setEarlyStop(true);
+        config.setStealthMode(true);
 
         cachedConfig = config;
         return config;

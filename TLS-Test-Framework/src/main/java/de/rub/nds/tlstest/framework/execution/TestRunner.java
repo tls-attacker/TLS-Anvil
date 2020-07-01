@@ -1,14 +1,22 @@
 package de.rub.nds.tlstest.framework.execution;
 
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
+import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.NamedGroup;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
+import de.rub.nds.tlsattacker.core.constants.RunningModeType;
+import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
+import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
@@ -34,8 +42,22 @@ import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.net.ConnectException;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
@@ -46,6 +68,8 @@ public class TestRunner {
     private final TestConfig testConfig;
     private final TestContext testContext;
     private final ParallelExecutor executor;
+
+    private boolean targetIsReady = false;
 
     public TestRunner(TestConfig testConfig, TestContext testContext) {
         this.testConfig = testConfig;
@@ -96,7 +120,57 @@ public class TestRunner {
     }
 
 
+    private void waitForClient() {
+        long start = System.currentTimeMillis();
+        try {
+            new Thread(() -> {
+                while (!targetIsReady) {
+                    LOGGER.warn("Waiting for the client to get ready...");
+                    try {
+                        testConfig.getTestClientDelegate().executeWakeupScript();
+                    } catch (Exception e) {
+
+                    }
+                    try {
+                        Thread.sleep(1000);
+                    } catch (Exception ignored) {}
+                }
+            }).start();
+            Socket socket = testConfig.getTestClientDelegate().getServerSocket().accept();
+            targetIsReady = true;
+            socket.close();
+        } catch (Exception e) {
+
+        }
+
+        LOGGER.info("Client is ready, prepapring client exploration...");
+    }
+
+    private void waitForServer() {
+        OutboundConnection connection = testConfig.createConfig().getDefaultClientConnection();
+
+        try {
+            Socket conTest = null;
+            while (!targetIsReady) {
+                try {
+                    conTest = new Socket(connection.getIp(), connection.getPort());
+                    targetIsReady = conTest.isConnected();
+                } catch (ConnectException e) {
+                    LOGGER.warn("Server not yet reachable");
+                    Thread.sleep(1000);
+                }
+            }
+            conTest.close();
+        } catch (Exception e) {
+            LOGGER.error(e);
+            System.exit(2);
+        }
+    }
+
+
     private void serverTestPreparation() {
+        waitForServer();
+
         TestSiteReport cachedReport = loadFromCache();
         if (cachedReport != null) {
             testConfig.setSiteReport(cachedReport.getSiteReport());
@@ -116,6 +190,8 @@ public class TestRunner {
 
 
     private void clientTestPreparation() {
+        waitForClient();
+
         TestSiteReport cachedReport = loadFromCache();
         if (cachedReport != null) {
             testContext.setReceivedClientHelloMessage(cachedReport.getReceivedClientHello());
@@ -143,9 +219,7 @@ public class TestRunner {
                 WorkflowTrace trace = configurationFactory.createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER);
                 State s = new State(config, trace);
                 StateExecutionServerTask task = new StateExecutionServerTask(s, testConfig.getTestClientDelegate().getServerSocket(), 2);
-                task.setBeforeAcceptCallback(() -> {
-                    testConfig.getTestClientDelegate().executeWakeupScript();
-                });
+                task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getWakeupScript());
                 tasks.add(task);
                 states.add(s);
             }
@@ -154,31 +228,41 @@ public class TestRunner {
             }
         }
 
-        ParallelExecutor executor = new ParallelExecutor(50, 2);
+        ParallelExecutor executor = new ParallelExecutor(30, 2);
+        LOGGER.info("Executing client exploration...");
         executor.bulkExecuteTasks(tasks);
+
 
         Set<CipherSuite> tls12CipherSuites = new HashSet<>();
         Set<CipherSuite> tls13CipherSuites = new HashSet<>();
         ClientHelloMessage clientHello = null;
+        ReceiveAction clientHelloReceiveAction = null;
+        long failed = 0;
         for (State s: states) {
             try {
                 if (s.getWorkflowTrace().executedAsPlanned()) {
                     if (clientHello == null) {
                         clientHello = s.getWorkflowTrace().getFirstReceivedMessage(ClientHelloMessage.class);
+                        clientHelloReceiveAction = (ReceiveAction)s.getWorkflowTrace().getReceivingActions().get(0);
                     }
                     if (s.getTlsContext().getSelectedProtocolVersion() == ProtocolVersion.TLS12)
                         tls12CipherSuites.add(s.getConfig().getDefaultSelectedCipherSuite());
                     else if (s.getTlsContext().getSelectedProtocolVersion() == ProtocolVersion.TLS13)
                         tls13CipherSuites.add(s.getConfig().getDefaultSelectedCipherSuite());
                 }
-
                 else {
+                    failed++;
                     LOGGER.debug("Workflow failed (" + s.getConfig().getDefaultSelectedCipherSuite() + ")");
                 }
             } catch (Exception e) {
                 LOGGER.error(e);
                 throw new RuntimeException(e);
             }
+        }
+
+        LOGGER.info(String.format("%d/%d client preparation workflows failed.", failed, states.size()));
+        if (failed == states.size()) {
+            throw new RuntimeException("Client preparation could not be completed.");
         }
 
         TestSiteReport report = new TestSiteReport(new SiteReport("", new ArrayList<>()));
@@ -192,9 +276,13 @@ public class TestRunner {
         }
 
         SupportedVersionsExtensionMessage msg = clientHello.getExtension(SupportedVersionsExtensionMessage.class);
+        List<ProtocolVersion> versions = new ArrayList<>();
+        versions.add(ProtocolVersion.getProtocolVersion(clientHello.getProtocolVersion().getValue()));
+        versions.add(ProtocolVersion.getProtocolVersion(((Record)clientHelloReceiveAction.getReceivedRecords().get(0)).getProtocolVersion().getValue()));
         if (msg != null) {
-            report.setVersions(ProtocolVersion.getProtocolVersions(msg.getSupportedVersions().getValue()));
+            versions.addAll(ProtocolVersion.getProtocolVersions(msg.getSupportedVersions().getValue()));
         }
+        report.setVersions(new ArrayList<>(new HashSet<>(versions)));
 
         SignatureAndHashAlgorithmsExtensionMessage sahExt = clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
         if (sahExt != null) {
@@ -210,6 +298,7 @@ public class TestRunner {
 
         testContext.setReceivedClientHelloMessage(clientHello);
         testConfig.setSiteReport(report.getSiteReport());
+        executor.shutdown();
 
     }
 
@@ -218,7 +307,7 @@ public class TestRunner {
             return;
         }
 
-        LOGGER.info("Prepare Test execution - Starting TLS Scanner");
+        LOGGER.info("Starting preparation phase");
         this.testConfig.createConfig();
 
         if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
@@ -228,6 +317,8 @@ public class TestRunner {
             serverTestPreparation();
         }
         else throw new RuntimeException("Invalid TestEndpointMode");
+
+        LOGGER.info("Prepartion finished!");
     }
 
 
@@ -257,12 +348,27 @@ public class TestRunner {
         long testcases = testplan.countTestIdentifiers(TestIdentifier::isTest);
         testContext.setTotalTests(testcases);
 
+        long start = System.currentTimeMillis();
+
         launcher.execute(request);
 
+        double elapsedTime = (System.currentTimeMillis() - start) / 1000.0;
+        if (elapsedTime < 10) {
+            LOGGER.error("Something seems to be wrong, testsuite executed in " + elapsedTime + "s");
+        }
+
         TestExecutionSummary summary = listener.getSummary();
-        summary.printTo(new PrintWriter(System.out));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintWriter writer = new PrintWriter(baos, true);
+        summary.printTo(writer);
+        String content = new String(baos.toByteArray(), StandardCharsets.UTF_8);
+        LOGGER.info("\n" + content);
 
         executor.shutdown();
+
+        try {
+            testConfig.getTestClientDelegate().getServerSocket().close();
+        } catch (Exception e) {}
     }
 
     public ParallelExecutor getExecutor() {

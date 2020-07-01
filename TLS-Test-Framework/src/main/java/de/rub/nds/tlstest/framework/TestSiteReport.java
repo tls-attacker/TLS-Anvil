@@ -1,37 +1,40 @@
 package de.rub.nds.tlstest.framework;
 
-import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
+import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.NamedGroup;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
+import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsscanner.probe.certificate.CertificateChain;
-import de.rub.nds.tlsscanner.probe.mac.CheckPattern;
 import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlsscanner.report.result.VersionSuiteListPair;
-import org.bouncycastle.crypto.tls.Certificate;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class TestSiteReport implements Serializable {
 
     //Version
-    private List<ProtocolVersion> versions = null;
+    private List<ProtocolVersion> versions = new ArrayList<>();
 
     //Extensions
-    private List<ExtensionType> supportedExtensions = null;
-    private List<NamedGroup> supportedNamedGroups = null;
-    private List<NamedGroup> supportedTls13Groups = null;
-    private List<SignatureAndHashAlgorithm> supportedSignatureAndHashAlgorithms = null;
+    private List<ExtensionType> supportedExtensions = new ArrayList<>();
+    private List<NamedGroup> supportedNamedGroups = new ArrayList<>();
+    private List<NamedGroup> supportedTls13Groups = new ArrayList<>();
+    private List<SignatureAndHashAlgorithm> supportedSignatureAndHashAlgorithms = new ArrayList<>();
 
     //Compression
-    private List<CompressionMethod> supportedCompressionMethods = null;
+    private List<CompressionMethod> supportedCompressionMethods = new ArrayList<>();
 
     //Ciphers
-    private Set<CipherSuite> cipherSuites = null;
-    private List<CipherSuite> supportedTls13CipherSuites = null;
+    private Set<CipherSuite> cipherSuites = new HashSet<>();
+    private List<CipherSuite> supportedTls13CipherSuites = new ArrayList<>();
 
-    private List<VersionSuiteListPair> versionSuiteListPairs = null;
+    private List<VersionSuiteListPair> versionSuiteListPairs = new ArrayList<>();
 
 
     private ClientHelloMessage receivedClientHello = null;

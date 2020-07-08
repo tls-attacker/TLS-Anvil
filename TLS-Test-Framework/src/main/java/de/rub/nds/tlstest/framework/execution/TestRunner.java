@@ -1,5 +1,8 @@
 package de.rub.nds.tlstest.framework.execution;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -23,6 +26,8 @@ import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsscanner.TlsScanner;
 import de.rub.nds.tlsscanner.config.ScannerConfig;
+import de.rub.nds.tlsscanner.constants.ProbeType;
+import de.rub.nds.tlsscanner.probe.CommonBugProbe;
 import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
@@ -67,18 +72,17 @@ public class TestRunner {
 
     private final TestConfig testConfig;
     private final TestContext testContext;
-    private final ParallelExecutor executor;
+    private ParallelExecutor executor;
 
     private boolean targetIsReady = false;
 
     public TestRunner(TestConfig testConfig, TestContext testContext) {
         this.testConfig = testConfig;
-        executor = new ParallelExecutor(5, 2);
         this.testContext = testContext;
     }
 
 
-    private void saveToCache(@Nonnull TestSiteReport smallReport) {
+    private void saveToCache(@Nonnull TestSiteReport report) {
         String fileName;
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
             fileName = testConfig.getTestClientDelegate().getPort().toString();
@@ -87,11 +91,17 @@ public class TestRunner {
         }
 
         try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker());
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+            mapper.writeValue(new File(fileName + ".json"), report);
+
             FileOutputStream fos = new FileOutputStream(fileName);
             ObjectOutputStream oos = new ObjectOutputStream(fos);
-            oos.writeObject(smallReport);
-        } catch (IOException e) {
-            e.printStackTrace();
+            oos.writeObject(report);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -110,7 +120,7 @@ public class TestRunner {
                 FileInputStream fis = new FileInputStream(fileName);
                 ObjectInputStream ois = new ObjectInputStream(fis);
                 LOGGER.info("Using cached siteReport");
-                return (TestSiteReport)ois.readObject();
+                return (TestSiteReport) ois.readObject();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -153,10 +163,16 @@ public class TestRunner {
             Socket conTest = null;
             while (!targetIsReady) {
                 try {
-                    conTest = new Socket(connection.getIp(), connection.getPort());
+                    String connectionEndpoint;
+                    if (connection.getHostname() != null) {
+                        connectionEndpoint = connection.getHostname();
+                    } else {
+                        connectionEndpoint = connection.getIp();
+                    }
+                    conTest = new Socket(connectionEndpoint, connection.getPort());
                     targetIsReady = conTest.isConnected();
                 } catch (ConnectException e) {
-                    LOGGER.warn("Server not yet reachable");
+                    LOGGER.warn("Server not yet available");
                     Thread.sleep(1000);
                 }
             }
@@ -173,17 +189,34 @@ public class TestRunner {
 
         TestSiteReport cachedReport = loadFromCache();
         if (cachedReport != null) {
-            testConfig.setSiteReport(cachedReport.getSiteReport());
+            testConfig.setSiteReport(cachedReport);
             return;
         }
 
+        LOGGER.info("Server available, starting TLS-Scanner");
         ScannerConfig scannerConfig = new ScannerConfig(testConfig.getGeneralDelegate(), testConfig.getTestServerDelegate());
-        scannerConfig.setOverallThreads(50);
+        Config config = scannerConfig.createConfig();
+        config.setAddServerNameIndicationExtension(testConfig.createConfig().isAddServerNameIndicationExtension());
+
+        config.getDefaultClientConnection().setConnectionTimeout(0);
+        scannerConfig.setCustomConfig(config);
+
+        scannerConfig.setProbes(
+                ProbeType.CIPHERSUITE,
+                ProbeType.TLS13,
+                ProbeType.COMPRESSIONS,
+                ProbeType.NAMED_GROUPS,
+                ProbeType.PROTOCOL_VERSION,
+                ProbeType.SIGNATURE_AND_HASH,
+                ProbeType.EC_POINT_FORMAT
+        );
+        scannerConfig.setOverallThreads(1);
+        scannerConfig.setParallelProbes(1);
 
         TlsScanner scanner = new TlsScanner(scannerConfig);
 
-        SiteReport report = scanner.scan();
-        saveToCache(new TestSiteReport(report));
+        TestSiteReport report = TestSiteReport.fromSiteReoport(scanner.scan());
+        saveToCache(report);
 
         testConfig.setSiteReport(report);
     }
@@ -194,8 +227,7 @@ public class TestRunner {
 
         TestSiteReport cachedReport = loadFromCache();
         if (cachedReport != null) {
-            testContext.setReceivedClientHelloMessage(cachedReport.getReceivedClientHello());
-            testConfig.setSiteReport(cachedReport.getSiteReport());
+            testConfig.setSiteReport(cachedReport);
             return;
         }
 
@@ -228,7 +260,7 @@ public class TestRunner {
             }
         }
 
-        ParallelExecutor executor = new ParallelExecutor(30, 2);
+        ParallelExecutor executor = new ParallelExecutor(testConfig.getParallel() * 3, 2);
         LOGGER.info("Executing client exploration...");
         executor.bulkExecuteTasks(tasks);
 
@@ -265,9 +297,9 @@ public class TestRunner {
             throw new RuntimeException("Client preparation could not be completed.");
         }
 
-        TestSiteReport report = new TestSiteReport(new SiteReport("", new ArrayList<>()));
-        report.setCipherSuites(tls12CipherSuites);
-        report.setSupportedTls13CipherSuites(new ArrayList<>(tls13CipherSuites));
+        TestSiteReport report = new TestSiteReport("");
+        report.addCipherSuites(tls12CipherSuites);
+        report.addCipherSuites(tls13CipherSuites);
         report.setReceivedClientHello(clientHello);
 
         EllipticCurvesExtensionMessage ecExt = clientHello.getExtension(EllipticCurvesExtensionMessage.class);
@@ -297,7 +329,7 @@ public class TestRunner {
         saveToCache(report);
 
         testContext.setReceivedClientHelloMessage(clientHello);
-        testConfig.setSiteReport(report.getSiteReport());
+        testConfig.setSiteReport(report);
         executor.shutdown();
 
     }
@@ -307,6 +339,7 @@ public class TestRunner {
             return;
         }
 
+        executor = new ParallelExecutor(testConfig.getParallel(), 2);
         LOGGER.info("Starting preparation phase");
         this.testConfig.createConfig();
 

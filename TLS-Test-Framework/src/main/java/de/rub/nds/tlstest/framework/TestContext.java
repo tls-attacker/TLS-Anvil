@@ -8,8 +8,10 @@ import me.tongfei.progressbar.ProgressBar;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class TestContext {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -29,6 +31,7 @@ public class TestContext {
     private long testsSucceeded = 0;
 
     private ProgressBar proggressBar = null;
+    private Date startTime = new Date();
 
 
     synchronized public static TestContext getInstance() {
@@ -100,8 +103,15 @@ public class TestContext {
         return totalTests;
     }
 
-    public void setTotalTests(long totalTests) {
-        proggressBar = new ProgressBar("Progress", totalTests);
+    public boolean isDocker() {
+        return System.getenv("DOCKER") != null;
+    }
+
+    synchronized public void setTotalTests(long totalTests) {
+        if (!isDocker()) {
+            proggressBar = new ProgressBar("Progress", totalTests);
+        }
+
         this.totalTests = totalTests;
     }
 
@@ -109,26 +119,32 @@ public class TestContext {
         return testsDone;
     }
 
-    public void testFinished() {
+    synchronized public void testFinished() {
         testsDone += 1;
-        if (proggressBar != null) {
+        if (proggressBar != null && !isDocker()) {
             proggressBar.stepBy(1);
 
             if (proggressBar.getMax() <= proggressBar.getCurrent()) {
                 proggressBar.close();
             }
+        } else if (isDocker()) {
+            long timediff = new Date().getTime() - startTime.getTime();
+            long minutes = TimeUnit.MILLISECONDS.toMinutes(timediff);
+            long remainingSecondsInMillis = timediff - TimeUnit.MINUTES.toMillis(minutes);
+            long seconds = TimeUnit.MILLISECONDS.toSeconds(remainingSecondsInMillis);
+            LOGGER.info(String.format("%d/%d Tests finished (in %02d:%02d)", testsDone, totalTests, minutes, seconds));
         }
     }
 
-    public void testDisabled() {
+    synchronized public void testDisabled() {
         testsDisabled++;
     }
 
-    public void testSucceeded() {
+    synchronized public void testSucceeded() {
         testsSucceeded++;
     }
 
-    public void testFailed() {
+    synchronized public void testFailed() {
         testsFailed++;
     }
 

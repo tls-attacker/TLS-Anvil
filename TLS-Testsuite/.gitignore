@@ -12,3 +12,5 @@ buildNumber.properties
 *.iml
 .idea
 .DS_Store
+logs
+apps

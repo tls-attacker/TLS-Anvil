@@ -10,7 +10,11 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
+import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
+import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ServerTest;
+import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -20,7 +24,8 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
 
 @RFC(number = 8446, section = "4.1.3 Server Hello")
 @ServerTest
@@ -58,6 +63,7 @@ public class ServerHello extends Tls13Test {
     @TlsTest(description = "The last 8 bytes MUST be overwritten as described " +
             "below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random.")
     @MethodCondition(method = "supportsTls12")
+    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void testServerRandomFor12(WorkflowRunner runner) {
         Config c = context.getConfig().createConfig();
         runner.replaceSupportedCiphersuites = true;

@@ -14,12 +14,10 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -94,6 +92,10 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
             AnnotatedState state = new AnnotatedState(new State(config, workflowTrace));
             state.addAdditionalTestInfo(String.format("RecordLayerVersion 0x03 0x%02x", i));
 
+            runner.setStateModifier(s -> {
+                s.addAdditionalTestInfo(String.format("Set protocol version to 0x03 0x%2x", i));
+                return null;
+            });
             container.addAll(runner.prepare(state));
         }
 

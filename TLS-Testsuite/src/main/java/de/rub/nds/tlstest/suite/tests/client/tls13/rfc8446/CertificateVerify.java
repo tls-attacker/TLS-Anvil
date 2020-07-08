@@ -2,7 +2,11 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.constants.AlertDescription;
+import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
+import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -54,6 +58,7 @@ public class CertificateVerify extends Tls13Test {
             if (algo.getSignatureAlgorithm() == SignatureAlgorithm.RSA) {
                 runner.setStateModifier(i -> {
                     WorkflowTrace trace = i.getWorkflowTrace();
+                    i.addAdditionalTestInfo(algo.name());
                     trace.getFirstSendMessage(CertificateVerifyMessage.class).setSignatureHashAlgorithm(Modifiable.explicit(algo.getByteValue()));
                     return null;
                 });

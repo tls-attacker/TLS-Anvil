@@ -15,7 +15,11 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlstest.framework.annotations.*;
+import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.ServerTest;
+import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
@@ -113,7 +117,7 @@ public class LengthFieldTest extends TlsGenericTest {
         runner.useRecordFragmentationDerivation = false;
         runner.useTCPFragmentationDerivation = false;
 
-        List<CipherSuite> tls13SupportedCipherSuites = context.getConfig().getSiteReport().getSupportedTls13CipherSuites();
+        List<CipherSuite> tls13SupportedCipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
         Config c = context.getConfig().createTls13Config();
         AnnotatedStateContainer container = getContainer(c, tls13SupportedCipherSuites, RunningModeType.CLIENT);
 
@@ -147,7 +151,7 @@ public class LengthFieldTest extends TlsGenericTest {
         runner.useRecordFragmentationDerivation = false;
         runner.useTCPFragmentationDerivation = false;
 
-        List<CipherSuite> tls13SupportedCipherSuites = context.getConfig().getSiteReport().getSupportedTls13CipherSuites();
+        List<CipherSuite> tls13SupportedCipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
         Config c = context.getConfig().createTls13Config();
         AnnotatedStateContainer container = getContainer(c, tls13SupportedCipherSuites, RunningModeType.SERVER);
 

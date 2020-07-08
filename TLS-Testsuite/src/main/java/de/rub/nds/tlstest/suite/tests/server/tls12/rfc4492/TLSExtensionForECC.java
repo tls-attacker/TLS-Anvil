@@ -49,7 +49,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @RFC(number = 4492, section = "4. TLS Extensions for ECC")
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello\n" +
             "   message if it does not propose any ECC cipher suites.", securitySeverity = SeverityLevel.INFORMATIONAL)
-    @KeyExchange(provided = KeyExchangeType.RSA, supported = KeyExchangeType.DH)
+    @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     public void BothECExtensions_WithoutECCCipher(WorkflowRunner runner) {
         Config c = this.getConfig();
 
@@ -62,7 +62,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @RFC(number = 4492, section = "4. TLS Extensions for ECC")
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello\n" +
             "   message if it does not propose any ECC cipher suites.")
-    @KeyExchange(provided = KeyExchangeType.RSA, supported = KeyExchangeType.DH)
+    @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     public void ECExtension_WithoutECCCipher(WorkflowRunner runner) {
         Config c = this.getConfig();
 
@@ -75,7 +75,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @RFC(number = 4492, section = "4. TLS Extensions for ECC")
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello\n" +
             "   message if it does not propose any ECC cipher suites.")
-    @KeyExchange(provided = KeyExchangeType.RSA, supported = KeyExchangeType.DH)
+    @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     public void ECPointFormatExtension_WithoutECCCipher(WorkflowRunner runner) {
         Config c = this.getConfig();
 
@@ -91,7 +91,7 @@ public class TLSExtensionForECC extends Tls12Test {
             "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake " +
             "while restricting itself to the enumerated curves and point formats, " +
             "it MUST NOT negotiate the use of an ECC cipher suite.", interoperabilitySeverity = SeverityLevel.LOW)
-    @KeyExchange(provided = KeyExchangeType.ECDH)
+    @KeyExchange(supported = KeyExchangeType.ECDH)
     public void InvalidEllipticCurve(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
@@ -117,7 +117,7 @@ public class TLSExtensionForECC extends Tls12Test {
             "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake " +
             "while restricting itself to the enumerated curves and point formats, " +
             "it MUST NOT negotiate the use of an ECC cipher suite.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(provided = KeyExchangeType.ECDH, supported = KeyExchangeType.ALL12)
+    @KeyExchange(supported = {KeyExchangeType.ECDH, KeyExchangeType.ALL12})
     public void InvalidEllipticCurve_WithNonECCCiphersuite(WorkflowRunner runner) {
         runner.appendEachSupportedCiphersuiteToClientSupported = true;
         Config c = this.getConfig();

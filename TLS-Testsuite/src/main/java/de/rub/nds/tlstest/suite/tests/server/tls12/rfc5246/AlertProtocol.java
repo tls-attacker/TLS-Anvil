@@ -4,19 +4,22 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
-import de.rub.nds.tlsattacker.core.protocol.message.*;
+import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
@@ -70,7 +73,7 @@ public class AlertProtocol extends Tls12Test {
 
     @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
-    public void abortAfterFatalAlert(WorkflowRunner runner) {
+    public void abortAfterFatalAlert_sendBeforeCCS(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
         runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -89,9 +92,42 @@ public class AlertProtocol extends Tls12Test {
                     new ReceiveAction(new AlertMessage())
             );
 
+            runner.setStateModifier(s -> {
+                s.addAdditionalTestInfo(i.name());
+                return null;
+            });
             container.addAll(runner.prepare(workflowTrace, c));
         }
 
+        runner.execute(container).validateFinal(Validator::receivedFatalAlert);
+    }
+
+    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
+    @RFC(number = 5264, section = "7.2.2 Error Alerts")
+    public void abortAfterFatalAlert_sendAfterServerHelloDone(WorkflowRunner runner) {
+        Config c = this.getConfig();
+        runner.replaceSupportedCiphersuites = true;
+        runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_HELLO_DONE);
+
+        AnnotatedStateContainer container = new AnnotatedStateContainer();
+        for (AlertDescription i : AlertDescription.values()) {
+            AlertMessage alert = new AlertMessage();
+            alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
+            alert.setDescription(Modifiable.explicit(i.getValue()));
+
+            WorkflowTrace workflowTrace = new WorkflowTrace();
+            workflowTrace.addTlsActions(
+                    new ReceiveAction(new ServerHelloDoneMessage()),
+                    new SendAction(alert),
+                    new ReceiveAction(new AlertMessage())
+            );
+
+            runner.setStateModifier(s -> {
+                s.addAdditionalTestInfo(i.name());
+                return null;
+            });
+            container.addAll(runner.prepare(workflowTrace, c));
+        }
 
         runner.execute(container).validateFinal(Validator::receivedFatalAlert);
     }

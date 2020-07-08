@@ -5,7 +5,8 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.protocol.message.*;
+import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -13,10 +14,8 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
@@ -84,6 +83,7 @@ public class AlertProtocol extends Tls12Test {
             alert.setDescription(Modifiable.explicit(i.getValue()));
 
             runner.setStateModifier(t -> {
+                t.addAdditionalTestInfo(String.format("Test with alert %s", i.name()));
                 SendAction serverHelloAction = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, t.getWorkflowTrace());
                 serverHelloAction.getSendMessages().add(0, alert);
                 return null;
@@ -114,6 +114,7 @@ public class AlertProtocol extends Tls12Test {
             alert.setDescription(Modifiable.explicit(i.getValue()));
 
             runner.setStateModifier(t -> {
+                t.addAdditionalTestInfo(String.format("Test with alert %s", i.name()));
                 SendAction serverHelloAction = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, t.getWorkflowTrace());
                 serverHelloAction.getSendMessages().add(serverHelloAction.getSendMessages().size() - 1, alert);
                 return null;

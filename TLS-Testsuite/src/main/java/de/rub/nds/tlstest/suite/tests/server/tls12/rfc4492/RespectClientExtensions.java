@@ -28,13 +28,13 @@ import static org.junit.Assert.*;
 @ServerTest
 public class RespectClientExtensions extends Tls12Test {
     @RFC(number = 4492, section = "5.1. Client Hello Extensions")
-    @TlsTest(description = "Servers implementing ECC cipher suites MUST support these extensions, "+
-            "and when a client uses these extensions, servers MUST NOT negotiate "+
-            "the use of an ECC cipher suite unless they can complete the handshake while respecting the choice"+
-            " of curves and compression techniques specified by the client.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(provided = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
+    @TlsTest(description = "Servers implementing ECC cipher suites MUST support these extensions, " +
+            "and when a client uses these extensions, servers MUST NOT negotiate " +
+            "the use of an ECC cipher suite unless they can complete the handshake while respecting the choice " +
+            "of curves and compression techniques specified by the client.", interoperabilitySeverity = SeverityLevel.CRITICAL)
+    @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
     // TODO: Client test missing
-    public void RespectChosenCurve(WorkflowRunner runner) {
+    public void respectChosenCurve(WorkflowRunner runner) {
         runner.replaceSupportedCiphersuites = true;
         Config c = this.getConfig();
 
@@ -55,6 +55,10 @@ public class RespectClientExtensions extends Tls12Test {
 
             for (NamedGroup i : groups) {
                 chm.getExtension(EllipticCurvesExtensionMessage.class).setSupportedGroups(Modifiable.explicit(i.getValue()));
+                runner.setStateModifier(s -> {
+                    s.addAdditionalTestInfo("Set EC Curve to " + i.name());
+                    return null;
+                });
                 container.addAll(runner.prepare(workflowTrace, c));
             }
         } catch(Exception e) {

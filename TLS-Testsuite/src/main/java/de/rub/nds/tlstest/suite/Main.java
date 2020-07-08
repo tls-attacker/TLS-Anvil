@@ -3,6 +3,7 @@ package de.rub.nds.tlstest.suite;
 
 import com.beust.jcommander.ParameterException;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,6 +22,9 @@ public class Main {
         catch (ParameterException E) {
             LOGGER.error("Could not parse provided parameters", E);
             testContext.getConfig().getArgParser().usage();
+        } catch (Exception e) {
+            LOGGER.error(ExecptionPrinter.stacktraceToString(e));
+            System.exit(3);
         }
     }
 }

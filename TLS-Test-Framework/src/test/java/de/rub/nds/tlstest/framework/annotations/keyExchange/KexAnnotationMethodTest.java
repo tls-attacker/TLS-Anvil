@@ -3,6 +3,7 @@ package de.rub.nds.tlstest.framework.annotations.keyExchange;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -23,9 +24,9 @@ public class KexAnnotationMethodTest {
     @BeforeAll
     static void setup() {
         TestContext testContext = new TestContext();
-        SiteReport report = new SiteReport("", new ArrayList<>());
+        TestSiteReport report = new TestSiteReport("");
 
-        report.setCipherSuites(new HashSet<CipherSuite>(){
+        report.addCipherSuites(new HashSet<CipherSuite>(){
             {
                 add(CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA);
             }
@@ -35,25 +36,16 @@ public class KexAnnotationMethodTest {
     }
 
     @TlsTest
-    @KeyExchange(provided = KeyExchangeType.DH, supported = { KeyExchangeType.ECDH })
-    public void execute_unsupportedProvided_but_SupportedSupported() { }
+    @KeyExchange(supported = { KeyExchangeType.ECDH })
+    public void execute_SupportedSupported() { }
 
     @TlsTest
-    @KeyExchange(provided = KeyExchangeType.DH, supported = { KeyExchangeType.ALL12 })
-    public void execute_unsupportedProvided_but_allSupported() { }
-
-
-    @TlsTest
-    @KeyExchange(provided = KeyExchangeType.ECDH, supported = { KeyExchangeType.DH })
-    public void execute_supportedProvided_but_UnsupportedSupported() { }
+    @KeyExchange(supported = { KeyExchangeType.ALL12 })
+    public void execute_allSupported() { }
 
     @TlsTest
     @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.ECDH})
-    public void execute_noProvided_multipleSupported() { }
-
-    @TlsTest
-    @KeyExchange(supported = KeyExchangeType.ECDH)
-    public void execute_KexSupportedByTarget_setSupportedOnly() { }
+    public void execute_multipleSupported() { }
 
 
 
@@ -61,11 +53,11 @@ public class KexAnnotationMethodTest {
     public void execute_noKexAnnotationSpecified() { }
 
     @TlsTest
-    @KeyExchange(provided = KeyExchangeType.DH)
+    @KeyExchange()
     public void not_execute_KexNotSupportedByTarget() { }
 
     @TlsTest
-    @KeyExchange(provided = KeyExchangeType.DH, mergeSupportedWithClassSupported = true)
+    @KeyExchange(mergeSupportedWithClassSupported = true)
     public void not_execute_KexNotSupportedByTarget2() { }
 
     @TlsTest

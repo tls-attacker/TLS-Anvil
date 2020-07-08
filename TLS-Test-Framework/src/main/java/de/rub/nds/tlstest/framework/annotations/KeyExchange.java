@@ -11,7 +11,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.TYPE})
 public @interface KeyExchange {
-    KeyExchangeType provided() default KeyExchangeType.NOT_SPECIFIED;
     KeyExchangeType[] supported() default {};
     boolean mergeSupportedWithClassSupported() default false;
     boolean requiresServerKeyExchMsg() default false;

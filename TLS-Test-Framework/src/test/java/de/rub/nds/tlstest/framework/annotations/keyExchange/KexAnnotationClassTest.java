@@ -3,6 +3,7 @@ package de.rub.nds.tlstest.framework.annotations.keyExchange;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 
-@KeyExchange(provided = KeyExchangeType.RSA, supported = KeyExchangeType.ECDH)
+@KeyExchange(supported = KeyExchangeType.ECDH)
 public class KexAnnotationClassTest {
 
     @RegisterExtension
@@ -24,9 +25,9 @@ public class KexAnnotationClassTest {
     @BeforeAll
     static void setup() {
         TestContext testContext = new TestContext();
-        SiteReport report = new SiteReport("", new ArrayList<>());
+        TestSiteReport report = new TestSiteReport("");
 
-        report.setCipherSuites(new HashSet<CipherSuite>(){
+        report.addCipherSuites(new HashSet<CipherSuite>(){
             {
                 add(CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA);
             }
@@ -39,19 +40,15 @@ public class KexAnnotationClassTest {
     public void execute_inheritedClassAnnoation() { }
 
     @TlsTest
-    @KeyExchange(provided = KeyExchangeType.DH, supported = { KeyExchangeType.ECDH })
-    public void execute_overwrittenClassAnnoation() { }
-
-    @TlsTest
-    @KeyExchange(provided = KeyExchangeType.DH, mergeSupportedWithClassSupported = true)
+    @KeyExchange(supported = {}, mergeSupportedWithClassSupported = true)
     public void execute_mergedWithClassAnnoation() { }
 
     @TlsTest
-    @KeyExchange(provided = KeyExchangeType.DH)
+    @KeyExchange()
     public void not_execute_unsupportedKex() { }
 
     @TlsTest
     @KeyExchange(supported = KeyExchangeType.DH)
-    public void not_execute_unsupprtedKex_supportedOnly() { }
+    public void not_execute_unsupprtedKex() { }
 
 }

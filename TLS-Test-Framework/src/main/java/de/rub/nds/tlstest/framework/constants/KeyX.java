@@ -8,6 +8,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +24,6 @@ import java.util.Set;
 public class KeyX implements KeyExchange {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private KeyExchangeType providedKx = KeyExchangeType.NOT_SPECIFIED;
     private KeyExchangeType[] supportedKxs = new KeyExchangeType[0];
     private boolean mergeSupportedWithClassSupported = true;
     private boolean requiresServerKeyExchMsg = false;
@@ -34,15 +34,9 @@ public class KeyX implements KeyExchange {
 
     public KeyX(KeyExchange exchange) {
         super();
-        this.providedKx = exchange.provided();
         this.supportedKxs = exchange.supported();
         this.mergeSupportedWithClassSupported = exchange.mergeSupportedWithClassSupported();
         this.requiresServerKeyExchMsg = exchange.requiresServerKeyExchMsg();
-    }
-
-    @Override
-    public KeyExchangeType provided() {
-        return this.providedKx;
     }
 
     @Override
@@ -65,17 +59,17 @@ public class KeyX implements KeyExchange {
         return null;
     }
 
-    public void setProvidedKx(KeyExchangeType providedKx) {
-        this.providedKx = providedKx;
-    }
-
     public void setSupportedKxs(KeyExchangeType[] supportedKxs) {
         this.supportedKxs = supportedKxs;
     }
 
+
+    /**
+     * filters supportedKxs, so that it only contains the KeyExchangeTypes that are actually supported by the server/client.
+     */
     public void filterSupportedKexs() {
         TestContext context = TestContext.getInstance();
-        SiteReport report = context.getConfig().getSiteReport();
+        TestSiteReport report = context.getConfig().getSiteReport();
         Set<CipherSuite> ciphers = report.getCipherSuites();
         if (ciphers == null) {
             ciphers = new HashSet<>();
@@ -107,7 +101,6 @@ public class KeyX implements KeyExchange {
                 report.getSupportedTls13CipherSuites().size() > 0) {
             filtered.add(KeyExchangeType.ALL13);
         }
-
 
         KeyExchangeType[] filteredA = new KeyExchangeType[filtered.size()];
         filtered.toArray(filteredA);
@@ -143,47 +136,22 @@ public class KeyX implements KeyExchange {
                 KeyExchangeType[] supportedKexs = new KeyExchangeType[supportedKexsSet.size()];
                 supportedKexsSet.toArray(supportedKexs);
 
-                KeyExchangeType provided = KeyExchangeType.NOT_SPECIFIED;
-                if (method.provided() != KeyExchangeType.NOT_SPECIFIED) {
-                    provided = method.provided();
-                } else if (cls.provided() != KeyExchangeType.NOT_SPECIFIED) {
-                    provided = cls.provided();
-                }
-
-                resolvedKeyExchange.setProvidedKx(provided);
                 resolvedKeyExchange.setSupportedKxs(supportedKexs);
             }
         } else if (testClass.isAnnotationPresent(KeyExchange.class)) {
             KeyExchange existing = testClass.getAnnotation(KeyExchange.class);
             resolvedKeyExchange = new KeyX(existing);
+        } else {
+            resolvedKeyExchange = new KeyX();
+            resolvedKeyExchange.setSupportedKxs(new KeyExchangeType[]{KeyExchangeType.ALL12, KeyExchangeType.ALL13});
         }
 
         boolean supportsAll = Arrays.asList(resolvedKeyExchange.supported()).contains(KeyExchangeType.ALL12);
-        if (supportsAll || resolvedKeyExchange.provided() == KeyExchangeType.ALL12) {
+        if (supportsAll) {
             resolvedKeyExchange.setSupportedKxs(new KeyExchangeType[]{KeyExchangeType.DH, KeyExchangeType.ECDH, KeyExchangeType.RSA});
         }
 
-        if (resolvedKeyExchange.provided() == KeyExchangeType.NOT_SPECIFIED &&
-                resolvedKeyExchange.supported().length == 1 &&
-                resolvedKeyExchange.supported()[0] != KeyExchangeType.ALL12) {
-            resolvedKeyExchange.setProvidedKx(resolvedKeyExchange.supported()[0]);
-        }
-
-        if ((testClass.isAnnotationPresent(KeyExchange.class) || testMethod.isAnnotationPresent(KeyExchange.class)) &&
-                (resolvedKeyExchange.provided() == KeyExchangeType.NOT_SPECIFIED || resolvedKeyExchange.provided() == KeyExchangeType.ALL12)) {
-            LOGGER.debug("KeyExchange annotation used on method or class of " + identifier + ", but KeyExchange property 'provided' is not set or set to ALL12, thus cannot transform.");
-        }
-
-        if (resolvedKeyExchange.supported().length > 0 || resolvedKeyExchange.provided() != KeyExchangeType.NOT_SPECIFIED) {
-            Set<KeyExchangeType> supportedKexsSet = new HashSet<>(Arrays.asList(resolvedKeyExchange.supported()));
-            if (resolvedKeyExchange.provided() != KeyExchangeType.NOT_SPECIFIED)
-                supportedKexsSet.add(resolvedKeyExchange.provided());
-
-            KeyExchangeType[] supportedKexs = new KeyExchangeType[supportedKexsSet.size()];
-            supportedKexsSet.toArray(supportedKexs);
-
-            resolvedKeyExchange.setSupportedKxs(supportedKexs);
-
+        if (resolvedKeyExchange.supported().length > 0) {
             resolvedKeyExchange.filterSupportedKexs();
         } else {
             resolvedKeyExchange.setSupportedKxs(new KeyExchangeType[0]);

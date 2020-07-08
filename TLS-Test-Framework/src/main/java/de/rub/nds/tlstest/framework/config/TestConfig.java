@@ -12,6 +12,7 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.SNIEntry;
 import de.rub.nds.tlsscanner.report.SiteReport;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
@@ -36,7 +37,7 @@ public class TestConfig extends TLSDelegateConfig {
     private JCommander argParser = null;
 
     private TestEndpointType testEndpointMode = null;
-    private SiteReport siteReport = null;
+    private TestSiteReport siteReport = null;
     private boolean parsedArgs = false;
 
     Config cachedConfig = null;
@@ -56,6 +57,9 @@ public class TestConfig extends TLSDelegateConfig {
 
     @Parameter(names = "-outputFormat", description = "Defines the format of the output. Supported: xml or json")
     private String outputFormat = "";
+
+    @Parameter(names = "-parallel", description = "How many TLS-Handshakes should be executed in parallel? (Default value: 5)")
+    private int parallel = 5;
 
 
     public TestConfig() {
@@ -197,19 +201,17 @@ public class TestConfig extends TLSDelegateConfig {
 
         Config config = super.createConfig();
 
+        // Server test -> TLS-Attacker acts as Client
+        config.getDefaultClientConnection().setFirstTimeout((parallel + 1) * 1000);
+        config.getDefaultClientConnection().setTimeout(1000);
+        config.getDefaultClientConnection().setConnectionTimeout(0);
 
-        if ((!IPAddress.isValid(config.getDefaultClientConnection().getHostname()) || this.getTestServerDelegate().getSniHostname() != null)
-                && this.testEndpointMode == TestEndpointType.SERVER) {
-            config.setAddServerNameIndicationExtension(true);
-            config.setDefaultClientSNIEntries(new SNIEntry(config.getDefaultClientConnection().getHostname(), NameType.HOST_NAME));
-        } else {
-            config.setAddServerNameIndicationExtension(false);
-        }
 
-        config.getDefaultClientConnection().setFirstTimeout(100 * 1000);
-        config.getDefaultClientConnection().setTimeout(3000);
-        config.getDefaultServerConnection().setFirstTimeout(100 * 1000);
-        config.getDefaultServerConnection().setTimeout(3000);
+        // Client test -> TLS-Attacker acts as Server
+        config.getDefaultServerConnection().setFirstTimeout(1000);
+        config.getDefaultServerConnection().setTimeout(1000);
+
+
         config.setWorkflowExecutorShouldClose(true);
         config.setEarlyStop(true);
         config.setStealthMode(true);
@@ -292,11 +294,11 @@ public class TestConfig extends TLSDelegateConfig {
         return argParser;
     }
 
-    public SiteReport getSiteReport() {
+    public TestSiteReport getSiteReport() {
         return siteReport;
     }
 
-    public void setSiteReport(SiteReport siteReport) {
+    public void setSiteReport(TestSiteReport siteReport) {
         this.siteReport = siteReport;
     }
 
@@ -326,5 +328,13 @@ public class TestConfig extends TLSDelegateConfig {
 
     public boolean isParsedArgs() {
         return parsedArgs;
+    }
+
+    public int getParallel() {
+        return parallel;
+    }
+
+    public void setParallel(int parallel) {
+        this.parallel = parallel;
     }
 }

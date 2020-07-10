@@ -83,10 +83,10 @@ public class MethodConditionExtension extends BaseCondition {
         }
         catch (IllegalAccessException e) {
             LOGGER.error("Couldn't execute " + identifier + ", make sure, that class, constructor and method is public.");
-            LOGGER.error(e);
+            LOGGER.error("", e);
         }
         catch (Exception e) {
-            LOGGER.error(e);
+            LOGGER.error("", e);
         }
         return ConditionEvaluationResult.disabled("Could not invoke method " + identifier);
     }

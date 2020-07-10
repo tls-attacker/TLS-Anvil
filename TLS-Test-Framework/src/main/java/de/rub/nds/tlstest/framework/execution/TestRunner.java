@@ -1,6 +1,5 @@
 package de.rub.nds.tlstest.framework.execution;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -27,8 +26,6 @@ import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsscanner.TlsScanner;
 import de.rub.nds.tlsscanner.config.ScannerConfig;
 import de.rub.nds.tlsscanner.constants.ProbeType;
-import de.rub.nds.tlsscanner.probe.CommonBugProbe;
-import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
@@ -51,12 +48,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ConnectException;
+import java.net.NoRouteToHostException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -171,8 +169,8 @@ public class TestRunner {
                     }
                     conTest = new Socket(connectionEndpoint, connection.getPort());
                     targetIsReady = conTest.isConnected();
-                } catch (ConnectException e) {
-                    LOGGER.warn("Server not yet available");
+                } catch (Exception e) {
+                    LOGGER.warn("Server not yet available (" + e.getLocalizedMessage() + ")");
                     Thread.sleep(1000);
                 }
             }
@@ -199,7 +197,7 @@ public class TestRunner {
         config.setAddServerNameIndicationExtension(testConfig.createConfig().isAddServerNameIndicationExtension());
 
         config.getDefaultClientConnection().setConnectionTimeout(0);
-        scannerConfig.setCustomConfig(config);
+        scannerConfig.setBaseConfig(config);
 
         scannerConfig.setProbes(
                 ProbeType.CIPHERSUITE,
@@ -228,6 +226,7 @@ public class TestRunner {
         TestSiteReport cachedReport = loadFromCache();
         if (cachedReport != null) {
             testConfig.setSiteReport(cachedReport);
+            testContext.setReceivedClientHelloMessage(cachedReport.getReceivedClientHello());
             return;
         }
 

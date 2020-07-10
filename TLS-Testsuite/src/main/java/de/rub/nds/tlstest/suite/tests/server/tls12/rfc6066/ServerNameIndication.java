@@ -8,11 +8,13 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 import java.util.List;
 
@@ -20,17 +22,24 @@ import java.util.List;
 @ServerTest
 public class ServerNameIndication extends Tls12Test {
 
+    public ConditionEvaluationResult sniActive() {
+        Config c = this.getConfig();
+        List<SNIEntry> l = c.getDefaultClientSNIEntryList();
+        if (l != null && l.size() > 0) {
+            return ConditionEvaluationResult.enabled("");
+        }
+        return ConditionEvaluationResult.disabled("SNI is disabled");
+    }
+
     @TlsTest(description = "The ServerNameList MUST NOT contain more than one name of the same " +
             "name_type.")
+    @MethodCondition(method = "sniActive")
     public void moreThanOneNameOfTheSameType(WorkflowRunner runner) {
         Config c = this.getConfig();
         c.setAddServerNameIndicationExtension(true);
 
         runner.replaceSupportedCiphersuites = true;
         List<SNIEntry> entries = c.getDefaultClientSNIEntryList();
-        if (entries.size() == 0) {
-            throw new AssertionError("DefaultClientSNIEntryList is empty");
-        }
         SNIEntry entry = entries.get(0);
         SNIEntry newEntry = new SNIEntry(entry.getName(), entry.getType());
 

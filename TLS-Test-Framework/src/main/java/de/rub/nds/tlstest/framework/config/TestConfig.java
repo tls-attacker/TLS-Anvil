@@ -246,6 +246,7 @@ public class TestConfig extends TLSDelegateConfig {
 
         config.setDefaultServerSupportedCiphersuites(CipherSuite.getImplemented().stream().filter(CipherSuite::isTLS13).collect(Collectors.toList()));
         config.setDefaultClientSupportedCiphersuites(config.getDefaultServerSupportedCiphersuites());
+        config.setDefaultSelectedCipherSuite(CipherSuite.TLS_AES_128_GCM_SHA256);
         return config;
     }
 

@@ -98,8 +98,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     public void sendServerHelloGreaseExtension(WorkflowRunner runner) {
         runner.replaceSelectedCiphersuite = true;
         Config c = this.getConfig();
-        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
         runner.setStateModifier(i -> {
             ServerHelloMessage sh = i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class);
@@ -107,7 +106,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             return null;
         });
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
 

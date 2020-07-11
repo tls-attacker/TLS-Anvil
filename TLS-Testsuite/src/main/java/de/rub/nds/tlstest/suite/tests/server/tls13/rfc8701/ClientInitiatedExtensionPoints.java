@@ -129,7 +129,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
             ServerHelloMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
             KeyShareExtensionMessage keyshares = msg.getExtension(KeyShareExtensionMessage.class);
             keyshares.getKeyShareList().forEach(j -> {
-                assertFalse("Server negotiated GREASE value", NamedGroup.getNamedGroup(j.getGroup().getValue()).isGrease());
+                assertFalse("Server negotiated GREASE named group", NamedGroup.getNamedGroup(j.getGroup().getValue()).isGrease());
             });
 
         });
@@ -160,7 +160,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
 
             CertificateVerifyMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(CertificateVerifyMessage.class);
             SignatureAndHashAlgorithm selected = SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(msg.getSignatureHashAlgorithm().getValue());
-            assertFalse("Server selected grease algorithm", selected.isGrease());
+            assertFalse("Server selected GREASE signature and hash algorithm", selected.isGrease());
         });
     }
 
@@ -194,7 +194,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
             if (ext == null) return;
 
             assertEquals("AlpnEntryExtension contains more or less than one protocol", 1, ext.getAlpnEntryList().size());
-            assertFalse("Server negotiated GREASE value", CipherSuite.getCipherSuite(ext.getAlpnEntryList().get(0).getAlpnEntryConfig()).isGrease());
+            assertFalse("Server negotiated GREASE ALPN Identifier", CipherSuite.getCipherSuite(ext.getAlpnEntryList().get(0).getAlpnEntryConfig()).isGrease());
         });
     }
 

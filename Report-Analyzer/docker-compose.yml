@@ -1,0 +1,22 @@
+version: '3.1'
+
+volumes:
+  mongodb_DB:
+  mongodb_conf:
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_DB:/data/db
+      - mongodb_conf:/data/configdb
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+

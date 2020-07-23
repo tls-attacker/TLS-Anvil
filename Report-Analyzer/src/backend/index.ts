@@ -121,25 +121,25 @@ router.get("/testReport/:containerId/testResult/:className/:methodName/:uuid/pca
     return execProgram(null, 'tcpdump', ['-r', '/tmp/p' + container.PcapStorageId, '-w', '-', `tcp port ${state.SrcPort} and tcp port ${state.DstPort}`])
   })
   .then((output) => {
+    return fsPromises.writeFile(`/tmp/filtered${container.PcapStorageId}.pcap`, output)
+  }).then(() => {
     const timeFilter = `frame.time >= "${startTimestamp.subtract(1, 'seconds').format("YYYY-MM-DD HH:mm:ss.S")}"` +
                     `&& frame.time <= "${startTimestamp.add(10, 'seconds').format("YYYY-MM-DD HH:mm:ss.S")}"`
 
     if (req.query.download) {
-      return fsPromises.writeFile(`/tmp/filtered${container.PcapStorageId}.pcap`, output).then(() => {
-        return execProgram(null, 
-          'tshark', 
-          [
-            '-r', `/tmp/filtered${container.PcapStorageId}.pcap`, '-w', '-',
-            '-2', '-R', timeFilter
-          ]
-        )
-      })
+      return execProgram(null, 
+        'tshark', 
+        [
+          '-r', `/tmp/filtered${container.PcapStorageId}.pcap`, '-w', '-',
+          '-2', '-R', timeFilter
+        ]
+      )
     }
 
-    return execProgram(output, 
+    return execProgram(null, 
       'tshark', 
       [
-        '-n', '-i', '-', 
+        '-n', '-r', `/tmp/filtered${container.PcapStorageId}.pcap`,
         '-o', `tls.keylog_file:/tmp/k${container.KeylogfileStorageId}`, '-Y', timeFilter,
         '-o', 'gui.column.format:"Time","%Aut","s","%uS","d","%uD","Protocol","%p","Info","%i"',
         '-T', 'tabs'

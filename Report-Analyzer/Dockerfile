@@ -1,6 +1,6 @@
-FROM node:12
+FROM node:12-alpine3.12
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y tcpdump tshark
+RUN apk update && apk add tshark tcpdump
 COPY *.js *.json /app/
 WORKDIR /app
 RUN npm install

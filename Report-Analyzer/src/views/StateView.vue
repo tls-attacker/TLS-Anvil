@@ -460,7 +460,7 @@ thead th {
 
   .packetWrapper {
     display: inline-block;
-    white-space: nowrap;
+    white-space: pre;
     min-width: 100%;
   }
 

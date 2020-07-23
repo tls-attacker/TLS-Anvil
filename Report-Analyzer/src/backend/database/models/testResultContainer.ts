@@ -1,9 +1,13 @@
-import { Schema, Document } from "mongoose";
+import { Schema, Document, MongooseDocument } from "mongoose";
 import { ITimestamp } from './timestamps';
 import { ITestResult } from './testResult';
 
 export interface ITestResultContainer extends Document, ITimestamp {
   Identifier: string,
+  ShortIdentifier: string,
+  PcapStorageId: MongooseDocument['_id'],
+  KeylogfileStorageId: MongooseDocument['_id'],
+  Date: Date,
   DisplayName: string
   ElapsedTime: number,
   FailedTests: number,
@@ -20,6 +24,14 @@ export const TestResultContainerSchema = new Schema({
     type: String,
     required: true,
   },
+  PcapStorageId: {
+    type: Schema.Types.ObjectId
+  },
+  KeylogfileStorageId: {
+    type: Schema.Types.ObjectId
+  },
+  ShortIdentifier: String,
+  Date: Date,
   DispalyName: String,
   ElapsedTime: Number,
   FailedTests: Number,

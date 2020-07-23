@@ -14,7 +14,9 @@
       </b-collapse>
     </b-navbar>
     <div id="container">
-      <router-view />
+      <keep-alive>
+        <router-view />
+      </keep-alive>
     </div>
   </div>
 </template>
@@ -40,5 +42,9 @@ h1 {
 
 .btn {
   margin-right: 10px;
+}
+
+.selectable {
+  cursor: pointer;
 }
 </style>

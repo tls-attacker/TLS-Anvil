@@ -14,7 +14,14 @@ Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 Vue.use(VueAxios, axios)
 
-axios.defaults.baseURL = 'http://localhost:5000/api/v1';
+
+console.log("mode", process.env)
+if (process.env.NODE_ENV == 'production') {
+  axios.defaults.baseURL = 'https://reportanalyzer./api/v1';
+} else {
+  axios.defaults.baseURL = 'http://localhost:5000/api/v1';
+}
+
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 new Vue({

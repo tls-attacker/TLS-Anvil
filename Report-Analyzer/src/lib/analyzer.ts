@@ -1,23 +1,41 @@
-import { ITestResultContainer, ITestResult, ITestMethod, IState, TestResultSchema } from '@/backend/database/models';
-
-
-interface ITestMethodTable extends ITestMethod {
-  testCaseName: string,
-}
+import { ITestMethod, ITestResult, ITestResultContainer } from '@/backend/database/models';
+import { HighlightOptions, HighlightOptionsStrings, resolveSeverityLevel, IItemProviderContext, Optional, resolveStatus, ISeverityFilter, allSeverityLevels, SeverityLevelStrings, allStatus, TestStatus, TestStatusStrings } from './const';
+import { filter } from 'vue/types/umd';
 
 interface ITestResultTable extends ITestResult {
-  TestMethod: ITestMethodTable,
   statusIcons: string
 }
 
-interface IItemProviderContext {
-  currentPage: number,
-  perPage: number,
-  filter: IFilter,
-  sortBy: string,
-  sortDesc: boolean,
-  apiUrl: string
+//@ts-ignore
+interface ITestResultContainerBrowser extends ITestResultContainer {
+  TestResultClassMethodIndexMap: {[key: string]: number}
 }
+
+export const differenceFilterOptions = [
+  { text: "Different test results", value: HighlightOptions.differentStatus },
+  { text: "Different states", value: HighlightOptions.differentStates }
+]
+
+export const hightlightOptions = [
+  { text: "None", value: null },
+  ...differenceFilterOptions
+]
+
+interface IFilter {
+  severity: ISeverityFilter,
+  status: TestStatus[],
+  properties: any[]
+}
+
+export const filterObj: IFilter = {
+  severity: {
+    security: [...allSeverityLevels],
+    interoperability: [...allSeverityLevels],
+  },
+  status: [...allStatus],
+  properties: [HighlightOptions.differentStatus, HighlightOptions.differentStates]
+}
+
 
 function timeConversion(millisec: number) {
   var seconds = parseFloat((millisec / 1000).toFixed(1));
@@ -35,65 +53,12 @@ function timeConversion(millisec: number) {
   }
 }
 
-enum SeverityLevel {
-  INFORMATIONAL = "INFORMATIONAL",
-  LOW = "LOW",
-  MEDIUM = "MEDIUM",
-  HIGH = "HIGH",
-  CRITICAL = "CRITICAL"
-}
-type SeverityLevelStrings = keyof typeof SeverityLevel
 
-
-enum TestStatus {
-  SUCCEEDED = "SUCCEEDED",
-  FAILED = "FAILED",
-  PARTIALLY_FAILED = "PARTIALLY_FAILED",
-  PARTIALLY_SUCCEEDED = "PARTIALLY_SUCCEEDED",
-  DISABLED = "DISABLED"
-}
-
-
-
-function resolveStatus(status: string) {
-  switch (status) {
-    case TestStatus.SUCCEEDED:
-      return "✅";
-    case TestStatus.FAILED:
-      return "❌"
-    case TestStatus.PARTIALLY_FAILED:
-      return "⚠️❌"
-    case TestStatus.PARTIALLY_SUCCEEDED:
-      return "⚠️✅"
-    case TestStatus.DISABLED:
-      return ""
-    default:
-      return "UNKNOWN"
-  }
-}
-
-function resolveSeverityLevel(level: string) {
-  switch(level) {
-    case SeverityLevel.INFORMATIONAL:
-      return '⚪️'
-    case SeverityLevel.LOW:
-      return '🟡'
-    case SeverityLevel.MEDIUM:
-      return '🟠'
-    case SeverityLevel.HIGH:
-      return '🔴'
-    case SeverityLevel.CRITICAL:
-      return '🟣'
-    default:
-      return 'U'
-  }
-}
-
-function resolveSeverity(method: ITestMethodTable) {
+function resolveSeverity(method: ITestMethod) {
   return `[S: ${resolveSeverityLevel(method.SecuritySeverity)}, I: ${resolveSeverityLevel(method.InteroperabilitySeverity)}]`
 }
 
-export function itemProvider(ctx: IItemProviderContext, reports: ITestResultContainer[]) {
+export function itemProvider(ctx: IItemProviderContext, reports: ITestResultContainerBrowser[]) {
   if (reports.length == 0) {
     return []
   }
@@ -108,8 +73,7 @@ export function itemProvider(ctx: IItemProviderContext, reports: ITestResultCont
   }]
   // build test case column first
   const descriptions = new Set<string>()
-  const mapTestcaseNameToTestResultIndexes: { [className: string]: number[] } = {}
-  const mapTestMethod: { [className: string]: ITestMethodTable } = {}
+  const resultIndexReportMap = new Map<string, number[]>()
 
   for (let i = 0; i < reports.length; i++) {
     const report = reports[i]
@@ -118,44 +82,35 @@ export function itemProvider(ctx: IItemProviderContext, reports: ITestResultCont
     items[2][report.Identifier] = {statusIcons: report.DisabledTests}
     items[3][report.Identifier] = {statusIcons: timeConversion(report.ElapsedTime)}
 
-    for (let j = 0; j < report.TestResults.length; j++) {
-      const result = <ITestResultTable>report.TestResults[j]
-      let testCaseName = `${result.TestMethod.ClassName}.${result.TestMethod.MethodName}`.replace("de.rub.nds.tlstest.suite.tests.", "")
-      result.TestMethod.testCaseName = testCaseName
-      result.statusIcons = resolveStatus(result.Status)
-      
-      descriptions.add(testCaseName)
-      if (!mapTestMethod[testCaseName]) {
-        mapTestMethod[testCaseName] = result.TestMethod
-      }
-
-      let positions = mapTestcaseNameToTestResultIndexes[testCaseName]
+    for (let testMethod of Object.keys(report.TestResultClassMethodIndexMap)) {
+      descriptions.add(testMethod)
+      let positions = resultIndexReportMap.get(testMethod)
       if (!positions) {
         positions = []
-        mapTestcaseNameToTestResultIndexes[testCaseName] = positions;
+        resultIndexReportMap.set(testMethod, positions)
       }
-        
+
       while (positions.length < i) {
         positions.push(-1)
       }
-      positions.push(j)
+      positions.push(report.TestResultClassMethodIndexMap[testMethod])
     }
   }
 
   const descriptionsArr = new Array(...descriptions)
   descriptionsArr.sort((a, b) => {
-    if (mapTestcaseNameToTestResultIndexes[mapTestMethod[a].testCaseName].indexOf(-1) > 0 && mapTestcaseNameToTestResultIndexes[mapTestMethod[b].testCaseName].indexOf(-1) == -1) {
+    if (resultIndexReportMap.get(a)!.includes(-1) && !resultIndexReportMap.get(b)!.includes(-1)) {
       // a is bigger -> sort to bottom
       return 1
     }
-    if (mapTestcaseNameToTestResultIndexes[mapTestMethod[b].testCaseName].indexOf(-1) > 0 && mapTestcaseNameToTestResultIndexes[mapTestMethod[a].testCaseName].indexOf(-1) == -1) {
+    if (resultIndexReportMap.get(b)!.includes(-1) && !resultIndexReportMap.get(a)!.includes(-1)) {
       // a is smaller -> sort to top
       return -1
     }
 
-    if (mapTestMethod[a].testCaseName < mapTestMethod[b].testCaseName) {
+    if (a < b) {
       return -1
-    } else if (mapTestMethod[b].testCaseName < mapTestMethod[a].testCaseName) {
+    } else if (b < a) {
       return 1
     }
 
@@ -165,14 +120,25 @@ export function itemProvider(ctx: IItemProviderContext, reports: ITestResultCont
 
   let oldTestClass = ""
   for (let testCase of descriptionsArr) {
-    const testResultIndexes = mapTestcaseNameToTestResultIndexes[testCase]
-    const testMethod = mapTestMethod[testCase]
-    if (!filterTestMethod(testMethod, ctx.filter)) {
+    const testResultIndexes = resultIndexReportMap.get(testCase)!
+    let testMethod : Optional<ITestMethod> = null
+    for (let idx in testResultIndexes) {
+      let elem = testResultIndexes[idx]
+      if (elem != -1) {
+        testMethod = reports[idx].TestResults[elem].TestMethod
+        break
+      }
+    }
+
+    if (!testMethod || !filterTestMethod(testMethod, ctx.filter)) {
       continue
     }
     
     const item: any = {
-      testcase: `&nbsp;&nbsp;&nbsp;&nbsp;${resolveSeverity(testMethod)} ${testMethod.MethodName}`
+      testcase: {
+        value: `&nbsp;&nbsp;&nbsp;&nbsp;${resolveSeverity(testMethod)} ${testMethod.MethodName}`,
+        TestMethod: testMethod
+      }
     }
     for (let i=0; i < reports.length; i++) {
       const report = reports[i]
@@ -180,7 +146,9 @@ export function itemProvider(ctx: IItemProviderContext, reports: ITestResultCont
       if (testResultIndex == -1 || report.TestResults[testResultIndex].Status == "DISABLED") {
         item[report.Identifier] = null
       } else {
-        item[report.Identifier] = report.TestResults[testResultIndex]
+        const result = <ITestResultTable>report.TestResults[testResultIndex]
+        result.statusIcons = resolveStatus(result.Status)
+        item[report.Identifier] = result
       }
     }
 
@@ -200,28 +168,43 @@ export function itemProvider(ctx: IItemProviderContext, reports: ITestResultCont
     if (testMethod.ClassName != oldTestClass) {
       oldTestClass = testMethod.ClassName
       items.push({
-        testcase: oldTestClass.replace("de.rub.nds.tlstest.suite.tests.", ""),
+        testcase: {
+          value: oldTestClass.replace("de.rub.nds.tlstest.suite.tests.", "")
+        }
       })
     }
 
-    items.push(item)
+    if (filterRowItem(item, ctx.filter)) {
+      items.push(item)
+    }
   }
 
   return items
 }
 
 
-export function getRowClass(item: any[], options: {highlightDifferentStatus: boolean}) {
+export function getRowClass(item: any[], highlightOption: HighlightOptionsStrings) {
   let identical = true
   let hasStates = false
   let lastStatus = null
   const retClasses = []
+  const states: {[key: string]: string} = {}
+  let differentStates = false
 
   for (const i in item) {
     let result : ITestResult = item[i] 
-    if (!result || !result.Status) continue
+    if (!result || !result.Status || i == 'testcase') continue
 
-    if (result.States && result.States.length > 0) {
+    for (const state of result.States) {
+      if (states[state.uuid] && states[state.uuid] != state.Status) {
+        differentStates = true
+        break
+      } else if (!states[state.uuid]) {
+        states[state.uuid] = state.Status
+      }
+    }
+
+    if (result.States.length > 0) {
       hasStates = true
     }
       
@@ -237,8 +220,12 @@ export function getRowClass(item: any[], options: {highlightDifferentStatus: boo
     lastStatus = result.Status
   }
 
-  if (!identical && options.highlightDifferentStatus) {
-    retClasses.push("differentStatus")
+  if (!identical && highlightOption == HighlightOptions.differentStatus) {
+    retClasses.push("highlight")
+  }
+
+  if (differentStates && highlightOption == HighlightOptions.differentStates) {
+    retClasses.push("highlight")
   }
 
   if (!hasStates) {
@@ -249,29 +236,42 @@ export function getRowClass(item: any[], options: {highlightDifferentStatus: boo
 }
 
 
-export const allSeverityLevels = [SeverityLevel.CRITICAL, SeverityLevel.HIGH, SeverityLevel.INFORMATIONAL, SeverityLevel.LOW, SeverityLevel.MEDIUM]
-export const filterObj: IFilter = {
-  security: [...allSeverityLevels],
-  interoperability: [...allSeverityLevels],
-}
 
-export interface IFilter {
-    security: SeverityLevelStrings[],
-    interoperability: SeverityLevelStrings[]
-}
-
-export function filterTestMethod(testMethod: ITestMethodTable, filter: IFilter) {
+function filterTestMethod(testMethod: ITestMethod, filter: IFilter): boolean {
   if (!filter)
     return true
   
-  if (filter.interoperability.indexOf(<SeverityLevelStrings>testMethod.InteroperabilitySeverity) == -1) {
+  if (filter.severity.interoperability.indexOf(<SeverityLevelStrings>testMethod.InteroperabilitySeverity) == -1) {
     return false
   }
 
-  if (filter.security.indexOf(<SeverityLevelStrings>testMethod.SecuritySeverity) == -1) {
+  if (filter.severity.security.indexOf(<SeverityLevelStrings>testMethod.SecuritySeverity) == -1) {
     return false
   }
 
   return true
+}
+
+function filterRowItem(item: any, filter: IFilter): boolean {
+  let ret = false
+  for (const key in item) {
+    if (key == 'testcase' || !item[key]) continue
+
+    const result : ITestResultTable = item[key]
+    if (filter.status.includes(<TestStatus>result.Status)) {
+      ret = true
+      break
+    }
+  }
+
+  if (!filter.properties.includes(HighlightOptions.differentStates)) {
+    ret = ret && getRowClass(item, HighlightOptions.differentStatus).includes('highlight')
+  }
+  
+  if (!filter.properties.includes(HighlightOptions.differentStatus)) {
+    ret = ret && getRowClass(item, HighlightOptions.differentStates).includes('highlight')
+  }
+
+  return ret
 }
 

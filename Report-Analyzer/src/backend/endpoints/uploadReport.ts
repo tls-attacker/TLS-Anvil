@@ -7,6 +7,13 @@ import { TestReportService } from '../services';
 
 
 export namespace UploadReportEndpoint {
+
+  export interface IBody {
+    testReport: ITestResultContainer,
+    pcapDump: string,
+    keylog: string,
+  }
+
   export class Controller {
     private router: Router
 
@@ -16,19 +23,19 @@ export namespace UploadReportEndpoint {
     }
 
     private async uploadReport(req: Request, res: Response, next: NextFunction) {
-      const body: ITestResultContainer = req.body
+      const body: IBody = req.body
       const replace: boolean = Boolean(req.query.replace)
   
-      if (!body.Identifier) {
+      if (!body.testReport.Identifier) {
         return next(new BadRequest("Identifier is required"))
       }
-      if (!body.TestClasses && !body.TestResults) {
+      if (!body.testReport.TestClasses && !body.testReport.TestResults) {
         return next(new BadRequest("JSON is not a test report"))
       }
   
-      const exists = await DB.resultContainerExistsForIdentifier(body.Identifier)
+      const exists = await DB.resultContainerExistsForIdentifier(body.testReport.Identifier)
       if (exists && !replace) {
-        res.status(304)
+        res.status(400)
         res.send({
           success: true,
           info: "Report already exists"
@@ -37,23 +44,20 @@ export namespace UploadReportEndpoint {
       }
   
       if (replace && exists) {
-        DB.removeResultContainer(body.Identifier)
+        DB.removeResultContainer(body.testReport.Identifier)
       }
 
-      const testReportService = new TestReportService(body)
+      const testReportService = new TestReportService(body.testReport)
       const formattedReport = testReportService.prepareTestReport()
-    
-
-      DB.addResultContainer(formattedReport).then(() => {
+      
+      DB.addResultContainer(formattedReport, body.pcapDump, body.keylog).then(() => {
         res.send({"success": true})
       }).catch((e) => {
+        console.log("catched")
         console.error(e)
         next(e)
       })
     }
   }
 }
-
-
-
 

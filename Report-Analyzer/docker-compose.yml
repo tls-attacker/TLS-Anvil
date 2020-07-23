@@ -1,22 +1,43 @@
-version: '3.1'
+version: '3.7'
 
 volumes:
   mongodb_DB:
   mongodb_conf:
 
+networks: 
+  traefik:
+    external: true
+  app:
+
 services:
   mongo:
     image: mongo
     restart: always
-    ports:
-      - 27017:27017
     volumes:
       - mongodb_DB:/data/db
       - mongodb_conf:/data/configdb
+    networks: 
+      - app
 
   mongo-express:
     image: mongo-express
     restart: always
     ports:
       - 8081:8081
+    networks:
+      - traefik
+      - app
+
+  app:
+    image: reportanalyzer
+    environment: 
+      PRODUCTION: '1'
+    build: 
+      context: .
+    ports:
+      - 5000:5000
+    networks:
+      - traefik
+      - app
+      
 

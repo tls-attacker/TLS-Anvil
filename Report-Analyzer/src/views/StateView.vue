@@ -18,7 +18,7 @@
             >
             </vue-json-pretty>
             <div class="packetViewer"></div>
-            <b-button variant="success" class="pcapInlineBtn" @click="downloadPcap(selectedRow[k], $event)">Download</b-button>
+            <b-button variant="success" class="pcapInlineBtn" @click="downloadPcap(selectedRow[k], k, $event)">Download</b-button>
             <b-button variant="primary" class="pcapInlineBtn" @click="showPcap(selectedRow[k], $event)">Show PCAP</b-button>
           </template>
         </div>
@@ -32,7 +32,7 @@
           >
           </vue-json-pretty>
           <div class="packetViewer"></div>
-          <b-button variant="success" class="pcapInlineBtn" @click="downloadPcap(k, $event)">Download</b-button>
+          <b-button variant="success" class="pcapInlineBtn" @click="downloadPcap(k, k.Identifier, $event)">Download</b-button>
           <b-button variant="primary" class="pcapInlineBtn" @click="showPcap(k, $event)">Show PCAP</b-button>
         </div>
       </template>
@@ -43,7 +43,7 @@
         >
         </vue-json-pretty>
         <div class="packetViewer"></div>
-        <b-button variant="success" class="pcapInlineBtn" @click="downloadPcap(selectedCell, $event)">Download</b-button>
+        <b-button variant="success" class="pcapInlineBtn" @click="downloadPcap(selectedCell, selectedCell.Identifier, $event)">Download</b-button>
         <b-button variant="primary" class="pcapInlineBtn" @click="showPcap(selectedCell, $event)">Show PCAP</b-button>
       </template>
     </b-modal>
@@ -81,6 +81,14 @@
       </b-col>
     </b-row>
 
+    <template v-if="testMethod">
+      <p>
+        <strong>RFC:</strong> {{testMethod.RFC.number}}, <strong>Section:</strong> {{testMethod.RFC.Section}}<br>
+        <strong>Description:</strong> {{testMethod.Description}}<br>
+        <strong>TLS-Version:</strong> {{testMethod.TlsVersion}}<br>
+        <strong>Security severity: </strong> {{testMethod.SecuritySeverity}}, <strong>Interoperability severity: </strong> {{testMethod.InteroperabilitySeverity}}
+      </p>
+    </template>
 
     <template v-if="this.selectedIdentifiers.length == 0">
       <h3 style="margin-top: 30px">No State selected</h3>
@@ -152,6 +160,7 @@ export default {
       selectedIdentifiers: [],
       className: null,
       methodName: null,
+      testMethod: null,
       guardNavigation: 0,
       options: {
         hightlight: stateview.hightlightOptions,
@@ -227,6 +236,9 @@ export default {
           console.log(`finished req ${i}`)
           res.data.Identifier = i
           this.testResults.push(res.data)
+          if (!this.testMethod && res.data.TestMethod) {
+            this.testMethod = res.data.TestMethod
+          }
         }).catch((e) => {
           console.error(e)
         })
@@ -297,6 +309,8 @@ export default {
         }
       }
 
+      states.map((i) => i.Identifier = identifier)
+
       this.selectedColumn = states
       this.detailsMode = 1
       this.showDetails = true
@@ -347,7 +361,7 @@ export default {
         ev.target.disabled = false
       })
     },
-    downloadPcap(selectedCell, ev) {
+    downloadPcap(selectedCell, identifier, ev) {
       ev.target.innerHTML = 'Loading...'
       ev.target.disabled = true
 
@@ -355,7 +369,7 @@ export default {
         const url = URL.createObjectURL(res.data)
         const link = document.createElement('a')
         link.href = url
-        link.download = `${selectedCell.Identifier}_${this.methodName}_${this.className.replace('de.rub.nds.tlstest.suite.tests.', '')}_${selectedCell.uuid}.pcap`
+        link.download = `${identifier}_${this.methodName}_${this.className.replace('de.rub.nds.tlstest.suite.tests.', '')}_${selectedCell.uuid}.pcap`
         link.click()
       }).then(() => {
         ev.target.innerHTML = "Download"

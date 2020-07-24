@@ -26,8 +26,11 @@ export const hightlightOptions = [
   {text: "Different status", value: HighlightOptions.differentStates}
 ]
 
+const additionalInformationFilter = "ADDITIONAL_INFORMATION"
+
 export const differenceFilterOptions = [
-  {text: "Different status", value: HighlightOptions.differentStates}
+  {text: "Different status", value: HighlightOptions.differentStates},
+  {text: "Additional information", value: additionalInformationFilter}
 ]
 
 export const filterObj: IFilter = {
@@ -155,6 +158,9 @@ export function itemProvider(ctx: IItemProviderContext, results: ITestResultTabl
         const column = <IStateTable>results[i3].States[position]
 
         column.statusIcons = resolveStatus(column.Status)
+        if (column.AdditionalResultInformation) {
+          column.statusIcons += "❗️"
+        }
         item[results[i3].Identifier] = column
         if (!item.uuid.state) {
           item.uuid.state = column
@@ -208,14 +214,17 @@ export function getRowClass(item: any[], highlightOption: HighlightOptionsString
 
 
 function filterRowItem(item: any, filter: IFilter): boolean {
-  let ret = false
+  let ret = true
   for (const key in item) {
     if (key == "uuid" || !item[key]) continue
 
     const result : IStateTable = item[key]
     if (filter.status.includes(<TestStatus>result.Status)) {
-      ret = true
-      break
+      ret = ret && true
+    }
+
+    if (filter.properties.includes(additionalInformationFilter) && !result.AdditionalResultInformation) {
+      return false
     }
   }
 

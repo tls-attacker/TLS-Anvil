@@ -258,7 +258,10 @@ function filterRowItem(item: any, filter: IFilter): boolean {
     if (key == 'testcase' || !item[key]) continue
 
     const result : ITestResultTable = item[key]
-    if (filter.status.includes(<TestStatus>result.Status)) {
+    if (filter.status.length == allStatus.length) {
+      ret = true
+      break
+    } else if (filter.status.length < allStatus.length && filter.status.includes(<TestStatus>result.Status)) {
       ret = true
       break
     }

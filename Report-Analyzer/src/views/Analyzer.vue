@@ -193,7 +193,7 @@ export default {
           key: "testcase",
           label: "Testcase",
           stickyColumn: true,
-          thStyle: {width: "480px"},
+          thStyle: { width: "590px" },
           tdClass: "stickyColumn"
         }, {
           key: "dummy",
@@ -314,7 +314,7 @@ export default {
       if (!item) return
 
       if (Object.keys(item).length == 1) {
-        return ["newClass", "stickyColumn"]
+        return ["newClass", "stickyColumn", "notSelectable"]
       }
 
       return analyzer.getRowClass(item, this.hightlightOption)

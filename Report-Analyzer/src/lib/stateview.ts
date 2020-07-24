@@ -219,8 +219,8 @@ function filterRowItem(item: any, filter: IFilter): boolean {
     if (key == "uuid" || !item[key]) continue
 
     const result : IStateTable = item[key]
-    if (filter.status.includes(<TestStatus>result.Status)) {
-      ret = ret && true
+    if (!filter.status.includes(<TestStatus>result.Status)) {
+      return false
     }
 
     if (filter.properties.includes(additionalInformationFilter) && !result.AdditionalResultInformation) {

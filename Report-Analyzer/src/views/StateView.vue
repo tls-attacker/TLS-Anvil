@@ -60,10 +60,10 @@
         </b-form-group>
         <b-form-group label="Show only rows with:">
           <b-form-checkbox-group
-            id="status"
+            id="filterProperties"
             v-model="filter.properties"
             :options="options.difference"
-            name="status"
+            name="filterProperties"
             stacked
           ></b-form-checkbox-group>
         </b-form-group>
@@ -71,10 +71,10 @@
       <b-col cols="3">
         <b-form-group label="Filter test results:">
           <b-form-checkbox-group
-            id="status"
+            id="filterStatus"
             v-model="filter.status"
             :options="options.status"
-            name="status"
+            name="filterStatus"
             stacked
           ></b-form-checkbox-group>
         </b-form-group>

@@ -120,6 +120,7 @@
         select-mode="single"
         :tbody-tr-class="rowClass"
         @row-selected="onRowSelected"
+        id="table"
       >
         <template v-slot:cell(testcase)="data">
           <template v-if="data.item.testcase.value">
@@ -173,6 +174,8 @@ export default {
     return {
       error: null,
       selectedIdentifiers: [],
+      addedScrollListener: false,
+      scrollPosition: 0,
       availableIdentifiers: [],
       reportsMetadata: {},
       currentSelection: "",
@@ -298,6 +301,12 @@ export default {
 
       Promise.all(promises).then(() => {
         this.$refs.table.refresh()
+        if (!this.addedScrollListener) {
+          this.addedScrollListener = true
+          document.getElementById('table').parentElement.addEventListener('scroll', (e) => {
+            this.scrollPosition = e.target.scrollTop
+          })
+        }
       })
     },
     itemProviderProxy(ctx) {
@@ -395,6 +404,14 @@ export default {
       console.error(e)
       this.error = e
     })
+  },
+  activated() {
+    const scrollContainer = document.getElementById('table')?.parentElement || null
+    console.log('activated')
+    if (this.scrollPosition > 0 && scrollContainer) {
+      console.log('scroll')
+      scrollContainer.scrollTo(0, this.scrollPosition)
+    }
   },
   beforeRouteUpdate(to, from, next) {
     if (this.guardNavigation > 0) {

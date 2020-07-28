@@ -409,7 +409,6 @@ export default {
     const scrollContainer = document.getElementById('table')?.parentElement || null
     console.log('activated')
     if (this.scrollPosition > 0 && scrollContainer) {
-      console.log('scroll')
       scrollContainer.scrollTo(0, this.scrollPosition)
     }
   },
@@ -480,5 +479,9 @@ export default {
 
 thead th {
   vertical-align: middle !important;
+}
+
+.table th, .table td {
+  border: 0 !important;
 }
 </style>

@@ -141,6 +141,8 @@ router.get("/testReport/:containerId/testResult/:className/:methodName/:uuid/pca
       'tshark', 
       [
         '-n', '-r', `/tmp/filtered_${state._id}.pcap`,
+        '-d', `tcp.port==${state.DstPort},tls`,
+        '-d', `tcp.port==${state.SrcPort},tls`,
         '-o', `tls.keylog_file:/tmp/k${container.KeylogfileStorageId}`, '-Y', timeFilter,
         '-o', 'gui.column.format:"Time","%Aut","s","%uS","d","%uD","Protocol","%p","Info","%i"',
         '-T', 'tabs'

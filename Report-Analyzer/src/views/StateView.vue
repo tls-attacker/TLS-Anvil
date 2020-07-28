@@ -82,11 +82,12 @@
     </b-row>
 
     <template v-if="testMethod">
-      <p>
+      <p style="max-width: 900px">
         <strong>RFC:</strong> {{testMethod.RFC.number}}, <strong>Section:</strong> {{testMethod.RFC.Section}}<br>
         <strong>Description:</strong> {{testMethod.Description}}<br>
         <strong>TLS-Version:</strong> {{testMethod.TlsVersion}}<br>
-        <strong>Security severity: </strong> {{testMethod.SecuritySeverity}}, <strong>Interoperability severity: </strong> {{testMethod.InteroperabilitySeverity}}
+        <strong>Security severity:</strong> {{testMethod.SecuritySeverity}}, <strong>Interoperability severity: </strong> {{testMethod.InteroperabilitySeverity}}<br>
+        <strong>Method:</strong> {{testMethod.ClassName}}.{{testMethod.MethodName}}
       </p>
     </template>
 
@@ -341,6 +342,7 @@ export default {
 
       if (!sameSelection || className !== this.className || methodName !== this.methodName) {
         this.testResults = []
+        this.testMethod = null
         if (this.fields.length > 2) {
           this.fields.splice(1, this.fields.length - 2)
         }

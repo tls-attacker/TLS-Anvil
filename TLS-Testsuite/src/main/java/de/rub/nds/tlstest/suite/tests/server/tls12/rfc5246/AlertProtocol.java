@@ -20,6 +20,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
@@ -55,7 +56,7 @@ public class AlertProtocol extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(trace.smartExecutedAsPlanned());
+            Validator.executedAsPlanned(i);
 
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
             if (message == null) {
@@ -87,8 +88,7 @@ public class AlertProtocol extends Tls12Test {
             WorkflowTrace workflowTrace = new WorkflowTrace();
             workflowTrace.addTlsActions(
                     new SendAction(alert),
-                    new SendAction(new ChangeCipherSpecMessage()),
-                    new SendAction(new FinishedMessage()),
+                    new SendAction(true, new ChangeCipherSpecMessage(), new FinishedMessage()),
                     new ReceiveAction(new AlertMessage())
             );
 
@@ -107,7 +107,7 @@ public class AlertProtocol extends Tls12Test {
     public void abortAfterFatalAlert_sendAfterServerHelloDone(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
-        runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_HELLO_DONE);
+        runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();
         for (AlertDescription i : AlertDescription.values()) {
@@ -117,7 +117,6 @@ public class AlertProtocol extends Tls12Test {
 
             WorkflowTrace workflowTrace = new WorkflowTrace();
             workflowTrace.addTlsActions(
-                    new ReceiveAction(new ServerHelloDoneMessage()),
                     new SendAction(alert),
                     new ReceiveAction(new AlertMessage())
             );

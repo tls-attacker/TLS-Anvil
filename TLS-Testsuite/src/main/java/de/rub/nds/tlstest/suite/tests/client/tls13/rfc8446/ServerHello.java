@@ -59,7 +59,6 @@ public class ServerHello extends Tls13Test {
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             if (msg == null) {
-                i.setStatus(TestStatus.PARTIALLY_FAILED);
                 return;
             }
 
@@ -91,7 +90,6 @@ public class ServerHello extends Tls13Test {
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             if (msg == null) {
-                i.setStatus(TestStatus.PARTIALLY_FAILED);
                 return;
             }
 
@@ -124,7 +122,6 @@ public class ServerHello extends Tls13Test {
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             if (msg == null) {
-                i.setStatus(TestStatus.PARTIALLY_FAILED);
                 return;
             }
             assertNotNull(AssertMsgs.AlertNotReceived, msg);
@@ -148,7 +145,7 @@ public class ServerHello extends Tls13Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_HELLO_DONE);
         workflowTrace.addTlsActions(
-                new SendAction(new ServerHelloDoneMessage()),
+                new SendAction(true, new ServerHelloDoneMessage()),
                 new ReceiveAction(new AlertMessage())
         );
 
@@ -164,7 +161,6 @@ public class ServerHello extends Tls13Test {
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             if (msg == null) {
-                i.setStatus(TestStatus.PARTIALLY_FAILED);
                 return;
             }
             assertSame(AssertMsgs.UnexpectedAlertDescription, AlertDescription.ILLEGAL_PARAMETER, AlertDescription.getAlertDescription(msg.getDescription().getValue()));

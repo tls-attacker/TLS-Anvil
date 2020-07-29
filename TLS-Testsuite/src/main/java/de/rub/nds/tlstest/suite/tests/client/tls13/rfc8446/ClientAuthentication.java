@@ -26,13 +26,7 @@ public class ClientAuthentication extends Tls13Test {
         Config c = this.getConfig();
         c.setClientAuthentication(true);
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CERTIFICATE_VERIFY);
-
-        runner.setStateModifier(i -> {
-            ((ReceiveAction)i.getWorkflowTrace().getLastReceivingAction()).setCheckOnlyExpected(true);
-            return null;
-        });
-
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 }

@@ -54,6 +54,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             runner.setStateModifier(i -> {
                 NewSessionTicketMessage msg = i.getWorkflowTrace().getFirstSendMessage(NewSessionTicketMessage.class);
                 msg.addExtension(new GreaseExtensionMessage(type, 25));
+                i.addAdditionalTestInfo(type.name());
                 return null;
             });
 

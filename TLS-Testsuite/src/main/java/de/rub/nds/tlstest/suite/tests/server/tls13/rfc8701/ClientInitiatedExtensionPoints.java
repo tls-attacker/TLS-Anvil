@@ -101,6 +101,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         AnnotatedStateContainer container = new AnnotatedStateContainer();
 
         for (NamedGroup type : context.getConfig().getSiteReport().getSupportedTls13Groups()) {
+            if (!NamedGroup.getImplemented().contains(type)) continue;
             Config c = this.getConfig();
             List<NamedGroup> groups = Arrays.stream(NamedGroup.values()).filter(i -> i.isGrease() || i == type).collect(Collectors.toList());
             c.setDefaultClientNamedGroups(groups);

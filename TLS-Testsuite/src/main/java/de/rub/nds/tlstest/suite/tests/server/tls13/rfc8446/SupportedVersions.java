@@ -81,15 +81,15 @@ public class SupportedVersions extends Tls13Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         runner.setStateModifier(i -> {
-            List<ProtocolVersion> versions = new ArrayList<>(context.getConfig().getSiteReport().getVersions());
-            versions.remove(ProtocolVersion.TLS13);
-
             i.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class)
-                    .setProtocolVersion(Modifiable.explicit(versions.get(0).getValue()));
+                    .setProtocolVersion(Modifiable.explicit(new byte[]{3,3}));
             return null;
         });
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.executedAsPlanned(i);
+            assertEquals("Wrong TLS Version selected", ProtocolVersion.TLS13, i.getState().getTlsContext().getSelectedProtocolVersion());
+        });
     }
 
 
@@ -119,6 +119,7 @@ public class SupportedVersions extends Tls13Test {
     public void supportedVersionsWithoutTls13(WorkflowRunner runner) {
         runner.replaceSupportedCiphersuites = true;
         Config c = context.getConfig().createConfig();
+        c.setAddSupportedVersionsExtension(true);
         c.setSupportedVersions(ProtocolVersion.TLS12);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);

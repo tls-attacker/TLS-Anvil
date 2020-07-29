@@ -38,12 +38,7 @@ public class Finished extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
-
-            Validator.receivedFatalAlert(i);
-        });
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
     @TlsTest(description = "For the PRF defined in Section 5, the Hash MUST be the Hash used as the basis for the PRF.", securitySeverity = SeverityLevel.CRITICAL)
@@ -72,12 +67,7 @@ public class Finished extends Tls12Test {
             return null;
         });
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
-
-            Validator.receivedFatalAlert(i);
-        });
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
     @TlsTest(description = "It is a fatal error if a Finished message is not preceded by a ChangeCipherSpec " +
@@ -93,12 +83,7 @@ public class Finished extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
-
-            Validator.receivedFatalAlert(i);
-        });
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
 }

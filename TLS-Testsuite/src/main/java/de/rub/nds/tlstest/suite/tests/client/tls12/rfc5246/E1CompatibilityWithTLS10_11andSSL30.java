@@ -31,7 +31,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     @TlsTest(description = "If the version chosen by the server is not supported by the client "+
             "(or not acceptable), the client MUST send a \"protocol_version\" alert "+
             "message and close the connection.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    public void versionGreaterThanSupportedByServer(WorkflowRunner runner) {
+    public void selectUnsupportedVersion(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSelectedCiphersuite = true;
 
@@ -56,5 +56,4 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             Validator.testAlertDescription(i, AlertDescription.PROTOCOL_VERSION, msg);
         });
     }
-
 }

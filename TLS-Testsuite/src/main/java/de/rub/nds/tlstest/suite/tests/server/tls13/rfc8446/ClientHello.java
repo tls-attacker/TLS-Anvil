@@ -5,6 +5,7 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ChangeConfigAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -25,7 +26,7 @@ public class ClientHello extends Tls13Test {
     @TlsTest(description = "Because TLS 1.3 forbids renegotiation, if a server has negotiated " +
             "TLS 1.3 and receives a ClientHello at any other time, it MUST terminate the " +
             "connection with an \"unexpected_message\" alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
-    public void noOverlappingParameters(WorkflowRunner runner) {
+    public void sendClientHelloAfterFinishedHandshake(WorkflowRunner runner) {
         Config config = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
@@ -50,12 +51,53 @@ public class ClientHello extends Tls13Test {
     @TlsTest(description = "In TLS 1.3, the client indicates its version preferences " +
             "in the \"supported_versions\" extension (Section 4.2.1) and the legacy_version " +
             "field MUST be set to 0x0303, which is the version number for TLS 1.2.")
-    public void invalidLegacyVersion(WorkflowRunner runner) {
+    public void invalidLegacyVersion_higher(WorkflowRunner runner) {
         Config config = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
         ClientHelloMessage msg = new ClientHelloMessage(config);
         msg.setProtocolVersion(Modifiable.explicit(new byte[]{0x05, 0x05}));
+
+        WorkflowTrace trace = new WorkflowTrace();
+        trace.addTlsActions(
+                new SendAction(msg),
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
+    }
+
+    @TlsTest(description = "In TLS 1.3, the client indicates its version preferences " +
+            "in the \"supported_versions\" extension (Section 4.2.1) and the legacy_version " +
+            "field MUST be set to 0x0303, which is the version number for TLS 1.2.")
+    public void invalidLegacyVersion_lower(WorkflowRunner runner) {
+        Config config = this.getConfig();
+        runner.replaceSupportedCiphersuites = true;
+
+        ClientHelloMessage msg = new ClientHelloMessage(config);
+        msg.setProtocolVersion(Modifiable.explicit(new byte[]{0x03, 0x02}));
+
+        WorkflowTrace trace = new WorkflowTrace();
+        trace.addTlsActions(
+                new SendAction(msg),
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
+    }
+
+    @TlsTest(description = "Implementations MUST NOT send a " +
+            "ClientHello.legacy_version or ServerHello.legacy_version " +
+            "set to 0x0300 or less. Any endpoint receiving a Hello message with " +
+            "ClientHello.legacy_version or ServerHello.legacy_version set to 0x0300 " +
+            "MUST abort the handshake with a \"protocol_version\" alert.", securitySeverity = SeverityLevel.MEDIUM)
+    @RFC(number = 8446, section = "D.5. Security Restrictions Related to Backward Compatibility")
+    public void invalidLegacyVersion_ssl30(WorkflowRunner runner) {
+        Config config = this.getConfig();
+        runner.replaceSupportedCiphersuites = true;
+
+        ClientHelloMessage msg = new ClientHelloMessage(config);
+        msg.setProtocolVersion(Modifiable.explicit(new byte[]{0x03, 0x00}));
 
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(

@@ -104,9 +104,7 @@ public class Fragmentation extends Tls12Test {
         workflowTrace.addTlsActions(new SendAction(new FinishedMessage(c)));
         workflowTrace.addTlsActions(new ReceiveAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            assertTrue(AssertMsgs.WorkflowNotExecuted, i.getWorkflowTrace().executedAsPlanned());
-        });
+        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
     @TlsTest(description = "")
@@ -128,9 +126,7 @@ public class Fragmentation extends Tls12Test {
         workflowTrace.addTlsActions(new SendAction(new ChangeCipherSpecMessage(c), new FinishedMessage(c)));
         workflowTrace.addTlsActions(new ReceiveAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            assertTrue(AssertMsgs.WorkflowNotExecuted, i.getWorkflowTrace().executedAsPlanned());
-        });
+        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
 

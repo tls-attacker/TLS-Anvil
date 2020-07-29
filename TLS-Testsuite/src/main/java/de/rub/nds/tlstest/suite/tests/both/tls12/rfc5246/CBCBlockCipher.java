@@ -18,6 +18,7 @@ import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -43,7 +44,7 @@ public class CBCBlockCipher extends Tls12Test {
     @TlsTest(description = "Each uint8 in the padding data " +
             "vector MUST be filled with the padding length value. The receiver " +
             "MUST check this padding and MUST use the bad_record_mac alert to " +
-            "indicate padding errors.", securitySeverity = SeverityLevel.CRITICAL)
+            "indicate padding errors.", securitySeverity = SeverityLevel.HIGH)
     @MethodCondition(method = "supportsCBCCipherSuites")
     public void invalidCBCPadding(WorkflowRunner runner) {
         Config c = this.getConfig();
@@ -74,10 +75,13 @@ public class CBCBlockCipher extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(trace.executedAsPlanned());
+            Validator.receivedFatalAlert(i);
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
+            if (msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
+                throw new AssertionError("Received non expected alert message with invalid CBC padding");
+            }
         });
 
     }
@@ -86,28 +90,27 @@ public class CBCBlockCipher extends Tls12Test {
             "GenericBlockCipher structure is a multiple of the cipher’s block " +
             "length. Legal values range from zero to 255, inclusive. This " +
             "length specifies the length of the padding field exclusive of the " +
-            "padding_length field itself.", securitySeverity = SeverityLevel.MEDIUM)
+            "padding_length field itself.", securitySeverity = SeverityLevel.HIGH)
     @MethodCondition(clazz = CBCBlockCipher.class, method = "supportsCBCCipherSuites")
-    public void invalidPaddingLength(WorkflowRunner runner) {
+    public void invalidCipherText(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
         runner.replaceSelectedCiphersuite = true;
         runner.respectConfigSupportedCiphersuites = true;
-        c.setHighestProtocolVersion(ProtocolVersion.TLS12);
 
         List<CipherSuite> suites = CipherSuite.getImplemented();
         suites.removeIf(i -> !i.isCBC());
         c.setDefaultServerSupportedCiphersuites(suites);
         c.setDefaultClientSupportedCiphersuites(suites);
 
-        ApplicationMessage applicationMessage = new ApplicationMessage();
-        applicationMessage.setData("test".getBytes());
-
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
-        //record.getComputations().setAdditionalPaddingLength(Modifiable.add(21));
+        record.getComputations().setCiphertext(Modifiable.xor(new byte[]{0x01}, 0));
 
-        SendAction sendAction = new SendAction(applicationMessage);
+        ApplicationMessage appData = new ApplicationMessage();
+        appData.setData(Modifiable.explicit("test".getBytes()));
+
+        SendAction sendAction = new SendAction(appData);
         sendAction.setRecords(record);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -118,10 +121,13 @@ public class CBCBlockCipher extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(trace.executedAsPlanned());
+            Validator.receivedFatalAlert(i);
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
+            if (msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
+                throw new AssertionError("Received non expected alert message with invalid CBC padding");
+            }
         });
     }
 

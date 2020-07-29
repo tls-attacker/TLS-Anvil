@@ -30,7 +30,7 @@ public class TLSRecordProtocol extends Tls12Test {
     @TlsTest(description = "Implementations MUST NOT send record types not defined in this document " +
             "unless negotiated by some extension. If a TLS implementation receives an unexpected " +
             "record type, it MUST send an unexpected_message alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
-    public void sendNotDefinedRecordTypesWithClientHello(WorkflowRunner runner) {
+    public void sendNotDefinedRecordTypesWithServerHello(WorkflowRunner runner) {
         runner.replaceSelectedCiphersuite = true;
 
         Record record = new Record();

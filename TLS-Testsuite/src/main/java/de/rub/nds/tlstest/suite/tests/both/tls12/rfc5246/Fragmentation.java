@@ -2,6 +2,7 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
@@ -16,6 +17,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
@@ -27,7 +29,7 @@ public class Fragmentation extends Tls12Test {
     @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, " +
             "Alert, or ChangeCipherSpec content types. Zero-length fragments of " +
             "Application data MAY be sent as they are potentially useful as a " +
-            "traffic analysis countermeasure.")
+            "traffic analysis countermeasure.", interoperabilitySeverity = SeverityLevel.HIGH)
     public void sendZeroLengthRecord_CCS(WorkflowRunner runner) {
         Config c = this.getConfig();
         c.setUseAllProvidedRecords(true);
@@ -43,22 +45,18 @@ public class Fragmentation extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         workflowTrace.addTlsActions(
                 sendAction,
-                new SendAction(new FinishedMessage()),
+                new SendAction(true, new FinishedMessage()),
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.executedAsPlanned(i);
-
-            Validator.receivedFatalAlert(i);
-        });
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
 
     @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, " +
             "Alert, or ChangeCipherSpec content types. Zero-length fragments of " +
             "Application data MAY be sent as they are potentially useful as a " +
-            "traffic analysis countermeasure.")
+            "traffic analysis countermeasure.", interoperabilitySeverity = SeverityLevel.HIGH)
     public void sendZeroLengthApplicationRecord(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
@@ -88,13 +86,16 @@ public class Fragmentation extends Tls12Test {
 
     }
 
-    @TlsTest(description = "The length (in bytes) of the following TLSPlaintext.fragment. The\n" +
-            "length MUST NOT exceed 2^14.")
-    public void sendRecordWithLengthOver2pow14plus1(WorkflowRunner runner) {
+    @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. " +
+            "The length MUST NOT exceed 2^14 + 2048.", interoperabilitySeverity = SeverityLevel.HIGH)
+    public void sendRecordWithPlaintextOver2pow14plus1(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
         runner.replaceSelectedCiphersuite = true;
         runner.useRecordFragmentationDerivation = false;
+
+        c.getDefaultClientConnection().setTimeout(5000);
+        c.getDefaultServerConnection().setTimeout(5000);
 
         ApplicationMessage msg = new ApplicationMessage(c);
         msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
@@ -106,10 +107,38 @@ public class Fragmentation extends Tls12Test {
         );
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
-
             Validator.receivedFatalAlert(i);
+            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            if (alert == null) return;
+            Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW, alert);
+        });
+    }
+
+    @TlsTest(description = "The length (in bytes) of the following TLSPlaintext.fragment. " +
+            "The length MUST NOT exceed 2^14.", interoperabilitySeverity = SeverityLevel.HIGH)
+    public void sendRecordWithCiphertextOver2pow14plus1(WorkflowRunner runner) {
+        Config c = this.getConfig();
+        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
+        runner.useRecordFragmentationDerivation = false;
+
+        c.getDefaultClientConnection().setTimeout(5000);
+        c.getDefaultServerConnection().setTimeout(5000);
+
+        ApplicationMessage msg = new ApplicationMessage(c);
+        msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 2049]));
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        workflowTrace.addTlsActions(
+                new SendAction(msg),
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            if (alert == null) return;
+            Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW, alert);
         });
     }
 }

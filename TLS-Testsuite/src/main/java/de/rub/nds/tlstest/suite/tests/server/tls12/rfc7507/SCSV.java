@@ -69,6 +69,7 @@ public class SCSV extends Tls12Test {
 
                 AnnotatedState annotatedState = new AnnotatedState(new State(c, trace));
                 annotatedState.setInspectedCipherSuite(cipherSuite);
+                annotatedState.addAdditionalTestInfo(versionSuite.getVersion().name());
                 container.add(annotatedState);
             }
         }
@@ -113,6 +114,7 @@ public class SCSV extends Tls12Test {
 
                 AnnotatedState annotatedState = new AnnotatedState(new State(c, trace));
                 annotatedState.setInspectedCipherSuite(cipherSuite);
+                annotatedState.addAdditionalTestInfo(versionSuite.getVersion().name());
                 container.add(annotatedState);
             }
         }

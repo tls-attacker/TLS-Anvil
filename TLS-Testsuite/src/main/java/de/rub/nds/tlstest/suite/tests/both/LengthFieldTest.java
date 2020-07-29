@@ -15,6 +15,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
@@ -121,9 +122,7 @@ public class LengthFieldTest extends TlsGenericTest {
         Config c = context.getConfig().createTls13Config();
         AnnotatedStateContainer container = getContainer(c, tls13SupportedCipherSuites, RunningModeType.CLIENT);
 
-        runner.execute(container).validateFinal(i -> {
-            assertFalse("Workflow could be executed as planned", i.getWorkflowTrace().executedAsPlanned());
-        });
+        runner.execute(container).validateFinal(Validator::executedAsPlanned);
     }
 
     @ServerTest
@@ -138,9 +137,7 @@ public class LengthFieldTest extends TlsGenericTest {
         Config c = context.getConfig().createConfig();
         AnnotatedStateContainer container = getContainer(c, cipherSuites, RunningModeType.CLIENT);
 
-        runner.execute(container).validateFinal(i -> {
-            assertFalse("Workflow could be executed as planned", i.getWorkflowTrace().executedAsPlanned());
-        });
+        runner.execute(container).validateFinal(Validator::executedAsPlanned);
     }
 
     @ClientTest
@@ -155,9 +152,7 @@ public class LengthFieldTest extends TlsGenericTest {
         Config c = context.getConfig().createTls13Config();
         AnnotatedStateContainer container = getContainer(c, tls13SupportedCipherSuites, RunningModeType.SERVER);
 
-        runner.execute(container).validateFinal(i -> {
-            assertFalse("Workflow could be executed as planned", i.getWorkflowTrace().executedAsPlanned());
-        });
+        runner.execute(container).validateFinal(Validator::executedAsPlanned);
     }
 
     @ClientTest
@@ -172,9 +167,7 @@ public class LengthFieldTest extends TlsGenericTest {
         Config c = context.getConfig().createConfig();
         AnnotatedStateContainer container = getContainer(c, cipherSuites, RunningModeType.SERVER);
 
-        runner.execute(container).validateFinal(i -> {
-            assertFalse("Workflow could be executed as planned", i.getWorkflowTrace().executedAsPlanned());
-        });
+        runner.execute(container).validateFinal(Validator::executedAsPlanned);
     }
 }
 

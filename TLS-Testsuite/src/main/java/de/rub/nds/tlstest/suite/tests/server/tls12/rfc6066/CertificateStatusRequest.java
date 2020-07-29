@@ -8,6 +8,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.CertificateStatusR
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
@@ -39,7 +40,7 @@ public class CertificateStatusRequest extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
+            Validator.executedAsPlanned(i);
 
             ServerHelloMessage message = trace.getFirstReceivedMessage(ServerHelloMessage.class);
             assertNull("CertificateStatusRequest found", message.getExtension(CertificateStatusRequestExtensionMessage.class));

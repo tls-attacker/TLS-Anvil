@@ -67,7 +67,7 @@ public class AEADCiphers extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(trace.executedAsPlanned());
+            Validator.receivedFatalAlert(i);
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
@@ -105,7 +105,7 @@ public class AEADCiphers extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(trace.executedAsPlanned());
+            Validator.receivedFatalAlert(i);
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);

@@ -85,7 +85,6 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
         runner.execute(container).validateFinal(i -> {
             Validator.executedAsPlanned(i);
 
-            ServerHelloMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
             i.getState().getTlsContext().getNegotiatedExtensionSet().forEach(j -> {
                 assertFalse("Server negotiated GREASE extension", j.name().startsWith("GREASE"));
             });
@@ -103,6 +102,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
         AnnotatedStateContainer container = new AnnotatedStateContainer();
 
         for (NamedGroup type : context.getConfig().getSiteReport().getSupportedNamedGroups()) {
+            if (!NamedGroup.getImplemented().contains(type)) continue;
             Config c = this.getConfig();
             List<NamedGroup> groups = Arrays.stream(NamedGroup.values()).filter(i -> i.isGrease() || i == type).collect(Collectors.toList());
             c.setDefaultClientNamedGroups(groups);
@@ -140,6 +140,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
             Validator.executedAsPlanned(i);
 
             ServerKeyExchangeMessage skx = i.getWorkflowTrace().getFirstReceivedMessage(ServerKeyExchangeMessage.class);
+            if (skx == null) return;
             assertFalse("Server selected GREASE signature and hash algorithm", SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(skx.getSignatureAndHashAlgorithm().getValue()).isGrease());
         });
     }
@@ -169,7 +170,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);
 
-            EncryptedExtensionsMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(EncryptedExtensionsMessage.class);
+            ServerHelloMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
             AlpnExtensionMessage ext = msg.getExtension(AlpnExtensionMessage.class);
             if (ext == null) return;
 

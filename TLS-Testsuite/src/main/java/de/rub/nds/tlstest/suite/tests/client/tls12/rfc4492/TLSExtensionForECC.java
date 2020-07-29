@@ -14,6 +14,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -27,9 +28,8 @@ public class TLSExtensionForECC extends Tls12Test {
     @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.RSA})
     public void bothECExtensions_WithoutECCCipher() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
-        assertNotNull(msg);
-        byte[] ciphers = msg.getCipherSuites().getValue();
-        List<CipherSuite> suites = CipherSuite.getCiphersuites(ciphers);
+        assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
+        Set<CipherSuite> suites = context.getConfig().getSiteReport().getCipherSuites();
         suites.removeIf(cs -> !KeyExchangeType.ECDH.compatibleWithCiphersuite(cs));
 
         if (suites.size() == 0) {

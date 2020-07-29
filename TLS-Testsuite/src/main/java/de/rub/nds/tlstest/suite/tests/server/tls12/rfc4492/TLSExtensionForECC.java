@@ -4,7 +4,11 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.RSAClientKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
@@ -12,6 +16,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -60,8 +65,8 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 4492, section = "4. TLS Extensions for ECC")
-    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello\n" +
-            "   message if it does not propose any ECC cipher suites.")
+    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello" +
+            " message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     public void ECExtension_WithoutECCCipher(WorkflowRunner runner) {
         Config c = this.getConfig();
@@ -117,7 +122,7 @@ public class TLSExtensionForECC extends Tls12Test {
             "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake " +
             "while restricting itself to the enumerated curves and point formats, " +
             "it MUST NOT negotiate the use of an ECC cipher suite.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    @KeyExchange(supported = {KeyExchangeType.ECDH, KeyExchangeType.ALL12})
+    @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     public void InvalidEllipticCurve_WithNonECCCiphersuite(WorkflowRunner runner) {
         runner.appendEachSupportedCiphersuiteToClientSupported = true;
         Config c = this.getConfig();
@@ -140,7 +145,7 @@ public class TLSExtensionForECC extends Tls12Test {
         chm.getExtension(EllipticCurvesExtensionMessage.class).setSupportedGroups(Modifiable.explicit(new byte[]{(byte) 123, 124}));
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
-            assertTrue(AssertMsgs.WorkflowNotExecuted, i.getWorkflowTrace().executedAsPlanned());
+            Validator.executedAsPlanned(i);
 
             WorkflowTrace trace = i.getWorkflowTrace();
             ServerHelloMessage message = trace.getFirstReceivedMessage(ServerHelloMessage.class);
@@ -148,7 +153,5 @@ public class TLSExtensionForECC extends Tls12Test {
             assertArrayEquals(AssertMsgs.UnexpectedCipherSuite, i.getInspectedCipherSuite().getByteValue(), message.getSelectedCipherSuite().getValue());
         });
     }
-
-
 
 }

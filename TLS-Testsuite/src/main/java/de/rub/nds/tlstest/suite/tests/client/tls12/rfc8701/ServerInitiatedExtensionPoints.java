@@ -56,13 +56,12 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
 
         runner.setStateModifier(i -> {
             ServerHelloMessage sh = i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class);
-            sh.setProtocolVersion(ProtocolVersion.GREASE_06.getValue());
+            sh.setProtocolVersion(Modifiable.explicit(ProtocolVersion.GREASE_06.getValue()));
             return null;
         });
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
-
 
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
             "In particular, the client MUST fail the connection " +

@@ -26,7 +26,7 @@ public class A5CipherSuite extends Tls12Test {
     }
 
     @TlsTest(description = "These cipher suites MUST NOT be used by TLS 1.2 implementations unless the application " +
-            "layer has specifically requested to allow anonymous key exchange")
+            "layer has specifically requested to allow anonymous key exchange", securitySeverity = SeverityLevel.HIGH)
     public void anonCipherSuites() {
         List<CipherSuite> suites = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
         List<CipherSuite> forbidden = CipherSuite.getImplemented();

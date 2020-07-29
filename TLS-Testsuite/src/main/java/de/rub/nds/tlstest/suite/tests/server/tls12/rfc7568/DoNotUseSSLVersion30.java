@@ -18,6 +18,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -30,13 +31,13 @@ import static org.junit.Assert.*;
 public class DoNotUseSSLVersion30 extends Tls12Test {
 
     @TlsTest(description = "SSLv3 MUST NOT be used. Negotiation of SSLv3 from any version of TLS " +
-            "MUST NOT be permitted.\n" +
+            "MUST NOT be permitted. " +
             "Pragmatically, clients MUST NOT send a ClientHello with " +
             "ClientHello.client_version set to {03,00}. Similarly, servers MUST " +
             "NOT send a ServerHello with ServerHello.server_version set to " +
             "{03,00}. Any party receiving a Hello message with the protocol " +
             "version set to {03,00} MUST respond with a \"protocol_version\" alert " +
-            "message and close the connection.")
+            "message and close the connection.", securitySeverity = SeverityLevel.CRITICAL)
     public void sendClientHelloVersion0300(WorkflowRunner runner) {
         Config config = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
@@ -68,7 +69,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
 
     @TlsTest(description = "TLS servers MUST accept any value " +
             "{03,XX} (including {03,00}) as the record layer version number for " +
-            "ClientHello, but they MUST NOT negotiate SSLv3.")
+            "ClientHello, but they MUST NOT negotiate SSLv3.", securitySeverity = SeverityLevel.CRITICAL, interoperabilitySeverity = SeverityLevel.HIGH)
     public void sendClientHelloVersion0300WithDifferentVersionInTheRecord(WorkflowRunner runner) {
         Config config = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
@@ -78,7 +79,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
         for (byte i : new byte[]{0x00, 0x01, 0x02, 0x04, 0x05, (byte)0xff}) {
             Record record = new Record();
             record.setProtocolVersion(Modifiable.explicit(new byte[]{0x03, i}));
-            ClientHelloMessage clientHelloMessage = new ClientHelloMessage();
+            ClientHelloMessage clientHelloMessage = new ClientHelloMessage(config);
 
             SendAction sendAction = new SendAction(clientHelloMessage);
             sendAction.setRecords(record);
@@ -101,7 +102,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
 
         runner.execute(container).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
+            Validator.executedAsPlanned(i);
 
             ServerHelloMessage shm = trace.getFirstReceivedMessage(ServerHelloMessage.class);
             assertNotNull(AssertMsgs.ServerHelloNotReceived, shm);

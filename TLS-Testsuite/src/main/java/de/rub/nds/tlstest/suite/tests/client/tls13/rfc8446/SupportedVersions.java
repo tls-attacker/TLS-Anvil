@@ -60,7 +60,7 @@ public class SupportedVersions extends Tls13Test {
 
         Config c = this.getConfig();
         c.setEnforceSettings(true);
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );

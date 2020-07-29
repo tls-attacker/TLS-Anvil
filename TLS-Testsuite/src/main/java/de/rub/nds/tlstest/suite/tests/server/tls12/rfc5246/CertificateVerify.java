@@ -39,7 +39,7 @@ public class CertificateVerify extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
         workflowTrace.addTlsActions(
-                new SendAction(new FinishedMessage()),
+                new SendAction(true, new FinishedMessage()),
                 new ReceiveAction(new AlertMessage())
         );
 

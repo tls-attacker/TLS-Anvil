@@ -4,13 +4,16 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
@@ -112,7 +115,7 @@ public class CertificateVerify extends Tls13Test {
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         for (CertificateKeyType keyType : certificateKeyTypes) {
             List<SignatureAndHashAlgorithm> algorithms = context.getConfig().getSiteReport().getSupportedSignatureAndHashAlgorithms().stream()
@@ -150,6 +153,21 @@ public class CertificateVerify extends Tls13Test {
             if (msg == null) return;
             Validator.testAlertDescription(i, AlertDescription.DECRYPT_ERROR, msg);
         });
+    }
+
+
+    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.",
+        securitySeverity = SeverityLevel.CRITICAL)
+    public void omitCertificateVerify(WorkflowRunner runner) {
+        runner.replaceSelectedCiphersuite = true;
+
+        WorkflowTrace trace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE_VERIFY);
+        trace.addTlsActions(
+                new SendAction(new FinishedMessage()),
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.execute(trace, this.getConfig()).validateFinal(Validator::receivedFatalAlert);
     }
 
 }

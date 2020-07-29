@@ -50,8 +50,7 @@ public class PointFormatExtension extends Tls12Test {
         runner.replaceSupportedCiphersuites = true;
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
-
+            Validator.executedAsPlanned(i);
 
             ServerHelloMessage message = trace.getFirstReceivedMessage(ServerHelloMessage.class);
             assertNotNull(AssertMsgs.ServerHelloNotReceived, message);

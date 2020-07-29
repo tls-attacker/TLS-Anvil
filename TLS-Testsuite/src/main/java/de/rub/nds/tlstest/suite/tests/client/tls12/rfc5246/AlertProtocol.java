@@ -16,12 +16,14 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RFC(number = 5264, section = "7.2.1 Closure Alerts")
@@ -32,7 +34,7 @@ public class AlertProtocol extends Tls12Test {
             "required to send a close_notify alert before closing the write side " +
             "of the connection. The other party MUST respond with a close_notify " +
             "alert of its own and close down the connection immediately, " +
-            "discarding any pending writes.")
+            "discarding any pending writes.", interoperabilitySeverity = SeverityLevel.MEDIUM)
     public void close_notify(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSelectedCiphersuite = true;
@@ -50,7 +52,7 @@ public class AlertProtocol extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(trace.smartExecutedAsPlanned());
+            Validator.executedAsPlanned(i);
 
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
             if (message == null) {
@@ -58,7 +60,7 @@ public class AlertProtocol extends Tls12Test {
                 i.setStatus(TestStatus.PARTIALLY_SUCCEEDED);
                 return;
             }
-            Validator.receivedWarningAlert(i);
+            assertEquals("Did not receive warning alert", AlertLevel.WARNING.getValue(), message.getLevel().getValue().byteValue());
             Validator.testAlertDescription(i, AlertDescription.CLOSE_NOTIFY, message);
 
         });
@@ -68,11 +70,9 @@ public class AlertProtocol extends Tls12Test {
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
     public void abortAfterFatalAlertServerHello(WorkflowRunner runner) {
         Config c = this.getConfig();
-        runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-
         AnnotatedStateContainer container = new AnnotatedStateContainer();
 
-        WorkflowTrace workflowTrace = new WorkflowTrace();
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
@@ -99,11 +99,9 @@ public class AlertProtocol extends Tls12Test {
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
     public void abortAfterFatalAlertServerHelloDone(WorkflowRunner runner) {
         Config c = this.getConfig();
-        runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-
         AnnotatedStateContainer container = new AnnotatedStateContainer();
 
-        WorkflowTrace workflowTrace = new WorkflowTrace();
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );

@@ -49,9 +49,8 @@ public class Extensions extends Tls13Test {
                 .collect(Collectors.toList());
         extensions.removeAll(clientExtensions);
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
-                new SendAction(new FinishedMessage()),
                 new ReceiveAction(new AlertMessage())
         );
 
@@ -97,9 +96,8 @@ public class Extensions extends Tls13Test {
         runner.replaceSelectedCiphersuite = true;
         Config c = this.getConfig();
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
-                new SendAction(new FinishedMessage()),
                 new ReceiveAction(new AlertMessage())
         );
 

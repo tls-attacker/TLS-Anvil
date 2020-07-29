@@ -3,8 +3,13 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
+import de.rub.nds.tlsattacker.core.crypto.ec.CurveFactory;
+import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurve;
+import de.rub.nds.tlsattacker.core.crypto.ec.Point;
+import de.rub.nds.tlsattacker.core.crypto.ec.PointFormatter;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareStoreEntry;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -21,6 +26,7 @@ import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import static org.junit.Assert.*;
@@ -44,6 +50,16 @@ public class CryptographicNegotiation extends Tls13Test {
                 NamedGroup.GREASE_04
         );
 
+        List<KeyShareStoreEntry> keyshareList = new ArrayList<>();
+        NamedGroup group =  context.getConfig().getSiteReport().getSupportedTls13Groups().get(0);
+        EllipticCurve curve = CurveFactory.getCurve(group);
+
+        Point publicKey = curve.mult(config.getDefaultClientEcPrivateKey(), curve.getBasePoint());
+        byte[] publicKeyBytes = PointFormatter.toRawFormat(publicKey);
+        keyshareList.add(new KeyShareStoreEntry(NamedGroup.GREASE_00, publicKeyBytes));
+
+        config.setDefaultClientKeyShareEntries(keyshareList);
+
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(
                 new SendAction(new ClientHelloMessage(config)),
@@ -55,7 +71,6 @@ public class CryptographicNegotiation extends Tls13Test {
 
             AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
             if (alert == null) {
-                i.setStatus(TestStatus.PARTIALLY_FAILED);
                 return;
             }
 

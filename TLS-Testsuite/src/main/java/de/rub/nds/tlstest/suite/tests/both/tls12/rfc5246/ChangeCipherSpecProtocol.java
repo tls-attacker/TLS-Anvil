@@ -14,36 +14,51 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 
 @RFC(number = 5264, section = "7.1 Change Cipher Spec Protocol")
 public class ChangeCipherSpecProtocol extends Tls12Test {
 
-    @TlsTest(description = "The message consists of a single byte of value 1.")
-    public void contentOfCCS(WorkflowRunner runner) {
+    private void ccsContentTest(WorkflowRunner runner, byte[] content) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
         runner.replaceSelectedCiphersuite = true;
 
-
         ChangeCipherSpecMessage changeCipherSpecMessage = new ChangeCipherSpecMessage(c);
-        changeCipherSpecMessage.setCcsProtocolType(Modifiable.explicit((byte)125));
+        changeCipherSpecMessage.setCcsProtocolType(Modifiable.explicit(content));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         workflowTrace.addTlsActions(
-                new SendAction(changeCipherSpecMessage, new FinishedMessage()),
+                new SendAction(changeCipherSpecMessage),
+                new SendAction(true, new FinishedMessage()),
                 new ReceiveAction(new AlertMessage())
         );
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
-
             Validator.receivedFatalAlert(i);
+
+            ChangeCipherSpecMessage msg = trace.getFirstReceivedMessage(ChangeCipherSpecMessage.class);
+            if (msg != null) {
+                assertEquals(1, msg.getCcsProtocolType().getValue().length);
+                assertEquals(1, msg.getCcsProtocolType().getValue()[0]);
+            }
         });
+    }
+
+    @TlsTest(description = "The message consists of a single byte of value 1.", interoperabilitySeverity = SeverityLevel.CRITICAL)
+    public void contentOfCCS(WorkflowRunner runner) {
+        ccsContentTest(runner, new byte[]{(byte)125});
+    }
+
+    @TlsTest(description = "The message consists of a single byte of value 1.", interoperabilitySeverity = SeverityLevel.CRITICAL)
+    public void contentOfCCSMoreThanOneByte(WorkflowRunner runner) {
+        ccsContentTest(runner, new byte[]{(byte)1, 1});
     }
 }

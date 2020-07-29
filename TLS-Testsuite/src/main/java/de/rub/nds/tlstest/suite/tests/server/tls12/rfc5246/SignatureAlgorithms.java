@@ -83,8 +83,8 @@ public class SignatureAlgorithms extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);
 
-            assertEquals(i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getSignatureAlgorithm(), SignatureAlgorithm.RSA);
-            assertEquals(i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm(), HashAlgorithm.SHA1);
+            assertEquals(SignatureAlgorithm.RSA, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getSignatureAlgorithm());
+            assertEquals(HashAlgorithm.SHA1, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm());
         });
 
     }
@@ -105,8 +105,8 @@ public class SignatureAlgorithms extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);
 
-            assertEquals(i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getSignatureAlgorithm(), SignatureAlgorithm.DSA);
-            assertEquals(i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm(), HashAlgorithm.SHA1);
+            assertEquals(SignatureAlgorithm.DSA, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getSignatureAlgorithm());
+            assertEquals(HashAlgorithm.SHA1, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm());
         });
     }
 
@@ -126,8 +126,8 @@ public class SignatureAlgorithms extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);
 
-            assertEquals(i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getSignatureAlgorithm(), SignatureAlgorithm.ECDSA);
-            assertEquals(i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm(), HashAlgorithm.SHA1);
+            assertEquals(SignatureAlgorithm.ECDSA, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getSignatureAlgorithm());
+            assertEquals(HashAlgorithm.SHA1, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm());
         });
     }
 }

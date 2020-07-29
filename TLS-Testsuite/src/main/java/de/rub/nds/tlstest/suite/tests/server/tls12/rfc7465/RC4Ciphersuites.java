@@ -57,7 +57,7 @@ public class RC4Ciphersuites extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
+            Validator.executedAsPlanned(i);
 
             ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
             assertArrayEquals(AssertMsgs.UnexpectedCipherSuite, i.getInspectedCipherSuite().getByteValue(), msg.getSelectedCipherSuite().getValue());

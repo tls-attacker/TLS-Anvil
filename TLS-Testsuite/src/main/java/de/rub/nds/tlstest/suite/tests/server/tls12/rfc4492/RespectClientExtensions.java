@@ -10,6 +10,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExte
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
@@ -66,7 +67,7 @@ public class RespectClientExtensions extends Tls12Test {
         }
 
         runner.execute(container).validateFinal(i -> {
-            assertTrue(AssertMsgs.WorkflowNotExecuted, i.getWorkflowTrace().executedAsPlanned());
+            Validator.executedAsPlanned(i);
 
             WorkflowTrace trace = i.getWorkflowTrace();
             ECDHEServerKeyExchangeMessage message = trace.getFirstReceivedMessage(ECDHEServerKeyExchangeMessage.class);

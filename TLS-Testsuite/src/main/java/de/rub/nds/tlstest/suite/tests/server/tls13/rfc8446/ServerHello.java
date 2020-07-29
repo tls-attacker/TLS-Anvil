@@ -61,7 +61,8 @@ public class ServerHello extends Tls13Test {
     }
 
     @TlsTest(description = "The last 8 bytes MUST be overwritten as described " +
-            "below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random.")
+            "below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random.",
+            securitySeverity = SeverityLevel.MEDIUM, interoperabilitySeverity = SeverityLevel.MEDIUM)
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void testServerRandomFor12(WorkflowRunner runner) {
@@ -81,7 +82,8 @@ public class ServerHello extends Tls13Test {
             ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
             assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
             byte[] random = msg.getRandom().getValue();
-            assertArrayEquals("Invalid random", new byte[]{0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x01}, Arrays.copyOfRange(random, random.length - 8, random.length));
+            assertArrayEquals("Invalid random", new byte[]{0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x01},
+                    Arrays.copyOfRange(random, random.length - 8, random.length));
         });
     }
 

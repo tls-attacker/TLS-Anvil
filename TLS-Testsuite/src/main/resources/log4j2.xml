@@ -33,7 +33,7 @@
         </Logger>
 
         <Logger name="de.rub.nds.tlsattacker" level="info" additivity="false">
-            <AppenderRef ref="Console" level="warn"/>
+            <AppenderRef ref="Console" level="error"/>
             <AppenderRef ref="FileTlsAttacker"/>
         </Logger>
         <Logger name="de.rub.nds.tlsattacker.attacks.connectivity" level="debug" additivity="false">

@@ -4,24 +4,29 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
+import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
+import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
+import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ServerTest;
+import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.junit.Assert.*;
 
 @RFC(number = 8446, section = "4.2.1 Supported Versions")
 @ServerTest
@@ -156,5 +161,57 @@ public class SupportedVersions extends Tls13Test {
         });
     }
 
-    
+    @TlsTest(description = "If this extension is present in the ClientHello, " +
+            "servers MUST NOT use the ClientHello.legacy_version value for " +
+            "version negotiation and MUST use only the \"supported_versions\" " +
+            "extension to determine client preferences.", interoperabilitySeverity = SeverityLevel.MEDIUM)
+    public void setLegacyVersionTo0304(WorkflowRunner runner) {
+        runner.replaceSupportedCiphersuites = true;
+
+        Config c = this.getConfig();
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        workflowTrace.addTlsActions(
+                new SendAction(new ClientHelloMessage(c)),
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.setStateModifier(i -> {
+            ClientHelloMessage chm = i.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
+            chm.setProtocolVersion(Modifiable.explicit(ProtocolVersion.TLS13.getValue()));
+            chm.getExtension(SupportedVersionsExtensionMessage.class).setSupportedVersions(Modifiable.explicit(
+                    ProtocolVersion.TLS12.getValue()
+            ));
+
+            return null;
+        });
+
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+    }
+
+    @TlsTest(description = "If this extension is present in the ClientHello, " +
+            "servers MUST NOT use the ClientHello.legacy_version value for " +
+            "version negotiation and MUST use only the \"supported_versions\" " +
+            "extension to determine client preferences.", interoperabilitySeverity = SeverityLevel.MEDIUM)
+    public void setLegacyVersionTo0304WithoutSVExt(WorkflowRunner runner) {
+        runner.replaceSupportedCiphersuites = true;
+
+        Config c = this.getConfig();
+        c.setAddSupportedVersionsExtension(false);
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        workflowTrace.addTlsActions(
+                new SendAction(new ClientHelloMessage(c)),
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.setStateModifier(i -> {
+            ClientHelloMessage chm = i.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
+            chm.setProtocolVersion(Modifiable.explicit(ProtocolVersion.TLS13.getValue()));
+            return null;
+        });
+
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+    }
+
+
+
 }

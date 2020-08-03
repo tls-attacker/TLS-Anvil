@@ -9,7 +9,9 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendDynamicClientKeyExchangeAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlsattacker.transport.TransportHandlerType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -29,7 +31,6 @@ public class Fragmentation extends Tls12Test {
             "Alert, or ChangeCipherSpec content types. Zero-length fragments of " +
             "Application data MAY be sent as they are potentially useful as a " +
             "traffic analysis countermeasure.", interoperabilitySeverity = SeverityLevel.MEDIUM)
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void sendZeroLengthRecord_SH(WorkflowRunner runner) {
         Config c = this.getConfig();
         c.setUseAllProvidedRecords(true);
@@ -52,5 +53,17 @@ public class Fragmentation extends Tls12Test {
         });
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+    }
+
+
+    @TlsTest(description = "")
+    public void sendHandshakeMessagesWithinSingleRecord(WorkflowRunner runner) {
+        Config c = this.getConfig();
+        c.setCreateIndividualRecords(false);
+
+        runner.replaceSelectedCiphersuite = true;
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 }

@@ -24,7 +24,8 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
 
 @ServerTest
 public class RespectClientExtensions extends Tls12Test {
@@ -34,7 +35,6 @@ public class RespectClientExtensions extends Tls12Test {
             "the use of an ECC cipher suite unless they can complete the handshake while respecting the choice " +
             "of curves and compression techniques specified by the client.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
-    // TODO: Client test missing
     public void respectChosenCurve(WorkflowRunner runner) {
         runner.replaceSupportedCiphersuites = true;
         Config c = this.getConfig();

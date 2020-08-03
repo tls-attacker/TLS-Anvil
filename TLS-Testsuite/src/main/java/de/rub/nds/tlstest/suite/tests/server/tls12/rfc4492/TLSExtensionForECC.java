@@ -4,11 +4,7 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.RSAClientKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
@@ -16,7 +12,6 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
-import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -32,7 +27,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertNotNull;
 
 
 @ServerTest
@@ -52,8 +48,8 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 4492, section = "4. TLS Extensions for ECC")
-    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello\n" +
-            "   message if it does not propose any ECC cipher suites.", securitySeverity = SeverityLevel.INFORMATIONAL)
+    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
+            "message if it does not propose any ECC cipher suites.", securitySeverity = SeverityLevel.INFORMATIONAL)
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     public void BothECExtensions_WithoutECCCipher(WorkflowRunner runner) {
         Config c = this.getConfig();
@@ -65,8 +61,8 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 4492, section = "4. TLS Extensions for ECC")
-    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello" +
-            " message if it does not propose any ECC cipher suites.")
+    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
+            "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     public void ECExtension_WithoutECCCipher(WorkflowRunner runner) {
         Config c = this.getConfig();
@@ -78,8 +74,8 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 4492, section = "4. TLS Extensions for ECC")
-    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello\n" +
-            "   message if it does not propose any ECC cipher suites.")
+    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
+            "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     public void ECPointFormatExtension_WithoutECCCipher(WorkflowRunner runner) {
         Config c = this.getConfig();

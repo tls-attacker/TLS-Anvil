@@ -9,6 +9,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
@@ -24,8 +25,7 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @RFC(number = 8446, section = "4.1.3 Server Hello")
 @ServerTest
@@ -110,6 +110,21 @@ public class ServerHello extends Tls13Test {
             ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
             assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
             assertArrayEquals("Session ID not echoed", sessionId, msg.getSessionId().getValue());
+        });
+    }
+
+    @TlsTest(description = "legacy_compression_method: A single byte which " +
+            "MUST have the value 0.", interoperabilitySeverity = SeverityLevel.MEDIUM, securitySeverity = SeverityLevel.MEDIUM)
+    public void testCompressionValue(WorkflowRunner runner) {
+        Config c = this.getConfig();
+        runner.replaceSupportedCiphersuites = true;
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            assertEquals("invalid compression method",
+                    0,
+                    i.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class).getSelectedCompressionMethod().getValue().byteValue()
+            );
         });
     }
 

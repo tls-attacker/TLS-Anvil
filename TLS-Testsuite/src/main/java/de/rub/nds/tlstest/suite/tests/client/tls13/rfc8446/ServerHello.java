@@ -37,7 +37,7 @@ public class ServerHello extends Tls13Test {
 
     @TlsTest(description = "A client which receives a legacy_session_id_echo " +
             "field that does not match what it sent in the ClientHello MUST " +
-            "abort the handshake with an \"illegal_parameter\" alert.", interoperabilitySeverity = SeverityLevel.CRITICAL)
+            "abort the handshake with an \"illegal_parameter\" alert.", interoperabilitySeverity = SeverityLevel.HIGH)
     public void testSessionId(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSelectedCiphersuite = true;

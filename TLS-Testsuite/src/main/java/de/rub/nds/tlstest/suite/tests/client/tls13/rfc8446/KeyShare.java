@@ -40,17 +40,9 @@ import java.util.List;
 @RFC(number = 8446, section = "4.2.8. Key Share")
 public class KeyShare extends Tls13Test {
 
-    public ConditionEvaluationResult supportsKeyShareExtension() {
-        if (context.getReceivedClientHelloMessage().getExtension(KeyShareExtensionMessage.class) != null) {
-            return ConditionEvaluationResult.enabled("");
-        }
-        return ConditionEvaluationResult.disabled("Does not support KeyShareExtension");
-    }
-
     @TlsTest(description = "Each KeyShareEntry value MUST correspond " +
             "to a group offered in the \"supported_groups\" extension " +
             "and MUST appear in the same order.", securitySeverity = SeverityLevel.MEDIUM)
-    @MethodCondition(method = "supportsKeyShareExtension")
     public void testOrderOfKeyshareEntries() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         EllipticCurvesExtensionMessage groups = chm.getExtension(EllipticCurvesExtensionMessage.class);
@@ -79,7 +71,6 @@ public class KeyShare extends Tls13Test {
     @TlsTest(description = "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. " +
             "This value MUST be in the same group as the KeyShareEntry value offered by the client " +
             "that the server has selected for the negotiated key exchange.")
-    @MethodCondition(method = "supportsKeyShareExtension")
     public void selectInvalidKeyshare(WorkflowRunner runner) {
         runner.replaceSelectedCiphersuite = true;
         Config c = this.getConfig();

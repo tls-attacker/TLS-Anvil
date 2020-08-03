@@ -11,9 +11,11 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
+import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ServerTest;
+import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -24,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
 
 @RFC(number = 7465, section = "2")
 @ServerTest
@@ -37,9 +38,9 @@ public class RC4Ciphersuites extends Tls12Test {
         return supported.size() == 0 ? ConditionEvaluationResult.disabled("No RC4 Ciphersuite supported") : ConditionEvaluationResult.enabled("");
     }
 
-    @TlsTest(description = "TLS servers MUST NOT select an RC4 cipher suite when a TLS client" +
-            " sends such a cipher suite in the ClientHello message.", securitySeverity = SeverityLevel.CRITICAL)
-    @MethodCondition(clazz = RC4Ciphersuites.class, method = "supportsRC4")
+    @TlsTest(description = "TLS servers MUST NOT select an RC4 cipher suite when a TLS client " +
+            "sends such a cipher suite in the ClientHello message.", securitySeverity = SeverityLevel.CRITICAL)
+    @MethodCondition(method = "supportsRC4")
     public void offerRC4AndOtherCiphers(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.appendEachSupportedCiphersuiteToClientSupported = true;
@@ -64,10 +65,10 @@ public class RC4Ciphersuites extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "If the TLS client only offers RC4 cipher suites, the TLS server" +
-            " MUST terminate the handshake.  The TLS server MAY send the" +
-            " insufficient_security fatal alert in this case.", securitySeverity = SeverityLevel.CRITICAL)
-    @MethodCondition(clazz = RC4Ciphersuites.class, method = "supportsRC4")
+    @TlsTest(description = "If the TLS client only offers RC4 cipher suites, the TLS server " +
+            "MUST terminate the handshake. The TLS server MAY send the " +
+            "insufficient_security fatal alert in this case.", securitySeverity = SeverityLevel.CRITICAL)
+    @MethodCondition(method = "supportsRC4")
     public void onlyRC4Suites(WorkflowRunner runner) {
         Config c = this.getConfig();
 

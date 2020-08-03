@@ -20,6 +20,8 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionM
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareStoreEntry;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
@@ -86,6 +88,25 @@ public class KeyShare extends Tls13Test {
 
             assertTrue(AssertMsgs.WorkflowNotExecuted + ", server likely selected the wrong key share",
                     i.getWorkflowTrace().executedAsPlanned());
+        });
+    }
+
+    @TlsTest(description = "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. " +
+            "This value MUST be in the same group as the KeyShareEntry value offered by the client " +
+            "that the server has selected for the negotiated key exchange.")
+    public void serverOnlyOffersOneKeshare(WorkflowRunner runner) {
+        // TODO: Iterate over each TLS 1.3 named group and offer only one key share of a different group in each handshake
+        runner.replaceSupportedCiphersuites = true;
+
+        Config c = this.getConfig();
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.executedAsPlanned(i);
+            KeyShareExtensionMessage keyshare = i.getWorkflowTrace()
+                    .getFirstReceivedMessage(ServerHelloMessage.class)
+                    .getExtension(KeyShareExtensionMessage.class);
+            assertEquals("Server offered more than one keyshare entry", 1, keyshare.getKeyShareList().size());
+            assertTrue(c.getDefaultClientNamedGroups().contains(keyshare.getKeyShareList().stream().map(KeyShareEntry::getGroupConfig).collect(Collectors.toList()).get(0)));
         });
     }
 }

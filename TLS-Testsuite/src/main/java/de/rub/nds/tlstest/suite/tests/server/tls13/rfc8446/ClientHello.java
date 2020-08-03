@@ -5,7 +5,6 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ChangeConfigAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -56,7 +55,7 @@ public class ClientHello extends Tls13Test {
         runner.replaceSupportedCiphersuites = true;
 
         ClientHelloMessage msg = new ClientHelloMessage(config);
-        msg.setProtocolVersion(Modifiable.explicit(new byte[]{0x05, 0x05}));
+        msg.setProtocolVersion(Modifiable.explicit(new byte[]{0x03, 0x04}));
 
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(

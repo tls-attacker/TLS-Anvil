@@ -5,16 +5,19 @@ import de.rub.nds.modifiablevariable.integer.ModifiableInteger;
 import de.rub.nds.modifiablevariable.singlebyte.ModifiableByte;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.protocol.ModifiableVariableHolder;
+import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -32,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 
 /**
@@ -110,64 +113,76 @@ public class LengthFieldTest extends TlsGenericTest {
     }
 
 
+    private void validate(AnnotatedState i) {
+        assertFalse("Workflow could be executed as planned", i.getWorkflowTrace().executedAsPlanned());
+
+        AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        assertNotNull("No alert received", msg);
+        assertEquals("No fatal alert received", AlertLevel.FATAL.getValue(), msg.getLevel().getValue().byteValue());
+        SocketState socketState = i.getState().getTlsContext().getFinalSocketState();
+        boolean socketClosed = (socketState == SocketState.SOCKET_EXCEPTION || socketState == SocketState.CLOSED || socketState == SocketState.IO_EXCEPTION);
+        assertTrue("Socket not closed", socketClosed);
+    }
+
+
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @TlsTest(description = "Manipulating length fields")
-    @KeyExchange(supported = KeyExchangeType.ALL13)
     public void serverTestTls13(WorkflowRunner runner) {
         runner.useRecordFragmentationDerivation = false;
         runner.useTCPFragmentationDerivation = false;
 
         List<CipherSuite> tls13SupportedCipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
         Config c = context.getConfig().createTls13Config();
+        c.setReceiveFinalSocketStateWithTimeout(true);
         AnnotatedStateContainer container = getContainer(c, tls13SupportedCipherSuites, RunningModeType.CLIENT);
 
-        runner.execute(container).validateFinal(Validator::executedAsPlanned);
+        runner.execute(container).validateFinal(this::validate);
     }
 
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @TlsTest(description = "Manipulating length fields")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void serverTestTls12(WorkflowRunner runner) {
         runner.useRecordFragmentationDerivation = false;
         runner.useTCPFragmentationDerivation = false;
 
         List<CipherSuite> cipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
         Config c = context.getConfig().createConfig();
+        c.setReceiveFinalSocketStateWithTimeout(true);
         AnnotatedStateContainer container = getContainer(c, cipherSuites, RunningModeType.CLIENT);
 
-        runner.execute(container).validateFinal(Validator::executedAsPlanned);
+        runner.execute(container).validateFinal(this::validate);
     }
 
     @ClientTest
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @TlsTest(description = "Manipulating length fields")
-    @KeyExchange(supported = KeyExchangeType.ALL13)
     public void clientTestTls13(WorkflowRunner runner) {
         runner.useRecordFragmentationDerivation = false;
         runner.useTCPFragmentationDerivation = false;
 
         List<CipherSuite> tls13SupportedCipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
         Config c = context.getConfig().createTls13Config();
+        c.setReceiveFinalSocketStateWithTimeout(true);
         AnnotatedStateContainer container = getContainer(c, tls13SupportedCipherSuites, RunningModeType.SERVER);
 
-        runner.execute(container).validateFinal(Validator::executedAsPlanned);
+        runner.execute(container).validateFinal(this::validate);
     }
 
     @ClientTest
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @TlsTest(description = "Manipulating length fields")
-    @KeyExchange(supported = KeyExchangeType.ALL12)
     public void clientTestTls12(WorkflowRunner runner) {
         runner.useRecordFragmentationDerivation = false;
         runner.useTCPFragmentationDerivation = false;
 
         List<CipherSuite> cipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
         Config c = context.getConfig().createConfig();
+        c.setReceiveFinalSocketStateWithTimeout(true);
         AnnotatedStateContainer container = getContainer(c, cipherSuites, RunningModeType.SERVER);
 
-        runner.execute(container).validateFinal(Validator::executedAsPlanned);
+        runner.execute(container).validateFinal(this::validate);
     }
 }
 
@@ -205,7 +220,6 @@ class ModifiableFields {
                 .flatMap(i -> ((SendAction)i).getSendMessages().stream())
                 .collect(Collectors.toList());
 
-        AnnotatedStateContainer result = new AnnotatedStateContainer();
         List<ModifiableFields> modifiableFields = new ArrayList<>();
         for (ProtocolMessage msg : sendingMessages) {
             List<ModifiableFields> fields = msg.getAllModifiableVariableHolders().stream()

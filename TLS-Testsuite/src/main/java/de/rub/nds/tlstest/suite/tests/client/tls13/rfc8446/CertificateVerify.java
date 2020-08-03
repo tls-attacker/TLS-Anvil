@@ -62,7 +62,8 @@ public class CertificateVerify extends Tls13Test {
                 runner.setStateModifier(i -> {
                     WorkflowTrace trace = i.getWorkflowTrace();
                     i.addAdditionalTestInfo(algo.name());
-                    trace.getFirstSendMessage(CertificateVerifyMessage.class).setSignatureHashAlgorithm(Modifiable.explicit(algo.getByteValue()));
+                    trace.getFirstSendMessage(CertificateVerifyMessage.class)
+                            .setSignatureHashAlgorithm(Modifiable.explicit(algo.getByteValue()));
                     return null;
                 });
 
@@ -96,7 +97,8 @@ public class CertificateVerify extends Tls13Test {
 
         runner.setStateModifier(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            trace.getFirstSendMessage(CertificateVerifyMessage.class).setSignatureHashAlgorithm(Modifiable.explicit(SignatureAndHashAlgorithm.ECDSA_SHA1.getByteValue()));
+            trace.getFirstSendMessage(CertificateVerifyMessage.class)
+                    .setSignatureHashAlgorithm(Modifiable.explicit(SignatureAndHashAlgorithm.ECDSA_SHA1.getByteValue()));
             return null;
         });
 
@@ -169,5 +171,65 @@ public class CertificateVerify extends Tls13Test {
 
         runner.execute(trace, this.getConfig()).validateFinal(Validator::receivedFatalAlert);
     }
+
+    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.",
+            securitySeverity = SeverityLevel.CRITICAL)
+    public void emptySignature(WorkflowRunner runner) {
+        runner.replaceSelectedCiphersuite = true;
+
+        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        trace.addTlsActions(
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.setStateModifier(i -> {
+            i.getWorkflowTrace().getFirstSendMessage(CertificateVerifyMessage.class)
+                    .setSignature(Modifiable.explicit(new byte[]{}));
+            return null;
+        });
+
+        runner.execute(trace, this.getConfig()).validateFinal(Validator::receivedFatalAlert);
+    }
+
+    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.",
+            securitySeverity = SeverityLevel.CRITICAL)
+    public void emptySigAlgorithm(WorkflowRunner runner) {
+        runner.replaceSelectedCiphersuite = true;
+
+        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        trace.addTlsActions(
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.setStateModifier(i -> {
+            i.getWorkflowTrace().getFirstSendMessage(CertificateVerifyMessage.class)
+                    .setSignatureHashAlgorithm(Modifiable.explicit(new byte[]{}));
+            return null;
+        });
+
+        runner.execute(trace, this.getConfig()).validateFinal(Validator::receivedFatalAlert);
+    }
+
+    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.",
+            securitySeverity = SeverityLevel.CRITICAL)
+    public void emptyBoth(WorkflowRunner runner) {
+        runner.replaceSelectedCiphersuite = true;
+
+        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        trace.addTlsActions(
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.setStateModifier(i -> {
+            i.getWorkflowTrace().getFirstSendMessage(CertificateVerifyMessage.class)
+                    .setSignatureHashAlgorithm(Modifiable.explicit(new byte[]{}));
+            i.getWorkflowTrace().getFirstSendMessage(CertificateVerifyMessage.class)
+                    .setSignature(Modifiable.explicit(new byte[]{}));
+            return null;
+        });
+
+        runner.execute(trace, this.getConfig()).validateFinal(Validator::receivedFatalAlert);
+    }
+
 
 }

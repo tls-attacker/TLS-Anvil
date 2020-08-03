@@ -32,8 +32,8 @@ public class PointFormatExtension extends Tls12Test {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @RFC(number = 4492, section = "5.2. Server Hello Extensions")
-    @TlsTest(description = "The Supported Point Formats Extension, when used, MUST contain the value 0 (uncompressed)"+
-            " as one of the items in the list of point formats.")
+    @TlsTest(description = "The Supported Point Formats Extension, when used, MUST contain the value 0 (uncompressed) " +
+            "as one of the items in the list of point formats.")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     public void serverSupportsUncompressPointFormat(WorkflowRunner runner) {
         Config c = this.getConfig();
@@ -71,7 +71,7 @@ public class PointFormatExtension extends Tls12Test {
     }
 
     @RFC(number = 4492, section = "5.1. Client Hello Extensions")
-    @TlsTest(description = "If the Supported Point Formats Extension is indeed sent, "+
+    @TlsTest(description = "If the Supported Point Formats Extension is indeed sent, " +
             "it MUST contain the value 0 (uncompressed) " +
             "as one of the items in the list of point formats. ")
     @KeyExchange(supported = KeyExchangeType.ECDH)

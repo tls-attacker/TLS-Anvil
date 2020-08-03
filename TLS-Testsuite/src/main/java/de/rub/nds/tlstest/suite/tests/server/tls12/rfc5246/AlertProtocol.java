@@ -56,7 +56,7 @@ public class AlertProtocol extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            Validator.executedAsPlanned(i);
+            assertTrue("Workflow could not be executed as planned", trace.smartExecutedAsPlanned());
 
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
             if (message == null) {

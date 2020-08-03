@@ -39,7 +39,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             "MAY select one or more GREASE extension values and advertise them as extensions " +
             "with varying length and contents. " +
             "When processing a CertiﬁcateRequest or NewSessionTicket, " +
-            "clients MUST NOT treat GREASE values diﬀerently from any unknown value.", interoperabilitySeverity = SeverityLevel.HIGH)
+            "clients MUST NOT treat GREASE values diﬀerently from any unknown value.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void advertiseGreaseExtensionsInSessionTicket(WorkflowRunner runner) {
         runner.replaceSelectedCiphersuite = true;
 
@@ -67,7 +67,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
             "In particular, the client MUST fail the connection " +
             "if a GREASE value appears in any of the following: " +
-            "The \"version\" value in a ServerHello or HelloRetryRequest", interoperabilitySeverity = SeverityLevel.HIGH)
+            "The \"version\" value in a ServerHello or HelloRetryRequest", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void selectGreaseVersion(WorkflowRunner runner) {
         runner.replaceSelectedCiphersuite = true;
         Config c = this.getConfig();
@@ -98,7 +98,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
             "In particular, the client MUST fail the connection " +
             "if a GREASE value appears in any of the following: " +
-            "The \"cipher_suite\" value in a ServerHello", interoperabilitySeverity = SeverityLevel.HIGH)
+            "The \"cipher_suite\" value in a ServerHello", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void selectGreaseCipherSuite(WorkflowRunner runner) {
         runner.replaceSelectedCiphersuite = true;
         Config c = this.getConfig();
@@ -125,7 +125,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
             "In particular, the client MUST fail the connection " +
             "if a GREASE value appears in any of the following: " +
-            "Any ServerHello extension", interoperabilitySeverity = SeverityLevel.HIGH)
+            "Any ServerHello extension", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void sendServerHelloGreaseExtension(WorkflowRunner runner) {
         runner.replaceSelectedCiphersuite = true;
         Config c = this.getConfig();
@@ -143,7 +143,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
             "In particular, the client MUST fail the connection " +
             "if a GREASE value appears in any of the following: " +
-            "Any EncryptedExtensions extension", interoperabilitySeverity = SeverityLevel.HIGH)
+            "Any EncryptedExtensions extension", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void sendEncryptedExtensionsGreaseExtension(WorkflowRunner runner) {
         runner.replaceSelectedCiphersuite = true;
         Config c = this.getConfig();
@@ -161,7 +161,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
             "In particular, the client MUST fail the connection " +
             "if a GREASE value appears in any of the following: " +
-            "The signature algorithm in a server CertiﬁcateVerify signature in TLS 1.3", interoperabilitySeverity = SeverityLevel.HIGH)
+            "The signature algorithm in a server CertiﬁcateVerify signature in TLS 1.3", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void sendCertificateVerifyGreaseSignatureAlgorithm(WorkflowRunner runner) {
         runner.replaceSelectedCiphersuite = true;
         Config c = this.getConfig();

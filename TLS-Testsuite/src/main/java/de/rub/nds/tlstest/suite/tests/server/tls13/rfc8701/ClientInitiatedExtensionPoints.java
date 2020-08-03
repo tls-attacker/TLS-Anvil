@@ -1,6 +1,5 @@
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8701;
 
-import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -10,13 +9,11 @@ import de.rub.nds.tlsattacker.core.crypto.ec.CurveFactory;
 import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurve;
 import de.rub.nds.tlsattacker.core.crypto.ec.Point;
 import de.rub.nds.tlsattacker.core.crypto.ec.PointFormatter;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.AlpnExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.alpn.AlpnEntry;
@@ -32,19 +29,20 @@ import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 @ServerTest
 @RFC(number = 8701, section = "3. Client-Initiated Extension Points")
 public class ClientInitiatedExtensionPoints extends Tls13Test {
 
     @TlsTest(description = "A client MAY select one or more GREASE cipher suite values and advertise them in the \"cipher_suites\" ﬁeld." +
-            "Servers MUST NOT negotiate any GREASE value when offﬀered in a ClientHello.", interoperabilitySeverity = SeverityLevel.HIGH)
+            "Servers MUST NOT negotiate any GREASE value when offﬀered in a ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void advertiseGreaseCiphersuites(WorkflowRunner runner) {
         runner.appendEachSupportedCiphersuiteToClientSupported = true;
 
@@ -60,7 +58,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
     }
 
     @TlsTest(description = "A client MAY select one or more GREASE extension values and advertise them as extensions with varying length and contents." +
-            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.HIGH)
+            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void advertiseGreaseExtensions(WorkflowRunner runner) {
         runner.replaceSupportedCiphersuites = true;
         Config c = this.getConfig();
@@ -93,7 +91,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "A client MAY select one or more GREASE named group values and advertise them in the \"supported_groups\" extension, " +
             "if sent. It MAY also send KeyShareEntry values for a subset of those selected in the \"key_share\" extension. " +
             "For each of these, the \"key_exchange\" ﬁeld MAY be any value. " +
-            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.HIGH)
+            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void advertiseGreaseNamedGroup(WorkflowRunner runner) {
         runner.replaceSupportedCiphersuites = true;
 
@@ -140,7 +138,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "A client MAY select one or more GREASE signature algorithm values " +
             "and advertise them in the \"signature_algorithms\" or " +
             "\"signature_algorithms_cert\" extensions, if sent. " +
-            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.HIGH)
+            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void advertiseGreaseSignatureAlgorithms(WorkflowRunner runner) {
         runner.replaceSupportedCiphersuites = true;
 
@@ -167,7 +165,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
 
     @TlsTest(description = "A client MAY select one or more GREASE ALPN identiﬁers " +
             "and advertise them in the \"application_layer_protocol_negotiation\" extension, if sent. " +
-            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.HIGH)
+            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void advertiseGreaseALPNIdentifiers(WorkflowRunner runner) {
         runner.replaceSupportedCiphersuites = true;
 

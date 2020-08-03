@@ -13,6 +13,7 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
@@ -23,7 +24,7 @@ public class EncryptedExtensions extends Tls13Test {
     @TlsTest(description = "The client MUST check EncryptedExtensions " +
             "for the presence of any forbidden extensions and if " +
             "any are found MUST abort the handshake " +
-            "with an \"illegal_parameter\" alert.")
+            "with an \"illegal_parameter\" alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
     public void sendSupportedVersionsExtensionInEE(WorkflowRunner runner) {
         runner.replaceSelectedCiphersuite = true;
 
@@ -44,7 +45,7 @@ public class EncryptedExtensions extends Tls13Test {
     @TlsTest(description = "The client MUST check EncryptedExtensions " +
             "for the presence of any forbidden extensions and if " +
             "any are found MUST abort the handshake " +
-            "with an \"illegal_parameter\" alert.")
+            "with an \"illegal_parameter\" alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
     public void sendPaddingExtensionInEE(WorkflowRunner runner) {
         runner.replaceSelectedCiphersuite = true;
 

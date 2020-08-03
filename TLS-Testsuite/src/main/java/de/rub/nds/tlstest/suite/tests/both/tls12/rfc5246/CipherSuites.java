@@ -1,4 +1,4 @@
-package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
+package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.*;
 
 @RFC(number = 5264, section = "1.2 Major Differences from TLS 1.1")
-@ServerTest
 public class CipherSuites extends Tls12Test {
 
     @TlsTest(description = "Removed IDEA and DES cipher suites. They are now deprecated and will be documented in a separate document.", securitySeverity = SeverityLevel.CRITICAL)
@@ -44,6 +43,4 @@ public class CipherSuites extends Tls12Test {
 
         assertEquals("Deprecated Ciphersuites supported: " + String.join(", ", badSuites), 0, badSuites.size());
     }
-
-
 }

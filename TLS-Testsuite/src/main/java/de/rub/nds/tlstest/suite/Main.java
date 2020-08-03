@@ -12,11 +12,21 @@ import java.util.Arrays;
 
 public class Main {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static boolean finished = false;
 
     public static void main(String[] args) {
 
         TestContext testContext = new TestContext();
         testContext.getConfig().setSupportedVersions(Arrays.asList(ProtocolVersion.TLS12, ProtocolVersion.TLS13));
+
+        new Thread(() -> {
+           while (!finished) {
+               LOGGER.debug("RAM: {}/{}",(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000, Runtime.getRuntime().totalMemory()/1000000);
+               try {
+                   Thread.sleep(2000);
+               } catch (Exception ignored){}
+           }
+        }).start();
 
         try {
             testContext.getConfig().parse(args);
@@ -31,5 +41,7 @@ public class Main {
             LOGGER.error("Something went wrong", e);
             System.exit(1);
         }
+
+        finished = true;
     }
 }

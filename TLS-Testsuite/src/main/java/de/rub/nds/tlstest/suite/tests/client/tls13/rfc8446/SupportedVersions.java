@@ -2,27 +2,27 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.constants.AlertDescription;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
+import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 @RFC(number = 8446, section = "4.2.1 Supported Versions")
 @ClientTest
@@ -78,5 +78,18 @@ public class SupportedVersions extends Tls13Test {
             if (msg == null) return;
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
+    }
+
+    @TlsTest(description = "Implementations of this specification MUST send this " +
+            "extension in the ClientHello containing all versions of TLS which they " +
+            "are prepared to negotiate (for this specification, that means minimally " +
+            "0x0304, but if previous versions of TLS are allowed to be " +
+            "negotiated, they MUST be present as well).")
+    public void supportedVersionContainsTls13() {
+        SupportedVersionsExtensionMessage ext = context.getReceivedClientHelloMessage().getExtension(SupportedVersionsExtensionMessage.class);
+        assertNotNull("CH Does not contain supported_versions extension", ext);
+
+        List<ProtocolVersion> versions = ProtocolVersion.getProtocolVersions(ext.getSupportedVersions().getValue());
+        assertTrue("supported_versions does not contain TLS 1.3", versions.contains(ProtocolVersion.TLS13));
     }
 }

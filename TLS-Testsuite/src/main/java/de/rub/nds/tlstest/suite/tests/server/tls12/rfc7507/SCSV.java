@@ -13,8 +13,10 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsscanner.report.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
+import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ServerTest;
+import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
@@ -43,7 +45,7 @@ public class SCSV extends Tls12Test {
             "because the version indicated in ClientHello.client_version is unsupported). " +
             "The record layer version number for this alert MUST be set to either ClientHello.client_version " +
             "(as it would for the Server Hello message if the server was continuing the handshake) " +
-            "or to the record layer version number used by the client.", securitySeverity = SeverityLevel.MEDIUM)
+            "or to the record layer version number used by the client.", securitySeverity = SeverityLevel.CRITICAL)
     @MethodCondition(method = "supportsOtherTlsVersions")
     public void includeFallbackSCSV(WorkflowRunner runner) {
         List<VersionSuiteListPair> olderCipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getVersionSuitePairs());
@@ -88,7 +90,7 @@ public class SCSV extends Tls12Test {
             "because the version indicated in ClientHello.client_version is unsupported). " +
             "The record layer version number for this alert MUST be set to either ClientHello.client_version " +
             "(as it would for the Server Hello message if the server was continuing the handshake) " +
-            "or to the record layer version number used by the client.", securitySeverity = SeverityLevel.MEDIUM)
+            "or to the record layer version number used by the client.", securitySeverity = SeverityLevel.CRITICAL)
     @MethodCondition(method = "supportsOtherTlsVersions")
     public void includeFallbackSCSV_nonRecommendedCipherSuiteOrder(WorkflowRunner runner) {
         List<VersionSuiteListPair> olderCipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getVersionSuitePairs());

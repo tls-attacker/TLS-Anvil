@@ -9,12 +9,13 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
+import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
+import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-
-import java.util.ArrayList;
 
 @ClientTest
 @RFC(number = 8446, section = "4.2.9 Pre-Shared Key Exchane Modes")

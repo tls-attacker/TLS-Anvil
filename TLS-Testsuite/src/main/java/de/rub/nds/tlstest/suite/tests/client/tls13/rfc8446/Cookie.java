@@ -7,7 +7,6 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
 import java.util.Arrays;
-import java.util.stream.Collectors;
 
 @ClientTest
 @RFC(number = 8446, section = "4.2.2 Cookie")

@@ -4,7 +4,6 @@ package de.rub.nds.tlstest.suite;
 import com.beust.jcommander.ParameterException;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

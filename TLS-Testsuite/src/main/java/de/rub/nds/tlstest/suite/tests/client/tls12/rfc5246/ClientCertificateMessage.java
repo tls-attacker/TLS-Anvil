@@ -9,7 +9,8 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertNotNull;
 
 @ClientTest
 @RFC(number = 5446, section = "7.4.6. Client Certificate")

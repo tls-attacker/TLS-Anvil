@@ -1,10 +1,8 @@
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 

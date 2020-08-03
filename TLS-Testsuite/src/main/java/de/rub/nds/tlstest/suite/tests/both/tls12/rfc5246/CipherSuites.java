@@ -4,18 +4,16 @@ import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsscanner.report.result.VersionSuiteListPair;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
 
 @RFC(number = 5264, section = "1.2 Major Differences from TLS 1.1")
 public class CipherSuites extends Tls12Test {

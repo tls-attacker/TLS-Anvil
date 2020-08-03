@@ -24,8 +24,6 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
-
 
 @RFC(number = 5264, section = "6.2.3.3 AEAD Ciphers")
 public class AEADCiphers extends Tls12Test {

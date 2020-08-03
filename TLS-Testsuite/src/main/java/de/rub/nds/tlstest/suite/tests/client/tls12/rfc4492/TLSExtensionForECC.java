@@ -13,7 +13,6 @@ import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;

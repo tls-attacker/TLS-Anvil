@@ -4,8 +4,8 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.utils.ConditionTest;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
+import de.rub.nds.tlstest.framework.utils.ConditionTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.RegisterExtension;
 

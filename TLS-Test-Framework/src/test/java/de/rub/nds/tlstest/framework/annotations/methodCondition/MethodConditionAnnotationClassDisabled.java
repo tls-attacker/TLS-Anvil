@@ -8,8 +8,6 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.Assert.assertTrue;
-
 
 @MethodCondition(method = "classCondition")
 public class MethodConditionAnnotationClassDisabled {

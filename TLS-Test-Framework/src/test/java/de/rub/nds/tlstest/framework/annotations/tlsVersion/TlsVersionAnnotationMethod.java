@@ -1,13 +1,12 @@
 package de.rub.nds.tlstest.framework.annotations.tlsVersion;
 
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
-import de.rub.nds.tlstest.framework.utils.ConditionTest;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
+import de.rub.nds.tlstest.framework.utils.ConditionTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.RegisterExtension;
 

@@ -7,9 +7,6 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ConditionTest implements ExecutionCondition {
     private static final Logger LOGGER = LogManager.getLogger();
     private Class<?>[] clazzes;

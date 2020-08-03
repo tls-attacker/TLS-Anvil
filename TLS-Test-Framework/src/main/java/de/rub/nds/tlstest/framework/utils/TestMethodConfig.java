@@ -2,7 +2,10 @@ package de.rub.nds.tlstest.framework.utils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import de.rub.nds.tlstest.framework.annotations.*;
+import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyX;
 import org.junit.jupiter.api.extension.ExtensionContext;
 

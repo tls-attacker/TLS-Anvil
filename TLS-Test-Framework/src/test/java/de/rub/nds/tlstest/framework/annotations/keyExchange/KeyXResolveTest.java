@@ -2,7 +2,6 @@ package de.rub.nds.tlstest.framework.annotations.keyExchange;
 
 
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -13,10 +12,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import static org.junit.Assert.*;
 
-import java.util.ArrayList;
 import java.util.HashSet;
+
+import static org.junit.Assert.assertEquals;
 
 @ExtendWith(ExtensionContextResolver.class)
 public class KeyXResolveTest {

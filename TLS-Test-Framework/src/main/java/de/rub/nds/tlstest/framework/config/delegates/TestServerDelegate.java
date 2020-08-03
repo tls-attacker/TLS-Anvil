@@ -6,7 +6,6 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.ClientDelegate;
 import de.rub.nds.tlsattacker.core.constants.NameType;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.SNIEntry;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import org.bouncycastle.util.IPAddress;
 
 @Parameters(commandDescription = "Test a server implementation, thus start TLS-Attacker in client mode.")

@@ -2,7 +2,12 @@ package de.rub.nds.tlstest.framework.testClasses;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.junitExtensions.*;
+import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
+import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
+import de.rub.nds.tlstest.framework.junitExtensions.MethodConditionExtension;
+import de.rub.nds.tlstest.framework.junitExtensions.TestWatcher;
+import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
+import de.rub.nds.tlstest.framework.junitExtensions.WorkflowRunnerResolver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtendWith;

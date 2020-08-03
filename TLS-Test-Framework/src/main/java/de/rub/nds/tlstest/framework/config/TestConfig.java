@@ -7,25 +7,24 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.NameType;
+import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.SNIEntry;
-import de.rub.nds.tlsscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.util.IPAddress;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 
@@ -40,7 +39,9 @@ public class TestConfig extends TLSDelegateConfig {
     private TestSiteReport siteReport = null;
     private boolean parsedArgs = false;
 
-    Config cachedConfig = null;
+    private Config cachedConfig = null;
+    private List<ProtocolVersion> supportedVersions = null;
+    private Callable<Integer> timeoutActionScript;
 
 
     @Parameter(names = "-tags", description = "Run only tests containing on of the specified tags", variableArity = true)
@@ -60,6 +61,12 @@ public class TestConfig extends TLSDelegateConfig {
 
     @Parameter(names = "-parallel", description = "How many TLS-Handshakes should be executed in parallel? (Default value: 5)")
     private int parallel = 5;
+
+    @Parameter(names = "-timeoutActionScript", description = "Script to execute, if the execution of the testsuite seems to make no progress", variableArity = true)
+    private List<String> timeoutActionCommand = new ArrayList<>();
+
+    @Parameter(names = "-identifier", description = "Identifier that is visible in the serialized test result. Defaults to the ")
+    private String identifier = null;
 
 
     public TestConfig() {
@@ -144,6 +151,15 @@ public class TestConfig extends TLSDelegateConfig {
             ext = this.outputFormat;
         }
 
+        if (this.identifier == null) {
+            if (argParser.getParsedCommand().equals("server")) {
+                this.identifier = testServerDelegate.getHost();
+            }
+            else {
+                this.identifier = testClientDelegate.getPort().toString();
+            }
+        }
+
         if (this.outputFile.isEmpty()) {
             this.outputFile = Paths.get(System.getProperty("user.dir"), "testResults." + ext).toString();
         }
@@ -166,14 +182,22 @@ public class TestConfig extends TLSDelegateConfig {
                 if (this.outputFile.endsWith("xml")) {
                     this.outputFormat = "xml";
                 }
-            }
-            else {
+            } else {
                 if ((this.outputFile.endsWith(".xml") && this.outputFormat.equals("json")) ||
                         (this.outputFile.endsWith(".json") && this.outputFormat.equals("xml"))) {
                     throw new ParameterException("-outputFile file extension does not match -outputFormat");
                 }
             }
 
+            if (timeoutActionCommand.size() > 0) {
+                timeoutActionScript = () -> {
+                    LOGGER.debug("Timeout action executed");
+                    ProcessBuilder processBuilder = new ProcessBuilder(timeoutActionCommand);
+                    Process p = processBuilder.start();
+                    p.waitFor();
+                    return p.exitValue();
+                };
+            }
         } catch (Exception e) {
             throw new ParameterException(e);
         }
@@ -247,6 +271,9 @@ public class TestConfig extends TLSDelegateConfig {
         config.setDefaultServerSupportedCiphersuites(CipherSuite.getImplemented().stream().filter(CipherSuite::isTLS13).collect(Collectors.toList()));
         config.setDefaultClientSupportedCiphersuites(config.getDefaultServerSupportedCiphersuites());
         config.setDefaultSelectedCipherSuite(CipherSuite.TLS_AES_128_GCM_SHA256);
+        config.setDefaultClientNamedGroups(Arrays.stream(NamedGroup.values()).filter(NamedGroup::isTls13).collect(Collectors.toList()));
+        config.setDefaultServerNamedGroups(config.getDefaultClientNamedGroups());
+        config.setDefaultSelectedNamedGroup(NamedGroup.ECDH_X25519);
         return config;
     }
 
@@ -337,5 +364,37 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setParallel(int parallel) {
         this.parallel = parallel;
+    }
+
+    public List<ProtocolVersion> getSupportedVersions() {
+        return supportedVersions;
+    }
+
+    public void setSupportedVersions(List<ProtocolVersion> supportedVersions) {
+        this.supportedVersions = supportedVersions;
+    }
+
+    public Callable<Integer> getTimeoutActionScript() {
+        return timeoutActionScript;
+    }
+
+    public void setTimeoutActionScript(Callable<Integer> timeoutActionScript) {
+        this.timeoutActionScript = timeoutActionScript;
+    }
+
+    public List<String> getTimeoutActionCommand() {
+        return timeoutActionCommand;
+    }
+
+    public void setTimeoutActionCommand(List<String> timeoutActionCommand) {
+        this.timeoutActionCommand = timeoutActionCommand;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 }

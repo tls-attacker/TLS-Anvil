@@ -50,6 +50,9 @@ public class ExecutionListener implements TestExecutionListener {
 
             TestResultContainer root = new TestResultContainer(rootIdentifier);
             root.setElapsedTime(elapsedTime);
+            root.setTestEndpointType(TestContext.getInstance().getConfig().getTestEndpointMode());
+            root.setIdentifier(TestContext.getInstance().getConfig().getIdentifier());
+            root.setDate(TestContext.getInstance().getStartTime());
             rootContainers.add(root);
 
             Set<TestIdentifier> containers = new HashSet<>(identifiers);

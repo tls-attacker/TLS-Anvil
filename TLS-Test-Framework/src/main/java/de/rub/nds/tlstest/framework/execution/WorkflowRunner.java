@@ -9,6 +9,8 @@ import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
+import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
@@ -75,9 +77,16 @@ public class WorkflowRunner {
         }
 
         for (AnnotatedState i : container.getStates()) {
+            TlsAction lastAction = i.getState().getWorkflowTrace().getLastAction();
+            if (lastAction instanceof ReceivingAction) {
+                List<ProtocolMessageType> messages = ((ReceivingAction) lastAction).getGoingToReceiveProtocolMessageTypes();
+                if (messages.size() > 0 && messages.get(messages.size() - 1).equals(ProtocolMessageType.ALERT)) {
+                    i.getState().getConfig().setReceiveFinalSocketStateWithTimeout(true);
+                }
+            }
+
             if (!useTCPFragmentationDerivation && !useRecordFragmentationDerivation)
                 break;
-
 
             if (useRecordFragmentationDerivation) {
                 AnnotatedState copy = new AnnotatedState(i);
@@ -223,6 +232,8 @@ public class WorkflowRunner {
             AnnotatedState ret = stateModifier.apply(result);
             if (ret != null)
                 result = ret;
+
+            result.getState().reset();
         }
 
         return result;

@@ -119,9 +119,22 @@ public class  AnnotatedStateContainer {
 
         if (finalValidation) {
             TestContext.getInstance().addTestResult(this);
+            List<String> uuids = new ArrayList<>();
+            for (AnnotatedState state : this.getStates()) {
+                if (uuids.contains(state.getUuid())) {
+                    LOGGER.warn("uuids of states in container are not unique! ({}.{})", this.testMethodConfig.getClassName(), this.testMethodConfig.getMethodName());
+                    break;
+                }
+                uuids.add(state.getUuid());
+            }
+
             if (failed) {
                 for (Throwable i: errors) {
-                    LOGGER.debug("\n" + ExecptionPrinter.stacktraceToString(i));
+                    if (System.getenv("DOCKER") != null) {
+                        LOGGER.debug("", i);
+                    } else {
+                        LOGGER.error("", i);
+                    }
                 }
                 AssertionError error = new AssertionError(String.format("%d/%d tests failed", errors.size(), states.size()));
                 this.setFailedStacktrace(error);

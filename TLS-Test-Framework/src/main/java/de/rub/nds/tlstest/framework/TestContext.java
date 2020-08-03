@@ -31,7 +31,7 @@ public class TestContext {
     private long testsSucceeded = 0;
 
     private ProgressBar proggressBar = null;
-    private Date startTime = new Date();
+    private final Date startTime = new Date();
 
 
     synchronized public static TestContext getInstance() {
@@ -148,8 +148,6 @@ public class TestContext {
         testsFailed++;
     }
 
-
-
     public ProgressBar getProggressBar() {
         return proggressBar;
     }
@@ -164,5 +162,9 @@ public class TestContext {
 
     public long getTestsSucceeded() {
         return testsSucceeded;
+    }
+
+    public Date getStartTime() {
+        return startTime;
     }
 }

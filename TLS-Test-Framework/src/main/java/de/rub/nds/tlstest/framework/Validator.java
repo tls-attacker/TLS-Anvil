@@ -4,6 +4,7 @@ import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
@@ -15,18 +16,29 @@ import static org.junit.Assert.*;
 public class Validator {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static void receivedFatalAlert(AnnotatedState i) {
+    public static void receivedFatalAlert(AnnotatedState i, boolean checkExecutedAsPlanned) {
         WorkflowTrace trace = i.getWorkflowTrace();
-        assertTrue(AssertMsgs.WorkflowNotExecuted, trace.smartExecutedAsPlanned());
+
+        if (checkExecutedAsPlanned) {
+            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.smartExecutedAsPlanned());
+        }
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        if (msg == null) {
+        SocketState socketState = i.getState().getTlsContext().getFinalSocketState();
+        boolean socketClosed = (socketState == SocketState.SOCKET_EXCEPTION || socketState == SocketState.CLOSED || socketState == SocketState.IO_EXCEPTION);
+        if (msg == null && socketClosed) {
             i.addAdditionalResultInfo("Timeout");
-            i.setStatus(TestStatus.PARTIALLY_FAILED);
+            i.setStatus(TestStatus.PARTIALLY_SUCCEEDED);
             LOGGER.debug("Timeout");
             return;
         }
+        assertNotNull("No Alert message received and socket is still open.", msg);
         assertEquals(AssertMsgs.NoFatalAlert, AlertLevel.FATAL.getValue(), msg.getLevel().getValue().byteValue());
+        assertTrue("Socket still open after fatal alert", socketClosed);
+    }
+
+    public static void receivedFatalAlert(AnnotatedState i) {
+        receivedFatalAlert(i, true);
     }
 
     public static void executedAsPlanned(AnnotatedState i) {
@@ -48,11 +60,12 @@ public class Validator {
             return;
         }
 
-        AlertDescription received = AlertDescription.getAlertDescription(msg.getDescription().getValue().byteValue());
+        AlertDescription received = AlertDescription.getAlertDescription(msg.getDescription().getValue());
         if (expexted != received) {
             i.addAdditionalResultInfo("Unexpected Alert Description");
             i.addAdditionalResultInfo(String.format("Expected: %s", expexted));
             i.addAdditionalResultInfo(String.format("Received: %s", received));
+            i.setStatus(TestStatus.PARTIALLY_SUCCEEDED);
             LOGGER.debug(i.getAdditionalResultInformation());
         }
     }

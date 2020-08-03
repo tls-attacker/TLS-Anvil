@@ -49,12 +49,14 @@ public class TestSiteReport extends SiteReport {
 
     @Override
     public synchronized Set<CipherSuite> getCipherSuites() {
+        if (super.getCipherSuites() == null) return new HashSet<>();
         Set<CipherSuite> set = new HashSet<>(super.getCipherSuites());
         set.removeIf(CipherSuite::isTLS13);
         return set;
     }
 
     public synchronized Set<CipherSuite> getSupportedTls13CipherSuites() {
+        if (super.getCipherSuites() == null) return new HashSet<>();
         Set<CipherSuite> set = new HashSet<>(super.getCipherSuites());
         set.removeIf(i -> !i.isTLS13());
         return set;

@@ -51,10 +51,7 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
-import java.net.ConnectException;
-import java.net.NoRouteToHostException;
 import java.net.Socket;
-import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -217,6 +214,7 @@ public class TestRunner {
         saveToCache(report);
 
         testConfig.setSiteReport(report);
+        LOGGER.debug("TLS-Scanner finished!");
     }
 
 
@@ -306,12 +304,12 @@ public class TestRunner {
             report.setSupportedNamedGroups(NamedGroup.namedGroupsFromByteArray(ecExt.getSupportedGroups().getValue()));
         }
 
-        SupportedVersionsExtensionMessage msg = clientHello.getExtension(SupportedVersionsExtensionMessage.class);
+        SupportedVersionsExtensionMessage supportedVersionsExt = clientHello.getExtension(SupportedVersionsExtensionMessage.class);
         List<ProtocolVersion> versions = new ArrayList<>();
         versions.add(ProtocolVersion.getProtocolVersion(clientHello.getProtocolVersion().getValue()));
         versions.add(ProtocolVersion.getProtocolVersion(((Record)clientHelloReceiveAction.getReceivedRecords().get(0)).getProtocolVersion().getValue()));
-        if (msg != null) {
-            versions.addAll(ProtocolVersion.getProtocolVersions(msg.getSupportedVersions().getValue()));
+        if (supportedVersionsExt != null) {
+            versions.addAll(ProtocolVersion.getProtocolVersions(supportedVersionsExt.getSupportedVersions().getValue()));
         }
         report.setVersions(new ArrayList<>(new HashSet<>(versions)));
 
@@ -339,6 +337,8 @@ public class TestRunner {
         }
 
         executor = new ParallelExecutor(testConfig.getParallel(), 2);
+        executor.setTimeoutAction(testConfig.getTimeoutActionScript());
+        executor.monitorExecutorService();
         LOGGER.info("Starting preparation phase");
         this.testConfig.createConfig();
 
@@ -350,6 +350,36 @@ public class TestRunner {
         }
         else throw new RuntimeException("Invalid TestEndpointMode");
 
+        if (testConfig.getSiteReport() == null) {
+            throw new RuntimeException("SiteReport is null after preparation phase");
+        }
+
+        boolean targetSupportVersions = true;
+        if (testConfig.getSupportedVersions() != null) {
+            targetSupportVersions = false;
+            for (ProtocolVersion i : testConfig.getSupportedVersions()) {
+                if (testConfig.getSiteReport().getVersions() != null && testConfig.getSiteReport().getVersions().contains(i)) {
+                    targetSupportVersions = true;
+                    break;
+                }
+            }
+        }
+
+        boolean startTestSuite = false;
+        if (testConfig.getSiteReport().getVersions() == null || testConfig.getSiteReport().getVersions().size() == 0) {
+            LOGGER.error("Target does not support any ProtocolVersion");
+        } else if (testConfig.getSiteReport().getCipherSuites().size() == 0 && testConfig.getSiteReport().getSupportedTls13CipherSuites().size() == 0) {
+            LOGGER.error("Target does not support any CipherSuites");
+        } else if (!targetSupportVersions) {
+            LOGGER.error("Target does not support any ProtocolVersion that the Testsuite supports");
+        } else {
+            startTestSuite = true;
+        }
+
+        if (!startTestSuite) {
+            System.exit(9);
+        }
+
         LOGGER.info("Prepartion finished!");
     }
 
@@ -359,10 +389,13 @@ public class TestRunner {
 
         String packageName = mainClass.getPackage().getName();
         LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()
-            .selectors(
+                .selectors(
                     selectPackage(packageName)
-            );
-
+                )
+                .configurationParameter("junit.jupiter.execution.parallel.config.strategy", "fixed")
+                .configurationParameter("junit.jupiter.execution.parallel.config.fixed.parallelism",
+                        String.valueOf(Math.min(testConfig.getParallel() * 3, Runtime.getRuntime().availableProcessors()))
+                );
 
         if (testConfig.getTags().size() > 0) {
             builder.filters(
@@ -401,6 +434,8 @@ public class TestRunner {
         try {
             testConfig.getTestClientDelegate().getServerSocket().close();
         } catch (Exception e) {}
+
+        System.exit(0);
     }
 
     public ParallelExecutor getExecutor() {

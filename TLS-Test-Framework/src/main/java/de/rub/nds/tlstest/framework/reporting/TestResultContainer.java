@@ -2,6 +2,7 @@ package de.rub.nds.tlstest.framework.reporting;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import org.junit.platform.launcher.TestIdentifier;
 
@@ -10,6 +11,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +27,21 @@ public class TestResultContainer {
     private Map<String, TestResultContainer> children = new HashMap<>();
 
     private String uniqueId;
+
+    @XmlElement(name = "TestEndpointMode")
+    @JsonProperty("TestEndpointMode")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private TestEndpointType testEndpointType = null;
+
+    @XmlElement(name = "Identifier")
+    @JsonProperty("Identifier")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String identifier = null;
+
+    @XmlElement(name = "Date")
+    @JsonProperty("Date")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Date date = null;
 
     @XmlElement(name = "ElapsedTime")
     @JsonProperty("ElapsedTime")
@@ -199,5 +216,29 @@ public class TestResultContainer {
 
     public void setTestsDisabled(long testsDisabled) {
         this.testsDisabled = testsDisabled;
+    }
+
+    public TestEndpointType getTestEndpointType() {
+        return testEndpointType;
+    }
+
+    public void setTestEndpointType(TestEndpointType testEndpointType) {
+        this.testEndpointType = testEndpointType;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 }

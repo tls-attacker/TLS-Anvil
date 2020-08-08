@@ -52,7 +52,7 @@ public class RespectClientExtensions extends Tls12Test {
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();
         try {
-            List<NamedGroup> groups = context.getConfig().getSiteReport().getSupportedNamedGroups();
+            List<NamedGroup> groups = context.getSiteReport().getSupportedNamedGroups();
 
             for (NamedGroup i : groups) {
                 chm.getExtension(EllipticCurvesExtensionMessage.class).setSupportedGroups(Modifiable.explicit(i.getValue()));

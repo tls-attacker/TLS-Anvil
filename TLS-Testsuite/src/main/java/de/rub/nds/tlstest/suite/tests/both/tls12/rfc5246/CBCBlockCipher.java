@@ -29,7 +29,7 @@ import java.util.List;
 public class CBCBlockCipher extends Tls12Test {
 
     private ConditionEvaluationResult supportsCBCCipherSuites() {
-        List<CipherSuite> suites = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> suites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         suites.removeIf(i -> !i.isCBC());
         if (suites.size() > 0) {
             return ConditionEvaluationResult.enabled("");

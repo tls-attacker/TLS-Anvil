@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class CertificateVerify extends Tls13Test {
 
     public ConditionEvaluationResult supportsLegacyRSASAHAlgorithms() {
-        List<SignatureAndHashAlgorithm> algos = context.getConfig().getSiteReport().getSupportedSignatureAndHashAlgorithms();
+        List<SignatureAndHashAlgorithm> algos = context.getSiteReport().getSupportedSignatureAndHashAlgorithms();
         algos = algos.stream().filter(i -> i.getSignatureAlgorithm() == SignatureAlgorithm.RSA).collect(Collectors.toList());
 
         if (algos.size() > 0) {
@@ -57,7 +57,7 @@ public class CertificateVerify extends Tls13Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();
-        for (SignatureAndHashAlgorithm algo : context.getConfig().getSiteReport().getSupportedSignatureAndHashAlgorithms()) {
+        for (SignatureAndHashAlgorithm algo : context.getSiteReport().getSupportedSignatureAndHashAlgorithms()) {
             if (algo.getSignatureAlgorithm() == SignatureAlgorithm.RSA) {
                 runner.setStateModifier(i -> {
                     WorkflowTrace trace = i.getWorkflowTrace();
@@ -76,7 +76,7 @@ public class CertificateVerify extends Tls13Test {
 
 
     public ConditionEvaluationResult supportsLegacyECDSASAHAlgorithms() {
-        if (context.getConfig().getSiteReport().getSupportedSignatureAndHashAlgorithms().contains(SignatureAndHashAlgorithm.ECDSA_SHA1)) {
+        if (context.getSiteReport().getSupportedSignatureAndHashAlgorithms().contains(SignatureAndHashAlgorithm.ECDSA_SHA1)) {
             return ConditionEvaluationResult.enabled("");
         }
         return ConditionEvaluationResult.disabled("Client does not support legacy rsa signature and hash algorithms");
@@ -120,7 +120,7 @@ public class CertificateVerify extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         for (CertificateKeyType keyType : certificateKeyTypes) {
-            List<SignatureAndHashAlgorithm> algorithms = context.getConfig().getSiteReport().getSupportedSignatureAndHashAlgorithms().stream()
+            List<SignatureAndHashAlgorithm> algorithms = context.getSiteReport().getSupportedSignatureAndHashAlgorithms().stream()
                     .filter(i -> i.getSignatureAlgorithm().toString().contains(keyType.toString()) &&
                             i.getHashAlgorithm() != HashAlgorithm.SHA1 &&
                             i.getSignatureAlgorithm() != SignatureAlgorithm.RSA &&

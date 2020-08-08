@@ -28,7 +28,7 @@ public class TLSExtensionForECC extends Tls12Test {
     public void bothECExtensions_WithoutECCCipher() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
-        Set<CipherSuite> suites = context.getConfig().getSiteReport().getCipherSuites();
+        Set<CipherSuite> suites = context.getSiteReport().getCipherSuites();
         suites.removeIf(cs -> !KeyExchangeType.ECDH.compatibleWithCiphersuite(cs));
 
         if (suites.size() == 0) {

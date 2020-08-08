@@ -72,7 +72,7 @@ public class KeyShare extends Tls13Test {
         Config c = this.getConfig();
 
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
-        List<NamedGroup> groups = context.getConfig().getSiteReport().getSupportedNamedGroups();
+        List<NamedGroup> groups = context.getSiteReport().getSupportedNamedGroups();
         KeyShareExtensionMessage keyshare = chm.getExtension(KeyShareExtensionMessage.class);
 
         for (KeyShareEntry i : keyshare.getKeyShareList()) {

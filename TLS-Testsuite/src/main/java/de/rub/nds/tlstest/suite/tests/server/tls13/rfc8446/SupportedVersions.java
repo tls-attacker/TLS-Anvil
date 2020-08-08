@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 @ServerTest
 public class SupportedVersions extends Tls13Test {
     public ConditionEvaluationResult supportsTls12() {
-        if (context.getConfig().getSiteReport().getVersions().contains(ProtocolVersion.TLS12)) {
+        if (context.getSiteReport().getVersions().contains(ProtocolVersion.TLS12)) {
             return ConditionEvaluationResult.enabled("");
         }
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
@@ -82,7 +82,7 @@ public class SupportedVersions extends Tls13Test {
     public void oldLegacyVersion(WorkflowRunner runner) {
         runner.appendEachSupportedCiphersuiteToClientSupported = true;
         Config c = this.getConfig();
-        c.setDefaultClientSupportedCiphersuites(context.getConfig().getSiteReport().getCipherSuites().stream().filter(i -> !i.isTLS13()).collect(Collectors.toList()));
+        c.setDefaultClientSupportedCiphersuites(context.getSiteReport().getCipherSuites().stream().filter(i -> !i.isTLS13()).collect(Collectors.toList()));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         runner.setStateModifier(i -> {

@@ -28,7 +28,7 @@ import static org.junit.Assert.assertTrue;
 @ClientTest
 public class SupportedVersions extends Tls13Test {
     public ConditionEvaluationResult supportsTls12() {
-        if (context.getConfig().getSiteReport().getVersions().contains(ProtocolVersion.TLS12)) {
+        if (context.getSiteReport().getVersions().contains(ProtocolVersion.TLS12)) {
             return ConditionEvaluationResult.enabled("");
         }
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");

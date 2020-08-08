@@ -61,7 +61,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        List<CipherSuite> greaseCipherSuites = context.getConfig().getSiteReport().getCipherSuites().stream().filter(CipherSuite::isGrease).collect(Collectors.toList());
+        List<CipherSuite> greaseCipherSuites = context.getSiteReport().getCipherSuites().stream().filter(CipherSuite::isGrease).collect(Collectors.toList());
         CipherSuite cs;
         if (greaseCipherSuites.size() > 0) {
             cs = greaseCipherSuites.get(0);
@@ -109,7 +109,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        List<NamedGroup> supportedGroups = context.getConfig().getSiteReport().getSupportedNamedGroups().stream().filter(NamedGroup::isGrease).collect(Collectors.toList());
+        List<NamedGroup> supportedGroups = context.getSiteReport().getSupportedNamedGroups().stream().filter(NamedGroup::isGrease).collect(Collectors.toList());
         NamedGroup ng;
         if (supportedGroups.size() > 0) {
             ng = supportedGroups.get(0);
@@ -138,7 +138,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        List<SignatureAndHashAlgorithm> supportedAlgs = context.getConfig().getSiteReport().getSupportedSignatureAndHashAlgorithms()
+        List<SignatureAndHashAlgorithm> supportedAlgs = context.getSiteReport().getSupportedSignatureAndHashAlgorithms()
                 .stream()
                 .filter(SignatureAndHashAlgorithm::isGrease)
                 .collect(Collectors.toList());

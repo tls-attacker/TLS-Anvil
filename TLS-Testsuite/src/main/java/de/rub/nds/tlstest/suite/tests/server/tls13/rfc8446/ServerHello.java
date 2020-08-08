@@ -32,7 +32,7 @@ import static org.junit.Assert.*;
 public class ServerHello extends Tls13Test {
 
     public ConditionEvaluationResult supportsTls12() {
-        if (context.getConfig().getSiteReport().getVersions().contains(ProtocolVersion.TLS12))
+        if (context.getSiteReport().getVersions().contains(ProtocolVersion.TLS12))
             return ConditionEvaluationResult.enabled("");
         return ConditionEvaluationResult.disabled("No TLS 1.2 supported");
     }

@@ -32,7 +32,7 @@ import java.util.List;
 public class SCSV extends Tls12Test {
 
     public ConditionEvaluationResult supportsOtherTlsVersions() {
-        List<ProtocolVersion> versions = context.getConfig().getSiteReport().getVersions();
+        List<ProtocolVersion> versions = context.getSiteReport().getVersions();
         if (versions.contains(ProtocolVersion.TLS10) || versions.contains(ProtocolVersion.TLS11)) {
             return ConditionEvaluationResult.enabled("Other versions are supported");
         }
@@ -48,7 +48,7 @@ public class SCSV extends Tls12Test {
             "or to the record layer version number used by the client.", securitySeverity = SeverityLevel.CRITICAL)
     @MethodCondition(method = "supportsOtherTlsVersions")
     public void includeFallbackSCSV(WorkflowRunner runner) {
-        List<VersionSuiteListPair> olderCipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getVersionSuitePairs());
+        List<VersionSuiteListPair> olderCipherSuites = new ArrayList<>(context.getSiteReport().getVersionSuitePairs());
         olderCipherSuites.removeIf(i -> i.getVersion() != ProtocolVersion.TLS10 && i.getVersion() != ProtocolVersion.TLS11);
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();
@@ -93,7 +93,7 @@ public class SCSV extends Tls12Test {
             "or to the record layer version number used by the client.", securitySeverity = SeverityLevel.CRITICAL)
     @MethodCondition(method = "supportsOtherTlsVersions")
     public void includeFallbackSCSV_nonRecommendedCipherSuiteOrder(WorkflowRunner runner) {
-        List<VersionSuiteListPair> olderCipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getVersionSuitePairs());
+        List<VersionSuiteListPair> olderCipherSuites = new ArrayList<>(context.getSiteReport().getVersionSuitePairs());
         olderCipherSuites.removeIf(i -> i.getVersion() != ProtocolVersion.TLS10 && i.getVersion() != ProtocolVersion.TLS11);
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();

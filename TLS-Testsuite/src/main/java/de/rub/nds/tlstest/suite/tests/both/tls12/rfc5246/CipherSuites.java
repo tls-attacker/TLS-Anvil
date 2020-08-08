@@ -20,7 +20,7 @@ public class CipherSuites extends Tls12Test {
 
     @TlsTest(description = "Removed IDEA and DES cipher suites. They are now deprecated and will be documented in a separate document.", securitySeverity = SeverityLevel.CRITICAL)
     public void supportOfDeprectedCipherSuites() {
-        List<VersionSuiteListPair> versionSuiteListPairList = context.getConfig().getSiteReport().getVersionSuitePairs();
+        List<VersionSuiteListPair> versionSuiteListPairList = context.getSiteReport().getVersionSuitePairs();
         List<CipherSuite> suites = versionSuiteListPairList.stream()
                 .filter(i -> i.getVersion() == ProtocolVersion.TLS12)
                 .flatMap(i -> i.getCiphersuiteList().stream())

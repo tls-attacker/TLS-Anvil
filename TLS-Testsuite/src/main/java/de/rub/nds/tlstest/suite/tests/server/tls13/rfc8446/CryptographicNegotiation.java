@@ -47,7 +47,7 @@ public class CryptographicNegotiation extends Tls13Test {
         );
 
         List<KeyShareStoreEntry> keyshareList = new ArrayList<>();
-        NamedGroup group =  context.getConfig().getSiteReport().getSupportedTls13Groups().get(0);
+        NamedGroup group =  context.getSiteReport().getSupportedTls13Groups().get(0);
         EllipticCurve curve = CurveFactory.getCurve(group);
 
         Point publicKey = curve.mult(config.getDefaultClientEcPrivateKey(), curve.getBasePoint());

@@ -42,7 +42,7 @@ public class SignatureAlgorithms extends Tls12Test {
     }
 
     private boolean supported(String filter) {
-        List<CipherSuite> cipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> cipherSuites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         cipherSuites.removeIf(i -> !i.toString().contains(filter));
         return cipherSuites.size() > 0;
     }

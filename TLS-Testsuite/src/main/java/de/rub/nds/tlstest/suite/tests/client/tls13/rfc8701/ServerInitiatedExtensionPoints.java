@@ -105,7 +105,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        List<CipherSuite> greaseCipherSuites = context.getConfig().getSiteReport().getCipherSuites().stream().filter(CipherSuite::isGrease).collect(Collectors.toList());
+        List<CipherSuite> greaseCipherSuites = context.getSiteReport().getCipherSuites().stream().filter(CipherSuite::isGrease).collect(Collectors.toList());
         CipherSuite cs;
         if (greaseCipherSuites.size() > 0) {
             cs = greaseCipherSuites.get(0);

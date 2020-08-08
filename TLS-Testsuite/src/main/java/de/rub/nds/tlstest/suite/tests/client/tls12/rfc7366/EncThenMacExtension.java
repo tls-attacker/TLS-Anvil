@@ -28,7 +28,7 @@ import static org.junit.Assert.assertNotNull;
 @ClientTest
 public class EncThenMacExtension extends Tls12Test {
     private boolean supportsBlockCiphers() {
-        if (context.getConfig().getSiteReport().getCipherSuites().stream().anyMatch(i -> {
+        if (context.getSiteReport().getCipherSuites().stream().anyMatch(i -> {
             try {
                 return AlgorithmResolver.getCipherType(i) != CipherType.BLOCK;
             } catch (Exception e) {

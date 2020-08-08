@@ -29,7 +29,7 @@ import java.util.List;
 public class AEADCiphers extends Tls12Test {
 
     private ConditionEvaluationResult supportsAEADCiphers() {
-        List<CipherSuite> suites = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> suites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         suites.removeIf(i -> !i.isAEAD());
         if (suites.size() > 0) {
             return ConditionEvaluationResult.enabled("");

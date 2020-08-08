@@ -25,7 +25,7 @@ import java.util.List;
 public class RC4Ciphersuites extends Tls12Test {
 
     public ConditionEvaluationResult supportsRC4(ExtensionContext context) {
-        List<CipherSuite> supported = new ArrayList<>(this.context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> supported = new ArrayList<>(this.context.getSiteReport().getCipherSuites());
         supported.removeIf(i -> !i.toString().contains("RC4"));
 
         return supported.size() == 0 ? ConditionEvaluationResult.disabled("No RC4 Ciphersuite supported") : ConditionEvaluationResult.enabled("");
@@ -33,7 +33,7 @@ public class RC4Ciphersuites extends Tls12Test {
 
     @TlsTest(description = "TLS clients MUST NOT include RC4 cipher suites in the ClientHello message.", securitySeverity = SeverityLevel.CRITICAL)
     public void offersRC4Ciphersuites(WorkflowRunner runner) {
-        List<CipherSuite> supported = new ArrayList<>(this.context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> supported = new ArrayList<>(this.context.getSiteReport().getCipherSuites());
         supported.removeIf(i -> !i.toString().contains("RC4"));
         if (supported.size() > 0) {
             throw new AssertionError("Client supports RC4 Ciphersuites");
@@ -47,7 +47,7 @@ public class RC4Ciphersuites extends Tls12Test {
         runner.replaceSelectedCiphersuite = true;
         runner.respectConfigSupportedCiphersuites = true;
 
-        List<CipherSuite> supported = new ArrayList<>(this.context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> supported = new ArrayList<>(this.context.getSiteReport().getCipherSuites());
         supported.removeIf(i -> !i.toString().contains("RC4"));
 
         Config config = this.getConfig();

@@ -98,7 +98,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         AnnotatedStateContainer container = new AnnotatedStateContainer();
 
-        for (NamedGroup type : context.getConfig().getSiteReport().getSupportedTls13Groups()) {
+        for (NamedGroup type : context.getSiteReport().getSupportedTls13Groups()) {
             if (!NamedGroup.getImplemented().contains(type)) continue;
             Config c = this.getConfig();
             List<NamedGroup> groups = Arrays.stream(NamedGroup.values()).filter(i -> i.isGrease() || i == type).collect(Collectors.toList());

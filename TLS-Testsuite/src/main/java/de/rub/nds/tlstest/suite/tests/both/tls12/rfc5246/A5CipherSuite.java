@@ -17,7 +17,7 @@ public class A5CipherSuite extends Tls12Test {
             "the first handshake on that channel, but MUST NOT be negotiated, as it provides no more protection " +
             "than an unsecured connection.", securitySeverity = SeverityLevel.CRITICAL)
     public void negotiateTLS_NULL_WITH_NULL_NULL() {
-        List<CipherSuite> suites = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> suites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         if (suites.contains(CipherSuite.TLS_NULL_WITH_NULL_NULL)) {
             throw new AssertionError("TLS_NULL_WITH_NULL_NULL ciphersuite is supported");
         }
@@ -26,7 +26,7 @@ public class A5CipherSuite extends Tls12Test {
     @TlsTest(description = "These cipher suites MUST NOT be used by TLS 1.2 implementations unless the application " +
             "layer has specifically requested to allow anonymous key exchange", securitySeverity = SeverityLevel.HIGH)
     public void anonCipherSuites() {
-        List<CipherSuite> suites = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> suites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         List<CipherSuite> forbidden = CipherSuite.getImplemented();
         forbidden.removeIf(i -> !i.toString().contains("_anon_"));
 

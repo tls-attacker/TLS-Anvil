@@ -22,7 +22,7 @@ public class SupportedCiphersuites extends Tls12Test {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
 
         List<CipherSuite> advertised = CipherSuite.getCiphersuites(clientHello.getCipherSuites().getValue());
-        List<CipherSuite> supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> supported = new ArrayList<>(context.getSiteReport().getCipherSuites());
 
         advertised.forEach(supported::remove);
 

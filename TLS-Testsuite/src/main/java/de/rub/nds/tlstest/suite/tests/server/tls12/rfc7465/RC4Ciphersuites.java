@@ -32,7 +32,7 @@ import static org.junit.Assert.assertArrayEquals;
 public class RC4Ciphersuites extends Tls12Test {
 
     public ConditionEvaluationResult supportsRC4(ExtensionContext context) {
-        List<CipherSuite> supported = new ArrayList<>(this.context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> supported = new ArrayList<>(this.context.getSiteReport().getCipherSuites());
         supported.removeIf(i -> !i.toString().contains("RC4"));
 
         return supported.size() == 0 ? ConditionEvaluationResult.disabled("No RC4 Ciphersuite supported") : ConditionEvaluationResult.enabled("");

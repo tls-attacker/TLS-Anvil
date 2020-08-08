@@ -65,7 +65,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     }
 
     public ConditionEvaluationResult doesSupportLegacyVersions() {
-        List<ProtocolVersion> versions = context.getConfig().getSiteReport().getVersions();
+        List<ProtocolVersion> versions = context.getSiteReport().getVersions();
         if (!versions.contains(ProtocolVersion.SSL3) || !versions.contains(ProtocolVersion.TLS10) || !versions.contains(ProtocolVersion.TLS11)) {
             return ConditionEvaluationResult.enabled("");
         }
@@ -81,7 +81,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
         Config c = this.getConfig();
         ProtocolVersion version = ProtocolVersion.SSL3;
-        List<ProtocolVersion> versions = context.getConfig().getSiteReport().getVersions();
+        List<ProtocolVersion> versions = context.getSiteReport().getVersions();
         if (!versions.contains(ProtocolVersion.TLS11)) {
             version = ProtocolVersion.TLS11;
         } else if (!versions.contains(ProtocolVersion.TLS10)) {

@@ -129,7 +129,7 @@ public class LengthFieldTest extends TlsGenericTest {
         runner.useRecordFragmentationDerivation = false;
         runner.useTCPFragmentationDerivation = false;
 
-        List<CipherSuite> tls13SupportedCipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
+        List<CipherSuite> tls13SupportedCipherSuites = new ArrayList<>(context.getSiteReport().getSupportedTls13CipherSuites());
         Config c = context.getConfig().createTls13Config();
         c.setReceiveFinalSocketStateWithTimeout(true);
         AnnotatedStateContainer container = getContainer(c, tls13SupportedCipherSuites, RunningModeType.CLIENT);
@@ -144,7 +144,7 @@ public class LengthFieldTest extends TlsGenericTest {
         runner.useRecordFragmentationDerivation = false;
         runner.useTCPFragmentationDerivation = false;
 
-        List<CipherSuite> cipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> cipherSuites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         Config c = context.getConfig().createConfig();
         c.setReceiveFinalSocketStateWithTimeout(true);
         AnnotatedStateContainer container = getContainer(c, cipherSuites, RunningModeType.CLIENT);
@@ -159,7 +159,7 @@ public class LengthFieldTest extends TlsGenericTest {
         runner.useRecordFragmentationDerivation = false;
         runner.useTCPFragmentationDerivation = false;
 
-        List<CipherSuite> tls13SupportedCipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
+        List<CipherSuite> tls13SupportedCipherSuites = new ArrayList<>(context.getSiteReport().getSupportedTls13CipherSuites());
         Config c = context.getConfig().createTls13Config();
         c.setReceiveFinalSocketStateWithTimeout(true);
         AnnotatedStateContainer container = getContainer(c, tls13SupportedCipherSuites, RunningModeType.SERVER);
@@ -174,7 +174,7 @@ public class LengthFieldTest extends TlsGenericTest {
         runner.useRecordFragmentationDerivation = false;
         runner.useTCPFragmentationDerivation = false;
 
-        List<CipherSuite> cipherSuites = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> cipherSuites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         Config c = context.getConfig().createConfig();
         c.setReceiveFinalSocketStateWithTimeout(true);
         AnnotatedStateContainer container = getContainer(c, cipherSuites, RunningModeType.SERVER);

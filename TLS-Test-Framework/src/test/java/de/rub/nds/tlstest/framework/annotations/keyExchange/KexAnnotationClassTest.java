@@ -42,10 +42,6 @@ public class KexAnnotationClassTest {
     public void execute_mergedWithClassAnnoation() { }
 
     @TlsTest
-    @KeyExchange()
-    public void not_execute_unsupportedKex() { }
-
-    @TlsTest
     @KeyExchange(supported = KeyExchangeType.DH)
     public void not_execute_unsupprtedKex() { }
 

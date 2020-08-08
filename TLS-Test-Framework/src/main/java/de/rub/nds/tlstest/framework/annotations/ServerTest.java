@@ -3,6 +3,7 @@ package de.rub.nds.tlstest.framework.annotations;
 
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -15,7 +16,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @TestEndpoint(endpoint = TestEndpointType.SERVER)
 @Tag("server")
-@TlsTest
+@Test
 public @interface ServerTest {
 
 }

@@ -45,7 +45,7 @@ public class KeyXResolveTest {
     }
 
     @Test
-    @KeyExchange()
+    @KeyExchange(supported = {})
     public void test_resolve_withoutSupported(ExtensionContext context) {
         KeyExchange resolved = KeyX.resolveKexAnnotation(context);
         assertEquals(resolved.supported().length, 0);

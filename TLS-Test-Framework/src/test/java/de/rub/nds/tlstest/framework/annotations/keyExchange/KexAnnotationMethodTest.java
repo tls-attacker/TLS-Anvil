@@ -51,11 +51,7 @@ public class KexAnnotationMethodTest {
     public void execute_noKexAnnotationSpecified() { }
 
     @TlsTest
-    @KeyExchange()
-    public void not_execute_KexNotSupportedByTarget() { }
-
-    @TlsTest
-    @KeyExchange(mergeSupportedWithClassSupported = true)
+    @KeyExchange(supported = {}, mergeSupportedWithClassSupported = true)
     public void not_execute_KexNotSupportedByTarget2() { }
 
     @TlsTest

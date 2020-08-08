@@ -3,6 +3,7 @@ package de.rub.nds.tlstest.framework.junitExtensions;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
+import de.rub.nds.tlstest.framework.annotations.TestEndpoint;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -24,6 +25,10 @@ public class EndpointCondition extends BaseCondition {
             return TestEndpointType.CLIENT;
         } else if (testClass.isAnnotationPresent(ServerTest.class)) {
             return TestEndpointType.SERVER;
+        } else if (testMethod.isAnnotationPresent(TestEndpoint.class)) {
+            return testMethod.getAnnotation(TestEndpoint.class).endpoint();
+        } else if (testClass.isAnnotationPresent(TestEndpoint.class)) {
+            return testClass.getAnnotation(TestEndpoint.class).endpoint();
         } else {
             return TestEndpointType.BOTH;
         }

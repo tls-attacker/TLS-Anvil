@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.TYPE})
 public @interface KeyExchange {
-    KeyExchangeType[] supported() default {};
+    KeyExchangeType[] supported();
     boolean mergeSupportedWithClassSupported() default false;
     boolean requiresServerKeyExchMsg() default false;
 }

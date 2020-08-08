@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface MethodCondition {
-    Class<?> clazz() default Exception.class;
+    Class<?> clazz() default Object.class;
     String method();
 }

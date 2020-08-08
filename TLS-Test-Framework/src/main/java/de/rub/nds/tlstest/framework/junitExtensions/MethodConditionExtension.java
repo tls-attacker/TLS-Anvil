@@ -17,7 +17,7 @@ public class MethodConditionExtension extends BaseCondition {
 
     private Method getMethodForAnnoation(MethodCondition annotation, Class<?> testClass) {
         Method result = null;
-        if (!annotation.clazz().equals(Exception.class)) {
+        if (!annotation.clazz().equals(Object.class)) {
             try {
                 Arrays.asList(annotation.clazz().getDeclaredMethods()).forEach((Method i) -> {
                     i.setAccessible(true);

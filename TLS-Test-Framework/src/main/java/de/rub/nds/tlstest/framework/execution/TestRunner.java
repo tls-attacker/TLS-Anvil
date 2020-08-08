@@ -67,7 +67,7 @@ public class TestRunner {
 
     private final TestConfig testConfig;
     private final TestContext testContext;
-    private ParallelExecutor executor;
+
 
     private boolean targetIsReady = false;
 
@@ -331,9 +331,11 @@ public class TestRunner {
             return;
         }
 
-        executor = new ParallelExecutor(testConfig.getParallel(), 2);
+        ParallelExecutor executor = new ParallelExecutor(testConfig.getParallel(), 2);
         executor.setTimeoutAction(testConfig.getTimeoutActionScript());
         executor.monitorExecutorService();
+        testContext.setStateExecutor(executor);
+
         LOGGER.info("Starting preparation phase");
         this.testConfig.createConfig();
 
@@ -424,16 +426,12 @@ public class TestRunner {
         String content = new String(baos.toByteArray(), StandardCharsets.UTF_8);
         LOGGER.info("\n" + content);
 
-        executor.shutdown();
+        testContext.getStateExecutor().shutdown();
 
         try {
             testConfig.getTestClientDelegate().getServerSocket().close();
         } catch (Exception e) {}
 
         System.exit(0);
-    }
-
-    public ParallelExecutor getExecutor() {
-        return executor;
     }
 }

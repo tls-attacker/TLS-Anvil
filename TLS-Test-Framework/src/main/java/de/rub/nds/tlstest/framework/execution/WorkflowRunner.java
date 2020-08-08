@@ -117,14 +117,14 @@ public class WorkflowRunner {
 
         List<State> states = container.getStates().parallelStream().map(AnnotatedState::getState).collect(Collectors.toList());
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-            context.getTestRunner().getExecutor().bulkExecuteStateTasks(states);
+            context.getStateExecutor().bulkExecuteStateTasks(states);
         } else {
             List<TlsTask> tasks = states.stream().map(i -> {
                 StateExecutionServerTask task = new StateExecutionServerTask(i, context.getConfig().getTestClientDelegate().getServerSocket(), 2);
                 task.setBeforeAcceptCallback(context.getConfig().getTestClientDelegate().getWakeupScript());
                 return task;
             }).collect(Collectors.toList());
-            context.getTestRunner().getExecutor().bulkExecuteTasks(tasks);
+            context.getStateExecutor().bulkExecuteTasks(tasks);
         }
 
 

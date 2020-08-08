@@ -1,6 +1,7 @@
 package de.rub.nds.tlstest.framework;
 
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.TestRunner;
@@ -19,6 +20,7 @@ public class TestContext {
 
     private static TestContext instance = null;
     private TestRunner testRunner = null;
+    private ParallelExecutor stateExecutor;
 
     private final Map<String, AnnotatedStateContainer> testResults = new HashMap<>();
     private boolean initializationFailed = false;
@@ -176,5 +178,13 @@ public class TestContext {
 
     public void setSiteReport(TestSiteReport siteReport) {
         this.siteReport = siteReport;
+    }
+
+    public ParallelExecutor getStateExecutor() {
+        return stateExecutor;
+    }
+
+    public void setStateExecutor(ParallelExecutor stateExecutor) {
+        this.stateExecutor = stateExecutor;
     }
 }

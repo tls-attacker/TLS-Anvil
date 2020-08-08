@@ -184,7 +184,7 @@ public class TestRunner {
 
         TestSiteReport cachedReport = loadFromCache();
         if (cachedReport != null) {
-            testConfig.setSiteReport(cachedReport);
+            testContext.setSiteReport(cachedReport);
             return;
         }
 
@@ -213,7 +213,7 @@ public class TestRunner {
         TestSiteReport report = TestSiteReport.fromSiteReoport(scanner.scan());
         saveToCache(report);
 
-        testConfig.setSiteReport(report);
+        testContext.setSiteReport(report);
         LOGGER.debug("TLS-Scanner finished!");
     }
 
@@ -223,7 +223,7 @@ public class TestRunner {
 
         TestSiteReport cachedReport = loadFromCache();
         if (cachedReport != null) {
-            testConfig.setSiteReport(cachedReport);
+            testContext.setSiteReport(cachedReport);
             testContext.setReceivedClientHelloMessage(cachedReport.getReceivedClientHello());
             return;
         }
@@ -326,7 +326,7 @@ public class TestRunner {
         saveToCache(report);
 
         testContext.setReceivedClientHelloMessage(clientHello);
-        testConfig.setSiteReport(report);
+        testContext.setSiteReport(report);
         executor.shutdown();
 
     }
@@ -350,7 +350,7 @@ public class TestRunner {
         }
         else throw new RuntimeException("Invalid TestEndpointMode");
 
-        if (testConfig.getSiteReport() == null) {
+        if (testContext.getSiteReport() == null) {
             throw new RuntimeException("SiteReport is null after preparation phase");
         }
 
@@ -358,7 +358,7 @@ public class TestRunner {
         if (testConfig.getSupportedVersions() != null) {
             targetSupportVersions = false;
             for (ProtocolVersion i : testConfig.getSupportedVersions()) {
-                if (testConfig.getSiteReport().getVersions() != null && testConfig.getSiteReport().getVersions().contains(i)) {
+                if (testContext.getSiteReport().getVersions() != null && testContext.getSiteReport().getVersions().contains(i)) {
                     targetSupportVersions = true;
                     break;
                 }
@@ -366,9 +366,9 @@ public class TestRunner {
         }
 
         boolean startTestSuite = false;
-        if (testConfig.getSiteReport().getVersions() == null || testConfig.getSiteReport().getVersions().size() == 0) {
+        if (testContext.getSiteReport().getVersions() == null || testContext.getSiteReport().getVersions().size() == 0) {
             LOGGER.error("Target does not support any ProtocolVersion");
-        } else if (testConfig.getSiteReport().getCipherSuites().size() == 0 && testConfig.getSiteReport().getSupportedTls13CipherSuites().size() == 0) {
+        } else if (testContext.getSiteReport().getCipherSuites().size() == 0 && testContext.getSiteReport().getSupportedTls13CipherSuites().size() == 0) {
             LOGGER.error("Target does not support any CipherSuites");
         } else if (!targetSupportVersions) {
             LOGGER.error("Target does not support any ProtocolVersion that the Testsuite supports");

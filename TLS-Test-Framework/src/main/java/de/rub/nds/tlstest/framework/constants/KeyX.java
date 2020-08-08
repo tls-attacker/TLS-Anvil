@@ -68,7 +68,7 @@ public class KeyX implements KeyExchange {
      */
     public void filterSupportedKexs() {
         TestContext context = TestContext.getInstance();
-        TestSiteReport report = context.getConfig().getSiteReport();
+        TestSiteReport report = context.getSiteReport();
         Set<CipherSuite> ciphers = report.getCipherSuites();
         if (ciphers == null) {
             ciphers = new HashSet<>();

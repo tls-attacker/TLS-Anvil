@@ -22,6 +22,8 @@ public class TestContext {
 
     private final Map<String, AnnotatedStateContainer> testResults = new HashMap<>();
     private boolean initializationFailed = false;
+
+    private TestSiteReport siteReport = null;
     private ClientHelloMessage receivedClientHelloMessage;
 
     private long totalTests = 0;
@@ -166,5 +168,13 @@ public class TestContext {
 
     public Date getStartTime() {
         return startTime;
+    }
+
+    public TestSiteReport getSiteReport() {
+        return siteReport;
+    }
+
+    public void setSiteReport(TestSiteReport siteReport) {
+        this.siteReport = siteReport;
     }
 }

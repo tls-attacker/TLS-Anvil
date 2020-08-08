@@ -25,7 +25,7 @@ public class TlsVersionCondition extends BaseCondition {
         Class<?> testC = extensionContext.getRequiredTestClass();
 
         TestContext context = TestContext.getInstance();
-        SiteReport report = context.getConfig().getSiteReport();
+        SiteReport report = context.getSiteReport();
         List<ProtocolVersion> protocolVersionList = report.getVersions();
         ProtocolVersion testSupportedVersion;
 

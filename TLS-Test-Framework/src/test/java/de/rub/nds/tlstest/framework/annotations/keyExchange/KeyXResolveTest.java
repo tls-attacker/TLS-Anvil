@@ -31,7 +31,7 @@ public class KeyXResolveTest {
             }
         });
 
-        context.getConfig().setSiteReport(siteReport);
+        context.setSiteReport(siteReport);
     }
 
 

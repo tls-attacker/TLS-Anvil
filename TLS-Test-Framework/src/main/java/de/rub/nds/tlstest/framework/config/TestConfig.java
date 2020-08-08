@@ -36,7 +36,6 @@ public class TestConfig extends TLSDelegateConfig {
     private JCommander argParser = null;
 
     private TestEndpointType testEndpointMode = null;
-    private TestSiteReport siteReport = null;
     private boolean parsedArgs = false;
 
     private Config cachedConfig = null;
@@ -320,14 +319,6 @@ public class TestConfig extends TLSDelegateConfig {
 
     public JCommander getArgParser() {
         return argParser;
-    }
-
-    public TestSiteReport getSiteReport() {
-        return siteReport;
-    }
-
-    public void setSiteReport(TestSiteReport siteReport) {
-        this.siteReport = siteReport;
     }
 
     public boolean isIgnoreCache() {

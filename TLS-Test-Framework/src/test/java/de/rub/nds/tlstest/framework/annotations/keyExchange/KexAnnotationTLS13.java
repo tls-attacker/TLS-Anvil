@@ -29,7 +29,7 @@ public class KexAnnotationTLS13 {
             }
         });
 
-        testContext.getConfig().setSiteReport(report);
+        testContext.setSiteReport(report);
     }
 
 

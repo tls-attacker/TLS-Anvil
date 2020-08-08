@@ -31,7 +31,7 @@ public class TlsVersionAnnotationMethod {
             }
         });
 
-        testContext.getConfig().setSiteReport(report);
+        testContext.setSiteReport(report);
     }
 
 

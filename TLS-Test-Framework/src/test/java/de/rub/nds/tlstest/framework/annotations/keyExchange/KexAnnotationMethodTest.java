@@ -30,7 +30,7 @@ public class KexAnnotationMethodTest {
             }
         });
 
-        testContext.getConfig().setSiteReport(report);
+        testContext.setSiteReport(report);
     }
 
     @TlsTest

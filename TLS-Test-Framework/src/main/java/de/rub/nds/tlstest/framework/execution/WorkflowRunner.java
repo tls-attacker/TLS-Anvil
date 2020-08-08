@@ -241,11 +241,11 @@ public class WorkflowRunner {
 
     private List<AnnotatedState> transformStateClientTest(AnnotatedState annotatedState) {
         List<AnnotatedState> result = new ArrayList<AnnotatedState>(){};
-        List<CipherSuite> supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> supported = new ArrayList<>(context.getSiteReport().getCipherSuites());
         Config inputConfig = annotatedState.getState().getConfig();
 
         if (inputConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13) {
-            supported.addAll(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
+            supported.addAll(context.getSiteReport().getSupportedTls13CipherSuites());
         }
 
         // supported only contains CipherSuites that are compatible with the keyExchange annotation
@@ -282,10 +282,10 @@ public class WorkflowRunner {
     private List<AnnotatedState> transformStateServerTest(AnnotatedState annotatedState) {
         List<AnnotatedState> result = new ArrayList<>();
         Config inputConfig = annotatedState.getState().getConfig();
-        List<CipherSuite> supported = new ArrayList<>(context.getConfig().getSiteReport().getCipherSuites());
+        List<CipherSuite> supported = new ArrayList<>(context.getSiteReport().getCipherSuites());
 
         if (inputConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13) {
-            supported.addAll(context.getConfig().getSiteReport().getSupportedTls13CipherSuites());
+            supported.addAll(context.getSiteReport().getSupportedTls13CipherSuites());
         }
 
         // supported only contains CipherSuites that are compatible with the keyExchange annotation

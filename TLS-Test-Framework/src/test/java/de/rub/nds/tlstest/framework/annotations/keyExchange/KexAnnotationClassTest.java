@@ -31,7 +31,7 @@ public class KexAnnotationClassTest {
             }
         });
 
-        testContext.getConfig().setSiteReport(report);
+        testContext.setSiteReport(report);
     }
 
     @TlsTest

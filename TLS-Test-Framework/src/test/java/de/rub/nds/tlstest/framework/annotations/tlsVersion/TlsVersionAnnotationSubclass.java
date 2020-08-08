@@ -32,7 +32,7 @@ public class TlsVersionAnnotationSubclass extends Tls12SuperClass  {
             }
         });
 
-        testContext.getConfig().setSiteReport(report);
+        testContext.setSiteReport(report);
     }
 
 

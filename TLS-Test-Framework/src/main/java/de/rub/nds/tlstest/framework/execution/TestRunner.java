@@ -126,16 +126,14 @@ public class TestRunner {
 
 
     private void waitForClient() {
-        long start = System.currentTimeMillis();
         try {
             new Thread(() -> {
                 while (!targetIsReady) {
                     LOGGER.warn("Waiting for the client to get ready...");
                     try {
                         testConfig.getTestClientDelegate().executeWakeupScript();
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {}
 
-                    }
                     try {
                         Thread.sleep(1000);
                     } catch (Exception ignored) {}
@@ -144,9 +142,7 @@ public class TestRunner {
             Socket socket = testConfig.getTestClientDelegate().getServerSocket().accept();
             targetIsReady = true;
             socket.close();
-        } catch (Exception e) {
-
-        }
+        } catch (Exception ignored) { }
 
         LOGGER.info("Client is ready, prepapring client exploration...");
     }
@@ -202,7 +198,6 @@ public class TestRunner {
                 ProbeType.COMPRESSIONS,
                 ProbeType.NAMED_GROUPS,
                 ProbeType.PROTOCOL_VERSION,
-                ProbeType.SIGNATURE_AND_HASH,
                 ProbeType.EC_POINT_FORMAT
         );
         scannerConfig.setOverallThreads(1);

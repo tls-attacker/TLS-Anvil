@@ -112,7 +112,6 @@ public class KeyX implements KeyExchange {
         Method testMethod = context.getRequiredTestMethod();
         Class<?> testClass = context.getRequiredTestClass();
         KeyX resolvedKeyExchange = new KeyX();
-        String identifier = testClass.getName() + "." + testMethod.getName();
 
         // annotation on method level
         if (testMethod.isAnnotationPresent(KeyExchange.class)) {

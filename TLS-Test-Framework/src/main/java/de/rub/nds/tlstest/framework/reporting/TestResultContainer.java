@@ -181,10 +181,10 @@ public class TestResultContainer {
     private void updateTestStats(AnnotatedStateContainer result) {
         switch (result.getStatus()) {
             case PARTIALLY_FAILED:
-            case PARTIALLY_SUCCEEDED:
             case FAILED:
                 this.testsFailed++;
                 break;
+            case PARTIALLY_SUCCEEDED:
             case SUCCEEDED:
                 this.testsSucceeded++;
                 break;

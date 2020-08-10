@@ -21,7 +21,7 @@ public class TestSiteReport extends SiteReport {
         super();
     }
 
-    public static TestSiteReport fromSiteReoport(SiteReport siteReport) {
+    public static TestSiteReport fromSiteReport(SiteReport siteReport) {
         try {
             TestSiteReport report = new TestSiteReport();
 

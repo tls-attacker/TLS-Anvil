@@ -205,7 +205,7 @@ public class TestRunner {
 
         TlsScanner scanner = new TlsScanner(scannerConfig);
 
-        TestSiteReport report = TestSiteReport.fromSiteReoport(scanner.scan());
+        TestSiteReport report = TestSiteReport.fromSiteReport(scanner.scan());
         saveToCache(report);
 
         testContext.setSiteReport(report);

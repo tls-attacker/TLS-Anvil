@@ -34,7 +34,25 @@ router.get("/testReportIdentifiers", async (req, res, next) => {
 })
 
 
-router.get("/testReport/:identifier", async (req, res, next) => {
+
+router.delete("/testReport/deleteRegex", async (req, res, next) => {
+  const regex = new RegExp(req.body.regex)
+  const identifiers = await DB.testResultContainer.find({}).select({Identifier: 1}).lean().exec()
+  const promises = []
+  for (const i of identifiers) {
+    if (regex.test(i.Identifier)) {
+      promises.push(DB.removeResultContainer(i.Identifier))
+    }
+  }
+
+  Promise.all(promises).then(() => {
+    res.send({sucess: true})
+  }).catch((e) => {
+    next(e)
+  })
+})
+
+router.route("/testReport/:identifier").get(async (req, res, next) => {
   const start = new Date().getTime()
   const identifier = req.params.identifier
   const container = await DB.testResultContainer.findOne({Identifier: identifier}).lean().exec()
@@ -54,7 +72,15 @@ router.get("/testReport/:identifier", async (req, res, next) => {
   const testReport = await DB.getResultContainer(identifier)
   res.send(testReport)
   console.log(`finished in ${new Date().getTime() - start}ms`)
+}).delete(async (req, res, next) => {
+  DB.removeResultContainer(req.params.identifier).then(() => {
+    res.send({sucess: true})
+  }).catch((e) => {
+    next(e)
+  })
 })
+
+
 
 router.get("/testReport/:identifier/testResult/:className/:methodName", async (req, res, next) => {
   const identifier = req.params.identifier

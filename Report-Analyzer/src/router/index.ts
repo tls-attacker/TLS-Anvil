@@ -19,6 +19,11 @@ const routes: Array<RouteConfig> = [
     path: '/states',
     name: 'states',
     component: () => import(/* webpackChunkName: "states" */ '../views/StateView.vue')
+  },
+  {
+    path: '/manage',
+    name: 'manage',
+    component: () => import(/* webpackChunkName: "manage" */ '../views/Manage.vue')
   }
 ]
 

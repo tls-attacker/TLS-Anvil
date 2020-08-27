@@ -83,7 +83,7 @@
 
     <template v-if="testMethod">
       <p style="max-width: 900px">
-        <strong>RFC:</strong> {{testMethod.RFC.number}}, <strong>Section:</strong> {{testMethod.RFC.Section}}<br>
+        <strong>RFC:</strong> {{testMethod.RFC ? testMethod.RFC.number : "" }}, <strong>Section:</strong> {{testMethod.RFC ? testMethod.RFC.Section : ""}}<br>
         <strong>Description:</strong> {{testMethod.Description}}<br>
         <strong>TLS-Version:</strong> {{testMethod.TlsVersion}}<br>
         <strong>Security severity:</strong> {{testMethod.SecuritySeverity}}, <strong>Interoperability severity: </strong> {{testMethod.InteroperabilitySeverity}}<br>
@@ -260,7 +260,7 @@ export default {
         this.currentlyVisibleRows = res
         return res
       } catch(e) {
-        console.error(e)
+        console.error("d", e, e.stack)
         return []
       }
     },

@@ -18,6 +18,7 @@ Vue.use(VueAxios, axios)
 console.log("mode", process.env)
 if (process.env.NODE_ENV == 'production') {
   axios.defaults.baseURL = 'https://reportanalyzer./api/v1';
+  //axios.defaults.baseURL = 'http://localhost:5000/api/v1';
 } else {
   axios.defaults.baseURL = 'http://localhost:5000/api/v1';
 }

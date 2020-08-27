@@ -86,14 +86,11 @@ export function itemProvider(ctx: IItemProviderContext, reports: ITestResultCont
       descriptions.add(testMethod)
       let positions = resultIndexReportMap.get(testMethod)
       if (!positions) {
-        positions = []
+        positions = Array.apply(null, Array(reports.length)).map(() => -1)
         resultIndexReportMap.set(testMethod, positions)
       }
 
-      while (positions.length < i) {
-        positions.push(-1)
-      }
-      positions.push(report.TestResultClassMethodIndexMap[testMethod])
+      positions[i] = report.TestResultClassMethodIndexMap[testMethod]
     }
   }
 

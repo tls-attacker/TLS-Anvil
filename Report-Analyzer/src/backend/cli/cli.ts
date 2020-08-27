@@ -7,6 +7,7 @@ import { UploadReportEndpoint } from '../endpoints';
 import axios from 'axios'
 
 async function main() {
+  console.log("start")
   const absolutePath = path.resolve(process.argv[2])
 
   let files: string[] = await new Promise<string[]>(resolve => {
@@ -17,45 +18,53 @@ async function main() {
     })
   })
 
+  files.sort()
+
   for (const f of files) {
-    const dir = path.dirname(f)
-    const pcap = path.join(dir, 'dump.pcap')
-    const keyfile = path.join(dir, 'keyfile.log')
-    const results = f
+    try {
+      const dir = path.dirname(f)
+      const pcap = path.join(dir, 'dump.pcap')
+      const keyfile = path.join(dir, 'keyfile.log')
+      const results = f
 
-    if (!existsSync(results) || !existsSync(keyfile) || !existsSync(pcap)) {
-      console.error("Files missing in folder " + dir)
-      continue
-    }
+      if (!existsSync(results) || !existsSync(keyfile) || !existsSync(pcap)) {
+        console.error("Files missing in folder " + dir)
+        continue
+      }
 
-    const pcapContent = readFileSync(pcap).toString('base64')
-    const keyfileContent = readFileSync(keyfile).toString('base64')
-    const resultsContent: ITestResultContainer = JSON.parse(readFileSync(results, 'utf-8'))
+      const pcapContent = readFileSync(pcap).toString('base64')
+      const keyfileContent = readFileSync(keyfile).toString('base64')
+      const resultsContent: ITestResultContainer = JSON.parse(readFileSync(results, 'utf-8'))
 
-    resultsContent.Identifier = basename(dir)
-    resultsContent.Date = moment(basename(dirname(dir)), "DD-MM-YY_HHmmss").toDate()
-    resultsContent.ShortIdentifier = basename(dir).replace('client', 'c').replace('server', 's')
-    resultsContent.ShortIdentifier = resultsContent.ShortIdentifier.slice(0, resultsContent.ShortIdentifier.length - 6)
+      resultsContent.Identifier = basename(dir)
+      resultsContent.Date = moment(basename(dirname(dir)), "DD-MM-YY_HHmmss").toDate()
+      resultsContent.ShortIdentifier = basename(dir).replace('client', 'c').replace('server', 's')
+      resultsContent.ShortIdentifier = resultsContent.ShortIdentifier.slice(0, resultsContent.ShortIdentifier.length - 6)
 
-    const uploadData: UploadReportEndpoint.IBody = {
-      keylog: keyfileContent,
-      pcapDump: pcapContent,
-      testReport: resultsContent
-    }
+      const uploadData: UploadReportEndpoint.IBody = {
+        keylog: keyfileContent,
+        pcapDump: pcapContent,
+        testReport: resultsContent
+      }
 
-    
-    await new Promise((res) => {
-      axios.post('http://localhost:5000/api/v1/uploadReport', uploadData, {
-        maxContentLength: 500000000
-      }).then(() => {
-        console.log('Uploaded ' + resultsContent.Identifier)
-        res()
-      }).catch((e: Error) => {
-        e.stack = null
-        console.error("Upload failed " + resultsContent.Identifier, e.message)
-        res()
+      
+      await new Promise((res) => {
+        //axios.post('https://report:p4ssw0rd123@reportanalyzer.alphanudel.de/api/v1/uploadReport', uploadData, {
+        axios.post('http://localhost:5000/api/v1/uploadReport', uploadData, {
+          maxContentLength: 500000000
+        }).then(() => {
+          console.log('Uploaded ' + resultsContent.Identifier)
+          res()
+        }).catch((e: Error) => {
+          e.stack = null
+          console.error("Upload failed " + resultsContent.Identifier, e.message)
+          res()
+        })
       })
-    })
+    } catch(e) {
+      console.error(f, e, e.stack)
+    }
+    
   }
 
 

@@ -2,6 +2,7 @@ import mongodb from 'mongodb';
 import mongoose from "mongoose";
 import { Readable } from 'stream';
 import { IState, ITestResult, ITestResultContainer, StateSchema, TestResultContainerSchema, TestResultSchema } from './models';
+import { BadRequest } from '../errors';
 
 export enum FileType {
   pcap,
@@ -44,13 +45,17 @@ class Database {
     return this.testResultContainer.findOne({Identifier: identifier}).exec()
   }
 
-  removeResultContainer(identifier: string) {
-    this.testResultContainer.findOne({Identifier: identifier}).then((doc) => {
-      this.testResult.deleteMany({ ContainerId: doc._id })
-      this.testResultState.deleteMany({ ContainerId: doc._id })
-      this.pcapBucket.delete(doc.PcapStorageId)
-      doc.deleteOne()
-    })
+  async removeResultContainer(identifier: string): Promise<any> {
+    const doc = await this.testResultContainer.findOne({ Identifier: identifier });
+    if (!doc) {
+      throw new BadRequest("Invalid identifier")
+    }
+    
+    this.testResult.deleteMany({ ContainerId: doc._id }).exec();
+    this.testResultState.deleteMany({ ContainerId: doc._id }).exec();
+    this.pcapBucket.delete(doc.PcapStorageId);
+    this.keylogfileBucket.delete(doc.KeylogfileStorageId);
+    doc.deleteOne();
   }
 
   async addResultContainer(container: ITestResultContainer, pcap: string, keylogfile: string): Promise<void> {
@@ -179,7 +184,6 @@ class Database {
       return Buffer.concat(values)
     })
   }
-
 }
 
 const _db = new Database()

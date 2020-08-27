@@ -70,14 +70,11 @@ export function itemProvider(ctx: IItemProviderContext, results: ITestResultTabl
 
       let positions = restultStateIndexMap.get(state.uuid)
       if (!positions) {
-        positions = []
+        positions = Array.apply(null, Array(results.length)).map(() => -1)
         restultStateIndexMap.set(state.uuid, positions)
       }
 
-      while (positions.length < i) {
-        positions.push(-1)
-      }
-      positions.push(result.StateIndexMap[state.uuid])
+      positions[i] = result.StateIndexMap[state.uuid]
     }
   }
 

@@ -312,11 +312,15 @@ export default {
     itemProviderProxy(ctx) {
       console.log("start itemProvider")
       const start = new Date().getTime()
-      const res = analyzer.itemProvider(ctx, this.reports)
-      console.log(`Finished in ${new Date().getTime() - start}ms (${res.length})`)
-      console.log(res)
-
-      return res
+      try {
+        const res = analyzer.itemProvider(ctx, this.reports)
+        console.log(`Finished in ${new Date().getTime() - start}ms (${res.length})`)
+        console.log(res)
+        return res
+      } catch(err) {
+        console.error(err, err.stack)
+        return []
+      }
     },
     rowClass(item, type) {
       if (type !== "row") return

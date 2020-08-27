@@ -9,6 +9,7 @@
         <b-navbar-nav>
           <b-nav-item href="#/">Upload</b-nav-item>
           <b-nav-item href="#/analyzer">Analyzer</b-nav-item>
+          <b-nav-item href="#/manage">Manage</b-nav-item>
         </b-navbar-nav>
 
       </b-collapse>

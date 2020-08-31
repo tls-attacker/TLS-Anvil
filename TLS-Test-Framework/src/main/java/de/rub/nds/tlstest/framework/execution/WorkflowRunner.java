@@ -121,7 +121,7 @@ public class WorkflowRunner {
         } else {
             List<TlsTask> tasks = states.stream().map(i -> {
                 StateExecutionServerTask task = new StateExecutionServerTask(i, context.getConfig().getTestClientDelegate().getServerSocket(), 2);
-                task.setBeforeAcceptCallback(context.getConfig().getTestClientDelegate().getWakeupScript());
+                task.setBeforeAcceptCallback(context.getConfig().getTestClientDelegate().getTriggerScript());
                 return task;
             }).collect(Collectors.toList());
             context.getStateExecutor().bulkExecuteTasks(tasks);

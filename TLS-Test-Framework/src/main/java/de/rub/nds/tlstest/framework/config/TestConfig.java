@@ -49,7 +49,8 @@ public class TestConfig extends TLSDelegateConfig {
     @Parameter(names = "-testPackage", description = "Run only tests included in the specified package")
     private String testPackage = null;
 
-    @Parameter(names = "-ignoreCache", description = "Discovering supported TLS-Features takes time, thus they are cached. Using this flag, the cache is ignored.")
+    @Parameter(names = "-ignoreCache", description = "Discovering supported TLS-Features takes time, " +
+            "thus they are cached. Using this flag, the cache is ignored.")
     private boolean ignoreCache = false;
 
     @Parameter(names = "-outputFile", description = "Filepath where the test results should be store, defaults to `pwd/results.json`")
@@ -61,10 +62,12 @@ public class TestConfig extends TLSDelegateConfig {
     @Parameter(names = "-parallel", description = "How many TLS-Handshakes should be executed in parallel? (Default value: 5)")
     private int parallel = 5;
 
-    @Parameter(names = "-timeoutActionScript", description = "Script to execute, if the execution of the testsuite seems to make no progress", variableArity = true)
+    @Parameter(names = "-timeoutActionScript", description = "Script to execute, if the execution of the testsuite " +
+            "seems to make no progress", variableArity = true)
     private List<String> timeoutActionCommand = new ArrayList<>();
 
-    @Parameter(names = "-identifier", description = "Identifier that is visible in the serialized test result. Defaults to the ")
+    @Parameter(names = "-identifier", description = "Identifier that is visible in the serialized test result. " +
+            "Defaults to the hostname of the target or the port. The identifier is visible in the test report.")
     private String identifier = null;
 
 
@@ -236,7 +239,7 @@ public class TestConfig extends TLSDelegateConfig {
 
 
         config.setWorkflowExecutorShouldClose(true);
-        config.setEarlyStop(true);
+        config.setEarlyStop(false);
         config.setStealthMode(true);
 
         cachedConfig = config;
@@ -363,6 +366,10 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setSupportedVersions(List<ProtocolVersion> supportedVersions) {
         this.supportedVersions = supportedVersions;
+    }
+
+    public void setSupportedVersions(ProtocolVersion ...supportedVersions) {
+        this.supportedVersions = Arrays.asList(supportedVersions);
     }
 
     public Callable<Integer> getTimeoutActionScript() {

@@ -131,7 +131,7 @@ public class TestRunner {
                 while (!targetIsReady) {
                     LOGGER.warn("Waiting for the client to get ready...");
                     try {
-                        testConfig.getTestClientDelegate().executeWakeupScript();
+                        testConfig.getTestClientDelegate().executeTriggerScript();
                     } catch (Exception ignored) {}
 
                     try {
@@ -243,7 +243,7 @@ public class TestRunner {
                 WorkflowTrace trace = configurationFactory.createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER);
                 State s = new State(config, trace);
                 StateExecutionServerTask task = new StateExecutionServerTask(s, testConfig.getTestClientDelegate().getServerSocket(), 2);
-                task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getWakeupScript());
+                task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getTriggerScript());
                 tasks.add(task);
                 states.add(s);
             }

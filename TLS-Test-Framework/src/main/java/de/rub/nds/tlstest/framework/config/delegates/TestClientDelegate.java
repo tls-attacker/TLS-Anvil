@@ -18,20 +18,20 @@ import java.util.concurrent.Callable;
 public class TestClientDelegate extends ServerDelegate {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    @Parameter(names = "-wakeupScript", description = "The script is executed before each TLS Handshake to trigger the client under test. " +
+    @Parameter(names = "-triggerScript", description = "The script is executed before each TLS Handshake to trigger the client under test. " +
             "This command takes a variable number of arguments.", variableArity = true)
-    protected List<String> wakeupScriptCommand = new ArrayList<>();
+    protected List<String> triggerScriptCommand = new ArrayList<>();
 
-    private Callable<Integer> wakeupScript;
+    private Callable<Integer> triggerScript;
     private ServerSocket serverSocket;
 
     @Override
     public void applyDelegate(Config config) {
         super.applyDelegate(config);
 
-        if (this.wakeupScriptCommand.size() > 0) {
-            wakeupScript = () -> {
-                ProcessBuilder processBuilder = new ProcessBuilder(wakeupScriptCommand);
+        if (this.triggerScriptCommand.size() > 0) {
+            triggerScript = () -> {
+                ProcessBuilder processBuilder = new ProcessBuilder(triggerScriptCommand);
                 Process p = processBuilder.start();
                 p.waitFor();
                 return p.exitValue();
@@ -47,16 +47,16 @@ public class TestClientDelegate extends ServerDelegate {
     }
 
 
-    public int executeWakeupScript() throws Exception {
-        return this.wakeupScript.call();
+    public int executeTriggerScript() throws Exception {
+        return this.triggerScript.call();
     }
 
-    public Callable<Integer> getWakeupScript() {
-        return wakeupScript;
+    public Callable<Integer> getTriggerScript() {
+        return triggerScript;
     }
 
-    public void setWakeupScript(Callable<Integer> wakeupScript) {
-        this.wakeupScript = wakeupScript;
+    public void setTriggerScript(Callable<Integer> triggerScript) {
+        this.triggerScript = triggerScript;
     }
 
     public ServerSocket getServerSocket() {

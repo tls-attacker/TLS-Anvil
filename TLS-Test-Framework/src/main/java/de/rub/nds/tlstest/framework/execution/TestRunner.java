@@ -30,13 +30,16 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
+import de.rub.nds.tlstest.framework.reporting.ExecutionListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.platform.engine.TestTag;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.TagFilter;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
+import org.junit.platform.launcher.core.LauncherConfig;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
@@ -381,10 +384,31 @@ public class TestRunner {
     }
 
 
+    private boolean countTests(TestIdentifier i, String versionS, String modeS) {
+        if (!i.isTest())
+            return false;
+
+        Set<TestTag> tags = i.getTags();
+        boolean version = tags.stream().anyMatch(j -> j.getName().equals(versionS));
+        boolean mode;
+        if (!modeS.equals("both")) {
+            mode = tags.stream().anyMatch(j -> j.getName().equals(modeS));
+        } else {
+            mode = tags.stream().noneMatch(j -> j.getName().equals("server"))
+                    && tags.stream().noneMatch(j -> j.getName().equals("client"));
+        }
+
+        return version && mode;
+    }
+
     public void runTests(Class<?> mainClass) {
         prepareTestExecution();
 
         String packageName = mainClass.getPackage().getName();
+        if (testConfig.getTestPackage() != null) {
+            packageName = testConfig.getTestPackage();
+        }
+
         LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()
                 .selectors(
                     selectPackage(packageName)
@@ -402,14 +426,30 @@ public class TestRunner {
 
         LauncherDiscoveryRequest request = builder.build();
 
-        Launcher launcher = LauncherFactory.create();
-
         SummaryGeneratingListener listener = new SummaryGeneratingListener();
-        launcher.registerTestExecutionListeners(listener);
+        ExecutionListener reporting = new ExecutionListener();
+
+        Launcher launcher = LauncherFactory.create(
+                LauncherConfig.builder()
+                        .enableTestExecutionListenerAutoRegistration(false)
+                        .addTestExecutionListeners(listener)
+                        .addTestExecutionListeners(reporting)
+                        .build()
+        );
+
         TestPlan testplan = launcher.discover(request);
         long testcases = testplan.countTestIdentifiers(TestIdentifier::isTest);
-        testContext.setTotalTests(testcases);
+        long clientTls12 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls12", "client"));
+        long clientTls13 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls13", "client"));
+        long serverTls12 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls12", "server"));
+        long serverTls13 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls13", "server"));
+        long bothTls12 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls12", "both"));
+        long bothTls13 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls13", "both"));
 
+        LOGGER.info("Server tests, TLS 1.2: {}, TLS 1.3: {}", serverTls12 + bothTls12, serverTls13 + bothTls13);
+        LOGGER.info("Client tests, TLS 1.2: {}, TLS 1.3: {}", clientTls12 + bothTls12, clientTls13 + bothTls13);
+
+        testContext.setTotalTests(testcases);
         long start = System.currentTimeMillis();
 
         launcher.execute(request);

@@ -59,9 +59,7 @@ public class ServerHello extends Tls13Test {
             if (msg == null) {
                 return;
             }
-
-            assertNotNull(AssertMsgs.AlertNotReceived, msg);
-            assertSame(AssertMsgs.UnexpectedAlertDescription, AlertDescription.ILLEGAL_PARAMETER, AlertDescription.getAlertDescription(msg.getDescription().getValue()));
+            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
     }
 
@@ -90,9 +88,7 @@ public class ServerHello extends Tls13Test {
             if (msg == null) {
                 return;
             }
-
-            assertNotNull(AssertMsgs.AlertNotReceived, msg);
-            assertSame(AssertMsgs.UnexpectedAlertDescription, AlertDescription.ILLEGAL_PARAMETER, AlertDescription.getAlertDescription(msg.getDescription().getValue()));
+            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
     }
 
@@ -161,7 +157,7 @@ public class ServerHello extends Tls13Test {
             if (msg == null) {
                 return;
             }
-            assertSame(AssertMsgs.UnexpectedAlertDescription, AlertDescription.ILLEGAL_PARAMETER, AlertDescription.getAlertDescription(msg.getDescription().getValue()));
+            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
     }
 

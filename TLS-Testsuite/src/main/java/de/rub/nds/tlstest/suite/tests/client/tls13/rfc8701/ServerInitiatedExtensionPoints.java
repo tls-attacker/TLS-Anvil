@@ -130,6 +130,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         runner.replaceSelectedCiphersuite = true;
         Config c = this.getConfig();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         runner.setStateModifier(i -> {
             ServerHelloMessage sh = i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class);
@@ -137,7 +138,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             return null;
         });
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
@@ -148,6 +149,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         runner.replaceSelectedCiphersuite = true;
         Config c = this.getConfig();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         runner.setStateModifier(i -> {
             EncryptedExtensionsMessage sh = i.getWorkflowTrace().getFirstSendMessage(EncryptedExtensionsMessage.class);
@@ -155,7 +157,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             return null;
         });
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +

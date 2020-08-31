@@ -47,6 +47,7 @@ public class RecordLayer extends Tls13Test {
             SendAction serverHello = new SendAction(new ServerHelloMessage(c));
             serverHello.setRecords(record);
             t.addTlsAction(1, serverHello);
+            ((SendAction)t.getTlsActions().get(2)).setOptional(true);
             return null;
         });
 

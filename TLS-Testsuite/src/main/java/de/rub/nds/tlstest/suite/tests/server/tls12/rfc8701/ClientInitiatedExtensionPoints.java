@@ -34,8 +34,8 @@ import static org.junit.Assert.assertFalse;
 @RFC(number = 8701, section = "3. Client-Initiated Extension Points")
 public class ClientInitiatedExtensionPoints extends Tls12Test {
 
-    @TlsTest(description = "A client MAY select one or more GREASE cipher suite values and advertise them in the \"cipher_suites\" ﬁeld." +
-            "Servers MUST NOT negotiate any GREASE value when offﬀered in a ClientHello.", interoperabilitySeverity = SeverityLevel.HIGH)
+    @TlsTest(description = "A client MAY select one or more GREASE cipher suite values and advertise them in the \"cipher_suites\" field." +
+            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.HIGH)
     public void advertiseGreaseCiphersuites(WorkflowRunner runner) {
         runner.appendEachSupportedCiphersuiteToClientSupported = true;
 

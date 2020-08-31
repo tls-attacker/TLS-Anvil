@@ -26,6 +26,7 @@ import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
+import org.junit.jupiter.api.Tag;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -123,6 +124,7 @@ public class LengthFieldTest extends TlsGenericTest {
 
 
     @ServerTest
+    @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @TlsTest(description = "Manipulating length fields")
     public void serverTestTls13(WorkflowRunner runner) {
@@ -138,6 +140,7 @@ public class LengthFieldTest extends TlsGenericTest {
     }
 
     @ServerTest
+    @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @TlsTest(description = "Manipulating length fields")
     public void serverTestTls12(WorkflowRunner runner) {
@@ -153,6 +156,7 @@ public class LengthFieldTest extends TlsGenericTest {
     }
 
     @ClientTest
+    @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @TlsTest(description = "Manipulating length fields")
     public void clientTestTls13(WorkflowRunner runner) {
@@ -168,6 +172,7 @@ public class LengthFieldTest extends TlsGenericTest {
     }
 
     @ClientTest
+    @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @TlsTest(description = "Manipulating length fields")
     public void clientTestTls12(WorkflowRunner runner) {

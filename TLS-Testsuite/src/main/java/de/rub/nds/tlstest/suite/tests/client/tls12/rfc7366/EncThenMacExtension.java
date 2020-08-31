@@ -41,7 +41,14 @@ public class EncThenMacExtension extends Tls12Test {
     }
 
     public ConditionEvaluationResult supportsNonBlockCipher() {
+        ConditionEvaluationResult supportsE = supportsExtension();
+        if (supportsE.isDisabled()) return supportsE;
         return supportsBlockCiphers() ? ConditionEvaluationResult.enabled("") : ConditionEvaluationResult.disabled("Does not support block ciphers");
+    }
+
+    public ConditionEvaluationResult supportsExtension() {
+        return context.getReceivedClientHelloMessage().getExtension(EncryptThenMacExtensionMessage.class) == null ?
+                ConditionEvaluationResult.disabled("Target does not support EncThenMacExt") : ConditionEvaluationResult.enabled("");
     }
 
     @TlsTest(description = "Test if the client supports the encrypt-then-mac extension", securitySeverity = SeverityLevel.MEDIUM)

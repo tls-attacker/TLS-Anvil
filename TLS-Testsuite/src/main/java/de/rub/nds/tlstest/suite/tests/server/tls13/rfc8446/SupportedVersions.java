@@ -38,7 +38,8 @@ public class SupportedVersions extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
 
-    @TlsTest(description = "The extension contains a list of supported versions in preference order, with the most preferred version first.")
+    @TlsTest(description = "The extension contains a list of supported versions in " +
+            "preference order, with the most preferred version first.")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void testVersionPreferrence(WorkflowRunner runner) {

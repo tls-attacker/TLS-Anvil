@@ -9,8 +9,7 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 @ClientTest
 @RFC(number = 8446, section = "4.1.2 Client Hello")
@@ -23,7 +22,7 @@ public class ClientHello extends Tls13Test {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
         byte[] version = clientHello.getProtocolVersion().getValue();
         SupportedVersionsExtensionMessage ext = clientHello.getExtension(SupportedVersionsExtensionMessage.class);
-        assertEquals("Invalid legacy_version", ProtocolVersion.TLS12.getValue(), version);
+        assertArrayEquals("Invalid legacy_version", ProtocolVersion.TLS12.getValue(), version);
         assertNotNull("Does not contain supported_versions extension", ext);
     }
 

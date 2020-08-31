@@ -75,7 +75,7 @@ public class CBCBlockCipher extends Tls12Test {
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
-            if (msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
+            if (msg == null || msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
                 throw new AssertionError("Received non expected alert message with invalid CBC padding");
             }
         });
@@ -121,7 +121,7 @@ public class CBCBlockCipher extends Tls12Test {
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
-            if (msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
+            if (msg == null || msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
                 throw new AssertionError("Received non expected alert message with invalid CBC padding");
             }
         });

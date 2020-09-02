@@ -58,6 +58,8 @@ public class TLSRecordProtocol extends Tls12Test {
             "record type, it MUST send an unexpected_message alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
     public void sendNotDefinedRecordTypesWithCCSAndFinished(WorkflowRunner runner) {
         Config c = this.getConfig();
+        runner.replaceSupportedCiphersuites = true;
+
         Record record = new Record();
         record.setContentType(Modifiable.explicit((byte) 0xFF));
 

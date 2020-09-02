@@ -74,7 +74,6 @@ public class AlertProtocol extends Tls12Test {
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
     public void abortAfterFatalAlert_sendBeforeCCS(WorkflowRunner runner) {
         Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
         runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();
@@ -104,7 +103,6 @@ public class AlertProtocol extends Tls12Test {
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
     public void abortAfterFatalAlert_sendAfterServerHelloDone(WorkflowRunner runner) {
         Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
         runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();

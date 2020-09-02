@@ -43,6 +43,7 @@ public class ProhibitingSSLv2 extends Tls12Test {
             "abort the connection")
     public void sendClientHelloVersionLower0300(WorkflowRunner runner) {
         Config c = this.getConfig();
+        runner.replaceSupportedCiphersuites = true;
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
         clientHelloMessage.setProtocolVersion(Modifiable.explicit(ProtocolVersion.SSL2.getValue()));

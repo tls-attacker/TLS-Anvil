@@ -25,23 +25,26 @@ The RFCs are available as PDF in the `RFCs` subfolder. The PDF files are annotat
 ## Build
 To build this project the following script needs to be executed:
 ```shell
+git clone git@github.com:RUB-NDS/ModifiableVariable.git
+( cd ModifiableVariable && git checkout 48a847247af1b028ced1caea479fd2297f57512d )
+
 git clone https://github.com/RUB-NDS/ASN.1-Tool
-cd ASN.1-Tool && git checkout 49c9d809954cf841ef21beeda1b0fbda9a771f51 
+( cd ASN.1-Tool && git checkout 49c9d809954cf841ef21beeda1b0fbda9a771f51 ) 
 
 git clone git@github.com:RUB-NDS/X509-Attacker.git
-cd X509-Attacker && git checkout b499437151b3616eb9b767b19ba6ce700f0771a2
+( cd X509-Attacker && git checkout b499437151b3616eb9b767b19ba6ce700f0771a2 )
 
 git clone git@github.com:RUB-NDS/TLS-Attacker-Development.git
-cd TLS-Attacker-Development && git checkout 281c566d7b98809f3ab72cf17315be1b5afee1d0
+( cd TLS-Attacker-Development && git checkout 66adcc9c1b794ff90b158040a694d678bdf4da4c )
 
 git clone git@github.com:RUB-NDS/TLS-Scanner-Development.git
-cd TLS-Scanner-Development && git checkout f2170ed04f3623d5ce9f89dab43d984225e14817
+( cd TLS-Scanner-Development && git checkout f2170ed04f3623d5ce9f89dab43d984225e14817 && git submodule update --init --recursive )
 
 git clone git@github.com:RUB-NDS/TLS-Test-Framework.git
-cd TLS-Test-Framework && git checkout 2a1e943018ad3eeea44e3f67d22b542460fe8e6c
+( cd TLS-Test-Framework && git checkout c85fbf2a4daa9ce0361f56fdfe58ae3d14bf1d47 )
 
 git clone git@github.com:RUB-NDS/TLS-Testsuite.git
-cd TLS-Testsuite && git checkout cc117ead7cfb6000690eb1533d8dc96b0e1fa8db
+( cd TLS-Testsuite && git checkout 2d11b29c2455c33c8d01e78b56497495960f765a )
 
 docker build -f TLS-Testsuite/Dockerfile . -t testsuite
 ```

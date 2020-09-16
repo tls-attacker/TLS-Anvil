@@ -1,6 +1,6 @@
 # TLS-Test-Framework
 
-The TLS-Test-Framework powers the [TLS-Testsuite](https://github.com/RUB-NDS/TLS-Testsuite) and was developed as part of the master's thesis *Development and Evaluation of a TLS-Testsuite* at the *Ruhr-University Bochum* in cooperation with the *TÜV Inormationstechnik GmbH*.
+The TLS-Test-Framework powers the [TLS-Testsuite](https://github.com/RUB-NDS/TLS-Testsuite) and was developed as part of the master's thesis *Development and Evaluation of a TLS-Testsuite* at the *Ruhr-University Bochum* in cooperation with the *TÜV Informationstechnik GmbH*.
 
 The framework provides JUnit extensions, annotations and an API for modeling tests for the TLS protocol. It uses the TLS stack of [TLS-Attacker](https://github.com/RUB-NDS/TLS-Attacker) for the execution of handshake workflows that are defined in test cases.
 

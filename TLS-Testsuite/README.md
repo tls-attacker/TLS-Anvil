@@ -1,6 +1,6 @@
 # TLS-Testsuite
 
-The TLS-Testsuite is powered by the [TLS-Test-Framework](https://github.com/RUB-NDS/TLS-Test-Framework) and was developed as part of the master's thesis *Development and Evaluation of a TLS-Testsuite* at the *Ruhr-University Bochum* in cooperation with the *TÜV Inormationstechnik GmbH*.
+The TLS-Testsuite is powered by the [TLS-Test-Framework](https://github.com/RUB-NDS/TLS-Test-Framework) and was developed as part of the master's thesis *Development and Evaluation of a TLS-Testsuite* at the *Ruhr-University Bochum* in cooperation with the *TÜV Informationstechnik GmbH*.
 
 The Testsuite contains around 175 client and server tests for TLS 1.2 and TLS 1.3 covering the following RFCs:
 * RFC 4492 - Elliptic Curve Cryptography (ECC) Cipher Suites for Transport Layer Security (TLS)

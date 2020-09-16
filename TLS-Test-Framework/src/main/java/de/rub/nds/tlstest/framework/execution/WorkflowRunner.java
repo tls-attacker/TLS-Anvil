@@ -257,8 +257,13 @@ public class WorkflowRunner {
         }
 
         if (!replaceSelectedCiphersuite) {
+            Config c = inputConfig.createCopy();
+            if (inputConfig.getDefaultClientSupportedCiphersuites().size() == context.getConfig().createConfig().getDefaultClientSupportedCiphersuites().size()
+                    && this.traceType != null) {
+                c.setDefaultServerSupportedCiphersuites(c.getDefaultSelectedCipherSuite());
+            }
             return new ArrayList<AnnotatedState>(){{
-                add(buildFinalState(annotatedState, inputConfig.createCopy()));
+                add(buildFinalState(annotatedState, c));
             }};
         }
 
@@ -306,8 +311,13 @@ public class WorkflowRunner {
         }
 
         if (!replaceSupportedCiphersuites && !appendEachSupportedCiphersuiteToClientSupported) {
+            Config c = inputConfig.createCopy();
+            if (inputConfig.getDefaultClientSupportedCiphersuites().size() == context.getConfig().createConfig().getDefaultClientSupportedCiphersuites().size()
+                && this.traceType != null) {
+                c.setDefaultClientSupportedCiphersuites(c.getDefaultSelectedCipherSuite());
+            }
             return new ArrayList<AnnotatedState>(){{
-                add(buildFinalState(annotatedState, inputConfig.createCopy()));
+                add(buildFinalState(annotatedState, c));
             }};
         }
 

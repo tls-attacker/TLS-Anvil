@@ -16,6 +16,11 @@ import static org.junit.Assert.*;
 public class Validator {
     private static final Logger LOGGER = LogManager.getLogger();
 
+    public static boolean socketClosed(AnnotatedState i) {
+        SocketState socketState = i.getState().getTlsContext().getFinalSocketState();
+        return (socketState == SocketState.SOCKET_EXCEPTION || socketState == SocketState.CLOSED || socketState == SocketState.IO_EXCEPTION);
+    }
+
     public static void receivedFatalAlert(AnnotatedState i, boolean checkExecutedAsPlanned) {
         WorkflowTrace trace = i.getWorkflowTrace();
 
@@ -24,8 +29,7 @@ public class Validator {
         }
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        SocketState socketState = i.getState().getTlsContext().getFinalSocketState();
-        boolean socketClosed = (socketState == SocketState.SOCKET_EXCEPTION || socketState == SocketState.CLOSED || socketState == SocketState.IO_EXCEPTION);
+        boolean socketClosed = socketClosed(i);
         if (msg == null && socketClosed) {
             i.addAdditionalResultInfo("Timeout");
             i.setStatus(TestStatus.PARTIALLY_SUCCEEDED);

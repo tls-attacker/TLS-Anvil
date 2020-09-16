@@ -10,6 +10,13 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurve;
+import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurveSECP256R1;
+import de.rub.nds.tlsattacker.core.crypto.ec.Point;
+import de.rub.nds.tlsattacker.core.crypto.ec.PointFormatter;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareStoreEntry;
+import de.rub.nds.tlsscanner.report.result.VersionSuiteListPair;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
@@ -24,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -135,6 +143,7 @@ public class TestConfig extends TLSDelegateConfig {
 
         this.argParser.parse(args);
         if (argParser.getParsedCommand() == null) {
+            argParser.usage();
             throw new ParameterException("You have to use the client or server command");
         }
 
@@ -211,7 +220,41 @@ public class TestConfig extends TLSDelegateConfig {
     @Override
     synchronized public Config createConfig() {
         if (cachedConfig != null) {
-            return cachedConfig.createCopy();
+            Config config = cachedConfig.createCopy();
+            TestSiteReport report = TestContext.getInstance().getSiteReport();
+            if (report != null) {
+                List<CipherSuite> supported = new ArrayList<>();
+                if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
+                    if (!report.getCipherSuites().contains(config.getDefaultSelectedCipherSuite())) {
+                        supported.addAll(report.getCipherSuites());
+                    }
+                } else {
+                    Optional<VersionSuiteListPair> suitePair = report.getVersionSuitePairs().stream().filter(i -> i.getVersion() == ProtocolVersion.TLS12).findFirst();
+                    if (suitePair.isPresent() && !suitePair.get().getCiphersuiteList().contains(config.getDefaultSelectedCipherSuite())) {
+                        supported.addAll(suitePair.get().getCiphersuiteList());
+                    }
+                }
+                if (supported.size() > 0) {
+                    if (supported.contains(CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256)) {
+                        config.setDefaultSelectedCipherSuite(CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256);
+                    } else if (supported.contains(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256)) {
+                        config.setDefaultSelectedCipherSuite(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256);
+                    } else if (supported.contains(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA)) {
+                        config.setDefaultSelectedCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA);
+                    } else if (supported.contains(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256)) {
+                        config.setDefaultSelectedCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256);
+                    } else if (supported.contains(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256)) {
+                        config.setDefaultSelectedCipherSuite(CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256);
+                    } else if (supported.contains(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256)) {
+                        config.setDefaultSelectedCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256);
+                    } else if (supported.contains(CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256)) {
+                        config.setDefaultSelectedCipherSuite(CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256);
+                    } else {
+                        config.setDefaultSelectedCipherSuite(supported.get(0));
+                    }
+                }
+            }
+            return config;
         }
 
         switch (this.testEndpointMode) {
@@ -276,6 +319,12 @@ public class TestConfig extends TLSDelegateConfig {
         config.setDefaultClientNamedGroups(Arrays.stream(NamedGroup.values()).filter(NamedGroup::isTls13).collect(Collectors.toList()));
         config.setDefaultServerNamedGroups(config.getDefaultClientNamedGroups());
         config.setDefaultSelectedNamedGroup(NamedGroup.ECDH_X25519);
+
+        List <KeyShareStoreEntry> keyshares = config.getDefaultClientKeyShareEntries();
+        EllipticCurve curve = new EllipticCurveSECP256R1();
+        Point p = curve.mult(config.getKeySharePrivate(), curve.getBasePoint());
+        keyshares.add(0, new KeyShareStoreEntry(NamedGroup.SECP256R1, PointFormatter.toRawFormat(p)));
+
         return config;
     }
 

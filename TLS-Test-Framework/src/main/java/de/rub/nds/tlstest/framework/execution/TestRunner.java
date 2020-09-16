@@ -201,7 +201,8 @@ public class TestRunner {
                 ProbeType.COMPRESSIONS,
                 ProbeType.NAMED_GROUPS,
                 ProbeType.PROTOCOL_VERSION,
-                ProbeType.EC_POINT_FORMAT
+                ProbeType.EC_POINT_FORMAT,
+                ProbeType.EXTENSIONS
         );
         scannerConfig.setOverallThreads(1);
         scannerConfig.setParallelProbes(1);

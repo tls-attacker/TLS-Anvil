@@ -44,7 +44,7 @@ export namespace UploadReportEndpoint {
       }
   
       if (replace && exists) {
-        DB.removeResultContainer(body.testReport.Identifier)
+        await DB.removeResultContainer(body.testReport.Identifier)
       }
 
       const testReportService = new TestReportService(body.testReport)

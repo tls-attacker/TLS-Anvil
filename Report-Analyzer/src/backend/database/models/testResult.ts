@@ -37,3 +37,6 @@ export const TestResultSchema = new Schema({
     default: new Map()
   }
 })
+
+TestResultSchema.index({ContainerId: 1})
+TestResultSchema.index({Status: 1})

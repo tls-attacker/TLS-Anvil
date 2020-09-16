@@ -190,7 +190,8 @@ router.get("/testReport/:containerId/testResult/:className/:methodName/:uuid/pca
 
 router.get('/keylogfile', (req, res, next) => {
   res.type('application/octet-stream')
-  DB.downloadKeylogFiles().then((buf) => {
+  const identifiers: string = typeof req.query.identifiers == 'string' ? req.query.identifiers : ""
+  DB.downloadKeylogFiles(identifiers.split(',')).then((buf) => {
     res.setHeader("Content-Disposition", 'attachment; filename="keylogfile.log"')
     res.send(buf)
   })

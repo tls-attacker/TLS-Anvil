@@ -28,3 +28,4 @@ export const TestMethodSchemaObject = {
   DisplayName: String,
   ClassName: String
 }
+

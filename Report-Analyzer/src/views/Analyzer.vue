@@ -371,8 +371,9 @@ export default {
       const store = ev.target.innerHTML
       ev.target.innerHTML = 'Loading...'
       ev.target.disabled = true
-
-      this.$http.get(`/keylogfile`, {responseType: 'blob'}).then((res) => {
+      
+      const ids = this.selectedIdentifiers.length > 0 ? this.selectedIdentifiers.join(',') : ""
+      this.$http.get(`/keylogfile?identifiers=${ids}`, {responseType: 'blob'}).then((res) => {
         const url = URL.createObjectURL(res.data)
         const link = document.createElement('a')
         link.href = url
@@ -396,7 +397,7 @@ export default {
       this.availableIdentifiers = resp.data
       this.error = null
       if (this.$route.query.selected) {
-        const routeSelected = this.$route.query.selected.split(',')
+        const routeSelected = decodeURIComponent(this.$route.query.selected).split(',')
         for (const i of routeSelected) {
           if (this.availableIdentifiers.indexOf(i) > -1 && this.selectedIdentifiers.indexOf(i) == -1) {
             this.selectedIdentifiers.push(i)
@@ -438,7 +439,7 @@ export default {
       this.selectedIdentifiers = []
       this.$refs.table.refresh()
     } else {
-      routeSelected = routeSelected.split(",")
+      routeSelected = decodeURIComponent(routeSelected).split(",")
       this.selectedIdentifiers = routeSelected
     }
 

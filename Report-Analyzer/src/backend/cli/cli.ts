@@ -1,14 +1,26 @@
-import fs, { readdir, readFileSync, existsSync } from "fs";
+import fs, { readdir, readFileSync, existsSync, symlinkSync } from "fs";
 import path, { basename, dirname } from "path";
 import {Utils} from './utils'
 import { ITestResult, ITestResultContainer } from "../database/models"
 import moment from 'moment';
 import { UploadReportEndpoint } from '../endpoints';
 import axios from 'axios'
+import { TestReportService } from '../services';
+import DB from "../database"
+import { exit } from 'process';
+
+const baseurl = "http://localhost:5000/api/v1"
+//const baseurl = "https://report:p4ssw0rd123@reportanalyzer.alphanudel.de/api/v1"
+const remote = false
 
 async function main() {
+  if (!remote) {
+    await DB.connect()
+  }
+
   console.log("start")
   const absolutePath = path.resolve(process.argv[2])
+  console.log(absolutePath)
 
   let files: string[] = await new Promise<string[]>(resolve => {
     Utils.walk(absolutePath, (err, results) => {
@@ -20,9 +32,14 @@ async function main() {
 
   files.sort()
 
+  const resp = await axios.get(baseurl + "/testReportIdentifiers")
+  const uploadedIdentifiers: string[]  = resp.data
+
   for (const f of files) {
     try {
       const dir = path.dirname(f)
+      //if (uploadedIdentifiers.includes(basename(dir))) continue;
+
       const pcap = path.join(dir, 'dump.pcap')
       const keyfile = path.join(dir, 'keyfile.log')
       const results = f
@@ -47,27 +64,34 @@ async function main() {
         testReport: resultsContent
       }
 
-      
-      await new Promise((res) => {
-        //axios.post('https://report:p4ssw0rd123@reportanalyzer.alphanudel.de/api/v1/uploadReport', uploadData, {
-        axios.post('http://localhost:5000/api/v1/uploadReport', uploadData, {
-          maxContentLength: 500000000
-        }).then(() => {
-          console.log('Uploaded ' + resultsContent.Identifier)
-          res()
-        }).catch((e: Error) => {
-          e.stack = null
-          console.error("Upload failed " + resultsContent.Identifier, e.message)
-          res()
+
+      if (remote) {
+        await new Promise((res) => {
+          //axios.post('https://report:p4ssw0rd123@reportanalyzer.alphanudel.de/api/v1/uploadReport', uploadData, {
+          axios.post(baseurl + '/uploadReport', uploadData, {
+            maxContentLength: 500000000
+          }).then(() => {
+            console.log('Uploaded ' + resultsContent.Identifier)
+            res()
+          }).catch((e: Error) => {
+            e.stack = null
+            console.error("Upload failed " + resultsContent.Identifier, e.message)
+            res()
+          })
         })
-      })
+      } else {
+        const testReportService = new TestReportService(uploadData.testReport)
+        const formattedReport = testReportService.prepareTestReport()
+        
+        await DB.addResultContainer(formattedReport, uploadData.pcapDump, uploadData.keylog)
+        console.log('Uploaded ' + resultsContent.Identifier)
+      }
     } catch(e) {
       console.error(f, e, e.stack)
     }
-    
   }
 
-
+  exit(0)
 }
 
 main()

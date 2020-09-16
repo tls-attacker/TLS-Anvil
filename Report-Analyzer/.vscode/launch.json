@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/dist-backend/index.js"
+            "program": "${workspaceFolder}/dist-backend/backend/index.js"
         },
         {
             "type": "firefox",

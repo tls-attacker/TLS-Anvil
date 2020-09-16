@@ -1,3 +1,5 @@
+import { TestStatus } from './TestStatus'
+
 export enum SeverityLevel {
   INFORMATIONAL = "INFORMATIONAL",
   LOW = "LOW",
@@ -23,5 +25,34 @@ export function resolveSeverityLevel(level: string) {
       return '🟣'
     default:
       return 'U'
+  }
+}
+
+
+function scoreForStatus(status: TestStatus, total: number): number {
+  switch (status) {
+    case TestStatus.SUCCEEDED:
+      return 1.0 * total
+    case TestStatus.PARTIALLY_SUCCEEDED:
+      return 0.8 * total
+    case TestStatus.PARTIALLY_FAILED:
+      return 0.2 * total
+    default:
+      return 0
+  }
+}
+
+export function score(severityLevel: SeverityLevel, status: TestStatus): number {
+  switch (severityLevel) {
+    case SeverityLevel.INFORMATIONAL:
+      return scoreForStatus(status, 20)
+    case SeverityLevel.LOW:
+      return scoreForStatus(status, 40)
+    case SeverityLevel.MEDIUM:
+      return scoreForStatus(status, 60)
+    case SeverityLevel.HIGH:
+      return scoreForStatus(status, 80)
+    case SeverityLevel.CRITICAL:
+      return scoreForStatus(status, 100)
   }
 }

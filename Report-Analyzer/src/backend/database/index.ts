@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { Readable } from 'stream';
 import { IState, ITestResult, ITestResultContainer, StateSchema, TestResultContainerSchema, TestResultSchema } from './models';
 import { BadRequest } from '../errors';
+import { TestStatus, SeverityLevel, SeverityLevelStrings, score } from '../../lib/const'
 
 export enum FileType {
   pcap,
@@ -66,6 +67,10 @@ class Database {
     for (let i = 0; i < container.TestResults.length; i++) {
       const result = container.TestResults[i]
       result.ContainerId = containerDoc._id
+      if (result.Status != TestStatus.DISABLED && result.Status != TestStatus.NOT_SPECIFIED && result.States?.length > 0) {
+        result.Status = "cleaned"
+      }
+
       const testResultDoc = new this.testResult(result)
       const stateIds = []
       const uuids: string[] = []
@@ -83,6 +88,44 @@ class Database {
         uuids.push(stateDoc.uuid)
         testResultDoc.StateIndexMap.set(stateDoc.uuid, stateIds.length - 1)
         stateDocs.push(stateDoc)
+
+        if (testResultDoc.Status == "cleaned") {
+          testResultDoc.Status = state.Status
+        } else if (testResultDoc.Status != TestStatus.DISABLED && testResultDoc.Status != TestStatus.NOT_SPECIFIED) {
+          if (testResultDoc.Status == TestStatus.SUCCEEDED) {
+            switch(state.Status) {
+              case TestStatus.PARTIALLY_FAILED:
+              case TestStatus.FAILED:
+                testResultDoc.Status = TestStatus.PARTIALLY_FAILED
+                break;
+              case TestStatus.PARTIALLY_SUCCEEDED:
+                testResultDoc.Status = TestStatus.PARTIALLY_SUCCEEDED
+                break;
+            }
+          } else if (testResultDoc.Status == TestStatus.FAILED) {
+            switch(state.Status) {
+              case TestStatus.SUCCEEDED:
+              case TestStatus.PARTIALLY_SUCCEEDED:
+              case TestStatus.PARTIALLY_FAILED:
+                testResultDoc.Status = TestStatus.PARTIALLY_FAILED
+                break;
+            }
+          } else if (testResultDoc.Status == TestStatus.PARTIALLY_SUCCEEDED) {
+            switch(state.Status) {
+              case TestStatus.FAILED:
+              case TestStatus.PARTIALLY_FAILED:
+                testResultDoc.Status = TestStatus.PARTIALLY_FAILED
+                break;
+            }
+          }
+        }
+      }
+
+      if (testResultDoc.Status != TestStatus.DISABLED && testResultDoc.Status != TestStatus.NOT_SPECIFIED) {
+        containerDoc.Score.Interoperability.Total   += score(<SeverityLevel>testResultDoc.TestMethod.InteroperabilitySeverity, TestStatus.SUCCEEDED)
+        containerDoc.Score.Interoperability.Reached += score(<SeverityLevel>testResultDoc.TestMethod.InteroperabilitySeverity, <TestStatus>testResultDoc.Status)
+        containerDoc.Score.Security.Total           += score(<SeverityLevel>testResultDoc.TestMethod.SecuritySeverity, TestStatus.SUCCEEDED)
+        containerDoc.Score.Security.Reached         += score(<SeverityLevel>testResultDoc.TestMethod.SecuritySeverity, <TestStatus>testResultDoc.Status)
       }
 
       if (!uuidsAreUnique) {
@@ -95,12 +138,14 @@ class Database {
     }
 
     containerDoc.TestResults = testResultDocs.map(i => i._id)
+    containerDoc.Score.Security.Percentage = containerDoc.Score.Security.Reached / containerDoc.Score.Security.Total * 100
+    containerDoc.Score.Interoperability.Percentage = containerDoc.Score.Interoperability.Reached / containerDoc.Score.Interoperability.Total * 100
 
     const promises: Promise<any>[] = []
     promises.push(this.uploadFile(FileType.pcap, pcap, containerDoc.Identifier))
     promises.push(this.uploadFile(FileType.keylog, keylogfile, containerDoc.Identifier))
 
-    return Promise.all(promises).then((vals) => {
+    return Promise.all(promises).then((vals) => { 
       containerDoc.PcapStorageId = vals[0]
       containerDoc.KeylogfileStorageId = vals[1]
       promises.push(containerDoc.save())
@@ -173,11 +218,11 @@ class Database {
     })
   }
 
-  async downloadKeylogFiles(): Promise<Buffer> {
-    const keyfiles = await this.keylogfileBucket.find().toArray()
+  async downloadKeylogFiles(identifiers: string[]): Promise<Buffer> {
+    const containers = await this.testResultContainer.find({Identifier: {$in: identifiers}}).lean().exec()
     const promises = []
-    for (let doc of keyfiles) {
-      promises.push(this.downloadFile(FileType.keylog, doc._id))
+    for (let doc of containers) {
+      promises.push(this.downloadFile(FileType.keylog, doc.KeylogfileStorageId))
     }
 
     return Promise.all(promises).then((values) => {

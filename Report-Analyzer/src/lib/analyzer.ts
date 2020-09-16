@@ -1,6 +1,5 @@
 import { ITestMethod, ITestResult, ITestResultContainer } from '@/backend/database/models';
 import { HighlightOptions, HighlightOptionsStrings, resolveSeverityLevel, IItemProviderContext, Optional, resolveStatus, ISeverityFilter, allSeverityLevels, SeverityLevelStrings, allStatus, TestStatus, TestStatusStrings } from './const';
-import { filter } from 'vue/types/umd';
 
 interface ITestResultTable extends ITestResult {
   statusIcons: string
@@ -63,6 +62,10 @@ export function itemProvider(ctx: IItemProviderContext, reports: ITestResultCont
     return []
   }
   const items: any[] = [{
+    testcase: "Score Security"
+  }, {
+    testcase: "Score Interop"
+  }, {
     testcase: "Succeeded tests"
   }, {
     testcase: "Failed tests"
@@ -77,10 +80,12 @@ export function itemProvider(ctx: IItemProviderContext, reports: ITestResultCont
 
   for (let i = 0; i < reports.length; i++) {
     const report = reports[i]
-    items[0][report.Identifier] = {statusIcons: report.SucceededTests}
-    items[1][report.Identifier] = {statusIcons: report.FailedTests}
-    items[2][report.Identifier] = {statusIcons: report.DisabledTests}
-    items[3][report.Identifier] = {statusIcons: timeConversion(report.ElapsedTime)}
+    items[0][report.Identifier] = {statusIcons: `${report.Score.Security.Reached}/${report.Score.Security.Total} (${report.Score.Security.Percentage.toFixed(2)}%)`}
+    items[1][report.Identifier] = {statusIcons: `${report.Score.Interoperability.Reached}/${report.Score.Interoperability.Total} (${report.Score.Interoperability.Percentage.toFixed(2)}%)`}
+    items[2][report.Identifier] = {statusIcons: report.SucceededTests}
+    items[3][report.Identifier] = {statusIcons: report.FailedTests}
+    items[4][report.Identifier] = {statusIcons: report.DisabledTests}
+    items[5][report.Identifier] = {statusIcons: timeConversion(report.ElapsedTime)}
 
     for (let testMethod of Object.keys(report.TestResultClassMethodIndexMap)) {
       descriptions.add(testMethod)
@@ -96,15 +101,6 @@ export function itemProvider(ctx: IItemProviderContext, reports: ITestResultCont
 
   const descriptionsArr = new Array(...descriptions)
   descriptionsArr.sort((a, b) => {
-    if (resultIndexReportMap.get(a)!.includes(-1) && !resultIndexReportMap.get(b)!.includes(-1)) {
-      // a is bigger -> sort to bottom
-      return 1
-    }
-    if (resultIndexReportMap.get(b)!.includes(-1) && !resultIndexReportMap.get(a)!.includes(-1)) {
-      // a is smaller -> sort to top
-      return -1
-    }
-
     if (a < b) {
       return -1
     } else if (b < a) {

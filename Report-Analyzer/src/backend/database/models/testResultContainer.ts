@@ -15,7 +15,19 @@ export interface ITestResultContainer extends Document, ITimestamp {
   DisabledTests: number,
   TestClasses?: ITestResultContainer[]
   TestResults: ITestResult[]
-  TestResultClassMethodIndexMap: Map<string, number>
+  TestResultClassMethodIndexMap: Map<string, number>,
+  Score: {
+    Security: {
+      Reached: number,
+      Total: number,
+      Percentage: number,
+    }
+    Interoperability: {
+      Reached: number,
+      Total: number,
+      Percentage: number
+    }
+  }
 }
 
 
@@ -37,6 +49,36 @@ export const TestResultContainerSchema = new Schema({
   FailedTests: Number,
   SucceededTests: Number,
   DisabledTests: Number,
+  Score: {
+    Security: {
+      Reached: {
+        type: Number,
+        default: 0
+      },
+      Total: {
+        type: Number,
+        default: 0
+      },
+      Percentage: {
+        type: Number,
+        default: 0
+      },
+    },
+    Interoperability: {
+      Reached: {
+        type: Number,
+        default: 0
+      },
+      Total: {
+        type: Number,
+        default: 0
+      },
+      Percentage: {
+        type: Number,
+        default: 0
+      },
+    }
+  },
   TestResults: [{
     type: Schema.Types.ObjectId,
     ref: 'TestResult'
@@ -51,3 +93,5 @@ export const TestResultContainerSchema = new Schema({
 })
 
 TestResultContainerSchema.index({Identifier: 1})
+TestResultContainerSchema.index({PcapStorageId: 1})
+TestResultContainerSchema.index({KeylogfileStorageId: 1})

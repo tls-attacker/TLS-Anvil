@@ -93,8 +93,15 @@ export function itemProvider(ctx: IItemProviderContext, results: ITestResultTabl
       return -1
     }
 
-    if ((!positionsA && !positionsB) || (restultStateIndexMap.get(b)?.includes(-1) && restultStateIndexMap.get(a)?.includes(-1)))
-      return 0
+    if ((!positionsA && !positionsB) || (restultStateIndexMap.get(b)?.includes(-1) && restultStateIndexMap.get(a)?.includes(-1))) {
+      if (positionsA && positionsB) {
+        const lA = positionsA.filter(i => i == -1).length
+        const lB = positionsB.filter(i => i == -1).length
+        if (lA < lB) return -1
+        if (lB < lA) return 1
+      }
+    }
+      
 
     let resultA = null
     for (const a of positionsA!) {
@@ -212,22 +219,23 @@ export function getRowClass(item: any[], highlightOption: HighlightOptionsString
 
 function filterRowItem(item: any, filter: IFilter): boolean {
   let ret = true
+  let filterStatus = false
   for (const key in item) {
     if (key == "uuid" || !item[key]) continue
 
     const result : IStateTable = item[key]
-    if (!filter.status.includes(<TestStatus>result.Status)) {
-      return false
+    if (filter.status.includes(<TestStatus>result.Status)) {
+      filterStatus = true;
     }
 
     if (filter.properties.includes(additionalInformationFilter) && !result.AdditionalResultInformation) {
-      return false
+      return false || filterStatus
     }
   }
 
   if (filter.properties.includes(HighlightOptions.differentStates)) {
-    ret = ret && getRowClass(item, HighlightOptions.differentStates).includes('highlight')
+    ret = getRowClass(item, HighlightOptions.differentStates).includes('highlight')
   }
 
-  return ret
+  return ret && filterStatus
 }

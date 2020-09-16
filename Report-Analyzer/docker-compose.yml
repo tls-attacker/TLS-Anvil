@@ -30,6 +30,7 @@ services:
 
   app:
     image: reportanalyzer
+    restart: always
     environment: 
       PRODUCTION: '1'
     build: 

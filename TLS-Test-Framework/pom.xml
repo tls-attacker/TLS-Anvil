@@ -118,7 +118,7 @@
                 <version>3.0</version>
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
-                    <header>${main.basedir}/license_header_plain.txt</header>
+                    <header>${basedir}/license_header_plain.txt</header>
                     <strictCheck>true</strictCheck>
                     <includes>
                         <include>src/**/*.java</include>

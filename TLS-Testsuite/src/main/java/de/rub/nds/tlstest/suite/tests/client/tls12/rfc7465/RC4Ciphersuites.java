@@ -32,7 +32,7 @@ public class RC4Ciphersuites extends Tls12Test {
     }
 
     @TlsTest(description = "TLS clients MUST NOT include RC4 cipher suites in the ClientHello message.", securitySeverity = SeverityLevel.CRITICAL)
-    public void offersRC4Ciphersuites(WorkflowRunner runner) {
+    public void offersRC4Ciphersuites() {
         List<CipherSuite> supported = new ArrayList<>(this.context.getSiteReport().getCipherSuites());
         supported.removeIf(i -> !i.toString().contains("RC4"));
         if (supported.size() > 0) {

@@ -24,10 +24,12 @@ import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.junit.Assert.assertTrue;
 
 @ServerTest
+@Tag("alert")
 public class AlertProtocol extends Tls12Test {
 
     @TlsTest(description = "Unless some other fatal alert has been transmitted, each party is " +

@@ -116,6 +116,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             "record layer version number for ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void acceptAnyRecordVersionNumber(WorkflowRunner runner) {
         Config c = this.getConfig();
+        runner.useRecordFragmentationDerivation = false;
         runner.replaceSupportedCiphersuites = true;
 
         Record record = new Record();

@@ -5,10 +5,8 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CipherType;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EncryptThenMacExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
@@ -23,6 +21,7 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 @ClientTest
@@ -82,9 +81,11 @@ public class EncThenMacExtension extends Tls12Test {
                 .collect(Collectors.toList())
         );
 
-        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        trace.addTlsActions(new ReceiveAction(new AlertMessage()));
+        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(trace, c).validateFinal(i -> {
+            assertFalse("Workflow executed as expected", i.getWorkflowTrace().executedAsPlanned());
+            Validator.receivedFatalAlert(i, false);
+        });
     }
 }

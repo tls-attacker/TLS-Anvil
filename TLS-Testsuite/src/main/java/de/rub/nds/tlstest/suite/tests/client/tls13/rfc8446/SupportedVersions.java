@@ -56,6 +56,7 @@ public class SupportedVersions extends Tls13Test {
             "handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "supportsTls12")
     public void selectOlderTlsVersion(WorkflowRunner runner) {
+        // TODO: This should be a TLS 1.2 handshake with TLS 1.2 added to the supportedVersions extension
         runner.replaceSelectedCiphersuite = true;
 
         Config c = this.getConfig();

@@ -128,4 +128,49 @@ public class CBCBlockCipher extends Tls12Test {
     }
 
 
+    @TlsTest(description = "The padding length MUST be such that the total size of the " +
+            "GenericBlockCipher structure is a multiple of the cipher’s block " +
+            "length. Legal values range from zero to 255, inclusive. This " +
+            "length specifies the length of the padding field exclusive of the " +
+            "padding_length field itself.", securitySeverity = SeverityLevel.HIGH)
+    @MethodCondition(clazz = CBCBlockCipher.class, method = "supportsCBCCipherSuites")
+    public void invalidMAC(WorkflowRunner runner) {
+        Config c = this.getConfig();
+        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
+        runner.respectConfigSupportedCiphersuites = true;
+
+        List<CipherSuite> suites = CipherSuite.getImplemented();
+        suites.removeIf(i -> !i.isCBC());
+        c.setDefaultServerSupportedCiphersuites(suites);
+        c.setDefaultClientSupportedCiphersuites(suites);
+
+        Record record = new Record();
+        record.setComputations(new RecordCryptoComputations());
+        record.getComputations().setMac(Modifiable.xor(new byte[]{0x01}, 0));
+
+        ApplicationMessage appData = new ApplicationMessage();
+        appData.setData(Modifiable.explicit("test".getBytes()));
+
+        SendAction sendAction = new SendAction(appData);
+        sendAction.setRecords(record);
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        workflowTrace.addTlsActions(
+                sendAction,
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            WorkflowTrace trace = i.getWorkflowTrace();
+            Validator.receivedFatalAlert(i);
+
+            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+            Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
+            if (msg == null || msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
+                throw new AssertionError("Received non expected alert message with invalid CBC padding");
+            }
+        });
+    }
+
 }

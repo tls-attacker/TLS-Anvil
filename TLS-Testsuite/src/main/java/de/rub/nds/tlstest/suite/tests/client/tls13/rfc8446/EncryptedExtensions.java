@@ -1,6 +1,7 @@
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PaddingExtensionMessage;
@@ -38,7 +39,12 @@ public class EncryptedExtensions extends Tls13Test {
             return null;
         });
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            if (alert == null) return;
+            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
+        });
     }
 
     @TlsTest(description = "The client MUST check EncryptedExtensions " +
@@ -59,7 +65,12 @@ public class EncryptedExtensions extends Tls13Test {
             return null;
         });
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            if (alert == null) return;
+            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
+        });
     }
 
 }

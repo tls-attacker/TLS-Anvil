@@ -3,6 +3,7 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
@@ -20,6 +21,7 @@ import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import org.junit.jupiter.api.Tag;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -84,7 +86,58 @@ public class Fragmentation extends Tls12Test {
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             assertNull("Received alert message", msg);
         });
+    }
 
+    @TlsTest(description = "Send a record without any content.",
+            securitySeverity = SeverityLevel.CRITICAL,
+            interoperabilitySeverity = SeverityLevel.HIGH)
+    @Tag("emptyRecord")
+    public void sendEmptyApplicationRecord(WorkflowRunner runner) {
+        Config c = this.getConfig();
+        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
+
+        ApplicationMessage appMsg = new ApplicationMessage(c);
+
+        Record r = new Record();
+        r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
+        r.setMaxRecordLengthConfig(0);
+        r.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
+        SendAction sendAction = new SendAction(appMsg);
+        sendAction.setRecords(r);
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        workflowTrace.addTlsActions(
+                sendAction,
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+    }
+
+    @TlsTest(description = "Send a record without any content.",
+            securitySeverity = SeverityLevel.CRITICAL,
+            interoperabilitySeverity = SeverityLevel.HIGH)
+    @Tag("emptyRecord")
+    public void sendEmptyFinishedRecord(WorkflowRunner runner) {
+        Config c = this.getConfig();
+        runner.replaceSupportedCiphersuites = true;
+        runner.replaceSelectedCiphersuite = true;
+
+        Record r = new Record();
+        r.setContentMessageType(ProtocolMessageType.HANDSHAKE);
+        r.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
+        r.setMaxRecordLengthConfig(0);
+        SendAction fin = new SendAction(new FinishedMessage());
+        fin.setRecords(r);
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
+        workflowTrace.addTlsActions(
+                fin,
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
     @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. " +

@@ -23,6 +23,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Optional;
 
+/**
+ * The class contains methods that are called when a test case terminates.
+ * If no AnnotatedStateContainer is associated with the finished test case
+ * a new container is created.
+ */
 public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher {
     private static final Logger LOGGER = LogManager.getLogger();
 

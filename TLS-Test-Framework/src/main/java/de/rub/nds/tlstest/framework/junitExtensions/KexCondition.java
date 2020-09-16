@@ -17,6 +17,10 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 
+/**
+ * Evaluates the KeyExchange annotation and disables a test
+ * if the target does not support cipher suites that the KeyExchange annotation requires.
+ */
 public class KexCondition extends BaseCondition {
     private static final Logger LOGGER = LogManager.getLogger();
 

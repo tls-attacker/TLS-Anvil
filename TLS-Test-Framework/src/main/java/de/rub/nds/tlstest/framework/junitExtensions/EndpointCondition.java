@@ -20,6 +20,10 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.lang.reflect.Method;
 
+/**
+ * Evaluates the ClientTest, ServerTest, TestEndpoint annotations
+ * The test is disabled when a client is tested but the test is written for servers.
+ */
 public class EndpointCondition extends BaseCondition {
 
     private TestEndpointType endpointOfMethod(ExtensionContext context) {

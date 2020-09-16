@@ -74,6 +74,11 @@ import java.util.stream.Collectors;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
 
+/**
+ * This class sets up and starts JUnit to excute the tests,
+ * when the runTests function is called.
+ * Before the tests are started, the preparation phase is executed.
+ */
 public class TestRunner {
     private static final Logger LOGGER = LogManager.getLogger();
 

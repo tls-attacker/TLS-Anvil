@@ -31,6 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Contains methods that are called when the complete testplan is finished.
+ * Generates the test report.
+ */
 public class ExecutionListener implements TestExecutionListener {
     private static final Logger LOGGER = LogManager.getLogger();
 

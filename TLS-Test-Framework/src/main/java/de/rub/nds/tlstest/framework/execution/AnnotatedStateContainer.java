@@ -31,6 +31,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 
+/**
+ * Usually each test case performing a handshake is associated with a AnnotatedStateContainer.
+ * This class contains a list of States / Handshakes that are the result
+ * of the derication process.
+ */
 @XmlAccessorType(XmlAccessType.NONE)
 public class  AnnotatedStateContainer {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -97,6 +102,14 @@ public class  AnnotatedStateContainer {
         this.states.add(state);
     }
 
+    /**
+     * Used by the test cases to validate the received messages.
+     * Iterates over the list of states and executes the lambda function for every state.
+     *
+     *
+     * @param finalValidation if set to true, an execption is thrown when the validation fails for one state
+     * @param f lambda function that accepts a annotated state
+     */
     public void validate(boolean finalValidation, Consumer<AnnotatedState> f) {
         boolean failed = false;
         List<Throwable> errors = new ArrayList<>();

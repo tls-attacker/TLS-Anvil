@@ -19,6 +19,10 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
+/**
+ * Creates a WorkflowRunner object that is passed to a test method that has
+ * specified a WorkflowRunner argument.
+ */
 public class WorkflowRunnerResolver implements ParameterResolver {
     private static final Logger LOGGER = LogManager.getLogger();
 

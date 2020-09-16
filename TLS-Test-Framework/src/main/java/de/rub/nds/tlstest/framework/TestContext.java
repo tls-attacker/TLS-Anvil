@@ -23,6 +23,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Shared global Singleton object that stores information
+ * that are used by the JUnit extensions and the test cases.
+ */
 public class TestContext {
     private static final Logger LOGGER = LogManager.getLogger();
     private TestConfig config;

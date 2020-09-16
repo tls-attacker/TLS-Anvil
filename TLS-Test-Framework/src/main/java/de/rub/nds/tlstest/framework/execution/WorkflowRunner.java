@@ -38,15 +38,22 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * An object of this class is passed to every test method, it is created by the
+ * WorkflowRunnerResolver class
+ */
 public class WorkflowRunner {
     private static final Logger LOGGER = LogManager.getLogger();
     private TestContext context = null;
     private ExtensionContext extensionContext = null;
 
+
+    /**
+     * Controls the test derivation. Setting everything to false disables the derivation.
+     */
     public boolean replaceSupportedCiphersuites = false;
     public boolean appendEachSupportedCiphersuiteToClientSupported = false;
     public boolean respectConfigSupportedCiphersuites = false;
-
     public boolean replaceSelectedCiphersuite = false;
 
     public boolean useRecordFragmentationDerivation = true;
@@ -67,6 +74,14 @@ public class WorkflowRunner {
         this.context = context;
     }
 
+
+    /**
+     * Executes a WorkflowTrace.
+     * It performs the derivation and executes each derived handshake.
+     *
+     * @param trace Trace to execute
+     * @return
+     */
     public AnnotatedStateContainer execute(WorkflowTrace trace) {
         return this.execute(this.prepare(trace));
     }
@@ -75,6 +90,15 @@ public class WorkflowRunner {
         return this.execute(this.prepare(trace, config));
     }
 
+
+    /**
+     * Executes a AnnotatedStateContainer by executing every State that is part of the container.
+     * Before the execution, the fragmentation derivation is performed.
+     * The States are executed by the shared ParallelExecutor, that is referenced by the TlsContext.
+     *
+     * @param container Container that is executed
+     * @return Returns the input container
+     */
     public AnnotatedStateContainer execute(AnnotatedStateContainer container) {
         container.setUniqueId(extensionContext.getUniqueId());
         container.setTestMethodConfig(testMethodConfig);
@@ -141,7 +165,13 @@ public class WorkflowRunner {
     }
 
 
-
+    /**
+     * Public method to perform the test derivation and returning the states
+     * in a AnnotatedStateContainer.
+     *
+     * @param trace base WorkflowTrace for the test derivation
+     * @return AnnotatedStateContainer that contains the derived states
+     */
     public AnnotatedStateContainer prepare(WorkflowTrace trace) {
         Config config = this.context.getConfig().createConfig();
         if (testMethodConfig.getTlsVersion().supported() == ProtocolVersion.TLS13) {
@@ -160,6 +190,15 @@ public class WorkflowRunner {
     }
 
 
+
+    /**
+     * Configures the WorkflowRunner to use the WorkflowConfigurationFactory to generate workflow traces.
+     * The workflows are generated when the buildFinalState is called.
+     * This function is called when the derivation is executed.
+     *
+     * @param type WorkflowTraceType that should be used for the generated workflowTrace
+     * @return empty WorkflowTrace
+     */
     public WorkflowTrace generateWorkflowTrace(@Nonnull WorkflowTraceType type) {
         this.traceType = type;
         // just return an empty trace, the real trace is generated and merged in the transform functions,
@@ -213,6 +252,16 @@ public class WorkflowRunner {
         return generateWorkflowTrace(type);
     }
 
+
+    /**
+     * Creates new AnnotatedState based on newConfig and annotatedState.
+     * The new state is created by the config and a copy of the workflow trace.
+     * Executes the stateModifier and builds the Workflow using the WorkflowConfigurationFactory
+     *
+     * @param annotatedState State
+     * @param newConfig Config
+     * @return AnnotatedState with a copied workflow
+     */
     private AnnotatedState buildFinalState(AnnotatedState annotatedState, Config newConfig) {
         WorkflowTrace trace;
         State state = annotatedState.getState();
@@ -248,6 +297,12 @@ public class WorkflowRunner {
         return result;
     }
 
+    /**
+     * Performs the test derivation for client tests
+     *
+     * @param annotatedState Base state for the test derivation
+     * @return List of derived states
+     */
     private List<AnnotatedState> transformStateClientTest(AnnotatedState annotatedState) {
         List<AnnotatedState> result = new ArrayList<AnnotatedState>(){};
         List<CipherSuite> supported = new ArrayList<>(context.getSiteReport().getCipherSuites());
@@ -293,6 +348,12 @@ public class WorkflowRunner {
     }
 
 
+    /**
+     * Performs the test derivation for server tests
+     *
+     * @param annotatedState Base state for the test derivation
+     * @return List of derived states
+     */
     private List<AnnotatedState> transformStateServerTest(AnnotatedState annotatedState) {
         List<AnnotatedState> result = new ArrayList<>();
         Config inputConfig = annotatedState.getState().getConfig();
@@ -351,6 +412,12 @@ public class WorkflowRunner {
     }
 
 
+    /**
+     * Starts the test derivation
+     *
+     * @param state Is used as base for the test derivation process
+     * @return List of derived states
+     */
     private List<AnnotatedState> transformState(AnnotatedState state) {
         if (this.context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
             return this.transformStateClientTest(state);

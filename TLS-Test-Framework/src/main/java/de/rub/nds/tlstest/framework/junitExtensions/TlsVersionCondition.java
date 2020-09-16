@@ -21,6 +21,11 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import java.lang.reflect.Method;
 import java.util.List;
 
+
+/**
+ * Evaluates the TlsVersion annotation.
+ * A test is disabled if the target does not support the TlsVersion the test is written for.
+ */
 public class TlsVersionCondition extends BaseCondition {
     private static final Logger LOGGER = LogManager.getLogger();
 

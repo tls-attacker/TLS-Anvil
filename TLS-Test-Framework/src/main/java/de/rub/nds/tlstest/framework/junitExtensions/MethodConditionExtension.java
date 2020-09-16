@@ -20,6 +20,10 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
+/**
+ * Evaluates the MethodCondition extension and calls the specified method using reflection
+ * that returns an ConditionEvaluationResult.
+ */
 public class MethodConditionExtension extends BaseCondition {
     private static final Logger LOGGER = LogManager.getLogger();
 

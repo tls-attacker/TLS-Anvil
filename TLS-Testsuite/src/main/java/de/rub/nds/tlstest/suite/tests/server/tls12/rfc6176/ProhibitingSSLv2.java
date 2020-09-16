@@ -1,3 +1,12 @@
+/**
+ * TLS-Testsuite - A testsuite for the TLS protocol
+ *
+ * Copyright 2020 Ruhr University Bochum and
+ * TÜV Informationstechnik GmbH
+ *
+ * Licensed under Apache License 2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc6176;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;

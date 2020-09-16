@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "tsc -p src/backend/ && vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "backend": "node dist-backend/index.js"
+    "backend": "tsc -p src/backend/ && node dist-backend/backend/index.js"
   },
   "dependencies": {
     "@types/moment": "^2.13.0",

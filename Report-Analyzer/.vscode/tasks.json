@@ -13,16 +13,6 @@
 		},
 		{
 			"type": "typescript",
-			"tsconfig": "tsconfig.json",
-			"option": "watch",
-			"problemMatcher": [
-				"$tsc-watch"
-			],
-			"group": "build",
-			"label": "tsc: Überwachen – browser tsconfig.json"
-		},
-		{
-			"type": "typescript",
 			"tsconfig": "src/backend/tsconfig.json",
 			"problemMatcher": [
 				"$tsc"

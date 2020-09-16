@@ -5,8 +5,6 @@ volumes:
   mongodb_conf:
 
 networks: 
-  traefik:
-    external: true
   app:
 
 services:
@@ -16,6 +14,8 @@ services:
     volumes:
       - mongodb_DB:/data/db
       - mongodb_conf:/data/configdb
+    ports:
+      - 27017:27017
     networks: 
       - app
 
@@ -25,7 +25,6 @@ services:
     ports:
       - 8081:8081
     networks:
-      - traefik
       - app
 
   app:
@@ -35,10 +34,11 @@ services:
       PRODUCTION: '1'
     build: 
       context: .
+      args:
+        REST_API_BASE_URL: http://localhost:5000/api/v1
     ports:
       - 5000:5000
     networks:
-      - traefik
       - app
       
 

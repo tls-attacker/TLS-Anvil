@@ -1,24 +1,44 @@
-# testsuite-report-analyzer
+# TLS-Testsuite-Report-Analyzer
 
-## Project setup
-```
-npm install
-```
+This web application visualizes the test report created by the [TLS-Testsuite](https://github.com/RUB-NDS/TLS-Testsuite).  
+The easiest way to run this project locally is using Docker.
 
-### Compiles and hot-reloads for development
-```
-npm run serve
+```shell
+docker-compose build
+docker-compose up -d
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
+The web application is deployed available at [http://localhost:5000/](http://localhost:5000/). To get direct access to the MongoDB database where the test reports are stored, either use [http://localhost:8181/](http://localhost:8181/) or a MongoDB client of your choice connecting to `localhost:2701`.
 
-### Lints and fixes files
-```
-npm run lint
-```
+For changing the URL where the application is deployed, the `docker-compose.yml` file has to be edited. The `app` container specifies a `REST_API_BASE_URL` variable, which must be changed.
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+
+## Development Setup
+For the development, it is annoying to build the Docker container every time. The setup for this is to just use Docker for running the database. The backend and frontend web application runs locally.
+
+1. Install dependencies
+    ```
+    npm install
+    ```
+
+1. Start the database
+    ```
+    docker-compose -f docker-compose.dev.yml up -d
+    ```
+
+1. Start the backend  
+    Either run:
+    ```
+    npm run backend
+    ```
+
+    Or use VSCode:
+    1. `STRG + SHIFT + B` select `tsc: Überwachen – tsconfig.json`
+    1. Execute the `Start Backend` task in the debugger
+
+1. Start the frontend
+    ```
+    npm run serve
+    ```
+
+1. Open [http://localhost:8080](http://localhost:8080)

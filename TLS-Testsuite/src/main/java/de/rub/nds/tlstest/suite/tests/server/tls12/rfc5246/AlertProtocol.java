@@ -65,7 +65,7 @@ public class AlertProtocol extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue("Workflow could not be executed as planned", trace.smartExecutedAsPlanned());
+            assertTrue("Workflow could not be executed as planned", Validator.smartExecutedAsPlanned(trace));
 
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
             if (message == null) {
@@ -78,7 +78,6 @@ public class AlertProtocol extends Tls12Test {
 
         });
     }
-
 
 
     @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
@@ -109,6 +108,7 @@ public class AlertProtocol extends Tls12Test {
 
         runner.execute(container).validateFinal(Validator::receivedFatalAlert);
     }
+
 
     @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
     @RFC(number = 5264, section = "7.2.2 Error Alerts")

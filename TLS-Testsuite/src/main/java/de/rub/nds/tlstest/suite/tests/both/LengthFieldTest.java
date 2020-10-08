@@ -144,7 +144,7 @@ public class LengthFieldTest extends TlsGenericTest {
 
         List<CipherSuite> tls13SupportedCipherSuites = new ArrayList<>(context.getSiteReport().getSupportedTls13CipherSuites());
         Config c = context.getConfig().createTls13Config();
-        c.setReceiveFinalSocketStateWithTimeout(true);
+        c.setReceiveFinalTcpSocketStateWithTimeout(true);
         AnnotatedStateContainer container = getContainer(c, tls13SupportedCipherSuites, RunningModeType.CLIENT);
 
         runner.execute(container).validateFinal(this::validate);
@@ -160,7 +160,7 @@ public class LengthFieldTest extends TlsGenericTest {
 
         List<CipherSuite> cipherSuites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         Config c = context.getConfig().createConfig();
-        c.setReceiveFinalSocketStateWithTimeout(true);
+        c.setReceiveFinalTcpSocketStateWithTimeout(true);
         AnnotatedStateContainer container = getContainer(c, cipherSuites, RunningModeType.CLIENT);
 
         runner.execute(container).validateFinal(this::validate);
@@ -176,7 +176,7 @@ public class LengthFieldTest extends TlsGenericTest {
 
         List<CipherSuite> tls13SupportedCipherSuites = new ArrayList<>(context.getSiteReport().getSupportedTls13CipherSuites());
         Config c = context.getConfig().createTls13Config();
-        c.setReceiveFinalSocketStateWithTimeout(true);
+        c.setReceiveFinalTcpSocketStateWithTimeout(true);
         AnnotatedStateContainer container = getContainer(c, tls13SupportedCipherSuites, RunningModeType.SERVER);
 
         runner.execute(container).validateFinal(this::validate);
@@ -192,7 +192,7 @@ public class LengthFieldTest extends TlsGenericTest {
 
         List<CipherSuite> cipherSuites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         Config c = context.getConfig().createConfig();
-        c.setReceiveFinalSocketStateWithTimeout(true);
+        c.setReceiveFinalTcpSocketStateWithTimeout(true);
         AnnotatedStateContainer container = getContainer(c, cipherSuites, RunningModeType.SERVER);
 
         runner.execute(container).validateFinal(this::validate);

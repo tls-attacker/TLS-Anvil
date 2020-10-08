@@ -31,10 +31,9 @@ public class ClientHello extends Tls12Test {
     @TlsTest(description = "If the list contains cipher suites the server does not recognize, support, " +
             "or wish to use, the server MUST ignore those cipher suites, and process the remaining ones as usual.", interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void unknownCipherSuite(WorkflowRunner runner) {
-        runner.appendEachSupportedCiphersuiteToClientSupported = true;
+        runner.replaceSupportedCiphersuites = true;
 
         Config c = this.getConfig();
-        c.setDefaultClientSupportedCiphersuites();
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
         clientHelloMessage.setCipherSuites(Modifiable.insert(new byte[]{(byte)0xfe, 0x00}, 0));

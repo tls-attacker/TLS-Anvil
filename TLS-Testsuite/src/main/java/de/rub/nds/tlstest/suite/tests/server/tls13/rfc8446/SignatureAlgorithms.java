@@ -71,11 +71,11 @@ public class SignatureAlgorithms extends Tls13Test {
         runner.replaceSupportedCiphersuites = true;
 
         List<SignatureAndHashAlgorithm> algos = SignatureAndHashAlgorithm.getImplemented().stream()
-                .filter(i -> !i.suitedForSigingTls13Messages())
+                .filter(i -> !i.suitedForSigningTls13Messages())
                 .collect(Collectors.toList());
 
         algos.addAll(SignatureAndHashAlgorithm.getImplemented().stream()
-                .filter(SignatureAndHashAlgorithm::suitedForSigingTls13Messages)
+                .filter(SignatureAndHashAlgorithm::suitedForSigningTls13Messages)
                 .collect(Collectors.toList())
         );
 
@@ -90,7 +90,7 @@ public class SignatureAlgorithms extends Tls13Test {
             CertificateVerifyMessage certVerifyMsg = i.getWorkflowTrace().getFirstReceivedMessage(CertificateVerifyMessage.class);
             assertNotNull(certVerifyMsg);
             SignatureAndHashAlgorithm sigHashAlg = SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(certVerifyMsg.getSignatureHashAlgorithm().getValue());
-            assertTrue("Invalid SignatureAndHashAlgorithm negotiated", sigHashAlg.suitedForSigingTls13Messages());
+            assertTrue("Invalid SignatureAndHashAlgorithm negotiated", sigHashAlg.suitedForSigningTls13Messages());
         });
     }
 
@@ -103,7 +103,7 @@ public class SignatureAlgorithms extends Tls13Test {
         runner.replaceSupportedCiphersuites = true;
 
         List<SignatureAndHashAlgorithm> algos = SignatureAndHashAlgorithm.getImplemented().stream()
-                .filter(i -> !i.suitedForSigingTls13Messages())
+                .filter(i -> !i.suitedForSigningTls13Messages())
                 .collect(Collectors.toList());
 
         AnnotatedStateContainer container = new AnnotatedStateContainer();

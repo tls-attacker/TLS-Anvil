@@ -60,16 +60,7 @@ public class KeyShare extends Tls13Test {
             add(NamedGroup.ECDH_X448);
         }};
 
-        List<KeyShareStoreEntry> keyshares = new ArrayList<>();
-        for (NamedGroup i : groups) {
-            EllipticCurve curve = CurveFactory.getCurve(i);
-            Point publicKey = curve.mult(c.getDefaultClientEcPrivateKey(), curve.getBasePoint());
-            byte[] publicKeyBytes = PointFormatter.toRawFormat(publicKey);
-
-            keyshares.add(new KeyShareStoreEntry(i, publicKeyBytes));
-        }
-
-        c.setDefaultClientKeyShareEntries(keyshares);
+        c.setDefaultClientKeyShareNamedGroups(new ArrayList<>(groups));
         Collections.reverse(groups);
         c.setDefaultClientNamedGroups(groups);
 

@@ -18,6 +18,7 @@ import de.rub.nds.tlsattacker.core.crypto.ec.Point;
 import de.rub.nds.tlsattacker.core.crypto.ec.PointFormatter;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareStoreEntry;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -47,27 +48,15 @@ public class CryptographicNegotiation extends Tls13Test {
         Config config = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
 
-        config.setDefaultClientNamedGroups(
-                NamedGroup.GREASE_00,
-                NamedGroup.GREASE_01,
-                NamedGroup.GREASE_02,
-                NamedGroup.GREASE_03,
-                NamedGroup.GREASE_04
-        );
-
-        List<KeyShareStoreEntry> keyshareList = new ArrayList<>();
         NamedGroup group =  context.getSiteReport().getSupportedTls13Groups().get(0);
-        EllipticCurve curve = CurveFactory.getCurve(group);
+        config.setDefaultClientKeyShareNamedGroups(group);
 
-        Point publicKey = curve.mult(config.getDefaultClientEcPrivateKey(), curve.getBasePoint());
-        byte[] publicKeyBytes = PointFormatter.toRawFormat(publicKey);
-        keyshareList.add(new KeyShareStoreEntry(NamedGroup.GREASE_00, publicKeyBytes));
-
-        config.setDefaultClientKeyShareEntries(keyshareList);
+        ClientHelloMessage chm = new ClientHelloMessage(config);
+        chm.getExtension(KeyShareExtensionMessage.class).getKeyShareList().get(0).setGroupConfig(NamedGroup.GREASE_00);
 
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(
-                new SendAction(new ClientHelloMessage(config)),
+                new SendAction(chm),
                 new ReceiveAction(new AlertMessage())
         );
 

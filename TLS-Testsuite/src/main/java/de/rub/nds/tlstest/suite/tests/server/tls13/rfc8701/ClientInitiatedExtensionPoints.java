@@ -26,6 +26,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.AlpnExtensionMessa
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.alpn.AlpnEntry;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareStoreEntry;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -113,17 +114,19 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
             List<NamedGroup> groups = Arrays.stream(NamedGroup.values()).filter(i -> i.isGrease() || i == type).collect(Collectors.toList());
             c.setDefaultClientNamedGroups(groups);
 
-            List<KeyShareStoreEntry> keyshares = new ArrayList<>();
-            for (NamedGroup i : groups) {
-                EllipticCurve curve = CurveFactory.getCurve(i);
-                Point publicKey = curve.mult(c.getDefaultClientEcPrivateKey(), curve.getBasePoint());
-                byte[] publicKeyBytes = PointFormatter.toRawFormat(publicKey);
-                keyshares.add(new KeyShareStoreEntry(i, publicKeyBytes));
+            List<NamedGroup> ksGroups = new ArrayList<>();
+            for (int i = 0; i < groups.size(); i++) {
+                ksGroups.add(type);
             }
-            c.setDefaultClientKeyShareEntries(keyshares);
+            c.setDefaultClientKeyShareNamedGroups(ksGroups);
+
 
             runner.setStateModifier(i -> {
                 i.addAdditionalTestInfo(type.name());
+                List <KeyShareEntry> ks = i.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class).getExtension(KeyShareExtensionMessage.class).getKeyShareList();
+                for (int j = 0; j < ks.size(); j++) {
+                    ks.get(j).setGroupConfig(groups.get(j));
+                }
                 return null;
             });
 

@@ -20,7 +20,7 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.action.ChangeTlsContextAction;
+import de.rub.nds.tlsattacker.core.workflow.action.ChangeContextValueAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -60,13 +60,13 @@ public class Finished extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
         workflowTrace.addTlsActions(
-                new ChangeTlsContextAction<PRFAlgorithm>("prfAlgorithm", null),
+                new ChangeContextValueAction<PRFAlgorithm>("prfAlgorithm", null),
                 new SendAction(new FinishedMessage()),
                 new ReceiveAction(new AlertMessage())
         );
 
         runner.setStateModifier(i -> {
-            ChangeTlsContextAction<PRFAlgorithm> action = i.getWorkflowTrace().getFirstAction(ChangeTlsContextAction.class);
+            ChangeContextValueAction<PRFAlgorithm> action = i.getWorkflowTrace().getFirstAction(ChangeContextValueAction.class);
             CipherSuite cipherSuite = i.getInspectedCipherSuite();
 
             PRFAlgorithm alg = AlgorithmResolver.getPRFAlgorithm(ProtocolVersion.TLS12, cipherSuite);

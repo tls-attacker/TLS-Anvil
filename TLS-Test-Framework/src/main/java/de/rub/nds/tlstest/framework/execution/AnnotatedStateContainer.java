@@ -115,9 +115,7 @@ public class  AnnotatedStateContainer {
         List<Throwable> errors = new ArrayList<>();
 
         for (AnnotatedState i : states) {
-            State state = i.getState();
             try {
-                state.getFinishedFuture().get(0, TimeUnit.MILLISECONDS);
                 f.accept(i);
                 if (i.getStatus() == TestStatus.NOT_SPECIFIED) {
                     i.setStatus(TestStatus.SUCCEEDED);

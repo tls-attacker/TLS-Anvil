@@ -24,7 +24,7 @@ import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurveSECP256R1;
 import de.rub.nds.tlsattacker.core.crypto.ec.Point;
 import de.rub.nds.tlsattacker.core.crypto.ec.PointFormatter;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareStoreEntry;
-import de.rub.nds.tlsscanner.report.result.VersionSuiteListPair;
+import de.rub.nds.tlsscanner.serverscanner.report.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
@@ -293,6 +293,8 @@ public class TestConfig extends TLSDelegateConfig {
         config.setWorkflowExecutorShouldClose(true);
         config.setEarlyStop(false);
         config.setStealthMode(true);
+        config.setRetryFailedClientTcpSocketInitialization(true);
+        config.setReceiveFinalTcpSocketStateWithTimeout(true);
 
         cachedConfig = config;
         return config;
@@ -320,7 +322,7 @@ public class TestConfig extends TLSDelegateConfig {
                 SignatureAndHashAlgorithm.ECDSA_SHA384,
                 SignatureAndHashAlgorithm.ECDSA_SHA512
         );
-        config.setSupportedSignatureAndHashAlgorithms(config.getDefaultServerSupportedSignatureAndHashAlgorithms());
+        config.setDefaultClientSupportedSignatureAndHashAlgorithms(config.getDefaultServerSupportedSignatureAndHashAlgorithms());
 
         config.setDefaultServerSupportedCiphersuites(CipherSuite.getImplemented().stream().filter(CipherSuite::isTLS13).collect(Collectors.toList()));
         config.setDefaultClientSupportedCiphersuites(config.getDefaultServerSupportedCiphersuites());
@@ -329,10 +331,7 @@ public class TestConfig extends TLSDelegateConfig {
         config.setDefaultServerNamedGroups(config.getDefaultClientNamedGroups());
         config.setDefaultSelectedNamedGroup(NamedGroup.ECDH_X25519);
 
-        List <KeyShareStoreEntry> keyshares = config.getDefaultClientKeyShareEntries();
-        EllipticCurve curve = new EllipticCurveSECP256R1();
-        Point p = curve.mult(config.getKeySharePrivate(), curve.getBasePoint());
-        keyshares.add(0, new KeyShareStoreEntry(NamedGroup.SECP256R1, PointFormatter.toRawFormat(p)));
+        config.setDefaultClientKeyShareNamedGroups(config.getDefaultClientNamedGroups());
 
         return config;
     }

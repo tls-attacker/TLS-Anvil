@@ -62,13 +62,6 @@ public class AnnotatedState {
 
     public AnnotatedState(@Nonnull State state) {
         this.state = state;
-
-        if (state.getFinishedFuture().isDone()) {
-            this.status = TestStatus.SUCCEEDED;
-        }
-        else if (state.getFinishedFuture().isCancelled() || state.getFinishedFuture().isCompletedExceptionally()) {
-            this.status = TestStatus.FAILED;
-        }
     }
 
     AnnotatedState(AnnotatedState aState, State mutated) {

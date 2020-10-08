@@ -32,9 +32,9 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
-import de.rub.nds.tlsscanner.TlsScanner;
-import de.rub.nds.tlsscanner.config.ScannerConfig;
-import de.rub.nds.tlsscanner.constants.ProbeType;
+import de.rub.nds.tlsscanner.serverscanner.TlsScanner;
+import de.rub.nds.tlsscanner.serverscanner.config.ScannerConfig;
+import de.rub.nds.tlsscanner.serverscanner.constants.ProbeType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
@@ -211,7 +211,6 @@ public class TestRunner {
 
         scannerConfig.setProbes(
                 ProbeType.CIPHERSUITE,
-                ProbeType.TLS13,
                 ProbeType.COMPRESSIONS,
                 ProbeType.NAMED_GROUPS,
                 ProbeType.PROTOCOL_VERSION,
@@ -351,7 +350,7 @@ public class TestRunner {
 
         ParallelExecutor executor = new ParallelExecutor(testConfig.getParallel(), 2);
         executor.setTimeoutAction(testConfig.getTimeoutActionScript());
-        executor.monitorExecutorService();
+        executor.armTimeoutAction();
         testContext.setStateExecutor(executor);
 
         LOGGER.info("Starting preparation phase");

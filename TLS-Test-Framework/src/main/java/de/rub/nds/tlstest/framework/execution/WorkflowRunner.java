@@ -114,7 +114,7 @@ public class WorkflowRunner {
             if (lastAction instanceof ReceivingAction) {
                 List<ProtocolMessageType> messages = ((ReceivingAction) lastAction).getGoingToReceiveProtocolMessageTypes();
                 if (messages.size() > 0 && messages.get(messages.size() - 1).equals(ProtocolMessageType.ALERT)) {
-                    i.getState().getConfig().setReceiveFinalSocketStateWithTimeout(true);
+                    i.getState().getConfig().setReceiveFinalTcpSocketStateWithTimeout(true);
                 }
             }
 
@@ -150,7 +150,7 @@ public class WorkflowRunner {
 
         List<State> states = container.getStates().parallelStream().map(AnnotatedState::getState).collect(Collectors.toList());
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-            context.getStateExecutor().bulkExecuteStateTasks(states);
+            context.getStateExecutor().bulkExecuteClientStateTasks(states);
         } else {
             List<TlsTask> tasks = states.stream().map(i -> {
                 StateExecutionServerTask task = new StateExecutionServerTask(i, context.getConfig().getTestClientDelegate().getServerSocket(), 2);

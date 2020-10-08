@@ -10,7 +10,7 @@
 package de.rub.nds.tlstest.framework.junitExtensions;
 
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsscanner.report.SiteReport;
+import de.rub.nds.tlsscanner.serverscanner.report.SiteReport;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import org.apache.logging.log4j.LogManager;

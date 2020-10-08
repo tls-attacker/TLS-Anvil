@@ -12,7 +12,7 @@ package de.rub.nds.tlstest.framework;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsscanner.report.SiteReport;
+import de.rub.nds.tlsscanner.serverscanner.report.SiteReport;
 
 import java.util.HashSet;
 import java.util.Set;

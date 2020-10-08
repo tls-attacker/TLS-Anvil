@@ -72,8 +72,7 @@ public class TestRunnerTest {
         config.setAddKeyShareExtension(true);
         config.setAddSignatureAndHashAlgorithmsExtension(true);
         config.getDefaultClientConnection().setHostname("localhost");
-        config.setSupportedSignatureAndHashAlgorithms(SignatureAndHashAlgorithm.RSA_PSS_RSAE_SHA256);
-        //config.setTls13BackwardsCompatibilityMode(false);
+        config.setDefaultClientSupportedSignatureAndHashAlgorithms(SignatureAndHashAlgorithm.RSA_PSS_RSAE_SHA256);
 
         WorkflowTrace trace = new WorkflowConfigurationFactory(config).createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.CLIENT);
 

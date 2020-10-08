@@ -39,7 +39,6 @@ public class TestServerDelegate extends ClientDelegate {
         if ((!IPAddress.isValid(config.getDefaultClientConnection().getHostname()) || this.getSniHostname() != null)
                 && !doNotSendSNIExtension) {
             config.setAddServerNameIndicationExtension(true);
-            config.setDefaultClientSNIEntries(new SNIEntry(config.getDefaultClientConnection().getHostname(), NameType.HOST_NAME));
         } else {
             config.setAddServerNameIndicationExtension(false);
         }

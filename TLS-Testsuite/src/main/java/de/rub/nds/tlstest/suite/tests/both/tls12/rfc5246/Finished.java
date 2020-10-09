@@ -60,7 +60,7 @@ public class Finished extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
         workflowTrace.addTlsActions(
-                new ChangeContextValueAction<PRFAlgorithm>("prfAlgorithm", null),
+                new ChangeContextValueAction<PRFAlgorithm>("prfAlgorithm", (PRFAlgorithm) null),
                 new SendAction(new FinishedMessage()),
                 new ReceiveAction(new AlertMessage())
         );

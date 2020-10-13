@@ -10,10 +10,20 @@
 package de.rub.nds.tlstest.framework.constants;
 
 public enum SeverityLevel {
-    NOT_CLASSIFIED,
-    INFORMATIONAL,
-    LOW,
-    MEDIUM,
-    HIGH,
-    CRITICAL
+    NOT_CLASSIFIED(0),
+    INFORMATIONAL(20),
+    LOW(40),
+    MEDIUM(60),
+    HIGH(80),
+    CRITICAL(100);
+
+    private int maxScore = 0;
+
+    SeverityLevel(int val) {
+        maxScore = val;
+    }
+
+    public int getMaxScore() {
+        return maxScore;
+    }
 }

@@ -31,11 +31,6 @@ public @interface TlsTest {
     @JsonProperty("Description")
     String description() default "";
 
-    @XmlElement(name = "SecuritySeverity")
-    @JsonProperty("SecuritySeverity")
     SeverityLevel securitySeverity() default SeverityLevel.INFORMATIONAL;
-
-    @XmlElement(name = "InteroperabilitySeverity")
-    @JsonProperty("InteroperabilitySeverity")
     SeverityLevel interoperabilitySeverity() default SeverityLevel.INFORMATIONAL;
 }

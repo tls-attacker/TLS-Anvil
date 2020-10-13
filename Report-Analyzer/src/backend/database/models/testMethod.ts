@@ -1,10 +1,9 @@
 import { Schema } from 'mongoose';
+import { IScoreMap, ScoreMapSchmaObject, ScoreSchemaObject } from './score';
 
 
 export interface ITestMethod {
   Description: string,
-  SecuritySeverity: string,
-  InteroperabilitySeverity: string,
   TlsVersion: string,
   RFC: {
     Section: string,
@@ -17,8 +16,6 @@ export interface ITestMethod {
 
 export const TestMethodSchemaObject = {
   Description: String,
-  SecuritySeverity: String,
-  InteroperabilitySeverity: String,
   TlsVersion: String,
   RFC: {
     Section: String,

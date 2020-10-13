@@ -1,6 +1,7 @@
 import { Schema, Document, MongooseDocument } from "mongoose";
 import { ITimestamp } from './timestamps';
 import { ITestResult } from './testResult';
+import { IScoreMap, ScoreMapSchmaObject } from './score';
 
 export interface ITestResultContainer extends Document, ITimestamp {
   Identifier: string,
@@ -16,18 +17,7 @@ export interface ITestResultContainer extends Document, ITimestamp {
   TestClasses?: ITestResultContainer[]
   TestResults: ITestResult[]
   TestResultClassMethodIndexMap: Map<string, number>,
-  Score: {
-    Security: {
-      Reached: number,
-      Total: number,
-      Percentage: number,
-    }
-    Interoperability: {
-      Reached: number,
-      Total: number,
-      Percentage: number
-    }
-  }
+  Score: IScoreMap
 }
 
 
@@ -49,36 +39,7 @@ export const TestResultContainerSchema = new Schema({
   FailedTests: Number,
   SucceededTests: Number,
   DisabledTests: Number,
-  Score: {
-    Security: {
-      Reached: {
-        type: Number,
-        default: 0
-      },
-      Total: {
-        type: Number,
-        default: 0
-      },
-      Percentage: {
-        type: Number,
-        default: 0
-      },
-    },
-    Interoperability: {
-      Reached: {
-        type: Number,
-        default: 0
-      },
-      Total: {
-        type: Number,
-        default: 0
-      },
-      Percentage: {
-        type: Number,
-        default: 0
-      },
-    }
-  },
+  Score: ScoreMapSchmaObject,
   TestResults: [{
     type: Schema.Types.ObjectId,
     ref: 'TestResult'

@@ -65,7 +65,7 @@
         </b-form-group>
       </b-col>
       <b-col cols="2">
-        <b-form-group label="Filter security severities:">
+        <b-form-group label="Security:">
           <b-form-checkbox-group
             id="security"
             v-model="filter.severity.security"
@@ -75,13 +75,24 @@
           ></b-form-checkbox-group>
         </b-form-group>
       </b-col>
-      <b-col cols="3">
-        <b-form-group label="Filter interoperability severities:">
+      <b-col cols="2">
+        <b-form-group label="Interoperability:">
           <b-form-checkbox-group
             id="interoperability"
             v-model="filter.severity.interoperability"
             :options="options.severity"
             name="interoperability"
+            stacked
+          ></b-form-checkbox-group>
+        </b-form-group>
+      </b-col>
+      <b-col cols="2">
+        <b-form-group label="Compliance:">
+          <b-form-checkbox-group
+            id="compliance"
+            v-model="filter.severity.compliance"
+            :options="options.severity"
+            name="compliance"
             stacked
           ></b-form-checkbox-group>
         </b-form-group>
@@ -163,7 +174,7 @@
 </template>
 
 <script>
-import { allSeverityLevels, allStatus } from '@/lib/const'
+import { allSeverityLevels, allStatus, resolveSeverityLevel } from '@/lib/const'
 import * as analyzer from '@/lib/analyzer'
 import VueJsonPretty from 'vue-json-pretty'
 
@@ -182,7 +193,7 @@ export default {
       regex: "",
       guardNavigation: 0,
       options: {
-        severity: allSeverityLevels,
+        severity: allSeverityLevels.map(i => {return {text: resolveSeverityLevel(i), value: i}}),
         status: allStatus,
         hightlight: analyzer.hightlightOptions,
         difference: analyzer.differenceFilterOptions

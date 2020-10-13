@@ -1,4 +1,4 @@
-import { IState, ITestResult, ITestResultContainer } from '@/backend/database/models';
+import { IState, ITestResult, ITestResultContainer } from '../backend/database/models';
 import { allStatus, HighlightOptions, HighlightOptionsStrings, IItemProviderContext, Optional, resolveStatus, TestStatus } from './const';
 
 //@ts-ignore

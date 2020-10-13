@@ -1,5 +1,7 @@
-import { ITestMethod, ITestResult, ITestResultContainer } from '@/backend/database/models';
+import { IScoreMap } from '../backend/database/models/score';
+import { ITestMethod, ITestResult, ITestResultContainer } from '../backend/database/models';
 import { HighlightOptions, HighlightOptionsStrings, resolveSeverityLevel, IItemProviderContext, Optional, resolveStatus, ISeverityFilter, allSeverityLevels, SeverityLevelStrings, allStatus, TestStatus, TestStatusStrings } from './const';
+import { allScoreCategories, ScoreCategories } from './const/ScoreCategories';
 
 interface ITestResultTable extends ITestResult {
   statusIcons: string
@@ -30,6 +32,7 @@ export const filterObj: IFilter = {
   severity: {
     security: [...allSeverityLevels],
     interoperability: [...allSeverityLevels],
+    compliance: [...allSeverityLevels]
   },
   status: [...allStatus],
   properties: [HighlightOptions.differentStatus, HighlightOptions.differentStates]
@@ -52,40 +55,44 @@ function timeConversion(millisec: number) {
   }
 }
 
-
-function resolveSeverity(method: ITestMethod) {
-  return `[S: ${resolveSeverityLevel(method.SecuritySeverity)}, I: ${resolveSeverityLevel(method.InteroperabilitySeverity)}]`
-}
-
 export function itemProvider(ctx: IItemProviderContext, reports: ITestResultContainerBrowser[]) {
   if (reports.length == 0) {
     return []
   }
-  const items: any[] = [{
-    testcase: "Score Security"
-  }, {
-    testcase: "Score Interop"
-  }, {
+  const items: any[] = []
+  for (const i of allScoreCategories) {
+    items.push({
+      testcase: `Score ${i}`
+    })
+  }
+
+  items.push({
     testcase: "Succeeded tests"
-  }, {
+  },{
     testcase: "Failed tests"
   },{
     testcase: "Disabled tests"
   },{
     testcase: "Execution time"
-  }]
+  })
+
   // build test case column first
   const descriptions = new Set<string>()
   const resultIndexReportMap = new Map<string, number[]>()
 
   for (let i = 0; i < reports.length; i++) {
     const report = reports[i]
-    items[0][report.Identifier] = {statusIcons: `${report.Score.Security.Reached}/${report.Score.Security.Total} (${report.Score.Security.Percentage.toFixed(2)}%)`}
-    items[1][report.Identifier] = {statusIcons: `${report.Score.Interoperability.Reached}/${report.Score.Interoperability.Total} (${report.Score.Interoperability.Percentage.toFixed(2)}%)`}
-    items[2][report.Identifier] = {statusIcons: report.SucceededTests}
-    items[3][report.Identifier] = {statusIcons: report.FailedTests}
-    items[4][report.Identifier] = {statusIcons: report.DisabledTests}
-    items[5][report.Identifier] = {statusIcons: timeConversion(report.ElapsedTime)}
+
+    for (let j = 0; j < allScoreCategories.length; j++) {
+      const category = allScoreCategories[j]
+      items[j][report.Identifier] = {statusIcons: `${report.Score[category].Reached}/${report.Score[category].Total} (${report.Score[category].Percentage.toFixed(2)}%)`}
+    }
+
+    const c = allScoreCategories.length;
+    items[c][report.Identifier] = {statusIcons: report.SucceededTests}
+    items[c+1][report.Identifier] = {statusIcons: report.FailedTests}
+    items[c+2][report.Identifier] = {statusIcons: report.DisabledTests}
+    items[c+3][report.Identifier] = {statusIcons: timeConversion(report.ElapsedTime)}
 
     for (let testMethod of Object.keys(report.TestResultClassMethodIndexMap)) {
       descriptions.add(testMethod)
@@ -114,22 +121,24 @@ export function itemProvider(ctx: IItemProviderContext, reports: ITestResultCont
   let oldTestClass = ""
   for (let testCase of descriptionsArr) {
     const testResultIndexes = resultIndexReportMap.get(testCase)!
+    let scoreMap : Optional<IScoreMap> = null
     let testMethod : Optional<ITestMethod> = null
     for (let idx in testResultIndexes) {
       let elem = testResultIndexes[idx]
       if (elem != -1) {
+        scoreMap = reports[idx].TestResults[elem].Score
         testMethod = reports[idx].TestResults[elem].TestMethod
         break
       }
     }
 
-    if (!testMethod || !filterTestMethod(testMethod, ctx.filter)) {
+    if (!testMethod || !filterTestMethod(scoreMap, ctx.filter)) {
       continue
     }
     
     const item: any = {
       testcase: {
-        value: `&nbsp;&nbsp;&nbsp;&nbsp;${resolveSeverity(testMethod)} ${testMethod.MethodName}`,
+        value: `&nbsp;&nbsp;&nbsp;&nbsp;${testMethod.MethodName}`,
         TestMethod: testMethod
       }
     }
@@ -230,16 +239,20 @@ export function getRowClass(item: any[], highlightOption: HighlightOptionsString
 
 
 
-function filterTestMethod(testMethod: ITestMethod, filter: IFilter): boolean {
-  if (!filter)
+function filterTestMethod(scoreMap: Optional<IScoreMap>, filter: IFilter): boolean {
+  if (!filter || !scoreMap)
     return true
   
-  if (filter.severity.interoperability.indexOf(<SeverityLevelStrings>testMethod.InteroperabilitySeverity) == -1) {
-    return false
+  if (filter.severity.interoperability.indexOf(<SeverityLevelStrings>scoreMap.INTEROPERABILITY?.SeverityLevel) == -1) {
+    return true
   }
 
-  if (filter.severity.security.indexOf(<SeverityLevelStrings>testMethod.SecuritySeverity) == -1) {
-    return false
+  if (filter.severity.security.indexOf(<SeverityLevelStrings>scoreMap.SECURITY?.SeverityLevel) == -1) {
+    return true
+  }
+
+  if (filter.severity.security.indexOf(<SeverityLevelStrings>scoreMap.COMPLIANCE?.SeverityLevel) == -1) {
+    return true
   }
 
   return true

@@ -127,6 +127,11 @@ public class  AnnotatedStateContainer {
                 }
             } catch (Throwable err) {
                 failed = true;
+
+                if (i.getState().getExecutionException() != null) {
+                    err.addSuppressed(i.getState().getExecutionException());
+                }
+
                 Throwable error = err;
                 if (i.getState().getTlsContext().isReceivedTransportHandlerException()) {
                     error = new TransportHandlerExpection("Received transportHandler excpetion", err);

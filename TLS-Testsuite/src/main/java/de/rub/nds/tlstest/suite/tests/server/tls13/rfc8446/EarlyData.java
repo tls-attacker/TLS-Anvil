@@ -100,7 +100,9 @@ public class EarlyData extends Tls13Test {
         c.setAddPSKKeyExchangeModesExtension(true);
         c.setAddPreSharedKeyExtension(true);
         c.setAddEarlyDataExtension(true);
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.END_OF_EARLY_DATA);
+        runner.replaceSupportedCiphersuites = true;
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
+        workflowTrace.addTlsAction(new ReceiveAction());
         
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
@@ -127,8 +129,9 @@ public class EarlyData extends Tls13Test {
         c.setAddPreSharedKeyExtension(true);
         c.setAddEarlyDataExtension(true);
         runner.replaceSupportedCiphersuites = true;
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.END_OF_EARLY_DATA);
-
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
+        workflowTrace.addTlsAction(new ReceiveAction());
+        
         runner.setStateModifier(s -> {
                 ClientHelloMessage secondHello = s.getWorkflowTrace().getLastSendMessage(ClientHelloMessage.class);
                 CipherSuite otherCipherSuite = getOtherSupportedCiphersuite(s.getInspectedCipherSuite());
@@ -139,7 +142,9 @@ public class EarlyData extends Tls13Test {
         
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(!trace.getLastReceivedMessage(EncryptedExtensionsMessage.class).containsExtension(ExtensionType.EARLY_DATA));
+            if(trace.getLastReceivedMessage(EncryptedExtensionsMessage.class) != null) {
+                assertTrue(!trace.getLastReceivedMessage(EncryptedExtensionsMessage.class).containsExtension(ExtensionType.EARLY_DATA));
+            }
         });
     }
     
@@ -156,8 +161,9 @@ public class EarlyData extends Tls13Test {
         c.setAddPreSharedKeyExtension(true);
         c.setAddEarlyDataExtension(true);
         runner.replaceSupportedCiphersuites = true;
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.END_OF_EARLY_DATA);
-
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
+        workflowTrace.addTlsAction(new ReceiveAction());
+        
         runner.setStateModifier(s -> {
                 ClientHelloMessage secondHello = s.getWorkflowTrace().getLastSendMessage(ClientHelloMessage.class);
                 CipherSuite otherCipherSuite = getOtherSupportedCiphersuite(s.getInspectedCipherSuite());
@@ -167,7 +173,9 @@ public class EarlyData extends Tls13Test {
         
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(!trace.getLastReceivedMessage(EncryptedExtensionsMessage.class).containsExtension(ExtensionType.EARLY_DATA));
+            if(trace.getLastReceivedMessage(EncryptedExtensionsMessage.class) != null) {
+                assertTrue(!trace.getLastReceivedMessage(EncryptedExtensionsMessage.class).containsExtension(ExtensionType.EARLY_DATA));
+            }
         });
     }
     
@@ -186,7 +194,8 @@ public class EarlyData extends Tls13Test {
         c.setAddEarlyDataExtension(true);
         c.setPreserveMessageRecordRelation(true);
         runner.replaceSupportedCiphersuites = true;
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.END_OF_EARLY_DATA);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
+        workflowTrace.addTlsAction(new ReceiveAction());
         
         runner.setStateModifier(s -> {
                 SendAction cHello = (SendAction) s.getWorkflowTrace().getLastSendingAction();
@@ -239,7 +248,8 @@ public class EarlyData extends Tls13Test {
         c.setAddEarlyDataExtension(true);
         c.setPreserveMessageRecordRelation(true);
         runner.replaceSupportedCiphersuites = true;
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.END_OF_EARLY_DATA);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
+        workflowTrace.addTlsAction(new ReceiveAction());
         
         runner.setStateModifier(s -> {
                 SendAction cHello = (SendAction) s.getWorkflowTrace().getLastSendingAction();

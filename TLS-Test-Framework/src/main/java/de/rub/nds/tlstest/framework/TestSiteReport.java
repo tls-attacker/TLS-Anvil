@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.framework;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlsscanner.serverscanner.report.SiteReport;
 
 import java.util.HashSet;
@@ -42,7 +43,11 @@ public class TestSiteReport extends SiteReport {
             report.setSupportedCompressionMethods(siteReport.getSupportedCompressionMethods());
             report.setSupportedTls13Groups(siteReport.getSupportedTls13Groups());
             report.setSupportedExtensions(siteReport.getSupportedExtensions());
-
+            
+            for(String key : siteReport.getResultMap().keySet()) {
+                report.putResult(AnalyzedProperty.valueOf(key), siteReport.getResultMap().get(key));
+            }
+            
             return report;
         } catch (Exception e) {
             throw new RuntimeException(e);

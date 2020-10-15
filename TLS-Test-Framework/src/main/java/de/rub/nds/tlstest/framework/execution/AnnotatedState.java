@@ -57,6 +57,8 @@ public class AnnotatedState {
 
     private List<String> additionalResultInformation = null;
     private List<String> additionalTestInformation = null;
+    
+    private boolean omitFromTests = false;
 
     public AnnotatedState() {}
 
@@ -80,6 +82,7 @@ public class AnnotatedState {
 
         WorkflowTrace trace = aState.getState().getWorkflowTraceCopy();
         Config config = aState.getState().getConfig().createCopy();
+        this.omitFromTests = aState.omitFromTests;
         this.setState(new State(config, trace));
     }
 
@@ -252,5 +255,13 @@ public class AnnotatedState {
 
     public void setAssociatedContainer(AnnotatedStateContainer associatedContainer) {
         this.associatedContainer = associatedContainer;
+    }
+
+    public boolean isOmitFromTests() {
+        return omitFromTests;
+    }
+
+    public void setOmitFromTests(boolean omitFromTests) {
+        this.omitFromTests = omitFromTests;
     }
 }

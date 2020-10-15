@@ -66,6 +66,7 @@ public class WorkflowRunner {
     private HandshakeMessageType untilHandshakeMessage;
     private ProtocolMessageType untilProtocolMessage;
     private Boolean untilSendingMessage = null;
+    private Boolean untilLast = false;
 
     private Function<AnnotatedState, AnnotatedState> stateModifier = null;
 
@@ -104,7 +105,7 @@ public class WorkflowRunner {
         container.setTestMethodConfig(testMethodConfig);
 
         List<AnnotatedState> toAdd = new ArrayList<>();
-
+        
         if (container.getStates().size() == 0) {
             LOGGER.warn("AnnotatedStateContainer does not contain any state. No Handshake will be performed...");
         }
@@ -148,6 +149,13 @@ public class WorkflowRunner {
 
         container.addAll(toAdd);
 
+        for(int i = 0; i < container.getStates().size(); i++) {
+            if(container.getStates().get(i).isOmitFromTests()) {
+                container.getStates().remove(i);
+                i--;
+            }
+        }
+        
         List<State> states = container.getStates().parallelStream().map(AnnotatedState::getState).collect(Collectors.toList());
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             context.getStateExecutor().bulkExecuteClientStateTasks(states);
@@ -159,8 +167,8 @@ public class WorkflowRunner {
             }).collect(Collectors.toList());
             context.getStateExecutor().bulkExecuteTasks(tasks);
         }
-
-
+        
+        
         return container;
     }
 
@@ -251,6 +259,58 @@ public class WorkflowRunner {
 
         return generateWorkflowTrace(type);
     }
+    
+    public WorkflowTrace generateWorkflowTraceUntilLastMessage(@Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+        this.untilHandshakeMessage = handshakeMessageType;
+        this.untilProtocolMessage = null;
+        this.untilLast = true;
+
+        return generateWorkflowTrace(type);
+    }
+
+    public WorkflowTrace generateWorkflowTraceUntilLastMessage(@Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+        this.untilHandshakeMessage = null;
+        this.untilProtocolMessage = protocolMessageType;
+        this.untilLast = true;
+        
+        return generateWorkflowTrace(type);
+    }
+
+    public WorkflowTrace generateWorkflowTraceUntilLastSendingMessage(@Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+        this.untilHandshakeMessage = handshakeMessageType;
+        this.untilProtocolMessage = null;
+        this.untilSendingMessage = true;
+        this.untilLast = true;
+
+        return generateWorkflowTrace(type);
+    }
+
+    public WorkflowTrace generateWorkflowTraceUntilLastSendingMessage(@Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+        this.untilHandshakeMessage = null;
+        this.untilProtocolMessage = protocolMessageType;
+        this.untilSendingMessage = true;
+        this.untilLast = true;
+
+        return generateWorkflowTrace(type);
+    }
+
+    public WorkflowTrace generateWorkflowTraceUntilLastReceivingMessage(@Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+        this.untilHandshakeMessage = handshakeMessageType;
+        this.untilProtocolMessage = null;
+        this.untilSendingMessage = false;
+        this.untilLast = true;
+
+        return generateWorkflowTrace(type);
+    }
+
+    public WorkflowTrace generateWorkflowTraceUntilLastReceivingMessage(@Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+        this.untilHandshakeMessage = null;
+        this.untilProtocolMessage = protocolMessageType;
+        this.untilSendingMessage = false;
+        this.untilLast = true;
+
+        return generateWorkflowTrace(type);
+    }
 
 
     /**
@@ -274,9 +334,9 @@ public class WorkflowRunner {
             }
             trace = new WorkflowConfigurationFactory(newConfig).createWorkflowTrace(traceType, runningMode);
             if (this.untilHandshakeMessage != null)
-                WorkflowTraceMutator.truncateAt(trace, this.untilHandshakeMessage, this.untilSendingMessage);
+                WorkflowTraceMutator.truncateAt(trace, this.untilHandshakeMessage, this.untilSendingMessage, untilLast);
             if (this.untilProtocolMessage != null)
-                WorkflowTraceMutator.truncateAt(trace, this.untilProtocolMessage, this.untilSendingMessage);
+                WorkflowTraceMutator.truncateAt(trace, this.untilProtocolMessage, this.untilSendingMessage, untilLast);
             WorkflowTrace tmpTrace = state.getWorkflowTraceCopy();
             trace.addTlsActions(tmpTrace.getTlsActions());
         }

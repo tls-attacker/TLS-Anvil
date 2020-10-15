@@ -7,7 +7,7 @@
  * Licensed under Apache License 2.0
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package de.rub.nds.tlstest.suite.tests.client.tls12.rfc4492;
+package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8422;
 
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ECPointFormat;

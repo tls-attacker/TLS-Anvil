@@ -7,7 +7,7 @@
  * Licensed under Apache License 2.0
  * http://www.apache.org/licenses/LICENSE-2.0
  */
-package de.rub.nds.tlstest.suite.tests.server.tls12.rfc4492;
+package de.rub.nds.tlstest.suite.tests.server.tls12.rfc8442;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;

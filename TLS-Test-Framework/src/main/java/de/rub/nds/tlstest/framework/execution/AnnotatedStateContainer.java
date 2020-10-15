@@ -10,14 +10,16 @@
 package de.rub.nds.tlstest.framework.execution;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.rub.nds.tlsattacker.core.state.State;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.exceptions.TransportHandlerExpection;
+import de.rub.nds.tlstest.framework.reporting.ScoreContainer;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import javax.annotation.Nonnull;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -27,7 +29,6 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 
@@ -44,9 +45,7 @@ public class  AnnotatedStateContainer {
     @JsonProperty("TestMethod")
     private TestMethodConfig testMethodConfig;
 
-    @XmlElement(name = "Status")
-    @JsonProperty("Status")
-    private TestStatus status = TestStatus.NOT_SPECIFIED;
+    private int statusRaw = 0;
 
     @XmlElement(name = "DisabledReason")
     @JsonProperty("DisabledReason")
@@ -67,18 +66,20 @@ public class  AnnotatedStateContainer {
     @JsonProperty("States")
     private List<AnnotatedState> states = new ArrayList<>();
 
-    private String uniqueId;
+    @JsonUnwrapped
+    private ScoreContainer scoreContainer;
 
-    public AnnotatedStateContainer(String uniqueId, TestMethodConfig tmc, List<AnnotatedState> states) {
-        this.uniqueId = uniqueId;
-        this.testMethodConfig = tmc;
-        this.addAll(states);
-    }
+    private String uniqueId;
 
     public AnnotatedStateContainer() { }
 
-    public AnnotatedStateContainer(String uniqueId, TestMethodConfig tmc, AnnotatedState... states) {
-        this(uniqueId, tmc, Arrays.asList(states));
+    public AnnotatedStateContainer(ExtensionContext extensionContext, List<AnnotatedState> states) {
+        updateExtensionContext(extensionContext);
+        this.addAll(states);
+    }
+
+    public AnnotatedStateContainer(ExtensionContext extensionContext, AnnotatedState... states) {
+        this(extensionContext, Arrays.asList(states));
     }
 
 
@@ -126,6 +127,11 @@ public class  AnnotatedStateContainer {
                 }
             } catch (Throwable err) {
                 failed = true;
+
+                if (i.getState().getExecutionException() != null) {
+                    err.addSuppressed(i.getState().getExecutionException());
+                }
+
                 Throwable error = err;
                 if (i.getState().getTlsContext().isReceivedTransportHandlerException()) {
                     error = new TransportHandlerExpection("Received transportHandler excpetion", err);
@@ -164,14 +170,7 @@ public class  AnnotatedStateContainer {
     }
 
     private void stateFinished(TestStatus stateStatus) {
-        if (status == TestStatus.NOT_SPECIFIED || stateStatus == TestStatus.PARTIALLY_FAILED) {
-            this.status = stateStatus;
-        } else if ((status == TestStatus.FAILED && (stateStatus == TestStatus.SUCCEEDED || stateStatus == TestStatus.PARTIALLY_SUCCEEDED))
-                || ((status == TestStatus.SUCCEEDED || status == TestStatus.PARTIALLY_SUCCEEDED) && stateStatus == TestStatus.FAILED)) {
-            status = TestStatus.PARTIALLY_FAILED;
-        } else if (status == TestStatus.SUCCEEDED && stateStatus == TestStatus.PARTIALLY_SUCCEEDED) {
-            status = TestStatus.PARTIALLY_SUCCEEDED;
-        }
+        setStatusRaw(this.statusRaw | stateStatus.getValue());
     }
 
     public void validateFinal(Consumer<AnnotatedState> f) {
@@ -198,12 +197,15 @@ public class  AnnotatedStateContainer {
         this.uniqueId = uniqueId;
     }
 
-    public TestStatus getStatus() {
-        return status;
+    public void setStatusRaw(int statusRaw) {
+        this.statusRaw = statusRaw;
+        scoreContainer.updateForStatus(getStatus());
     }
 
-    public void setStatus(TestStatus status) {
-        this.status = status;
+    @XmlElement(name = "Status")
+    @JsonProperty("Status")
+    public TestStatus getStatus() {
+        return TestStatus.statusForBitmask(statusRaw);
     }
 
     public TestMethodConfig getTestMethodConfig() {
@@ -254,5 +256,17 @@ public class  AnnotatedStateContainer {
 
     public void setElapsedTime(Long elapsedTime) {
         this.elapsedTime = elapsedTime;
+    }
+
+    public void updateExtensionContext(ExtensionContext extensionContext) {
+        this.uniqueId = extensionContext.getUniqueId();
+        this.testMethodConfig = new TestMethodConfig(extensionContext);
+        if (this.scoreContainer == null) {
+            this.scoreContainer = new ScoreContainer(extensionContext);
+        }
+    }
+
+    public ScoreContainer getScoreContainer() {
+        return scoreContainer;
     }
 }

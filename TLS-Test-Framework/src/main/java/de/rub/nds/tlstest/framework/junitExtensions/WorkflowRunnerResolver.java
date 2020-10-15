@@ -33,12 +33,10 @@ public class WorkflowRunnerResolver implements ParameterResolver {
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        WorkflowRunner param = new WorkflowRunner(TestContext.getInstance());
-        if (!extensionContext.getTestMethod().isPresent()) return param;
+        if (!extensionContext.getTestMethod().isPresent()) {
+            return null;
+        }
 
-        param.setTestMethodConfig(new TestMethodConfig(extensionContext));
-        param.setExtensionContext(extensionContext);
-
-        return param;
+        return new WorkflowRunner(extensionContext);
     }
 }

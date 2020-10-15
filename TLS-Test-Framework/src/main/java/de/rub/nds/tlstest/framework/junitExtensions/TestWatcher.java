@@ -43,9 +43,8 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
             return null;
         }
 
-        TestMethodConfig testMethodConfig = new TestMethodConfig(context);
-        AnnotatedStateContainer result = new AnnotatedStateContainer(uniqueId, testMethodConfig, new ArrayList<>());
-        result.setStatus(status);
+        AnnotatedStateContainer result = new AnnotatedStateContainer(context, new ArrayList<>());
+        result.setStatusRaw(status.getValue());
 
         TestContext.getInstance().addTestResult(result);
         return result;
@@ -67,11 +66,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
         }
 
         if (!(cause instanceof AssertionError)) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintWriter writer = new PrintWriter(baos, true);
-            cause.printStackTrace(writer);
-            String content = new String(baos.toByteArray(), StandardCharsets.UTF_8);
-            LOGGER.error(String.format("Test failed without AssertionError %s\n%s", context.getDisplayName(), content));
+            LOGGER.error("Test failed without AssertionError {}\n", context.getDisplayName(), cause);
         }
     }
 

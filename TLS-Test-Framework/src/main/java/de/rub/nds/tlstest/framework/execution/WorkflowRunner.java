@@ -61,7 +61,7 @@ public class WorkflowRunner {
 
 
 
-    private TestMethodConfig testMethodConfig;
+    private final TestMethodConfig testMethodConfig;
     private WorkflowTraceType traceType;
     private HandshakeMessageType untilHandshakeMessage;
     private ProtocolMessageType untilProtocolMessage;
@@ -71,8 +71,10 @@ public class WorkflowRunner {
     private Function<AnnotatedState, AnnotatedState> stateModifier = null;
 
 
-    public WorkflowRunner(TestContext context) {
-        this.context = context;
+    public WorkflowRunner(ExtensionContext extensionContext) {
+        this.context = TestContext.getInstance();
+        this.extensionContext = extensionContext;
+        this.testMethodConfig = new TestMethodConfig(extensionContext);
     }
 
 
@@ -101,8 +103,7 @@ public class WorkflowRunner {
      * @return Returns the input container
      */
     public AnnotatedStateContainer execute(AnnotatedStateContainer container) {
-        container.setUniqueId(extensionContext.getUniqueId());
-        container.setTestMethodConfig(testMethodConfig);
+        container.updateExtensionContext(extensionContext);
 
         List<AnnotatedState> toAdd = new ArrayList<>();
         
@@ -194,7 +195,7 @@ public class WorkflowRunner {
     }
 
     public AnnotatedStateContainer prepare(AnnotatedState annotatedState) {
-        return new AnnotatedStateContainer(extensionContext.getUniqueId(), testMethodConfig, this.transformState(annotatedState));
+        return new AnnotatedStateContainer(extensionContext, this.transformState(annotatedState));
     }
 
 
@@ -493,14 +494,6 @@ public class WorkflowRunner {
 
     public void setExtensionContext(ExtensionContext extensionContext) {
         this.extensionContext = extensionContext;
-    }
-
-    public TestMethodConfig getTestMethodConfig() {
-        return testMethodConfig;
-    }
-
-    public void setTestMethodConfig(TestMethodConfig testMethodConfig) {
-        this.testMethodConfig = testMethodConfig;
     }
 
     public Function<AnnotatedState, AnnotatedState> getStateModifier() {

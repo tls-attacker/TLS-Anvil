@@ -11,6 +11,8 @@ package de.rub.nds.tlstest.framework.reporting;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import de.rub.nds.tlstest.framework.constants.TestCategory;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import org.junit.platform.launcher.TestIdentifier;
@@ -68,6 +70,10 @@ public class TestResultContainer {
     @XmlElement(name = "DisabledTests")
     @JsonProperty("DisabledTests")
     private long testsDisabled = 0;
+
+
+    @JsonUnwrapped
+    private ScoreContainer scoreContainer = ScoreContainer.forEveryCategory();
 
     private TestResultContainer parent = null;
 
@@ -200,6 +206,11 @@ public class TestResultContainer {
             case DISABLED:
                 this.testsDisabled++;
                 break;
+        }
+
+        for (TestCategory i : result.getScoreContainer().getScoreMap().keySet()) {
+            scoreContainer.getScoreMap().get(i).setReached(scoreContainer.getScoreMap().get(i).getReached() + result.getScoreContainer().getScoreMap().get(i).getReached());
+            scoreContainer.getScoreMap().get(i).setTotal(scoreContainer.getScoreMap().get(i).getTotal() + result.getScoreContainer().getScoreMap().get(i).getTotal());
         }
     }
 

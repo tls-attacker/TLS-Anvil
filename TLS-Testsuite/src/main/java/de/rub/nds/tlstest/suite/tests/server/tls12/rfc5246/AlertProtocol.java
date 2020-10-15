@@ -30,7 +30,10 @@ import de.rub.nds.tlsattacker.core.workflow.action.ResetConnectionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
+import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
@@ -43,6 +46,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
 
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
@@ -50,7 +54,15 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 @Tag("alert")
 @Execution(ExecutionMode.SAME_THREAD)
 public class AlertProtocol extends Tls12Test {
-
+    
+    public ConditionEvaluationResult supportsResumption() {
+        if(context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_SESSION_IDS) == TestResult.TRUE) {
+            return ConditionEvaluationResult.enabled("");
+        } else {
+            return ConditionEvaluationResult.disabled("Does not support session resumption");
+        }
+    }
+    
     @TlsTest(description = "Unless some other fatal alert has been transmitted, each party is " +
             "required to send a close_notify alert before closing the write side " +
             "of the connection. The other party MUST respond with a close_notify " +
@@ -148,39 +160,33 @@ public class AlertProtocol extends Tls12Test {
         runner.execute(container).validateFinal(Validator::receivedFatalAlert);
     }
     
-    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
+    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.MEDIUM)
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
-    @Tag("WIP")
+    @MethodCondition(method = "supportsResumption")
     public void rejectResumptionAfterFatalPostHandshake(WorkflowRunner runner) {
         Config c = this.getConfig();
-        runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.CLIENT_HELLO);
         
         AnnotatedStateContainer container = new AnnotatedStateContainer();
         for (AlertDescription i : AlertDescription.values()) {
-            WorkflowTrace workflowTrace = new WorkflowTrace();
         
             AlertMessage alert = new AlertMessage();
             alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
             alert.setDescription(Modifiable.explicit(i.getValue()));
         
-            workflowTrace.addTlsActions(
-                    new SendAction(alert),
-                    new ResetConnectionAction()
-            );
-        
             runner.setStateModifier(s -> {
                 s.addAdditionalTestInfo(i.name());
-                CipherSuite cipherSuite = s.getInspectedCipherSuite();
-                Config dummyConfig = c.createCopy();
-                dummyConfig.setDefaultSelectedCipherSuite(cipherSuite);
-            
-                WorkflowTrace secondHandshake = new WorkflowConfigurationFactory(dummyConfig).createWorkflowTrace(WorkflowTraceType.RESUMPTION, s.getState().getRunningMode());
-                s.getWorkflowTrace().addTlsActions(secondHandshake.getTlsActions().get(0),
-                    secondHandshake.getTlsActions().get(1));
+                
+                WorkflowTrace workflowTrace = s.getWorkflowTrace();
+                SendAction finSend = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.FINISHED, workflowTrace);
+                finSend.getSendMessages().add(alert);
+                workflowTrace.addTlsAction(new ReceiveAction());
+
                 return null;
             });
             
-            container.addAll(runner.prepare(workflowTrace, c));
+            container.addAll(runner.prepare(new WorkflowTrace(), c));
+            break;
         }
         runner.execute(container).validateFinal(s -> {
             WorkflowTrace trace = s.getWorkflowTrace();
@@ -195,34 +201,21 @@ public class AlertProtocol extends Tls12Test {
     
     @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
-    @Tag("WIP")
+    @MethodCondition(method = "supportsResumption")
     public void rejectResumptionAfterInvalidFinished(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
-        runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
-        
-        WorkflowTrace workflowTrace = new WorkflowTrace();
-            
-        FinishedMessage finishedMessage = new FinishedMessage();
-        finishedMessage.setVerifyData(Modifiable.xor(new byte[]{0x01}, 0));
-        
-        workflowTrace.addTlsActions(
-                new SendAction(finishedMessage),
-                new ResetConnectionAction()
-        );
-        
+        runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.CLIENT_HELLO);
+
        runner.setStateModifier(s -> {
-            CipherSuite cipherSuite = s.getInspectedCipherSuite();
-            Config dummyConfig = c.createCopy();
-            dummyConfig.setDefaultSelectedCipherSuite(cipherSuite);
-            
-            WorkflowTrace secondHandshake = new WorkflowConfigurationFactory(dummyConfig).createWorkflowTrace(WorkflowTraceType.RESUMPTION, s.getState().getRunningMode());
-            s.getWorkflowTrace().addTlsActions(secondHandshake.getTlsActions().get(0),
-                secondHandshake.getTlsActions().get(1));
-            return null;
+                WorkflowTrace workflowTrace = s.getWorkflowTrace();
+                FinishedMessage fin = (FinishedMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.FINISHED, workflowTrace);
+                fin.setVerifyData(Modifiable.xor(new byte[]{0x01}, 0));
+                workflowTrace.addTlsAction(new ReceiveAction());
+                return null;
         });
         
-        runner.execute(workflowTrace, c).validateFinal(s -> {
+        runner.execute(new WorkflowTrace(), c).validateFinal(s -> {
             WorkflowTrace trace = s.getWorkflowTrace();
             ClientHelloMessage cHello = trace.getLastSendMessage(ClientHelloMessage.class);
             if(WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.SERVER_HELLO, trace) 

@@ -215,6 +215,7 @@ public class TestRunner {
                 ProbeType.NAMED_GROUPS,
                 ProbeType.PROTOCOL_VERSION,
                 ProbeType.EC_POINT_FORMAT,
+                ProbeType.RESUMPTION,
                 ProbeType.EXTENSIONS
         );
         scannerConfig.setOverallThreads(1);

@@ -15,6 +15,7 @@ public class AssertMsgs {
     public final static String ServerHelloNotReceived = "ServerHello not received!";
     public final static String ServerKxNotReceived = "ServerKeyExchange not received!";
     public final static String ServerHelloDoneNotReceived = "ServerHelloDone not received!";
+    public final static String EncExtensionsNotReceived = "EncryptedExtensions not received!";
     public final static String ClientKxNotReceived = "ClientKx not received!";
     public final static String FinishedNotReceived = "Finished not received!";
     public final static String AlertNotReceived = "Alert not received!";

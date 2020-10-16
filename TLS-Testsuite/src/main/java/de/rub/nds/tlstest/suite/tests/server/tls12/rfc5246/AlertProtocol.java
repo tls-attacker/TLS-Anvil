@@ -13,7 +13,6 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -26,9 +25,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
-import de.rub.nds.tlsattacker.core.workflow.action.ResetConnectionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
-import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
@@ -68,7 +65,7 @@ public class AlertProtocol extends Tls12Test {
             "of the connection. The other party MUST respond with a close_notify " +
             "alert of its own and close down the connection immediately, " +
             "discarding any pending writes.")
-    @RFC(number = 5264, section = "7.2.1 Closure Alerts")
+    @RFC(number = 5246, section = "7.2.1 Closure Alerts")
     public void close_notify(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.replaceSupportedCiphersuites = true;
@@ -102,8 +99,9 @@ public class AlertProtocol extends Tls12Test {
     }
 
 
-    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
-    @RFC(number = 5264, section = "7.2.2 Error Alerts")
+    @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both" +
+            "parties immediately close the connection.", securitySeverity = SeverityLevel.CRITICAL)
+    @RFC(number = 5246, section = "7.2.2 Error Alerts")
     public void abortAfterFatalAlert_sendBeforeCCS(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -132,8 +130,9 @@ public class AlertProtocol extends Tls12Test {
     }
     
 
-    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
-    @RFC(number = 5264, section = "7.2.2 Error Alerts")
+    @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both" +
+            "parties immediately close the connection.", securitySeverity = SeverityLevel.CRITICAL)
+    @RFC(number = 5246, section = "7.2.2 Error Alerts")
     public void abortAfterFatalAlert_sendAfterServerHelloDone(WorkflowRunner runner) {
         Config c = this.getConfig();
         runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -161,7 +160,7 @@ public class AlertProtocol extends Tls12Test {
     }
     
     @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.MEDIUM)
-    @RFC(number = 5264, section = "7.2.2 Error Alerts")
+    @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
     public void rejectResumptionAfterFatalPostHandshake(WorkflowRunner runner) {
         Config c = this.getConfig();
@@ -200,7 +199,7 @@ public class AlertProtocol extends Tls12Test {
     }
     
     @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
-    @RFC(number = 5264, section = "7.2.2 Error Alerts")
+    @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
     public void rejectResumptionAfterInvalidFinished(WorkflowRunner runner) {
         Config c = this.getConfig();

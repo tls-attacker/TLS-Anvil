@@ -40,7 +40,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import org.junit.jupiter.api.Tag;
 
 @ClientTest
 @RFC(number = 8446, section = "4.2.8. Key Share")
@@ -122,7 +121,7 @@ public class KeyShare extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
     
-    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated most older elliptic curves")
+    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used", securitySeverity = SeverityLevel.LOW, interoperabilitySeverity = SeverityLevel.CRITICAL)
     public void offeredDeprecatedGroups() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         boolean foundDeprecated = false;

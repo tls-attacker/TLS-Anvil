@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc8442;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
@@ -37,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 
@@ -56,7 +58,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @RFC(number = 4492, section = "4. TLS Extensions for ECC")
+    @RFC(number = 8422, section = "4. TLS Extensions for ECC")
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
             "message if it does not propose any ECC cipher suites.", securitySeverity = SeverityLevel.INFORMATIONAL)
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
@@ -69,7 +71,7 @@ public class TLSExtensionForECC extends Tls12Test {
         execute(runner, c);
     }
 
-    @RFC(number = 4492, section = "4. TLS Extensions for ECC")
+    @RFC(number = 8422, section = "4. TLS Extensions for ECC")
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
             "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
@@ -82,7 +84,7 @@ public class TLSExtensionForECC extends Tls12Test {
         execute(runner, c);
     }
 
-    @RFC(number = 4492, section = "4. TLS Extensions for ECC")
+    @RFC(number = 8422, section = "4. TLS Extensions for ECC")
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
             "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
@@ -96,7 +98,7 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
 
-    @RFC(number = 4492, section = "5.1. Client Hello Extensions")
+    @RFC(number = 8422, section = "5.1. Client Hello Extensions")
     @TlsTest(description = "If a server does not understand the Supported Elliptic Curves Extension, " +
             "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake " +
             "while restricting itself to the enumerated curves and point formats, " +
@@ -122,7 +124,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @RFC(number = 4492, section = "5.1. Client Hello Extensions")
+    @RFC(number = 8422, section = "5.1. Client Hello Extensions")
     @TlsTest(description = "If a server does not understand the Supported Elliptic Curves Extension, " +
             "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake " +
             "while restricting itself to the enumerated curves and point formats, " +
@@ -157,6 +159,26 @@ public class TLSExtensionForECC extends Tls12Test {
             assertNotNull(AssertMsgs.ServerHelloNotReceived, message);
             assertArrayEquals(AssertMsgs.UnexpectedCipherSuite, i.getInspectedCipherSuite().getByteValue(), message.getSelectedCipherSuite().getValue());
         });
+    }
+    
+    @RFC(number = 8422, section = "5.1.1 Supported Elliptic Curves Extension")
+    @TlsTest(description = " RFC 4492 defined 25 different curves in the NamedCurve registry (now\n" +
+            "renamed the \"TLS Supported Groups\" registry, although the enumeration\n" +
+            "below is still named NamedCurve) for use in TLS.  Only three have\n" +
+            "seen much use.  This specification is deprecating the rest (with\n" +
+            "numbers 1-22).  This specification also deprecates the explicit " +
+            "curves with identifiers 0xFF01 and 0xFF02.  It also adds the new\n" +
+            "curves defined in [RFC7748]", securitySeverity = SeverityLevel.LOW)
+    @KeyExchange(supported = {KeyExchangeType.ECDH})
+    public void supportsDeprecated(WorkflowRunner runner) {
+        boolean deprecated = false;
+        for(NamedGroup group : context.getSiteReport().getSupportedNamedGroups()) {
+            if(group.getIntValue() < NamedGroup.SECP256R1.getIntValue() || group == NamedGroup.EXPLICIT_CHAR2 || group == NamedGroup.EXPLICIT_PRIME) {
+                deprecated = true;
+                break;
+            }
+        }
+        assertFalse("A deprecated group was accepted", deprecated);
     }
 
 }

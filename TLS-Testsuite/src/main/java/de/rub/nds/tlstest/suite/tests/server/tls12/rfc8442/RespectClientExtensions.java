@@ -38,11 +38,13 @@ import static org.junit.Assert.assertNotNull;
 
 @ServerTest
 public class RespectClientExtensions extends Tls12Test {
-    @RFC(number = 4492, section = "5.1. Client Hello Extensions")
-    @TlsTest(description = "Servers implementing ECC cipher suites MUST support these extensions, " +
-            "and when a client uses these extensions, servers MUST NOT negotiate " +
-            "the use of an ECC cipher suite unless they can complete the handshake while respecting the choice " +
-            "of curves and compression techniques specified by the client.", interoperabilitySeverity = SeverityLevel.CRITICAL)
+    @RFC(number = 8422, section = "5.1. Client Hello Extensions")
+    @TlsTest(description = "A server that receives a ClientHello containing one or both of these " +
+            "extensions MUST use the client's enumerated capabilities to guide its " +
+            "selection of an appropriate cipher suite.  One of the proposed ECC " +
+            "cipher suites must be negotiated only if the server can successfully " +
+            "complete the handshake while using the curves and point formats " +
+            "supported by the client (cf. Sections 5.3 and 5.4).", interoperabilitySeverity = SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
     public void respectChosenCurve(WorkflowRunner runner) {
         runner.replaceSupportedCiphersuites = true;
@@ -50,9 +52,30 @@ public class RespectClientExtensions extends Tls12Test {
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
+        constructTest(runner, c);
 
+    }
+    
+    @RFC(number = 8422, section = "5.1. Client Hello Extensions")
+    @TlsTest(description = "A server that receives a ClientHello containing one or both of these " +
+            "extensions MUST use the client's enumerated capabilities to guide its " +
+            "selection of an appropriate cipher suite.  One of the proposed ECC " +
+            "cipher suites must be negotiated only if the server can successfully " +
+            "complete the handshake while using the curves and point formats " +
+            "supported by the client (cf. Sections 5.3 and 5.4).", interoperabilitySeverity = SeverityLevel.CRITICAL)
+    @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
+    public void respectChosenCurveWithoutFormats(WorkflowRunner runner) {
+        runner.replaceSupportedCiphersuites = true;
+        Config c = this.getConfig();
+
+        c.setAddEllipticCurveExtension(true);
+        c.setAddECPointFormatExtension(false);
+        constructTest(runner, c);
+
+    }
+
+    private void constructTest(WorkflowRunner runner, Config c) {
         ClientHelloMessage chm = new ClientHelloMessage(c);
-
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(chm),
@@ -71,7 +94,7 @@ public class RespectClientExtensions extends Tls12Test {
                 });
                 container.addAll(runner.prepare(workflowTrace, c));
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 

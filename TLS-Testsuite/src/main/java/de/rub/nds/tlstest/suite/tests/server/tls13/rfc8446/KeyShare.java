@@ -12,17 +12,15 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
+import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlsattacker.core.crypto.ec.CurveFactory;
-import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurve;
-import de.rub.nds.tlsattacker.core.crypto.ec.Point;
-import de.rub.nds.tlsattacker.core.crypto.ec.PointFormatter;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareStoreEntry;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -39,6 +37,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @ServerTest
@@ -98,6 +97,26 @@ public class KeyShare extends Tls13Test {
                     .getExtension(KeyShareExtensionMessage.class);
             assertEquals("Server offered more than one keyshare entry", 1, keyshare.getKeyShareList().size());
             assertTrue(c.getDefaultClientNamedGroups().contains(keyshare.getKeyShareList().stream().map(KeyShareEntry::getGroupConfig).collect(Collectors.toList()).get(0)));
+        });
+    }
+    
+    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used", securitySeverity = SeverityLevel.LOW, interoperabilitySeverity = SeverityLevel.CRITICAL)
+    public void serverAcceptsDeprecatedGroups(WorkflowRunner runner){
+        Config c = this.getConfig();
+        List<NamedGroup> groups = NamedGroup.getImplemented();
+        groups.removeIf(i -> i.isTls13());
+        c.setDefaultClientKeyShareNamedGroups(groups);
+        c.setDefaultClientNamedGroups(groups);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            WorkflowTrace trace = i.getWorkflowTrace();
+            if(WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.SERVER_HELLO, trace) && trace.getFirstReceivedMessage(ServerHelloMessage.class).containsExtension(ExtensionType.KEY_SHARE)) {
+                KeyShareExtensionMessage ksExt = trace.getFirstReceivedMessage(ServerHelloMessage.class).getExtension(KeyShareExtensionMessage.class);
+                assertFalse("Server accepted a deprecated group", groups.contains(ksExt.getKeyShareList().stream().map(KeyShareEntry::getGroupConfig).collect(Collectors.toList()).get(0)));
+                //other groups may not be used - even in HelloRetryRequest
+                assertTrue("Server selected an unsupported group", groups.contains(ksExt.getKeyShareList().stream().map(KeyShareEntry::getGroupConfig).collect(Collectors.toList()).get(0)));
+            }
         });
     }
 }

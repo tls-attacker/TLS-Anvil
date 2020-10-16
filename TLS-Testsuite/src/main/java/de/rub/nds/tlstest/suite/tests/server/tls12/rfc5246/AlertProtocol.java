@@ -52,14 +52,6 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 @Execution(ExecutionMode.SAME_THREAD)
 public class AlertProtocol extends Tls12Test {
     
-    public ConditionEvaluationResult supportsResumption() {
-        if(context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_SESSION_IDS) == TestResult.TRUE) {
-            return ConditionEvaluationResult.enabled("");
-        } else {
-            return ConditionEvaluationResult.disabled("Does not support session resumption");
-        }
-    }
-    
     @TlsTest(description = "Unless some other fatal alert has been transmitted, each party is " +
             "required to send a close_notify alert before closing the write side " +
             "of the connection. The other party MUST respond with a close_notify " +
@@ -157,72 +149,6 @@ public class AlertProtocol extends Tls12Test {
         }
 
         runner.execute(container).validateFinal(Validator::receivedFatalAlert);
-    }
-    
-    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.MEDIUM)
-    @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    @MethodCondition(method = "supportsResumption")
-    public void rejectResumptionAfterFatalPostHandshake(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.CLIENT_HELLO);
-        
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
-        for (AlertDescription i : AlertDescription.values()) {
-        
-            AlertMessage alert = new AlertMessage();
-            alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
-            alert.setDescription(Modifiable.explicit(i.getValue()));
-        
-            runner.setStateModifier(s -> {
-                s.addAdditionalTestInfo(i.name());
-                
-                WorkflowTrace workflowTrace = s.getWorkflowTrace();
-                SendAction finSend = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.FINISHED, workflowTrace);
-                finSend.getSendMessages().add(alert);
-                workflowTrace.addTlsAction(new ReceiveAction());
-
-                return null;
-            });
-            
-            container.addAll(runner.prepare(new WorkflowTrace(), c));
-            break;
-        }
-        runner.execute(container).validateFinal(s -> {
-            WorkflowTrace trace = s.getWorkflowTrace();
-            ClientHelloMessage cHello = trace.getLastSendMessage(ClientHelloMessage.class);
-            if(WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.SERVER_HELLO, trace) 
-                    &&  trace.getLastReceivedMessage(ServerHelloMessage.class) != trace.getFirstReceivedMessage(ServerHelloMessage.class)) {
-                ServerHelloMessage sHello = trace.getLastReceivedMessage(ServerHelloMessage.class);
-                assertTrue(!Arrays.equals(cHello.getSessionId().getValue(), sHello.getSessionId().getValue()));
-            }
-        });
-    }
-    
-    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
-    @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    @MethodCondition(method = "supportsResumption")
-    public void rejectResumptionAfterInvalidFinished(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.CLIENT_HELLO);
-
-       runner.setStateModifier(s -> {
-                WorkflowTrace workflowTrace = s.getWorkflowTrace();
-                FinishedMessage fin = (FinishedMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.FINISHED, workflowTrace);
-                fin.setVerifyData(Modifiable.xor(new byte[]{0x01}, 0));
-                workflowTrace.addTlsAction(new ReceiveAction());
-                return null;
-        });
-        
-        runner.execute(new WorkflowTrace(), c).validateFinal(s -> {
-            WorkflowTrace trace = s.getWorkflowTrace();
-            ClientHelloMessage cHello = trace.getLastSendMessage(ClientHelloMessage.class);
-            if(WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.SERVER_HELLO, trace) 
-                    &&  trace.getLastReceivedMessage(ServerHelloMessage.class) != trace.getFirstReceivedMessage(ServerHelloMessage.class)) {
-                ServerHelloMessage sHello = trace.getLastReceivedMessage(ServerHelloMessage.class);
-                assertTrue(!Arrays.equals(cHello.getSessionId().getValue(), sHello.getSessionId().getValue()));
-            }
-        });
     }
 }
 

@@ -28,6 +28,7 @@ import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
@@ -85,12 +86,21 @@ public class KeyShare extends Tls13Test {
             "This value MUST be in the same group as the KeyShareEntry value offered by the client " +
             "that the server has selected for the negotiated key exchange.")
     public void serverOnlyOffersOneKeshare(WorkflowRunner runner) {
-        // TODO: Iterate over each TLS 1.3 named group and offer only one key share of a different group in each handshake
         runner.replaceSupportedCiphersuites = true;
-
+        AnnotatedStateContainer container = new AnnotatedStateContainer();
+        List<NamedGroup> groupsToTest = context.getSiteReport().getSupportedTls13Groups();
         Config c = this.getConfig();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        runner.execute(workflowTrace, c).validateFinal(i -> {
+        for(NamedGroup group: groupsToTest) {
+            c.setDefaultClientKeyShareNamedGroups(group);
+            runner.setStateModifier(i -> {
+                i.addAdditionalTestInfo(group.toString());
+                return null;
+            });
+            container.addAll(runner.prepare(workflowTrace, c));
+        }
+        
+        runner.execute(container).validateFinal(i -> {
             Validator.executedAsPlanned(i);
             KeyShareExtensionMessage keyshare = i.getWorkflowTrace()
                     .getFirstReceivedMessage(ServerHelloMessage.class)

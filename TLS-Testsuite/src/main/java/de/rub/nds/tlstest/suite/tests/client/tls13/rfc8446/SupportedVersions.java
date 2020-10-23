@@ -21,9 +21,12 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -48,15 +51,22 @@ public class SupportedVersions extends Tls13Test {
             "only the \"supported_versions\" extension to determine the selected version.")
     public void invalidLegacyVersion(WorkflowRunner runner) {
         runner.replaceSelectedCiphersuite = true;
-
+        
         Config c = this.getConfig();
-        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        runner.setStateModifier(i -> {
-            i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class).setProtocolVersion(Modifiable.explicit(new byte[]{0x05, 0x05}));
-            return null;
-        });
-
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        
+        byte[][] testVersions = {{0x05, 0x05}, {0x03, 0x04}};
+        AnnotatedStateContainer container = new AnnotatedStateContainer();
+        
+        for(int n = 0; n < testVersions.length; n++) {
+            byte[] testcase = testVersions[n];
+            WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+            runner.setStateModifier(i -> {
+                i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class).setProtocolVersion(Modifiable.explicit(testcase));
+                return null;
+            });
+            container.addAll(runner.prepare(workflowTrace, c));
+        }
+        runner.execute(container).validateFinal(Validator::executedAsPlanned);
     }
 
     @TlsTest(description = "If the \"supported_versions\" extension in the ServerHello " +
@@ -64,8 +74,38 @@ public class SupportedVersions extends Tls13Test {
             "prior to TLS 1.3, the client MUST abort the " +
             "handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "supportsTls12")
+    @KeyExchange(supported = KeyExchangeType.ALL12)
+    public void selectOlderTlsVersionInTls12(WorkflowRunner runner) {
+        runner.replaceSelectedCiphersuite = true;
+
+        Config c = context.getConfig().createConfig();
+        c.setAddSupportedVersionsExtension(true);
+        c.setEnforceSettings(true);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        workflowTrace.addTlsActions(
+                new ReceiveAction(new AlertMessage())
+        );
+        runner.setStateModifier(i -> {
+            i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class)
+                    .getExtension(SupportedVersionsExtensionMessage.class)
+                    .setSupportedVersions(Modifiable.explicit(new byte[]{0x03, 0x03}));
+            return null;
+        });
+
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+
+            AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            if (msg == null) return;
+            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
+        });
+    }
+    
+    @TlsTest(description = "If the \"supported_versions\" extension in the ServerHello " +
+            "contains a version not offered by the client or contains a version " +
+            "prior to TLS 1.3, the client MUST abort the " +
+            "handshake with an \"illegal_parameter\" alert.")
     public void selectOlderTlsVersion(WorkflowRunner runner) {
-        // TODO: This should be a TLS 1.2 handshake with TLS 1.2 added to the supportedVersions extension
         runner.replaceSelectedCiphersuite = true;
 
         Config c = this.getConfig();

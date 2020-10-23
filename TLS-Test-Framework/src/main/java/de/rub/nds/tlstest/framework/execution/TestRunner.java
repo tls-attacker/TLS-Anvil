@@ -211,6 +211,7 @@ public class TestRunner {
 
         scannerConfig.setProbes(
                 ProbeType.CIPHERSUITE,
+                ProbeType.CERTIFICATE,
                 ProbeType.COMPRESSIONS,
                 ProbeType.NAMED_GROUPS,
                 ProbeType.PROTOCOL_VERSION,

@@ -71,7 +71,6 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 public class Finished extends Tls12Test {
     
     @ModelFromScope(scopeLimitations = {DerivationType.ALERT}, scopeExtensions = {DerivationType.CIPHERSUITE})
-    @ScopeExtensions
     @TlsTest( description = "Recipients of Finished messages MUST verify that the contents are correct.", securitySeverity = SeverityLevel.CRITICAL)
     @Tag("WIP")
     public void verifyFinishedMessageCorrect(ArgumentsAccessor argumentAccessor) {

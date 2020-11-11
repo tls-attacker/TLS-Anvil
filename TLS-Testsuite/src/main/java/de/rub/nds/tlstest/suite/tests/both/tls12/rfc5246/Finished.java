@@ -24,24 +24,64 @@ import de.rub.nds.tlsattacker.core.workflow.action.ChangeContextValueAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import de.rwth.swc.coffee4j.engine.characterization.delta.ImprovedDeltaDebugging;
+import de.rwth.swc.coffee4j.engine.constraint.ConstraintCheckerFactory;
+import de.rwth.swc.coffee4j.engine.constraint.DiagnosticConstraintCheckerFactory;
+import de.rwth.swc.coffee4j.engine.generator.ipog.Ipog;
+import de.rwth.swc.coffee4j.junit.CombinatorialTest;
+import de.rwth.swc.coffee4j.junit.provider.configuration.characterization.EnableFaultCharacterization;
+import de.rwth.swc.coffee4j.junit.provider.configuration.generator.Generator;
+import de.rwth.swc.coffee4j.junit.provider.configuration.reporter.Reporter;
+import de.rwth.swc.coffee4j.junit.provider.model.ModelFromMethod;
+import de.rwth.swc.coffee4j.model.InputParameterModel;
+import de.rwth.swc.coffee4j.model.report.PrintStreamExecutionReporter;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import org.junit.rules.TestName;
+import de.rub.nds.tlstest.framework.coffee4j.ModelFromScope;
+import de.rub.nds.tlstest.framework.coffee4j.TlsTestsuiteReporter;
+import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.model.DerivationContainer;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 @RFC(number = 5246, section = "7.4.9 Finished")
 public class Finished extends Tls12Test {
-
-    @TlsTest(description = "Recipients of Finished messages MUST verify that the contents are correct.", securitySeverity = SeverityLevel.CRITICAL)
-    public void verifyFinishedMessageCorrect(WorkflowRunner runner) {
+    
+    @ModelFromScope(scopeLimitations = {DerivationType.ALERT}, scopeExtensions = {DerivationType.CIPHERSUITE})
+    @ScopeExtensions
+    @TlsTest( description = "Recipients of Finished messages MUST verify that the contents are correct.", securitySeverity = SeverityLevel.CRITICAL)
+    @Tag("WIP")
+    public void verifyFinishedMessageCorrect(ArgumentsAccessor argumentAccessor) {
+        derivationContainer = new DerivationContainer(argumentAccessor);
         Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
+        WorkflowRunner runner = new WorkflowRunner(extensionContext, c);
 
+        byte[] modificationBitmask = (byte[])derivationContainer.getDerivation(DerivationType.MAC_BITMASK).getSelectedValue();
         FinishedMessage finishedMessage = new FinishedMessage();
-        finishedMessage.setVerifyData(Modifiable.xor(new byte[]{0x01}, 0));
+        finishedMessage.setVerifyData(Modifiable.xor(modificationBitmask, 0));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
         workflowTrace.addTlsActions(
@@ -49,7 +89,7 @@ public class Finished extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.executeImmediately(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
     @TlsTest(description = "For the PRF defined in Section 5, the Hash MUST be the Hash used as the basis for the PRF.", securitySeverity = SeverityLevel.CRITICAL)
@@ -96,5 +136,5 @@ public class Finished extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
-
+    
 }

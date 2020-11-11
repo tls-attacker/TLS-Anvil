@@ -17,7 +17,9 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
-import static org.junit.Assert.assertNotEquals;
+import java.util.Arrays;
+
+import static org.junit.Assert.*;
 
 @RFC(number = 7568, section = "3")
 @ClientTest
@@ -29,9 +31,8 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
             "ClientHello.client_version set to {03,00}.", securitySeverity = SeverityLevel.HIGH)
     public void sendClientHelloVersion0300() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
-        assertNotEquals("ClientHello contains protocol version 0300",
-                ProtocolVersion.SSL3.getDeclaringClass(),
-                clientHelloMessage.getProtocolVersion().getValue()
+        assertFalse("ClientHello contains protocol version 0300",
+                Arrays.equals(ProtocolVersion.SSL3.getValue(), clientHelloMessage.getProtocolVersion().getValue())
         );
     }
 }

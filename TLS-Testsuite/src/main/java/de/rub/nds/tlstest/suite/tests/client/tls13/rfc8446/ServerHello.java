@@ -35,8 +35,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 @RFC(number = 8446, section = "4.1.3 Server Hello")
 @ClientTest
@@ -143,7 +142,9 @@ public class ServerHello extends Tls13Test {
 
         ModifiableByteArray downgradeRandom = new ModifiableByteArray();
         VariableModification<byte[]> mod = ByteArrayModificationFactory.insert(new byte[]{0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x01}, 24);
-        mod.setPostModification(ByteArrayModificationFactory.delete(32, 8));
+        // FIXME: Does not work anymore with ModifiableVariable 3.1.0
+        //mod.setPostModification(ByteArrayModificationFactory.delete(32, 8));
+        assertFalse("See FixME comment! Test is broken", true);
         downgradeRandom.setModification(mod);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_HELLO_DONE);

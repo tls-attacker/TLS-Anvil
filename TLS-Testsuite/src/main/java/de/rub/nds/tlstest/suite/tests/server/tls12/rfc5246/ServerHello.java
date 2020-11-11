@@ -23,7 +23,9 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
-import static org.junit.Assert.assertNotEquals;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertFalse;
 
 @RFC(number = 5246, section = "7.4.1.3. Server Hello")
 @ServerTest
@@ -47,7 +49,7 @@ public class ServerHello extends Tls12Test {
             ServerHelloMessage serverHello = trace.getFirstReceivedMessage(ServerHelloMessage.class);
             ClientHelloMessage clientHello = trace.getFirstSendMessage(ClientHelloMessage.class);
 
-            assertNotEquals("ServerHello equals ClienHello", clientHello.getRandom().getValue(), serverHello.getRandom().getValue());
+            assertFalse("ServerHello equals ClienHello", Arrays.equals(clientHello.getRandom().getValue(), serverHello.getRandom().getValue()));
         });
     }
 }

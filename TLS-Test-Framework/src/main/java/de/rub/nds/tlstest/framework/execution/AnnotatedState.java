@@ -15,6 +15,7 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceSerializer;
+import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
 import de.rub.nds.tlstest.framework.constants.TestStatus;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import org.apache.logging.log4j.LogManager;
@@ -240,12 +241,12 @@ public class AnnotatedState {
 
     @JsonProperty("SrcPort")
     public int getSrcPort() {
-        return state.getTlsContext().getTransportHandler().getSrcPort();
+        return ((TcpTransportHandler)state.getTlsContext().getTransportHandler()).getSrcPort();
     }
 
     @JsonProperty("DstPort")
     public int getDstPort() {
-        return state.getTlsContext().getTransportHandler().getDstPort();
+        return ((TcpTransportHandler)state.getTlsContext().getTransportHandler()).getDstPort();
     }
 
 

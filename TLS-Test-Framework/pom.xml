@@ -9,12 +9,12 @@
         <dependency>
             <groupId>de.rub.nds.tlsattacker</groupId>
             <artifactId>TLS-Core</artifactId>
-            <version>3.6.0</version>
+            <version>3.7.0</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tlsattacker</groupId>
             <artifactId>Attacks</artifactId>
-            <version>3.6.0</version>
+            <version>3.7.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -39,7 +39,7 @@
         <dependency>
             <artifactId>TLS-Server-Scanner</artifactId>
             <groupId>de.rub.nds.tlsscanner</groupId>
-            <version>4.0.0</version>
+            <version>4.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

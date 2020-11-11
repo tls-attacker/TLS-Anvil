@@ -140,7 +140,6 @@ public class TestConfig extends TLSDelegateConfig {
                     .addCommand("client", testClientDelegate)
                     .addCommand("server", testServerDelegate)
                     .addObject(this)
-                    .addObject(this.getGeneralDelegate())
                     .build();
         }
 

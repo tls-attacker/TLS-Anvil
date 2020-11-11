@@ -17,6 +17,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.coffee4j.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyX;
 import org.junit.jupiter.api.extension.ExtensionContext;
 

@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Tag;
 public class Tls12Test extends TlsBaseTest {
     @Override
     public Config getConfig() {
-        return context.getConfig().createConfig();
+        Config baseConfig = context.getConfig().createConfig();
+        derivationContainer.applyToConfig(baseConfig, context);
+        return baseConfig;
     }
 }

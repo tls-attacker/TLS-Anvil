@@ -12,14 +12,20 @@ package de.rub.nds.tlstest.framework.testClasses;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
+import de.rub.nds.tlstest.framework.junitExtensions.ExtensionContextResolver;
 import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.MethodConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.TestWatcher;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.WorkflowRunnerResolver;
+import de.rub.nds.tlstest.framework.model.DerivationContainer;
+import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
+import de.rwth.swc.coffee4j.model.InputParameterModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 @ExtendWith({
         TestWatcher.class,
@@ -27,13 +33,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
         TlsVersionCondition.class,
         KexCondition.class,
         MethodConditionExtension.class,
+        ExtensionContextResolver.class,
         WorkflowRunnerResolver.class
 })
 public abstract class TlsBaseTest {
     protected static final Logger LOGGER = LogManager.getLogger();
 
     protected TestContext context;
-
+    
+    protected DerivationContainer derivationContainer;
+    
+    protected ExtensionContext extensionContext;
+    
+    @BeforeEach
+    public void setExtensionContext(ExtensionContext extensionContext) {
+        this.extensionContext = extensionContext;
+    }
+    
     public TlsBaseTest() {
         this.context = TestContext.getInstance();
     }
@@ -45,7 +61,7 @@ public abstract class TlsBaseTest {
     public TestContext getTestContext() {
         return context;
     }
-
+    
     public abstract Config getConfig();
 }
 

@@ -26,7 +26,9 @@ import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsattacker.transport.TransportHandlerType;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.constants.KeyX;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
+import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,6 +36,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -58,10 +61,13 @@ public class WorkflowRunner {
 
     public boolean useRecordFragmentationDerivation = true;
     public boolean useTCPFragmentationDerivation = true;
+    
+    private Config preparedConfig;
 
 
 
     private final TestMethodConfig testMethodConfig;
+    private DerivationContainer derivationContainer;
     private WorkflowTraceType traceType;
     private HandshakeMessageType untilHandshakeMessage;
     private ProtocolMessageType untilProtocolMessage;
@@ -76,7 +82,11 @@ public class WorkflowRunner {
         this.extensionContext = extensionContext;
         this.testMethodConfig = new TestMethodConfig(extensionContext);
     }
-
+    
+    public WorkflowRunner(ExtensionContext extensionContext, Config config) {
+        this(extensionContext);
+        this.preparedConfig = config;
+    }
 
     /**
      * Executes a WorkflowTrace.
@@ -92,6 +102,20 @@ public class WorkflowRunner {
     public AnnotatedStateContainer execute(WorkflowTrace trace, Config config) {
         return this.execute(this.prepare(trace, config));
     }
+    
+    public AnnotatedStateContainer executeImmediately(WorkflowTrace trace, Config config){
+        AnnotatedState annotatedState = new AnnotatedState(new State(config, trace));
+        AnnotatedStateContainer tmpContainer = new AnnotatedStateContainer(extensionContext, annotatedState);
+        
+        if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
+            context.getStateExecutor().bulkExecuteClientStateTasks(annotatedState.getState());
+        } else {
+            StateExecutionServerTask task = new StateExecutionServerTask(annotatedState.getState(), context.getConfig().getTestClientDelegate().getServerSocket(), 2);
+            task.setBeforeAcceptCallback(context.getConfig().getTestClientDelegate().getTriggerScript());
+            context.getStateExecutor().bulkExecuteTasks(task);
+        }
+        return tmpContainer;
+    }
 
 
     /**
@@ -104,7 +128,7 @@ public class WorkflowRunner {
      */
     public AnnotatedStateContainer execute(AnnotatedStateContainer container) {
         container.updateExtensionContext(extensionContext);
-
+        /*
         List<AnnotatedState> toAdd = new ArrayList<>();
         
         if (container.getStates().size() == 0) {
@@ -156,7 +180,7 @@ public class WorkflowRunner {
                 i--;
             }
         }
-        
+        */
         List<State> states = container.getStates().parallelStream().map(AnnotatedState::getState).collect(Collectors.toList());
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             context.getStateExecutor().bulkExecuteClientStateTasks(states);
@@ -182,11 +206,12 @@ public class WorkflowRunner {
      * @return AnnotatedStateContainer that contains the derived states
      */
     public AnnotatedStateContainer prepare(WorkflowTrace trace) {
-        Config config = this.context.getConfig().createConfig();
+        /*Config config = this.context.getConfig().createConfig();
         if (testMethodConfig.getTlsVersion().supported() == ProtocolVersion.TLS13) {
             config = this.context.getConfig().createTls13Config();
-        }
-        return this.prepare(trace, config);
+        }*/
+        
+        return this.prepare(trace, getBasicConfig());
     }
 
     public AnnotatedStateContainer prepare(WorkflowTrace trace, Config config) {
@@ -195,7 +220,17 @@ public class WorkflowRunner {
     }
 
     public AnnotatedStateContainer prepare(AnnotatedState annotatedState) {
+        List<AnnotatedState> dummyList = new LinkedList<>();
         return new AnnotatedStateContainer(extensionContext, this.transformState(annotatedState));
+    }
+    
+    //Note: replaces prepare(WorkflowTrace ...)
+    private Config getBasicConfig() {
+        Config config = this.context.getConfig().createConfig();
+        if (testMethodConfig.getTlsVersion().supported() == ProtocolVersion.TLS13) {
+            config = this.context.getConfig().createTls13Config();
+        }
+        return config;
     }
 
 
@@ -210,9 +245,16 @@ public class WorkflowRunner {
      */
     public WorkflowTrace generateWorkflowTrace(@Nonnull WorkflowTraceType type) {
         this.traceType = type;
-        // just return an empty trace, the real trace is generated and merged in the transform functions,
-        // because the ciphersuite needs to be known for this.
-        return new WorkflowTrace();
+        RunningModeType runningMode = RunningModeType.CLIENT;
+        if (context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
+            runningMode = RunningModeType.SERVER;
+        }
+        WorkflowTrace trace = new WorkflowConfigurationFactory(preparedConfig).createWorkflowTrace(traceType, runningMode);
+        if (this.untilHandshakeMessage != null)
+                WorkflowTraceMutator.truncateAt(trace, this.untilHandshakeMessage, this.untilSendingMessage, untilLast);
+            if (this.untilProtocolMessage != null)
+                WorkflowTraceMutator.truncateAt(trace, this.untilProtocolMessage, this.untilSendingMessage, untilLast);
+        return trace;
     }
 
     public WorkflowTrace generateWorkflowTraceUntilMessage(@Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
@@ -324,7 +366,7 @@ public class WorkflowRunner {
      * @return AnnotatedState with a copied workflow
      */
     private AnnotatedState buildFinalState(AnnotatedState annotatedState, Config newConfig) {
-        WorkflowTrace trace;
+        /*WorkflowTrace trace;
         State state = annotatedState.getState();
         if (traceType == null) {
             trace = state.getWorkflowTraceCopy();
@@ -354,8 +396,8 @@ public class WorkflowRunner {
 
             result.getState().reset();
         }
-
-        return result;
+        */
+        return annotatedState;
     }
 
     /**
@@ -368,7 +410,9 @@ public class WorkflowRunner {
         List<AnnotatedState> result = new ArrayList<AnnotatedState>(){};
         List<CipherSuite> supported = new ArrayList<>(context.getSiteReport().getCipherSuites());
         Config inputConfig = annotatedState.getState().getConfig();
-
+        
+        result.add(annotatedState);
+        /*
         if (inputConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13) {
             supported.addAll(context.getSiteReport().getSupportedTls13CipherSuites());
         }
@@ -404,7 +448,7 @@ public class WorkflowRunner {
             AnnotatedState newState = buildFinalState(annotatedState, config);
             result.add(newState);
         }
-
+        */
         return result;
     }
 
@@ -420,6 +464,9 @@ public class WorkflowRunner {
         Config inputConfig = annotatedState.getState().getConfig();
         List<CipherSuite> supported = new ArrayList<>(context.getSiteReport().getCipherSuites());
 
+        
+        result.add(buildFinalState(annotatedState, inputConfig));
+        /*
         if (inputConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13) {
             supported.addAll(context.getSiteReport().getSupportedTls13CipherSuites());
         }
@@ -468,7 +515,7 @@ public class WorkflowRunner {
             AnnotatedState newState = buildFinalState(annotatedState, config);
             result.add(newState);
         }
-
+        */
         return result;
     }
 
@@ -502,5 +549,13 @@ public class WorkflowRunner {
 
     public void setStateModifier(Function<AnnotatedState, AnnotatedState> stateModifier) {
         this.stateModifier = stateModifier;
+    }
+    
+    public Config getPreparedConfig() {
+        return preparedConfig;
+    }
+
+    public void setPreparedConfig(Config preparedConfig) {
+        this.preparedConfig = preparedConfig;
     }
 }

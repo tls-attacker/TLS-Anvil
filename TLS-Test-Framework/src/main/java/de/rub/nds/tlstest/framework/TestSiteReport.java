@@ -42,6 +42,8 @@ public class TestSiteReport extends SiteReport {
             report.setVersionSuitePairs(siteReport.getVersionSuitePairs());
             report.setSupportedCompressionMethods(siteReport.getSupportedCompressionMethods());
             report.setSupportedTls13Groups(siteReport.getSupportedTls13Groups());
+            report.setSupportedNamedGroupsWitnesses(siteReport.getSupportedNamedGroupsWitnesses());
+            report.setSupportedNamedGroupsWitnessesTls13(siteReport.getSupportedNamedGroupsWitnessesTls13());
             report.setSupportedExtensions(siteReport.getSupportedExtensions());
             
             for(String key : siteReport.getResultMap().keySet()) {

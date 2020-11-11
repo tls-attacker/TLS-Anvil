@@ -70,9 +70,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPackage;
+import org.junit.platform.launcher.listeners.LoggingListener;
 
 /**
  * This class sets up and starts JUnit to excute the tests,
@@ -433,7 +435,7 @@ public class TestRunner {
                 .configurationParameter("junit.jupiter.execution.parallel.config.fixed.parallelism",
                         String.valueOf(Math.min(testConfig.getParallel() * 3, Runtime.getRuntime().availableProcessors()))
                 );
-
+        
         if (testConfig.getTags().size() > 0) {
             builder.filters(
                     TagFilter.includeTags(testConfig.getTags())
@@ -441,8 +443,9 @@ public class TestRunner {
         }
 
         LauncherDiscoveryRequest request = builder.build();
-
+        
         SummaryGeneratingListener listener = new SummaryGeneratingListener();
+        LoggingListener listenerLog = LoggingListener.forJavaUtilLogging(Level.INFO);
         ExecutionListener reporting = new ExecutionListener();
 
         Launcher launcher = LauncherFactory.create(
@@ -450,9 +453,10 @@ public class TestRunner {
                         .enableTestExecutionListenerAutoRegistration(false)
                         .addTestExecutionListeners(listener)
                         .addTestExecutionListeners(reporting)
+                        //.addTestExecutionListeners(listenerLog)
                         .build()
         );
-
+        
         TestPlan testplan = launcher.discover(request);
         long testcases = testplan.countTestIdentifiers(TestIdentifier::isTest);
         long clientTls12 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls12", "client"));

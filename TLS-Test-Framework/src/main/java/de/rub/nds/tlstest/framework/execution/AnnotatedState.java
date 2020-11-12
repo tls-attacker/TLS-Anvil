@@ -16,7 +16,8 @@ import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceSerializer;
 import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
-import de.rub.nds.tlstest.framework.constants.TestStatus;
+import de.rub.nds.tlstest.framework.constants.TestResult;
+import de.rub.nds.tlstest.framework.exceptions.TransportHandlerExpection;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
@@ -46,9 +48,9 @@ public class AnnotatedState {
     private Throwable failedReason;
     private AnnotatedStateContainer associatedContainer;
 
-    @XmlElement(name = "Status")
-    @JsonProperty("Status")
-    private TestStatus status = TestStatus.NOT_SPECIFIED;
+    @XmlElement(name = "Result")
+    @JsonProperty("Result")
+    private TestResult result = TestResult.NOT_SPECIFIED;
 
     @XmlElement(name = "InspectedCiphersuite")
     @JsonProperty("InspectedCiphersuite")
@@ -96,12 +98,12 @@ public class AnnotatedState {
     }
 
 
-    public TestStatus getStatus() {
-        return status;
+    public TestResult getResult() {
+        return result;
     }
 
-    public void setStatus(TestStatus status) {
-        this.status = status;
+    public void setResult(TestResult result) {
+        this.result = result;
     }
 
     public Throwable getFailedReason() {
@@ -110,7 +112,7 @@ public class AnnotatedState {
 
     public void setFailedReason(Throwable failedReason) {
         this.failedReason = failedReason;
-        this.status = this.failedReason != null ? TestStatus.FAILED : TestStatus.NOT_SPECIFIED;
+        this.result = this.failedReason != null ? TestResult.FAILED : TestResult.NOT_SPECIFIED;
     }
 
     public CipherSuite getInspectedCipherSuite() {

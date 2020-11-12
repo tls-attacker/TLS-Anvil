@@ -5,7 +5,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.TestCategory;
-import de.rub.nds.tlstest.framework.constants.TestStatus;
+import de.rub.nds.tlstest.framework.constants.TestResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -59,21 +59,21 @@ public class ScoreContainer {
         }
     }
 
-    public void updateForStatus(TestStatus status) {
+    public void updateForResult(TestResult status) {
         for (Score i : scoreMap.values()) {
-            i.updateForTestStatus(status);
+            i.updateForTestResult(status);
         }
     }
 
-    public void updateStatusForCategory(TestCategory category, TestStatus status) {
+    public void updateStatusForCategory(TestCategory category, TestResult status) {
         if (scoreMap.containsKey(category)) {
-            scoreMap.get(category).updateForTestStatus(status);
+            scoreMap.get(category).updateForTestResult(status);
         }
     }
 
-    public void overwriteStatusForCategory(TestCategory category, TestStatus status) {
+    public void overwriteStatusForCategory(TestCategory category, TestResult status) {
         if (scoreMap.containsKey(category)) {
-            scoreMap.get(category).overwiteTestStatus(status);
+            scoreMap.get(category).overwiteTestResult(status);
         }
     }
 

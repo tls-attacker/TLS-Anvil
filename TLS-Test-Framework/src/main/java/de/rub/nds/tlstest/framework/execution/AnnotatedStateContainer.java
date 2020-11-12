@@ -12,7 +12,7 @@ package de.rub.nds.tlstest.framework.execution;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.constants.TestStatus;
+import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.exceptions.TransportHandlerExpection;
 import de.rub.nds.tlstest.framework.reporting.ScoreContainer;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
@@ -45,7 +45,7 @@ public class  AnnotatedStateContainer {
     @JsonProperty("TestMethod")
     private TestMethodConfig testMethodConfig;
 
-    private int statusRaw = 0;
+    private int resultRaw = 0;
 
     @XmlElement(name = "DisabledReason")
     @JsonProperty("DisabledReason")
@@ -118,12 +118,12 @@ public class  AnnotatedStateContainer {
         for (AnnotatedState i : states) {
             try {
                 f.accept(i);
-                if (i.getStatus() == TestStatus.NOT_SPECIFIED) {
-                    i.setStatus(TestStatus.SUCCEEDED);
-                    stateFinished(TestStatus.SUCCEEDED);
+                if (i.getResult() == TestResult.NOT_SPECIFIED) {
+                    i.setResult(TestResult.SUCCEEDED);
+                    stateFinished(TestResult.SUCCEEDED);
                 }
                 else {
-                    stateFinished(i.getStatus());
+                    stateFinished(i.getResult());
                 }
             } catch (Throwable err) {
                 failed = true;
@@ -139,7 +139,7 @@ public class  AnnotatedStateContainer {
 
                 i.setFailedReason(error);
                 errors.add(error);
-                stateFinished(TestStatus.FAILED);
+                stateFinished(TestResult.FAILED);
             }
         }
 
@@ -169,8 +169,8 @@ public class  AnnotatedStateContainer {
         }
     }
 
-    private void stateFinished(TestStatus stateStatus) {
-        setStatusRaw(this.statusRaw | stateStatus.getValue());
+    private void stateFinished(TestResult result) {
+        setResultRaw(this.resultRaw | result.getValue());
     }
 
     public void validateFinal(Consumer<AnnotatedState> f) {
@@ -197,15 +197,15 @@ public class  AnnotatedStateContainer {
         this.uniqueId = uniqueId;
     }
 
-    public void setStatusRaw(int statusRaw) {
-        this.statusRaw = statusRaw;
-        scoreContainer.updateForStatus(getStatus());
+    public void setResultRaw(int resultRaw) {
+        this.resultRaw = resultRaw;
+        scoreContainer.updateForResult(getResult());
     }
 
-    @XmlElement(name = "Status")
-    @JsonProperty("Status")
-    public TestStatus getStatus() {
-        return TestStatus.statusForBitmask(statusRaw);
+    @XmlElement(name = "Result")
+    @JsonProperty("Result")
+    public TestResult getResult() {
+        return TestResult.resultForBitmask(resultRaw);
     }
 
     public TestMethodConfig getTestMethodConfig() {

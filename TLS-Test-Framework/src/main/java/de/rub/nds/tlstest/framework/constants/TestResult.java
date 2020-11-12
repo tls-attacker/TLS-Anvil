@@ -12,7 +12,7 @@ package de.rub.nds.tlstest.framework.constants;
 import java.util.ArrayList;
 import java.util.List;
 
-public enum TestStatus {
+public enum TestResult {
     NOT_SPECIFIED(1, 0),
     SUCCEEDED(1 << 1, 100),
     PARTIALLY_SUCCEEDED(1 << 2, 80),
@@ -23,7 +23,7 @@ public enum TestStatus {
     private final int value;
     private final int scorePercentage;
 
-    TestStatus(int value, int scorePercentage) {
+    TestResult(int value, int scorePercentage) {
         this.value = value;
         this.scorePercentage = scorePercentage;
     }
@@ -32,45 +32,45 @@ public enum TestStatus {
         return value;
     }
 
-    public static List<TestStatus> parse(int val) {
-        List<TestStatus> statusList = new ArrayList<TestStatus>();
+    public static List<TestResult> parse(int val) {
+        List<TestResult> resultList = new ArrayList<TestResult>();
         if (val == 0) {
-            statusList.add(NOT_SPECIFIED);
-            return statusList;
+            resultList.add(NOT_SPECIFIED);
+            return resultList;
         }
 
-        for (TestStatus ap : values()) {
+        for (TestResult ap : values()) {
             if ((val & ap.getValue()) > 0)
-                statusList.add(ap);
+                resultList.add(ap);
         }
-        return statusList;
+        return resultList;
     }
 
-    public static TestStatus statusForBitmask(int val) {
+    public static TestResult resultForBitmask(int val) {
         if (val == 0) {
             return NOT_SPECIFIED;
         }
 
-        List<TestStatus> status = TestStatus.parse(val);
-        if (status.size() == 1) {
-            return status.get(0);
+        List<TestResult> result = TestResult.parse(val);
+        if (result.size() == 1) {
+            return result.get(0);
         }
 
-        if (status.contains(DISABLED)) {
-            throw new UnsupportedOperationException("TestStatus Bitmask contains DISABLED");
+        if (result.contains(DISABLED)) {
+            throw new UnsupportedOperationException("TestResult Bitmask contains DISABLED");
         }
 
-        if (status.contains(NOT_SPECIFIED)) {
-            throw new UnsupportedOperationException("TestStatus Bitmask contains NOT_SPECIFIED");
+        if (result.contains(NOT_SPECIFIED)) {
+            throw new UnsupportedOperationException("TestResult Bitmask contains NOT_SPECIFIED");
         }
 
-        if (status.contains(FAILED) || status.contains(PARTIALLY_FAILED)) {
-            if (status.contains(PARTIALLY_SUCCEEDED) || status.contains(SUCCEEDED)) {
+        if (result.contains(FAILED) || result.contains(PARTIALLY_FAILED)) {
+            if (result.contains(PARTIALLY_SUCCEEDED) || result.contains(SUCCEEDED)) {
                 return PARTIALLY_FAILED;
             }
         }
 
-        return status.get(status.size() - 1);
+        return result.get(result.size() - 1);
     }
 
     public int getScorePercentage() {

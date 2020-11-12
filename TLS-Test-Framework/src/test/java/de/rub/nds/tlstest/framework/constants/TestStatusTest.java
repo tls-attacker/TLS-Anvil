@@ -8,35 +8,35 @@ public class TestStatusTest {
 
     @Test
     public void partiallyFailed() {
-        TestStatus status = TestStatus.statusForBitmask((TestStatus.SUCCEEDED.getValue() | TestStatus.FAILED.getValue() | TestStatus.PARTIALLY_SUCCEEDED.getValue()));
-        assertEquals(TestStatus.PARTIALLY_FAILED, status);
+        TestResult status = TestResult.resultForBitmask((TestResult.SUCCEEDED.getValue() | TestResult.FAILED.getValue() | TestResult.PARTIALLY_SUCCEEDED.getValue()));
+        assertEquals(TestResult.PARTIALLY_FAILED, status);
 
-        status = TestStatus.statusForBitmask((TestStatus.FAILED.getValue() | TestStatus.PARTIALLY_SUCCEEDED.getValue()));
-        assertEquals(TestStatus.PARTIALLY_FAILED, status);
+        status = TestResult.resultForBitmask((TestResult.FAILED.getValue() | TestResult.PARTIALLY_SUCCEEDED.getValue()));
+        assertEquals(TestResult.PARTIALLY_FAILED, status);
 
-        status = TestStatus.statusForBitmask((TestStatus.FAILED.getValue() | TestStatus.SUCCEEDED.getValue()));
-        assertEquals(TestStatus.PARTIALLY_FAILED, status);
+        status = TestResult.resultForBitmask((TestResult.FAILED.getValue() | TestResult.SUCCEEDED.getValue()));
+        assertEquals(TestResult.PARTIALLY_FAILED, status);
     }
 
     @Test
     public void partiallySucceeded() {
-        TestStatus status = TestStatus.statusForBitmask((TestStatus.SUCCEEDED.getValue() | TestStatus.PARTIALLY_SUCCEEDED.getValue()));
-        assertEquals(TestStatus.PARTIALLY_SUCCEEDED, status);
+        TestResult status = TestResult.resultForBitmask((TestResult.SUCCEEDED.getValue() | TestResult.PARTIALLY_SUCCEEDED.getValue()));
+        assertEquals(TestResult.PARTIALLY_SUCCEEDED, status);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void containsNotSpecified() {
-        TestStatus.statusForBitmask((TestStatus.SUCCEEDED.getValue() | TestStatus.NOT_SPECIFIED.getValue()));
+        TestResult.resultForBitmask((TestResult.SUCCEEDED.getValue() | TestResult.NOT_SPECIFIED.getValue()));
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void containsDisabled() {
-        TestStatus.statusForBitmask((TestStatus.SUCCEEDED.getValue() | TestStatus.DISABLED.getValue()));
+        TestResult.resultForBitmask((TestResult.SUCCEEDED.getValue() | TestResult.DISABLED.getValue()));
     }
 
     @Test()
     public void returnDefault() {
-        TestStatus status = TestStatus.statusForBitmask(0);
-        assertEquals(TestStatus.NOT_SPECIFIED, status);
+        TestResult status = TestResult.resultForBitmask(0);
+        assertEquals(TestResult.NOT_SPECIFIED, status);
     }
 }

@@ -26,7 +26,7 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.constants.TestStatus;
+import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -64,7 +64,7 @@ public class AlertProtocol extends Tls12Test {
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
             if (message == null) {
                 i.addAdditionalResultInfo("No close_notify alert received.");
-                i.setStatus(TestStatus.PARTIALLY_SUCCEEDED);
+                i.setResult(TestResult.PARTIALLY_SUCCEEDED);
                 return;
             }
             assertEquals("Did not receive warning alert", AlertLevel.WARNING.getValue(), message.getLevel().getValue().byteValue());

@@ -37,7 +37,7 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.coffee4j.ModelFromScope;
 import de.rub.nds.tlstest.framework.coffee4j.TlsTestsuiteReporter;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.constants.TestStatus;
+import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
@@ -92,7 +92,7 @@ public class AlertProtocol extends Tls12Test {
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
             if (message == null) {
                 i.addAdditionalResultInfo("No close_notify alert received.");
-                i.setStatus(TestStatus.PARTIALLY_SUCCEEDED);
+                i.setResult(TestResult.PARTIALLY_SUCCEEDED);
                 return;
             }
             Validator.receivedWarningAlert(i);

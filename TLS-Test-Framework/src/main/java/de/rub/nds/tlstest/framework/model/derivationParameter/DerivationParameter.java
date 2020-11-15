@@ -5,6 +5,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
@@ -64,5 +65,14 @@ public abstract class DerivationParameter<T> {
         } else {
             return type + "=" + selectedValue;
         }    
+    }
+
+    @JsonValue
+    public String jsonValue() {
+        if(selectedValue instanceof byte[]) {
+            return ArrayConverter.bytesToHexString((byte[])selectedValue);
+        } else {
+            return "" + selectedValue;
+        }
     }
 }

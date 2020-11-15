@@ -3,14 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.rub.nds.tlstest.framework.coffee4j;
+package de.rub.nds.tlstest.framework.coffee4j.model;
 
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
-import static de.rwth.swc.coffee4j.junit.provider.ProviderUtil.getObjectReturnedByMethod;
-import de.rwth.swc.coffee4j.junit.provider.model.ModelFromMethod;
 import de.rwth.swc.coffee4j.junit.provider.model.ModelProvider;
 import de.rwth.swc.coffee4j.model.InputParameterModel;
 import org.junit.jupiter.api.extension.ExtensionContext;

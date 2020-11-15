@@ -11,12 +11,14 @@ package de.rub.nds.tlstest.framework.junitExtensions;
 
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestResult;
+import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
+import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
+import de.rub.nds.tlstest.framework.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -30,19 +32,14 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
     private AnnotatedStateContainer createResult(ExtensionContext context, TestResult result) {
         TestContext.getInstance().testFinished();
 
-        if (!context.getTestMethod().isPresent()) {
-            return null;
+        String uniqueId = Utils.getTemplateContainerExtensionContext(context).getUniqueId();
+        AnnotatedStateContainer container = TestContext.getInstance().getTestResults().get(uniqueId);
+        if (container != null) {
+            return container;
         }
 
-        String uniqueId = context.getUniqueId();
-        if (TestContext.getInstance().getTestResults().get(uniqueId) != null) {
-            return null;
-        }
-
-        AnnotatedStateContainer container = new AnnotatedStateContainer(context, new ArrayList<>());
+        container = AnnotatedStateContainer.forExtensionContext(context);
         container.setResultRaw(result.getValue());
-
-        TestContext.getInstance().addTestResult(container);
         return container;
     }
 
@@ -57,8 +54,17 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
     public void testFailed(ExtensionContext context, Throwable cause) {
         TestContext.getInstance().testFailed();
         AnnotatedStateContainer container = createResult(context, TestResult.FAILED);
-        if (container != null) {
-            container.setFailedStacktrace(cause);
+        AnnotatedState state = container.getStates().stream()
+                .filter(i -> i.getExtensionContext().getUniqueId().equals(context.getUniqueId()))
+                .findFirst()
+                .orElse(null);
+        if (state == null) {
+            if (Utils.extensionContextIsTemplateContainer(context.getParent().get())) {
+                state = new AnnotatedState(context, null);
+                state.setFailedReason(cause);
+            } else {
+                container.setFailedReason(ExecptionPrinter.stacktraceToString(cause));
+            }
         }
 
         if (!(cause instanceof AssertionError)) {
@@ -70,8 +76,6 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
     public void testDisabled(ExtensionContext context, Optional<String> reason) {
         TestContext.getInstance().testDisabled();
         AnnotatedStateContainer container = createResult(context, TestResult.DISABLED);
-        if (container != null) {
-            container.setDisabledReason(reason.orElse("No reason"));
-        }
+        container.setDisabledReason(reason.orElse("No reason"));
     }
 }

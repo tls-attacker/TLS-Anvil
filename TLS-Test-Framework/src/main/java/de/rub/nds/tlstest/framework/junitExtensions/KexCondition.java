@@ -10,7 +10,6 @@
 package de.rub.nds.tlstest.framework.junitExtensions;
 
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.coffee4j.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyX;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

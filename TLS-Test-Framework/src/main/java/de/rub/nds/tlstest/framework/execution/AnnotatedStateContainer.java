@@ -13,10 +13,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestResult;
-import de.rub.nds.tlstest.framework.exceptions.TransportHandlerExpection;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.reporting.ScoreContainer;
-import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
+import de.rub.nds.tlstest.framework.utils.Utils;
+import de.rwth.swc.coffee4j.model.Combination;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -28,7 +29,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 
@@ -51,8 +54,6 @@ public class  AnnotatedStateContainer {
     @JsonProperty("DisabledReason")
     private String disabledReason;
 
-    private Throwable failedStacktrace;
-
     @XmlElement(name = "FailedReason")
     @JsonProperty("FailedReason")
     private String failedReason;
@@ -71,18 +72,41 @@ public class  AnnotatedStateContainer {
 
     private String uniqueId;
 
+    @JsonProperty("FailureInducingCombinations")
+    List<Map<String, Object>> failureInducingCombinations;
+
+    @Deprecated
     public AnnotatedStateContainer() { }
 
+    @Deprecated
     public AnnotatedStateContainer(ExtensionContext extensionContext, List<AnnotatedState> states) {
-        updateExtensionContext(extensionContext);
         this.addAll(states);
     }
 
+    @Deprecated
     public AnnotatedStateContainer(ExtensionContext extensionContext, AnnotatedState... states) {
         this(extensionContext, Arrays.asList(states));
     }
 
+    private AnnotatedStateContainer(ExtensionContext extensionContext) {
+        this.uniqueId = extensionContext.getUniqueId();
+        this.scoreContainer = new ScoreContainer(extensionContext);
+    }
 
+    public static AnnotatedStateContainer forExtensionContext(ExtensionContext extensionContext) {
+        ExtensionContext resolvedContext = Utils.getTemplateContainerExtensionContext(extensionContext);
+
+        if (TestContext.getInstance().getTestResult(resolvedContext.getUniqueId()) != null) {
+            return TestContext.getInstance().getTestResult(resolvedContext.getUniqueId());
+        }
+
+        AnnotatedStateContainer container = new AnnotatedStateContainer(resolvedContext);
+        container.setTestMethodConfig(new TestMethodConfig(resolvedContext));
+        TestContext.getInstance().addTestResult(container);
+        return container;
+    }
+
+    @Deprecated
     public void addAll(@Nonnull AnnotatedStateContainer container) {
         List<AnnotatedState> states = container.getStates();
         states.parallelStream().forEach(i -> i.setAssociatedContainer(this));
@@ -111,74 +135,52 @@ public class  AnnotatedStateContainer {
      * @param finalValidation if set to true, an execption is thrown when the validation fails for one state
      * @param f lambda function that accepts a annotated state
      */
+    @Deprecated
     public void validate(boolean finalValidation, Consumer<AnnotatedState> f) {
-        boolean failed = false;
-        List<Throwable> errors = new ArrayList<>();
 
-        for (AnnotatedState i : states) {
-            try {
-                f.accept(i);
-                if (i.getResult() == TestResult.NOT_SPECIFIED) {
-                    i.setResult(TestResult.SUCCEEDED);
-                    stateFinished(TestResult.SUCCEEDED);
-                }
-                else {
-                    stateFinished(i.getResult());
-                }
-            } catch (Throwable err) {
-                failed = true;
-
-                if (i.getState().getExecutionException() != null) {
-                    err.addSuppressed(i.getState().getExecutionException());
-                }
-
-                Throwable error = err;
-                if (i.getState().getTlsContext().isReceivedTransportHandlerException()) {
-                    error = new TransportHandlerExpection("Received transportHandler excpetion", err);
-                }
-
-                i.setFailedReason(error);
-                errors.add(error);
-                stateFinished(TestResult.FAILED);
-            }
-        }
-
-        if (finalValidation) {
-            TestContext.getInstance().addTestResult(this);
-            List<String> uuids = new ArrayList<>();
-            for (AnnotatedState state : this.getStates()) {
-                if (uuids.contains(state.getUuid())) {
-                    LOGGER.warn("uuids of states in container are not unique! ({}.{})", this.testMethodConfig.getClassName(), this.testMethodConfig.getMethodName());
-                    break;
-                }
-                uuids.add(state.getUuid());
-            }
-
-            if (failed) {
-                for (Throwable i: errors) {
-                    if (System.getenv("DOCKER") != null) {
-                        LOGGER.debug("", i);
-                    } else {
-                        LOGGER.error("", i);
-                    }
-                }
-                AssertionError error = new AssertionError(String.format("%d/%d tests failed", errors.size(), states.size()));
-                this.setFailedStacktrace(error);
-                throw error;
-            }
-        }
     }
 
-    private void stateFinished(TestResult result) {
-        setResultRaw(this.resultRaw | result.getValue());
-    }
-
+    @Deprecated
     public void validateFinal(Consumer<AnnotatedState> f) {
         this.validate(true, f);
     }
 
+    @Deprecated
     public void validate(Consumer<AnnotatedState> f) {
         this.validate(false, f);
+    }
+
+    public void finished() {
+        List<String> uuids = new ArrayList<>();
+        List<Throwable> errors = new ArrayList<>();
+        boolean failed = false;
+        for (AnnotatedState state : this.getStates()) {
+            if (state.getResult() == TestResult.FAILED) {
+                errors.add(state.getFailedReason());
+                failed = true;
+            }
+
+            if (uuids.contains(state.getUuid())) {
+                LOGGER.warn("uuids of states in container are not unique! ({}.{})", this.testMethodConfig.getClassName(), this.testMethodConfig.getMethodName());
+                continue;
+            }
+            uuids.add(state.getUuid());
+        }
+
+        if (failed) {
+            for (Throwable i: errors) {
+                if (System.getenv("DOCKER") != null) {
+                    LOGGER.debug("", i);
+                } else {
+                    LOGGER.error("", i);
+                }
+            }
+            failedReason = String.format("%d/%d tests failed", errors.size(), states.size());
+        }
+    }
+
+    public void stateFinished(TestResult result) {
+        setResultRaw(this.resultRaw | result.getValue());
     }
 
     public List<AnnotatedState> getStates() {
@@ -224,32 +226,6 @@ public class  AnnotatedStateContainer {
         this.disabledReason = disabledReason;
     }
 
-    public Throwable getFailedStacktrace() {
-        return failedStacktrace;
-    }
-
-    public void setFailedStacktrace(Throwable failedStacktrace) {
-        this.failedReason = failedStacktrace.getMessage();
-        this.failedStacktrace = failedStacktrace;
-    }
-
-    @XmlElement(name = "FailedStacktrace")
-    @JsonProperty("FailedStacktrace")
-    public String getStacktrace() {
-        if (failedStacktrace != null) {
-            return ExecptionPrinter.stacktraceToString(failedStacktrace);
-        }
-        return null;
-    }
-
-    public String getFailedReason() {
-        return failedReason;
-    }
-
-    public void setFailedReason(String failedReason) {
-        this.failedReason = failedReason;
-    }
-
     public Long getElapsedTime() {
         return elapsedTime;
     }
@@ -258,15 +234,38 @@ public class  AnnotatedStateContainer {
         this.elapsedTime = elapsedTime;
     }
 
-    public void updateExtensionContext(ExtensionContext extensionContext) {
-        this.uniqueId = extensionContext.getUniqueId();
-        this.testMethodConfig = new TestMethodConfig(extensionContext);
-        if (this.scoreContainer == null) {
-            this.scoreContainer = new ScoreContainer(extensionContext);
-        }
+    public List<Map<String, Object>> getFailureInducingCombinations() {
+        return failureInducingCombinations;
+    }
+
+    public void setFailureInducingCombinations(List<Combination> failureInducingCombinations) {
+        if (failureInducingCombinations == null || failureInducingCombinations.isEmpty())
+            return;
+
+        List<Map<String, Object>> parameters = new ArrayList<>();
+        failureInducingCombinations.forEach(i -> {
+            Map<String, Object> map = new HashMap<>();
+            i.getParameterValueMap().forEach((k, v) -> {
+                if (!(v.get() instanceof DerivationParameter)) {
+                    LOGGER.warn("Parameter is not a DerivationParameter");
+                }
+
+                map.put(k.getName(), v.get());
+            });
+            parameters.add(map);
+        });
+        this.failureInducingCombinations = parameters;
     }
 
     public ScoreContainer getScoreContainer() {
         return scoreContainer;
+    }
+
+    public String getFailedReason() {
+        return failedReason;
+    }
+
+    public void setFailedReason(String failedReason) {
+        this.failedReason = failedReason;
     }
 }

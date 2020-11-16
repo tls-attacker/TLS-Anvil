@@ -107,6 +107,14 @@ public class WorkflowRunner {
         AnnotatedState annotatedState = new AnnotatedState(new State(config, trace));
         AnnotatedStateContainer tmpContainer = new AnnotatedStateContainer(extensionContext, annotatedState);
         
+        TlsAction lastAction = annotatedState.getState().getWorkflowTrace().getLastAction();
+            if (lastAction instanceof ReceivingAction) {
+                List<ProtocolMessageType> messages = ((ReceivingAction) lastAction).getGoingToReceiveProtocolMessageTypes();
+                if (messages.size() > 0 && messages.get(messages.size() - 1).equals(ProtocolMessageType.ALERT)) {
+                    annotatedState.getState().getConfig().setReceiveFinalTcpSocketStateWithTimeout(true);
+                }
+        }
+        
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             context.getStateExecutor().bulkExecuteClientStateTasks(annotatedState.getState());
         } else {

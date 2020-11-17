@@ -180,6 +180,17 @@ public class  AnnotatedStateContainer {
             }
             failedReason = String.format("%d/%d tests failed", errors.size(), states.size());
         }
+
+        String tmp = failureInducingCombinations.stream().map(i -> {
+            return i.keySet().stream().map(j -> {
+                if (i.get(j) instanceof DerivationParameter) {
+                    return String.format("%s=%s", j, ((DerivationParameter)i.get(j)).jsonValue());
+                } else {
+                    return i.get(j).toString();
+                }
+            }).collect(Collectors.joining(", "));
+        }).collect(Collectors.joining("\n\t"));
+        LOGGER.info("The following parameters resulted in test failures:\n\t{}", tmp);
     }
 
     public void stateFinished(TestResult result) {

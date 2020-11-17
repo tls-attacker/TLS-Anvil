@@ -89,7 +89,7 @@ public class AlertProtocol extends Tls12Test {
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
             if (message == null) {
                 i.addAdditionalResultInfo("No close_notify alert received.");
-                i.setStatus(TestStatus.PARTIALLY_SUCCEEDED);
+                i.setResult(TestResult.PARTIALLY_SUCCEEDED);
                 return;
             }
             Validator.receivedWarningAlert(i);

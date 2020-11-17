@@ -54,17 +54,22 @@ public class WorkflowRunner {
     /**
      * Controls the test derivation. Setting everything to false disables the derivation.
      */
+    // TODO: Delete these after migration
+    @Deprecated
     public boolean replaceSupportedCiphersuites = false;
+    @Deprecated
     public boolean appendEachSupportedCiphersuiteToClientSupported = false;
+    @Deprecated
     public boolean respectConfigSupportedCiphersuites = false;
+    @Deprecated
     public boolean replaceSelectedCiphersuite = false;
-
+    @Deprecated
     public boolean useRecordFragmentationDerivation = true;
+    @Deprecated
     public boolean useTCPFragmentationDerivation = true;
+
     
     private Config preparedConfig;
-
-
 
     private final TestMethodConfig testMethodConfig;
     private DerivationContainer derivationContainer;
@@ -73,8 +78,6 @@ public class WorkflowRunner {
     private ProtocolMessageType untilProtocolMessage;
     private Boolean untilSendingMessage = null;
     private Boolean untilLast = false;
-
-    private Function<AnnotatedState, AnnotatedState> stateModifier = null;
 
 
     public WorkflowRunner(ExtensionContext extensionContext) {
@@ -95,17 +98,22 @@ public class WorkflowRunner {
      * @param trace Trace to execute
      * @return
      */
+   @Deprecated
     public AnnotatedStateContainer execute(WorkflowTrace trace) {
         return this.execute(this.prepare(trace));
     }
 
-    public AnnotatedStateContainer execute(WorkflowTrace trace, Config config) {
-        return this.execute(this.prepare(trace, config));
+    @Deprecated
+    public AnnotatedStateContainer execute(AnnotatedStateContainer container) {
+        return new AnnotatedStateContainer();
     }
-    
-    public AnnotatedStateContainer executeImmediately(WorkflowTrace trace, Config config){
-        AnnotatedState annotatedState = new AnnotatedState(new State(config, trace));
-        AnnotatedStateContainer tmpContainer = new AnnotatedStateContainer(extensionContext, annotatedState);
+
+    public AnnotatedState execute(WorkflowTrace trace, Config config) {
+        return executeImmediately(trace, config);
+    }
+
+    public AnnotatedState executeImmediately(WorkflowTrace trace, Config config){
+        AnnotatedState annotatedState = new AnnotatedState(extensionContext, new State(config, trace));
         
         TlsAction lastAction = annotatedState.getState().getWorkflowTrace().getLastAction();
             if (lastAction instanceof ReceivingAction) {
@@ -122,87 +130,8 @@ public class WorkflowRunner {
             task.setBeforeAcceptCallback(context.getConfig().getTestClientDelegate().getTriggerScript());
             context.getStateExecutor().bulkExecuteTasks(task);
         }
-        return tmpContainer;
-    }
 
-
-    /**
-     * Executes a AnnotatedStateContainer by executing every State that is part of the container.
-     * Before the execution, the fragmentation derivation is performed.
-     * The States are executed by the shared ParallelExecutor, that is referenced by the TlsContext.
-     *
-     * @param container Container that is executed
-     * @return Returns the input container
-     */
-    public AnnotatedStateContainer execute(AnnotatedStateContainer container) {
-        container.updateExtensionContext(extensionContext);
-        /*
-        List<AnnotatedState> toAdd = new ArrayList<>();
-        
-        if (container.getStates().size() == 0) {
-            LOGGER.warn("AnnotatedStateContainer does not contain any state. No Handshake will be performed...");
-        }
-
-        for (AnnotatedState i : container.getStates()) {
-            TlsAction lastAction = i.getState().getWorkflowTrace().getLastAction();
-            if (lastAction instanceof ReceivingAction) {
-                List<ProtocolMessageType> messages = ((ReceivingAction) lastAction).getGoingToReceiveProtocolMessageTypes();
-                if (messages.size() > 0 && messages.get(messages.size() - 1).equals(ProtocolMessageType.ALERT)) {
-                    i.getState().getConfig().setReceiveFinalTcpSocketStateWithTimeout(true);
-                }
-            }
-
-            if (!useTCPFragmentationDerivation && !useRecordFragmentationDerivation)
-                break;
-
-            if (useRecordFragmentationDerivation) {
-                AnnotatedState copy = new AnnotatedState(i);
-                copy.setParentUUID(i.getUuid());
-
-                copy.getState().getConfig().setDefaultMaxRecordData(50);
-                copy.addTransformationDescription("Record fragmentation");
-
-                toAdd.add(copy);
-            }
-
-            if (useTCPFragmentationDerivation) {
-                AnnotatedState copy = new AnnotatedState(i);
-                copy.setParentUUID(i.getUuid());
-
-                copy.getState().getConfig().getDefaultClientConnection().setTransportHandlerType(TransportHandlerType.TCP_FRAGMENTATION);
-                copy.getState().getConfig().getDefaultServerConnection().setTransportHandlerType(TransportHandlerType.TCP_FRAGMENTATION);
-                copy.getWorkflowTrace().setConnections(null);
-                copy.getState().reset();
-
-                copy.addTransformationDescription("TCP fragmentation");
-                toAdd.add(copy);
-            }
-
-        }
-
-        container.addAll(toAdd);
-
-        for(int i = 0; i < container.getStates().size(); i++) {
-            if(container.getStates().get(i).isOmitFromTests()) {
-                container.getStates().remove(i);
-                i--;
-            }
-        }
-        */
-        List<State> states = container.getStates().parallelStream().map(AnnotatedState::getState).collect(Collectors.toList());
-        if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-            context.getStateExecutor().bulkExecuteClientStateTasks(states);
-        } else {
-            List<TlsTask> tasks = states.stream().map(i -> {
-                StateExecutionServerTask task = new StateExecutionServerTask(i, context.getConfig().getTestClientDelegate().getServerSocket(), 2);
-                task.setBeforeAcceptCallback(context.getConfig().getTestClientDelegate().getTriggerScript());
-                return task;
-            }).collect(Collectors.toList());
-            context.getStateExecutor().bulkExecuteTasks(tasks);
-        }
-        
-        
-        return container;
+        return annotatedState;
     }
 
 
@@ -213,34 +142,20 @@ public class WorkflowRunner {
      * @param trace base WorkflowTrace for the test derivation
      * @return AnnotatedStateContainer that contains the derived states
      */
+    @Deprecated
     public AnnotatedStateContainer prepare(WorkflowTrace trace) {
-        /*Config config = this.context.getConfig().createConfig();
-        if (testMethodConfig.getTlsVersion().supported() == ProtocolVersion.TLS13) {
-            config = this.context.getConfig().createTls13Config();
-        }*/
-        
-        return this.prepare(trace, getBasicConfig());
+        return new AnnotatedStateContainer();
     }
 
+    @Deprecated
     public AnnotatedStateContainer prepare(WorkflowTrace trace, Config config) {
-        AnnotatedState annotatedState = new AnnotatedState(new State(config, trace));
-        return this.prepare(annotatedState);
+        return new AnnotatedStateContainer();
     }
 
+    @Deprecated
     public AnnotatedStateContainer prepare(AnnotatedState annotatedState) {
-        List<AnnotatedState> dummyList = new LinkedList<>();
-        return new AnnotatedStateContainer(extensionContext, this.transformState(annotatedState));
+        return new AnnotatedStateContainer();
     }
-    
-    //Note: replaces prepare(WorkflowTrace ...)
-    private Config getBasicConfig() {
-        Config config = this.context.getConfig().createConfig();
-        if (testMethodConfig.getTlsVersion().supported() == ProtocolVersion.TLS13) {
-            config = this.context.getConfig().createTls13Config();
-        }
-        return config;
-    }
-
 
 
     /**
@@ -364,185 +279,6 @@ public class WorkflowRunner {
     }
 
 
-    /**
-     * Creates new AnnotatedState based on newConfig and annotatedState.
-     * The new state is created by the config and a copy of the workflow trace.
-     * Executes the stateModifier and builds the Workflow using the WorkflowConfigurationFactory
-     *
-     * @param annotatedState State
-     * @param newConfig Config
-     * @return AnnotatedState with a copied workflow
-     */
-    private AnnotatedState buildFinalState(AnnotatedState annotatedState, Config newConfig) {
-        /*WorkflowTrace trace;
-        State state = annotatedState.getState();
-        if (traceType == null) {
-            trace = state.getWorkflowTraceCopy();
-        } else {
-            RunningModeType runningMode = RunningModeType.CLIENT;
-            if (context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
-                runningMode = RunningModeType.SERVER;
-            }
-            trace = new WorkflowConfigurationFactory(newConfig).createWorkflowTrace(traceType, runningMode);
-            if (this.untilHandshakeMessage != null)
-                WorkflowTraceMutator.truncateAt(trace, this.untilHandshakeMessage, this.untilSendingMessage, untilLast);
-            if (this.untilProtocolMessage != null)
-                WorkflowTraceMutator.truncateAt(trace, this.untilProtocolMessage, this.untilSendingMessage, untilLast);
-            WorkflowTrace tmpTrace = state.getWorkflowTraceCopy();
-            trace.addTlsActions(tmpTrace.getTlsActions());
-        }
-
-        AnnotatedState result = new AnnotatedState(annotatedState, new State(newConfig, trace));
-        if (replaceSupportedCiphersuites || appendEachSupportedCiphersuiteToClientSupported || replaceSelectedCiphersuite) {
-            result.setInspectedCipherSuite(newConfig.getDefaultSelectedCipherSuite());
-        }
-
-        if (stateModifier != null) {
-            AnnotatedState ret = stateModifier.apply(result);
-            if (ret != null)
-                result = ret;
-
-            result.getState().reset();
-        }
-        */
-        return annotatedState;
-    }
-
-    /**
-     * Performs the test derivation for client tests
-     *
-     * @param annotatedState Base state for the test derivation
-     * @return List of derived states
-     */
-    private List<AnnotatedState> transformStateClientTest(AnnotatedState annotatedState) {
-        List<AnnotatedState> result = new ArrayList<AnnotatedState>(){};
-        List<CipherSuite> supported = new ArrayList<>(context.getSiteReport().getCipherSuites());
-        Config inputConfig = annotatedState.getState().getConfig();
-        
-        result.add(annotatedState);
-        /*
-        if (inputConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13) {
-            supported.addAll(context.getSiteReport().getSupportedTls13CipherSuites());
-        }
-
-        // supported only contains CipherSuites that are compatible with the keyExchange annotation
-        supported.removeIf((CipherSuite i) -> !testMethodConfig.getKeyExchange().compatibleWithCiphersuite(i));
-
-        if (respectConfigSupportedCiphersuites) {
-            List<CipherSuite> configCiphersuites = inputConfig.getDefaultServerSupportedCiphersuites();
-            supported.removeIf(i -> !configCiphersuites.contains(i));
-        }
-
-        if (!replaceSelectedCiphersuite) {
-            Config c = inputConfig.createCopy();
-            if (inputConfig.getDefaultClientSupportedCiphersuites().size() == context.getConfig().createConfig().getDefaultClientSupportedCiphersuites().size()
-                    && this.traceType != null) {
-                c.setDefaultServerSupportedCiphersuites(c.getDefaultSelectedCipherSuite());
-            }
-            return new ArrayList<AnnotatedState>(){{
-                add(buildFinalState(annotatedState, c));
-            }};
-        }
-
-        for (CipherSuite i: supported) {
-            Config config = inputConfig.createCopy();
-
-            if (replaceSelectedCiphersuite) {
-                // always true
-                config.setDefaultServerSupportedCiphersuites(i);
-                config.setDefaultSelectedCipherSuite(i);
-            }
-
-            AnnotatedState newState = buildFinalState(annotatedState, config);
-            result.add(newState);
-        }
-        */
-        return result;
-    }
-
-
-    /**
-     * Performs the test derivation for server tests
-     *
-     * @param annotatedState Base state for the test derivation
-     * @return List of derived states
-     */
-    private List<AnnotatedState> transformStateServerTest(AnnotatedState annotatedState) {
-        List<AnnotatedState> result = new ArrayList<>();
-        Config inputConfig = annotatedState.getState().getConfig();
-        List<CipherSuite> supported = new ArrayList<>(context.getSiteReport().getCipherSuites());
-
-        
-        result.add(buildFinalState(annotatedState, inputConfig));
-        /*
-        if (inputConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13) {
-            supported.addAll(context.getSiteReport().getSupportedTls13CipherSuites());
-        }
-
-        // supported only contains CipherSuites that are compatible with the keyExchange annotation
-        supported.removeIf((CipherSuite i) -> !testMethodConfig.getKeyExchange().compatibleWithCiphersuite(i));
-
-
-        if (appendEachSupportedCiphersuiteToClientSupported && replaceSupportedCiphersuites) {
-            throw new RuntimeException("appendEachSupportedCiphersuiteToSupported and replaceSupportedCiphersuites are mutually exclusive options.");
-        }
-
-        if (respectConfigSupportedCiphersuites) {
-            List<CipherSuite> configCiphersuites = inputConfig.getDefaultClientSupportedCiphersuites();
-            supported.removeIf(i -> !configCiphersuites.contains(i));
-        }
-        else if (appendEachSupportedCiphersuiteToClientSupported) {
-            List<CipherSuite> configCiphersuites = inputConfig.getDefaultClientSupportedCiphersuites();
-            supported.removeIf(configCiphersuites::contains);
-        }
-
-        if (!replaceSupportedCiphersuites && !appendEachSupportedCiphersuiteToClientSupported) {
-            Config c = inputConfig.createCopy();
-            if (inputConfig.getDefaultClientSupportedCiphersuites().size() == context.getConfig().createConfig().getDefaultClientSupportedCiphersuites().size()
-                && this.traceType != null) {
-                c.setDefaultClientSupportedCiphersuites(c.getDefaultSelectedCipherSuite());
-            }
-            return new ArrayList<AnnotatedState>(){{
-                add(buildFinalState(annotatedState, c));
-            }};
-        }
-
-        for (CipherSuite i: supported) {
-            Config config = inputConfig.createCopy();
-            config.setDefaultSelectedCipherSuite(i);
-
-            if (replaceSupportedCiphersuites) {
-                config.setDefaultClientSupportedCiphersuites(i);
-            }
-            else if (appendEachSupportedCiphersuiteToClientSupported) {
-                List<CipherSuite> ciphersuites = config.getDefaultClientSupportedCiphersuites();
-                ciphersuites.add(i);
-                config.setDefaultClientSupportedCiphersuites(ciphersuites);
-            }
-
-            AnnotatedState newState = buildFinalState(annotatedState, config);
-            result.add(newState);
-        }
-        */
-        return result;
-    }
-
-
-    /**
-     * Starts the test derivation
-     *
-     * @param state Is used as base for the test derivation process
-     * @return List of derived states
-     */
-    private List<AnnotatedState> transformState(AnnotatedState state) {
-        if (this.context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
-            return this.transformStateClientTest(state);
-        }
-
-        return this.transformStateServerTest(state);
-    }
-
-
     public ExtensionContext getExtensionContext() {
         return extensionContext;
     }
@@ -551,12 +287,14 @@ public class WorkflowRunner {
         this.extensionContext = extensionContext;
     }
 
+    @Deprecated
     public Function<AnnotatedState, AnnotatedState> getStateModifier() {
-        return stateModifier;
+        return null;
     }
 
+    @Deprecated
     public void setStateModifier(Function<AnnotatedState, AnnotatedState> stateModifier) {
-        this.stateModifier = stateModifier;
+
     }
     
     public Config getPreparedConfig() {

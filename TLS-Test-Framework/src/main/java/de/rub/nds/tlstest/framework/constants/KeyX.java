@@ -18,7 +18,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.coffee4j.ModelFromScope;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -127,57 +127,6 @@ public class KeyX implements KeyExchange {
         KeyExchangeType[] filteredA = new KeyExchangeType[filtered.size()];
         filtered.toArray(filteredA);
         setSupportedKxs(filteredA);
-    }
-
-    @Nonnull
-    public static KeyExchange resolveKexFromScope(ExtensionContext context) {
-        Method testMethod = context.getRequiredTestMethod();
-        Class<?> testClass = context.getRequiredTestClass();
-        KeyX resolvedKeyExchange = new KeyX();
-
-        // annotation on method level
-        if (testMethod.isAnnotationPresent(ModelFromScope.class)) {
-            if (!testClass.isAnnotationPresent(ModelFromScope.class)) {
-                // annotation only on method level present
-                ModelFromScope existing = testMethod.getAnnotation(ModelFromScope.class);
-                resolvedKeyExchange = new KeyX(existing);
-            } else if (testClass.isAnnotationPresent(ModelFromScope.class)) {
-                // annotation on method AND class level present
-                ModelFromScope method = testMethod.getAnnotation(ModelFromScope.class);
-                resolvedKeyExchange = new KeyX(method);
-
-                ModelFromScope cls = testClass.getAnnotation(ModelFromScope.class);
-                Set<KeyExchangeType> supportedKexsSet = new HashSet<>(Arrays.asList(method.requiredKeyEx()));
-
-                if (method.mergeSupportedWithClassSupported()) {
-                    supportedKexsSet.addAll(Arrays.asList(cls.requiredKeyEx()));
-                }
-
-                KeyExchangeType[] supportedKexs = new KeyExchangeType[supportedKexsSet.size()];
-                supportedKexsSet.toArray(supportedKexs);
-
-                resolvedKeyExchange.setSupportedKxs(supportedKexs);
-            }
-        } else if (testClass.isAnnotationPresent(ModelFromScope.class)) {
-            ModelFromScope existing = testClass.getAnnotation(ModelFromScope.class);
-            resolvedKeyExchange = new KeyX(existing);
-        } else {
-            resolvedKeyExchange = new KeyX();
-            resolvedKeyExchange.setSupportedKxs(new KeyExchangeType[]{KeyExchangeType.ALL12, KeyExchangeType.ALL13});
-        }
-
-        boolean supportsAll = Arrays.asList(resolvedKeyExchange.supported()).contains(KeyExchangeType.ALL12);
-        if (supportsAll) {
-            resolvedKeyExchange.setSupportedKxs(new KeyExchangeType[]{KeyExchangeType.DH, KeyExchangeType.ECDH, KeyExchangeType.RSA});
-        }
-
-        if (resolvedKeyExchange.supported().length > 0) {
-            resolvedKeyExchange.filterSupportedKexs();
-        } else {
-            resolvedKeyExchange.setSupportedKxs(new KeyExchangeType[0]);
-        }
-
-        return resolvedKeyExchange;
     }
 
     @Nonnull

@@ -16,10 +16,12 @@ import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceSerializer;
 import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
-import de.rub.nds.tlstest.framework.constants.TestStatus;
+import de.rub.nds.tlstest.framework.constants.TestResult;
+import de.rub.nds.tlstest.framework.exceptions.TransportHandlerExpection;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import javax.annotation.Nonnull;
 import javax.xml.bind.DatatypeConverter;
@@ -34,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.NONE)
@@ -46,46 +49,38 @@ public class AnnotatedState {
     private Throwable failedReason;
     private AnnotatedStateContainer associatedContainer;
 
-    @XmlElement(name = "Status")
-    @JsonProperty("Status")
-    private TestStatus status = TestStatus.NOT_SPECIFIED;
+    @XmlElement(name = "Result")
+    @JsonProperty("Result")
+    private TestResult result = TestResult.NOT_SPECIFIED;
 
     @XmlElement(name = "InspectedCiphersuite")
     @JsonProperty("InspectedCiphersuite")
     private CipherSuite inspectedCipherSuite;
 
-    private String parentUUID;
+    @JsonProperty("DisplayName")
+    private String displayName;
 
     private List<String> additionalResultInformation = null;
     private List<String> additionalTestInformation = null;
     
     private boolean omitFromTests = false;
+    private ExtensionContext extensionContext;
 
-    public AnnotatedState() {}
+    private AnnotatedState() {}
 
-    public AnnotatedState(@Nonnull State state) {
+    public AnnotatedState(ExtensionContext context, State state) {
+        this.state = state;
+        this.extensionContext = context;
+        this.displayName = context.getDisplayName();
+        this.associatedContainer = AnnotatedStateContainer.forExtensionContext(context);
+        this.associatedContainer.add(this);
+    }
+
+    @Deprecated
+    public AnnotatedState(State state) {
         this.state = state;
     }
 
-    AnnotatedState(AnnotatedState aState, State mutated) {
-        this.state = mutated;
-        this.inspectedCipherSuite = aState.inspectedCipherSuite;
-
-        if (aState.additionalTestInformation != null)
-            this.additionalTestInformation = new ArrayList<>(aState.additionalTestInformation);
-
-        if (aState.additionalResultInformation != null)
-            this.additionalResultInformation = new ArrayList<>(aState.additionalResultInformation);
-    }
-
-    AnnotatedState(AnnotatedState aState) {
-        this(aState, null);
-
-        WorkflowTrace trace = aState.getState().getWorkflowTraceCopy();
-        Config config = aState.getState().getConfig().createCopy();
-        this.omitFromTests = aState.omitFromTests;
-        this.setState(new State(config, trace));
-    }
 
     public State getState() {
         return state;
@@ -96,12 +91,12 @@ public class AnnotatedState {
     }
 
 
-    public TestStatus getStatus() {
-        return status;
+    public TestResult getResult() {
+        return result;
     }
 
-    public void setStatus(TestStatus status) {
-        this.status = status;
+    public void setResult(TestResult result) {
+        this.result = result;
     }
 
     public Throwable getFailedReason() {
@@ -110,7 +105,7 @@ public class AnnotatedState {
 
     public void setFailedReason(Throwable failedReason) {
         this.failedReason = failedReason;
-        this.status = this.failedReason != null ? TestStatus.FAILED : TestStatus.NOT_SPECIFIED;
+        this.result = this.failedReason != null ? TestResult.FAILED : TestResult.NOT_SPECIFIED;
     }
 
     public CipherSuite getInspectedCipherSuite() {
@@ -119,6 +114,32 @@ public class AnnotatedState {
 
     public void setInspectedCipherSuite(CipherSuite inspectedCipherSuite) {
         this.inspectedCipherSuite = inspectedCipherSuite;
+    }
+
+    public void validateFinal(Consumer<AnnotatedState> validateFunction) {
+        try {
+            validateFunction.accept(this);
+            if (result == TestResult.NOT_SPECIFIED) {
+                result = TestResult.SUCCEEDED;
+            }
+        } catch (Throwable err) {
+            if (state.getExecutionException() != null) {
+                err.addSuppressed(state.getExecutionException());
+            }
+
+            if (state.getTlsContext().isReceivedTransportHandlerException()) {
+                TransportHandlerExpection error = new TransportHandlerExpection("Received transportHandler excpetion", err);
+                setFailedReason(error);
+                associatedContainer.stateFinished(result);
+                throw error;
+            }
+
+            setFailedReason(err);
+            associatedContainer.stateFinished(result);
+            throw err;
+        }
+
+        associatedContainer.stateFinished(result);
     }
 
     @XmlElement(name = "Stacktrace")
@@ -136,18 +157,6 @@ public class AnnotatedState {
             return state.getWorkflowTrace();
         }
         return null;
-    }
-
-//    @JsonProperty("WorkflowTrace")
-    public String getSerializedWorkflowTrace() {
-        try {
-            return WorkflowTraceSerializer.write(state.getWorkflowTrace());
-        }
-        catch (Exception e) {
-            LOGGER.error("Could not serialize WorkflowTrace");
-            return null;
-        }
-
     }
 
     @XmlElement(name = "AdditionalResultInformation")
@@ -215,18 +224,9 @@ public class AnnotatedState {
         }
     }
 
-    @XmlElement(name = "TransformationParentUuid")
-    @JsonProperty("TransformationParentUuid")
-    public String getParentUUID() {
-        return parentUUID;
-    }
-
-    public void setParentUUID(String parentUUID) {
-        this.parentUUID = parentUUID;
-    }
-
     @JsonProperty("StartTimestamp")
     public String getStartTimestamp() {
+        if (state == null) return null;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         return format.format(new Date(state.getStartTimestamp()));
@@ -234,18 +234,21 @@ public class AnnotatedState {
 
     @JsonProperty("EndTimestamp")
     public String getEndTimestamp() {
+        if (state == null) return null;
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         return format.format(new Date(state.getEndTimestamp()));
     }
 
     @JsonProperty("SrcPort")
-    public int getSrcPort() {
+    public Integer getSrcPort() {
+        if (state == null) return null;
         return ((TcpTransportHandler)state.getTlsContext().getTransportHandler()).getSrcPort();
     }
 
     @JsonProperty("DstPort")
-    public int getDstPort() {
+    public Integer getDstPort() {
+        if (state == null) return null;
         return ((TcpTransportHandler)state.getTlsContext().getTransportHandler()).getDstPort();
     }
 
@@ -264,5 +267,9 @@ public class AnnotatedState {
 
     public void setOmitFromTests(boolean omitFromTests) {
         this.omitFromTests = omitFromTests;
+    }
+
+    public ExtensionContext getExtensionContext() {
+        return extensionContext;
     }
 }

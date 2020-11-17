@@ -20,7 +20,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
-import de.rub.nds.tlstest.framework.constants.TestStatus;
+import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +49,7 @@ public class Validator {
         boolean socketClosed = socketClosed(i);
         if (msg == null && socketClosed) {
             i.addAdditionalResultInfo("Timeout");
-            i.setStatus(TestStatus.PARTIALLY_SUCCEEDED);
+            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
             LOGGER.debug("Timeout");
             return;
         }
@@ -86,7 +86,7 @@ public class Validator {
             i.addAdditionalResultInfo("Unexpected Alert Description");
             i.addAdditionalResultInfo(String.format("Expected: %s", expexted));
             i.addAdditionalResultInfo(String.format("Received: %s", received));
-            i.setStatus(TestStatus.PARTIALLY_SUCCEEDED);
+            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
             LOGGER.debug(i.getAdditionalResultInformation());
         }
     }

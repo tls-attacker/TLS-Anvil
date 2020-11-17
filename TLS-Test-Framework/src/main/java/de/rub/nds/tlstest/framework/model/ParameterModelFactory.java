@@ -1,14 +1,18 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * TLS-Test-Framework - A framework for modeling TLS tests
+ *
+ * Copyright 2020 Ruhr University Bochum and
+ * TÜV Informationstechnik GmbH
+ *
+ * Licensed under Apache License 2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model;
 
 
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationInstanceFactory;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rwth.swc.coffee4j.model.InputParameterModel;
 import static de.rwth.swc.coffee4j.model.InputParameterModel.inputParameterModel;
@@ -30,7 +34,7 @@ public class ParameterModelFactory {
     public static InputParameterModel generateModel(DerivationScope derivationScope, TestContext testContext) {
         List<DerivationType> derivationTypes = getDerivationsForScope(derivationScope);
         Parameter.Builder[] builders  = getModelParameters(derivationTypes, testContext, derivationScope);
-        Constraint[] constraints = getModelConstraints(derivationTypes);
+        Constraint[] constraints = getModelConstraints(derivationTypes, derivationScope);
 
         
         return inputParameterModel("dynamic-model").strength(2).parameters(builders).exclusionConstraints(constraints).build();
@@ -61,17 +65,22 @@ public class ParameterModelFactory {
     private static Parameter.Builder[] getModelParameters(List<DerivationType> derivationTypes, TestContext testContext, DerivationScope derivationScope) {
         List<Parameter.Builder> parameterBuilders = new LinkedList<>();
         for (DerivationType derivationType : derivationTypes) {
-            DerivationParameter paramDerivation = DerivationInstanceFactory.getInstance(derivationType);
+            DerivationParameter paramDerivation = DerivationFactory.getInstance(derivationType);
             parameterBuilders.add(paramDerivation.getParameterBuilder(testContext, derivationScope));
+            if(derivationType.isBitmaskDerivation()) {
+                DerivationParameter bitPositionParam = DerivationFactory.getInstance(DerivationType.BIT_POSITION);
+                bitPositionParam.setParent(derivationType);
+                parameterBuilders.add(bitPositionParam.getParameterBuilder(testContext, derivationScope));
+            }
         }
 
         return parameterBuilders.toArray(new Parameter.Builder[]{});
     }
     
-    private static Constraint[] getModelConstraints(List<DerivationType> derivationTypes) {
+    private static Constraint[] getModelConstraints(List<DerivationType> derivationTypes, DerivationScope scope) {
         List<Constraint> applicableConstraints = new LinkedList<>();
         for (DerivationType derivationType : derivationTypes) {
-            List<ConditionalConstraint> condConstraints = DerivationInstanceFactory.getInstance(derivationType).getConditionalConstraints();
+            List<ConditionalConstraint> condConstraints = DerivationFactory.getInstance(derivationType).getConditionalConstraints(scope);
             for(ConditionalConstraint condConstraint : condConstraints) {
                 if(condConstraint.isApplicableTo(derivationTypes)) {
                     applicableConstraints.add(condConstraint.getConstraint());
@@ -94,8 +103,8 @@ public class ParameterModelFactory {
         List<DerivationType> derivationTypes = new LinkedList<>();
         derivationTypes.add(DerivationType.CIPHERSUITE);
         derivationTypes.add(DerivationType.NAMED_GROUP);
-        derivationTypes.add(DerivationType.MAC_BITMASK);
-        derivationTypes.add(DerivationType.ALERT);
+        derivationTypes.add(DerivationType.RECORD_LENGTH);
+        derivationTypes.add(DerivationType.TCP_FRAGMENTATION);
         return derivationTypes;
     }
 }

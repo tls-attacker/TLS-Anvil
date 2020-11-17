@@ -11,12 +11,14 @@ package de.rub.nds.tlstest.framework.testClasses;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.ExtensionContextResolver;
 import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.MethodConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.TestWatcher;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
+import de.rub.nds.tlstest.framework.junitExtensions.ValueConstraintsConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.WorkflowRunnerResolver;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
@@ -26,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ExtendWith({
         TestWatcher.class,
@@ -33,6 +36,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
         TlsVersionCondition.class,
         KexCondition.class,
         MethodConditionExtension.class,
+        ValueConstraintsConditionExtension.class,
         ExtensionContextResolver.class,
         WorkflowRunnerResolver.class
 })
@@ -48,6 +52,14 @@ public abstract class TlsBaseTest {
     @BeforeEach
     public void setExtensionContext(ExtensionContext extensionContext) {
         this.extensionContext = extensionContext;
+    }
+    
+    public Config getPreparedConfig(ArgumentsAccessor argAccessor, WorkflowRunner runner) {
+        derivationContainer = new DerivationContainer(argAccessor);
+        Config preparedConfig = getConfig();
+        derivationContainer.applyToConfig(preparedConfig, context);
+        runner.setPreparedConfig(preparedConfig);
+        return preparedConfig;
     }
     
     public TlsBaseTest() {

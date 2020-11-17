@@ -10,17 +10,15 @@
 package de.rub.nds.tlstest.framework.junitExtensions;
 
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.constants.TestStatus;
+import de.rub.nds.tlstest.framework.constants.TestResult;
+import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
-import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
+import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
+import de.rub.nds.tlstest.framework.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -31,38 +29,42 @@ import java.util.Optional;
 public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private AnnotatedStateContainer createResult(ExtensionContext context, TestStatus status) {
+    private AnnotatedStateContainer createResult(ExtensionContext context, TestResult result) {
         TestContext.getInstance().testFinished();
 
-        if (!context.getTestMethod().isPresent()) {
-            return null;
+        String uniqueId = Utils.getTemplateContainerExtensionContext(context).getUniqueId();
+        AnnotatedStateContainer container = TestContext.getInstance().getTestResults().get(uniqueId);
+        if (container != null) {
+            return container;
         }
 
-        String uniqueId = context.getUniqueId();
-        if (TestContext.getInstance().getTestResults().get(uniqueId) != null) {
-            return null;
-        }
-
-        AnnotatedStateContainer result = new AnnotatedStateContainer(context, new ArrayList<>());
-        result.setStatusRaw(status.getValue());
-
-        TestContext.getInstance().addTestResult(result);
-        return result;
+        container = AnnotatedStateContainer.forExtensionContext(context);
+        container.setResultRaw(result.getValue());
+        return container;
     }
 
 
     @Override
     public void testSuccessful(ExtensionContext context) {
         TestContext.getInstance().testSucceeded();
-        createResult(context, TestStatus.SUCCEEDED);
+        createResult(context, TestResult.SUCCEEDED);
     }
 
     @Override
     public void testFailed(ExtensionContext context, Throwable cause) {
         TestContext.getInstance().testFailed();
-        AnnotatedStateContainer result = createResult(context, TestStatus.FAILED);
-        if (result != null) {
-            result.setFailedStacktrace(cause);
+        AnnotatedStateContainer container = createResult(context, TestResult.FAILED);
+        AnnotatedState state = container.getStates().stream()
+                .filter(i -> i.getExtensionContext().getUniqueId().equals(context.getUniqueId()))
+                .findFirst()
+                .orElse(null);
+        if (state == null) {
+            if (Utils.extensionContextIsTemplateContainer(context.getParent().get())) {
+                state = new AnnotatedState(context, null);
+                state.setFailedReason(cause);
+            } else {
+                container.setFailedReason(ExecptionPrinter.stacktraceToString(cause));
+            }
         }
 
         if (!(cause instanceof AssertionError)) {
@@ -73,9 +75,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
     @Override
     public void testDisabled(ExtensionContext context, Optional<String> reason) {
         TestContext.getInstance().testDisabled();
-        AnnotatedStateContainer result = createResult(context, TestStatus.DISABLED);
-        if (result != null) {
-            result.setDisabledReason(reason.orElse("No reason"));
-        }
+        AnnotatedStateContainer container = createResult(context, TestResult.DISABLED);
+        container.setDisabledReason(reason.orElse("No reason"));
     }
 }

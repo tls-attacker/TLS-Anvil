@@ -1,10 +1,9 @@
 package de.rub.nds.tlstest.framework.reporting;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.constants.TestStatus;
+import de.rub.nds.tlstest.framework.constants.TestResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -83,12 +82,12 @@ public class Score {
         this.max = max;
     }
 
-    public void updateForTestStatus(TestStatus status) {
+    public void updateForTestResult(TestResult result) {
         if (overwritten) return;
-        setReached((status.getScorePercentage() / 100.0) * severityLevel.getMaxScore() * (max / 100.0));
+        setReached((result.getScorePercentage() / 100.0) * severityLevel.getMaxScore() * (max / 100.0));
     }
 
-    public void overwiteTestStatus(TestStatus status) {
+    public void overwiteTestResult(TestResult status) {
         overwritten = true;
         setReached((status.getScorePercentage() / 100.0) * severityLevel.getMaxScore() * (max / 100.0));
     }

@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Contains methods that are called when the complete testplan is finished.
@@ -68,16 +69,31 @@ public class ExecutionListener implements TestExecutionListener {
             root.setDate(TestContext.getInstance().getStartTime());
             rootContainers.add(root);
 
-            Set<TestIdentifier> containers = new HashSet<>(identifiers);
-            containers.removeIf(i -> !i.isContainer());
+            Set<TestIdentifier> containers = new HashSet<>(identifiers).stream().filter(TestIdentifier::isContainer).collect(Collectors.toSet());
+            Set<TestIdentifier> tests = new HashSet<>();
+            Map<String, AnnotatedStateContainer> results = TestContext.getInstance().getTestResults();
+
             for (TestIdentifier container : containers) {
+                if (results.get(container.getUniqueId()) != null) {
+                    tests.add(container);
+                    continue;
+                }
+
                 TestResultContainer child = root.addChildContainer(container);
                 child.setElapsedTime(containerElapsedTimes.get(container.getUniqueId()));
             }
 
-            Set<TestIdentifier> tests = new HashSet<>(identifiers);
-            Map<String, AnnotatedStateContainer> results = TestContext.getInstance().getTestResults();
-            tests.removeIf(i -> !i.isTest());
+            Set<TestIdentifier> notAddedTests = new HashSet<>(identifiers).stream()
+                    .filter(TestIdentifier::isTest)
+                    .filter(i -> {
+                        return tests.stream()
+                                .map(TestIdentifier::getUniqueId)
+                                .noneMatch(j -> j.equals(i.getParentId().get()));
+                    })
+                    .collect(Collectors.toSet());
+
+            tests.addAll(notAddedTests);
+
             for (TestIdentifier i : tests) {
                 if (!i.getParentId().isPresent()) {
                     throw new RuntimeException("Test has no parent...");

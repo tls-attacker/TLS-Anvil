@@ -23,7 +23,6 @@ public class Tls12Test extends TlsBaseTest {
     @Override
     public Config getConfig() {
         Config baseConfig = context.getConfig().createConfig();
-        derivationContainer.applyToConfig(baseConfig, context);
         return baseConfig;
-    }
+    }  
 }

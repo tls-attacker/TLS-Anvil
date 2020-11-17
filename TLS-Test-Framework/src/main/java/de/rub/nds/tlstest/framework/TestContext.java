@@ -104,6 +104,10 @@ public class TestContext {
         return testResults;
     }
 
+    synchronized public AnnotatedStateContainer getTestResult(String uniqueId) {
+        return testResults.get(uniqueId);
+    }
+
     synchronized public void addTestResult(AnnotatedStateContainer result) {
         testResults.put(result.getUniqueId(), result);
     }

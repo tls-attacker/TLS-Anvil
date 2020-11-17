@@ -453,7 +453,7 @@ public class TestRunner {
                         .enableTestExecutionListenerAutoRegistration(false)
                         .addTestExecutionListeners(listener)
                         .addTestExecutionListeners(reporting)
-                        //.addTestExecutionListeners(listenerLog)
+                        .addTestExecutionListeners(listenerLog)
                         .build()
         );
         

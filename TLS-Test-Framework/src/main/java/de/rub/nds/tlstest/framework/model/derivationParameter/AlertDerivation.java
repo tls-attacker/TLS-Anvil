@@ -1,7 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * TLS-Test-Framework - A framework for modeling TLS tests
+ *
+ * Copyright 2020 Ruhr University Bochum and
+ * TÜV Informationstechnik GmbH
+ *
+ * Licensed under Apache License 2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
@@ -21,7 +25,7 @@ import java.util.List;
 public class AlertDerivation extends DerivationParameter<AlertDescription>  {
 
     public AlertDerivation() {
-        super(DerivationType.ALERT);
+        super(DerivationType.ALERT, AlertDescription.class);
     }
     
     public AlertDerivation(AlertDescription selectedValue) {

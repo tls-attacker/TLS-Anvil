@@ -1,10 +1,15 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * TLS-Test-Framework - A framework for modeling TLS tests
+ *
+ * Copyright 2020 Ruhr University Bochum and
+ * TÜV Informationstechnik GmbH
+ *
+ * Licensed under Apache License 2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
@@ -115,17 +120,20 @@ public abstract class DerivationParameter<T> {
         }    
     }
 
-    /**
-     * @return the parent
-     */
     public DerivationType getParent() {
         return parent;
     }
 
-    /**
-     * @param parent the parent to set
-     */
     public void setParent(DerivationType parent) {
         this.parent = parent;
+    }
+    
+    @JsonValue
+    public String jsonValue() {
+        if(selectedValue instanceof byte[]) {
+            return ArrayConverter.bytesToHexString((byte[])selectedValue);
+        } else {
+            return "" + selectedValue;
+        }
     }
 }

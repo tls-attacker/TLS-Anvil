@@ -21,22 +21,30 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.InvalidCCSContentDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 
 @RFC(number = 5264, section = "7.1 Change Cipher Spec Protocol")
 public class ChangeCipherSpecProtocol extends Tls12Test {
 
-    private void ccsContentTest(WorkflowRunner runner, byte[] content) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
+    @TlsTest(description = "The message consists of a single byte of value 1.")
+    @ScopeExtensions(DerivationType.INVALID_CCS_CONTENT)
+    @Interoperability(SeverityLevel.CRITICAL)
+    private void ccsContentTest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
+        byte[] content = derivationContainer.getDerivation(InvalidCCSContentDerivation.class).getSelectedValue();
         ChangeCipherSpecMessage changeCipherSpecMessage = new ChangeCipherSpecMessage(c);
         changeCipherSpecMessage.setCcsProtocolType(Modifiable.explicit(content));
 
@@ -57,15 +65,5 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
                 assertEquals(1, msg.getCcsProtocolType().getValue()[0]);
             }
         });
-    }
-
-    @TlsTest(description = "The message consists of a single byte of value 1.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    public void contentOfCCS(WorkflowRunner runner) {
-        ccsContentTest(runner, new byte[]{(byte)125});
-    }
-
-    @TlsTest(description = "The message consists of a single byte of value 1.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    public void contentOfCCSMoreThanOneByte(WorkflowRunner runner) {
-        ccsContentTest(runner, new byte[]{(byte)1, 1});
     }
 }

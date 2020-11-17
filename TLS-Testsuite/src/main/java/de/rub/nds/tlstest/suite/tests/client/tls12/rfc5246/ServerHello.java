@@ -10,6 +10,7 @@
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NameType;
@@ -28,12 +29,16 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 
 @ClientTest
@@ -43,9 +48,11 @@ public class ServerHello extends Tls12Test {
     @TlsTest(description = "If a client receives an extension type in ServerHello that it did "+
             "not request in the associated ClientHello, it MUST abort the handshake with an " +
             "unsupported_extension fatal alert.")
-    public void sendAdditionalExtension(WorkflowRunner runner) {
+    public void sendAdditionalExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        c.setAddRenegotiationInfoExtension(false);
+        
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
-        runner.replaceSelectedCiphersuite = true;
 
         List<ExtensionMessage> receivedExtensions = clientHello.getExtensions();
         List<ExtensionType> types = new ArrayList<>();
@@ -86,17 +93,15 @@ public class ServerHello extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            ServerHelloMessage msg = i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class);
-            msg.addExtension(extensionMessage);
-            return null;
-        });
 
-        runner.execute(workflowTrace).validateFinal(i -> {
+        ServerHelloMessage msg = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        msg.addExtension(extensionMessage);
+
+        runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
 
-            AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.UNSUPPORTED_EXTENSION, msg);
+            AlertMessage alertMsg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            Validator.testAlertDescription(i, AlertDescription.UNSUPPORTED_EXTENSION, alertMsg);
         });
 
     }

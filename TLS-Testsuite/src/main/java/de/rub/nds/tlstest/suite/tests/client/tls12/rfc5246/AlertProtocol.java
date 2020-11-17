@@ -24,14 +24,22 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.constants.TestStatus;
+import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 5264, section = "7.2.1 Closure Alerts")
 @ClientTest
@@ -41,10 +49,10 @@ public class AlertProtocol extends Tls12Test {
             "required to send a close_notify alert before closing the write side " +
             "of the connection. The other party MUST respond with a close_notify " +
             "alert of its own and close down the connection immediately, " +
-            "discarding any pending writes.", interoperabilitySeverity = SeverityLevel.MEDIUM)
-    public void close_notify(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSelectedCiphersuite = true;
+            "discarding any pending writes.")
+    @Interoperability(SeverityLevel.MEDIUM)
+    public void close_notify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));
@@ -64,7 +72,7 @@ public class AlertProtocol extends Tls12Test {
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
             if (message == null) {
                 i.addAdditionalResultInfo("No close_notify alert received.");
-                i.setStatus(TestStatus.PARTIALLY_SUCCEEDED);
+                i.setResult(TestResult.PARTIALLY_SUCCEEDED);
                 return;
             }
             assertEquals("Did not receive warning alert", AlertLevel.WARNING.getValue(), message.getLevel().getValue().byteValue());
@@ -73,61 +81,52 @@ public class AlertProtocol extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
+    @TlsTest
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
-    public void abortAfterFatalAlertServerHello(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
+    @Security(SeverityLevel.CRITICAL)
+    @ScopeExtensions(DerivationType.ALERT)
+    @TestDescription("A Fatal Alert must terminate the connection")
+    public void abortAfterFatalAlertServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        AlertDescription description = derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
 
-        for (AlertDescription i : AlertDescription.values()) {
-            AlertMessage alert = new AlertMessage();
-            alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
-            alert.setDescription(Modifiable.explicit(i.getValue()));
+        AlertMessage alert = new AlertMessage();
+        alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
+        alert.setDescription(Modifiable.explicit(description.getValue()));
 
-            runner.setStateModifier(t -> {
-                t.addAdditionalTestInfo(String.format("Test with alert %s", i.name()));
-                SendAction serverHelloAction = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, t.getWorkflowTrace());
-                serverHelloAction.getSendMessages().add(0, alert);
-                return null;
-            });
+        SendAction serverHelloAction = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
+            serverHelloAction.getSendMessages().add(0, alert);
 
-            container.addAll(runner.prepare(workflowTrace, c));
-        }
-
-        runner.execute(container).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
+    @TlsTest
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
-    public void abortAfterFatalAlertServerHelloDone(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
+    @Security(SeverityLevel.CRITICAL)
+    @ScopeExtensions(DerivationType.ALERT)
+    @TestDescription("A Fatal Alert must terminate the connection")
+    public void abortAfterFatalAlertServerHelloDone(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        AlertDescription description = derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
 
-        for (AlertDescription i : AlertDescription.values()) {
-            AlertMessage alert = new AlertMessage();
-            alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
-            alert.setDescription(Modifiable.explicit(i.getValue()));
+        AlertMessage alert = new AlertMessage();
+        alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
+        alert.setDescription(Modifiable.explicit(description.getValue()));
 
-            runner.setStateModifier(t -> {
-                t.addAdditionalTestInfo(String.format("Test with alert %s", i.name()));
-                SendAction serverHelloAction = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, t.getWorkflowTrace());
-                serverHelloAction.getSendMessages().add(serverHelloAction.getSendMessages().size() - 1, alert);
-                return null;
-            });
+        SendAction serverHelloAction = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
+            serverHelloAction.getSendMessages().add(serverHelloAction.getSendMessages().size() - 1, alert);
 
-            container.addAll(runner.prepare(workflowTrace, c));
-        }
 
-        runner.execute(container).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 }

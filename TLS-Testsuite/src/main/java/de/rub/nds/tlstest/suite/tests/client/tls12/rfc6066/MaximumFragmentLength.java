@@ -23,10 +23,14 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 6066, section = "4. Maximum Fragment Length Negotiation")
 @ClientTest
@@ -51,9 +55,9 @@ public class MaximumFragmentLength extends Tls12Test {
     @TlsTest(description = "Similarly, if a client receives a maximum fragment length negotiation " +
             "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    public void invalidMaximumFragmentLength(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSelectedCiphersuite = true;
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    public void invalidMaximumFragmentLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddMaxFragmentLengthExtension(true);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -61,12 +65,10 @@ public class MaximumFragmentLength extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            ServerHelloMessage serverHello = trace.getFirstSendMessage(ServerHelloMessage.class);
-            serverHello.getExtension(MaxFragmentLengthExtensionMessage.class).setMaxFragmentLength(Modifiable.explicit(new byte[]{5}));
-            return null;
-        });
+
+        ServerHelloMessage serverHello = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        serverHello.getExtension(MaxFragmentLengthExtensionMessage.class).setMaxFragmentLength(Modifiable.explicit(new byte[]{5}));
+
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
@@ -82,9 +84,9 @@ public class MaximumFragmentLength extends Tls12Test {
     @TlsTest(description = "Similarly, if a client receives a maximum fragment length negotiation " +
             "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    public void unrequestedMaximumFragmentLength(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSelectedCiphersuite = true;
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    public void unrequestedMaximumFragmentLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddMaxFragmentLengthExtension(true);
         
         MaxFragmentLength unreqLen = getUnrequestedMaxFragLen(context.getReceivedClientHelloMessage().getExtension(MaxFragmentLengthExtensionMessage.class));
@@ -95,12 +97,10 @@ public class MaximumFragmentLength extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            ServerHelloMessage serverHello = trace.getFirstSendMessage(ServerHelloMessage.class);
-            serverHello.getExtension(MaxFragmentLengthExtensionMessage.class).setMaxFragmentLength(Modifiable.explicit(new byte[]{unreqLen.getValue()}));
-            return null;
-        });
+
+        ServerHelloMessage serverHello = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        serverHello.getExtension(MaxFragmentLengthExtensionMessage.class).setMaxFragmentLength(Modifiable.explicit(new byte[]{unreqLen.getValue()}));
+
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);

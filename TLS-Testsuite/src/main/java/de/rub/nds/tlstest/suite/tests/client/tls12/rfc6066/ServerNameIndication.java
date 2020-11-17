@@ -15,6 +15,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.ServerNamePair
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 
 @RFC(number = 6066, section = "3. Server Name Indication")
 @ClientTest
@@ -35,9 +37,9 @@ public class ServerNameIndication extends Tls12Test {
         return ConditionEvaluationResult.disabled("SNI is disabled");
     }
 
-    @TlsTest(description = "The ServerNameList MUST NOT contain more than one name of the same " +
-            "name_type.")
+    @Test
     @MethodCondition(method = "sniActive")
+    @TestDescription("The ServerNameList MUST NOT contain more than one name of the same name_type.")
     public void moreThanOneNameOfTheSameType() {
         ServerNameIndicationExtensionMessage ext = context.getReceivedClientHelloMessage().getExtension(ServerNameIndicationExtensionMessage.class);
         List<ServerNamePair> snis = ext.getServerNameList();

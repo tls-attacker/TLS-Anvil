@@ -24,44 +24,36 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 
 @RFC(number = 5264, section = "6.2.3.3 AEAD Ciphers")
 public class AEADCiphers extends Tls12Test {
 
-    private ConditionEvaluationResult supportsAEADCiphers() {
-        List<CipherSuite> suites = new ArrayList<>(context.getSiteReport().getCipherSuites());
-        suites.removeIf(i -> !i.isAEAD());
-        if (suites.size() > 0) {
-            return ConditionEvaluationResult.enabled("");
-        }
-        return ConditionEvaluationResult.disabled("No AEAD Cipher Suites are supported");
-    }
-
-    @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.", securitySeverity = SeverityLevel.CRITICAL)
-    @MethodCondition(method = "supportsAEADCiphers")
-    public void invalidAuthTag(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
-        runner.respectConfigSupportedCiphersuites = true;
-
-        List<CipherSuite> suites = CipherSuite.getImplemented();
-        suites.removeIf(i -> !i.isAEAD());
-        c.setDefaultServerSupportedCiphersuites(suites);
-        c.setDefaultClientSupportedCiphersuites(suites);
+    @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
+    @Security(SeverityLevel.CRITICAL)
+    @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
+    @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isAEAD")
+    public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        byte[] modificationBitmask = derivationContainer.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
-        record.getComputations().setAuthenticationTag(Modifiable.xor(new byte[]{0x01}, 0));
+        record.getComputations().setAuthenticationTag(Modifiable.xor(modificationBitmask, 0));
 
         SendAction sendAction = new SendAction(new ApplicationMessage());
         sendAction.setRecords(record);
@@ -81,25 +73,20 @@ public class AEADCiphers extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.", securitySeverity = SeverityLevel.CRITICAL)
-    @MethodCondition(method = "supportsAEADCiphers")
-    public void invalidCiphertext(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
-        runner.respectConfigSupportedCiphersuites = true;
-
-        List<CipherSuite> suites = CipherSuite.getImplemented();
-        suites.removeIf(i -> !i.isAEAD());
-        c.setDefaultServerSupportedCiphersuites(suites);
-        c.setDefaultClientSupportedCiphersuites(suites);
+    @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
+    @Security(SeverityLevel.CRITICAL)
+    @ScopeExtensions({DerivationType.CIPHERTEXT_BITMASK, DerivationType.APP_MSG_LENGHT})
+    @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isAEAD")
+    public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        byte[] modificationBitmask = derivationContainer.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
-        record.getComputations().setCiphertext(Modifiable.xor(new byte[]{0x01}, 0));
+        record.getComputations().setCiphertext(Modifiable.xor(modificationBitmask, 0));
 
         ApplicationMessage appData = new ApplicationMessage();
-        appData.setData(Modifiable.explicit("test".getBytes()));
+        appData.setData(Modifiable.explicit(c.getDefaultApplicationMessageData().getBytes()));
 
         SendAction sendAction = new SendAction(appData);
         sendAction.setRecords(record);

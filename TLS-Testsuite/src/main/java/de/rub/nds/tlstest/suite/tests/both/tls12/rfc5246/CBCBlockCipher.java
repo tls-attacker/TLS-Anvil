@@ -22,52 +22,41 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.api.Tag;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 
 @RFC(number = 5264, section = "6.2.3.2 CBC Block Cipher")
 public class CBCBlockCipher extends Tls12Test {
 
-    private ConditionEvaluationResult supportsCBCCipherSuites() {
-        List<CipherSuite> suites = new ArrayList<>(context.getSiteReport().getCipherSuites());
-        suites.removeIf(i -> !i.isCBC());
-        if (suites.size() > 0) {
-            return ConditionEvaluationResult.enabled("");
-        }
-        return ConditionEvaluationResult.disabled("No CBC Suites are supported");
-    }
-
     @TlsTest(description = "Each uint8 in the padding data " +
             "vector MUST be filled with the padding length value. The receiver " +
             "MUST check this padding and MUST use the bad_record_mac alert to " +
-            "indicate padding errors.", securitySeverity = SeverityLevel.HIGH)
-    @MethodCondition(method = "supportsCBCCipherSuites")
-    public void invalidCBCPadding(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
-        runner.respectConfigSupportedCiphersuites = true;
-
-        List<CipherSuite> suites = CipherSuite.getImplemented();
-        suites.removeIf(i -> !i.isCBC());
-        c.setDefaultServerSupportedCiphersuites(suites);
-        c.setDefaultClientSupportedCiphersuites(suites);
+            "indicate padding errors.")
+    @Security(SeverityLevel.HIGH)
+    @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.PADDING_BITMASK})
+    @ValueConstraints(affectedTypes = {DerivationType.CIPHERSUITE}, methods = "isCBC")
+    public void invalidCBCPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        byte[] modificationBitmask = derivationContainer.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
-        record.getComputations().setPadding(Modifiable.xor(new byte[]{0x01}, 0));
+        record.getComputations().setPadding(Modifiable.xor(modificationBitmask, 0));
 
         ApplicationMessage appData = new ApplicationMessage();
-        appData.setData(Modifiable.explicit("test".getBytes()));
+        appData.setData(Modifiable.explicit(c.getDefaultApplicationMessageData().getBytes()));
 
         SendAction sendAction = new SendAction(appData);
         sendAction.setRecords(record);
@@ -95,22 +84,17 @@ public class CBCBlockCipher extends Tls12Test {
             "GenericBlockCipher structure is a multiple of the cipher’s block " +
             "length. Legal values range from zero to 255, inclusive. This " +
             "length specifies the length of the padding field exclusive of the " +
-            "padding_length field itself.", securitySeverity = SeverityLevel.HIGH)
-    @MethodCondition(clazz = CBCBlockCipher.class, method = "supportsCBCCipherSuites")
-    public void invalidCipherText(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
-        runner.respectConfigSupportedCiphersuites = true;
-
-        List<CipherSuite> suites = CipherSuite.getImplemented();
-        suites.removeIf(i -> !i.isCBC());
-        c.setDefaultServerSupportedCiphersuites(suites);
-        c.setDefaultClientSupportedCiphersuites(suites);
-
+            "padding_length field itself.")
+    @Security(SeverityLevel.HIGH)
+    @ScopeExtensions(DerivationType.CIPHERTEXT_BITMASK)
+    @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
+    public void invalidCipherText(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
-        record.getComputations().setCiphertext(Modifiable.xor(new byte[]{0x01}, 0));
+        record.getComputations().setCiphertext(Modifiable.xor(modificationBitmask, 0));
 
         ApplicationMessage appData = new ApplicationMessage();
         appData.setData(Modifiable.explicit("test".getBytes()));
@@ -141,18 +125,11 @@ public class CBCBlockCipher extends Tls12Test {
             "GenericBlockCipher structure is a multiple of the cipher’s block " +
             "length. Legal values range from zero to 255, inclusive. This " +
             "length specifies the length of the padding field exclusive of the " +
-            "padding_length field itself.", securitySeverity = SeverityLevel.HIGH)
-    @MethodCondition(clazz = CBCBlockCipher.class, method = "supportsCBCCipherSuites")
-    public void invalidMAC(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
-        runner.respectConfigSupportedCiphersuites = true;
-
-        List<CipherSuite> suites = CipherSuite.getImplemented();
-        suites.removeIf(i -> !i.isCBC());
-        c.setDefaultServerSupportedCiphersuites(suites);
-        c.setDefaultClientSupportedCiphersuites(suites);
+            "padding_length field itself.")
+    @Security(SeverityLevel.HIGH)
+    @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
+    public void invalidMAC(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());

@@ -18,7 +18,9 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExte
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -27,15 +29,18 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Set;
 
 import static org.junit.Assert.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 
 @RFC(number = 8422, section = "4. TLS Extensions for ECC")
 @ClientTest
 public class TLSExtensionForECC extends Tls12Test {
 
-    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
-            "message if it does not propose any ECC cipher suites.")
+    @Test
     @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.RSA})
+    @TestDescription("The client MUST NOT include these extensions in the ClientHello " +
+            "message if it does not propose any ECC cipher suites.")
     public void bothECExtensions_WithoutECCCipher() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
@@ -51,13 +56,14 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
 
-    @TlsTest(description = "Implementations of this document MUST support the" +
+    @Test
+    @KeyExchange(supported = KeyExchangeType.ECDH)
+    @TestDescription("Implementations of this document MUST support the" +
             "uncompressed format for all of their supported curves and MUST NOT" +
             "support other formats for curves defined in this specification.  For" +
             "backwards compatibility purposes, the point format list extension MAY" +
             "still be included and contain exactly one value: the uncompressed" +
             "point format (0).")
-    @KeyExchange(supported = KeyExchangeType.ECDH)
     public void invalidPointFormat() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
@@ -88,14 +94,16 @@ public class TLSExtensionForECC extends Tls12Test {
         }
     }
     
-    @TlsTest(description = " RFC 4492 defined 25 different curves in the NamedCurve registry (now\n" +
+    /*@TlsTest(description = " RFC 4492 defined 25 different curves in the NamedCurve registry (now\n" +
             "renamed the \"TLS Supported Groups\" registry, although the enumeration\n" +
             "below is still named NamedCurve) for use in TLS.  Only three have\n" +
             "seen much use.  This specification is deprecating the rest (with\n" +
             "numbers 1-22).  This specification also deprecates the explicit " +
             "curves with identifiers 0xFF01 and 0xFF02.  It also adds the new\n" +
-            "curves defined in [RFC7748]", securitySeverity = SeverityLevel.LOW)
+            "curves defined in [RFC7748]", securitySeverity = SeverityLevel.LOW)*/
     @KeyExchange(supported = {KeyExchangeType.ECDH})
+    @Security(SeverityLevel.LOW)
+    @TestDescription("Deprecated groups should not be offered by a client")
     public void offeredDeprecatedGroup() {
         boolean deprecated = false;
         for(NamedGroup group : context.getSiteReport().getSupportedNamedGroups()) {

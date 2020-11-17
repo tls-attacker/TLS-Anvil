@@ -25,15 +25,20 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 5264, section = "6.2.1 Fragmentation")
 public class Fragmentation extends Tls12Test {
@@ -41,12 +46,11 @@ public class Fragmentation extends Tls12Test {
     @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, " +
             "Alert, or ChangeCipherSpec content types. Zero-length fragments of " +
             "Application data MAY be sent as they are potentially useful as a " +
-            "traffic analysis countermeasure.", interoperabilitySeverity = SeverityLevel.HIGH)
-    public void sendZeroLengthRecord_CCS(WorkflowRunner runner) {
-        Config c = this.getConfig();
+            "traffic analysis countermeasure.")
+    @Interoperability(SeverityLevel.HIGH)
+    public void sendZeroLengthRecord_CCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -68,11 +72,10 @@ public class Fragmentation extends Tls12Test {
     @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, " +
             "Alert, or ChangeCipherSpec content types. Zero-length fragments of " +
             "Application data MAY be sent as they are potentially useful as a " +
-            "traffic analysis countermeasure.", interoperabilitySeverity = SeverityLevel.HIGH)
-    public void sendZeroLengthApplicationRecord(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
+            "traffic analysis countermeasure.")
+    @Interoperability(SeverityLevel.HIGH)
+    public void sendZeroLengthApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         ApplicationMessage appMsg = new ApplicationMessage(c);
 
@@ -97,14 +100,12 @@ public class Fragmentation extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "Send a record without any content.",
-            securitySeverity = SeverityLevel.CRITICAL,
-            interoperabilitySeverity = SeverityLevel.HIGH)
+    @TlsTest(description = "Send a record without any content.")
     @Tag("emptyRecord")
-    public void sendEmptyApplicationRecord(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
+    @Security(SeverityLevel.CRITICAL)
+    @Interoperability(SeverityLevel.HIGH)
+    public void sendEmptyApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         ApplicationMessage appMsg = new ApplicationMessage(c);
 
@@ -127,11 +128,11 @@ public class Fragmentation extends Tls12Test {
     @TlsTest(description = "Send a record without any content.",
             securitySeverity = SeverityLevel.CRITICAL,
             interoperabilitySeverity = SeverityLevel.HIGH)
+    @Security(SeverityLevel.CRITICAL)
+    @Interoperability(SeverityLevel.HIGH)
     @Tag("emptyRecord")
-    public void sendEmptyFinishedRecord(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
+    public void sendEmptyFinishedRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.HANDSHAKE);
@@ -150,12 +151,11 @@ public class Fragmentation extends Tls12Test {
     }
 
     @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. " +
-            "The length MUST NOT exceed 2^14 + 2048.", interoperabilitySeverity = SeverityLevel.HIGH)
-    public void sendRecordWithPlaintextOver2pow14plus1(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
-        runner.useRecordFragmentationDerivation = false;
+            "The length MUST NOT exceed 2^14 + 2048.")
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @Interoperability(SeverityLevel.HIGH)
+    public void sendRecordWithPlaintextOver2pow14plus1(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.getDefaultClientConnection().setTimeout(5000);
         c.getDefaultServerConnection().setTimeout(5000);
@@ -179,11 +179,10 @@ public class Fragmentation extends Tls12Test {
 
     @TlsTest(description = "The length (in bytes) of the following TLSPlaintext.fragment. " +
             "The length MUST NOT exceed 2^14.", interoperabilitySeverity = SeverityLevel.HIGH)
-    public void sendRecordWithCiphertextOver2pow14plus1(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
-        runner.useRecordFragmentationDerivation = false;
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @Interoperability(SeverityLevel.HIGH)
+    public void sendRecordWithCiphertextOver2pow14plus1(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.getDefaultClientConnection().setTimeout(5000);
         c.getDefaultServerConnection().setTimeout(5000);

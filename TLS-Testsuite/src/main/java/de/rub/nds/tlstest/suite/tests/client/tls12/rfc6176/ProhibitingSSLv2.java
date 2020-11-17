@@ -22,19 +22,28 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import static org.junit.Assert.assertFalse;
+import org.junit.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 6176, section = "3")
 @ClientTest
 public class ProhibitingSSLv2 extends Tls12Test {
 
-    @TlsTest(description = "TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT-" +
-            "HELLO message format.", securitySeverity = SeverityLevel.CRITICAL, interoperabilitySeverity = SeverityLevel.CRITICAL)
+    @Test
+    @Interoperability(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.CRITICAL)
+    @TestDescription("TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT-"
+            + "HELLO message format.")
     public void sendSSL2CompatibleClientHello(WorkflowRunner runner) {
         Config c = this.getConfig();
 
@@ -48,31 +57,29 @@ public class ProhibitingSSLv2 extends Tls12Test {
         });
     }
 
-
-    @TlsTest(description = "TLS servers MUST NOT reply with an SSL 2.0 SERVER-HELLO with a" +
-            "protocol version that is less than { 0x03, 0x00 } and instead MUST" +
-            "abort the connection,", securitySeverity = SeverityLevel.HIGH, interoperabilitySeverity = SeverityLevel.HIGH)
-    public void sendClientHelloVersionLower0300(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
-        Config c = this.getConfig();
+    @TlsTest(description = "TLS servers MUST NOT reply with an SSL 2.0 SERVER-HELLO with a"
+            + "protocol version that is less than { 0x03, 0x00 } and instead MUST"
+            + "abort the connection")
+    @Interoperability(SeverityLevel.HIGH)
+    @Security(SeverityLevel.HIGH)
+    public void sendServerHelloVersionLower0300(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class)
-                    .setProtocolVersion(Modifiable.explicit(ProtocolVersion.SSL2.getValue()));
-            return null;
-        });
+        workflowTrace.getFirstSendMessage(ServerHelloMessage.class)
+                .setProtocolVersion(Modifiable.explicit(ProtocolVersion.SSL2.getValue()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Clients MUST NOT send any ClientHello " +
-            "message that specifies a protocol version less than " +
-            "{ 0x03, 0x00 }.", securitySeverity = SeverityLevel.MEDIUM, interoperabilitySeverity = SeverityLevel.HIGH)
+    @Test
+    @Interoperability(SeverityLevel.HIGH)
+    @Security(SeverityLevel.MEDIUM)
+    @TestDescription("Clients MUST NOT send any ClientHello message that specifies a protocol version less than { 0x03, 0x00 }.")
     public void testClientHelloProtocolVersion() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertFalse("ClientHello protocol version is less than 0x0300", msg.getProtocolVersion().getValue()[0] < 3);

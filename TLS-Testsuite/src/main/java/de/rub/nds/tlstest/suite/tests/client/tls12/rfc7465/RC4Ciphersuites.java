@@ -17,30 +17,36 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 7465, section = "2")
 @ClientTest
 public class RC4Ciphersuites extends Tls12Test {
-
-    public ConditionEvaluationResult supportsRC4(ExtensionContext context) {
-        List<CipherSuite> supported = new ArrayList<>(this.context.getSiteReport().getCipherSuites());
-        supported.removeIf(i -> !i.toString().contains("RC4"));
-
-        return supported.size() == 0 ? ConditionEvaluationResult.disabled("No RC4 Ciphersuite supported") : ConditionEvaluationResult.enabled("");
+  
+    public boolean isRC4CipherSuite(CipherSuite cipherSuite) {
+        return cipherSuite.name().contains("RC4");
     }
 
-    @TlsTest(description = "TLS clients MUST NOT include RC4 cipher suites in the ClientHello message.", securitySeverity = SeverityLevel.CRITICAL)
+    @Test
+    @Security(SeverityLevel.CRITICAL)
+    @TestDescription("TLS clients MUST NOT include RC4 cipher suites in the ClientHello message.")
     public void offersRC4Ciphersuites() {
         List<CipherSuite> supported = new ArrayList<>(this.context.getSiteReport().getCipherSuites());
         supported.removeIf(i -> !i.toString().contains("RC4"));
@@ -51,22 +57,15 @@ public class RC4Ciphersuites extends Tls12Test {
 
     @TlsTest(description = "TLS servers MUST NOT select an RC4 cipher suite when a TLS client sends such " +
             "a cipher suite in the ClientHello message.", securitySeverity = SeverityLevel.CRITICAL)
-    @MethodCondition(clazz = RC4Ciphersuites.class, method = "supportsRC4")
-    public void selectRC4CipherSuite(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
-        runner.respectConfigSupportedCiphersuites = true;
-
-        List<CipherSuite> supported = new ArrayList<>(this.context.getSiteReport().getCipherSuites());
-        supported.removeIf(i -> !i.toString().contains("RC4"));
-
-        Config config = this.getConfig();
-        config.setDefaultServerSupportedCiphersuites(supported);
+    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isRC4CipherSuite")
+    public void selectRC4CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 }

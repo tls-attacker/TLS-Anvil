@@ -22,9 +22,12 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 
 @RFC(number = 5246, section = "E.1. Compatibility with TLS 1.0/1.1 and SSL 3.0")
@@ -33,10 +36,10 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
     @TlsTest(description = "If the version chosen by the server is not supported by the client "+
             "(or not acceptable), the client MUST send a \"protocol_version\" alert "+
-            "message and close the connection.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    public void selectUnsupportedVersion(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSelectedCiphersuite = true;
+            "message and close the connection.")
+    @Interoperability(SeverityLevel.CRITICAL)
+    public void selectUnsupportedVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         ModifiableByteArray protocolVersionSend = Modifiable.explicit(new byte[]{0x03, 0x0F});
 
@@ -45,11 +48,8 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class)
-                    .setProtocolVersion(protocolVersionSend);
-            return null;
-        });
+        workflowTrace.getFirstSendMessage(ServerHelloMessage.class).setProtocolVersion(protocolVersionSend);
+
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);

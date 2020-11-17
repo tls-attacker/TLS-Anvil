@@ -14,7 +14,9 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsscanner.serverscanner.report.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
@@ -23,11 +25,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 @RFC(number = 5264, section = "1.2 Major Differences from TLS 1.1")
 public class CipherSuites extends Tls12Test {
 
-    @TlsTest(description = "Removed IDEA and DES cipher suites. They are now deprecated and will be documented in a separate document.", securitySeverity = SeverityLevel.CRITICAL)
+    //@TlsTest(description = "Removed IDEA and DES cipher suites. They are now deprecated and will be documented in a separate document.", )
+    @Test
+    @Security(SeverityLevel.CRITICAL)
+    @TestDescription("IDEA and DES cipher suites must not be used for TLS 1.2")
     public void supportOfDeprectedCipherSuites() {
         List<VersionSuiteListPair> versionSuiteListPairList = context.getSiteReport().getVersionSuitePairs();
         List<CipherSuite> suites = versionSuiteListPairList.stream()

@@ -12,7 +12,10 @@ package de.rub.nds.tlstest.suite.tests.client.tls12;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
@@ -22,12 +25,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 @ClientTest
 public class SupportedCiphersuites extends Tls12Test {
 
-    @TlsTest(description = "Client exploration detected moresupported ciphersuites than " +
-            "advertised by the client in the ClientHello message.", securitySeverity = SeverityLevel.MEDIUM)
+    @Test
+    @TestDescription("Client exploration detected more supported ciphersuites than " +
+            "advertised by the client in the ClientHello message.")
+    @Security(SeverityLevel.MEDIUM)
     @Tag("ciphersuites")
     public void supportsMoreCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
@@ -45,8 +51,10 @@ public class SupportedCiphersuites extends Tls12Test {
     }
 
 
-    @TlsTest(description = "Client exploration detected less supported ciphersuites than " +
-            "advertised by the client in the ClientHello message.", interoperabilitySeverity = SeverityLevel.HIGH)
+    @Test
+    @TestDescription("Client exploration detected less supported ciphersuites than " +
+            "advertised by the client in the ClientHello message.")
+    @Interoperability(SeverityLevel.HIGH)
     @Tag("ciphersuites")
     public void supportsLessCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();

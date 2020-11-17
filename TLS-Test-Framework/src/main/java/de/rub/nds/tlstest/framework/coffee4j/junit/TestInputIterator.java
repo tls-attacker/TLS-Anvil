@@ -1,6 +1,8 @@
 package de.rub.nds.tlstest.framework.coffee4j.junit;
 
+import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rwth.swc.coffee4j.model.Combination;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -21,40 +23,41 @@ import java.util.concurrent.TimeUnit;
 class TestInputIterator implements Iterator<Combination> {
     
     private final BlockingDeque<Combination> testInputQueue = new LinkedBlockingDeque<>();
+    private final ExtensionContext extensionContext;
     
-    void add(Combination testInput) {
+    synchronized void add(Combination testInput) {
         testInputQueue.add(testInput);
+    }
+
+    public TestInputIterator(ExtensionContext context) {
+        extensionContext = context;
     }
     
     @Override
     public boolean hasNext() {
-        try {
-            Combination nextTestInput = testInputQueue.poll(10, TimeUnit.SECONDS);
-            if (nextTestInput != null)
-                testInputQueue.addFirst(nextTestInput);
-            return nextTestInput != null;
-        } catch (InterruptedException e) {
-            return false;
+        while (!AnnotatedStateContainer.forExtensionContext(extensionContext).isFinished()) {
+            try {
+                Combination nextTestInput = testInputQueue.poll(3, TimeUnit.SECONDS);
+                if (nextTestInput != null) {
+                    testInputQueue.addFirst(nextTestInput);
+                    return true;
+                }
+            } catch (InterruptedException ignored) {
+            }
         }
+
+        return false;
     }
     
     @Override
     public Combination next() {
-        final Combination nextTestInput;
-        try {
-            nextTestInput = testInputQueue.poll(1, TimeUnit.DAYS);
+        final Combination nextTestInput = testInputQueue.poll();
 
-            if (nextTestInput == null) {
-                throw new NoSuchElementException("No more elements in iterator");
-            }
-
-            return nextTestInput;
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (nextTestInput == null) {
+            throw new NoSuchElementException("No more elements in iterator");
         }
 
-        return null;
+        return nextTestInput;
     }
 
     public BlockingQueue<Combination> getTestInputQueue() {

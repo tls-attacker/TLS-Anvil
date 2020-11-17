@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 
 /**
@@ -43,6 +44,7 @@ import java.util.function.Consumer;
 @XmlAccessorType(XmlAccessType.NONE)
 public class  AnnotatedStateContainer {
     private static final Logger LOGGER = LogManager.getLogger();
+    private boolean finished = false;
 
     @XmlElement(name = "TestMethod")
     @JsonProperty("TestMethod")
@@ -93,7 +95,7 @@ public class  AnnotatedStateContainer {
         this.scoreContainer = new ScoreContainer(extensionContext);
     }
 
-    public static AnnotatedStateContainer forExtensionContext(ExtensionContext extensionContext) {
+    synchronized public static AnnotatedStateContainer forExtensionContext(ExtensionContext extensionContext) {
         ExtensionContext resolvedContext = Utils.getTemplateContainerExtensionContext(extensionContext);
 
         if (TestContext.getInstance().getTestResult(resolvedContext.getUniqueId()) != null) {
@@ -151,6 +153,7 @@ public class  AnnotatedStateContainer {
     }
 
     public void finished() {
+        finished = true;
         List<String> uuids = new ArrayList<>();
         List<Throwable> errors = new ArrayList<>();
         boolean failed = false;
@@ -267,5 +270,9 @@ public class  AnnotatedStateContainer {
 
     public void setFailedReason(String failedReason) {
         this.failedReason = failedReason;
+    }
+
+    public boolean isFinished() {
+        return finished;
     }
 }

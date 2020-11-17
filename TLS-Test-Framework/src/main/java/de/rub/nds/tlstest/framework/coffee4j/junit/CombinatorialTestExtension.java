@@ -48,14 +48,14 @@ public class CombinatorialTestExtension implements TestTemplateInvocationContext
     }
     
     static Store getStore(ExtensionContext extensionContext) {
-        return extensionContext.getStore(Namespace.create(CombinatorialTestExtension.class, extensionContext.getRequiredTestMethod()));
+        return extensionContext.getStore(Namespace.create(CombinatorialTestExtension.class, extensionContext.getRequiredTestMethod(), extensionContext.getRequiredTestClass()));
     }
     
     @Override
     public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext extensionContext) {
         final Method testMethod = extensionContext.getRequiredTestMethod();
         final CombinatorialTestConsumerManagerConfiguration configuration = new ConfigurationLoader().load(extensionContext);
-        final TestInputIterator iterator = new TestInputIterator();
+        final TestInputIterator iterator = new TestInputIterator(extensionContext);
         final InputParameterModel model = new ModelLoader().load(extensionContext);
         final CombinatorialTestConsumerManager manager = new CombinatorialTestConsumerManager(configuration, iterator::add, model);
 

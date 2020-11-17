@@ -61,9 +61,8 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
     @Override
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-        ConstraintHelper constraintHelper = new ConstraintHelper();
 
-        if (constraintHelper.multipleBlocksizesModeled(scope)) {
+        if (ConstraintHelper.multipleBlocksizesModeled(scope)) {
             Set<DerivationType> requiredDerivations = new HashSet<>();
             requiredDerivations.add(DerivationType.CIPHERSUITE);
             //ensure that the selected byte is within (blocksize - 1) of ciphersuite

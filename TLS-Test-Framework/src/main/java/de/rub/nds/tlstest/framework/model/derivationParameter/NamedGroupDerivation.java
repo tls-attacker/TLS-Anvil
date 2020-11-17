@@ -18,6 +18,7 @@ import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintStatus;
 import java.util.HashSet;
@@ -51,7 +52,7 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     @Override
     public void applyToConfig(Config config, TestContext context) {
         if (getSelectedValue() != null) {
-            if(context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
+            if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
                 config.setDefaultClientNamedGroups(getSelectedValue());
             } else {
                 config.setDefaultServerNamedGroups(getSelectedValue());
@@ -84,19 +85,21 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
 
     @Override
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
-        //TODO: do we want to handle it like this? i.e null = exclude extension
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-        condConstraints.add(new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(DerivationType.NAMED_GROUP.name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter group, DerivationParameter cipherSuite) -> {
-            NamedGroupDerivation groupDev = (NamedGroupDerivation) group;
-            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-            if (groupDev.getSelectedValue() == null && AlgorithmResolver.getKeyExchangeAlgorithm(cipherDev.getSelectedValue()).isKeyExchangeEcdh()) {
-                return false;
-            }
-            return true;
-        })));
+        if (ConstraintHelper.ecdhCipherSuiteModeled(scope)) {
+            //TODO: do we want to handle it like this? i.e null = exclude extension
+            Set<DerivationType> requiredDerivations = new HashSet<>();
+            requiredDerivations.add(DerivationType.CIPHERSUITE);
 
+            condConstraints.add(new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(DerivationType.NAMED_GROUP.name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter group, DerivationParameter cipherSuite) -> {
+                NamedGroupDerivation groupDev = (NamedGroupDerivation) group;
+                CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
+                if (groupDev.getSelectedValue() == null && AlgorithmResolver.getKeyExchangeAlgorithm(cipherDev.getSelectedValue()).isKeyExchangeEcdh()) {
+                    return false;
+                }
+                return true;
+            })));
+        }
         return condConstraints;
     }
 

@@ -11,6 +11,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeByteLength;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -18,11 +19,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- *
- * @author marcel
+ * Determines the bytes that affect the bitmask used to alter the output of the
+ * PRF (TLS 1.2) or HKDF (TLS 1.3)
  */
 public class PRFBitmaskDerivation extends DerivationParameter<Integer> {
-    
+
     public PRFBitmaskDerivation() {
         super(DerivationType.PRF_BITMASK, Integer.class);
     }
@@ -31,7 +32,7 @@ public class PRFBitmaskDerivation extends DerivationParameter<Integer> {
         this();
         setSelectedValue(selectedValue);
     }
-    
+
     @Override
     public List getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
@@ -44,5 +45,5 @@ public class PRFBitmaskDerivation extends DerivationParameter<Integer> {
     @Override
     public void applyToConfig(Config config, TestContext context) {
     }
-    
+
 }

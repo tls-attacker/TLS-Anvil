@@ -11,6 +11,7 @@ package de.rub.nds.tlstest.framework.model;
 
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
@@ -23,8 +24,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import static java.util.Arrays.stream;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
@@ -38,12 +41,16 @@ public class DerivationScope {
     private final KeyX keyExchangeRequirements;
     private final List<ValueConstraint> valueConstraints;
     private final ProtocolVersion targetVersion;
+    private final Map<DerivationType, String> explicitValues;
+    private final ExtensionContext extensionContext;
     
     public DerivationScope(ExtensionContext context) {
         this.keyExchangeRequirements = (KeyX)KeyX.resolveKexAnnotation(context);
         this.scopeLimits = resolveScopeLimits(context);
         this.scopeExtensions = resolveScopeExtensions(context);
         this.valueConstraints = resolveValueConstraints(context);
+        this.explicitValues = resolveExplicitValues(context);
+        this.extensionContext = context;
         
         TestMethodConfig tmpConfig = new TestMethodConfig(context);
         this.targetVersion = tmpConfig.getTlsVersion().supported();
@@ -127,7 +134,29 @@ public class DerivationScope {
         return constraints;
     }
 
+    private Map<DerivationType, String> resolveExplicitValues(ExtensionContext context) {
+        Map<DerivationType, String> valueMap = new HashMap<>();
+        Method testMethod = context.getRequiredTestMethod();
+        if(testMethod.isAnnotationPresent(ExplicitValues.class)) {
+            ExplicitValues explicitValues = testMethod.getAnnotation(ExplicitValues.class);
+            DerivationType[] affectedTypes = explicitValues.affectedTypes();
+            String[] methods = explicitValues.methods();
+            if(methods.length != affectedTypes.length) {
+                throw new RuntimeException("Unable to resolve ExplicitValues - argument count mismatch");
+            }
+            for(int i = 0; i < affectedTypes.length; i++) {
+                if(valueMap.containsKey(affectedTypes[i])) {
+                    throw new RuntimeException("Unable to resolve ExplicitValues - multiple explicit values derfined for " + affectedTypes[i]);
+                }
+                valueMap.put(affectedTypes[i], methods[i]);
+            }
+        }
+        return valueMap;
+    }
     
+    public boolean hasExplicitValues(DerivationType type) {
+        return explicitValues.containsKey(type);
+    }
 
     public List<ValueConstraint> getValueConstraints() {
         return valueConstraints;
@@ -135,5 +164,13 @@ public class DerivationScope {
 
     public ProtocolVersion getTargetVersion() {
         return targetVersion;
+    }
+
+    public String getExplicitValueMethod(DerivationType type) {
+        return explicitValues.get(type);
+    }
+
+    public ExtensionContext getExtensionContext() {
+        return extensionContext;
     }
 }

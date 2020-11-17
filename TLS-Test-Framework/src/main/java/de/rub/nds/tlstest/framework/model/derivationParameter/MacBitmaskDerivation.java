@@ -64,9 +64,8 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
     @Override
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-        ConstraintHelper constraintHelper = new ConstraintHelper();
 
-        if (constraintHelper.multipleMacSizesModeled(scope)) {
+        if (ConstraintHelper.multipleMacSizesModeled(scope)) {
             Set<DerivationType> requiredDerivations = new HashSet<>();
             requiredDerivations.add(DerivationType.CIPHERSUITE);
 

@@ -65,10 +65,9 @@ public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
 
     @Override
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
-        ConstraintHelper constraintHelper = new ConstraintHelper();
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
         
-        if (constraintHelper.multipleBlocksizesModeled(scope)) {
+        if (ConstraintHelper.multipleBlocksizesModeled(scope)) {
             Set<DerivationType> requiredDerivations = new HashSet<>();
             requiredDerivations.add(DerivationType.CIPHERSUITE);
             

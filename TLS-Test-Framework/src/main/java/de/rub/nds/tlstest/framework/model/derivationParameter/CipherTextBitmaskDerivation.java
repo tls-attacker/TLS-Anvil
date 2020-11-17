@@ -61,10 +61,9 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
 
     @Override
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
-        ConstraintHelper constraintHelper = new ConstraintHelper();
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
-        if (constraintHelper.multipleBlocksizesModeled(scope)) {
+        if (ConstraintHelper.multipleBlocksizesModeled(scope)) {
             Set<DerivationType> requiredDerivations = new HashSet<>();
             requiredDerivations.add(DerivationType.CIPHERSUITE);
 
@@ -76,7 +75,7 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
             })));
         }
 
-        if (constraintHelper.unpaddedCipherSuitesModeled(scope)) {
+        if (ConstraintHelper.unpaddedCipherSuitesModeled(scope)) {
             Set<DerivationType> requiredDerivationsCiphertext = new HashSet<>();
             requiredDerivationsCiphertext.add(DerivationType.CIPHERSUITE);
             requiredDerivationsCiphertext.add(DerivationType.APP_MSG_LENGHT);

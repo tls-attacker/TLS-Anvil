@@ -31,6 +31,7 @@ public enum DerivationType {
     GREASE_EXTENSION,
     GREASE_NAMED_GROUP,
     GREASE_SIG_HASH,
+    PROTOCOL_VERSION,
     BIT_POSITION;
     
     public boolean isBitmaskDerivation() {

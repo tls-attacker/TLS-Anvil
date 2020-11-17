@@ -13,10 +13,6 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- *
- * @author marcel
- */
 public class DerivationFactory {
     
     private static final Logger LOGGER = LogManager.getLogger();
@@ -59,6 +55,8 @@ public class DerivationFactory {
                 return new GreaseProtocolVersionDerivation();
             case GREASE_SIG_HASH:
                 return new GreaseSigHashDerivation();
+            case PROTOCOL_VERSION:
+                return new ProtocolVersionDerivation();
             default:
                 throw new UnsupportedOperationException("Derivation Type not implemented");
         }

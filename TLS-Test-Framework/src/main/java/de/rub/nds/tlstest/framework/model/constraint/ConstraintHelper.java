@@ -22,12 +22,15 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
- * @author marcel
+ * Analyzes modeled parameter values for the Coffee4J model.
+ * 
+ * Each Coffee4J constraint requires at least one parameter combination that
+ * is forbidden under the constraint. This class provides methods used to
+ * add constraints only if this condition is met.
  */
 public class ConstraintHelper {
     
-    public boolean multipleBlocksizesModeled(DerivationScope scope) {
+    public static boolean multipleBlocksizesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation)DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         Set<Integer> blockLengths = new HashSet<>();
@@ -38,7 +41,7 @@ public class ConstraintHelper {
         return blockLengths.size() > 1;
     }
     
-    public boolean unpaddedCipherSuitesModeled(DerivationScope scope) {
+    public static boolean unpaddedCipherSuitesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation)DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         for(DerivationParameter param : values) {
@@ -50,7 +53,7 @@ public class ConstraintHelper {
         return false;
     }
     
-    public boolean multipleMacSizesModeled(DerivationScope scope) {
+    public static boolean multipleMacSizesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation)DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         Set<Integer> macLengths = new HashSet<>();
@@ -62,5 +65,17 @@ public class ConstraintHelper {
         }
         
         return macLengths.size() > 1;
+    }
+    
+    public static boolean ecdhCipherSuiteModeled(DerivationScope scope) {
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation)DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        for(DerivationParameter param : values) {
+            if(AlgorithmResolver.getKeyExchangeAlgorithm((CipherSuite)param.getSelectedValue()).isKeyExchangeEcdh()) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

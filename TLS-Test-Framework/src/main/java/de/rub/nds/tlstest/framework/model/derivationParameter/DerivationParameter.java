@@ -50,11 +50,15 @@ public abstract class DerivationParameter<T> {
     public abstract List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope);
     
     public List<DerivationParameter> getConstrainedParameterValues(TestContext context, DerivationScope scope) {
-        List<DerivationParameter> parameterValues = getParameterValues(context, scope);
-        parameterValues = parameterValues.stream().filter(val -> 
+        if(scope.hasExplicitValues(type)) {
+            return getExplicitValues(scope);
+        } else {
+            List<DerivationParameter> parameterValues = getParameterValues(context, scope);
+            parameterValues = parameterValues.stream().filter(val -> 
             valueApplicableUnderAllConstraints(scope.getValueConstraints(), (T)val.getSelectedValue())
-        ).collect(Collectors.toList());
-        return parameterValues;
+            ).collect(Collectors.toList());
+            return parameterValues;
+        }
     }
     
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
@@ -110,6 +114,19 @@ public abstract class DerivationParameter<T> {
             Logger.getLogger(DerivationParameter.class.getName()).log(Level.SEVERE, null, ex);
             return true;
         }
+    }
+    
+    public List<DerivationParameter> getExplicitValues(DerivationScope scope) {
+        try {
+            String methodName = scope.getExplicitValueMethod(type);
+            Method method = scope.getExtensionContext().getRequiredTestClass().getMethod(methodName);
+            Constructor constructor = scope.getExtensionContext().getRequiredTestClass().getConstructor();
+            
+            return (List<DerivationParameter>)method.invoke(constructor.newInstance());
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException ex) {
+            Logger.getLogger(DerivationParameter.class.getName()).log(Level.SEVERE, null, ex);
+            return new LinkedList<>();
+        } 
     }
     
     public String toString() {

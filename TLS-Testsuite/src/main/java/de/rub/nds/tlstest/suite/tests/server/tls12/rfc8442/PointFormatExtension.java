@@ -42,6 +42,8 @@ import static org.junit.Assert.assertFalse;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class PointFormatExtension extends Tls12Test {
@@ -55,8 +57,8 @@ public class PointFormatExtension extends Tls12Test {
             "still be included and contain exactly one value: the uncompressed" +
             "point format (0).")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    public void serverSupportsUncompressedPointFormat(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    public void serverSupportsUncompressedPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
@@ -67,7 +69,6 @@ public class PointFormatExtension extends Tls12Test {
                 new ReceiveTillAction(new ServerHelloDoneMessage())
         );
 
-        runner.replaceSupportedCiphersuites = true;
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
             Validator.executedAsPlanned(i);
@@ -104,8 +105,8 @@ public class PointFormatExtension extends Tls12Test {
             "this specification, then the server MUST abort the handshake and" +
             "return an illegal_parameter alert.")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    public void invalidPointFormat(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    public void invalidPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
@@ -121,7 +122,6 @@ public class PointFormatExtension extends Tls12Test {
         chm.getExtension(ECPointFormatExtensionMessage.class)
                 .setPointFormats(Modifiable.explicit(new byte[]{(byte) 33}));
 
-        runner.replaceSupportedCiphersuites = true;
         runner.execute(workflowTrace, c).validateFinal(i -> { 
             Validator.receivedFatalAlert(i, false);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
@@ -136,8 +136,9 @@ public class PointFormatExtension extends Tls12Test {
             "Groups extension to indicate support for any of the curves defined in" +
             "this specification, then the server MUST abort the handshake and" +
             "return an illegal_parameter alert.")
-    public void deprecatedFormat(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    @KeyExchange(supported = KeyExchangeType.ECDH)
+    public void deprecatedFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);

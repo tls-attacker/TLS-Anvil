@@ -26,16 +26,21 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 
 @RFC(number = 5246, section = "E.1. Compatibility with TLS 1.0/1.1 and SSL 3.0")
@@ -44,10 +49,10 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
     @TlsTest(description = "If a TLS server receives a ClientHello containing a version number " +
             "greater than the highest version supported by the server, it MUST " +
-            "reply according to the highest version supported by the server.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    public void versionGreaterThanSupportedByServer(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+            "reply according to the highest version supported by the server.")
+    @Interoperability(SeverityLevel.CRITICAL)
+    public void versionGreaterThanSupportedByServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         ModifiableByteArray protocolVersionSend = Modifiable.explicit(new byte[]{0x03, 0x0F});
 
@@ -83,12 +88,12 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
     @TlsTest(description = "If server supports (or is willing to use) only " +
             "versions greater than client_version, it MUST send a " +
-            "\"protocol_version\" alert message and close the connection.", interoperabilitySeverity = SeverityLevel.LOW)
+            "\"protocol_version\" alert message and close the connection.")
     @MethodCondition(method = "doesSupportLegacyVersions")
-    public void versionLowerThanSupportedByServer(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
+    @Interoperability(SeverityLevel.LOW)
+    public void versionLowerThanSupportedByServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
-        Config c = this.getConfig();
         ProtocolVersion version = ProtocolVersion.SSL3;
         List<ProtocolVersion> versions = context.getSiteReport().getVersions();
         if (!versions.contains(ProtocolVersion.TLS11)) {
@@ -122,11 +127,11 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     }
 
     @TlsTest(description = "Thus, TLS server compliant with this specification MUST accept any value {03,XX} as the " +
-            "record layer version number for ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    public void acceptAnyRecordVersionNumber(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.useRecordFragmentationDerivation = false;
-        runner.replaceSupportedCiphersuites = true;
+            "record layer version number for ClientHello.")
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @Interoperability(SeverityLevel.CRITICAL)
+    public void acceptAnyRecordVersionNumber(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         Record record = new Record();
         record.setProtocolVersion(Modifiable.explicit(new byte[]{0x03, 0x05}));

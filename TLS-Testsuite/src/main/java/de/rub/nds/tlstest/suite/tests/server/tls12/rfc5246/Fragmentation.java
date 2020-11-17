@@ -16,6 +16,7 @@ import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
@@ -31,10 +32,16 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.transport.TransportHandlerType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 5264, section = "6.2.1 Fragmentation")
 @ServerTest
@@ -44,16 +51,17 @@ public class Fragmentation extends Tls12Test {
             "Alert, or ChangeCipherSpec content types. Zero-length fragments of " +
             "Application data MAY be sent as they are potentially useful as a " +
             "traffic analysis countermeasure.")
-    public void sendZeroLengthRecord_CH(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        c.setDefaultClientSupportedCiphersuites(CipherSuite.getImplemented());
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    public void sendZeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
-        runner.replaceSupportedCiphersuites = true;
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.HANDSHAKE);
         r.setMaxRecordLengthConfig(0);
-        SendAction sendAction = new SendAction(new ClientHelloMessage(c));
+        ClientHelloMessage cHello = new ClientHelloMessage(c);
+        cHello.setProtocolVersion(ProtocolVersion.TLS12.getValue());
+        SendAction sendAction = new SendAction(cHello);
         sendAction.setRecords(r);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -69,11 +77,10 @@ public class Fragmentation extends Tls12Test {
             "Alert, or ChangeCipherSpec content types. Zero-length fragments of " +
             "Application data MAY be sent as they are potentially useful as a " +
             "traffic analysis countermeasure.")
-    public void sendZeroLengthRecord_Alert(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        c.setDefaultClientSupportedCiphersuites(CipherSuite.getImplemented());
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    public void sendZeroLengthRecord_Alert(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
-        runner.replaceSupportedCiphersuites = true;
 
         AlertMessage alertMsg = new AlertMessage(c);
         alertMsg.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));
@@ -97,11 +104,11 @@ public class Fragmentation extends Tls12Test {
 
 
 
-    @TlsTest(description = "")
-    public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCS_F(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        c.getDefaultClientConnection().setTransportHandlerType(TransportHandlerType.TCP_NO_DELAY);
-        runner.replaceSupportedCiphersuites = true;
+    @TlsTest
+    @ScopeLimitations({DerivationType.RECORD_LENGTH, DerivationType.TCP_FRAGMENTATION})
+    @TestDescription("Handshake messages spread across different records should be accepted")
+    public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCS_F(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         if (c.isClientAuthentication()) {
@@ -121,10 +128,11 @@ public class Fragmentation extends Tls12Test {
     }
 
     @TlsTest(description = "")
-    public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCSF(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    @ScopeLimitations({DerivationType.RECORD_LENGTH, DerivationType.TCP_FRAGMENTATION})
+    @TestDescription("Handshake messages spread across different records should be accepted")
+    public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCSF(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.getDefaultClientConnection().setTransportHandlerType(TransportHandlerType.TCP_NO_DELAY);
-        runner.replaceSupportedCiphersuites = true;
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         if (c.isClientAuthentication()) {

@@ -20,20 +20,22 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 5246, section = "7.4.1.2. Client Hello")
 @ServerTest
 public class ClientHello extends Tls12Test {
 
     @TlsTest(description = "If the list contains cipher suites the server does not recognize, support, " +
-            "or wish to use, the server MUST ignore those cipher suites, and process the remaining ones as usual.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    public void unknownCipherSuite(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-
-        Config c = this.getConfig();
+            "or wish to use, the server MUST ignore those cipher suites, and process the remaining ones as usual.")
+    @Interoperability(SeverityLevel.CRITICAL)
+    public void unknownCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
         clientHelloMessage.setCipherSuites(Modifiable.insert(new byte[]{(byte)0xfe, 0x00}, 0));
@@ -48,10 +50,10 @@ public class ClientHello extends Tls12Test {
     }
 
     @TlsTest(description = "This vector MUST contain, and all implementations MUST support, CompressionMethod.null. " +
-            "Thus, a client and server will always be able to agree on a compression method.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    public void unknownCompressionMethod(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+            "Thus, a client and server will always be able to agree on a compression method.")
+    @Interoperability(SeverityLevel.CRITICAL)
+    public void unknownCompressionMethod(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
         clientHelloMessage.setCompressions(Modifiable.explicit(new byte[]{0x00, 0x04}));

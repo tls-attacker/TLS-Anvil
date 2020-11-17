@@ -10,6 +10,7 @@
 package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -24,6 +25,7 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 8446, section = "4.4.4. Finished")
 public class Finished extends Tls13Test {
@@ -31,9 +33,8 @@ public class Finished extends Tls13Test {
     @TlsTest(description = "Recipients of Finished messages MUST verify " +
             "that the contents are correct and if incorrect MUST terminate " +
             "the connection with a \"decrypt_error\" alert.", securitySeverity = SeverityLevel.CRITICAL)
-    public void invalidSignature(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
-        runner.replaceSupportedCiphersuites = true;
+    public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
         workflowTrace.addTlsActions(

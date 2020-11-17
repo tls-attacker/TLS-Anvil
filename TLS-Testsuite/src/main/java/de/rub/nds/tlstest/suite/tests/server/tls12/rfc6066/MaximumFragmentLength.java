@@ -24,6 +24,8 @@ import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 6066, section = "4. Maximum Fragment Length Negotiation")
 @ServerTest
@@ -31,9 +33,8 @@ public class MaximumFragmentLength extends Tls12Test {
 
     @TlsTest(description = "If a server receives a maximum fragment length negotiation request for "+
             "a value other than the allowed values, it MUST abort the handshake with an \"illegal_parameter\" alert.")
-    public void invalidMaximumFragmentLength(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+    public void invalidMaximumFragmentLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddMaxFragmentLengthExtension(true);
         ClientHelloMessage chm = new ClientHelloMessage(c);

@@ -22,19 +22,30 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsscanner.serverscanner.report.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 7507, section = "3. Server Behavior")
 @ServerTest
@@ -47,6 +58,34 @@ public class SCSV extends Tls12Test {
         }
         return ConditionEvaluationResult.disabled("No other TLS versions are supported");
     }
+    
+    public List<DerivationParameter> getOldCiphersuites() {
+        List<DerivationParameter> parameterValues = new LinkedList<>();
+        Set<CipherSuite> olderCipherSuites = new HashSet<>();
+                
+        List<VersionSuiteListPair> olderPairs = new ArrayList<>(context.getSiteReport().getVersionSuitePairs());
+        olderPairs.removeIf(i -> i.getVersion() != ProtocolVersion.TLS10 && i.getVersion() != ProtocolVersion.TLS11);
+        for(VersionSuiteListPair pair: olderPairs) {
+            olderCipherSuites.addAll(pair.getCiphersuiteList());
+        }
+        
+        for(CipherSuite cipherSuite: olderCipherSuites) {
+            parameterValues.add(new CipherSuiteDerivation(cipherSuite));
+        }
+        
+        return parameterValues;
+    }
+    
+    public ProtocolVersion getVersionForCipherSuite(CipherSuite cipherSuite) {
+        List<VersionSuiteListPair> olderPairs = new ArrayList<>(context.getSiteReport().getVersionSuitePairs());
+        olderPairs.removeIf(i -> i.getVersion() != ProtocolVersion.TLS10 && i.getVersion() != ProtocolVersion.TLS11);
+        for(VersionSuiteListPair versionSuite: olderPairs) {
+            if(versionSuite.getCiphersuiteList().contains(cipherSuite)) {
+                return versionSuite.getVersion();
+            }
+        }
+        return null;
+    }
 
     @TlsTest(description = "If TLS_FALLBACK_SCSV appears in ClientHello.cipher_suites and the highest protocol version " +
             "supported by the server is higher than the version indicated in ClientHello.client_version, " +
@@ -54,38 +93,28 @@ public class SCSV extends Tls12Test {
             "because the version indicated in ClientHello.client_version is unsupported). " +
             "The record layer version number for this alert MUST be set to either ClientHello.client_version " +
             "(as it would for the Server Hello message if the server was continuing the handshake) " +
-            "or to the record layer version number used by the client.", securitySeverity = SeverityLevel.CRITICAL)
+            "or to the record layer version number used by the client.")
+    @Security(SeverityLevel.CRITICAL)
+    @ExplicitValues(affectedTypes=DerivationType.CIPHERSUITE,methods="getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
-    public void includeFallbackSCSV(WorkflowRunner runner) {
-        List<VersionSuiteListPair> olderCipherSuites = new ArrayList<>(context.getSiteReport().getVersionSuitePairs());
-        olderCipherSuites.removeIf(i -> i.getVersion() != ProtocolVersion.TLS10 && i.getVersion() != ProtocolVersion.TLS11);
+    public void includeFallbackSCSV(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        CipherSuite cipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+        c.setDefaultSelectedProtocolVersion(getVersionForCipherSuite(cipherSuite));
 
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
+        c.setDefaultSelectedCipherSuite(cipherSuite);
+        c.setDefaultClientSupportedCiphersuites(cipherSuite, CipherSuite.TLS_FALLBACK_SCSV);
 
-        for (VersionSuiteListPair versionSuite : olderCipherSuites) {
-            for (CipherSuite cipherSuite : versionSuite.getCiphersuiteList()) {
-                Config c = this.getConfig();
-                c.setDefaultSelectedCipherSuite(cipherSuite);
-                c.setDefaultClientSupportedCiphersuites(cipherSuite, CipherSuite.TLS_FALLBACK_SCSV);
-                c.setDefaultSelectedProtocolVersion(versionSuite.getVersion());
+        ClientHelloMessage clientHello = new ClientHelloMessage(c);
+        clientHello.setProtocolVersion(Modifiable.explicit(getVersionForCipherSuite(cipherSuite).getValue()));
 
-                ClientHelloMessage clientHello = new ClientHelloMessage(c);
-                clientHello.setProtocolVersion(Modifiable.explicit(versionSuite.getVersion().getValue()));
-
-                WorkflowTrace trace = new WorkflowTrace();
-                trace.addTlsActions(
-                        new SendAction(clientHello),
-                        new ReceiveAction(new AlertMessage())
-                );
-
-                AnnotatedState annotatedState = new AnnotatedState(new State(c, trace));
-                annotatedState.setInspectedCipherSuite(cipherSuite);
-                annotatedState.addAdditionalTestInfo(versionSuite.getVersion().name());
-                container.add(annotatedState);
-            }
-        }
-
-        runner.execute(container).validateFinal(i -> {
+        WorkflowTrace trace = new WorkflowTrace();
+        trace.addTlsActions(
+            new SendAction(clientHello),
+            new ReceiveAction(new AlertMessage())
+        );
+        
+        runner.execute(trace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
 
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
@@ -99,38 +128,28 @@ public class SCSV extends Tls12Test {
             "because the version indicated in ClientHello.client_version is unsupported). " +
             "The record layer version number for this alert MUST be set to either ClientHello.client_version " +
             "(as it would for the Server Hello message if the server was continuing the handshake) " +
-            "or to the record layer version number used by the client.", securitySeverity = SeverityLevel.CRITICAL)
+            "or to the record layer version number used by the client.")
+    @Security(SeverityLevel.CRITICAL)
+    @ExplicitValues(affectedTypes=DerivationType.CIPHERSUITE,methods="getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
-    public void includeFallbackSCSV_nonRecommendedCipherSuiteOrder(WorkflowRunner runner) {
-        List<VersionSuiteListPair> olderCipherSuites = new ArrayList<>(context.getSiteReport().getVersionSuitePairs());
-        olderCipherSuites.removeIf(i -> i.getVersion() != ProtocolVersion.TLS10 && i.getVersion() != ProtocolVersion.TLS11);
+    public void includeFallbackSCSV_nonRecommendedCipherSuiteOrder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        CipherSuite cipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+        c.setDefaultSelectedProtocolVersion(getVersionForCipherSuite(cipherSuite));
 
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
+        c.setDefaultSelectedCipherSuite(cipherSuite);
+        c.setDefaultClientSupportedCiphersuites(CipherSuite.TLS_FALLBACK_SCSV, cipherSuite);
 
-        for (VersionSuiteListPair versionSuite : olderCipherSuites) {
-            for (CipherSuite cipherSuite : versionSuite.getCiphersuiteList()) {
-                Config c = this.getConfig();
-                c.setDefaultSelectedCipherSuite(cipherSuite);
-                c.setDefaultClientSupportedCiphersuites(CipherSuite.TLS_FALLBACK_SCSV, cipherSuite);
-                c.setDefaultSelectedProtocolVersion(versionSuite.getVersion());
+        ClientHelloMessage clientHello = new ClientHelloMessage(c);
+        clientHello.setProtocolVersion(Modifiable.explicit(getVersionForCipherSuite(cipherSuite).getValue()));
 
-                ClientHelloMessage clientHello = new ClientHelloMessage(c);
-                clientHello.setProtocolVersion(Modifiable.explicit(versionSuite.getVersion().getValue()));
-
-                WorkflowTrace trace = new WorkflowTrace();
-                trace.addTlsActions(
-                        new SendAction(clientHello),
-                        new ReceiveAction(new AlertMessage())
-                );
-
-                AnnotatedState annotatedState = new AnnotatedState(new State(c, trace));
-                annotatedState.setInspectedCipherSuite(cipherSuite);
-                annotatedState.addAdditionalTestInfo(versionSuite.getVersion().name());
-                container.add(annotatedState);
-            }
-        }
-
-        runner.execute(container).validateFinal(i -> {
+        WorkflowTrace trace = new WorkflowTrace();
+        trace.addTlsActions(
+            new SendAction(clientHello),
+            new ReceiveAction(new AlertMessage())
+        );
+        
+        runner.execute(trace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
 
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);

@@ -24,6 +24,7 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -35,6 +36,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class RespectClientExtensions extends Tls12Test {
@@ -44,11 +47,11 @@ public class RespectClientExtensions extends Tls12Test {
             "selection of an appropriate cipher suite.  One of the proposed ECC " +
             "cipher suites must be negotiated only if the server can successfully " +
             "complete the handshake while using the curves and point formats " +
-            "supported by the client (cf. Sections 5.3 and 5.4).", interoperabilitySeverity = SeverityLevel.CRITICAL)
+            "supported by the client (cf. Sections 5.3 and 5.4).")
+    @Interoperability(SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
-    public void respectChosenCurve(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-        Config c = this.getConfig();
+    public void respectChosenCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
@@ -62,11 +65,11 @@ public class RespectClientExtensions extends Tls12Test {
             "selection of an appropriate cipher suite.  One of the proposed ECC " +
             "cipher suites must be negotiated only if the server can successfully " +
             "complete the handshake while using the curves and point formats " +
-            "supported by the client (cf. Sections 5.3 and 5.4).", interoperabilitySeverity = SeverityLevel.CRITICAL)
+            "supported by the client (cf. Sections 5.3 and 5.4).")
+    @Interoperability(SeverityLevel.CRITICAL)
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
-    public void respectChosenCurveWithoutFormats(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-        Config c = this.getConfig();
+    public void respectChosenCurveWithoutFormats(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(false);
@@ -82,23 +85,7 @@ public class RespectClientExtensions extends Tls12Test {
                 new ReceiveTillAction(new ServerHelloDoneMessage())
         );
 
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
-        try {
-            List<NamedGroup> groups = context.getSiteReport().getSupportedNamedGroups();
-
-            for (NamedGroup i : groups) {
-                chm.getExtension(EllipticCurvesExtensionMessage.class).setSupportedGroups(Modifiable.explicit(i.getValue()));
-                runner.setStateModifier(s -> {
-                    s.addAdditionalTestInfo("Set EC Curve to " + i.name());
-                    return null;
-                });
-                container.addAll(runner.prepare(workflowTrace, c));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        runner.execute(container).validateFinal(i -> {
+        runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);
 
             WorkflowTrace trace = i.getWorkflowTrace();

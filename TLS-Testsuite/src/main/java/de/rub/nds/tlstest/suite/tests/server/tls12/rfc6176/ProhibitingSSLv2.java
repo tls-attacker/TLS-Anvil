@@ -22,9 +22,12 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 
 @RFC(number = 6176, section = "3")
@@ -32,10 +35,10 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 public class ProhibitingSSLv2 extends Tls12Test {
 
     @TlsTest(description = "TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT-" +
-            "HELLO message format.", securitySeverity = SeverityLevel.CRITICAL)
-    public void sendSSL2CompatibleClientHello(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+            "HELLO message format.")
+    @Security(SeverityLevel.CRITICAL)
+    public void sendSSL2CompatibleClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
@@ -50,9 +53,8 @@ public class ProhibitingSSLv2 extends Tls12Test {
     @TlsTest(description = "TLS servers MUST NOT reply with an SSL 2.0 SERVER-HELLO with a " +
             "protocol version that is less than { 0x03, 0x00 } and instead MUST " +
             "abort the connection")
-    public void sendClientHelloVersionLower0300(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+    public void sendClientHelloVersionLower0300(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
         clientHelloMessage.setProtocolVersion(Modifiable.explicit(ProtocolVersion.SSL2.getValue()));

@@ -24,10 +24,12 @@ import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @RFC(number = 5246, section = "7.4.8. Certificate Verify")
@@ -42,11 +44,11 @@ public class CertificateVerify extends Tls12Test {
     @TlsTest(description = "Here handshake_messages refers to all handshake messages sent or received, " +
             "starting at client hello and up to, but not including, this message, including the " +
             "type and length fields of the handshake messages. This is the concatenation of all " +
-            "the Handshake structures (as defined in Section 7.4) exchanged thus far.", securitySeverity = SeverityLevel.CRITICAL)
+            "the Handshake structures (as defined in Section 7.4) exchanged thus far.")
     @MethodCondition(method = "clientAuth")
-    public void invalidCertificateVerify(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+    @Security(SeverityLevel.CRITICAL)
+    public void invalidCertificateVerify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
         workflowTrace.addTlsActions(
@@ -54,11 +56,8 @@ public class CertificateVerify extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            CertificateVerifyMessage msg = i.getWorkflowTrace().getFirstSendMessage(CertificateVerifyMessage.class);
-            msg.setSignature(Modifiable.xor(new byte[]{0x01}, 0));
-            return null;
-        });
+        CertificateVerifyMessage msg = workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class);
+        msg.setSignature(Modifiable.xor(new byte[]{0x01}, 0));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }

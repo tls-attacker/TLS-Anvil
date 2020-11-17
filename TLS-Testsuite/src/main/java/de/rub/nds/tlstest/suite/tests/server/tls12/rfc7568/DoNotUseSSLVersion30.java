@@ -23,33 +23,44 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 7568, section = "3")
 @ServerTest
 public class DoNotUseSSLVersion30 extends Tls12Test {
 
-    @TlsTest(description = "SSLv3 MUST NOT be used. Negotiation of SSLv3 from any version of TLS " +
-            "MUST NOT be permitted. " +
-            "Pragmatically, clients MUST NOT send a ClientHello with " +
-            "ClientHello.client_version set to {03,00}. Similarly, servers MUST " +
-            "NOT send a ServerHello with ServerHello.server_version set to " +
-            "{03,00}. Any party receiving a Hello message with the protocol " +
-            "version set to {03,00} MUST respond with a \"protocol_version\" alert " +
-            "message and close the connection.", securitySeverity = SeverityLevel.CRITICAL)
-    public void sendClientHelloVersion0300(WorkflowRunner runner) {
-        Config config = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+    @TlsTest(description = "SSLv3 MUST NOT be used. Negotiation of SSLv3 from any version of TLS "
+            + "MUST NOT be permitted. "
+            + "Pragmatically, clients MUST NOT send a ClientHello with "
+            + "ClientHello.client_version set to {03,00}. Similarly, servers MUST "
+            + "NOT send a ServerHello with ServerHello.server_version set to "
+            + "{03,00}. Any party receiving a Hello message with the protocol "
+            + "version set to {03,00} MUST respond with a \"protocol_version\" alert "
+            + "message and close the connection.")
+    @Security(SeverityLevel.CRITICAL)
+    public void sendClientHelloVersion0300(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(config);
         clientHelloMessage.setProtocolVersion(Modifiable.explicit(new byte[]{0x03, 0x00}));
@@ -76,40 +87,39 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
 
     }
 
-    @TlsTest(description = "TLS servers MUST accept any value " +
-            "{03,XX} (including {03,00}) as the record layer version number for " +
-            "ClientHello, but they MUST NOT negotiate SSLv3.", securitySeverity = SeverityLevel.CRITICAL, interoperabilitySeverity = SeverityLevel.HIGH)
-    public void sendClientHelloVersion0300WithDifferentVersionInTheRecord(WorkflowRunner runner) {
-        Config config = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
-
-        for (byte i : new byte[]{0x00, 0x01, 0x02, 0x04, 0x05, (byte)0xff}) {
-            Record record = new Record();
-            record.setProtocolVersion(Modifiable.explicit(new byte[]{0x03, i}));
-            ClientHelloMessage clientHelloMessage = new ClientHelloMessage(config);
-
-            SendAction sendAction = new SendAction(clientHelloMessage);
-            sendAction.setRecords(record);
-
-            WorkflowTrace workflowTrace = new WorkflowTrace();
-            workflowTrace.addTlsActions(
-                    sendAction,
-                    new ReceiveTillAction(new ServerHelloDoneMessage())
-            );
-
-            AnnotatedState state = new AnnotatedState(new State(config, workflowTrace));
-            state.addAdditionalTestInfo(String.format("RecordLayerVersion 0x03 0x%02x", i));
-
-            runner.setStateModifier(s -> {
-                s.addAdditionalTestInfo(String.format("Set protocol version to 0x03 0x%2x", i));
-                return null;
-            });
-            container.addAll(runner.prepare(state));
+    public List<DerivationParameter> get03ProtocolVersions() {
+        List<DerivationParameter> parameterValues = new LinkedList<>();
+        for (byte i : new byte[]{0x00, 0x01, 0x02, 0x04, 0x05, (byte) 0xff}) {
+            parameterValues.add(new ProtocolVersionDerivation(new byte[]{0x03, i}));
         }
+        return parameterValues;
+    }
 
-        runner.execute(container).validateFinal(i -> {
+    @TlsTest(description = "TLS servers MUST accept any value "
+            + "{03,XX} (including {03,00}) as the record layer version number for "
+            + "ClientHello, but they MUST NOT negotiate SSLv3.")
+    @Security(SeverityLevel.CRITICAL)
+    @Interoperability(SeverityLevel.HIGH)
+    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "get03ProtocolVersions")
+    public void sendClientHelloVersion0300WithDifferentVersionInTheRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        byte[] protocolVersionBytes = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();
+        
+        Record record = new Record();
+        record.setProtocolVersion(Modifiable.explicit(protocolVersionBytes));
+        ClientHelloMessage clientHelloMessage = new ClientHelloMessage(config);
+
+        SendAction sendAction = new SendAction(clientHelloMessage);
+        sendAction.setRecords(record);
+
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        workflowTrace.addTlsActions(
+                sendAction,
+                new ReceiveTillAction(new ServerHelloDoneMessage())
+        );
+
+        runner.execute(workflowTrace, config).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
             Validator.executedAsPlanned(i);
 

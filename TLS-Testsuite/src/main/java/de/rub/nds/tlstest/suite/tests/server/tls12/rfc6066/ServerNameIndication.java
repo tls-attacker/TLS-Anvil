@@ -30,6 +30,8 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 6066, section = "3. Server Name Indication")
 @ServerTest
@@ -46,11 +48,9 @@ public class ServerNameIndication extends Tls12Test {
     @TlsTest(description = "The ServerNameList MUST NOT contain more than one name of the same " +
             "name_type.")
     @MethodCondition(method = "sniActive")
-    public void moreThanOneNameOfTheSameType(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    public void moreThanOneNameOfTheSameType(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddServerNameIndicationExtension(true);
-
-        runner.replaceSupportedCiphersuites = true;
 
         ServerNamePair pair = new ServerNamePair();
         pair.setServerNameConfig(c.getDefaultClientConnection().getHostname()

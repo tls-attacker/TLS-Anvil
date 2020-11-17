@@ -17,12 +17,16 @@ import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
@@ -31,56 +35,35 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class EncThenMacExtension extends Tls12Test {
-    public ConditionEvaluationResult blockCipherSupported() {
-        if (context.getSiteReport().getCipherSuites().stream().anyMatch(i -> {
-            try {
-                return AlgorithmResolver.getCipherType(i) == CipherType.BLOCK;
-            } catch (Exception e) {
-                return false;
-            }
-        })) {
-            return ConditionEvaluationResult.enabled("");
+    
+    public boolean isBlockCipher(CipherSuite cipherSuite) {
+        try {
+            return AlgorithmResolver.getCipherType(cipherSuite) == CipherType.BLOCK;
+        } catch (Exception e) {
+            return false;
         }
-        return ConditionEvaluationResult.disabled("Does not support block ciphers");
+    }
+    
+    public boolean isNotBlockCipher(CipherSuite cipherSuite) {
+        try {
+            return AlgorithmResolver.getCipherType(cipherSuite) != CipherType.BLOCK;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
-    public ConditionEvaluationResult supportsNonBlockCipher() {
-        if (context.getSiteReport().getCipherSuites().stream().anyMatch(i -> {
-            try {
-                return AlgorithmResolver.getCipherType(i) != CipherType.BLOCK;
-            } catch (Exception e) {
-                return false;
-            }
-        })) {
-            return ConditionEvaluationResult.enabled("");
-        }
-        return ConditionEvaluationResult.disabled("Does not support non block cipher");
-    }
-
-    @TlsTest(description = "Test if the server supports the encrypt-then-mac extension", securitySeverity = SeverityLevel.MEDIUM)
-    @MethodCondition(method = "blockCipherSupported")
-    public void supportsEncThenMacExt(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-        runner.respectConfigSupportedCiphersuites = true;
-
-        Config c = this.getConfig();
+    @TlsTest(description = "Test if the server supports the encrypt-then-mac extension")
+    @Security(SeverityLevel.MEDIUM)
+    @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isBlockCipher")
+    public void supportsEncThenMacExt(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);
-
-        c.setDefaultClientSupportedCiphersuites(
-                Arrays.stream(CipherSuite.values())
-                .filter(i -> {
-                    try {
-                        return AlgorithmResolver.getCipherType(i) == CipherType.BLOCK;
-                    } catch (Exception e) {
-                        return false;
-                    }
-                })
-                .collect(Collectors.toList())
-        );
-
+        
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         runner.execute(trace, c).validateFinal(i -> {
@@ -92,27 +75,13 @@ public class EncThenMacExtension extends Tls12Test {
     @RFC(number = 7366, section = "3.  Applying Encrypt-then-MAC")
     @TlsTest(description = "If a server receives an encrypt-then-MAC request extension from a client and then " +
             "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, " +
-            "it MUST NOT send an encrypt-then-MAC response extension back to the client.",
-            securitySeverity = SeverityLevel.LOW, interoperabilitySeverity = SeverityLevel.MEDIUM)
-    @MethodCondition(method = "supportsNonBlockCipher")
-    public void negotiatesEncThenMacExtOnlyWithBckCiphers(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-        runner.respectConfigSupportedCiphersuites = true;
-
-        Config c = this.getConfig();
+            "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
+    @Interoperability(SeverityLevel.MEDIUM)
+    @Security(SeverityLevel.LOW)
+    @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isNotBlockCipher")
+    public void negotiatesEncThenMacExtOnlyWithBckCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);
-
-        c.setDefaultClientSupportedCiphersuites(
-                Arrays.stream(CipherSuite.values())
-                        .filter(i -> {
-                            try {
-                                return AlgorithmResolver.getCipherType(i) != CipherType.BLOCK;
-                            } catch (Exception e) {
-                                return false;
-                            }
-                        })
-                        .collect(Collectors.toList())
-        );
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 

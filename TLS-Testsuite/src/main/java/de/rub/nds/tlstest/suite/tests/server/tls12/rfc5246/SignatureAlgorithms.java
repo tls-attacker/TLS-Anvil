@@ -26,6 +26,7 @@ import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -36,15 +37,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @RFC(number = 5246, section = "7.4.1.4.1. Signature Algorithms")
 public class SignatureAlgorithms extends Tls12Test {
 
-    private WorkflowTrace getWorkflowFor(Config c, String cipherSuiteFilter) {
-        List<CipherSuite> cipherSuiteList = CipherSuite.getImplemented();
-        cipherSuiteList.removeIf(i -> !i.toString().contains(cipherSuiteFilter));
-        c.setDefaultClientSupportedCiphersuites(cipherSuiteList);
+    private WorkflowTrace getWorkflowFor(Config c) {
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
@@ -83,17 +83,15 @@ public class SignatureAlgorithms extends Tls12Test {
 
     @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
             "If the negotiated key exchange algorithm is one of (RSA, DHE_RSA, DH_RSA, RSA_PSK, ECDH_RSA, ECDHE_RSA), " +
-            "behave as if client had sent the value {sha1,rsa}.", interoperabilitySeverity = SeverityLevel.MEDIUM)
+            "behave as if client had sent the value {sha1,rsa}.")
+    @Interoperability(SeverityLevel.MEDIUM)
     @MethodCondition(method = "rsaCiphersuitesSupported")
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
-    public void rsaNoSignatureAlgorithmsExtension(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    public void rsaNoSignatureAlgorithmsExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddSignatureAndHashAlgorithmsExtension(false);
 
-        runner.replaceSupportedCiphersuites = true;
-        runner.respectConfigSupportedCiphersuites = true;
-
-        WorkflowTrace workflowTrace = getWorkflowFor(c, "_RSA");
+        WorkflowTrace workflowTrace = getWorkflowFor(c);
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);
@@ -108,16 +106,14 @@ public class SignatureAlgorithms extends Tls12Test {
 
     @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
             "If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), " +
-            "behave as if the client had sent the value {sha1,dsa}.", interoperabilitySeverity = SeverityLevel.MEDIUM)
+            "behave as if the client had sent the value {sha1,dsa}.")
+    @Interoperability(SeverityLevel.MEDIUM)
     @MethodCondition(method = "dssCiphersuitesSupported")
-    public void dssNoSignatureAlgorithmsExtension(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    public void dssNoSignatureAlgorithmsExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddSignatureAndHashAlgorithmsExtension(false);
 
-        runner.replaceSupportedCiphersuites = true;
-        runner.respectConfigSupportedCiphersuites = true;
-
-        WorkflowTrace workflowTrace = getWorkflowFor(c, "_DSS");
+        WorkflowTrace workflowTrace = getWorkflowFor(c);
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);
@@ -129,16 +125,14 @@ public class SignatureAlgorithms extends Tls12Test {
 
     @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
             "If the negotiated key exchange algorithm is one of (ECDH_ECDSA, ECDHE_ECDSA), " +
-            "behave as if the client had sent value {sha1,ecdsa}.", interoperabilitySeverity = SeverityLevel.MEDIUM)
+            "behave as if the client had sent value {sha1,ecdsa}.")
+    @Interoperability(SeverityLevel.MEDIUM)
     @MethodCondition(method = "ecdsaCiphersuitesSupported")
-    public void ecdsaNoSignatureAlgorithmsExtension(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    public void ecdsaNoSignatureAlgorithmsExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddSignatureAndHashAlgorithmsExtension(false);
 
-        runner.replaceSupportedCiphersuites = true;
-        runner.respectConfigSupportedCiphersuites = true;
-
-        WorkflowTrace workflowTrace = getWorkflowFor(c, "_ECDSA");
+        WorkflowTrace workflowTrace = getWorkflowFor(c);
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);

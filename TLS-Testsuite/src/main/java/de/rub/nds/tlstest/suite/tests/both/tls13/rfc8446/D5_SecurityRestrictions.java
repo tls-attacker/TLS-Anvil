@@ -21,10 +21,12 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 
 public class D5_SecurityRestrictions extends Tls13Test {
@@ -32,12 +34,11 @@ public class D5_SecurityRestrictions extends Tls13Test {
     @TlsTest(description = "Implementations MUST NOT send any records with a " +
             "version less than 0x0300. Implementations SHOULD NOT accept any " +
             "records with a version less than 0x0300 (but may inadvertently " +
-            "do so if the record version number is ignored completely).", interoperabilitySeverity = SeverityLevel.MEDIUM)
+            "do so if the record version number is ignored completely).")
     @RFC(number = 8446, section = "D.5. Security Restrictions Related to Backward Compatibility")
-    public void invalidRecordVersion_ssl30(WorkflowRunner runner) {
-        Config config = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-        runner.replaceSelectedCiphersuite = true;
+    @Interoperability(SeverityLevel.MEDIUM)
+    public void invalidRecordVersion_ssl30(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
 
         Record record = new Record();
         record.setProtocolVersion(Modifiable.explicit(new byte[]{0x02, (byte)0x03}));
@@ -54,12 +55,9 @@ public class D5_SecurityRestrictions extends Tls13Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            SendAction action;
-            action = i.getWorkflowTrace().getFirstAction(SendAction.class);
-            action.setRecords(record);
-            return null;
-        });
+        SendAction action;
+        action = trace.getFirstAction(SendAction.class);
+        action.setRecords(record);
 
         runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
     }

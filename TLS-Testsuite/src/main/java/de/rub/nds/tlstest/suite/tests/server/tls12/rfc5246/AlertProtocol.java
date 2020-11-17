@@ -27,18 +27,21 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rwth.swc.coffee4j.engine.characterization.delta.ImprovedDeltaDebugging;
 import de.rwth.swc.coffee4j.junit.CombinatorialTest;
@@ -66,9 +69,8 @@ public class AlertProtocol extends Tls12Test {
             "alert of its own and close down the connection immediately, " +
             "discarding any pending writes.")
     @RFC(number = 5246, section = "7.2.1 Closure Alerts")
-    public void close_notify(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+    public void close_notify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));
@@ -100,51 +102,40 @@ public class AlertProtocol extends Tls12Test {
 
     
     @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both" +
-            "parties immediately close the connection.", securitySeverity = SeverityLevel.CRITICAL)
+            "parties immediately close the connection.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    public void abortAfterFatalAlert_sendBeforeCCS(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
+    @Security(SeverityLevel.CRITICAL)
+    @ScopeExtensions(DerivationType.ALERT)
+    public void abortAfterFatalAlert_sendBeforeCCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
+        AlertDescription alertDescr = derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
 
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
-        for (AlertDescription i : AlertDescription.values()) {
-            AlertMessage alert = new AlertMessage();
-            alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
-            alert.setDescription(Modifiable.explicit(i.getValue()));
+        AlertMessage alert = new AlertMessage();
+        alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
+        alert.setDescription(Modifiable.explicit(alertDescr.getValue()));
 
-            WorkflowTrace workflowTrace = new WorkflowTrace();
-            workflowTrace.addTlsActions(
-                    new SendAction(alert),
-                    new SendAction(true, new ChangeCipherSpecMessage(), new FinishedMessage()),
-                    new ReceiveAction(new AlertMessage())
-            );
 
-            runner.setStateModifier(s -> {
-                s.addAdditionalTestInfo(i.name());
-                return null;
-            });
-            container.addAll(runner.prepare(workflowTrace, c));
-        }
+        workflowTrace.addTlsActions(
+            new SendAction(alert),
+            new SendAction(true, new ChangeCipherSpecMessage(), new FinishedMessage()),
+            new ReceiveAction(new AlertMessage())
+        );
 
-        runner.execute(container).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
     
 
     @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both" +
-            "parties immediately close the connection.", securitySeverity = SeverityLevel.CRITICAL)
-    @ModelFromScope(scopeLimitations = {DerivationType.MAC_BITMASK})
+            "parties immediately close the connection.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    @Tag("WIP")
-    public void abortAfterFatalAlert_sendAfterServerHelloDone(ArgumentsAccessor argumentAccessor) {
-        derivationContainer = new DerivationContainer(argumentAccessor);
-        Config c = this.getConfig();
-        WorkflowRunner runner = new WorkflowRunner(extensionContext, c);
-        
-        runner.setPreparedConfig(c);
+    @Security(SeverityLevel.CRITICAL)
+    @ScopeExtensions(DerivationType.ALERT)
+    public void abortAfterFatalAlert_sendAfterServerHelloDone(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        
-        AlertDescription alertDescr = (AlertDescription)derivationContainer.getDerivation(DerivationType.ALERT).getSelectedValue();
-        
+        AlertDescription alertDescr = derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
+
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
         alert.setDescription(Modifiable.explicit(alertDescr.getValue()));

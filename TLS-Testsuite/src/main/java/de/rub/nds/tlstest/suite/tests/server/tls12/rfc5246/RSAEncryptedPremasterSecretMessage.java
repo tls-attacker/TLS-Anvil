@@ -24,10 +24,13 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 
 @RFC(number = 5246, section = "7.4.7.1")
@@ -40,11 +43,11 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
             "In any case, a TLS server MUST NOT generate an alert if processing an " +
             "RSA-encrypted premaster secret message fails, or the version number " +
             "is not as expected.  Instead, it MUST continue the handshake with a " +
-            "randomly generated premaster secret.", securitySeverity = SeverityLevel.CRITICAL)
+            "randomly generated premaster secret.")
     @KeyExchange(supported = KeyExchangeType.RSA)
-    public void PMWithWrongClientVersion(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+    @Security(SeverityLevel.CRITICAL)
+    public void PMWithWrongClientVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
 
@@ -53,13 +56,11 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            RSAClientKeyExchangeMessage cke = i.getWorkflowTrace().getFirstSendMessage(RSAClientKeyExchangeMessage.class);
-            cke.prepareComputations();
-            //changes "0x03 0x03" to "0x03 0x02" (TLS1.2 to TLS1.1)
-            cke.getComputations().setPremasterSecret(Modifiable.xor(new byte[] {0x00, 0x01}, 0));
-            return null;
-        });
+        RSAClientKeyExchangeMessage cke = workflowTrace.getFirstSendMessage(RSAClientKeyExchangeMessage.class);
+        cke.prepareComputations();
+        //changes "0x03 0x03" to "0x03 0x02" (TLS1.2 to TLS1.1)
+        cke.getComputations().setPremasterSecret(Modifiable.xor(new byte[] {0x00, 0x01}, 0));
+
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
@@ -69,9 +70,8 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
             "is not as expected.  Instead, it MUST continue the handshake with a " +
             "randomly generated premaster secret.")
     @KeyExchange(supported = KeyExchangeType.RSA)
-    public void PMWithWrongPKCS1Padding(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
+    public void PMWithWrongPKCS1Padding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
 
@@ -80,13 +80,10 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            RSAClientKeyExchangeMessage cke = i.getWorkflowTrace().getFirstSendMessage(RSAClientKeyExchangeMessage.class);
-            cke.prepareComputations();
-            //changes "0x00 0x02 random 0x00" to "0x00 0x01 random 0x00"
-            cke.getComputations().setPremasterSecret(Modifiable.xor(new byte[] {0x01}, 1));
-            return null;
-        });
+        RSAClientKeyExchangeMessage cke = workflowTrace.getFirstSendMessage(RSAClientKeyExchangeMessage.class);
+        cke.prepareComputations();
+        //changes "0x00 0x02 random 0x00" to "0x00 0x01 random 0x00"
+        cke.getComputations().setPremasterSecret(Modifiable.xor(new byte[] {0x01}, 1));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }

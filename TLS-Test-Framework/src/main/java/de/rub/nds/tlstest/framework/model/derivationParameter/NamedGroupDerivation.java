@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsscanner.serverscanner.probe.namedcurve.NamedCurveWitness;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
@@ -44,8 +45,13 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     @Override
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        context.getSiteReport().getSupportedNamedGroups().forEach(group -> parameterValues.add(new NamedGroupDerivation(group)));
-        parameterValues.add(new NamedGroupDerivation(null));
+        List<NamedGroup> groupList = context.getSiteReport().getSupportedTls13Groups();
+        if(scope.getTargetVersion() == ProtocolVersion.TLS12) {
+            groupList = context.getSiteReport().getSupportedNamedGroups();
+            parameterValues.add(new NamedGroupDerivation(null));
+        }
+        groupList.forEach(group -> parameterValues.add(new NamedGroupDerivation(group)));
+        
         return parameterValues;
     }
 
@@ -54,6 +60,7 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
         if (getSelectedValue() != null) {
             if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
                 config.setDefaultClientNamedGroups(getSelectedValue());
+                config.setDefaultClientKeyShareNamedGroups(getSelectedValue());
             } else {
                 config.setDefaultServerNamedGroups(getSelectedValue());
             }
@@ -86,7 +93,7 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     @Override
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-        if (ConstraintHelper.ecdhCipherSuiteModeled(scope)) {
+        if (ConstraintHelper.ecdhCipherSuiteModeled(scope) && scope.getTargetVersion() == ProtocolVersion.TLS12) {
             //TODO: do we want to handle it like this? i.e null = exclude extension
             Set<DerivationType> requiredDerivations = new HashSet<>();
             requiredDerivations.add(DerivationType.CIPHERSUITE);

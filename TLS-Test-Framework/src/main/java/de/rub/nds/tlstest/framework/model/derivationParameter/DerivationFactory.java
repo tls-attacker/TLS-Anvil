@@ -57,6 +57,8 @@ public class DerivationFactory {
                 return new GreaseSigHashDerivation();
             case PROTOCOL_VERSION:
                 return new ProtocolVersionDerivation();
+            case SIG_HASH_ALGORIHTM:
+                return new SigAndHashDerivation();
             default:
                 throw new UnsupportedOperationException("Derivation Type not implemented");
         }

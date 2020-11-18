@@ -11,6 +11,7 @@ package de.rub.nds.tlstest.framework.model.constraint;
 
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.HKDFAlgorithm;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -71,11 +72,46 @@ public class ConstraintHelper {
         CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation)DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         for(DerivationParameter param : values) {
+            if(scope.isTls13Test()) {
+                return true;
+            }
             if(AlgorithmResolver.getKeyExchangeAlgorithm((CipherSuite)param.getSelectedValue()).isKeyExchangeEcdh()) {
                 return true;
             }
         }
         
         return false;
+    }
+    
+    public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation)DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        Set<HKDFAlgorithm> hkdfAlgos = new HashSet<>();
+        for(DerivationParameter param : values) {
+            CipherSuite selectedCipher = (CipherSuite)param.getSelectedValue();
+            hkdfAlgos.add(AlgorithmResolver.getHKDFAlgorithm(selectedCipher));
+        }
+        
+        return hkdfAlgos.size() > 1;
+    }
+    
+    public static boolean multipleTagSizesModeled(DerivationScope scope) {
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation)DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        Set<Integer> tagLengths = new HashSet<>();
+        for(DerivationParameter param : values) {
+            CipherSuite selectedCipher = (CipherSuite)param.getSelectedValue();
+            tagLengths.add(getAuthTagLen(selectedCipher));
+        }
+        
+        return tagLengths.size() > 1;
+    }
+    
+    //TODO: integrate into AlgorithmResolver?
+    private static int getAuthTagLen(CipherSuite cipherSuite) {
+        if (cipherSuite.name().contains("CCM_8")) {
+            return 8;
+        }
+        return 16;
     }
 }

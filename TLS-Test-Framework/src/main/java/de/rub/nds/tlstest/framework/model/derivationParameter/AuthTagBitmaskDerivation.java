@@ -16,6 +16,7 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -41,7 +42,11 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         int maxTagLen = 0;
-        for (CipherSuite cipherSuite : context.getSiteReport().getCipherSuites()) {
+        Set<CipherSuite> cipherSuiteList = context.getSiteReport().getCipherSuites();
+        if (scope.isTls13Test()) {
+            cipherSuiteList = context.getSiteReport().getSupportedTls13CipherSuites();
+        }
+        for (CipherSuite cipherSuite : cipherSuiteList) {
             if (cipherSuite.isAEAD()) {
                 if (maxTagLen < getAuthTagLen(cipherSuite)) {
                     maxTagLen = getAuthTagLen(cipherSuite);
@@ -62,20 +67,23 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
 
     @Override
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
-        //selected byte must be within tag size
-        condConstraints.add(new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePosParam, DerivationParameter cipherSuite) -> {
-            int msgLen = (Integer) bytePosParam.getSelectedValue();
-            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-            return AlgorithmResolver.getCipher(cipherDev.getSelectedValue()).getBlocksize() >= msgLen;
-        })));
+        if (ConstraintHelper.multipleTagSizesModeled(scope)) {
+            Set<DerivationType> requiredDerivations = new HashSet<>();
+            requiredDerivations.add(DerivationType.CIPHERSUITE);
 
+            //selected byte must be within tag size
+            condConstraints.add(new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePosParam, DerivationParameter cipherSuite) -> {
+                int selectedPos = (Integer) bytePosParam.getSelectedValue();
+                CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
+                return getAuthTagLen(cipherDev.getSelectedValue()) > selectedPos;
+            })));
+        }
         return condConstraints;
     }
 
+    //TODO: integrate into AlgorithmResolver?
     private int getAuthTagLen(CipherSuite cipherSuite) {
         if (cipherSuite.name().contains("CCM_8")) {
             return 8;

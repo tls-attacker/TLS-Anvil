@@ -18,6 +18,7 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.constraint.ValueConstraint;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -47,7 +48,11 @@ public class CipherSuiteDerivation extends DerivationParameter<CipherSuite> {
     @Override
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        for (CipherSuite cipherSuite : context.getSiteReport().getCipherSuites()) {
+        Set<CipherSuite> cipherSuiteList = context.getSiteReport().getCipherSuites();
+        if(scope.isTls13Test()) {
+            cipherSuiteList = context.getSiteReport().getSupportedTls13CipherSuites();
+        }
+        for (CipherSuite cipherSuite : cipherSuiteList) {
             if(scope.getKeyExchangeRequirements().compatibleWithCiphersuite(cipherSuite)) {
                 parameterValues.add(new CipherSuiteDerivation(cipherSuite));
             }

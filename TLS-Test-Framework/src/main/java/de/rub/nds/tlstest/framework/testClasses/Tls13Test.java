@@ -27,9 +27,4 @@ public class Tls13Test extends TlsBaseTest {
     public Config getConfig() {
         return context.getConfig().createTls13Config();
     }
-
-    @Override
-    public Config getPreparedConfig(ArgumentsAccessor argAccessor, WorkflowRunner runner) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 }

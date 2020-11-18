@@ -24,8 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- *
- * @author marcel
+ * Provides a model for Coffee4J 
  */
 public class ParameterModelFactory {
 

@@ -41,7 +41,11 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
     @Override
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         int maxCipherTextByteLen = 0;
-        for (CipherSuite cipherSuite : context.getSiteReport().getCipherSuites()) {
+        Set<CipherSuite> cipherSuiteList = context.getSiteReport().getCipherSuites();
+        if(scope.isTls13Test()) {
+            cipherSuiteList = context.getSiteReport().getSupportedTls13CipherSuites();
+        }
+        for (CipherSuite cipherSuite : cipherSuiteList) {
             if (AlgorithmResolver.getCipher(cipherSuite).getBlocksize() > maxCipherTextByteLen && AlgorithmResolver.getCipher(cipherSuite).usesPadding()) {
                 maxCipherTextByteLen = AlgorithmResolver.getCipher(cipherSuite).getBlocksize();
             }

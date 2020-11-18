@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /**
@@ -32,9 +33,11 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class DerivationContainer {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private List<DerivationParameter> derivations;
+    private final List<DerivationParameter> derivations;
+    private final DerivationScope underlyingScope;
 
-    public DerivationContainer(ArgumentsAccessor argumentAccessor) {
+    public DerivationContainer(ArgumentsAccessor argumentAccessor, DerivationScope underlyingScope) {
+        this.underlyingScope = underlyingScope;
         derivations = new LinkedList<>();
         for (Object derivation : argumentAccessor.toList()) {
             if (derivation instanceof DerivationParameter) {
@@ -76,10 +79,15 @@ public class DerivationContainer {
 
     public void applyToConfig(Config baseConfig, TestContext context) {
         for (DerivationParameter listed : derivations) {
-            listed.applyToConfig(baseConfig, context);
+            if(underlyingScope.isAutoApplyToConfig(listed.getType())) {
+                listed.applyToConfig(baseConfig, context);
+            } 
         }
         for (DerivationParameter listed : derivations) {
-            listed.postProcessConfig(baseConfig, context);
+            if(underlyingScope.isAutoApplyToConfig(listed.getType())) {
+                listed.postProcessConfig(baseConfig, context);
+            } 
+            
         }
         System.out.println("Applied " + derivationsToString());
     }
@@ -110,4 +118,8 @@ public class DerivationContainer {
         return constructed;
     }
 
+    public DerivationScope getUnderlyingScope() {
+        return underlyingScope;
+    }
+    
 }

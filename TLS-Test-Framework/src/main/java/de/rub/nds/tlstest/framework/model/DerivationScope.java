@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.framework.model;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
+import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
@@ -25,14 +26,15 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import static java.util.Arrays.stream;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
  *
- * @author marcel
  */
 public class DerivationScope {
     private ModelType baseModel = ModelType.GENERIC;
@@ -43,6 +45,7 @@ public class DerivationScope {
     private final ProtocolVersion targetVersion;
     private final Map<DerivationType, String> explicitValues;
     private final ExtensionContext extensionContext;
+    private final Set<DerivationType> manualConfigTypes;
     
     public DerivationScope(ExtensionContext context) {
         this.keyExchangeRequirements = (KeyX)KeyX.resolveKexAnnotation(context);
@@ -50,6 +53,7 @@ public class DerivationScope {
         this.scopeExtensions = resolveScopeExtensions(context);
         this.valueConstraints = resolveValueConstraints(context);
         this.explicitValues = resolveExplicitValues(context);
+        this.manualConfigTypes = resolveManualConfigTypes(context);
         this.extensionContext = context;
         
         TestMethodConfig tmpConfig = new TestMethodConfig(context);
@@ -154,6 +158,17 @@ public class DerivationScope {
         return valueMap;
     }
     
+    private Set<DerivationType> resolveManualConfigTypes(ExtensionContext context) {
+        Set<DerivationType> manualConfigTypes = new HashSet<>();
+        Method testMethod = context.getRequiredTestMethod();
+        if(testMethod.isAnnotationPresent(ManualConfig.class)) {
+            ManualConfig manualConfig = testMethod.getAnnotation(ManualConfig.class);
+            DerivationType[] types = manualConfig.value();
+            manualConfigTypes.addAll(Arrays.asList(types));
+        }
+        return manualConfigTypes;
+    }
+    
     public boolean hasExplicitValues(DerivationType type) {
         return explicitValues.containsKey(type);
     }
@@ -172,5 +187,13 @@ public class DerivationScope {
 
     public ExtensionContext getExtensionContext() {
         return extensionContext;
+    }
+    
+    public boolean isTls13Test() {
+        return targetVersion == ProtocolVersion.TLS13;
+    }
+    
+    public boolean isAutoApplyToConfig(DerivationType type) {
+        return !manualConfigTypes.contains(type);
     }
 }

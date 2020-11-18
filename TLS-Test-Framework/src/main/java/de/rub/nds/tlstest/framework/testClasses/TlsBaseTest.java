@@ -21,6 +21,7 @@ import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.ValueConstraintsConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.WorkflowRunnerResolver;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
 import de.rwth.swc.coffee4j.model.InputParameterModel;
 import org.apache.logging.log4j.LogManager;
@@ -55,7 +56,7 @@ public abstract class TlsBaseTest {
     }
     
     public Config getPreparedConfig(ArgumentsAccessor argAccessor, WorkflowRunner runner) {
-        derivationContainer = new DerivationContainer(argAccessor);
+        derivationContainer = new DerivationContainer(argAccessor, new DerivationScope(extensionContext));
         Config preparedConfig = getConfig();
         derivationContainer.applyToConfig(preparedConfig, context);
         runner.setPreparedConfig(preparedConfig);

@@ -16,9 +16,12 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 @RFC(number = 8446, section = "4.4.2. Certificate")
@@ -26,11 +29,10 @@ public class ClientAuthentication extends Tls13Test {
 
     @TlsTest(description = "If the server requests client authentication but no " +
             "suitable certificate is available, the client MUST send a " +
-            "Certificate message containing no certificates.", interoperabilitySeverity = SeverityLevel.HIGH)
-    public void clientSendsCertificateMessage(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
-
-        Config c = this.getConfig();
+            "Certificate message containing no certificates.")
+    @Interoperability(SeverityLevel.HIGH)
+    public void clientSendsCertificateMessage(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setClientAuthentication(true);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

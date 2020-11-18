@@ -29,9 +29,13 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
 import java.io.ByteArrayOutputStream;
@@ -40,14 +44,19 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 @RFC(number = 8446, section = "4.2.8. Key Share")
 public class KeyShare extends Tls13Test {
 
-    @TlsTest(description = "Each KeyShareEntry value MUST correspond " +
+    @Test
+    @Security(SeverityLevel.MEDIUM)
+    @TestDescription("Each KeyShareEntry value MUST correspond " +
             "to a group offered in the \"supported_groups\" extension " +
-            "and MUST appear in the same order.", securitySeverity = SeverityLevel.MEDIUM)
+            "and MUST appear in the same order.")
     public void testOrderOfKeyshareEntries() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         EllipticCurvesExtensionMessage groups = chm.getExtension(EllipticCurvesExtensionMessage.class);
@@ -76,9 +85,9 @@ public class KeyShare extends Tls13Test {
     @TlsTest(description = "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. " +
             "This value MUST be in the same group as the KeyShareEntry value offered by the client " +
             "that the server has selected for the negotiated key exchange.")
-    public void selectInvalidKeyshare(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
-        Config c = this.getConfig();
+    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    public void selectInvalidKeyshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         List<NamedGroup> groups = context.getSiteReport().getSupportedNamedGroups();
@@ -91,11 +100,8 @@ public class KeyShare extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         if (groups.size() == 0) {
-            runner.setStateModifier(i -> {
-                KeyShareExtensionMessage keyShareExt = i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class).getExtension(KeyShareExtensionMessage.class);
-                keyShareExt.setKeyShareListBytes(Modifiable.explicit(new byte[]{0x50, 0x50, 0, 1, 1}));
-                return null;
-            });
+            KeyShareExtensionMessage keyShareExt = workflowTrace.getFirstSendMessage(ServerHelloMessage.class).getExtension(KeyShareExtensionMessage.class);
+            keyShareExt.setKeyShareListBytes(Modifiable.explicit(new byte[]{0x50, 0x50, 0, 1, 1}));
         }
         else {
             EllipticCurve curve = CurveFactory.getCurve(groups.get(0));
@@ -111,11 +117,9 @@ public class KeyShare extends Tls13Test {
                 throw new RuntimeException("ByteArrayOutputStream is broken");
             }
 
-            runner.setStateModifier(i -> {
-                KeyShareExtensionMessage keyShareExt = i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class).getExtension(KeyShareExtensionMessage.class);
-                keyShareExt.setKeyShareListBytes(Modifiable.explicit(stream.toByteArray()));
-                return null;
-            });
+            KeyShareExtensionMessage keyShareExt = workflowTrace.getFirstSendMessage(ServerHelloMessage.class).getExtension(KeyShareExtensionMessage.class);
+            keyShareExt.setKeyShareListBytes(Modifiable.explicit(stream.toByteArray()));
+
         }
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);

@@ -140,7 +140,6 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
             "and advertise them in the \"application_layer_protocol_negotiation\" extension, if sent. " +
             "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @Interoperability(SeverityLevel.HIGH)
-    @Tag("WIP")
     public void advertiseGreaseALPNIdentifiers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddAlpnExtension(true);

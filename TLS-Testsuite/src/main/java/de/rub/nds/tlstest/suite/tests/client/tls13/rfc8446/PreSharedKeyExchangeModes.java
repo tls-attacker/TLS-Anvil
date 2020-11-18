@@ -24,7 +24,9 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 @RFC(number = 8446, section = "4.2.9 Pre-Shared Key Exchane Modes")
@@ -39,24 +41,18 @@ public class PreSharedKeyExchangeModes extends Tls13Test {
 
     @TlsTest(description = "The server MUST NOT send a \"psk_key_exchange_modes\" extension.")
     @MethodCondition(method = "supportsPSKModeExtension")
-    public void sendPSKModeExtension(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
+    public void sendPSKModeExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
-        Config c = this.getConfig();
         c.setAddPSKKeyExchangeModesExtension(true);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        runner.setStateModifier(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            ServerHelloMessage sh = trace.getFirstSendMessage(ServerHelloMessage.class);
-            PSKKeyExchangeModesExtensionMessage ext = new PSKKeyExchangeModesExtensionMessage();
-            ext.setExtensionBytes(Modifiable.explicit(context.getReceivedClientHelloMessage().getExtension(PSKKeyExchangeModesExtensionMessage.class).getExtensionBytes().getValue()));
-
-            sh.addExtension(ext);
-            return null;
-        });
+        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        PSKKeyExchangeModesExtensionMessage ext = new PSKKeyExchangeModesExtensionMessage();
+        ext.setExtensionBytes(Modifiable.explicit(context.getReceivedClientHelloMessage().getExtension(PSKKeyExchangeModesExtensionMessage.class).getExtensionBytes().getValue()));
+        sh.addExtension(ext);
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }

@@ -26,18 +26,28 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
+import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 @RFC(number = 8446, section = "4.4.3. Certificate Verify")
@@ -52,37 +62,37 @@ public class CertificateVerify extends Tls13Test {
         }
         return ConditionEvaluationResult.disabled("Client does not support legacy rsa signature and hash algorithms");
     }
+    
+    public List<DerivationParameter> getLegacyRSASAHAlgorithms() {
+        List<DerivationParameter> parameterValues = new LinkedList<>();
+        for (SignatureAndHashAlgorithm algo : context.getSiteReport().getSupportedSignatureAndHashAlgorithms()) {
+            if (algo.getSignatureAlgorithm() == SignatureAlgorithm.RSA) {
+                parameterValues.add(new SigAndHashDerivation(algo));
+            }
+        }
+        return parameterValues;
+    }
 
     @TlsTest(description = "RSA signatures MUST use an RSASSA-PSS algorithm, " +
             "regardless of whether RSASSA-PKCS1-v1_5 algorithms " +
             "appear in \"signature_algorithms\". The SHA-1 algorithm " +
-            "MUST NOT be used in any signatures of CertificateVerify messages.", securitySeverity = SeverityLevel.MEDIUM)
+            "MUST NOT be used in any signatures of CertificateVerify messages.")
+    @Security(SeverityLevel.MEDIUM)
+    @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
+    @ExplicitValues(affectedTypes=DerivationType.SIG_HASH_ALGORIHTM,methods="getLegacyRSASAHAlgorithms")
+    @ManualConfig(DerivationType.SIG_HASH_ALGORIHTM)
     @MethodCondition(method = "supportsLegacyRSASAHAlgorithms")
-    public void selectLegacyRSASignatureAlgorithm(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
-
-        Config c = this.getConfig();
+    public void selectLegacyRSASignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        SignatureAndHashAlgorithm selsectedLegacySigHash = derivationContainer.getDerivation(SigAndHashDerivation.class).getSelectedValue();
+        
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
+        workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class).setSignatureHashAlgorithm(Modifiable.explicit(selsectedLegacySigHash.getByteValue()));
 
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
-        for (SignatureAndHashAlgorithm algo : context.getSiteReport().getSupportedSignatureAndHashAlgorithms()) {
-            if (algo.getSignatureAlgorithm() == SignatureAlgorithm.RSA) {
-                runner.setStateModifier(i -> {
-                    WorkflowTrace trace = i.getWorkflowTrace();
-                    i.addAdditionalTestInfo(algo.name());
-                    trace.getFirstSendMessage(CertificateVerifyMessage.class)
-                            .setSignatureHashAlgorithm(Modifiable.explicit(algo.getByteValue()));
-                    return null;
-                });
 
-                container.addAll(runner.prepare(workflowTrace, c));
-            }
-        }
-
-        runner.execute(container).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
-
 
     public ConditionEvaluationResult supportsLegacyECDSASAHAlgorithms() {
         if (context.getSiteReport().getSupportedSignatureAndHashAlgorithms().contains(SignatureAndHashAlgorithm.ECDSA_SHA1)) {
@@ -96,38 +106,27 @@ public class CertificateVerify extends Tls13Test {
             "appear in \"signature_algorithms\". The SHA-1 algorithm " +
             "MUST NOT be used in any signatures of CertificateVerify messages.", securitySeverity = SeverityLevel.MEDIUM)
     @MethodCondition(method = "supportsLegacyECDSASAHAlgorithms")
-    public void selectLegacyECDSASignatureAlgorithm(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
+    public void selectLegacyECDSASignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        SignatureAndHashAlgorithm selsectedLegacySigHash = SignatureAndHashAlgorithm.ECDSA_SHA1;
 
-        Config c = this.getConfig();
         c.setPreferedCertificateSignatureType(CertificateKeyType.ECDSA);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        runner.setStateModifier(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            trace.getFirstSendMessage(CertificateVerifyMessage.class)
-                    .setSignatureHashAlgorithm(Modifiable.explicit(SignatureAndHashAlgorithm.ECDSA_SHA1.getByteValue()));
-            return null;
-        });
+        workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class)
+                .setSignatureHashAlgorithm(Modifiable.explicit(SignatureAndHashAlgorithm.ECDSA_SHA1.getByteValue()));
+
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
-
-    @TlsTest(description = "The receiver of a CertificateVerify message MUST verify " +
-            "the signature field. If the verification fails, " +
-            "the receiver MUST terminate the handshake with a \"decrypt_error\" alert.", securitySeverity = SeverityLevel.MEDIUM)
-    public void invalidSignature(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
-
+    
+    public List<DerivationParameter> getSigHashAlgorithms() {
+        List<DerivationParameter> parameterValues = new LinkedList<>();
         List<CertificateKeyType> certificateKeyTypes = new ArrayList<CertificateKeyType>(){{
             add(CertificateKeyType.RSA);
+            //TODO: add more CertificateKeyTypes?
         }};
-
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
-
-        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         for (CertificateKeyType keyType : certificateKeyTypes) {
             List<SignatureAndHashAlgorithm> algorithms = context.getSiteReport().getSupportedSignatureAndHashAlgorithms().stream()
                     .filter(i -> i.getSignatureAlgorithm().toString().contains(keyType.toString()) &&
@@ -135,42 +134,49 @@ public class CertificateVerify extends Tls13Test {
                             i.getSignatureAlgorithm() != SignatureAlgorithm.RSA &&
                             i.getSignatureAlgorithm() != SignatureAlgorithm.RSA_PSS_PSS)
                     .collect(Collectors.toList());
-            if (algorithms.size() == 0) continue;
-
             for (SignatureAndHashAlgorithm sigHashAlg : algorithms) {
-                Config c = this.getConfig();
-                c.setPreferedCertificateSignatureType(keyType);
-                c.setDefaultServerSupportedSignatureAndHashAlgorithms(sigHashAlg);
-
-                runner.setStateModifier(i -> {
-                    WorkflowTrace trace = i.getWorkflowTrace();
-                    CertificateVerifyMessage msg = trace.getFirstSendMessage(CertificateVerifyMessage.class);
-                    msg.setSignatureHashAlgorithm(Modifiable.explicit(sigHashAlg.getByteValue()));
-                    msg.setSignature(Modifiable.xor(new byte[]{0x01}, 0));
-
-                    i.addAdditionalTestInfo(keyType.toString());
-                    i.addAdditionalTestInfo(sigHashAlg.toString());
-                    return null;
-                });
-
-                container.addAll(runner.prepare(workflowTrace, c));
+                parameterValues.add(new SigAndHashDerivation(sigHashAlg));
             }
-        }
+        } 
+        
+        return parameterValues;
+    }
 
-        runner.execute(container).validateFinal(i -> {
+    @TlsTest(description = "The receiver of a CertificateVerify message MUST verify " +
+            "the signature field. If the verification fails, " +
+            "the receiver MUST terminate the handshake with a \"decrypt_error\" alert.")
+    @Security(SeverityLevel.MEDIUM)
+    @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
+    @ExplicitValues(affectedTypes=DerivationType.SIG_HASH_ALGORIHTM,methods="getSigHashAlgorithms")
+    public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        SignatureAndHashAlgorithm selsectedSigHash = derivationContainer.getDerivation(SigAndHashDerivation.class).getSelectedValue();
+
+        //TODO: update this if more CertKey Types are used
+        c.setPreferedCertificateSignatureType(CertificateKeyType.RSA);
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
+
+        CertificateVerifyMessage msg = workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class);
+        msg.setSignatureHashAlgorithm(Modifiable.explicit(selsectedSigHash.getByteValue()));
+        msg.setSignature(Modifiable.xor(new byte[]{0x01}, 0));
+
+
+        runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
 
-            AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (msg == null) return;
-            Validator.testAlertDescription(i, AlertDescription.DECRYPT_ERROR, msg);
+            AlertMessage amsg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            if (amsg == null) return;
+            Validator.testAlertDescription(i, AlertDescription.DECRYPT_ERROR, amsg);
         });
     }
 
 
-    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.",
-        securitySeverity = SeverityLevel.CRITICAL)
-    public void omitCertificateVerify(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
+    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
+    @Security(SeverityLevel.CRITICAL)
+    public void omitCertificateVerify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace trace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE_VERIFY);
         trace.addTlsActions(
@@ -178,66 +184,61 @@ public class CertificateVerify extends Tls13Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(trace, this.getConfig()).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.",
-            securitySeverity = SeverityLevel.CRITICAL)
-    public void emptySignature(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
+    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
+    @Security(SeverityLevel.CRITICAL)
+    public void emptySignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            i.getWorkflowTrace().getFirstSendMessage(CertificateVerifyMessage.class)
-                    .setSignature(Modifiable.explicit(new byte[]{}));
-            return null;
-        });
 
-        runner.execute(trace, this.getConfig()).validateFinal(Validator::receivedFatalAlert);
+        trace.getFirstSendMessage(CertificateVerifyMessage.class)
+                .setSignature(Modifiable.explicit(new byte[]{}));
+
+
+        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.",
-            securitySeverity = SeverityLevel.CRITICAL)
-    public void emptySigAlgorithm(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
+    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
+    @Security(SeverityLevel.CRITICAL)
+    public void emptySigAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            i.getWorkflowTrace().getFirstSendMessage(CertificateVerifyMessage.class)
-                    .setSignatureHashAlgorithm(Modifiable.explicit(new byte[]{}));
-            return null;
-        });
 
-        runner.execute(trace, this.getConfig()).validateFinal(Validator::receivedFatalAlert);
+        trace.getFirstSendMessage(CertificateVerifyMessage.class)
+                .setSignatureHashAlgorithm(Modifiable.explicit(new byte[]{}));
+
+        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.",
-            securitySeverity = SeverityLevel.CRITICAL)
-    public void emptyBoth(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
+    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
+    @Security(SeverityLevel.CRITICAL)
+    public void emptyBoth(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            i.getWorkflowTrace().getFirstSendMessage(CertificateVerifyMessage.class)
-                    .setSignatureHashAlgorithm(Modifiable.explicit(new byte[]{}));
-            i.getWorkflowTrace().getFirstSendMessage(CertificateVerifyMessage.class)
-                    .setSignature(Modifiable.explicit(new byte[]{}));
-            return null;
-        });
 
-        runner.execute(trace, this.getConfig()).validateFinal(Validator::receivedFatalAlert);
+        trace.getFirstSendMessage(CertificateVerifyMessage.class)
+                .setSignatureHashAlgorithm(Modifiable.explicit(new byte[]{}));
+        trace.getFirstSendMessage(CertificateVerifyMessage.class)
+                .setSignature(Modifiable.explicit(new byte[]{}));
+
+        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
 

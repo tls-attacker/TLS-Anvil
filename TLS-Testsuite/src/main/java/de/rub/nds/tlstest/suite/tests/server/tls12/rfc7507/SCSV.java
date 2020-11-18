@@ -95,7 +95,7 @@ public class SCSV extends Tls12Test {
             "(as it would for the Server Hello message if the server was continuing the handshake) " +
             "or to the record layer version number used by the client.")
     @Security(SeverityLevel.CRITICAL)
-    @ExplicitValues(affectedTypes=DerivationType.CIPHERSUITE,methods="getOldCiphersuites")
+    @ExplicitValues(affectedTypes=DerivationType.CIPHERSUITE, methods="getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     public void includeFallbackSCSV(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -130,7 +130,7 @@ public class SCSV extends Tls12Test {
             "(as it would for the Server Hello message if the server was continuing the handshake) " +
             "or to the record layer version number used by the client.")
     @Security(SeverityLevel.CRITICAL)
-    @ExplicitValues(affectedTypes=DerivationType.CIPHERSUITE,methods="getOldCiphersuites")
+    @ExplicitValues(affectedTypes=DerivationType.CIPHERSUITE, methods="getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     public void includeFallbackSCSV_nonRecommendedCipherSuiteOrder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

@@ -29,7 +29,9 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 @RFC(number = 8446, section = "4.3.1. Encrypted Extensions")
@@ -55,19 +57,15 @@ public class EncryptedExtensions extends Tls13Test {
             "for the presence of any forbidden extensions and if " +
             "any are found MUST abort the handshake " +
             "with an \"illegal_parameter\" alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
-    public void sendSupportedVersionsExtensionInEE(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
+    public void sendSupportedVersionsExtensionInEE(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
-        Config c = this.getConfig();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        runner.setStateModifier(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            EncryptedExtensionsMessage ee = trace.getFirstSendMessage(EncryptedExtensionsMessage.class);
-            ee.addExtension(new SupportedVersionsExtensionMessage());
-            return null;
-        });
+        EncryptedExtensionsMessage ee = workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
+        ee.addExtension(new SupportedVersionsExtensionMessage());
+
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
@@ -81,19 +79,14 @@ public class EncryptedExtensions extends Tls13Test {
             "for the presence of any forbidden extensions and if " +
             "any are found MUST abort the handshake " +
             "with an \"illegal_parameter\" alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
-    public void sendPaddingExtensionInEE(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
+    public void sendPaddingExtensionInEE(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
-        Config c = this.getConfig();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        runner.setStateModifier(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            EncryptedExtensionsMessage ee = trace.getFirstSendMessage(EncryptedExtensionsMessage.class);
-            ee.addExtension(new PaddingExtensionMessage());
-            return null;
-        });
+        EncryptedExtensionsMessage ee = workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
+        ee.addExtension(new PaddingExtensionMessage());
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
@@ -107,29 +100,25 @@ public class EncryptedExtensions extends Tls13Test {
     @TlsTest(description = "Similarly, if a client receives a maximum fragment length negotiation " +
             "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    public void invalidMaximumFragmentLength(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSelectedCiphersuite = true;
+    public void invalidMaximumFragmentLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            EncryptedExtensionsMessage encExt = trace.getFirstSendMessage(EncryptedExtensionsMessage.class);
-            MaxFragmentLengthExtensionMessage malMaxFrag = new MaxFragmentLengthExtensionMessage();
-            malMaxFrag.setMaxFragmentLength(Modifiable.explicit(new byte[]{5}));
-            encExt.addExtension(malMaxFrag);
-            return null;
-        });
+        EncryptedExtensionsMessage encExt = workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
+        MaxFragmentLengthExtensionMessage malMaxFrag = new MaxFragmentLengthExtensionMessage();
+        malMaxFrag.setMaxFragmentLength(Modifiable.explicit(new byte[]{5}));
+        encExt.addExtension(malMaxFrag);
+
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
 
-            WorkflowTrace trace = i.getWorkflowTrace();
-            AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
+            WorkflowTrace wtrace = i.getWorkflowTrace();
+            AlertMessage alert = wtrace.getLastReceivedMessage(AlertMessage.class);
             if (alert == null) return;
 
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
@@ -139,10 +128,8 @@ public class EncryptedExtensions extends Tls13Test {
     @TlsTest(description = "Similarly, if a client receives a maximum fragment length negotiation " +
             "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    public void unrequestedMaximumFragmentLength(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSelectedCiphersuite = true;
-        c.setAddMaxFragmentLengthExtension(true);
+    public void unrequestedMaximumFragmentLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         
         MaxFragmentLength unreqLen = getUnrequestedMaxFragLen(context.getReceivedClientHelloMessage().getExtension(MaxFragmentLengthExtensionMessage.class));
 
@@ -151,14 +138,11 @@ public class EncryptedExtensions extends Tls13Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            EncryptedExtensionsMessage encExt = trace.getFirstSendMessage(EncryptedExtensionsMessage.class);
-            MaxFragmentLengthExtensionMessage malMaxFrag = new MaxFragmentLengthExtensionMessage();
-            malMaxFrag.setMaxFragmentLength(Modifiable.explicit(new byte[]{unreqLen.getValue()}));
-            encExt.addExtension(malMaxFrag);
-            return null;
-        });
+        EncryptedExtensionsMessage encExt = workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
+        MaxFragmentLengthExtensionMessage malMaxFrag = new MaxFragmentLengthExtensionMessage();
+        malMaxFrag.setMaxFragmentLength(Modifiable.explicit(new byte[]{unreqLen.getValue()}));
+        encExt.addExtension(malMaxFrag);
+
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);

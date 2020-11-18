@@ -28,14 +28,20 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
 import static org.junit.Assert.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 8446, section = "4.1.3 Server Hello")
 @ClientTest
@@ -43,21 +49,19 @@ public class ServerHello extends Tls13Test {
 
     @TlsTest(description = "A client which receives a legacy_session_id_echo " +
             "field that does not match what it sent in the ClientHello MUST " +
-            "abort the handshake with an \"illegal_parameter\" alert.", interoperabilitySeverity = SeverityLevel.HIGH)
-    public void testSessionId(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSelectedCiphersuite = true;
+            "abort the handshake with an \"illegal_parameter\" alert.")
+    @Interoperability(SeverityLevel.HIGH)
+    public void testSessionId(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            ServerHelloMessage sh = i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class);
-            sh.setSessionId(Modifiable.explicit(new byte[]{0x01, 0x02, 0x03, 0x04}));
-            return null;
-        });
+        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        sh.setSessionId(Modifiable.explicit(new byte[]{0x01, 0x02, 0x03, 0x04}));
+
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
@@ -73,20 +77,21 @@ public class ServerHello extends Tls13Test {
 
     @TlsTest(description = "A client which receives a cipher suite that was " +
             "not offered MUST abort the handshake with " +
-            "an \"illegal_parameter\" alert.", interoperabilitySeverity = SeverityLevel.CRITICAL, securitySeverity = SeverityLevel.HIGH)
-    public void testCipherSuite(WorkflowRunner runner) {
-        Config c = this.getConfig();
+            "an \"illegal_parameter\" alert.")
+    @Interoperability(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.HIGH)
+    @ScopeLimitations(DerivationType.CIPHERSUITE)
+    public void testCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            ServerHelloMessage sh = i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class);
-            sh.setSelectedCipherSuite(Modifiable.explicit(CipherSuite.GREASE_00.getByteValue()));
-            return null;
-        });
+        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        sh.setSelectedCipherSuite(Modifiable.explicit(CipherSuite.GREASE_00.getByteValue()));
+
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
@@ -102,21 +107,19 @@ public class ServerHello extends Tls13Test {
 
 
     @TlsTest(description = "legacy_compression_method: A single byte which " +
-            "MUST have the value 0.", interoperabilitySeverity = SeverityLevel.MEDIUM, securitySeverity = SeverityLevel.MEDIUM)
-    public void testCompressionValue(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.replaceSelectedCiphersuite = true;
+            "MUST have the value 0.")
+    @Interoperability(SeverityLevel.MEDIUM)
+    @Security(SeverityLevel.MEDIUM)
+    public void testCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            ServerHelloMessage sh = i.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class);
-            sh.setSelectedCompressionMethod(Modifiable.explicit((byte) 0x01));
-            return null;
-        });
+        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        sh.setSelectedCompressionMethod(Modifiable.explicit((byte) 0x01));
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
@@ -134,11 +137,12 @@ public class ServerHello extends Tls13Test {
     @TlsTest(description = "TLS 1.3 clients receiving a ServerHello indicating TLS 1.2 or below MUST " +
             "check that the last 8 bytes are not equal to either of these values. " +
             "If a match is found, the client MUST abort the handshake " +
-            "with an \"illegal_parameter\" alert.", interoperabilitySeverity = SeverityLevel.MEDIUM, securitySeverity = SeverityLevel.HIGH)
+            "with an \"illegal_parameter\" alert.")
+    @Interoperability(SeverityLevel.MEDIUM)
+    @Security(SeverityLevel.HIGH)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    public void testRandomDowngradeValue(WorkflowRunner runner) {
-        Config c = context.getConfig().createConfig();
-        runner.replaceSelectedCiphersuite = true;
+    public void testRandomDowngradeValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         ModifiableByteArray downgradeRandom = new ModifiableByteArray();
         VariableModification<byte[]> mod = ByteArrayModificationFactory.insert(new byte[]{0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x01}, 24);
@@ -153,11 +157,8 @@ public class ServerHello extends Tls13Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            WorkflowTrace w = i.getWorkflowTrace();
-            w.getFirstSendMessage(ServerHelloMessage.class).setRandom(downgradeRandom);
-            return null;
-        });
+        workflowTrace.getFirstSendMessage(ServerHelloMessage.class).setRandom(downgradeRandom);
+
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();

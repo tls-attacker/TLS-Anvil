@@ -12,7 +12,9 @@ package de.rub.nds.tlstest.suite.tests.client.tls13;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
@@ -21,12 +23,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
 
 @ClientTest
 public class SupportedCiphersuites extends Tls13Test {
 
-    @TlsTest(description = "Client exploration detected moresupported ciphersuites than " +
-            "advertised by the client in the ClientHello message.", securitySeverity = SeverityLevel.MEDIUM)
+    @Test
+    @Security(SeverityLevel.MEDIUM)
+    @TestDescription("Client exploration detected more supported ciphersuites than " +
+            "advertised by the client in the ClientHello message.")
     public void supportsMoreCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
 

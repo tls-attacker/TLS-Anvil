@@ -42,7 +42,6 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 7465, section = "2")
 @ServerTest
-@Tag("WIP")
 public class RC4Ciphersuites extends Tls12Test {
 
     public boolean isRC4(CipherSuite cipherSuite) {

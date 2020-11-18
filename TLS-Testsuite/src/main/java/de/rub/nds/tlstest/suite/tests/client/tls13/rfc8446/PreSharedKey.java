@@ -14,8 +14,10 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.PreSharedKeyExtens
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 @ClientTest
@@ -28,12 +30,13 @@ public class PreSharedKey extends Tls13Test {
         return ConditionEvaluationResult.disabled("Client does not support PreSharedKeyExtension");
     }
 
-    // TODO: Server test is missing
-    @TlsTest(description = "The \"pre_shared_key\" extension MUST be the last extension " +
+    /*@TlsTest(description = "The \"pre_shared_key\" extension MUST be the last extension " +
             "in the ClientHello (this facilitates implementation as described below). " +
             "Servers MUST check that it is the last extension and otherwise fail " +
-            "the handshake with an \"illegal_parameter\" alert.")
+            "the handshake with an \"illegal_parameter\" alert.")*/
+    @Test
     @MethodCondition(method = "sendsPSKExtension")
+    @TestDescription("The Pre-Shared Key extension must me the last extension of the Client Hello")
     public void isLastExtension() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         if (!chm.getExtensions().get(chm.getExtensions().size() - 1).getClass().equals(PreSharedKeyExtensionMessage.class)) {

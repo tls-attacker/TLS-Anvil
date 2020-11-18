@@ -20,18 +20,19 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class Finished extends Tls13Test {
 
-    @TlsTest(description = "CVE-2020-24613, Send Finished without Certificate", securitySeverity = SeverityLevel.CRITICAL)
-    public void sendFinishedWithoutCert(WorkflowRunner runner) {
-        runner.replaceSelectedCiphersuite = true;
-
-        Config c = this.getConfig();
+    @TlsTest(description = "CVE-2020-24613, Send Finished without Certificate")
+    @Security(SeverityLevel.CRITICAL)
+    public void sendFinishedWithoutCert(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE);
         workflowTrace.addTlsActions(
                 new SendAction(new FinishedMessage()),

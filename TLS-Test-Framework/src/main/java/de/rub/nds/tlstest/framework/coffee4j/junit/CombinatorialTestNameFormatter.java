@@ -1,5 +1,6 @@
 package de.rub.nds.tlstest.framework.coffee4j.junit;
 
+import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rwth.swc.coffee4j.junit.CombinatorialTest;
 import de.rwth.swc.coffee4j.model.Combination;
 import de.rwth.swc.coffee4j.model.Parameter;
@@ -51,7 +52,7 @@ class CombinatorialTestNameFormatter {
     }
     
     private String replaceCombinations(String pattern, Combination testInput) {
-        return pattern.replace("{combination}", testInput.toString());
+        return pattern.replace("{combination}", DerivationContainer.fromCombination(testInput).toString());
     }
     
 }

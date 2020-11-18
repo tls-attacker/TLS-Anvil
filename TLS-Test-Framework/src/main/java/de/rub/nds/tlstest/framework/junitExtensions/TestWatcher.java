@@ -60,7 +60,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
                 .orElse(null);
         if (state == null) {
             if (Utils.extensionContextIsTemplateContainer(context.getParent().get())) {
-                state = new AnnotatedState(context, null);
+                state = new AnnotatedState(context, null, null);
                 state.setFailedReason(cause);
             } else {
                 container.setFailedReason(ExecptionPrinter.stacktraceToString(cause));

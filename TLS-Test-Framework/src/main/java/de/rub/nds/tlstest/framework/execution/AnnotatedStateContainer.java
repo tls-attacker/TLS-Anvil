@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestResult;
+import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.reporting.ScoreContainer;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
@@ -75,7 +76,7 @@ public class  AnnotatedStateContainer {
     private String uniqueId;
 
     @JsonProperty("FailureInducingCombinations")
-    List<Map<String, Object>> failureInducingCombinations;
+    List<DerivationContainer> failureInducingCombinations;
 
     @Deprecated
     public AnnotatedStateContainer() { }
@@ -181,16 +182,10 @@ public class  AnnotatedStateContainer {
             failedReason = String.format("%d/%d tests failed", errors.size(), states.size());
         }
 
-        String tmp = failureInducingCombinations.stream().map(i -> {
-            return i.keySet().stream().map(j -> {
-                if (i.get(j) instanceof DerivationParameter) {
-                    return String.format("%s=%s", j, ((DerivationParameter)i.get(j)).jsonValue());
-                } else {
-                    return i.get(j).toString();
-                }
-            }).collect(Collectors.joining(", "));
-        }).collect(Collectors.joining("\n\t"));
-        LOGGER.info("The following parameters resulted in test failures:\n\t{}", tmp);
+        if (failureInducingCombinations != null) {
+            String tmp = failureInducingCombinations.stream().map(DerivationContainer::toString).collect(Collectors.joining("\n\t"));
+            LOGGER.info("The following parameters resulted in test failures:\n\t{}", tmp);
+        }
     }
 
     public void stateFinished(TestResult result) {
@@ -248,7 +243,7 @@ public class  AnnotatedStateContainer {
         this.elapsedTime = elapsedTime;
     }
 
-    public List<Map<String, Object>> getFailureInducingCombinations() {
+    public List<DerivationContainer> getFailureInducingCombinations() {
         return failureInducingCombinations;
     }
 
@@ -256,18 +251,12 @@ public class  AnnotatedStateContainer {
         if (failureInducingCombinations == null || failureInducingCombinations.isEmpty())
             return;
 
-        List<Map<String, Object>> parameters = new ArrayList<>();
-        failureInducingCombinations.forEach(i -> {
-            Map<String, Object> map = new HashMap<>();
-            i.getParameterValueMap().forEach((k, v) -> {
-                if (!(v.get() instanceof DerivationParameter)) {
-                    LOGGER.warn("Parameter is not a DerivationParameter");
-                }
+        List<DerivationContainer> parameters = new ArrayList<>();
+        for (Combination i : failureInducingCombinations) {
+            DerivationContainer container = DerivationContainer.fromCombination(i);
+            parameters.add(container);
+        }
 
-                map.put(k.getName(), v.get());
-            });
-            parameters.add(map);
-        });
         this.failureInducingCombinations = parameters;
     }
 

@@ -18,13 +18,14 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ValueConstraint;
 import de.rwth.swc.coffee4j.model.Parameter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -32,7 +33,8 @@ import java.util.stream.Collectors;
  * @author marcel
  */
 public abstract class DerivationParameter<T> {
-    
+    private static final Logger LOGGER = LogManager.getLogger();
+
     private final DerivationType type;
     
     private T selectedValue;
@@ -111,7 +113,7 @@ public abstract class DerivationParameter<T> {
                 return (Boolean)method.invoke(valueInQuestion);
             }
         } catch (InstantiationException | SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.getLogger(DerivationParameter.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.error("", ex);
             return true;
         }
     }
@@ -124,7 +126,7 @@ public abstract class DerivationParameter<T> {
             
             return (List<DerivationParameter>)method.invoke(constructor.newInstance());
         } catch (NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException ex) {
-            Logger.getLogger(DerivationParameter.class.getName()).log(Level.SEVERE, null, ex);
+            LOGGER.error("", ex);
             return new LinkedList<>();
         } 
     }

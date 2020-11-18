@@ -113,7 +113,7 @@ public class WorkflowRunner {
     }
 
     public AnnotatedState executeImmediately(WorkflowTrace trace, Config config){
-        AnnotatedState annotatedState = new AnnotatedState(extensionContext, new State(config, trace));
+        AnnotatedState annotatedState = new AnnotatedState(extensionContext, new State(config, trace), derivationContainer);
         
         TlsAction lastAction = annotatedState.getState().getWorkflowTrace().getLastAction();
             if (lastAction instanceof ReceivingAction) {
@@ -303,5 +303,13 @@ public class WorkflowRunner {
 
     public void setPreparedConfig(Config preparedConfig) {
         this.preparedConfig = preparedConfig;
+    }
+
+    public DerivationContainer getDerivationContainer() {
+        return derivationContainer;
+    }
+
+    public void setDerivationContainer(DerivationContainer derivationContainer) {
+        this.derivationContainer = derivationContainer;
     }
 }

@@ -56,7 +56,7 @@ public abstract class TlsBaseTest {
     }
     
     public Config getPreparedConfig(ArgumentsAccessor argAccessor, WorkflowRunner runner) {
-        derivationContainer = new DerivationContainer(argAccessor.toList());
+        derivationContainer = new DerivationContainer(argAccessor.toList(), new DerivationScope(extensionContext));
         Config preparedConfig = getConfig();
         derivationContainer.applyToConfig(preparedConfig, context);
         runner.setPreparedConfig(preparedConfig);

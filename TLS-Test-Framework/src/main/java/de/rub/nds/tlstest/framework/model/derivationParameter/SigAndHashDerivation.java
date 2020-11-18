@@ -3,6 +3,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import java.util.LinkedList;
@@ -33,6 +34,11 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
 
     @Override
     public void applyToConfig(Config config, TestContext context) {
+        if(context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
+            config.setDefaultClientSupportedSignatureAndHashAlgorithms(getSelectedValue());
+        } else {
+            config.setDefaultServerSupportedSignatureAndHashAlgorithms(getSelectedValue());
+        }
     }
 
 }

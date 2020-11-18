@@ -32,109 +32,112 @@ import java.util.stream.Collectors;
  * @author marcel
  */
 public abstract class DerivationParameter<T> {
-    
+
     private final DerivationType type;
-    
+
     private T selectedValue;
-    
+
     private DerivationType parent = null;
-    
+
     private final Class<T> valueClass;
-    
+
     public DerivationParameter(DerivationType type, Class<T> valueClass) {
         this.type = type;
         this.valueClass = valueClass;
     }
-    
-    
+
     public abstract List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope);
-    
+
     public List<DerivationParameter> getConstrainedParameterValues(TestContext context, DerivationScope scope) {
-        if(scope.hasExplicitValues(type)) {
-            return getExplicitValues(scope);
+        List<DerivationParameter> parameterValues = new LinkedList<>();
+        if (scope.hasExplicitValues(type)) { 
+            parameterValues = getExplicitValues(scope);
         } else {
-            List<DerivationParameter> parameterValues = getParameterValues(context, scope);
-            parameterValues = parameterValues.stream().filter(val -> 
-            valueApplicableUnderAllConstraints(scope.getValueConstraints(), (T)val.getSelectedValue())
+            parameterValues = getParameterValues(context, scope).stream().filter(val
+                    -> valueApplicableUnderAllConstraints(scope.getValueConstraints(), (T) val.getSelectedValue())
             ).collect(Collectors.toList());
-            return parameterValues;
         }
+        return parameterValues;
     }
-    
+
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
         return new LinkedList<>();
     }
     
+    public int getParameterValueCount(TestContext context, DerivationScope scope) {
+        return getConstrainedParameterValues(context, scope).size();
+    }
+
     public Parameter.Builder getParameterBuilder(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = getConstrainedParameterValues(context, scope);
         return Parameter.parameter(type.name()).values(parameterValues.toArray());
     }
-    
+
     public abstract void applyToConfig(Config config, TestContext context);
-    
+
     public void postProcessConfig(Config config, TestContext context) {
     }
-    
+
     public final T getSelectedValue() {
         return selectedValue;
     }
-    
+
     public final void setSelectedValue(T selectedValue) {
         this.selectedValue = selectedValue;
     }
-    
+
     public DerivationType getType() {
         return type;
     }
-    
+
     public boolean valueApplicableUnderAllConstraints(List<ValueConstraint> valueConstraints, T valueInQuestion) {
-        for(ValueConstraint constraint : valueConstraints) {
-            if(constraint.getAffectedType() == type) {
-                if(!valueApplicableUnderConstraint(constraint, valueInQuestion)) {
+        for (ValueConstraint constraint : valueConstraints) {
+            if (constraint.getAffectedType() == type) {
+                if (!valueApplicableUnderConstraint(constraint, valueInQuestion)) {
                     return false;
                 }
             }
         }
         return true;
     }
-    
+
     public boolean valueApplicableUnderConstraint(ValueConstraint valueConstraint, T valueInQuestion) {
         try {
-            Method method; 
+            Method method;
             Constructor constructor;
-            if(valueConstraint.isDynamic()) {
+            if (valueConstraint.isDynamic()) {
                 method = valueConstraint.getClazz().getMethod(valueConstraint.getEvaluationMethod(), valueClass);
                 constructor = valueConstraint.getClazz().getConstructor();
-                return (Boolean)method.invoke(constructor.newInstance(), valueInQuestion);
+                return (Boolean) method.invoke(constructor.newInstance(), valueInQuestion);
             } else {
                 method = valueClass.getMethod(valueConstraint.getEvaluationMethod());
-                return (Boolean)method.invoke(valueInQuestion);
+                return (Boolean) method.invoke(valueInQuestion);
             }
         } catch (InstantiationException | SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(DerivationParameter.class.getName()).log(Level.SEVERE, null, ex);
             return true;
         }
     }
-    
+
     public List<DerivationParameter> getExplicitValues(DerivationScope scope) {
         try {
             String methodName = scope.getExplicitValueMethod(type);
             Method method = scope.getExtensionContext().getRequiredTestClass().getMethod(methodName);
             Constructor constructor = scope.getExtensionContext().getRequiredTestClass().getConstructor();
-            
-            return (List<DerivationParameter>)method.invoke(constructor.newInstance());
+
+            return (List<DerivationParameter>) method.invoke(constructor.newInstance());
         } catch (NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException ex) {
             Logger.getLogger(DerivationParameter.class.getName()).log(Level.SEVERE, null, ex);
             return new LinkedList<>();
-        } 
+        }
     }
-    
+
     public String toString() {
-        if(selectedValue instanceof byte[] && selectedValue != null) {
-            return type + "=" + ArrayConverter.bytesToHexString((byte[])selectedValue);
+        if (selectedValue instanceof byte[] && selectedValue != null) {
+            return type + "=" + ArrayConverter.bytesToHexString((byte[]) selectedValue);
         } else {
             return type + "=" + selectedValue;
-        }    
+        }
     }
 
     public DerivationType getParent() {
@@ -144,13 +147,13 @@ public abstract class DerivationParameter<T> {
     public void setParent(DerivationType parent) {
         this.parent = parent;
     }
-    
+
     @JsonValue
     public String jsonValue() {
-        if(selectedValue instanceof byte[]) {
-            return ArrayConverter.bytesToHexString((byte[])selectedValue);
+        if (selectedValue instanceof byte[]) {
+            return ArrayConverter.bytesToHexString((byte[]) selectedValue);
         } else {
             return "" + selectedValue;
         }
-    }      
+    }
 }

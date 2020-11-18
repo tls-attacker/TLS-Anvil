@@ -59,6 +59,10 @@ public class DerivationFactory {
                 return new ProtocolVersionDerivation();
             case SIG_HASH_ALGORIHTM:
                 return new SigAndHashDerivation();
+            case EXTENSION:
+                return new ExtensionDerivation();
+            case CHOSEN_HANDSHAKE_MSG:
+                return new ChosenHandshakeMessageDerivation();
             default:
                 throw new UnsupportedOperationException("Derivation Type not implemented");
         }

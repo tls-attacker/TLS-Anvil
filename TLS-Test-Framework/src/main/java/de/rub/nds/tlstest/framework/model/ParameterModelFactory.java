@@ -65,11 +65,15 @@ public class ParameterModelFactory {
         List<Parameter.Builder> parameterBuilders = new LinkedList<>();
         for (DerivationType derivationType : derivationTypes) {
             DerivationParameter paramDerivation = DerivationFactory.getInstance(derivationType);
-            parameterBuilders.add(paramDerivation.getParameterBuilder(testContext, derivationScope));
-            if(derivationType.isBitmaskDerivation()) {
-                DerivationParameter bitPositionParam = DerivationFactory.getInstance(DerivationType.BIT_POSITION);
-                bitPositionParam.setParent(derivationType);
-                parameterBuilders.add(bitPositionParam.getParameterBuilder(testContext, derivationScope));
+            if(paramDerivation.getParameterValueCount(testContext, derivationScope) > 1) {
+                parameterBuilders.add(paramDerivation.getParameterBuilder(testContext, derivationScope));
+                if(derivationType.isBitmaskDerivation()) {
+                    DerivationParameter bitPositionParam = DerivationFactory.getInstance(DerivationType.BIT_POSITION);
+                    bitPositionParam.setParent(derivationType);
+                    parameterBuilders.add(bitPositionParam.getParameterBuilder(testContext, derivationScope));
+                }
+            } else {
+                //TODO: this should be added as some kind of 'static' derivation
             }
         }
 

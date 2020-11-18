@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestResult;
+import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.reporting.ScoreContainer;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
@@ -33,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 
 /**
@@ -43,6 +45,7 @@ import java.util.function.Consumer;
 @XmlAccessorType(XmlAccessType.NONE)
 public class  AnnotatedStateContainer {
     private static final Logger LOGGER = LogManager.getLogger();
+    private boolean finished = false;
 
     @XmlElement(name = "TestMethod")
     @JsonProperty("TestMethod")
@@ -73,7 +76,7 @@ public class  AnnotatedStateContainer {
     private String uniqueId;
 
     @JsonProperty("FailureInducingCombinations")
-    List<Map<String, Object>> failureInducingCombinations;
+    List<DerivationContainer> failureInducingCombinations;
 
     @Deprecated
     public AnnotatedStateContainer() { }
@@ -93,7 +96,7 @@ public class  AnnotatedStateContainer {
         this.scoreContainer = new ScoreContainer(extensionContext);
     }
 
-    public static AnnotatedStateContainer forExtensionContext(ExtensionContext extensionContext) {
+    synchronized public static AnnotatedStateContainer forExtensionContext(ExtensionContext extensionContext) {
         ExtensionContext resolvedContext = Utils.getTemplateContainerExtensionContext(extensionContext);
 
         if (TestContext.getInstance().getTestResult(resolvedContext.getUniqueId()) != null) {
@@ -151,6 +154,7 @@ public class  AnnotatedStateContainer {
     }
 
     public void finished() {
+        finished = true;
         List<String> uuids = new ArrayList<>();
         List<Throwable> errors = new ArrayList<>();
         boolean failed = false;
@@ -176,6 +180,11 @@ public class  AnnotatedStateContainer {
                 }
             }
             failedReason = String.format("%d/%d tests failed", errors.size(), states.size());
+        }
+
+        if (failureInducingCombinations != null) {
+            String tmp = failureInducingCombinations.stream().map(DerivationContainer::toString).collect(Collectors.joining("\n\t"));
+            LOGGER.info("The following parameters resulted in test failures:\n\t{}", tmp);
         }
     }
 
@@ -234,7 +243,7 @@ public class  AnnotatedStateContainer {
         this.elapsedTime = elapsedTime;
     }
 
-    public List<Map<String, Object>> getFailureInducingCombinations() {
+    public List<DerivationContainer> getFailureInducingCombinations() {
         return failureInducingCombinations;
     }
 
@@ -242,18 +251,12 @@ public class  AnnotatedStateContainer {
         if (failureInducingCombinations == null || failureInducingCombinations.isEmpty())
             return;
 
-        List<Map<String, Object>> parameters = new ArrayList<>();
-        failureInducingCombinations.forEach(i -> {
-            Map<String, Object> map = new HashMap<>();
-            i.getParameterValueMap().forEach((k, v) -> {
-                if (!(v.get() instanceof DerivationParameter)) {
-                    LOGGER.warn("Parameter is not a DerivationParameter");
-                }
+        List<DerivationContainer> parameters = new ArrayList<>();
+        for (Combination i : failureInducingCombinations) {
+            DerivationContainer container = DerivationContainer.fromCombination(i);
+            parameters.add(container);
+        }
 
-                map.put(k.getName(), v.get());
-            });
-            parameters.add(map);
-        });
         this.failureInducingCombinations = parameters;
     }
 
@@ -267,5 +270,9 @@ public class  AnnotatedStateContainer {
 
     public void setFailedReason(String failedReason) {
         this.failedReason = failedReason;
+    }
+
+    public boolean isFinished() {
+        return finished;
     }
 }

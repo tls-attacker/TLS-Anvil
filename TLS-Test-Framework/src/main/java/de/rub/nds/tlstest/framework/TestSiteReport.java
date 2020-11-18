@@ -15,8 +15,13 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlsscanner.serverscanner.report.SiteReport;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class TestSiteReport extends SiteReport {
 
@@ -66,16 +71,16 @@ public class TestSiteReport extends SiteReport {
 
     @Override
     public synchronized Set<CipherSuite> getCipherSuites() {
-        if (super.getCipherSuites() == null) return new HashSet<>();
-        Set<CipherSuite> set = new HashSet<>(super.getCipherSuites());
-        set.removeIf(CipherSuite::isTLS13);
+        if (super.getCipherSuites() == null) return new TreeSet<>();
+        Set<CipherSuite> set = new TreeSet<CipherSuite>((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.name(), b.name()));
+        set.addAll(super.getCipherSuites().stream().filter(i -> !i.isTLS13()).collect(Collectors.toSet()));
         return set;
     }
 
     public synchronized Set<CipherSuite> getSupportedTls13CipherSuites() {
-        if (super.getCipherSuites() == null) return new HashSet<>();
-        Set<CipherSuite> set = new HashSet<>(super.getCipherSuites());
-        set.removeIf(i -> !i.isTLS13());
+        if (super.getCipherSuites() == null) return new TreeSet<>();
+        Set<CipherSuite> set = new TreeSet<CipherSuite>((a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.name(), b.name()));
+        set.addAll(super.getCipherSuites().stream().filter(CipherSuite::isTLS13).collect(Collectors.toSet()));
         return set;
     }
 }

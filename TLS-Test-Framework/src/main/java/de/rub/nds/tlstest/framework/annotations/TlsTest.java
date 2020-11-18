@@ -11,14 +11,13 @@ package de.rub.nds.tlstest.framework.annotations;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.rub.nds.tlstest.framework.coffee4j.junit.CombinatorialTlsTest;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.coffee4j.reporter.TlsTestsuiteReporter;
 import de.rub.nds.tlstest.framework.coffee4j.reporter.TlsReporter;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rwth.swc.coffee4j.engine.characterization.delta.ImprovedDeltaDebugging;
-import de.rwth.swc.coffee4j.junit.CombinatorialTest;
 import de.rwth.swc.coffee4j.junit.provider.configuration.characterization.EnableFaultCharacterization;
-import de.rwth.swc.coffee4j.junit.provider.configuration.reporter.Reporter;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -30,7 +29,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
-@CombinatorialTest
+@CombinatorialTlsTest
 @EnableFaultCharacterization(ImprovedDeltaDebugging.class)
 @ModelFromScope()
 @TlsReporter(TlsTestsuiteReporter.class)

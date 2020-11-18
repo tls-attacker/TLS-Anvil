@@ -18,6 +18,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceSerializer;
 import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.exceptions.TransportHandlerExpection;
+import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,8 +45,6 @@ public class AnnotatedState {
     private static final Logger LOGGER = LogManager.getLogger();
     private State state;
 
-    private List<String> transformationDescription = null;
-
     private Throwable failedReason;
     private AnnotatedStateContainer associatedContainer;
 
@@ -60,20 +59,24 @@ public class AnnotatedState {
     @JsonProperty("DisplayName")
     private String displayName;
 
+    private DerivationContainer derivationContainer;
+
     private List<String> additionalResultInformation = null;
     private List<String> additionalTestInformation = null;
-    
+
+    @Deprecated
     private boolean omitFromTests = false;
     private ExtensionContext extensionContext;
 
     private AnnotatedState() {}
 
-    public AnnotatedState(ExtensionContext context, State state) {
+    public AnnotatedState(ExtensionContext context, State state, DerivationContainer container) {
         this.state = state;
         this.extensionContext = context;
         this.displayName = context.getDisplayName();
         this.associatedContainer = AnnotatedStateContainer.forExtensionContext(context);
         this.associatedContainer.add(this);
+        this.derivationContainer = container;
     }
 
     @Deprecated
@@ -108,10 +111,12 @@ public class AnnotatedState {
         this.result = this.failedReason != null ? TestResult.FAILED : TestResult.NOT_SPECIFIED;
     }
 
+    @Deprecated
     public CipherSuite getInspectedCipherSuite() {
         return inspectedCipherSuite;
     }
 
+    @Deprecated
     public void setInspectedCipherSuite(CipherSuite inspectedCipherSuite) {
         this.inspectedCipherSuite = inspectedCipherSuite;
     }
@@ -189,29 +194,12 @@ public class AnnotatedState {
         additionalTestInformation.add(info);
     }
 
-    @XmlElement(name = "TransformationDescription")
-    @JsonProperty("TransformationDescription")
-    public String getTransformationDescription() {
-        if (transformationDescription == null) return "";
-        return String.join(", ", transformationDescription);
-    }
-
-    public void addTransformationDescription(String info) {
-        if (transformationDescription == null) {
-            transformationDescription = new ArrayList<>();
-        }
-
-        transformationDescription.add(info);
-    }
-
     @XmlElement(name = "uuid")
     @JsonProperty("uuid")
     public String getUuid() {
         StringBuilder toHash = new StringBuilder();
-        if (this.getInspectedCipherSuite() != null)
-            toHash.append(this.getInspectedCipherSuite().toString());
-        toHash.append(this.getTransformationDescription());
         toHash.append(this.getAdditionalTestInformation());
+        toHash.append(this.derivationContainer.toString());
         toHash.append(associatedContainer.getTestMethodConfig().getClassName());
         toHash.append(associatedContainer.getTestMethodConfig().getMethodName());
 
@@ -261,10 +249,12 @@ public class AnnotatedState {
         this.associatedContainer = associatedContainer;
     }
 
+    @Deprecated
     public boolean isOmitFromTests() {
         return omitFromTests;
     }
 
+    @Deprecated
     public void setOmitFromTests(boolean omitFromTests) {
         this.omitFromTests = omitFromTests;
     }

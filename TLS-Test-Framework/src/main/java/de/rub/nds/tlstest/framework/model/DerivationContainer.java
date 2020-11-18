@@ -9,22 +9,20 @@
  */
 package de.rub.nds.tlstest.framework.model;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
-import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
-import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
+import de.rwth.swc.coffee4j.model.Combination;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /**
  *
@@ -34,18 +32,31 @@ public class DerivationContainer {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<DerivationParameter> derivations;
-    private final DerivationScope underlyingScope;
-
-    public DerivationContainer(ArgumentsAccessor argumentAccessor, DerivationScope underlyingScope) {
-        this.underlyingScope = underlyingScope;
+    private DerivationScope underlyingScope;
+    
+    public DerivationContainer(List<Object> objects) {
         derivations = new LinkedList<>();
-        for (Object derivation : argumentAccessor.toList()) {
+        for (Object derivation : objects) {
             if (derivation instanceof DerivationParameter) {
                 derivations.add((DerivationParameter) derivation);
             } else {
                 LOGGER.warn("Found a Test Parameter that is not a DerivationParameter - will be ignored");
             }
         }
+    }
+
+    public DerivationContainer(List<Object> objects, DerivationScope underlyingScope) {
+        this(objects);
+        this.underlyingScope = underlyingScope;
+    }
+
+    public static DerivationContainer fromCombination(Combination combination) {
+        List<Object> res = new ArrayList<>();
+        combination.getParameterValueMap().keySet().forEach(key -> {
+            Object value = combination.getParameterValueMap().get(key).get();
+            res.add(value);
+        });
+        return new DerivationContainer(res);
     }
     
     public <T extends DerivationParameter<?>> T getDerivation(Class<T> clazz) {
@@ -89,7 +100,7 @@ public class DerivationContainer {
             } 
             
         }
-        System.out.println("Applied " + derivationsToString());
+        LOGGER.debug("Applied " + derivationsToString());
     }
 
     public String derivationsToString() {
@@ -98,6 +109,10 @@ public class DerivationContainer {
             joiner.add(derivationParameter.toString());
         }
         return joiner.toString();
+    }
+
+    public String toString() {
+        return derivationsToString();
     }
     
     public byte[] buildBitmask() {
@@ -116,6 +131,15 @@ public class DerivationContainer {
         byte[] constructed = new byte[(Integer)byteParameter.getSelectedValue() + 1];
         constructed[(Integer)byteParameter.getSelectedValue()] = (byte)(1 << (Integer)bitParameter.getSelectedValue());
         return constructed;
+    }
+
+    @JsonValue
+    private Map<String, DerivationParameter> jsonObject() {
+        Map<String, DerivationParameter> res = new HashMap<>();
+        for (DerivationParameter i : derivations) {
+            res.put(i.getType().name(), i);
+        }
+        return res;
     }
 
     public DerivationScope getUnderlyingScope() {

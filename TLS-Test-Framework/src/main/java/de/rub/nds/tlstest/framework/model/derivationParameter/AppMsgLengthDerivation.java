@@ -23,10 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-/**
- *
- * @author marcel
- */
 public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
 
     public AppMsgLengthDerivation() {

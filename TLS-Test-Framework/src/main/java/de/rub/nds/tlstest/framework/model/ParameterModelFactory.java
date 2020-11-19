@@ -39,7 +39,7 @@ public class ParameterModelFactory {
         return inputParameterModel("dynamic-model").strength(2).parameters(builders).exclusionConstraints(constraints).build();
     }
 
-    private static List<DerivationType> getDerivationsForScope(DerivationScope derivationScope) {
+    public static List<DerivationType> getDerivationsForScope(DerivationScope derivationScope) {
         List<DerivationType> resultingDerivations = new LinkedList<>();
         List<DerivationType> derivationsOfModel = getDerivationsOfModel(derivationScope.getBaseModel());
         for (DerivationType derivationType : DerivationType.values()) {
@@ -65,15 +65,13 @@ public class ParameterModelFactory {
         List<Parameter.Builder> parameterBuilders = new LinkedList<>();
         for (DerivationType derivationType : derivationTypes) {
             DerivationParameter paramDerivation = DerivationFactory.getInstance(derivationType);
-            if(paramDerivation.getParameterValueCount(testContext, derivationScope) > 1) {
+            if(paramDerivation.canBeModeled(testContext, derivationScope)) {
                 parameterBuilders.add(paramDerivation.getParameterBuilder(testContext, derivationScope));
                 if(derivationType.isBitmaskDerivation()) {
                     DerivationParameter bitPositionParam = DerivationFactory.getInstance(DerivationType.BIT_POSITION);
                     bitPositionParam.setParent(derivationType);
                     parameterBuilders.add(bitPositionParam.getParameterBuilder(testContext, derivationScope));
                 }
-            } else {
-                //TODO: this should be added as some kind of 'static' derivation
             }
         }
 
@@ -109,5 +107,22 @@ public class ParameterModelFactory {
         derivationTypes.add(DerivationType.RECORD_LENGTH);
         derivationTypes.add(DerivationType.TCP_FRAGMENTATION);
         return derivationTypes;
+    }
+    
+    /**
+     * DerivationParameters that only have one possible value can not be modeled
+     * by Coffee4J, we collect these here with their static value so the config
+     * can be set up properly
+     */
+    public static List<DerivationParameter> getStaticParameters(TestContext context, DerivationScope scope) {
+        List<DerivationParameter> staticParameters = new LinkedList<>();
+        List<DerivationType> plannedDerivations = getDerivationsForScope(scope);
+        for(DerivationType type: plannedDerivations) {
+            List<DerivationParameter> parameterValues = DerivationFactory.getInstance(type).getConstrainedParameterValues(context, scope);
+            if(parameterValues.size() == 1) {
+                staticParameters.add(parameterValues.get(0));
+            }
+        }
+        return staticParameters;
     }
 }

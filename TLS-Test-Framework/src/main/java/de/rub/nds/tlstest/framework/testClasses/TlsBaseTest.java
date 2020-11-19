@@ -56,12 +56,16 @@ public abstract class TlsBaseTest {
     }
     
     public Config getPreparedConfig(ArgumentsAccessor argAccessor, WorkflowRunner runner) {
+        Config toPrepare = getConfig();
+        return prepareConfig(toPrepare, argAccessor, runner);
+    }
+    
+    public Config prepareConfig(Config config, ArgumentsAccessor argAccessor, WorkflowRunner runner) {
         derivationContainer = new DerivationContainer(argAccessor.toList(), new DerivationScope(extensionContext));
-        Config preparedConfig = getConfig();
-        derivationContainer.applyToConfig(preparedConfig, context);
-        runner.setPreparedConfig(preparedConfig);
+        derivationContainer.applyToConfig(config, context);
+        runner.setPreparedConfig(config);
         runner.setDerivationContainer(derivationContainer);
-        return preparedConfig;
+        return config;
     }
     
     public TlsBaseTest() {

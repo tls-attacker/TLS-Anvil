@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- *
- * @author marcel
+ * Provides functions to obtain all possible parameter values under a given
+ * scope
  */
 public abstract class DerivationParameter<T> {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -66,10 +66,10 @@ public abstract class DerivationParameter<T> {
         return new LinkedList<>();
     }
     
-    public int getParameterValueCount(TestContext context, DerivationScope scope) {
-        return getConstrainedParameterValues(context, scope).size();
+    public boolean canBeModeled(TestContext context, DerivationScope scope) {
+        return getConstrainedParameterValues(context, scope).size() > 1;
     }
-
+    
     public Parameter.Builder getParameterBuilder(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = getConstrainedParameterValues(context, scope);
         return Parameter.parameter(type.name()).values(parameterValues.toArray());

@@ -50,7 +50,7 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<NamedGroup> groupList = context.getSiteReport().getSupportedTls13Groups();
-        if(!scope.isTls13Test()) {
+        if (!scope.isTls13Test()) {
             groupList = context.getSiteReport().getSupportedNamedGroups();
             parameterValues.add(new NamedGroupDerivation(null));
         } else if (scope.isTls13Test() && context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
@@ -58,12 +58,12 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
             KeyShareExtensionMessage keyshareExt = chm.getExtension(KeyShareExtensionMessage.class);
             groupList = new LinkedList<>();
             List<KeyShareEntry> ksEntries = keyshareExt.getKeyShareList();
-            for(KeyShareEntry entry: ksEntries) {
+            for (KeyShareEntry entry : ksEntries) {
                 groupList.add(entry.getGroupConfig());
             }
         }
         groupList.forEach(group -> parameterValues.add(new NamedGroupDerivation(group)));
-        
+
         return parameterValues;
     }
 
@@ -90,13 +90,14 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
             NamedGroup selectedGroup = getSelectedValue();
             NamedCurveWitness witness = context.getSiteReport().getSupportedNamedGroupsWitnesses().get(selectedGroup);
             groups.add(selectedGroup);
-            if (config.getDefaultSelectedCipherSuite().isEphemeral()) {
-                groups.add(witness.getEcdsaPkGroupEphemeral());
-                groups.add(witness.getEcdsaSigGroupEphemeral());
-            } else {
-                groups.add(witness.getEcdsaSigGroupStatic());
+            if (witness != null) {
+                if (config.getDefaultSelectedCipherSuite().isEphemeral()) {
+                    groups.add(witness.getEcdsaPkGroupEphemeral());
+                    groups.add(witness.getEcdsaSigGroupEphemeral());
+                } else {
+                    groups.add(witness.getEcdsaSigGroupStatic());
+                }
             }
-
             groups.remove(null);
             config.setDefaultClientNamedGroups(new LinkedList<>(groups));
         }

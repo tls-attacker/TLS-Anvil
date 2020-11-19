@@ -166,9 +166,10 @@ public class Resumption extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.", securitySeverity = SeverityLevel.CRITICAL)
+    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
+    @Security(SeverityLevel.CRITICAL)
     public void rejectResumptionAfterInvalidFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);

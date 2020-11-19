@@ -48,6 +48,9 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -94,6 +97,7 @@ public class EarlyData extends Tls13Test {
             + "verify that the server's selected_identity is 0.") //todo: does this suffice as an implicit instruction for the server?
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "supports0rtt")
+    @Interoperability(SeverityLevel.HIGH)
     public void selectedFirstIdentity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddPSKKeyExchangeModesExtension(true);
@@ -180,6 +184,7 @@ public class EarlyData extends Tls13Test {
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "supports0rtt")
     @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.CIPHERTEXT_BITMASK})
+    @Security(SeverityLevel.CRITICAL)
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddPSKKeyExchangeModesExtension(true);
@@ -239,6 +244,7 @@ public class EarlyData extends Tls13Test {
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
     @MethodCondition(method = "supports0rtt")
+    @Security(SeverityLevel.CRITICAL)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddPSKKeyExchangeModesExtension(true);

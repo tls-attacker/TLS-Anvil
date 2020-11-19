@@ -28,6 +28,7 @@ import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -110,7 +111,8 @@ public class SupportedVersions extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "[Servers] MUST ignore any unknown versions that are present in that extension.", interoperabilitySeverity = SeverityLevel.CRITICAL)
+    @TlsTest(description = "[Servers] MUST ignore any unknown versions that are present in that extension.")
+    @Interoperability(SeverityLevel.CRITICAL)
     public void unknownVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -126,9 +128,10 @@ public class SupportedVersions extends Tls13Test {
     @TlsTest(description = "Servers MUST be prepared to receive ClientHellos that "
             + "include this extension but do not include 0x0304 in the list of versions. "
             + "A server which negotiates a version of TLS prior to TLS 1.3 MUST "
-            + "set ServerHello.version and MUST NOT send the \"supported_versions\" extension.", interoperabilitySeverity = SeverityLevel.HIGH)
+            + "set ServerHello.version and MUST NOT send the \"supported_versions\" extension.")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
+    @Interoperability(SeverityLevel.HIGH)
     public void supportedVersionsWithoutTls13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
         c.setAddSupportedVersionsExtension(true);
@@ -170,7 +173,8 @@ public class SupportedVersions extends Tls13Test {
     @TlsTest(description = "If this extension is present in the ClientHello, "
             + "servers MUST NOT use the ClientHello.legacy_version value for "
             + "version negotiation and MUST use only the \"supported_versions\" "
-            + "extension to determine client preferences.", interoperabilitySeverity = SeverityLevel.MEDIUM)
+            + "extension to determine client preferences.")
+    @Interoperability(SeverityLevel.MEDIUM)
     public void setLegacyVersionTo0304(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -191,7 +195,8 @@ public class SupportedVersions extends Tls13Test {
     @TlsTest(description = "If this extension is present in the ClientHello, "
             + "servers MUST NOT use the ClientHello.legacy_version value for "
             + "version negotiation and MUST use only the \"supported_versions\" "
-            + "extension to determine client preferences.", interoperabilitySeverity = SeverityLevel.MEDIUM)
+            + "extension to determine client preferences.")
+    @Interoperability(SeverityLevel.MEDIUM)
     public void setLegacyVersionTo0304WithoutSVExt(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddSupportedVersionsExtension(false);

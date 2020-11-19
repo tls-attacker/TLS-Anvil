@@ -29,6 +29,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -66,7 +67,8 @@ public class TLSExtensionForECC extends Tls12Test {
 
     @RFC(number = 8422, section = "4. TLS Extensions for ECC")
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
-            "message if it does not propose any ECC cipher suites.", securitySeverity = SeverityLevel.INFORMATIONAL)
+            "message if it does not propose any ECC cipher suites.")
+    @Security(SeverityLevel.INFORMATIONAL)
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     public void BothECExtensions_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -108,7 +110,8 @@ public class TLSExtensionForECC extends Tls12Test {
     @TlsTest(description = "If a server does not understand the Supported Elliptic Curves Extension, " +
             "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake " +
             "while restricting itself to the enumerated curves and point formats, " +
-            "it MUST NOT negotiate the use of an ECC cipher suite.", interoperabilitySeverity = SeverityLevel.LOW)
+            "it MUST NOT negotiate the use of an ECC cipher suite.")
+    @Interoperability(SeverityLevel.LOW)
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @KeyExchange(supported = KeyExchangeType.ECDH)
     public void InvalidEllipticCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -134,7 +137,8 @@ public class TLSExtensionForECC extends Tls12Test {
     @TlsTest(description = "If a server does not understand the Supported Elliptic Curves Extension, " +
             "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake " +
             "while restricting itself to the enumerated curves and point formats, " +
-            "it MUST NOT negotiate the use of an ECC cipher suite.", interoperabilitySeverity = SeverityLevel.CRITICAL)
+            "it MUST NOT negotiate the use of an ECC cipher suite.")
+    @Interoperability(SeverityLevel.CRITICAL)
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     public void InvalidEllipticCurve_WithNonECCCiphersuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

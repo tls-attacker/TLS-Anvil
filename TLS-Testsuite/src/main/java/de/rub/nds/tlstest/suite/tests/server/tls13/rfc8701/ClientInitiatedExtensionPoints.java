@@ -35,6 +35,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -58,11 +59,13 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @RFC(number = 8701, section = "3. Client-Initiated Extension Points")
+@Tag("WIP")
 public class ClientInitiatedExtensionPoints extends Tls13Test {
 
     @TlsTest(description = "A client MAY select one or more GREASE cipher suite values and advertise them in the \"cipher_suites\" field." +
-            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
+            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
+    @Interoperability(SeverityLevel.CRITICAL)
     public void advertiseGreaseCiphersuites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedGrease = derivationContainer.getDerivation(GreaseCipherSuiteDerivation.class).getSelectedValue();
@@ -78,8 +81,9 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
     }
 
     @TlsTest(description = "A client MAY select one or more GREASE extension values and advertise them as extensions with varying length and contents." +
-            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
+            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
+    @Interoperability(SeverityLevel.CRITICAL)
     public void advertiseGreaseExtensions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ExtensionType selectedGrease = derivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
@@ -102,8 +106,9 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "A client MAY select one or more GREASE named group values and advertise them in the \"supported_groups\" extension, " +
             "if sent. It MAY also send KeyShareEntry values for a subset of those selected in the \"key_share\" extension. " +
             "For each of these, the \"key_exchange\" ﬁeld MAY be any value. " +
-            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
+            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @ScopeExtensions(DerivationType.GREASE_NAMED_GROUP)
+    @Interoperability(SeverityLevel.CRITICAL)
     public void advertiseGreaseNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         NamedGroup selectedGrease = derivationContainer.getDerivation(GreaseNamedGroupDerivation.class).getSelectedValue();
@@ -134,8 +139,9 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "A client MAY select one or more GREASE signature algorithm values " +
             "and advertise them in the \"signature_algorithms\" or " +
             "\"signature_algorithms_cert\" extensions, if sent. " +
-            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
+            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
+    @Interoperability(SeverityLevel.CRITICAL)
     public void advertiseGreaseSignatureAlgorithms(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         SignatureAndHashAlgorithm selectedGrease = derivationContainer.getDerivation(GreaseSigHashDerivation.class).getSelectedValue();
@@ -154,7 +160,8 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
 
     @TlsTest(description = "A client MAY select one or more GREASE ALPN identiﬁers " +
             "and advertise them in the \"application_layer_protocol_negotiation\" extension, if sent. " +
-            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.", interoperabilitySeverity = SeverityLevel.CRITICAL)
+            "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
+    @Interoperability(SeverityLevel.CRITICAL)
     public void advertiseGreaseALPNIdentifiers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddAlpnExtension(true);

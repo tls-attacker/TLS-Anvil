@@ -28,6 +28,8 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
@@ -55,8 +57,10 @@ public class KeyShare extends Tls13Test {
 
     @TlsTest(description = "Each KeyShareEntry value MUST correspond " +
             "to a group offered in the \"supported_groups\" extension " +
-            "and MUST appear in the same order.", securitySeverity = SeverityLevel.MEDIUM, interoperabilitySeverity = SeverityLevel.HIGH)
+            "and MUST appear in the same order.")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @Interoperability(SeverityLevel.HIGH)
+    @Security(SeverityLevel.MEDIUM)
     public void testOrderOfKeyshareEntries(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -133,8 +137,10 @@ public class KeyShare extends Tls13Test {
         return parameterValues;
     }
     
-    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used", securitySeverity = SeverityLevel.LOW, interoperabilitySeverity = SeverityLevel.CRITICAL)
+    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
     @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getLegacyGroups")
+    @Interoperability(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.LOW)
     public void serverAcceptsDeprecatedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> groups = NamedGroup.getImplemented();
@@ -142,8 +148,10 @@ public class KeyShare extends Tls13Test {
         performDeprecatedGroupsTest(c, runner);
     }
     
-    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used", securitySeverity = SeverityLevel.LOW, interoperabilitySeverity = SeverityLevel.CRITICAL)
+    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @Interoperability(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.LOW)
     public void serverAcceptsDeprecatedGroupsAllAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> groups = NamedGroup.getImplemented();

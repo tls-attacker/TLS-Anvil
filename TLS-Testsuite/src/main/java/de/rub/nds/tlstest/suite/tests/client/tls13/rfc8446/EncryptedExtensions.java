@@ -26,6 +26,7 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -56,7 +57,8 @@ public class EncryptedExtensions extends Tls13Test {
     @TlsTest(description = "The client MUST check EncryptedExtensions " +
             "for the presence of any forbidden extensions and if " +
             "any are found MUST abort the handshake " +
-            "with an \"illegal_parameter\" alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
+            "with an \"illegal_parameter\" alert.")
+    @Interoperability(SeverityLevel.MEDIUM)
     public void sendSupportedVersionsExtensionInEE(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -78,7 +80,8 @@ public class EncryptedExtensions extends Tls13Test {
     @TlsTest(description = "The client MUST check EncryptedExtensions " +
             "for the presence of any forbidden extensions and if " +
             "any are found MUST abort the handshake " +
-            "with an \"illegal_parameter\" alert.", interoperabilitySeverity = SeverityLevel.MEDIUM)
+            "with an \"illegal_parameter\" alert.")
+    @Interoperability(SeverityLevel.MEDIUM)
     public void sendPaddingExtensionInEE(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

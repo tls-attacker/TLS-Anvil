@@ -56,7 +56,8 @@ public class RC4Ciphersuites extends Tls12Test {
     }
 
     @TlsTest(description = "TLS servers MUST NOT select an RC4 cipher suite when a TLS client sends such " +
-            "a cipher suite in the ClientHello message.", securitySeverity = SeverityLevel.CRITICAL)
+            "a cipher suite in the ClientHello message.")
+    @Security(SeverityLevel.CRITICAL)
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isRC4CipherSuite")
     public void selectRC4CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

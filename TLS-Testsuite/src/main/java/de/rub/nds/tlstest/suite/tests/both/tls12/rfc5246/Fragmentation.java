@@ -125,9 +125,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Send a record without any content.",
-            securitySeverity = SeverityLevel.CRITICAL,
-            interoperabilitySeverity = SeverityLevel.HIGH)
+    @TlsTest(description = "Send a record without any content.")
     @Security(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.HIGH)
     @Tag("emptyRecord")
@@ -178,7 +176,7 @@ public class Fragmentation extends Tls12Test {
     }
 
     @TlsTest(description = "The length (in bytes) of the following TLSPlaintext.fragment. " +
-            "The length MUST NOT exceed 2^14.", interoperabilitySeverity = SeverityLevel.HIGH)
+            "The length MUST NOT exceed 2^14.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
     public void sendRecordWithCiphertextOver2pow14plus1(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

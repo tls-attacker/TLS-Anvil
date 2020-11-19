@@ -26,6 +26,8 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -93,10 +95,12 @@ public class SignatureAlgorithms extends Tls13Test {
 
     @TlsTest(description = "Clients offering these values MUST list "
             + "them (legacy algorithms) as the lowest priority (listed after all other "
-            + "algorithms in SignatureSchemeList).", securitySeverity = SeverityLevel.HIGH, interoperabilitySeverity = SeverityLevel.HIGH)
+            + "algorithms in SignatureSchemeList).")
     @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
     @ManualConfig(DerivationType.SIG_HASH_ALGORIHTM)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
+    @Interoperability(SeverityLevel.HIGH)
+    @Security(SeverityLevel.HIGH)
     public void offerLegacySignatureAlgorithms(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         SignatureAndHashAlgorithm selectedSigHash = derivationContainer.getDerivation(SigAndHashDerivation.class).getSelectedValue();
@@ -124,9 +128,10 @@ public class SignatureAlgorithms extends Tls13Test {
             + "certificates (see Section 4.4.2.2) and are not defined for use in "
             + "signed TLS handshake messages, although they MAY appear in \"signature_algorithms\" "
             + "and \"signature_algorithms_cert\" for backward "
-            + "compatibility with TLS 1.2.", securitySeverity = SeverityLevel.HIGH)
+            + "compatibility with TLS 1.2.")
     @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
+    @Security(SeverityLevel.HIGH)
     public void offerOnlyLegacySignatureAlgorithms(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

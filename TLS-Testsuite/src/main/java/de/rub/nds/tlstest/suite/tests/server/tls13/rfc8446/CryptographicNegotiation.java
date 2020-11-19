@@ -27,6 +27,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -45,7 +46,8 @@ public class CryptographicNegotiation extends Tls13Test {
 
     @TlsTest(description = "If the server is unable to negotiate a supported set of parameters " +
             "(i.e., there is no overlap between the client and server parameters), it MUST abort " +
-            "the handshake with either a \"handshake_failure\" or \"insufficient_security\" fatal alert (see Section 6).", interoperabilitySeverity = SeverityLevel.MEDIUM)
+            "the handshake with either a \"handshake_failure\" or \"insufficient_security\" fatal alert (see Section 6).")
+    @Interoperability(SeverityLevel.MEDIUM)
     public void noOverlappingParameters(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

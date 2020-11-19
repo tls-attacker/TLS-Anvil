@@ -136,7 +136,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
             "In particular, the client MUST fail the connection " +
             "if a GREASE value appears in any of the following: " +
-            "The signature algorithm in a ServerKeyExchange signature in TLS 1.2 or earlier", interoperabilitySeverity = SeverityLevel.HIGH)
+            "The signature algorithm in a ServerKeyExchange signature in TLS 1.2 or earlier")
+    @Interoperability(SeverityLevel.HIGH)
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
     @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
     public void selectGreaseSignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

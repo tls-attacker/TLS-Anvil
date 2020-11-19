@@ -32,6 +32,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -125,7 +126,9 @@ public class KeyShare extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
     
-    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used", securitySeverity = SeverityLevel.LOW, interoperabilitySeverity = SeverityLevel.CRITICAL)
+    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
+    @Interoperability(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.LOW)
     public void offeredDeprecatedGroups() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         boolean foundDeprecated = false;

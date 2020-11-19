@@ -49,9 +49,7 @@ public class CipherSuiteDerivation extends DerivationParameter<CipherSuite> {
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         Set<CipherSuite> cipherSuiteList = context.getSiteReport().getCipherSuites();
-        if(scope.isTls13Test()) {
-            cipherSuiteList = context.getSiteReport().getSupportedTls13CipherSuites();
-        }
+        cipherSuiteList.addAll(context.getSiteReport().getSupportedTls13CipherSuites());
         for (CipherSuite cipherSuite : cipherSuiteList) {
             if(scope.getKeyExchangeRequirements().compatibleWithCiphersuite(cipherSuite)) {
                 parameterValues.add(new CipherSuiteDerivation(cipherSuite));

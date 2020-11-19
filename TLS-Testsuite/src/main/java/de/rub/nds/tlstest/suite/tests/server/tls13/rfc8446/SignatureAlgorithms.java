@@ -20,33 +20,40 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
+import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 8446, section = "4.2.3 Signature Algorithms")
 @ServerTest
 public class SignatureAlgorithms extends Tls13Test {
 
-    @TlsTest(description = "If a server is authenticating via a certificate " +
-            "and the client has not sent a \"signature_algorithms\" extension, " +
-            "then the server MUST abort the handshake with " +
-            "a \"missing_extension\" alert (see Section 9.2).")
-    public void omitSignatureAlgorithmsExtension(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-
-        Config c = this.getConfig();
+    @TlsTest(description = "If a server is authenticating via a certificate "
+            + "and the client has not sent a \"signature_algorithms\" extension, "
+            + "then the server MUST abort the handshake with "
+            + "a \"missing_extension\" alert (see Section 9.2).")
+    public void omitSignatureAlgorithmsExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddSignatureAndHashAlgorithmsExtension(false);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -59,27 +66,46 @@ public class SignatureAlgorithms extends Tls13Test {
             Validator.receivedFatalAlert(i);
 
             AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (msg == null) return;
+            if (msg == null) {
+                return;
+            }
             Validator.testAlertDescription(i, AlertDescription.MISSING_EXTENSION, msg);
         });
     }
 
-    @TlsTest(description = "Clients offering these values MUST list " +
-            "them (legacy algorithms) as the lowest priority (listed after all other " +
-            "algorithms in SignatureSchemeList).", securitySeverity = SeverityLevel.HIGH, interoperabilitySeverity = SeverityLevel.HIGH)
-    public void offerLegacySignatureAlgorithms(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-
+    public List<DerivationParameter> getLegacySigHashAlgoritms() {
+        List<DerivationParameter> parameterValues = new LinkedList<>();
         List<SignatureAndHashAlgorithm> algos = SignatureAndHashAlgorithm.getImplemented().stream()
                 .filter(i -> !i.suitedForSigningTls13Messages())
                 .collect(Collectors.toList());
+        algos.forEach(i -> parameterValues.add(new SigAndHashDerivation(i)));
+        return parameterValues;
+    }
 
-        algos.addAll(SignatureAndHashAlgorithm.getImplemented().stream()
+    public List<DerivationParameter> getTls13SigHashAlgoritms() {
+        List<DerivationParameter> parameterValues = new LinkedList<>();
+        List<SignatureAndHashAlgorithm> algos = SignatureAndHashAlgorithm.getImplemented().stream()
+                .filter(i -> i.suitedForSigningTls13Messages())
+                .collect(Collectors.toList());
+        algos.forEach(i -> parameterValues.add(new SigAndHashDerivation(i)));
+        return parameterValues;
+    }
+
+    @TlsTest(description = "Clients offering these values MUST list "
+            + "them (legacy algorithms) as the lowest priority (listed after all other "
+            + "algorithms in SignatureSchemeList).", securitySeverity = SeverityLevel.HIGH, interoperabilitySeverity = SeverityLevel.HIGH)
+    @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
+    @ManualConfig(DerivationType.SIG_HASH_ALGORIHTM)
+    @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
+    public void offerLegacySignatureAlgorithms(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        SignatureAndHashAlgorithm selectedSigHash = derivationContainer.getDerivation(SigAndHashDerivation.class).getSelectedValue();
+
+        List<SignatureAndHashAlgorithm> algos = SignatureAndHashAlgorithm.getImplemented().stream()
                 .filter(SignatureAndHashAlgorithm::suitedForSigningTls13Messages)
-                .collect(Collectors.toList())
-        );
+                .collect(Collectors.toList());
+        algos.add(0, selectedSigHash);
 
-        Config c = this.getConfig();
         c.setDefaultClientSupportedSignatureAndHashAlgorithms(algos);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -94,37 +120,22 @@ public class SignatureAlgorithms extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "These values refer solely to signatures which appear in " +
-            "certificates (see Section 4.4.2.2) and are not defined for use in " +
-            "signed TLS handshake messages, although they MAY appear in \"signature_algorithms\" " +
-            "and \"signature_algorithms_cert\" for backward " +
-            "compatibility with TLS 1.2.", securitySeverity = SeverityLevel.HIGH)
-    public void offerOnlyLegacySignatureAlgorithms(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
+    @TlsTest(description = "These values refer solely to signatures which appear in "
+            + "certificates (see Section 4.4.2.2) and are not defined for use in "
+            + "signed TLS handshake messages, although they MAY appear in \"signature_algorithms\" "
+            + "and \"signature_algorithms_cert\" for backward "
+            + "compatibility with TLS 1.2.", securitySeverity = SeverityLevel.HIGH)
+    @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
+    @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
+    public void offerOnlyLegacySignatureAlgorithms(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
-        List<SignatureAndHashAlgorithm> algos = SignatureAndHashAlgorithm.getImplemented().stream()
-                .filter(i -> !i.suitedForSigningTls13Messages())
-                .collect(Collectors.toList());
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        workflowTrace.addTlsActions(
+                new SendAction(new ClientHelloMessage(c)),
+                new ReceiveAction(new AlertMessage())
+        );
 
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
-        for (SignatureAndHashAlgorithm i : algos) {
-            Config c = this.getConfig();
-            c.setDefaultClientSupportedSignatureAndHashAlgorithms(Collections.singletonList(i));
-
-            WorkflowTrace workflowTrace = new WorkflowTrace();
-            workflowTrace.addTlsActions(
-                    new SendAction(new ClientHelloMessage(c)),
-                    new ReceiveAction(new AlertMessage())
-            );
-
-            runner.setStateModifier(j -> {
-                j.addAdditionalTestInfo(i.name());
-                return null;
-            });
-
-            container.addAll(runner.prepare(workflowTrace, c));
-        }
-
-        runner.execute(container).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 }

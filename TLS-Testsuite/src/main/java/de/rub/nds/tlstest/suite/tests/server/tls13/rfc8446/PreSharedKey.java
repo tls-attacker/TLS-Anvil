@@ -31,10 +31,12 @@ import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
@@ -44,6 +46,7 @@ import javax.crypto.Mac;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @RFC(number = 8446, section = "4.2.11 Pre-Shared Key Extension")
@@ -64,7 +67,7 @@ public class PreSharedKey extends Tls13Test {
         return dummyTrace.getFirstSendMessage(ClientHelloMessage.class).getExtensions().size();
     }
 
-    @TlsTest(description = "The \"pre_shared_key\" extension MUST be the last extension "
+    /*@TlsTest(description = "The \"pre_shared_key\" extension MUST be the last extension "
             + "in the ClientHello (this facilitates implementation as described below). "
             + "Servers MUST check that it is the last extension and otherwise fail "
             + "the handshake with an \"illegal_parameter\" alert.")
@@ -142,58 +145,30 @@ public class PreSharedKey extends Tls13Test {
             }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
-    }
+    }*/
 
     @TlsTest(description = "Prior to accepting PSK key establishment, the server MUST validate"
             + "the corresponding binder value")
     @RFC(number = 8446, section = "4.2.11. Pre-Shared Key Extension")
-    @MethodCondition(method = "supportsPsk") //todo: this takes ~ 1h 20 for all combinations - we should limit this
-    public void invalidBinder(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    @ScopeExtensions(DerivationType.PRF_BITMASK)
+    @MethodCondition(method = "supportsPsk")
+    public void invalidBinder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddPSKKeyExchangeModesExtension(true);
         c.setAddPreSharedKeyExtension(true);
         c.setLimitPsksToOne(true);
-        runner.replaceSupportedCiphersuites = true;
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction());
-        
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
-        for (int i = 0; i < 384; i++) {
-            int affectedBit = i;
-            runner.setStateModifier(s -> {
-                ClientHelloMessage cHello = s.getWorkflowTrace().getLastSendMessage(ClientHelloMessage.class);
-                PreSharedKeyExtensionMessage pskExt = cHello.getExtension(PreSharedKeyExtensionMessage.class);
-                HKDFAlgorithm hkdfAlgortihm = AlgorithmResolver.getHKDFAlgorithm(s.getInspectedCipherSuite());
-                int macLen = 0;
-                try {
-                    macLen = Mac.getInstance(hkdfAlgortihm.getMacAlgorithm().getJavaName()).getMacLength() * 8;
-                } catch (NoSuchAlgorithmException ex) {
-                    LOGGER.warn("CipherSuite did not yield a known Mac algorithm");
-                    macLen = 256;
-                }
+        byte[] modificationBitmask = derivationContainer.buildBitmask();
 
-                if (affectedBit < macLen) {
-                    s.addAdditionalTestInfo("Manipulated bit " + (affectedBit + 1) + " of " + macLen + " for " + s.getInspectedCipherSuite());
-                    byte[] mask =  new byte[] {(byte)(0x1 << (affectedBit % 8))};
-                    pskExt.setBinderListBytes(Modifiable.xor(mask, ExtensionByteLength.PSK_BINDER_LENGTH + (affectedBit / 8)));
-                } else {
-                    s.setOmitFromTests(true);
-                }
-                return null;
-            });
+        ClientHelloMessage cHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
+        PreSharedKeyExtensionMessage pskExt = cHello.getExtension(PreSharedKeyExtensionMessage.class);
+        pskExt.setBinderListBytes(Modifiable.xor(modificationBitmask, ExtensionByteLength.PSK_BINDER_LENGTH));
 
-            container.addAll(runner.prepare(workflowTrace, c));
-            break;
-        }
 
-        runner.execute(container).validateFinal(i -> {
+        runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
             Validator.receivedFatalAlert(i, false);
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
-            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }
 
@@ -201,23 +176,19 @@ public class PreSharedKey extends Tls13Test {
             + "the corresponding binder value")
     @RFC(number = 8446, section = "4.2.11. Pre-Shared Key Extension")
     @MethodCondition(method = "supportsPsk")
-    public void noBinder(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    public void noBinder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddPSKKeyExchangeModesExtension(true);
         c.setAddPreSharedKeyExtension(true);
         c.setLimitPsksToOne(true);
-        runner.replaceSupportedCiphersuites = true;
         
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction());
-        
-        runner.setStateModifier(s -> {
-            ClientHelloMessage cHello = s.getWorkflowTrace().getLastSendMessage(ClientHelloMessage.class);
-            PreSharedKeyExtensionMessage pskExt = cHello.getExtension(PreSharedKeyExtensionMessage.class);
-            pskExt.setBinderListBytes(Modifiable.explicit(new byte[0]));
-            pskExt.setBinderListLength(Modifiable.explicit(0));
-            return null;
-        });
+
+        ClientHelloMessage cHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
+        PreSharedKeyExtensionMessage pskExt = cHello.getExtension(PreSharedKeyExtensionMessage.class);
+        pskExt.setBinderListBytes(Modifiable.explicit(new byte[0]));
+        pskExt.setBinderListLength(Modifiable.explicit(0));
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();

@@ -23,6 +23,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
@@ -30,16 +31,21 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 8446, section = "4.2.1 Supported Versions")
 @ServerTest
 public class SupportedVersions extends Tls13Test {
+
     public ConditionEvaluationResult supportsTls12() {
         if (context.getSiteReport().getVersions().contains(ProtocolVersion.TLS12)) {
             return ConditionEvaluationResult.enabled("");
@@ -47,16 +53,15 @@ public class SupportedVersions extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
 
-    @TlsTest(description = "The extension contains a list of supported versions in " +
-            "preference order, with the most preferred version first.")
+    @TlsTest(description = "The extension contains a list of supported versions in "
+            + "preference order, with the most preferred version first.")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    public void testVersionPreferrence(WorkflowRunner runner) {
-        runner.appendEachSupportedCiphersuiteToClientSupported = true;
+    public void testVersionPreferrence(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
 
-        Config c = context.getConfig().createConfig();
         c.setSupportedVersions(ProtocolVersion.TLS12, ProtocolVersion.TLS13);
-        c.setDefaultClientSupportedCiphersuites(
+        c.getDefaultClientSupportedCiphersuites().addAll(
                 CipherSuite.getImplemented().stream().filter(CipherSuite::isTLS13).collect(Collectors.toList())
         );
 
@@ -65,18 +70,17 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(description = "If this extension is not present, servers which are compliant " +
-            "with this specification and which also support TLS 1.2 MUST " +
-            "negotiate TLS 1.2 or prior as specified in [RFC5246]")
+    @TlsTest(description = "If this extension is not present, servers which are compliant "
+            + "with this specification and which also support TLS 1.2 MUST "
+            + "negotiate TLS 1.2 or prior as specified in [RFC5246]")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    public void omitSupportedVersionsExtension(WorkflowRunner runner) {
-        runner.appendEachSupportedCiphersuiteToClientSupported = true;
-
-        Config c = this.getConfig();
+    public void omitSupportedVersionsExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        
         c.setAddSupportedVersionsExtension(false);
         c.setHighestProtocolVersion(ProtocolVersion.TLS12);
-        c.setDefaultClientSupportedCiphersuites(
+        c.getDefaultClientSupportedCiphersuites().addAll(
                 CipherSuite.getImplemented().stream().filter(CipherSuite::isTLS13).collect(Collectors.toList())
         );
 
@@ -84,22 +88,21 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(description = "If this extension is present in the ClientHello, " +
-            "servers MUST NOT use the ClientHello.legacy_version value " +
-            "for version negotiation and MUST use only the \"supported_versions\" " +
-            "extension to determine client preferences.")
+    @TlsTest(description = "If this extension is present in the ClientHello, "
+            + "servers MUST NOT use the ClientHello.legacy_version value "
+            + "for version negotiation and MUST use only the \"supported_versions\" "
+            + "extension to determine client preferences.")
     @MethodCondition(method = "supportsTls12")
-    public void oldLegacyVersion(WorkflowRunner runner) {
-        runner.appendEachSupportedCiphersuiteToClientSupported = true;
-        Config c = this.getConfig();
+    @ManualConfig(DerivationType.CIPHERSUITE)
+    public void oldLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        CipherSuite tls13CipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
         c.setDefaultClientSupportedCiphersuites(context.getSiteReport().getCipherSuites().stream().filter(i -> !i.isTLS13()).collect(Collectors.toList()));
+        c.getDefaultClientSupportedCiphersuites().add(tls13CipherSuite);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        runner.setStateModifier(i -> {
-            i.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class)
-                    .setProtocolVersion(Modifiable.explicit(new byte[]{3,3}));
-            return null;
-        });
+        workflowTrace.getFirstSendMessage(ClientHelloMessage.class)
+                .setProtocolVersion(Modifiable.explicit(new byte[]{3, 3}));
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);
@@ -107,33 +110,27 @@ public class SupportedVersions extends Tls13Test {
         });
     }
 
-
     @TlsTest(description = "[Servers] MUST ignore any unknown versions that are present in that extension.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    public void unknownVersion(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-        Config c = this.getConfig();
+    public void unknownVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        runner.setStateModifier(i -> {
-            i.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class)
-                    .getExtension(SupportedVersionsExtensionMessage.class)
-                    .setSupportedVersions(Modifiable.explicit(new byte[]{0x05, 0x05, 0x03, 0x04}));
-            return null;
-        });
+
+        workflowTrace.getFirstSendMessage(ClientHelloMessage.class)
+                .getExtension(SupportedVersionsExtensionMessage.class)
+                .setSupportedVersions(Modifiable.explicit(new byte[]{0x05, 0x05, 0x03, 0x04}));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-
-    @TlsTest(description = "Servers MUST be prepared to receive ClientHellos that " +
-            "include this extension but do not include 0x0304 in the list of versions. " +
-            "A server which negotiates a version of TLS prior to TLS 1.3 MUST " +
-            "set ServerHello.version and MUST NOT send the \"supported_versions\" extension.", interoperabilitySeverity = SeverityLevel.HIGH)
+    @TlsTest(description = "Servers MUST be prepared to receive ClientHellos that "
+            + "include this extension but do not include 0x0304 in the list of versions. "
+            + "A server which negotiates a version of TLS prior to TLS 1.3 MUST "
+            + "set ServerHello.version and MUST NOT send the \"supported_versions\" extension.", interoperabilitySeverity = SeverityLevel.HIGH)
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    public void supportedVersionsWithoutTls13(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-        Config c = context.getConfig().createConfig();
+    public void supportedVersionsWithoutTls13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
         c.setAddSupportedVersionsExtension(true);
         c.setSupportedVersions(ProtocolVersion.TLS12);
 
@@ -149,13 +146,12 @@ public class SupportedVersions extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "A server which negotiates TLS 1.3 MUST " +
-            "respond by sending a \"supported_versions\" extension " +
-            "containing the selected version value (0x0304). " +
-            "It MUST set the ServerHello.legacy_version field to 0x0303 (TLS 1.2).")
-    public void tls13Handshake(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-        Config c = this.getConfig();
+    @TlsTest(description = "A server which negotiates TLS 1.3 MUST "
+            + "respond by sending a \"supported_versions\" extension "
+            + "containing the selected version value (0x0304). "
+            + "It MUST set the ServerHello.legacy_version field to 0x0303 (TLS 1.2).")
+    public void tls13Handshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
@@ -171,57 +167,45 @@ public class SupportedVersions extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "If this extension is present in the ClientHello, " +
-            "servers MUST NOT use the ClientHello.legacy_version value for " +
-            "version negotiation and MUST use only the \"supported_versions\" " +
-            "extension to determine client preferences.", interoperabilitySeverity = SeverityLevel.MEDIUM)
-    public void setLegacyVersionTo0304(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
+    @TlsTest(description = "If this extension is present in the ClientHello, "
+            + "servers MUST NOT use the ClientHello.legacy_version value for "
+            + "version negotiation and MUST use only the \"supported_versions\" "
+            + "extension to determine client preferences.", interoperabilitySeverity = SeverityLevel.MEDIUM)
+    public void setLegacyVersionTo0304(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
-        Config c = this.getConfig();
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)),
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            ClientHelloMessage chm = i.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
-            chm.setProtocolVersion(Modifiable.explicit(ProtocolVersion.TLS13.getValue()));
-            chm.getExtension(SupportedVersionsExtensionMessage.class).setSupportedVersions(Modifiable.explicit(
-                    ProtocolVersion.TLS12.getValue()
-            ));
+        ClientHelloMessage chm = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+        chm.setProtocolVersion(Modifiable.explicit(ProtocolVersion.TLS13.getValue()));
+        chm.getExtension(SupportedVersionsExtensionMessage.class).setSupportedVersions(Modifiable.explicit(ProtocolVersion.TLS12.getValue()));
 
-            return null;
-        });
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "If this extension is present in the ClientHello, " +
-            "servers MUST NOT use the ClientHello.legacy_version value for " +
-            "version negotiation and MUST use only the \"supported_versions\" " +
-            "extension to determine client preferences.", interoperabilitySeverity = SeverityLevel.MEDIUM)
-    public void setLegacyVersionTo0304WithoutSVExt(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-
-        Config c = this.getConfig();
+    @TlsTest(description = "If this extension is present in the ClientHello, "
+            + "servers MUST NOT use the ClientHello.legacy_version value for "
+            + "version negotiation and MUST use only the \"supported_versions\" "
+            + "extension to determine client preferences.", interoperabilitySeverity = SeverityLevel.MEDIUM)
+    public void setLegacyVersionTo0304WithoutSVExt(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddSupportedVersionsExtension(false);
+        
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)),
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.setStateModifier(i -> {
-            ClientHelloMessage chm = i.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
-            chm.setProtocolVersion(Modifiable.explicit(ProtocolVersion.TLS13.getValue()));
-            return null;
-        });
+        ClientHelloMessage chm = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+        chm.setProtocolVersion(Modifiable.explicit(ProtocolVersion.TLS13.getValue()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
-
-
 
 }

@@ -23,23 +23,31 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @RFC(number = 8446, section = "4.2.8. Key Share")
@@ -48,10 +56,10 @@ public class KeyShare extends Tls13Test {
     @TlsTest(description = "Each KeyShareEntry value MUST correspond " +
             "to a group offered in the \"supported_groups\" extension " +
             "and MUST appear in the same order.", securitySeverity = SeverityLevel.MEDIUM, interoperabilitySeverity = SeverityLevel.HIGH)
-    public void testOrderOfKeyshareEntries(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
+    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    public void testOrderOfKeyshareEntries(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
-        Config c = this.getConfig();
         List<NamedGroup> groups = new ArrayList<NamedGroup>(){{
             add(NamedGroup.SECP256R1);
             add(NamedGroup.SECP384R1);
@@ -85,22 +93,29 @@ public class KeyShare extends Tls13Test {
     @TlsTest(description = "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. " +
             "This value MUST be in the same group as the KeyShareEntry value offered by the client " +
             "that the server has selected for the negotiated key exchange.")
-    public void serverOnlyOffersOneKeshare(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
-        List<NamedGroup> groupsToTest = context.getSiteReport().getSupportedTls13Groups();
-        Config c = this.getConfig();
+    public void serverOnlyOffersOneKeshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        List<NamedGroup> supportedTls13 = context.getSiteReport().getSupportedTls13Groups();
+        c.setDefaultClientNamedGroups(supportedTls13);
+        performOneKeyshareTest(c, runner);
+    }
+    
+    @TlsTest(description = "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. " +
+            "This value MUST be in the same group as the KeyShareEntry value offered by the client " +
+            "that the server has selected for the negotiated key exchange.")
+    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    public void serverOnlyOffersOneKeshareAllGroupsAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        List<NamedGroup> supportedTls13 = context.getSiteReport().getSupportedTls13Groups();
+        c.setDefaultClientKeyShareNamedGroups(supportedTls13);
+        c.setDefaultClientNamedGroups(supportedTls13);
+        performOneKeyshareTest(c, runner);
+    }
+    
+    public void performOneKeyshareTest(Config c, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        for(NamedGroup group: groupsToTest) {
-            c.setDefaultClientKeyShareNamedGroups(group);
-            runner.setStateModifier(i -> {
-                i.addAdditionalTestInfo(group.toString());
-                return null;
-            });
-            container.addAll(runner.prepare(workflowTrace, c));
-        }
         
-        runner.execute(container).validateFinal(i -> {
+        runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);
             KeyShareExtensionMessage keyshare = i.getWorkflowTrace()
                     .getFirstReceivedMessage(ServerHelloMessage.class)
@@ -110,14 +125,38 @@ public class KeyShare extends Tls13Test {
         });
     }
     
-    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used", securitySeverity = SeverityLevel.LOW, interoperabilitySeverity = SeverityLevel.CRITICAL)
-    public void serverAcceptsDeprecatedGroups(WorkflowRunner runner){
-        Config c = this.getConfig();
+    public List<DerivationParameter> getLegacyGroups() {
+        List<DerivationParameter> parameterValues = new LinkedList<>();
         List<NamedGroup> groups = NamedGroup.getImplemented();
         groups.removeIf(i -> i.isTls13());
-        c.setDefaultClientKeyShareNamedGroups(groups);
+        groups.forEach(i -> parameterValues.add(new NamedGroupDerivation(i)));
+        return parameterValues;
+    }
+    
+    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used", securitySeverity = SeverityLevel.LOW, interoperabilitySeverity = SeverityLevel.CRITICAL)
+    @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getLegacyGroups")
+    public void serverAcceptsDeprecatedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        List<NamedGroup> groups = NamedGroup.getImplemented();
+        groups.removeIf(i -> i.isTls13());
+        performDeprecatedGroupsTest(c, runner);
+    }
+    
+    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used", securitySeverity = SeverityLevel.LOW, interoperabilitySeverity = SeverityLevel.CRITICAL)
+    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    public void serverAcceptsDeprecatedGroupsAllAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        List<NamedGroup> groups = NamedGroup.getImplemented();
+        groups.removeIf(i -> i.isTls13());
         c.setDefaultClientNamedGroups(groups);
+        c.setDefaultClientKeyShareNamedGroups(groups);
+        
+        performDeprecatedGroupsTest(c, runner);
+    }
+    
+    public void performDeprecatedGroupsTest(Config c, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        List<NamedGroup> groups = c.getDefaultClientKeyShareNamedGroups();
         
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();

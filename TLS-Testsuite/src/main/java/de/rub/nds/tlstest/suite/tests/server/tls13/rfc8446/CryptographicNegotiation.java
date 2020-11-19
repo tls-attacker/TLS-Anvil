@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @RFC(number = 8446, section = "4.1.1 Cryptographic Negotiation")
@@ -44,14 +46,12 @@ public class CryptographicNegotiation extends Tls13Test {
     @TlsTest(description = "If the server is unable to negotiate a supported set of parameters " +
             "(i.e., there is no overlap between the client and server parameters), it MUST abort " +
             "the handshake with either a \"handshake_failure\" or \"insufficient_security\" fatal alert (see Section 6).", interoperabilitySeverity = SeverityLevel.MEDIUM)
-    public void noOverlappingParameters(WorkflowRunner runner) {
-        Config config = this.getConfig();
-        runner.replaceSupportedCiphersuites = true;
-
-        NamedGroup group =  context.getSiteReport().getSupportedTls13Groups().get(0);
-        config.setDefaultClientKeyShareNamedGroups(group);
+    public void noOverlappingParameters(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
 
         ClientHelloMessage chm = new ClientHelloMessage(config);
+        //TODO: should we use actually unsupported groups here (if there are any)?
+        //using a GREASE group does not seem to be what the RFC means here
         chm.getExtension(KeyShareExtensionMessage.class).getKeyShareList().get(0).setGroupConfig(NamedGroup.GREASE_00);
 
         WorkflowTrace trace = new WorkflowTrace();

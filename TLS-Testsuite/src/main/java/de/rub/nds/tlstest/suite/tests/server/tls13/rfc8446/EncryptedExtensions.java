@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @RFC(number = 8446, section = "4.3.1  Encrypted Extensions")
@@ -38,9 +39,8 @@ public class EncryptedExtensions extends Tls13Test {
     @TlsTest(description = "The client MUST check EncryptedExtensions for the " +
             "presence of any forbidden extensions and if any are found MUST abort " +
             "the handshake with an \"illegal_parameter\" alert.", interoperabilitySeverity = SeverityLevel.CRITICAL)
-    public void includedInvalidExtensions(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
-        Config c = this.getConfig();
+    public void includedInvalidExtensions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 

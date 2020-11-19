@@ -22,14 +22,16 @@ import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @RFC(number = 8446, section = "4.2.2 Cookie")
 public class Cookie extends Tls13Test {
 
     @TlsTest(description = "Clients MUST NOT use cookies in their initial ClientHello in subsequent connections.")
-    public void clientHelloContainsCookieExtension(WorkflowRunner runner) {
-        runner.replaceSupportedCiphersuites = true;
+    public void clientHelloContainsCookieExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
 
         Config c = this.getConfig();
         ClientHelloMessage clientHello = new ClientHelloMessage(c);

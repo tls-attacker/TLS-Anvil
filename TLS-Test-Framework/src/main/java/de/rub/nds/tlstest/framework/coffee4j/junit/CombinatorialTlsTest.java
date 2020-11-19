@@ -16,6 +16,7 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 @Retention(RetentionPolicy.RUNTIME)
 @TestTemplate
 @ExtendWith(CombinatorialTestExtension.class)
+@Execution(ExecutionMode.SAME_THREAD)
 public @interface CombinatorialTlsTest {
     
     /**

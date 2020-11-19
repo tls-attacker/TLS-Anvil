@@ -104,7 +104,8 @@ public class CertificateVerify extends Tls13Test {
     @TlsTest(description = "RSA signatures MUST use an RSASSA-PSS algorithm, " +
             "regardless of whether RSASSA-PKCS1-v1_5 algorithms " +
             "appear in \"signature_algorithms\". The SHA-1 algorithm " +
-            "MUST NOT be used in any signatures of CertificateVerify messages.", securitySeverity = SeverityLevel.MEDIUM)
+            "MUST NOT be used in any signatures of CertificateVerify messages.")
+    @Security(SeverityLevel.MEDIUM)
     @MethodCondition(method = "supportsLegacyECDSASAHAlgorithms")
     public void selectLegacyECDSASignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

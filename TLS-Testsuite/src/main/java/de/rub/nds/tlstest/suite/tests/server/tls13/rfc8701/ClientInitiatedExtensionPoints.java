@@ -59,7 +59,6 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @RFC(number = 8701, section = "3. Client-Initiated Extension Points")
-@Tag("WIP")
 public class ClientInitiatedExtensionPoints extends Tls13Test {
 
     @TlsTest(description = "A client MAY select one or more GREASE cipher suite values and advertise them in the \"cipher_suites\" field." +

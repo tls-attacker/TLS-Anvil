@@ -142,7 +142,7 @@ public class ServerHello extends Tls13Test {
     @Security(SeverityLevel.HIGH)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void testRandomDowngradeValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+        Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
 
         ModifiableByteArray downgradeRandom = new ModifiableByteArray();
         VariableModification<byte[]> mod = ByteArrayModificationFactory.insert(new byte[]{0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x01}, 24);

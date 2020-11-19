@@ -87,7 +87,7 @@ public class SupportedVersions extends Tls13Test {
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void selectOlderTlsVersionInTls12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+        Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
 
         c.setAddSupportedVersionsExtension(true);
         c.setEnforceSettings(true);

@@ -25,7 +25,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @TestEndpoint(endpoint = TestEndpointType.CLIENT)
 @Tag("client")
-@Test
 public @interface ClientTest {
 
 }

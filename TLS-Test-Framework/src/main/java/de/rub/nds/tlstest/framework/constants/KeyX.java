@@ -48,13 +48,6 @@ public class KeyX implements KeyExchange {
         this.requiresServerKeyExchMsg = exchange.requiresServerKeyExchMsg();
     }
     
-    public KeyX(ModelFromScope scope) {
-        super();
-        this.supportedKxs = scope.requiredKeyEx();
-        this.mergeSupportedWithClassSupported = scope.mergeSupportedWithClassSupported();
-        this.requiresServerKeyExchMsg = scope.requiresServerKeyExchMsg();
-    }
-    
     public KeyX(KeyExchangeType[] supportedKxs, boolean mergeSupportedWithClassSupported, boolean requiresServerKeyExchMsg) {
         this.supportedKxs = supportedKxs;
         this.mergeSupportedWithClassSupported = mergeSupportedWithClassSupported;

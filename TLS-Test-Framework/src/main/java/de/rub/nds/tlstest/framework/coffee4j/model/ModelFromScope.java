@@ -26,8 +26,4 @@ public @interface ModelFromScope {
     ModelType baseModel() default ModelType.GENERIC;
     DerivationType[] scopeLimitations() default {};
     DerivationType[] scopeExtensions() default {};
-    
-    KeyExchangeType[] requiredKeyEx() default {KeyExchangeType.ALL12, KeyExchangeType.ALL13};
-    boolean mergeSupportedWithClassSupported() default false;
-    boolean requiresServerKeyExchMsg() default false;
 }

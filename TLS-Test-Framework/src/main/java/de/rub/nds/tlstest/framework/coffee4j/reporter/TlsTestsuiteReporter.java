@@ -13,14 +13,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.io.PrintStream;
 import java.util.List;
-import java.util.stream.Collectors;
 
-/**
- *
- * @author marcel
- */
 public class TlsTestsuiteReporter implements ExecutionReporter {
     private static final Logger LOGGER = LogManager.getLogger();
 

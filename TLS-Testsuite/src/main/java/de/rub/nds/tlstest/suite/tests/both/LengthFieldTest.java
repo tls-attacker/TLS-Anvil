@@ -15,34 +15,39 @@ import de.rub.nds.modifiablevariable.singlebyte.ModifiableByte;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.protocol.ModifiableVariableHolder;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ProtocolMessage;
-import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.ManualConfig;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 
 /**
@@ -52,6 +57,11 @@ import static org.junit.Assert.*;
  *   it is necessary to execute the test against different versions of a single TLS implemenation or
  *   different TLS implementations and compare the number failed tests. The direct comparision of the
  *   failed tests count only works, if the tested TLS implementations support the same set of CipherSuites.
+ * 
+ * TODO: Trello task says these tests must be made 'explicit'. For now, the Coffe4j integration is a little
+ * messy - we fake a TCP fragmentation derivation that we never apply. In addition, the test methods generate
+ * further tests themselves which is not what we want(?) but this should be solved by adding explicit tests.
+ * Currently, all tests should fail since there is always a workflow that succeeds as stated above.
  */
 public class LengthFieldTest extends TlsGenericTest {
 
@@ -60,10 +70,10 @@ public class LengthFieldTest extends TlsGenericTest {
      * @param runningMode The mode used to create a workflow using WorkflowConfigurationFactory
      * @return An AnnotatedStateContainer, where each state contains a complete handshake workflow modifying a single length field.
      */
-    private AnnotatedStateContainer generateWorkflows(Config c, RunningModeType runningMode) {
+    private List<WorkflowTrace> generateWorkflows(Config c, RunningModeType runningMode) {
         WorkflowTrace origTrace = new WorkflowConfigurationFactory(c).createWorkflowTrace(WorkflowTraceType.HANDSHAKE, runningMode);
         List<ModifiableFields> origFields = ModifiableFields.forWorkflowTrace(origTrace);
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
+        List<WorkflowTrace> modifiedTraces = new LinkedList<>();
 
         for (int i = 0; i < origFields.size(); i++) {
             for (int j = 0; j < origFields.get(i).getFields().size(); j++) {
@@ -91,32 +101,18 @@ public class LengthFieldTest extends TlsGenericTest {
                     LOGGER.error("Exception occurred", e);
                 }
 
-                Config copy = c.createCopy();
-                AnnotatedState state = new AnnotatedState(new State(copy, trace));
-                state.setInspectedCipherSuite(c.getDefaultSelectedCipherSuite());
-                state.addAdditionalTestInfo(transformation);
-                container.add(state);
+                modifiedTraces.add(trace);
             }
         }
 
-        return container;
+        return modifiedTraces;
     }
 
-    private AnnotatedStateContainer getContainer(Config c, List<CipherSuite> cipherSuites, RunningModeType runningMode) {
-        AnnotatedStateContainer container = new AnnotatedStateContainer();
-        for (CipherSuite i : cipherSuites) {
-            c.setDefaultClientSupportedCiphersuites(i);
-            c.setDefaultServerSupportedCiphersuites(i);
-            c.setDefaultSelectedCipherSuite(i);
-
-            c.getDefaultServerConnection().setTimeout(1000);
-            c.getDefaultServerConnection().setFirstTimeout(5000);
-            c.getDefaultClientConnection().setTimeout(1000);
-            c.getDefaultClientConnection().setFirstTimeout(5000);
-
-            container.addAll(generateWorkflows(c, runningMode));
-        }
-        return container;
+    private void setTimeouts(Config c) {
+        c.getDefaultServerConnection().setTimeout(1000);
+        c.getDefaultServerConnection().setFirstTimeout(5000);
+        c.getDefaultClientConnection().setTimeout(1000);
+        c.getDefaultClientConnection().setFirstTimeout(5000);
     }
 
 
@@ -138,64 +134,75 @@ public class LengthFieldTest extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @TlsTest(description = "Manipulating length fields")
-    public void serverTestTls13(WorkflowRunner runner) {
-        runner.useRecordFragmentationDerivation = false;
-        runner.useTCPFragmentationDerivation = false;
+    @KeyExchange(supported = KeyExchangeType.ALL13)
+    @ScopeLimitations({DerivationType.RECORD_LENGTH})
+    @ManualConfig(DerivationType.TCP_FRAGMENTATION)
+    public void serverTestTls13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = prepareConfig(context.getConfig().createTls13Config(), argumentAccessor, runner);
 
-        List<CipherSuite> tls13SupportedCipherSuites = new ArrayList<>(context.getSiteReport().getSupportedTls13CipherSuites());
-        Config c = context.getConfig().createTls13Config();
         c.setReceiveFinalTcpSocketStateWithTimeout(true);
-        AnnotatedStateContainer container = getContainer(c, tls13SupportedCipherSuites, RunningModeType.CLIENT);
-
-        runner.execute(container).validateFinal(this::validate);
+        setTimeouts(c);
+        List<WorkflowTrace> traces = generateWorkflows(c,RunningModeType.CLIENT);
+        
+        for(WorkflowTrace trace: traces) {
+            runner.execute(trace, c.createCopy()).validateFinal(this::validate);
+        }
     }
 
     @ServerTest
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @TlsTest(description = "Manipulating length fields")
-    public void serverTestTls12(WorkflowRunner runner) {
-        runner.useRecordFragmentationDerivation = false;
-        runner.useTCPFragmentationDerivation = false;
+    @KeyExchange(supported = KeyExchangeType.ALL12)
+    @ScopeLimitations({DerivationType.RECORD_LENGTH})
+    @ManualConfig(DerivationType.TCP_FRAGMENTATION)
+    public void serverTestTls12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
 
-        List<CipherSuite> cipherSuites = new ArrayList<>(context.getSiteReport().getCipherSuites());
-        Config c = context.getConfig().createConfig();
         c.setReceiveFinalTcpSocketStateWithTimeout(true);
-        AnnotatedStateContainer container = getContainer(c, cipherSuites, RunningModeType.CLIENT);
-
-        runner.execute(container).validateFinal(this::validate);
+        setTimeouts(c);
+        List<WorkflowTrace> traces = generateWorkflows(c,RunningModeType.CLIENT);
+        
+        for(WorkflowTrace trace: traces) {
+            runner.execute(trace, c.createCopy()).validateFinal(this::validate);
+        }
     }
 
     @ClientTest
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @TlsTest(description = "Manipulating length fields")
-    public void clientTestTls13(WorkflowRunner runner) {
-        runner.useRecordFragmentationDerivation = false;
-        runner.useTCPFragmentationDerivation = false;
-
-        List<CipherSuite> tls13SupportedCipherSuites = new ArrayList<>(context.getSiteReport().getSupportedTls13CipherSuites());
-        Config c = context.getConfig().createTls13Config();
+    @KeyExchange(supported = KeyExchangeType.ALL13)
+    @ScopeLimitations({DerivationType.RECORD_LENGTH})
+    @ManualConfig(DerivationType.TCP_FRAGMENTATION)
+    public void clientTestTls13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = prepareConfig(context.getConfig().createTls13Config(), argumentAccessor, runner);
         c.setReceiveFinalTcpSocketStateWithTimeout(true);
-        AnnotatedStateContainer container = getContainer(c, tls13SupportedCipherSuites, RunningModeType.SERVER);
-
-        runner.execute(container).validateFinal(this::validate);
+        setTimeouts(c);
+        List<WorkflowTrace> traces = generateWorkflows(c,RunningModeType.SERVER);
+        
+        for(WorkflowTrace trace: traces) {
+            runner.execute(trace, c.createCopy()).validateFinal(this::validate);
+        }
+        
     }
 
     @ClientTest
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @TlsTest(description = "Manipulating length fields")
-    public void clientTestTls12(WorkflowRunner runner) {
-        runner.useRecordFragmentationDerivation = false;
-        runner.useTCPFragmentationDerivation = false;
-
-        List<CipherSuite> cipherSuites = new ArrayList<>(context.getSiteReport().getCipherSuites());
-        Config c = context.getConfig().createConfig();
+    @KeyExchange(supported = KeyExchangeType.ALL12)
+    @ScopeLimitations({DerivationType.RECORD_LENGTH})
+    @ManualConfig(DerivationType.TCP_FRAGMENTATION)
+    public void clientTestTls12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
         c.setReceiveFinalTcpSocketStateWithTimeout(true);
-        AnnotatedStateContainer container = getContainer(c, cipherSuites, RunningModeType.SERVER);
-
-        runner.execute(container).validateFinal(this::validate);
+        setTimeouts(c);
+        List<WorkflowTrace> traces = generateWorkflows(c,RunningModeType.SERVER);
+        
+        for(WorkflowTrace trace: traces) {
+            runner.execute(trace, c.createCopy()).validateFinal(this::validate);
+        }
     }
 }
 

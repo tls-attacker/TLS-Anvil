@@ -70,6 +70,10 @@ public abstract class DerivationParameter<T> {
         return getConstrainedParameterValues(context, scope).size() > 1;
     }
     
+    public boolean isEmpty(TestContext context, DerivationScope scope) {
+        return getConstrainedParameterValues(context, scope).isEmpty();
+    }
+    
     public Parameter.Builder getParameterBuilder(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = getConstrainedParameterValues(context, scope);
         return Parameter.parameter(type.name()).values(parameterValues.toArray());

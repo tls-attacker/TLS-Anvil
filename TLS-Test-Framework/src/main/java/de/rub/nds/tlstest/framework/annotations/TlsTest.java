@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.TYPE})
-@CombinatorialTlsTest
+@TestChooser
 @EnableFaultCharacterization(ImprovedDeltaDebugging.class)
 @ModelFromScope()
 @TlsReporter(TlsTestsuiteReporter.class)

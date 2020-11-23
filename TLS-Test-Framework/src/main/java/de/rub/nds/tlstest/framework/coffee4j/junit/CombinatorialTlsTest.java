@@ -17,6 +17,7 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 @TestTemplate
 @ExtendWith(CombinatorialTestExtension.class)
 @Execution(ExecutionMode.SAME_THREAD)
+@Deprecated
 public @interface CombinatorialTlsTest {
     
     /**

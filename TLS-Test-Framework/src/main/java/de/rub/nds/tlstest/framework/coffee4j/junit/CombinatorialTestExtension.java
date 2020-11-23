@@ -1,5 +1,9 @@
 package de.rub.nds.tlstest.framework.coffee4j.junit;
 
+import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.annotations.TestChooser;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
+import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
 import de.rwth.swc.coffee4j.junit.CombinatorialTest;
 import de.rwth.swc.coffee4j.junit.provider.configuration.ConfigurationLoader;
 import de.rwth.swc.coffee4j.junit.provider.model.ModelLoader;
@@ -40,7 +44,7 @@ public class CombinatorialTestExtension implements TestTemplateInvocationContext
         }
         
         final Method testMethod = extensionContext.getRequiredTestMethod();
-        if (!isAnnotated(testMethod, CombinatorialTlsTest.class)) {
+        if (!isAnnotated(testMethod, TestChooser.class)) {
             return false;
         }
         
@@ -85,8 +89,8 @@ public class CombinatorialTestExtension implements TestTemplateInvocationContext
     }
 
     private CombinatorialTestNameFormatter createNameFormatter(Method testMethod) {
-        final CombinatorialTlsTest combinatorialTest = findAnnotation(testMethod, CombinatorialTlsTest.class).orElseThrow(() -> new JUnitException("Illegal state: could not find combinatorial test annotation"));
-        final String name = Preconditions.notBlank(combinatorialTest.name().trim(), () -> "Configuration error: @" + CombinatorialTlsTest.class.getSimpleName() + " on method " + testMethod.getName() + " must be declared with a non-empty name.");
+        final TestChooser combinatorialTest = findAnnotation(testMethod, TestChooser.class).orElseThrow(() -> new JUnitException("Illegal state: could not find combinatorial test annotation"));
+        final String name = Preconditions.notBlank(combinatorialTest.name().trim(), () -> "Configuration error: @" + TestChooser.class.getSimpleName() + " on method " + testMethod.getName() + " must be declared with a non-empty name.");
         return new CombinatorialTestNameFormatter(name);
     }
     

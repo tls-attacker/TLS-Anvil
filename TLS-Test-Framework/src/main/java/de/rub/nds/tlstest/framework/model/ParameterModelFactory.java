@@ -24,7 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Provides a model for Coffee4J 
+ * Provides a model for Coffee4j or a SimpleTlsTest
  */
 public class ParameterModelFactory {
 
@@ -124,5 +124,22 @@ public class ParameterModelFactory {
             }
         }
         return staticParameters;
+    }
+    
+    public static boolean mustUseSimpleModel(TestContext context, DerivationScope scope) {
+        List<DerivationType> derivationTypes = getDerivationsForScope(scope);
+        Parameter.Builder[] builders  = getModelParameters(derivationTypes, context, scope);
+        return builders.length == 1;
+    }
+    
+    public static List<DerivationParameter> getSimpleModelVariations(TestContext context, DerivationScope scope) {
+        List<DerivationType> modelDerivations = getDerivationsForScope(scope);
+        for(DerivationType type: modelDerivations) {
+            DerivationParameter parameter = DerivationFactory.getInstance(type);
+            if(parameter.canBeModeled(context, scope)) {
+                return parameter.getConstrainedParameterValues(context, scope);
+            }
+        }
+        return null;
     }
 }

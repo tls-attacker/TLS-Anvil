@@ -59,9 +59,9 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
  *   failed tests count only works, if the tested TLS implementations support the same set of CipherSuites.
  * 
  * TODO: Trello task says these tests must be made 'explicit'. For now, the Coffe4j integration is a little
- * messy - we fake a TCP fragmentation derivation that we never apply. In addition, the test methods generate
- * further tests themselves which is not what we want(?) but this should be solved by adding explicit tests.
- * Currently, all tests should fail since there is always a workflow that succeeds as stated above.
+ * messy the test methods generate further tests themselves which is not what we want(?) but this should 
+ * be solved by adding explicit tests. Currently, all tests should fail since there is always a workflow that 
+ * succeeds as stated above.
  */
 public class LengthFieldTest extends TlsGenericTest {
 
@@ -135,8 +135,7 @@ public class LengthFieldTest extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @TlsTest(description = "Manipulating length fields")
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @ScopeLimitations({DerivationType.RECORD_LENGTH})
-    @ManualConfig(DerivationType.TCP_FRAGMENTATION)
+    @ScopeLimitations({DerivationType.RECORD_LENGTH, DerivationType.TCP_FRAGMENTATION})
     public void serverTestTls13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = prepareConfig(context.getConfig().createTls13Config(), argumentAccessor, runner);
 
@@ -154,8 +153,7 @@ public class LengthFieldTest extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @TlsTest(description = "Manipulating length fields")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @ScopeLimitations({DerivationType.RECORD_LENGTH})
-    @ManualConfig(DerivationType.TCP_FRAGMENTATION)
+    @ScopeLimitations({DerivationType.RECORD_LENGTH, DerivationType.TCP_FRAGMENTATION})
     public void serverTestTls12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
 
@@ -173,8 +171,7 @@ public class LengthFieldTest extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @TlsTest(description = "Manipulating length fields")
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @ScopeLimitations({DerivationType.RECORD_LENGTH})
-    @ManualConfig(DerivationType.TCP_FRAGMENTATION)
+    @ScopeLimitations({DerivationType.RECORD_LENGTH, DerivationType.TCP_FRAGMENTATION})
     public void clientTestTls13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = prepareConfig(context.getConfig().createTls13Config(), argumentAccessor, runner);
         c.setReceiveFinalTcpSocketStateWithTimeout(true);
@@ -192,8 +189,7 @@ public class LengthFieldTest extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @TlsTest(description = "Manipulating length fields")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @ScopeLimitations({DerivationType.RECORD_LENGTH})
-    @ManualConfig(DerivationType.TCP_FRAGMENTATION)
+    @ScopeLimitations({DerivationType.RECORD_LENGTH, DerivationType.TCP_FRAGMENTATION})
     public void clientTestTls12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
         c.setReceiveFinalTcpSocketStateWithTimeout(true);

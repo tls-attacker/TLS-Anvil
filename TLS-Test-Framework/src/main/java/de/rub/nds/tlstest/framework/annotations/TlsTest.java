@@ -11,7 +11,6 @@ package de.rub.nds.tlstest.framework.annotations;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.rub.nds.tlstest.framework.coffee4j.junit.CombinatorialTlsTest;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.coffee4j.reporter.TlsTestsuiteReporter;
 import de.rub.nds.tlstest.framework.coffee4j.reporter.TlsReporter;

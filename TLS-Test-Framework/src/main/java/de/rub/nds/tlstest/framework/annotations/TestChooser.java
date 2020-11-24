@@ -1,6 +1,5 @@
 package de.rub.nds.tlstest.framework.annotations;
 
-import de.rub.nds.tlstest.framework.coffee4j.junit.CombinatorialTlsTest;
 import de.rub.nds.tlstest.framework.simpleTest.TestChooserExtension;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

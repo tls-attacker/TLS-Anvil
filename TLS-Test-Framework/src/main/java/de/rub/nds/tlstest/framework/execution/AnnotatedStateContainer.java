@@ -78,18 +78,6 @@ public class  AnnotatedStateContainer {
     @JsonProperty("FailureInducingCombinations")
     List<DerivationContainer> failureInducingCombinations;
 
-    @Deprecated
-    public AnnotatedStateContainer() { }
-
-    @Deprecated
-    public AnnotatedStateContainer(ExtensionContext extensionContext, List<AnnotatedState> states) {
-        this.addAll(states);
-    }
-
-    @Deprecated
-    public AnnotatedStateContainer(ExtensionContext extensionContext, AnnotatedState... states) {
-        this(extensionContext, Arrays.asList(states));
-    }
 
     private AnnotatedStateContainer(ExtensionContext extensionContext) {
         this.uniqueId = extensionContext.getUniqueId();
@@ -109,13 +97,6 @@ public class  AnnotatedStateContainer {
         return container;
     }
 
-    @Deprecated
-    public void addAll(@Nonnull AnnotatedStateContainer container) {
-        List<AnnotatedState> states = container.getStates();
-        states.parallelStream().forEach(i -> i.setAssociatedContainer(this));
-        this.states.addAll(states);
-    }
-
     public void addAll(List<AnnotatedState> states) {
         states.parallelStream().forEach(i -> i.setAssociatedContainer(this));
         this.states.addAll(states);
@@ -128,29 +109,6 @@ public class  AnnotatedStateContainer {
     public void add(AnnotatedState state) {
         state.setAssociatedContainer(this);
         this.states.add(state);
-    }
-
-    /**
-     * Used by the test cases to validate the received messages.
-     * Iterates over the list of states and executes the lambda function for every state.
-     *
-     *
-     * @param finalValidation if set to true, an execption is thrown when the validation fails for one state
-     * @param f lambda function that accepts a annotated state
-     */
-    @Deprecated
-    public void validate(boolean finalValidation, Consumer<AnnotatedState> f) {
-
-    }
-
-    @Deprecated
-    public void validateFinal(Consumer<AnnotatedState> f) {
-        this.validate(true, f);
-    }
-
-    @Deprecated
-    public void validate(Consumer<AnnotatedState> f) {
-        this.validate(false, f);
     }
 
     public void finished() {

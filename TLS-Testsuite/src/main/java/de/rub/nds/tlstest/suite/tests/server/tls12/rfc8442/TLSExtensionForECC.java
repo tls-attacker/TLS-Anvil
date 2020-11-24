@@ -24,6 +24,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
@@ -36,16 +37,17 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -140,14 +142,17 @@ public class TLSExtensionForECC extends Tls12Test {
             "it MUST NOT negotiate the use of an ECC cipher suite.")
     @Interoperability(SeverityLevel.CRITICAL)
     @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ManualConfig(DerivationType.CIPHERSUITE)
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     public void InvalidEllipticCurve_WithNonECCCiphersuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
-        List<CipherSuite> cipherSuiteList = CipherSuite.getImplemented();
-        cipherSuiteList.removeIf(i -> KeyExchangeType.forCipherSuite(i) != KeyExchangeType.ECDH);
+        List<CipherSuite> cipherSuiteList = CipherSuite.getImplemented().stream()
+                .filter(i -> KeyExchangeType.forCipherSuite(i) == KeyExchangeType.ECDH)
+                .collect(Collectors.toList());
+        cipherSuiteList.add(derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue());
 
         c.setDefaultClientSupportedCiphersuites(cipherSuiteList);
 
@@ -167,7 +172,11 @@ public class TLSExtensionForECC extends Tls12Test {
             WorkflowTrace trace = i.getWorkflowTrace();
             ServerHelloMessage message = trace.getFirstReceivedMessage(ServerHelloMessage.class);
             assertNotNull(AssertMsgs.ServerHelloNotReceived, message);
-            assertArrayEquals(AssertMsgs.UnexpectedCipherSuite, i.getInspectedCipherSuite().getByteValue(), message.getSelectedCipherSuite().getValue());
+            assertArrayEquals(
+                    AssertMsgs.UnexpectedCipherSuite,
+                    derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue().getByteValue(),
+                    message.getSelectedCipherSuite().getValue()
+            );
         });
     }
     

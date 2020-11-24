@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /**
  *
@@ -20,7 +21,7 @@ public class SimpleTestParameterResolver implements ParameterResolver  {
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        if(parameterContext.getParameter().getName().equals("argumentAccessor")) {
+        if(parameterContext.getParameter().getType() == ArgumentsAccessor.class) {
             return true;
         }
         return false;

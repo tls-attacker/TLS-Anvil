@@ -140,6 +140,8 @@ public class TLSExtensionForECC extends Tls12Test {
             "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake " +
             "while restricting itself to the enumerated curves and point formats, " +
             "it MUST NOT negotiate the use of an ECC cipher suite.")
+    @TestDescription("Send single non ECC cipher suite and all ECC cipher suites with an invalid curve. " +
+            "Check if the server selects the non ECC cipher suite.")
     @Interoperability(SeverityLevel.CRITICAL)
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @ManualConfig(DerivationType.CIPHERSUITE)

@@ -21,6 +21,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
@@ -30,6 +31,7 @@ import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -49,20 +51,20 @@ public class RC4Ciphersuites extends Tls12Test {
         return cipherSuite.toString().contains("RC4");
     }
     
-    /*
-    TODO: isn't this a duplicate?
-    
+
     @TlsTest(description = "TLS servers MUST NOT select an RC4 cipher suite when a TLS client " +
-            "sends such a cipher suite in the ClientHello message.", securitySeverity = SeverityLevel.CRITICAL)
+            "sends such a cipher suite in the ClientHello message.")
+    @ManualConfig(DerivationType.CIPHERSUITE)
     @MethodCondition(method = "supportsRC4")
-    public void offerRC4AndOtherCiphers(WorkflowRunner runner) {
-        Config c = this.getConfig();
-        runner.appendEachSupportedCiphersuiteToClientSupported = true;
+    @Security(SeverityLevel.CRITICAL)
+    public void offerRC4AndOtherCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        CipherSuite selectedCipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
 
         List<CipherSuite> implemented = CipherSuite.getImplemented();
         implemented.removeIf(i -> !i.toString().contains("RC4"));
-
         c.setDefaultClientSupportedCiphersuites(implemented);
+        c.getDefaultClientSupportedCiphersuites().add(selectedCipherSuite);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
@@ -75,9 +77,9 @@ public class RC4Ciphersuites extends Tls12Test {
             Validator.executedAsPlanned(i);
 
             ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
-            assertArrayEquals(AssertMsgs.UnexpectedCipherSuite, i.getInspectedCipherSuite().getByteValue(), msg.getSelectedCipherSuite().getValue());
+            assertArrayEquals(AssertMsgs.UnexpectedCipherSuite, selectedCipherSuite.getByteValue(), msg.getSelectedCipherSuite().getValue());
         });
-    }*/
+    }
 
     @TlsTest(description = "If the TLS client only offers RC4 cipher suites, the TLS server " +
             "MUST terminate the handshake. The TLS server MAY send the " +

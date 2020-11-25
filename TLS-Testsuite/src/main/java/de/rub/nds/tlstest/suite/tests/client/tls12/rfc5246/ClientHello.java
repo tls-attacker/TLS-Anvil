@@ -19,7 +19,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import static org.junit.Assert.assertTrue;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @RFC(number = 5246, section = "7.4.1.2. Client Hello")
 @ClientTest

@@ -19,7 +19,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 @RFC(number = 5246, section = "A.5. The Cipher Suite")

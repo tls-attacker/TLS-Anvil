@@ -16,7 +16,7 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 @RFC(number = 5246, section = "9")

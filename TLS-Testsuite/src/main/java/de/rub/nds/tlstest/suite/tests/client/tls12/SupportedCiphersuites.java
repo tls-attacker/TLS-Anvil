@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @ClientTest
 public class SupportedCiphersuites extends Tls12Test {

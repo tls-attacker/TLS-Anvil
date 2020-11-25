@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertFalse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @RFC(number = 6066, section = "3. Server Name Indication")
 @ClientTest

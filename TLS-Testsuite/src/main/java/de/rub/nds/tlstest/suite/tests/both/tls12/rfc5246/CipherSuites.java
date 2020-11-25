@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @RFC(number = 5264, section = "1.2 Major Differences from TLS 1.1")
 public class CipherSuites extends Tls12Test {

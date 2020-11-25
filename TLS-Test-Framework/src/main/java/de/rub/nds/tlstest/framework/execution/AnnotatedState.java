@@ -52,10 +52,6 @@ public class AnnotatedState {
     @JsonProperty("Result")
     private TestResult result = TestResult.NOT_SPECIFIED;
 
-    @XmlElement(name = "InspectedCiphersuite")
-    @JsonProperty("InspectedCiphersuite")
-    private CipherSuite inspectedCipherSuite;
-
     @JsonProperty("DisplayName")
     private String displayName;
 
@@ -64,8 +60,6 @@ public class AnnotatedState {
     private List<String> additionalResultInformation = null;
     private List<String> additionalTestInformation = null;
 
-    @Deprecated
-    private boolean omitFromTests = false;
     private ExtensionContext extensionContext;
 
     private AnnotatedState() {}
@@ -77,11 +71,6 @@ public class AnnotatedState {
         this.associatedContainer = AnnotatedStateContainer.forExtensionContext(context);
         this.associatedContainer.add(this);
         this.derivationContainer = container;
-    }
-
-    @Deprecated
-    public AnnotatedState(State state) {
-        this.state = state;
     }
 
 
@@ -109,16 +98,6 @@ public class AnnotatedState {
     public void setFailedReason(Throwable failedReason) {
         this.failedReason = failedReason;
         this.result = this.failedReason != null ? TestResult.FAILED : TestResult.NOT_SPECIFIED;
-    }
-
-    @Deprecated
-    public CipherSuite getInspectedCipherSuite() {
-        return inspectedCipherSuite;
-    }
-
-    @Deprecated
-    public void setInspectedCipherSuite(CipherSuite inspectedCipherSuite) {
-        this.inspectedCipherSuite = inspectedCipherSuite;
     }
 
     public void validateFinal(Consumer<AnnotatedState> validateFunction) {
@@ -247,16 +226,6 @@ public class AnnotatedState {
 
     public void setAssociatedContainer(AnnotatedStateContainer associatedContainer) {
         this.associatedContainer = associatedContainer;
-    }
-
-    @Deprecated
-    public boolean isOmitFromTests() {
-        return omitFromTests;
-    }
-
-    @Deprecated
-    public void setOmitFromTests(boolean omitFromTests) {
-        this.omitFromTests = omitFromTests;
     }
 
     public ExtensionContext getExtensionContext() {

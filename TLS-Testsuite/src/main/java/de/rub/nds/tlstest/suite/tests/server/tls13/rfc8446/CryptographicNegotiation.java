@@ -24,6 +24,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
@@ -31,10 +32,14 @@ import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
@@ -43,18 +48,24 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 @RFC(number = 8446, section = "4.1.1 Cryptographic Negotiation")
 public class CryptographicNegotiation extends Tls13Test {
+    
+    public List<DerivationParameter> getUnsupportedGroups() {
+        List<DerivationParameter> unsupportedGroups = new LinkedList<>();
+        List<NamedGroup> supportedTls13Groups = context.getSiteReport().getSupportedTls13Groups();
+        NamedGroup.getImplemented().stream().filter(group -> !supportedTls13Groups.contains(group))
+                .forEach(unsupportedGroup -> unsupportedGroups.add(new NamedGroupDerivation(unsupportedGroup)));
+        return unsupportedGroups;
+    }
 
     @TlsTest(description = "If the server is unable to negotiate a supported set of parameters " +
             "(i.e., there is no overlap between the client and server parameters), it MUST abort " +
             "the handshake with either a \"handshake_failure\" or \"insufficient_security\" fatal alert (see Section 6).")
     @Interoperability(SeverityLevel.MEDIUM)
+    @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getUnsupportedGroups")
     public void noOverlappingParameters(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
         ClientHelloMessage chm = new ClientHelloMessage(config);
-        //TODO: should we use actually unsupported groups here (if there are any)?
-        //using a GREASE group does not seem to be what the RFC means here
-        chm.getExtension(KeyShareExtensionMessage.class).getKeyShareList().get(0).setGroupConfig(NamedGroup.GREASE_00);
 
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(
@@ -77,6 +88,6 @@ public class CryptographicNegotiation extends Tls13Test {
             );
         });
     }
-
+   
 
 }

@@ -84,17 +84,6 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         ProtocolVersion selectedGreaseVersion = derivationContainer.getDerivation(GreaseProtocolVersionDerivation.class).getSelectedValue();
 
-        //TODO: should this remain as it was before? i.e focus on GREASE values offered by client
-        /*ClientHelloMessage ch = context.getReceivedClientHelloMessage();
-
-        List<ProtocolVersion> versions = ProtocolVersion.getProtocolVersions(ch.getExtension(SupportedVersionsExtensionMessage.class).getSupportedVersions().getValue());
-        versions = versions.stream().filter(ProtocolVersion::isGrease).collect(Collectors.toList());
-        ProtocolVersion v;
-        if (versions.size() > 0) {
-            v = versions.get(0);
-        } else {
-            v = ProtocolVersion.GREASE_09;
-        }*/
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         SupportedVersionsExtensionMessage ext = sh.getExtension(SupportedVersionsExtensionMessage.class);
         ext.setSupportedVersions(Modifiable.explicit(selectedGreaseVersion.getValue()));

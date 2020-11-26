@@ -313,14 +313,33 @@ public class TestRunner {
             throw new RuntimeException("Client preparation could not be completed.");
         }
 
+
+        Config config = this.testConfig.createConfig();
+        CipherSuite suite = tls12CipherSuites.iterator().next();
+        config.setDefaultServerSupportedCiphersuites(suite);
+        config.setDefaultSelectedCipherSuite(suite);
+        config.setDefaultMaxRecordData(50);
+
+        State state = new State(config, new WorkflowConfigurationFactory(config).createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER));
+        StateExecutionServerTask task = new StateExecutionServerTask(state, testConfig.getTestClientDelegate().getServerSocket(), 2);
+        task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getTriggerScript());
+        executor.bulkExecuteTasks(task);
+        boolean supportsRecordFragmentation = state.getWorkflowTrace().executedAsPlanned();
+
         TestSiteReport report = new TestSiteReport("");
         report.addCipherSuites(tls12CipherSuites);
         report.addCipherSuites(tls13CipherSuites);
         report.setReceivedClientHello(clientHello);
+        report.setSupportsRecordFragmentation(supportsRecordFragmentation);
 
         EllipticCurvesExtensionMessage ecExt = clientHello.getExtension(EllipticCurvesExtensionMessage.class);
         if (ecExt != null) {
-            report.setSupportedNamedGroups(NamedGroup.namedGroupsFromByteArray(ecExt.getSupportedGroups().getValue()));
+            report.setSupportedNamedGroups(
+                    NamedGroup.namedGroupsFromByteArray(ecExt.getSupportedGroups().getValue())
+                        .stream()
+                        .filter(i -> NamedGroup.getImplemented().contains(i))
+                        .collect(Collectors.toList())
+            );
         }
 
         SupportedVersionsExtensionMessage supportedVersionsExt = clientHello.getExtension(SupportedVersionsExtensionMessage.class);
@@ -334,7 +353,11 @@ public class TestRunner {
 
         SignatureAndHashAlgorithmsExtensionMessage sahExt = clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
         if (sahExt != null) {
-            report.setSupportedSignatureAndHashAlgorithms(SignatureAndHashAlgorithm.getSignatureAndHashAlgorithms(sahExt.getSignatureAndHashAlgorithms().getValue()));
+            report.setSupportedSignatureAndHashAlgorithms(
+                    SignatureAndHashAlgorithm.getSignatureAndHashAlgorithms(sahExt.getSignatureAndHashAlgorithms().getValue()).stream()
+                            .filter(i -> SignatureAndHashAlgorithm.getImplemented().contains(i))
+                            .collect(Collectors.toList())
+            );
         }
 
         List<ExtensionType> extensions = clientHello.getExtensions().stream()

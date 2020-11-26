@@ -30,7 +30,6 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
     private static final Logger LOGGER = LogManager.getLogger();
 
     private AnnotatedStateContainer createResult(ExtensionContext context, TestResult result) {
-        TestContext.getInstance().testFinished();
 
         String uniqueId = Utils.getTemplateContainerExtensionContext(context).getUniqueId();
         AnnotatedStateContainer container = TestContext.getInstance().getTestResults().get(uniqueId);
@@ -38,6 +37,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
             return container;
         }
 
+        TestContext.getInstance().testFinished();
         container = AnnotatedStateContainer.forExtensionContext(context);
         container.setResultRaw(result.getValue());
         return container;

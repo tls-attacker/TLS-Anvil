@@ -42,7 +42,9 @@ import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.reporting.ExecutionListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.TestTag;
+import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.TagFilter;
@@ -404,8 +406,10 @@ public class TestRunner {
 
 
     private boolean countTests(TestIdentifier i, String versionS, String modeS) {
-        if (!i.isTest())
+        TestSource source = i.getSource().orElse(null);
+        if (!i.isTest() && (source == null || !source.getClass().equals(MethodSource.class))) {
             return false;
+        }
 
         Set<TestTag> tags = i.getTags();
         boolean version = tags.stream().anyMatch(j -> j.getName().equals(versionS));
@@ -454,12 +458,15 @@ public class TestRunner {
                         .enableTestExecutionListenerAutoRegistration(false)
                         .addTestExecutionListeners(listener)
                         .addTestExecutionListeners(reporting)
-                        .addTestExecutionListeners(listenerLog)
+                        //.addTestExecutionListeners(listenerLog)
                         .build()
         );
         
         TestPlan testplan = launcher.discover(request);
-        long testcases = testplan.countTestIdentifiers(TestIdentifier::isTest);
+        long testcases = testplan.countTestIdentifiers(i -> {
+            TestSource source = i.getSource().orElse(null);
+            return i.isTest() || (source != null && source.getClass().equals(MethodSource.class));
+        });
         long clientTls12 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls12", "client"));
         long clientTls13 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls13", "client"));
         long serverTls12 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls12", "server"));

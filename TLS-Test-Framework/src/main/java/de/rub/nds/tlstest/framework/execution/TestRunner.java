@@ -219,7 +219,8 @@ public class TestRunner {
                 ProbeType.PROTOCOL_VERSION,
                 ProbeType.EC_POINT_FORMAT,
                 ProbeType.RESUMPTION,
-                ProbeType.EXTENSIONS
+                ProbeType.EXTENSIONS,
+                ProbeType.RECORD_FRAGMENTATION
         );
         scannerConfig.setOverallThreads(1);
         scannerConfig.setParallelProbes(1);

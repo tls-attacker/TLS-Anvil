@@ -34,9 +34,12 @@ public class RecordLengthDerivation extends DerivationParameter<Integer>  {
     @Override
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new RecordLengthDerivation(16384));
-        parameterValues.add(new RecordLengthDerivation(50));
-        parameterValues.add(new RecordLengthDerivation(111));
+
+        if (context.getSiteReport().getSupportsRecordFragmentation()) {
+            parameterValues.add(new RecordLengthDerivation(16384));
+            parameterValues.add(new RecordLengthDerivation(50));
+            parameterValues.add(new RecordLengthDerivation(111));
+        }
         
         return parameterValues;
     }

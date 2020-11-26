@@ -15,6 +15,8 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import de.rub.nds.tlstest.framework.constants.TestCategory;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.platform.launcher.TestIdentifier;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -30,6 +32,8 @@ import java.util.Map;
 @XmlRootElement(name = "TestResultReport")
 @XmlAccessorType(XmlAccessType.NONE)
 public class TestResultContainer {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     @XmlElement(name = "DisplayName")
     @JsonProperty("DisplayName")
     private String displayName;
@@ -146,6 +150,7 @@ public class TestResultContainer {
 
         TestResultContainer parentContainer = getContainerWithId(parentId);
         if (parentContainer == null) {
+            LOGGER.error("Could not add child container");
             throw new RuntimeException("Could not add child container");
         }
 

@@ -178,7 +178,9 @@ public class AnnotatedState {
     public String getUuid() {
         StringBuilder toHash = new StringBuilder();
         toHash.append(this.getAdditionalTestInformation());
-        toHash.append(this.derivationContainer.toString());
+        if (this.derivationContainer != null) {
+            toHash.append(this.derivationContainer.toString());
+        }
         toHash.append(associatedContainer.getTestMethodConfig().getClassName());
         toHash.append(associatedContainer.getTestMethodConfig().getMethodName());
 

@@ -13,23 +13,20 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
 import de.rub.nds.tlsscanner.serverscanner.probe.namedcurve.NamedCurveWitness;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
-import de.rwth.swc.coffee4j.model.constraints.ConstraintStatus;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -50,17 +47,11 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<NamedGroup> groupList = context.getSiteReport().getSupportedTls13Groups();
-        if (!scope.isTls13Test()) {
+        if (!scope.isTls13Test() || scope.getKeyExchangeRequirements().supports(KeyExchangeType.ECDH)) {
             groupList = context.getSiteReport().getSupportedNamedGroups();
             parameterValues.add(new NamedGroupDerivation(null));
         } else if (scope.isTls13Test() && context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
-            ClientHelloMessage chm = context.getReceivedClientHelloMessage();
-            KeyShareExtensionMessage keyshareExt = chm.getExtension(KeyShareExtensionMessage.class);
-            groupList = new LinkedList<>();
-            List<KeyShareEntry> ksEntries = keyshareExt.getKeyShareList();
-            for (KeyShareEntry entry : ksEntries) {
-                groupList.add(entry.getGroupConfig());
-            }
+            groupList = context.getSiteReport().getSupportedTls13Groups().stream().filter(group -> NamedGroup.getImplemented().contains(group)).collect(Collectors.toList());
         }
         groupList.forEach(group -> parameterValues.add(new NamedGroupDerivation(group)));
 

@@ -11,23 +11,29 @@ package de.rub.nds.tlstest.framework.execution;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
@@ -68,6 +74,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -272,11 +279,11 @@ public class TestRunner {
 
             }
         }
-
+        
         ParallelExecutor executor = new ParallelExecutor(testConfig.getParallel() * 3, 2);
         LOGGER.info("Executing client exploration...");
         executor.bulkExecuteTasks(tasks);
-
+        
 
         Set<CipherSuite> tls12CipherSuites = new HashSet<>();
         Set<CipherSuite> tls13CipherSuites = new HashSet<>();
@@ -304,6 +311,36 @@ public class TestRunner {
                 throw new RuntimeException(e);
             }
         }
+        
+        List<State> keyShareStates = new LinkedList<>();
+        List<TlsTask> keyShareTasks = new LinkedList<>();
+        if(clientHello.containsExtension(ExtensionType.ELLIPTIC_CURVES) && clientHello.containsExtension(ExtensionType.KEY_SHARE)) {
+            keyShareStates = buildClientKeyShareProbeStates(clientHello);
+            if(!keyShareStates.isEmpty()) {
+                for(State state: keyShareStates) {
+                    StateExecutionServerTask task = new StateExecutionServerTask(state, testConfig.getTestClientDelegate().getServerSocket(), 2);
+                    task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getTriggerScript());
+                    keyShareTasks.add(task);
+                }
+                executor.bulkExecuteTasks(keyShareTasks);
+            }
+        }
+        List<NamedGroup> additionalTls13Groups = new LinkedList<>();
+        for(State state: keyShareStates) {
+            try {
+                //test for Finished instead of asPlanned(), to ignore legacy CCS
+                if (WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.FINISHED, state.getWorkflowTrace())) {
+                    additionalTls13Groups.add(state.getConfig().getDefaultSelectedNamedGroup());
+                }
+                else {
+                    failed++;
+                    LOGGER.debug("Workflow failed (" + state.getConfig().getDefaultSelectedNamedGroup() + ")");
+                }
+            } catch (Exception e) {
+                LOGGER.error(e);
+                throw new RuntimeException(e);
+            }
+        }
 
         LOGGER.info(String.format("%d/%d client preparation workflows failed.", failed, states.size()));
         if (failed == states.size()) {
@@ -314,6 +351,8 @@ public class TestRunner {
         report.addCipherSuites(tls12CipherSuites);
         report.addCipherSuites(tls13CipherSuites);
         report.setReceivedClientHello(clientHello);
+        additionalTls13Groups.addAll(report.getClientHelloKeyShareGroups());
+        report.setSupportedTls13Groups(additionalTls13Groups);
 
         EllipticCurvesExtensionMessage ecExt = clientHello.getExtension(EllipticCurvesExtensionMessage.class);
         if (ecExt != null) {
@@ -493,5 +532,38 @@ public class TestRunner {
         } catch (Exception e) {}
 
         System.exit(0);
+    }
+    
+    private List<State> buildClientKeyShareProbeStates(ClientHelloMessage clientHello) {
+        List<State> states = new ArrayList<>();
+        EllipticCurvesExtensionMessage ecExtension = clientHello.getExtension(EllipticCurvesExtensionMessage.class);
+        KeyShareExtensionMessage ksExtension = clientHello.getExtension(KeyShareExtensionMessage.class);
+        List<NamedGroup> nonKeyShareCurves = NamedGroup.namedGroupsFromByteArray(ecExtension.getSupportedGroups().getValue());
+        ksExtension.getKeyShareList().forEach(offeredKs -> nonKeyShareCurves.remove(offeredKs.getGroupConfig()));
+        for (NamedGroup group: nonKeyShareCurves) {
+            if (NamedGroup.getImplemented().contains(group)) {
+                Config config = this.testConfig.createTls13Config();
+                config.setDefaultServerNamedGroups(group);
+                config.setDefaultSelectedNamedGroup(group);
+                try {
+                    WorkflowConfigurationFactory configurationFactory = new WorkflowConfigurationFactory(config);
+                    WorkflowTrace trace = configurationFactory.createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER);
+                
+                    ClientHelloMessage failingClientHello = new ClientHelloMessage();
+                    ServerHelloMessage helloRetryRequest = new ServerHelloMessage(config);
+                    helloRetryRequest.setRandom(Modifiable.explicit(ServerHelloMessage.getHelloRetryRequestRandom()));
+        
+                    trace.getTlsActions().add(0, new SendAction(helloRetryRequest));
+                    trace.getTlsActions().add(0, new ReceiveAction(failingClientHello));
+                
+                    State s = new State(config, trace);
+                    states.add(s);
+                }
+                catch(Exception ignored) {
+
+                }
+            }
+        }
+        return states;
     }
 }

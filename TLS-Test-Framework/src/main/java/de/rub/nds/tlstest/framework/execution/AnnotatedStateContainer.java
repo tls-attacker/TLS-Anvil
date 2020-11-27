@@ -142,7 +142,7 @@ public class  AnnotatedStateContainer {
 
         if (failureInducingCombinations != null) {
             String tmp = failureInducingCombinations.stream().map(DerivationContainer::toString).collect(Collectors.joining("\n\t"));
-            LOGGER.info("The following parameters resulted in test failures:\n\t{}", tmp);
+            LOGGER.info("The following parameters resulted in test failures for test " + testMethodConfig.getMethodName() + ":\n\t{}", tmp);
         }
     }
 

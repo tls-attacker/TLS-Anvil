@@ -207,4 +207,12 @@ public class KeyX implements KeyExchange {
 
         return compatible;
     }
+    
+    public boolean supports(KeyExchangeType keyExType) {
+        if(supported() == null) {
+            return false;
+        } else {
+            return Arrays.stream(supported()).anyMatch(supportedType -> keyExType.equals(supportedType));
+        }
+    }
 }

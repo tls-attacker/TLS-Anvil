@@ -34,7 +34,8 @@ import java.util.Set;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
- *
+ * Defines which TLS parameters are used for the test derivation and how they
+ * are applied to the session.
  */
 public class DerivationScope {
     private ModelType baseModel = ModelType.GENERIC;

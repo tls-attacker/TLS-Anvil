@@ -11,12 +11,17 @@ package de.rub.nds.tlstest.framework;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlsscanner.serverscanner.report.SiteReport;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
@@ -63,6 +68,17 @@ public class TestSiteReport extends SiteReport {
 
     public ClientHelloMessage getReceivedClientHello() {
         return receivedClientHello;
+    }
+    
+    public List<NamedGroup> getClientHelloKeyShareGroups() {
+        List<NamedGroup> keyShareGroups = new LinkedList<>();
+        if(receivedClientHello != null && receivedClientHello.containsExtension(ExtensionType.KEY_SHARE)) {
+            KeyShareExtensionMessage keyshare = receivedClientHello.getExtension(KeyShareExtensionMessage.class);
+            for(KeyShareEntry ksEntry : keyshare.getKeyShareList()) {
+                keyShareGroups.add(ksEntry.getGroupConfig());
+            }
+        }
+        return keyShareGroups;
     }
 
     public void setReceivedClientHello(ClientHelloMessage receivedClientHelloMessage) {

@@ -55,6 +55,7 @@ public class TestSiteReport extends SiteReport {
             report.setSupportedNamedGroupsWitnesses(siteReport.getSupportedNamedGroupsWitnesses());
             report.setSupportedNamedGroupsWitnessesTls13(siteReport.getSupportedNamedGroupsWitnessesTls13());
             report.setSupportedExtensions(siteReport.getSupportedExtensions());
+            report.setSupportsRecordFragmentation(siteReport.getSupportsRecordFragmentation());
             
             for(String key : siteReport.getResultMap().keySet()) {
                 report.putResult(AnalyzedProperty.valueOf(key), siteReport.getResultMap().get(key));

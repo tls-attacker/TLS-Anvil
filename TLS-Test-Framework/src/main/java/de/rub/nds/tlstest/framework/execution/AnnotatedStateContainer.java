@@ -112,6 +112,7 @@ public class  AnnotatedStateContainer {
     }
 
     public void finished() {
+        TestContext.getInstance().testFinished();
         finished = true;
         List<String> uuids = new ArrayList<>();
         List<Throwable> errors = new ArrayList<>();

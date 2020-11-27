@@ -48,7 +48,9 @@ import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.reporting.ExecutionListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.platform.engine.TestSource;
 import org.junit.platform.engine.TestTag;
+import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.Launcher;
 import org.junit.platform.launcher.LauncherDiscoveryRequest;
 import org.junit.platform.launcher.TagFilter;
@@ -226,7 +228,8 @@ public class TestRunner {
                 ProbeType.PROTOCOL_VERSION,
                 ProbeType.EC_POINT_FORMAT,
                 ProbeType.RESUMPTION,
-                ProbeType.EXTENSIONS
+                ProbeType.EXTENSIONS,
+                ProbeType.RECORD_FRAGMENTATION
         );
         scannerConfig.setOverallThreads(1);
         scannerConfig.setParallelProbes(1);
@@ -347,16 +350,35 @@ public class TestRunner {
             throw new RuntimeException("Client preparation could not be completed.");
         }
 
+
+        Config config = this.testConfig.createConfig();
+        CipherSuite suite = tls12CipherSuites.iterator().next();
+        config.setDefaultServerSupportedCiphersuites(suite);
+        config.setDefaultSelectedCipherSuite(suite);
+        config.setDefaultMaxRecordData(50);
+
+        State state = new State(config, new WorkflowConfigurationFactory(config).createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER));
+        StateExecutionServerTask task = new StateExecutionServerTask(state, testConfig.getTestClientDelegate().getServerSocket(), 2);
+        task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getTriggerScript());
+        executor.bulkExecuteTasks(task);
+        boolean supportsRecordFragmentation = state.getWorkflowTrace().executedAsPlanned();
+
         TestSiteReport report = new TestSiteReport("");
         report.addCipherSuites(tls12CipherSuites);
         report.addCipherSuites(tls13CipherSuites);
         report.setReceivedClientHello(clientHello);
+        report.setSupportsRecordFragmentation(supportsRecordFragmentation);
         additionalTls13Groups.addAll(report.getClientHelloKeyShareGroups());
         report.setSupportedTls13Groups(additionalTls13Groups);
 
         EllipticCurvesExtensionMessage ecExt = clientHello.getExtension(EllipticCurvesExtensionMessage.class);
         if (ecExt != null) {
-            report.setSupportedNamedGroups(NamedGroup.namedGroupsFromByteArray(ecExt.getSupportedGroups().getValue()));
+            report.setSupportedNamedGroups(
+                    NamedGroup.namedGroupsFromByteArray(ecExt.getSupportedGroups().getValue())
+                        .stream()
+                        .filter(i -> NamedGroup.getImplemented().contains(i))
+                        .collect(Collectors.toList())
+            );
         }
 
         SupportedVersionsExtensionMessage supportedVersionsExt = clientHello.getExtension(SupportedVersionsExtensionMessage.class);
@@ -370,7 +392,11 @@ public class TestRunner {
 
         SignatureAndHashAlgorithmsExtensionMessage sahExt = clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
         if (sahExt != null) {
-            report.setSupportedSignatureAndHashAlgorithms(SignatureAndHashAlgorithm.getSignatureAndHashAlgorithms(sahExt.getSignatureAndHashAlgorithms().getValue()));
+            report.setSupportedSignatureAndHashAlgorithms(
+                    SignatureAndHashAlgorithm.getSignatureAndHashAlgorithms(sahExt.getSignatureAndHashAlgorithms().getValue()).stream()
+                            .filter(i -> SignatureAndHashAlgorithm.getImplemented().contains(i))
+                            .collect(Collectors.toList())
+            );
         }
 
         List<ExtensionType> extensions = clientHello.getExtensions().stream()
@@ -442,8 +468,10 @@ public class TestRunner {
 
 
     private boolean countTests(TestIdentifier i, String versionS, String modeS) {
-        if (!i.isTest())
+        TestSource source = i.getSource().orElse(null);
+        if (!i.isTest() && (source == null || !source.getClass().equals(MethodSource.class))) {
             return false;
+        }
 
         Set<TestTag> tags = i.getTags();
         boolean version = tags.stream().anyMatch(j -> j.getName().equals(versionS));
@@ -492,12 +520,15 @@ public class TestRunner {
                         .enableTestExecutionListenerAutoRegistration(false)
                         .addTestExecutionListeners(listener)
                         .addTestExecutionListeners(reporting)
-                        .addTestExecutionListeners(listenerLog)
+                        //.addTestExecutionListeners(listenerLog)
                         .build()
         );
         
         TestPlan testplan = launcher.discover(request);
-        long testcases = testplan.countTestIdentifiers(TestIdentifier::isTest);
+        long testcases = testplan.countTestIdentifiers(i -> {
+            TestSource source = i.getSource().orElse(null);
+            return i.isTest() || (source != null && source.getClass().equals(MethodSource.class));
+        });
         long clientTls12 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls12", "client"));
         long clientTls13 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls13", "client"));
         long serverTls12 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls12", "server"));

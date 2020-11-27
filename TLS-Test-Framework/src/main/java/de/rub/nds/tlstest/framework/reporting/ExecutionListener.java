@@ -96,6 +96,7 @@ public class ExecutionListener implements TestExecutionListener {
 
             for (TestIdentifier i : tests) {
                 if (!i.getParentId().isPresent()) {
+                    LOGGER.error("Test has no parent");
                     throw new RuntimeException("Test has no parent...");
                 }
                 root.addResultWithParent(i.getParentId().get(), results.get(i.getUniqueId()));
@@ -117,6 +118,7 @@ public class ExecutionListener implements TestExecutionListener {
 
                 mapper.writeValue(new File(TestContext.getInstance().getConfig().getOutputFile()), rootContainers.get(0));
             } catch (Exception e) {
+                LOGGER.error("", e);
                 throw new RuntimeException(e);
             }
 
@@ -131,6 +133,7 @@ public class ExecutionListener implements TestExecutionListener {
                 f.getParentFile().mkdirs();
                 jaxbMarshaller.marshal(rootContainers.get(0), f);
             } catch (Exception e) {
+                LOGGER.error("", e);
                 throw new RuntimeException(e);
             }
         }

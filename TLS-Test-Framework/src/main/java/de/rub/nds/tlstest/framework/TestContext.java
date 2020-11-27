@@ -144,10 +144,6 @@ public class TestContext {
         testsDone += 1;
         if (proggressBar != null && !isDocker()) {
             proggressBar.stepBy(1);
-
-            if (proggressBar.getMax() <= proggressBar.getCurrent()) {
-                proggressBar.close();
-            }
         } else if (isDocker()) {
             long timediff = new Date().getTime() - startTime.getTime();
             long minutes = TimeUnit.MILLISECONDS.toMinutes(timediff);

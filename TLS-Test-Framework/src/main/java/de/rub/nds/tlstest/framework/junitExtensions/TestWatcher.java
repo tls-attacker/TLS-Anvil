@@ -30,7 +30,6 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
     private static final Logger LOGGER = LogManager.getLogger();
 
     private AnnotatedStateContainer createResult(ExtensionContext context, TestResult result) {
-        TestContext.getInstance().testFinished();
 
         String uniqueId = Utils.getTemplateContainerExtensionContext(context).getUniqueId();
         AnnotatedStateContainer container = TestContext.getInstance().getTestResults().get(uniqueId);
@@ -38,20 +37,22 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
             return container;
         }
 
+        TestContext.getInstance().testFinished();
         container = AnnotatedStateContainer.forExtensionContext(context);
         container.setResultRaw(result.getValue());
+        TestContext.getInstance().addTestResult(container);
         return container;
     }
 
 
     @Override
-    public void testSuccessful(ExtensionContext context) {
+    synchronized public void testSuccessful(ExtensionContext context) {
         TestContext.getInstance().testSucceeded();
         createResult(context, TestResult.SUCCEEDED);
     }
 
     @Override
-    public void testFailed(ExtensionContext context, Throwable cause) {
+    synchronized public void testFailed(ExtensionContext context, Throwable cause) {
         TestContext.getInstance().testFailed();
         AnnotatedStateContainer container = createResult(context, TestResult.FAILED);
         AnnotatedState state = container.getStates().stream()
@@ -73,7 +74,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
     }
 
     @Override
-    public void testDisabled(ExtensionContext context, Optional<String> reason) {
+    synchronized public void testDisabled(ExtensionContext context, Optional<String> reason) {
         TestContext.getInstance().testDisabled();
         AnnotatedStateContainer container = createResult(context, TestResult.DISABLED);
         container.setDisabledReason(reason.orElse("No reason"));

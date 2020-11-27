@@ -43,6 +43,8 @@ import static org.junit.Assert.*;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
+import java.util.Random;
+
 @RFC(number = 8446, section = "4.1.3 Server Hello")
 @ClientTest
 public class ServerHello extends Tls13Test {
@@ -144,12 +146,12 @@ public class ServerHello extends Tls13Test {
     public void testRandomDowngradeValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
 
-        ModifiableByteArray downgradeRandom = new ModifiableByteArray();
-        VariableModification<byte[]> mod = ByteArrayModificationFactory.insert(new byte[]{0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x01}, 24);
-        // FIXME: Does not work anymore with ModifiableVariable 3.1.0
-        //mod.setPostModification(ByteArrayModificationFactory.delete(32, 8));
-        assertFalse("See FixME comment! Test is broken", true);
-        downgradeRandom.setModification(mod);
+        Random random = new Random();
+        byte[] serverRandom = new byte[32];
+        random.nextBytes(serverRandom);
+
+        byte[] downgradeValue = new byte[]{0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x01};
+        System.arraycopy(downgradeValue, 0, serverRandom, 24, downgradeValue.length);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_HELLO_DONE);
         workflowTrace.addTlsActions(
@@ -157,8 +159,7 @@ public class ServerHello extends Tls13Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        workflowTrace.getFirstSendMessage(ServerHelloMessage.class).setRandom(downgradeRandom);
-
+        workflowTrace.getFirstSendMessage(ServerHelloMessage.class).setRandom(Modifiable.explicit(serverRandom));
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();

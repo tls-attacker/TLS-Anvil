@@ -17,6 +17,7 @@ import de.rub.nds.tlsattacker.core.constants.MaxFragmentLength;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.SSL2ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.AlpnExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
@@ -24,17 +25,21 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.HeartbeatExtension
 import de.rub.nds.tlsattacker.core.protocol.message.extension.MaxFragmentLengthExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ServerNameIndicationExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
+import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -152,19 +157,5 @@ public class Extensions extends Tls13Test {
             }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
-    }
-
-    @Test
-    @TestDescription("When multiple extensions of different "
-            + "types are present, the extensions MAY appear "
-            + "in any order, with the exception of \"pre_shared_key\" (Section 4.2.11) "
-            + "which MUST be the last extension in the ClientHello "
-            + "(but can appear anywhere in the ServerHello extensions block).")
-    public void pskMustBeLastExtension() {
-        ClientHelloMessage ch = context.getReceivedClientHelloMessage();
-        if (ch.containsExtension(ExtensionType.PRE_SHARED_KEY)) {
-            List<ExtensionMessage> extensions = ch.getExtensions();
-            assertEquals("PSK Extensions is not last in list", ExtensionType.PRE_SHARED_KEY, extensions.get(extensions.size() - 1).getExtensionTypeConstant());
-        }
     }
 }

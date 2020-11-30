@@ -9,7 +9,6 @@
  */
 package de.rub.nds.tlstest.framework.model;
 
-
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
@@ -32,10 +31,9 @@ public class ParameterModelFactory {
 
     public static InputParameterModel generateModel(DerivationScope derivationScope, TestContext testContext) {
         List<DerivationType> derivationTypes = getDerivationsForScope(derivationScope);
-        Parameter.Builder[] builders  = getModelParameters(derivationTypes, testContext, derivationScope);
+        Parameter.Builder[] builders = getModelParameters(derivationTypes, testContext, derivationScope);
         Constraint[] constraints = getModelConstraints(derivationTypes, derivationScope);
 
-        
         return inputParameterModel("dynamic-model").strength(2).parameters(builders).exclusionConstraints(constraints).build();
     }
 
@@ -65,9 +63,9 @@ public class ParameterModelFactory {
         List<Parameter.Builder> parameterBuilders = new LinkedList<>();
         for (DerivationType derivationType : derivationTypes) {
             DerivationParameter paramDerivation = DerivationFactory.getInstance(derivationType);
-            if(paramDerivation.canBeModeled(testContext, derivationScope)) {
+            if (paramDerivation.canBeModeled(testContext, derivationScope)) {
                 parameterBuilders.add(paramDerivation.getParameterBuilder(testContext, derivationScope));
-                if(derivationType.isBitmaskDerivation()) {
+                if (derivationType.isBitmaskDerivation()) {
                     DerivationParameter bitPositionParam = DerivationFactory.getInstance(DerivationType.BIT_POSITION);
                     bitPositionParam.setParent(derivationType);
                     parameterBuilders.add(bitPositionParam.getParameterBuilder(testContext, derivationScope));
@@ -77,21 +75,22 @@ public class ParameterModelFactory {
 
         return parameterBuilders.toArray(new Parameter.Builder[]{});
     }
-    
+
     private static Constraint[] getModelConstraints(List<DerivationType> derivationTypes, DerivationScope scope) {
         List<Constraint> applicableConstraints = new LinkedList<>();
         for (DerivationType derivationType : derivationTypes) {
-            List<ConditionalConstraint> condConstraints = DerivationFactory.getInstance(derivationType).getConditionalConstraints(scope);
-            for(ConditionalConstraint condConstraint : condConstraints) {
-                if(condConstraint.isApplicableTo(derivationTypes, scope)) {
-                    applicableConstraints.add(condConstraint.getConstraint());
+            if (DerivationFactory.getInstance(derivationType).canBeModeled(TestContext.getInstance(), scope)) {
+                List<ConditionalConstraint> condConstraints = DerivationFactory.getInstance(derivationType).getConditionalConstraints(scope);
+                for (ConditionalConstraint condConstraint : condConstraints) {
+                    if (condConstraint.isApplicableTo(derivationTypes, scope)) {
+                        applicableConstraints.add(condConstraint.getConstraint());
+                    }
                 }
             }
         }
-        
+
         return applicableConstraints.toArray(new Constraint[]{});
     }
-
 
     private static boolean isBeyondScope(DerivationType derivationParameter, List<DerivationType> basicDerivations, List<DerivationType> scopeLimitations, List<DerivationType> scopeExtensions) {
         if ((!basicDerivations.contains(derivationParameter) && !scopeExtensions.contains(derivationParameter)) || scopeLimitations.contains(derivationParameter)) {
@@ -108,7 +107,7 @@ public class ParameterModelFactory {
         derivationTypes.add(DerivationType.TCP_FRAGMENTATION);
         return derivationTypes;
     }
-    
+
     /**
      * DerivationParameters that only have one possible value can not be modeled
      * by Coffee4J, we collect these here with their static value so the config
@@ -117,26 +116,26 @@ public class ParameterModelFactory {
     public static List<DerivationParameter> getStaticParameters(TestContext context, DerivationScope scope) {
         List<DerivationParameter> staticParameters = new LinkedList<>();
         List<DerivationType> plannedDerivations = getDerivationsForScope(scope);
-        for(DerivationType type: plannedDerivations) {
+        for (DerivationType type : plannedDerivations) {
             List<DerivationParameter> parameterValues = DerivationFactory.getInstance(type).getConstrainedParameterValues(context, scope);
-            if(parameterValues.size() == 1) {
+            if (parameterValues.size() == 1) {
                 staticParameters.add(parameterValues.get(0));
             }
         }
         return staticParameters;
     }
-    
+
     public static boolean mustUseSimpleModel(TestContext context, DerivationScope scope) {
         List<DerivationType> derivationTypes = getDerivationsForScope(scope);
-        Parameter.Builder[] builders  = getModelParameters(derivationTypes, context, scope);
+        Parameter.Builder[] builders = getModelParameters(derivationTypes, context, scope);
         return builders.length == 1;
     }
-    
+
     public static List<DerivationParameter> getSimpleModelVariations(TestContext context, DerivationScope scope) {
         List<DerivationType> modelDerivations = getDerivationsForScope(scope);
-        for(DerivationType type: modelDerivations) {
+        for (DerivationType type : modelDerivations) {
             DerivationParameter parameter = DerivationFactory.getInstance(type);
-            if(parameter.canBeModeled(context, scope)) {
+            if (parameter.canBeModeled(context, scope)) {
                 return parameter.getConstrainedParameterValues(context, scope);
             }
         }

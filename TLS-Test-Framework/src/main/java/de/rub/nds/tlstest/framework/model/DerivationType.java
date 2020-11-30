@@ -35,6 +35,8 @@ public enum DerivationType {
     SIG_HASH_ALGORIHTM,
     EXTENSION,
     CHOSEN_HANDSHAKE_MSG,
+    MIRRORED_CIPHERSUITE,
+    MIRRORED_NAMED_GROUP,
     BIT_POSITION;
     
     public boolean isBitmaskDerivation() {

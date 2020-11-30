@@ -10,6 +10,7 @@
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.mirrored.MirroredCipherSuiteDerivation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -63,6 +64,8 @@ public class DerivationFactory {
                 return new ExtensionDerivation();
             case CHOSEN_HANDSHAKE_MSG:
                 return new ChosenHandshakeMessageDerivation();
+            case MIRRORED_CIPHERSUITE:
+                return new MirroredCipherSuiteDerivation();
             default:
                 throw new UnsupportedOperationException("Derivation Type not implemented");
         }

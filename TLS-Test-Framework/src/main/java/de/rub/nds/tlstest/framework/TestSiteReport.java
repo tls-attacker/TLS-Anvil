@@ -14,6 +14,7 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
@@ -80,6 +81,13 @@ public class TestSiteReport extends SiteReport {
             }
         }
         return keyShareGroups;
+    }
+    
+    public List<NamedGroup> getClientHelloNamedGroups() {
+        if(receivedClientHello != null && receivedClientHello.containsExtension(ExtensionType.ELLIPTIC_CURVES)) {
+            return NamedGroup.namedGroupsFromByteArray(receivedClientHello.getExtension(EllipticCurvesExtensionMessage.class).getSupportedGroups().getValue());
+        }
+        return new LinkedList<>();
     }
 
     public void setReceivedClientHello(ClientHelloMessage receivedClientHelloMessage) {

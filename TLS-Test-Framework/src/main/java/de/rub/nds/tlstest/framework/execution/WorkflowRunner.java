@@ -271,12 +271,7 @@ public class WorkflowRunner {
             compatibilityCCS.setRequired(false);
             //OpenSSL sends  ChangeCipherSpec || ClientHello upon HelloRetry
             ((ReceiveAction)trace.getTlsActions().get(2)).getExpectedMessages().add(0, compatibilityCCS); 
-        }
-        
-        
-        
-        
-        
+        }        
     } 
 
     public Boolean isAutoHelloRetryRequest() {

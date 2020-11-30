@@ -83,7 +83,7 @@ public class ParameterModelFactory {
         for (DerivationType derivationType : derivationTypes) {
             List<ConditionalConstraint> condConstraints = DerivationFactory.getInstance(derivationType).getConditionalConstraints(scope);
             for(ConditionalConstraint condConstraint : condConstraints) {
-                if(condConstraint.isApplicableTo(derivationTypes)) {
+                if(condConstraint.isApplicableTo(derivationTypes, scope)) {
                     applicableConstraints.add(condConstraint.getConstraint());
                 }
             }

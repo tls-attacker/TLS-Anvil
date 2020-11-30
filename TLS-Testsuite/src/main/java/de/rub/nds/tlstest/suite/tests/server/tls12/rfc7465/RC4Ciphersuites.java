@@ -19,6 +19,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
@@ -47,8 +48,19 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class RC4Ciphersuites extends Tls12Test {
 
+    public ConditionEvaluationResult supportsRC4(ExtensionContext context) {
+        List<CipherSuite> supported = new ArrayList<>(this.context.getSiteReport().getCipherSuites());
+        supported.removeIf(i -> !i.toString().contains("RC4"));
+
+        return supported.size() == 0 ? ConditionEvaluationResult.disabled("No RC4 Ciphersuite supported") : ConditionEvaluationResult.enabled("");
+    }
+
     public boolean isRC4(CipherSuite cipherSuite) {
         return cipherSuite.toString().contains("RC4");
+    }
+
+    public boolean isNonRC4(CipherSuite cipherSuite) {
+        return !isRC4(cipherSuite);
     }
     
 
@@ -56,12 +68,13 @@ public class RC4Ciphersuites extends Tls12Test {
             "sends such a cipher suite in the ClientHello message.")
     @ManualConfig(DerivationType.CIPHERSUITE)
     @MethodCondition(method = "supportsRC4")
+    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isNonRC4")
     @Security(SeverityLevel.CRITICAL)
     public void offerRC4AndOtherCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
 
-        List<CipherSuite> implemented = CipherSuite.getImplemented();
+        List<CipherSuite> implemented = new ArrayList<>(TestContext.getInstance().getSiteReport().getCipherSuites());
         implemented.removeIf(i -> !i.toString().contains("RC4"));
         c.setDefaultClientSupportedCiphersuites(implemented);
         c.getDefaultClientSupportedCiphersuites().add(selectedCipherSuite);

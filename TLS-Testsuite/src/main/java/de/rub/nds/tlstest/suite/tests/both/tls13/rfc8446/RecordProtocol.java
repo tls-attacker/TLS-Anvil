@@ -46,6 +46,7 @@ public class RecordProtocol extends Tls13Test {
             "defined in this document unless negotiated by some extension. " +
             "If a TLS implementation receives an unexpected record type, " +
             "it MUST terminate the connection with an \"unexpected_message\" alert.")
+    @Interoperability(SeverityLevel.LOW)
     public void invalidRecordContentType(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace trace;
@@ -64,6 +65,35 @@ public class RecordProtocol extends Tls13Test {
 
 
         runner.execute(trace, c).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+
+            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            if (alert == null) return;
+            Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, alert);
+        });
+    }
+    
+    @TlsTest(description = "Implementations MUST NOT send record types not " +
+            "defined in this document unless negotiated by some extension. " +
+            "If a TLS implementation receives an unexpected record type, " +
+            "it MUST terminate the connection with an \"unexpected_message\" alert.")
+    @Interoperability(SeverityLevel.LOW)
+    public void invalidRecordContentTypeAfterEncryption(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+
+        
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
+        Record record = new Record();
+        record.setContentType(Modifiable.explicit((byte)0xff));
+        FinishedMessage finished = new FinishedMessage(c);
+        SendAction sendFinished = new SendAction(finished);
+        sendFinished.setRecords(record);
+        workflowTrace.addTlsActions(
+                sendFinished,
+                new ReceiveAction(new AlertMessage())
+        );
+        
+        runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
 
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);

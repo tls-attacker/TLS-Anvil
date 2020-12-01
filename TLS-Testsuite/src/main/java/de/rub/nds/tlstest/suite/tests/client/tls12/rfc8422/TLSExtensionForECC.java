@@ -19,7 +19,6 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -101,6 +100,7 @@ public class TLSExtensionForECC extends Tls12Test {
             "numbers 1-22).  This specification also deprecates the explicit " +
             "curves with identifiers 0xFF01 and 0xFF02.  It also adds the new\n" +
             "curves defined in [RFC7748]", securitySeverity = SeverityLevel.LOW)*/
+    @Test
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @Security(SeverityLevel.LOW)
     @TestDescription("Deprecated groups should not be offered by a client")
@@ -125,5 +125,5 @@ public class TLSExtensionForECC extends Tls12Test {
         }
         return false;
     }
-
+    
 }

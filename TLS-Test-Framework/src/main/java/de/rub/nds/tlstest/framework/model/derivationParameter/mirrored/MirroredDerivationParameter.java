@@ -28,8 +28,8 @@ public abstract class MirroredDerivationParameter<T> extends DerivationParameter
     }
 
     @Override
-    public boolean isEmpty(TestContext context, DerivationScope scope) {
-        return DerivationFactory.getInstance(getMirroredType()).isEmpty(context, scope);
+    public boolean hasNoApplicableValues(TestContext context, DerivationScope scope) {
+        return DerivationFactory.getInstance(getMirroredType()).hasNoApplicableValues(context, scope);
     }
 
     @Override

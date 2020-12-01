@@ -107,6 +107,10 @@ public class ConstraintHelper {
         return tagLengths.size() > 1;
     }
     
+    public static boolean nullModeled(DerivationScope scope, DerivationType type) {
+        return DerivationFactory.getInstance(type).getConstrainedParameterValues(TestContext.getInstance(), scope).contains(null);
+    }
+    
     //TODO: integrate into AlgorithmResolver?
     private static int getAuthTagLen(CipherSuite cipherSuite) {
         if (cipherSuite.name().contains("CCM_8")) {

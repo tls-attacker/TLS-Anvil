@@ -70,7 +70,7 @@ public abstract class DerivationParameter<T> {
         return getConstrainedParameterValues(context, scope).size() > 1;
     }
     
-    public boolean isEmpty(TestContext context, DerivationScope scope) {
+    public boolean hasNoApplicableValues(TestContext context, DerivationScope scope) {
         return getConstrainedParameterValues(context, scope).isEmpty();
     }
     

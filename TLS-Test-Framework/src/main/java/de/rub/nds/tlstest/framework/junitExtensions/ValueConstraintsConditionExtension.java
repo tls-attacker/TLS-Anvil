@@ -37,7 +37,7 @@ public class ValueConstraintsConditionExtension extends BaseCondition {
         DerivationScope derivationScope = new DerivationScope(extensionContext);
         for(ValueConstraint valContraint : derivationScope.getValueConstraints()) {
             DerivationParameter derivationParam = DerivationFactory.getInstance(valContraint.getAffectedType());
-            if(derivationParam.getConstrainedParameterValues(TestContext.getInstance(), derivationScope).size() == 0) {
+            if(derivationParam.hasNoApplicableValues(TestContext.getInstance(), derivationScope)) {
                 return ConditionEvaluationResult.disabled("Host does not support required value for parameter " + derivationParam.getType());
             }
         }

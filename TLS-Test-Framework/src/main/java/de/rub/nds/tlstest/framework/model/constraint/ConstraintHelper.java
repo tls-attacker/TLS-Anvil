@@ -10,14 +10,18 @@
 package de.rub.nds.tlstest.framework.model.constraint;
 
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
+import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HKDFAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -108,7 +112,8 @@ public class ConstraintHelper {
     }
     
     public static boolean nullModeled(DerivationScope scope, DerivationType type) {
-        return DerivationFactory.getInstance(type).getConstrainedParameterValues(TestContext.getInstance(), scope).contains(null);
+        return DerivationFactory.getInstance(type).getConstrainedParameterValues(TestContext.getInstance(), scope)
+                .stream().anyMatch(parameterValue -> ((DerivationParameter)parameterValue).getSelectedValue() == null);
     }
     
     //TODO: integrate into AlgorithmResolver?

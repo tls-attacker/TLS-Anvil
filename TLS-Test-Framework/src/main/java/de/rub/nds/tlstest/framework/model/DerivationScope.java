@@ -179,7 +179,11 @@ public class DerivationScope {
     }
 
     public ProtocolVersion getTargetVersion() {
-        return targetVersion;
+        if(isTls13Test()) {
+            return ProtocolVersion.TLS13;
+        } else {
+            return ProtocolVersion.TLS12;
+        }
     }
 
     public String getExplicitValueMethod(DerivationType type) {
@@ -191,9 +195,14 @@ public class DerivationScope {
     }
     
     public boolean isTls13Test() {
-        return targetVersion == ProtocolVersion.TLS13;
+        /* Some tests defined in TLS 1.3 test packages
+         * test the backwards compatibility of an implementation
+         * using a TLS 1.2 handshake - this is evident from the defined
+         * KeyExchange annotation
+        */ 
+        return keyExchangeRequirements.supports(KeyExchangeType.ALL13);
     }
-    
+       
     public boolean isAutoApplyToConfig(DerivationType type) {
         return !manualConfigTypes.contains(type);
     }

@@ -44,7 +44,7 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.INVALID_CCS_CONTENT)
     @Interoperability(SeverityLevel.CRITICAL)
-    private void ccsContentTest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void ccsContentTest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         byte[] content = derivationContainer.getDerivation(InvalidCCSContentDerivation.class).getSelectedValue();

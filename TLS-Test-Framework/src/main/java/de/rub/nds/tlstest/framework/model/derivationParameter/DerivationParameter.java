@@ -139,11 +139,7 @@ public abstract class DerivationParameter<T> {
     }
 
     public String toString() {
-        if (selectedValue instanceof byte[] && selectedValue != null) {
-            return type + "=" + ArrayConverter.bytesToHexString((byte[]) selectedValue);
-        } else {
-            return type + "=" + selectedValue;
-        }
+        return type + "=" + jsonValue();
     }
 
     public DerivationType getParent() {

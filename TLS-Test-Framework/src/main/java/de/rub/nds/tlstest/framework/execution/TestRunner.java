@@ -265,7 +265,7 @@ public class TestRunner {
                 config = this.testConfig.createTls13Config();
             }
 
-            config.setDefaultServerSupportedCiphersuites(Collections.singletonList(i));
+            config.setDefaultServerSupportedCipherSuites(Collections.singletonList(i));
             config.setDefaultSelectedCipherSuite(i);
             config.setEnforceSettings(true);
 
@@ -353,7 +353,7 @@ public class TestRunner {
 
         Config config = this.testConfig.createConfig();
         CipherSuite suite = tls12CipherSuites.iterator().next();
-        config.setDefaultServerSupportedCiphersuites(suite);
+        config.setDefaultServerSupportedCipherSuites(suite);
         config.setDefaultSelectedCipherSuite(suite);
         config.setDefaultMaxRecordData(50);
 

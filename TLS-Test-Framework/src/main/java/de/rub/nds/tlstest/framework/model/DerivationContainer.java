@@ -102,19 +102,15 @@ public class DerivationContainer {
             } 
             
         }
-        LOGGER.debug("Applied " + derivationsToString());
+        LOGGER.debug("Applied " + toString());
     }
 
-    public String derivationsToString() {
+    public String toString() {
         StringJoiner joiner = new StringJoiner(", ");
         for (DerivationParameter derivationParameter : derivations) {
             joiner.add(derivationParameter.toString());
         }
         return joiner.toString();
-    }
-
-    public String toString() {
-        return derivationsToString();
     }
     
     public byte[] buildBitmask() {

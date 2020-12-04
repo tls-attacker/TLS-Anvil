@@ -323,8 +323,8 @@ public class TestConfig extends TLSDelegateConfig {
         );
         config.setDefaultClientSupportedSignatureAndHashAlgorithms(config.getDefaultServerSupportedSignatureAndHashAlgorithms());
 
-        config.setDefaultServerSupportedCiphersuites(CipherSuite.getImplemented().stream().filter(CipherSuite::isTLS13).collect(Collectors.toList()));
-        config.setDefaultClientSupportedCiphersuites(config.getDefaultServerSupportedCiphersuites());
+        config.setDefaultServerSupportedCipherSuites(CipherSuite.getImplemented().stream().filter(CipherSuite::isTLS13).collect(Collectors.toList()));
+        config.setDefaultClientSupportedCipherSuites(config.getDefaultServerSupportedCipherSuites());
         config.setDefaultSelectedCipherSuite(CipherSuite.TLS_AES_128_GCM_SHA256);
         config.setDefaultClientNamedGroups(Arrays.stream(NamedGroup.values()).filter(NamedGroup::isTls13).collect(Collectors.toList()));
         config.setDefaultServerNamedGroups(config.getDefaultClientNamedGroups());

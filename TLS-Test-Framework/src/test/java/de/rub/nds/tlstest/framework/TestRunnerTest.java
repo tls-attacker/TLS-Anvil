@@ -52,10 +52,10 @@ public class TestRunnerTest {
     @Test
     public void test() {
         Config config = Config.createConfig();
-        config.setDefaultClientSupportedCiphersuites(new ArrayList<>());
+        config.setDefaultClientSupportedCipherSuites(new ArrayList<>());
 
         Config copy = config.createCopy();
-        assert copy.getDefaultClientSupportedCiphersuites().size() == config.getDefaultClientSupportedCiphersuites().size();
+        assert copy.getDefaultClientSupportedCipherSuites().size() == config.getDefaultClientSupportedCipherSuites().size();
     }
 
 
@@ -66,7 +66,7 @@ public class TestRunnerTest {
         config.setHighestProtocolVersion(ProtocolVersion.TLS13);
         config.setSupportedVersions(ProtocolVersion.TLS13);
         config.setDefaultSelectedProtocolVersion(ProtocolVersion.TLS13);
-        config.setDefaultClientSupportedCiphersuites(CipherSuite.TLS_AES_128_GCM_SHA256);
+        config.setDefaultClientSupportedCipherSuites(CipherSuite.TLS_AES_128_GCM_SHA256);
         config.setDefaultSelectedCipherSuite(CipherSuite.TLS_AES_128_GCM_SHA256);
         config.setAddSupportedVersionsExtension(true);
         config.setAddKeyShareExtension(true);

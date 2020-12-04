@@ -97,20 +97,40 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     @Override
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-        if (ConstraintHelper.ecdhCipherSuiteModeled(scope) && ConstraintHelper.nullModeled(scope, getType()) && scope.getTargetVersion() == ProtocolVersion.TLS12) {
-            //TODO: do we want to handle it like this? i.e null = exclude extension
-            Set<DerivationType> requiredDerivations = new HashSet<>();
-            requiredDerivations.add(DerivationType.CIPHERSUITE);
-            condConstraints.add(new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(DerivationType.NAMED_GROUP.name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter group, DerivationParameter cipherSuite) -> {
-                NamedGroupDerivation groupDev = (NamedGroupDerivation) group;
-                CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-                if (groupDev.getSelectedValue() == null && AlgorithmResolver.getKeyExchangeAlgorithm(cipherDev.getSelectedValue()).isKeyExchangeEcdh()) {
-                    return false;
-                }
-                return true;
-            })));
+        if (!scope.isTls13Test() && ConstraintHelper.ecdhCipherSuiteModeled(scope) && ConstraintHelper.nullModeled(scope, getType())) {
+            condConstraints.add(getMustNotBeNullForECDHConstraint());
+        }
+
+        if (!scope.isTls13Test() && ConstraintHelper.nonEcdhCipherSuiteModeled(scope)) {
+            condConstraints.add(getMustBeNullForNonECDHConstraint());
         }
         return condConstraints;
+    }
+
+    private ConditionalConstraint getMustNotBeNullForECDHConstraint() {
+        Set<DerivationType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter group, DerivationParameter cipherSuite) -> {
+            NamedGroupDerivation groupDev = (NamedGroupDerivation) group;
+            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
+            if (groupDev.getSelectedValue() == null && AlgorithmResolver.getKeyExchangeAlgorithm(cipherDev.getSelectedValue()).isKeyExchangeEcdh()) {
+                return false;
+            }
+            return true;
+        }));
+    }
+
+    private ConditionalConstraint getMustBeNullForNonECDHConstraint() {
+        Set<DerivationType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter group, DerivationParameter cipherSuite) -> {
+            NamedGroupDerivation groupDev = (NamedGroupDerivation) group;
+            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
+            if (groupDev.getSelectedValue() != null && !AlgorithmResolver.getKeyExchangeAlgorithm(cipherDev.getSelectedValue()).isKeyExchangeEcdh()) {
+                return false;
+            }
+            return true;
+        }));
     }
 
 }

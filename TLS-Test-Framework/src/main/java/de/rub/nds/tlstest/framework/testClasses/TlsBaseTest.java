@@ -11,6 +11,7 @@ package de.rub.nds.tlstest.framework.testClasses;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.ExtensionContextResolver;

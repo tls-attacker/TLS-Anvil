@@ -10,6 +10,7 @@
 package de.rub.nds.tlstest.framework.model;
 
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
@@ -50,13 +51,20 @@ public class ParameterModelFactory {
     }
 
     private static List<DerivationType> getDerivationsOfModel(ModelType baseModel) {
+        LinkedList<DerivationType> derivationsOfModel = new LinkedList<>();
         switch (baseModel) {
             case EMPTY:
-                return new LinkedList<>();
+                break;
+            case CERTIFICATE:
+                if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
+                    derivationsOfModel.add(DerivationType.CERTIFICATE);
+                    derivationsOfModel.add(DerivationType.SIG_HASH_ALGORIHTM);
+                }
             case GENERIC:
             default:
-                return getBasicModelDerivations();
+                derivationsOfModel.addAll(getBasicModelDerivations());
         }
+        return derivationsOfModel;
     }
 
     private static Parameter.Builder[] getModelParameters(List<DerivationType> derivationTypes, TestContext testContext, DerivationScope derivationScope) {

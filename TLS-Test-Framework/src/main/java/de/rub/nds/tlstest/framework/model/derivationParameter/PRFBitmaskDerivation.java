@@ -43,11 +43,7 @@ public class PRFBitmaskDerivation extends DerivationParameter<Integer> {
     @Override
     public List getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        if (scope.getTargetVersion() == ProtocolVersion.TLS12) {
-            for (int i = 0; i < HandshakeByteLength.VERIFY_DATA; i++) {
-                parameterValues.add(new PRFBitmaskDerivation(i));
-            }
-        } else {
+        if (scope.isTls13Test()) {
             int maxHkdfSize = 0;
             for (CipherSuite cipherSuite : context.getSiteReport().getSupportedTls13CipherSuites()) {
                 int hkdfSize = AlgorithmResolver.getHKDFAlgorithm(cipherSuite).getMacAlgorithm().getSize();
@@ -56,6 +52,10 @@ public class PRFBitmaskDerivation extends DerivationParameter<Integer> {
                 }
             }
             for (int i = 0; i < maxHkdfSize; i++) {
+                parameterValues.add(new PRFBitmaskDerivation(i));
+            }
+        } else {
+            for (int i = 0; i < HandshakeByteLength.VERIFY_DATA; i++) {
                 parameterValues.add(new PRFBitmaskDerivation(i));
             }
         }

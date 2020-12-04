@@ -36,6 +36,8 @@ public enum DerivationType {
     EXTENSION,
     CHOSEN_HANDSHAKE_MSG,
     MIRRORED_CIPHERSUITE,
+    CERTIFICATE,
+    SIGNATURE_BITMASK,
     BIT_POSITION;
     
     public boolean isBitmaskDerivation() {

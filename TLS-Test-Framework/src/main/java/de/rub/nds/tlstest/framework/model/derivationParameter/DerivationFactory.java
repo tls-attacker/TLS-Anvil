@@ -66,6 +66,10 @@ public class DerivationFactory {
                 return new ChosenHandshakeMessageDerivation();
             case MIRRORED_CIPHERSUITE:
                 return new MirroredCipherSuiteDerivation();
+            case CERTIFICATE:
+                return new CertificateDerivation();
+            case SIGNATURE_BITMASK:
+                return new SignatureBitmaskDerivation();
             default:
                 throw new UnsupportedOperationException("Derivation Type not implemented");
         }

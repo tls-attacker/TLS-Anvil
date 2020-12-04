@@ -72,6 +72,7 @@ public class ExecutionListener implements TestExecutionListener {
             Set<TestIdentifier> containers = new HashSet<>(identifiers).stream().filter(TestIdentifier::isContainer).collect(Collectors.toSet());
             Set<TestIdentifier> tests = new HashSet<>();
             Map<String, AnnotatedStateContainer> results = TestContext.getInstance().getTestResults();
+            LOGGER.debug("{}", containers.stream().map(TestIdentifier::getUniqueId).collect(Collectors.toList()));
 
             for (TestIdentifier container : containers) {
                 if (results.get(container.getUniqueId()) != null) {
@@ -79,8 +80,13 @@ public class ExecutionListener implements TestExecutionListener {
                     continue;
                 }
 
-                TestResultContainer child = root.addChildContainer(container);
-                child.setElapsedTime(containerElapsedTimes.get(container.getUniqueId()));
+                try {
+                    TestResultContainer child = root.addChildContainer(container);
+                    child.setElapsedTime(containerElapsedTimes.get(container.getUniqueId()));
+                } catch (Exception E) {
+                    root.addAdditionalInformation("Problem occurred by adding " + container.getUniqueId());
+                    LOGGER.error("Problem occurred by adding {}", container.getUniqueId(), E);
+                }
             }
 
             Set<TestIdentifier> notAddedTests = new HashSet<>(identifiers).stream()
@@ -97,6 +103,7 @@ public class ExecutionListener implements TestExecutionListener {
             for (TestIdentifier i : tests) {
                 if (!i.getParentId().isPresent()) {
                     LOGGER.error("Test has no parent");
+                    root.addAdditionalInformation(String.format("Test has no parent %s", i.getUniqueId()));
                     throw new RuntimeException("Test has no parent...");
                 }
                 root.addResultWithParent(i.getParentId().get(), results.get(i.getUniqueId()));

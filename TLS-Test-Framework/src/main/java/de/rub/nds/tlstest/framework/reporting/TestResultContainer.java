@@ -75,6 +75,10 @@ public class TestResultContainer {
     @JsonProperty("DisabledTests")
     private long testsDisabled = 0;
 
+    @JsonProperty("AdditionalInformation")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String additionalInformation;
+
 
     @JsonUnwrapped
     private ScoreContainer scoreContainer = ScoreContainer.forEveryCategory();
@@ -138,6 +142,7 @@ public class TestResultContainer {
 
     public TestResultContainer addChildContainer(TestIdentifier container) {
         if (!container.getParentId().isPresent()) {
+            LOGGER.error("Could not add child container {}", container.getUniqueId());
             throw new RuntimeException("Could not add child container");
         }
         String parentId = container.getParentId().get();
@@ -150,7 +155,7 @@ public class TestResultContainer {
 
         TestResultContainer parentContainer = getContainerWithId(parentId);
         if (parentContainer == null) {
-            LOGGER.error("Could not add child container");
+            LOGGER.error("Could not add child container {}", container.getUniqueId());
             throw new RuntimeException("Could not add child container");
         }
 
@@ -265,5 +270,17 @@ public class TestResultContainer {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getAdditionalInformation() {
+        return additionalInformation;
+    }
+
+    public void addAdditionalInformation(String additionalInformation) {
+        if (this.additionalInformation == null) {
+            this.additionalInformation = additionalInformation;
+        } else {
+            this.additionalInformation = this.additionalInformation.concat(",\n" + additionalInformation);
+        }
     }
 }

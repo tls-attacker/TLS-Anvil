@@ -168,7 +168,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         
         List<AlpnEntry> alpnEntries = new ArrayList<>();
         for (CipherSuite i : Arrays.stream(CipherSuite.values()).filter(CipherSuite::isGrease).collect(Collectors.toList())) {
-            alpnEntries.add(new AlpnEntry(i.getByteValue()));
+            alpnEntries.add(new AlpnEntry(i.name()));
         }
 
         ClientHelloMessage msg = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
@@ -183,7 +183,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
             if (aext == null) return;
 
             assertEquals("AlpnEntryExtension contains more or less than one protocol", 1, aext.getAlpnEntryList().size());
-            assertFalse("Server negotiated GREASE ALPN Identifier", CipherSuite.getCipherSuite(ext.getAlpnEntryList().get(0).getAlpnEntryConfig()).isGrease());
+            assertFalse("Server negotiated GREASE ALPN Identifier", ext.getAlpnEntryList().get(0).getAlpnEntryConfig().contains("GREASE"));
         });
     }
 

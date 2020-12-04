@@ -57,7 +57,7 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
         for (int i = 0; i < maxTagLen; i++) {
             parameterValues.add(new AuthTagBitmaskDerivation(i));
         }
-
+        
         return parameterValues;
     }
 

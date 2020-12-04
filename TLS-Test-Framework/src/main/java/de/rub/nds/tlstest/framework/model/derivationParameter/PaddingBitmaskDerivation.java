@@ -12,6 +12,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.CipherType;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -46,7 +48,7 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
             cipherSuiteList = context.getSiteReport().getSupportedTls13CipherSuites();
         }
         for (CipherSuite cipherSuite : cipherSuiteList) {
-            if (AlgorithmResolver.getCipher(cipherSuite).getBlocksize() > maxCipherTextByteLen && AlgorithmResolver.getCipher(cipherSuite).usesPadding()) {
+            if (AlgorithmResolver.getCipher(cipherSuite).getBlocksize() > maxCipherTextByteLen && cipherSuite.isUsingPadding(scope.getTargetVersion()) && AlgorithmResolver.getCipherType(cipherSuite) != CipherType.AEAD) {
                 maxCipherTextByteLen = AlgorithmResolver.getCipher(cipherSuite).getBlocksize();
             }
         }

@@ -38,9 +38,9 @@ public class CipherSuiteDerivation extends DerivationParameter<CipherSuite> {
     @Override
     public void applyToConfig(Config config, TestContext context) {
         if(context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-            config.setDefaultClientSupportedCiphersuites(getSelectedValue());
+            config.setDefaultClientSupportedCipherSuites(getSelectedValue());
         } else {
-            config.setDefaultServerSupportedCiphersuites(getSelectedValue());
+            config.setDefaultServerSupportedCipherSuites(getSelectedValue());
         }
         config.setDefaultSelectedCipherSuite(getSelectedValue());
     }

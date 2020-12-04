@@ -12,6 +12,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.CipherType;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -89,7 +91,7 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
                 int chosenBytePos = (Integer) bytePos.getSelectedValue();
                 int appMsgLen = (Integer) appMsgLenParam.getSelectedValue();
                 CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-                if (!AlgorithmResolver.getCipher(cipherDev.getSelectedValue()).usesPadding()) {
+                if (!cipherDev.getSelectedValue().isUsingPadding(scope.getTargetVersion()) || AlgorithmResolver.getCipherType(cipherDev.getSelectedValue()) == CipherType.AEAD) {
                     return appMsgLen > chosenBytePos;
                 }
                 return true;

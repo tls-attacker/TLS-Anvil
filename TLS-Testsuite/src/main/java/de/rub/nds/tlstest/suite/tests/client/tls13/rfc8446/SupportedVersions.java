@@ -29,10 +29,12 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -67,6 +69,7 @@ public class SupportedVersions extends Tls13Test {
     @TlsTest(description = "If this extension is present, clients MUST ignore the " +
             "ServerHello.legacy_version value and MUST use " +
             "only the \"supported_versions\" extension to determine the selected version.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
     @ManualConfig(DerivationType.PROTOCOL_VERSION)
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getInvalidLegacyVersions")

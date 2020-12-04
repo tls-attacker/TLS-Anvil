@@ -103,7 +103,7 @@ public class SCSV extends Tls12Test {
         c.setDefaultSelectedProtocolVersion(getVersionForCipherSuite(cipherSuite));
 
         c.setDefaultSelectedCipherSuite(cipherSuite);
-        c.setDefaultClientSupportedCiphersuites(cipherSuite, CipherSuite.TLS_FALLBACK_SCSV);
+        c.setDefaultClientSupportedCipherSuites(cipherSuite, CipherSuite.TLS_FALLBACK_SCSV);
 
         ClientHelloMessage clientHello = new ClientHelloMessage(c);
         clientHello.setProtocolVersion(Modifiable.explicit(getVersionForCipherSuite(cipherSuite).getValue()));
@@ -138,7 +138,7 @@ public class SCSV extends Tls12Test {
         c.setDefaultSelectedProtocolVersion(getVersionForCipherSuite(cipherSuite));
 
         c.setDefaultSelectedCipherSuite(cipherSuite);
-        c.setDefaultClientSupportedCiphersuites(CipherSuite.TLS_FALLBACK_SCSV, cipherSuite);
+        c.setDefaultClientSupportedCipherSuites(CipherSuite.TLS_FALLBACK_SCSV, cipherSuite);
 
         ClientHelloMessage clientHello = new ClientHelloMessage(c);
         clientHello.setProtocolVersion(Modifiable.explicit(getVersionForCipherSuite(cipherSuite).getValue()));

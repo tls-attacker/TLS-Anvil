@@ -28,9 +28,11 @@ import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
@@ -44,8 +46,9 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class AEADCiphers extends Tls12Test {
 
     @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
+    @ScopeExtensions({DerivationType.AUTH_TAG_BITMASK})
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isAEAD")
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -74,6 +77,7 @@ public class AEADCiphers extends Tls12Test {
     }
 
     @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions({DerivationType.CIPHERTEXT_BITMASK, DerivationType.APP_MSG_LENGHT})
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isAEAD")

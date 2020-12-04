@@ -24,9 +24,11 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.InvalidCCSContentDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
@@ -39,6 +41,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class ChangeCipherSpecProtocol extends Tls12Test {
 
     @TlsTest(description = "The message consists of a single byte of value 1.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.INVALID_CCS_CONTENT)
     @Interoperability(SeverityLevel.CRITICAL)
     private void ccsContentTest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

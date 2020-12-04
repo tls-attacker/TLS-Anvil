@@ -29,10 +29,12 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 
@@ -101,6 +103,7 @@ public class Fragmentation extends Tls12Test {
     }
 
     @TlsTest(description = "Send a record without any content.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Tag("emptyRecord")
     @Security(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.HIGH)
@@ -150,6 +153,7 @@ public class Fragmentation extends Tls12Test {
 
     @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. " +
             "The length MUST NOT exceed 2^14 + 2048.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
     public void sendRecordWithPlaintextOver2pow14plus1(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

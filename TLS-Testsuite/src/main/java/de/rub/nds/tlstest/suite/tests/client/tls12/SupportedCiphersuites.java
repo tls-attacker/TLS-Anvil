@@ -38,7 +38,7 @@ public class SupportedCiphersuites extends Tls12Test {
     public void supportsMoreCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
 
-        List<CipherSuite> advertised = CipherSuite.getCiphersuites(clientHello.getCipherSuites().getValue());
+        List<CipherSuite> advertised = CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue());
         List<CipherSuite> supported = new ArrayList<>(context.getSiteReport().getCipherSuites());
         supported.addAll(context.getSiteReport().getSupportedTls13CipherSuites());
 
@@ -59,7 +59,7 @@ public class SupportedCiphersuites extends Tls12Test {
     public void supportsLessCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
 
-        List<CipherSuite> advertised = CipherSuite.getCiphersuites(clientHello.getCipherSuites().getValue());
+        List<CipherSuite> advertised = CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue());
         advertised.remove(CipherSuite.TLS_FALLBACK_SCSV);
         advertised.remove(CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV);
 

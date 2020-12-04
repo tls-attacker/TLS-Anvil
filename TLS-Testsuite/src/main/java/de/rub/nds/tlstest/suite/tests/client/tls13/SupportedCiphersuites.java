@@ -35,7 +35,7 @@ public class SupportedCiphersuites extends Tls13Test {
     public void supportsMoreCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
 
-        List<CipherSuite> advertised = CipherSuite.getCiphersuites(clientHello.getCipherSuites().getValue());
+        List<CipherSuite> advertised = CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue());
         List<CipherSuite> supported = new ArrayList<>(context.getSiteReport().getSupportedTls13CipherSuites());
 
         advertised.forEach(supported::remove);

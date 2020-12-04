@@ -79,7 +79,7 @@ public class HelloRetryRequest extends Tls13Test {
 
     public List<DerivationParameter> getUnofferedTls13CipherSuites() {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        List<CipherSuite> offeredTls13 = CipherSuite.getCiphersuites(context.getReceivedClientHelloMessage().getCipherSuites().getValue());
+        List<CipherSuite> offeredTls13 = CipherSuite.getCipherSuites(context.getReceivedClientHelloMessage().getCipherSuites().getValue());
         CipherSuite.getImplementedTls13CipherSuites().stream().filter(cipherSuite -> !offeredTls13.contains(cipherSuite))
                 .forEach(cipherSuite -> parameterValues.add(new CipherSuiteDerivation(cipherSuite)));
         return parameterValues;

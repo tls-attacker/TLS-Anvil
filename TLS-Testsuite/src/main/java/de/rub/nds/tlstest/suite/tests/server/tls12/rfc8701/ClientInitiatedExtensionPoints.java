@@ -63,7 +63,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
         List<CipherSuite> cipherSuites = new LinkedList<>();
         cipherSuites.add(selectedCipherSuite);
         cipherSuites.addAll(Arrays.stream(CipherSuite.values()).filter(CipherSuite::isGrease).collect(Collectors.toList()));
-        c.setDefaultClientSupportedCiphersuites(cipherSuites);
+        c.setDefaultClientSupportedCipherSuites(cipherSuites);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         runner.execute(workflowTrace, c).validateFinal(i -> {

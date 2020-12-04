@@ -33,10 +33,12 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -111,7 +113,7 @@ public class CertificateVerify extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         SignatureAndHashAlgorithm selsectedLegacySigHash = SignatureAndHashAlgorithm.ECDSA_SHA1;
 
-        c.setPreferedCertificateSignatureType(CertificateKeyType.ECDSA);
+        c.setPreferredCertificateSignatureType(CertificateKeyType.ECDSA);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
@@ -121,47 +123,22 @@ public class CertificateVerify extends Tls13Test {
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
-    
-    public List<DerivationParameter> getSigHashAlgorithms() {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
-        List<CertificateKeyType> certificateKeyTypes = new ArrayList<CertificateKeyType>(){{
-            add(CertificateKeyType.RSA);
-            //TODO: add more CertificateKeyTypes?
-        }};
-        for (CertificateKeyType keyType : certificateKeyTypes) {
-            List<SignatureAndHashAlgorithm> algorithms = context.getSiteReport().getSupportedSignatureAndHashAlgorithms().stream()
-                    .filter(i -> i.getSignatureAlgorithm().toString().contains(keyType.toString()) &&
-                            i.getHashAlgorithm() != HashAlgorithm.SHA1 &&
-                            i.getSignatureAlgorithm() != SignatureAlgorithm.RSA &&
-                            i.getSignatureAlgorithm() != SignatureAlgorithm.RSA_PSS_PSS)
-                    .collect(Collectors.toList());
-            for (SignatureAndHashAlgorithm sigHashAlg : algorithms) {
-                parameterValues.add(new SigAndHashDerivation(sigHashAlg));
-            }
-        } 
-        
-        return parameterValues;
-    }
 
     @TlsTest(description = "The receiver of a CertificateVerify message MUST verify " +
             "the signature field. If the verification fails, " +
             "the receiver MUST terminate the handshake with a \"decrypt_error\" alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.MEDIUM)
-    @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
-    @ExplicitValues(affectedTypes=DerivationType.SIG_HASH_ALGORIHTM,methods="getSigHashAlgorithms")
+    @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        SignatureAndHashAlgorithm selsectedSigHash = derivationContainer.getDerivation(SigAndHashDerivation.class).getSelectedValue();
-
-        //TODO: update this if more CertKey Types are used
-        c.setPreferedCertificateSignatureType(CertificateKeyType.RSA);
+        byte[] bitmask = derivationContainer.buildBitmask();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         CertificateVerifyMessage msg = workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class);
-        msg.setSignatureHashAlgorithm(Modifiable.explicit(selsectedSigHash.getByteValue()));
-        msg.setSignature(Modifiable.xor(new byte[]{0x01}, 0));
+        msg.setSignature(Modifiable.xor(bitmask, 0));
 
 
         runner.execute(workflowTrace, c).validateFinal(i -> {

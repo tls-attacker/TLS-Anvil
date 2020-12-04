@@ -31,8 +31,10 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import java.util.ArrayList;
@@ -48,6 +50,7 @@ public class ServerHello extends Tls12Test {
     @TlsTest(description = "If a client receives an extension type in ServerHello that it did "+
             "not request in the associated ClientHello, it MUST abort the handshake with an " +
             "unsupported_extension fatal alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void sendAdditionalExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddRenegotiationInfoExtension(false);

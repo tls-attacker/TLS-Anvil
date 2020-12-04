@@ -33,10 +33,12 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseCipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseExtensionDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseProtocolVersionDerivation;
@@ -58,6 +60,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             "with varying length and contents. " +
             "When processing a CertiﬁcateRequest or NewSessionTicket, " +
             "clients MUST NOT treat GREASE values diﬀerently from any unknown value.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     public void advertiseGreaseExtensionsInSessionTicket(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -76,6 +79,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             "In particular, the client MUST fail the connection " +
             "if a GREASE value appears in any of the following: " +
             "The \"version\" value in a ServerHello or HelloRetryRequest")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -97,6 +101,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             "In particular, the client MUST fail the connection " +
             "if a GREASE value appears in any of the following: " +
             "The \"cipher_suite\" value in a ServerHello")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -116,6 +121,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             "In particular, the client MUST fail the connection " +
             "if a GREASE value appears in any of the following: " +
             "Any ServerHello extension")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     public void sendServerHelloGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -134,6 +140,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             "In particular, the client MUST fail the connection " +
             "if a GREASE value appears in any of the following: " +
             "Any EncryptedExtensions extension")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     public void sendEncryptedExtensionsGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

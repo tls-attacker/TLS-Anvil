@@ -62,7 +62,7 @@ public class SupportedVersions extends Tls13Test {
         Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
 
         c.setSupportedVersions(ProtocolVersion.TLS12, ProtocolVersion.TLS13);
-        c.getDefaultClientSupportedCiphersuites().addAll(
+        c.getDefaultClientSupportedCipherSuites().addAll(
                 CipherSuite.getImplemented().stream().filter(CipherSuite::isTLS13).collect(Collectors.toList())
         );
 
@@ -81,7 +81,7 @@ public class SupportedVersions extends Tls13Test {
         
         c.setAddSupportedVersionsExtension(false);
         c.setHighestProtocolVersion(ProtocolVersion.TLS12);
-        c.getDefaultClientSupportedCiphersuites().addAll(
+        c.getDefaultClientSupportedCipherSuites().addAll(
                 CipherSuite.getImplemented().stream().filter(CipherSuite::isTLS13).collect(Collectors.toList())
         );
 
@@ -98,8 +98,8 @@ public class SupportedVersions extends Tls13Test {
     public void oldLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite tls13CipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
-        c.setDefaultClientSupportedCiphersuites(context.getSiteReport().getCipherSuites().stream().filter(i -> !i.isTLS13()).collect(Collectors.toList()));
-        c.getDefaultClientSupportedCiphersuites().add(tls13CipherSuite);
+        c.setDefaultClientSupportedCipherSuites(context.getSiteReport().getCipherSuites().stream().filter(i -> !i.isTLS13()).collect(Collectors.toList()));
+        c.getDefaultClientSupportedCipherSuites().add(tls13CipherSuite);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.getFirstSendMessage(ClientHelloMessage.class)

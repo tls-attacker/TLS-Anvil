@@ -76,8 +76,8 @@ public class RC4Ciphersuites extends Tls12Test {
 
         List<CipherSuite> implemented = new ArrayList<>(TestContext.getInstance().getSiteReport().getCipherSuites());
         implemented.removeIf(i -> !i.toString().contains("RC4"));
-        c.setDefaultClientSupportedCiphersuites(implemented);
-        c.getDefaultClientSupportedCiphersuites().add(selectedCipherSuite);
+        c.setDefaultClientSupportedCipherSuites(implemented);
+        c.getDefaultClientSupportedCipherSuites().add(selectedCipherSuite);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(

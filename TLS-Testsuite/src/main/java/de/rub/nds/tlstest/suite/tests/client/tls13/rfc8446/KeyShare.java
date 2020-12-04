@@ -34,9 +34,11 @@ import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
 import java.io.ByteArrayOutputStream;
@@ -87,6 +89,7 @@ public class KeyShare extends Tls13Test {
             "This value MUST be in the same group as the KeyShareEntry value offered by the client " +
             "that the server has selected for the negotiated key exchange.")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void selectInvalidKeyshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

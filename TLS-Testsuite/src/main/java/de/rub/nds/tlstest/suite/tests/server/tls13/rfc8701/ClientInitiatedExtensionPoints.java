@@ -69,7 +69,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedGrease = derivationContainer.getDerivation(GreaseCipherSuiteDerivation.class).getSelectedValue();
         
-        c.getDefaultClientSupportedCiphersuites().add(0, selectedGrease);
+        c.getDefaultClientSupportedCipherSuites().add(0, selectedGrease);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         runner.execute(workflowTrace, c).validateFinal(i -> {

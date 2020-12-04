@@ -32,11 +32,13 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
 import static org.junit.Assert.*;
@@ -52,6 +54,7 @@ public class ServerHello extends Tls13Test {
     @TlsTest(description = "A client which receives a legacy_session_id_echo " +
             "field that does not match what it sent in the ClientHello MUST " +
             "abort the handshake with an \"illegal_parameter\" alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.HIGH)
     public void testSessionId(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -80,6 +83,7 @@ public class ServerHello extends Tls13Test {
     @TlsTest(description = "A client which receives a cipher suite that was " +
             "not offered MUST abort the handshake with " +
             "an \"illegal_parameter\" alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.HIGH)
     @ScopeLimitations(DerivationType.CIPHERSUITE)
@@ -110,6 +114,7 @@ public class ServerHello extends Tls13Test {
 
     @TlsTest(description = "legacy_compression_method: A single byte which " +
             "MUST have the value 0.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.MEDIUM)
     @Security(SeverityLevel.MEDIUM)
     public void testCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -140,6 +145,7 @@ public class ServerHello extends Tls13Test {
             "check that the last 8 bytes are not equal to either of these values. " +
             "If a match is found, the client MUST abort the handshake " +
             "with an \"illegal_parameter\" alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.MEDIUM)
     @Security(SeverityLevel.HIGH)
     @KeyExchange(supported = KeyExchangeType.ALL12)

@@ -31,10 +31,12 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -77,6 +79,7 @@ public class RecordProtocol extends Tls13Test {
             "defined in this document unless negotiated by some extension. " +
             "If a TLS implementation receives an unexpected record type, " +
             "it MUST terminate the connection with an \"unexpected_message\" alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.LOW)
     public void invalidRecordContentTypeAfterEncryption(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -105,6 +108,7 @@ public class RecordProtocol extends Tls13Test {
 
     @TlsTest(description = "If the decryption fails, the receiver MUST " +
             "terminate the connection with a \"bad_record_mac\" alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -130,6 +134,7 @@ public class RecordProtocol extends Tls13Test {
             "TLSPlaintext.fragment. The length MUST NOT exceed 2^14 + 256 bytes. " +
             "An endpoint that receives a record that exceeds this " +
             "length MUST terminate the connection with a \"record_overflow\" alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.HIGH)
     @RFC(number = 8446, section = "5.1. Record Layer")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
@@ -158,6 +163,7 @@ public class RecordProtocol extends Tls13Test {
 
     @TlsTest(description = "If the decryption fails, the receiver MUST " +
             "terminate the connection with a \"bad_record_mac\" alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions({DerivationType.CIPHERTEXT_BITMASK, DerivationType.APP_MSG_LENGHT})
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
@@ -184,6 +190,7 @@ public class RecordProtocol extends Tls13Test {
     @TlsTest(description = "The length MUST NOT exceed 2^14 + 256 bytes. " +
             "An endpoint that receives a record that exceeds this " +
             "length MUST terminate the connection with a \"record_overflow\" alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.HIGH)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
@@ -235,6 +242,7 @@ public class RecordProtocol extends Tls13Test {
     }
 
     @TlsTest(description = "Send a record without any content.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.HIGH)
     @Tag("emptyRecord")

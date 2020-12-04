@@ -28,9 +28,11 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 
@@ -44,6 +46,7 @@ public class CBCBlockCipher extends Tls12Test {
             "vector MUST be filled with the padding length value. The receiver " +
             "MUST check this padding and MUST use the bad_record_mac alert to " +
             "indicate padding errors.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.HIGH)
     @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.PADDING_BITMASK})
     @ValueConstraints(affectedTypes = {DerivationType.CIPHERSUITE}, methods = "isCBC")
@@ -85,6 +88,7 @@ public class CBCBlockCipher extends Tls12Test {
             "length. Legal values range from zero to 255, inclusive. This " +
             "length specifies the length of the padding field exclusive of the " +
             "padding_length field itself.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.CIPHERTEXT_BITMASK)
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
@@ -126,6 +130,7 @@ public class CBCBlockCipher extends Tls12Test {
             "length. Legal values range from zero to 255, inclusive. This " +
             "length specifies the length of the padding field exclusive of the " +
             "padding_length field itself.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.HIGH)
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
     public void invalidMAC(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

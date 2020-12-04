@@ -156,7 +156,7 @@ public class TLSExtensionForECC extends Tls12Test {
                 .collect(Collectors.toList());
         cipherSuiteList.add(derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue());
 
-        c.setDefaultClientSupportedCiphersuites(cipherSuiteList);
+        c.setDefaultClientSupportedCipherSuites(cipherSuiteList);
 
         ClientHelloMessage chm = new ClientHelloMessage(c);
 

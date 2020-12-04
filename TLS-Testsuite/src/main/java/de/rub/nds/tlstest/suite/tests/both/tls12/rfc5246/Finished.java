@@ -30,9 +30,11 @@ import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -41,6 +43,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class Finished extends Tls12Test {
 
     @TlsTest( description = "Recipients of Finished messages MUST verify that the contents are correct.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.PRF_BITMASK)
     public void verifyFinishedMessageCorrect(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -59,6 +62,7 @@ public class Finished extends Tls12Test {
     }
 
     @TlsTest(description = "For the PRF defined in Section 5, the Hash MUST be the Hash used as the basis for the PRF.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     public void invalidPRF(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -84,6 +88,7 @@ public class Finished extends Tls12Test {
 
     @TlsTest(description = "It is a fatal error if a Finished message is not preceded by a ChangeCipherSpec " +
             "message at the appropriate point in the handshake.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     public void omitCCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

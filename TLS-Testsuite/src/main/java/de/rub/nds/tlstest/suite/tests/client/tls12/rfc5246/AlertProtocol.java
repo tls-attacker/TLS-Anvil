@@ -29,11 +29,13 @@ import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
@@ -100,12 +102,13 @@ public class AlertProtocol extends Tls12Test {
         alert.setDescription(Modifiable.explicit(description.getValue()));
 
         SendAction serverHelloAction = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
-            serverHelloAction.getSendMessages().add(0, alert);
+        serverHelloAction.getSendMessages().add(0, alert);
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
     @TlsTest
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
     @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.ALERT)

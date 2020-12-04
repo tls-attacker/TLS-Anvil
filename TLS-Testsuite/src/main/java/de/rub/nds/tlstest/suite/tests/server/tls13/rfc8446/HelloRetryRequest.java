@@ -73,7 +73,7 @@ public class HelloRetryRequest extends Tls13Test {
     @Interoperability(SeverityLevel.CRITICAL)
     public void selectsSameCipherSuiteAllAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        c.setDefaultClientSupportedCiphersuites(new LinkedList<>(context.getSiteReport().getSupportedTls13CipherSuites()));
+        c.setDefaultClientSupportedCipherSuites(new LinkedList<>(context.getSiteReport().getSupportedTls13CipherSuites()));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.ENCRYPTED_EXTENSIONS);
         ClientHelloMessage initialHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);

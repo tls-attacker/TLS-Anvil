@@ -1,27 +1,17 @@
-/**
- * TLS-Testsuite - A testsuite for the TLS protocol
- *
- * Copyright 2020 Ruhr University Bochum and
- * TÜV Informationstechnik GmbH
- *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
- */
-package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8422;
+package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.DigestAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -32,12 +22,15 @@ import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
@@ -50,7 +43,27 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8422, section = "5.4 Server Key Exchange")
 @ClientTest
 public class ServerKeyExchange extends Tls12Test {
+    
+    @TlsTest(description = "The client must verify the signature of the ServerKeyExchange message")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @Security(SeverityLevel.CRITICAL)
+    @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
+    @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)
+    public void invalidServerKeyExchangeSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        byte[] bitmask = derivationContainer.buildBitmask();
+        
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
+        ServerKeyExchangeMessage serverKeyExchangeMsg = (ServerKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
+        serverKeyExchangeMsg.setSignature(Modifiable.xor(bitmask, 0));
+        
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+        });
+    }
+    
     public List<DerivationParameter> getUnproposedNamedGroups() {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         NamedGroup.getImplemented().stream()
@@ -63,6 +76,7 @@ public class ServerKeyExchange extends Tls12Test {
     @TlsTest(description = "A possible reason for a "
             + "fatal handshake failure is that the client's capabilities for "
             + "handling elliptic curves and point formats are exceeded")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.MEDIUM)
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getUnproposedNamedGroups")
@@ -80,6 +94,7 @@ public class ServerKeyExchange extends Tls12Test {
     @TlsTest(description = "The client verifies the signature (when present) and retrieves the "
             + "server's elliptic curve domain parameters and ephemeral ECDH public "
             + "key from the ServerKeyExchange message.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
     public void acceptsMissingSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

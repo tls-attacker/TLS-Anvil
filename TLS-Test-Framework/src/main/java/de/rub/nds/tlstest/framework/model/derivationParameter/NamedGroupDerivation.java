@@ -51,8 +51,9 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
             groupList = context.getSiteReport().getSupportedNamedGroups();
             parameterValues.add(new NamedGroupDerivation(null));
         } else if (scope.isTls13Test() && context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
-            groupList = context.getSiteReport().getSupportedTls13Groups().stream().filter(group -> NamedGroup.getImplemented().contains(group)).collect(Collectors.toList());
+            groupList = context.getSiteReport().getSupportedTls13Groups();
         }
+        groupList = groupList.stream().filter(group -> NamedGroup.getImplemented().contains(group)).collect(Collectors.toList());
         groupList.forEach(group -> parameterValues.add(new NamedGroupDerivation(group)));
 
         return parameterValues;

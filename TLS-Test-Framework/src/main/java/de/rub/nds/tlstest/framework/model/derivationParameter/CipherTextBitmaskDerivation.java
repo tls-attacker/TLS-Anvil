@@ -45,7 +45,7 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         int maxCipherTextByteLen = 0;
         Set<CipherSuite> cipherSuiteList = context.getSiteReport().getCipherSuites();
-        if(scope.isTls13Test()) {
+        if (scope.isTls13Test()) {
             cipherSuiteList = context.getSiteReport().getSupportedTls13CipherSuites();
         }
         for (CipherSuite cipherSuite : cipherSuiteList) {
@@ -70,33 +70,40 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         if (ConstraintHelper.multipleBlocksizesModeled(scope)) {
-            Set<DerivationType> requiredDerivations = new HashSet<>();
-            requiredDerivations.add(DerivationType.CIPHERSUITE);
-
-            //ensure that the selected byte is within blocksize of ciphersuite
-            condConstraints.add(new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(DerivationType.CIPHERTEXT_BITMASK.name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePos, DerivationParameter cipherSuite) -> {
-                int chosenBytePos = (Integer) bytePos.getSelectedValue();
-                CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-                return AlgorithmResolver.getCipher(cipherDev.getSelectedValue()).getBlocksize() > chosenBytePos;
-            })));
+            condConstraints.add(getMustBeWithinBlocksizeConstraint());
         }
 
         if (ConstraintHelper.unpaddedCipherSuitesModeled(scope)) {
-            Set<DerivationType> requiredDerivationsCiphertext = new HashSet<>();
-            requiredDerivationsCiphertext.add(DerivationType.CIPHERSUITE);
-            requiredDerivationsCiphertext.add(DerivationType.APP_MSG_LENGHT);
-
-            //ensure that the selected byte is within ciphertext size (for non-padded)
-            condConstraints.add(new ConditionalConstraint(requiredDerivationsCiphertext, ConstraintBuilder.constrain(DerivationType.CIPHERTEXT_BITMASK.name(), DerivationType.CIPHERSUITE.name(), DerivationType.APP_MSG_LENGHT.name()).by((DerivationParameter bytePos, DerivationParameter cipherSuite, DerivationParameter appMsgLenParam) -> {
-                int chosenBytePos = (Integer) bytePos.getSelectedValue();
-                int appMsgLen = (Integer) appMsgLenParam.getSelectedValue();
-                CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-                if (!cipherDev.getSelectedValue().isUsingPadding(scope.getTargetVersion()) || AlgorithmResolver.getCipherType(cipherDev.getSelectedValue()) == CipherType.AEAD) {
-                    return appMsgLen > chosenBytePos;
-                }
-                return true;
-            })));
+            condConstraints.add(getMustBeWithinCiphertextSizeConstraint(scope));
         }
         return condConstraints;
+    }
+
+    private ConditionalConstraint getMustBeWithinBlocksizeConstraint() {
+        Set<DerivationType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(DerivationType.CIPHERSUITE);
+
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(DerivationType.CIPHERTEXT_BITMASK.name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePos, DerivationParameter cipherSuite) -> {
+            int chosenBytePos = (Integer) bytePos.getSelectedValue();
+            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
+            return AlgorithmResolver.getCipher(cipherDev.getSelectedValue()).getBlocksize() > chosenBytePos;
+        }));
+    }
+
+    private ConditionalConstraint getMustBeWithinCiphertextSizeConstraint(DerivationScope scope) {
+        Set<DerivationType> requiredDerivationsCiphertext = new HashSet<>();
+        requiredDerivationsCiphertext.add(DerivationType.CIPHERSUITE);
+        requiredDerivationsCiphertext.add(DerivationType.APP_MSG_LENGHT);
+
+        //ensure that the selected byte is within ciphertext size (for non-padded)
+        return new ConditionalConstraint(requiredDerivationsCiphertext, ConstraintBuilder.constrain(DerivationType.CIPHERTEXT_BITMASK.name(), DerivationType.CIPHERSUITE.name(), DerivationType.APP_MSG_LENGHT.name()).by((DerivationParameter bytePos, DerivationParameter cipherSuite, DerivationParameter appMsgLenParam) -> {
+            int chosenBytePos = (Integer) bytePos.getSelectedValue();
+            int appMsgLen = (Integer) appMsgLenParam.getSelectedValue();
+            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
+            if (!cipherDev.getSelectedValue().isUsingPadding(scope.getTargetVersion()) || AlgorithmResolver.getCipherType(cipherDev.getSelectedValue()) == CipherType.AEAD) {
+                return appMsgLen > chosenBytePos;
+            }
+            return true;
+        }));
     }
 }

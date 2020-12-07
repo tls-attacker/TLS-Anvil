@@ -66,17 +66,20 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         if (ConstraintHelper.multipleMacSizesModeled(scope)) {
-            Set<DerivationType> requiredDerivations = new HashSet<>();
-            requiredDerivations.add(DerivationType.CIPHERSUITE);
-
-            //selected byte must be within mac size of ciphersuite
-            condConstraints.add(new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePosParam, DerivationParameter cipherSuite) -> {
-                int chosenPos = (Integer) bytePosParam.getSelectedValue();
-                CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-                return AlgorithmResolver.getMacAlgorithm(scope.getTargetVersion(), cipherDev.getSelectedValue()).getSize() > chosenPos;
-            })));
+            condConstraints.add(getMustBeWithinMacSizeConstraint(scope));
         }
         return condConstraints;
+    }
+
+    private ConditionalConstraint getMustBeWithinMacSizeConstraint(DerivationScope scope) {
+        Set<DerivationType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(DerivationType.CIPHERSUITE);
+
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePosParam, DerivationParameter cipherSuite) -> {
+            int chosenPos = (Integer) bytePosParam.getSelectedValue();
+            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
+            return AlgorithmResolver.getMacAlgorithm(scope.getTargetVersion(), cipherDev.getSelectedValue()).getSize() > chosenPos;
+        }));
     }
 
 }

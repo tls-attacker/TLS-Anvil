@@ -70,17 +70,20 @@ public class PRFBitmaskDerivation extends DerivationParameter<Integer> {
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
         if (scope.isTls13Test() && ConstraintHelper.multipleHkdfSizesModeled(scope)) {
-            Set<DerivationType> requiredDerivations = new HashSet<>();
-            requiredDerivations.add(DerivationType.CIPHERSUITE);
-
-            //selected byte must be within tag size
-            condConstraints.add(new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePosParam, DerivationParameter cipherSuite) -> {
-                int selectedPos = (Integer) bytePosParam.getSelectedValue();
-                CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-                return AlgorithmResolver.getHKDFAlgorithm(cipherDev.getSelectedValue()).getMacAlgorithm().getSize() > selectedPos;
-            })));
+            condConstraints.add(getMustBeWithinPRFSizeConstraint());
         }
         return condConstraints;
+    }
+
+    private ConditionalConstraint getMustBeWithinPRFSizeConstraint() {
+        Set<DerivationType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(DerivationType.CIPHERSUITE);
+
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePosParam, DerivationParameter cipherSuite) -> {
+            int selectedPos = (Integer) bytePosParam.getSelectedValue();
+            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
+            return AlgorithmResolver.getHKDFAlgorithm(cipherDev.getSelectedValue()).getMacAlgorithm().getSize() > selectedPos;
+        }));
     }
 
 }

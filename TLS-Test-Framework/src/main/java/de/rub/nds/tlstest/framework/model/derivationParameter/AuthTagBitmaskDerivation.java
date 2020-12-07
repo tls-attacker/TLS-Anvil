@@ -57,7 +57,7 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
         for (int i = 0; i < maxTagLen; i++) {
             parameterValues.add(new AuthTagBitmaskDerivation(i));
         }
-        
+
         return parameterValues;
     }
 
@@ -70,17 +70,20 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         if (ConstraintHelper.multipleTagSizesModeled(scope)) {
-            Set<DerivationType> requiredDerivations = new HashSet<>();
-            requiredDerivations.add(DerivationType.CIPHERSUITE);
-
-            //selected byte must be within tag size
-            condConstraints.add(new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePosParam, DerivationParameter cipherSuite) -> {
-                int selectedPos = (Integer) bytePosParam.getSelectedValue();
-                CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-                return getAuthTagLen(cipherDev.getSelectedValue()) > selectedPos;
-            })));
+            condConstraints.add(getMustBeWithinTagSizeConstraint());
         }
         return condConstraints;
+    }
+
+    private ConditionalConstraint getMustBeWithinTagSizeConstraint() {
+        Set<DerivationType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(DerivationType.CIPHERSUITE);
+
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePosParam, DerivationParameter cipherSuite) -> {
+            int selectedPos = (Integer) bytePosParam.getSelectedValue();
+            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
+            return getAuthTagLen(cipherDev.getSelectedValue()) > selectedPos;
+        }));
     }
 
     //TODO: integrate into AlgorithmResolver?

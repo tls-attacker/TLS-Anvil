@@ -53,13 +53,37 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
         List<DerivationParameter> parameterValues = new LinkedList<>();
         //the applied algorithm depends on the chosen ciphersuite - see constraints
         //TLS 1.3 clients must send the extension if they expect a server cert
-        parameterValues.add(new SigAndHashDerivation(SignatureAndHashAlgorithm.RSA_SHA1));
-        parameterValues.add(new SigAndHashDerivation(SignatureAndHashAlgorithm.DSA_SHA1));
-        parameterValues.add(new SigAndHashDerivation(SignatureAndHashAlgorithm.ECDSA_SHA1));
-
+        if(supportsAnyRSA()) {
+           parameterValues.add(new SigAndHashDerivation(SignatureAndHashAlgorithm.RSA_SHA1)); 
+        }
+        if(supportsAnyECDSA()) {
+            parameterValues.add(new SigAndHashDerivation(SignatureAndHashAlgorithm.ECDSA_SHA1));
+        }
+        if(supportsAnyDSA()) {
+            parameterValues.add(new SigAndHashDerivation(SignatureAndHashAlgorithm.DSA_SHA1));
+        }
+        
         return parameterValues;
     }
-
+    
+    private boolean supportsAnyRSA() {
+        TestContext testContext = TestContext.getInstance();
+        return testContext.getSiteReport().getCipherSuites().stream()
+                .anyMatch(cipherSuite -> cipherSuite.name().contains("RSA"));
+    }
+    
+    private boolean supportsAnyECDSA() {
+        TestContext testContext = TestContext.getInstance();
+        return testContext.getSiteReport().getCipherSuites().stream()
+                .anyMatch(cipherSuite -> cipherSuite.isECDSA());
+    }
+    
+    private boolean supportsAnyDSA() {
+        TestContext testContext = TestContext.getInstance();
+        return testContext.getSiteReport().getCipherSuites().stream()
+                .anyMatch(cipherSuite -> cipherSuite.isDSS());
+    }
+    
     private List<DerivationParameter> getClientTestAlgorithms(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         context.getSiteReport().getSupportedSignatureAndHashAlgorithms().stream()
@@ -95,7 +119,7 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
             condConstraints.add(getMustMatchPkOfCertificateConstraint());
         }
 
-        if (!scope.isTls13Test() && TestContext.getInstance().getSiteReport().getSupportedSignatureAndHashAlgorithms() == null) {
+        if (!scope.isTls13Test() && TestContext.getInstance().getSiteReport().getSupportedSignatureAndHashAlgorithms() == null && ConstraintHelper.multipleSigAlgorithmsModeled(scope)) {
             condConstraints.add(getDefaultAlgorithmMustMatchCipherSuite());
         }
 
@@ -162,7 +186,6 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CERTIFICATE);
 
-        //the certificate pk must be eligible for the chosen algorithm 
         return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CERTIFICATE.name()).by((DerivationParameter sigHashAlgParam, DerivationParameter certParam) -> {
             SigAndHashDerivation sigHashAlg = (SigAndHashDerivation) sigHashAlgParam;
             CertificateDerivation cert = (CertificateDerivation) certParam;

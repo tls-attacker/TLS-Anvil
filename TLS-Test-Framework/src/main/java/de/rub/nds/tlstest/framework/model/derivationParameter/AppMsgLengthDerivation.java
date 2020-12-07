@@ -38,7 +38,7 @@ public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         int maxCipherTextByteLen = 0;
         Set<CipherSuite> cipherSuiteList = context.getSiteReport().getCipherSuites();
-        if(scope.isTls13Test()) {
+        if (scope.isTls13Test()) {
             cipherSuiteList = context.getSiteReport().getSupportedTls13CipherSuites();
         }
         for (CipherSuite cipherSuite : cipherSuiteList) {
@@ -66,20 +66,22 @@ public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
     @Override
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-        
-        if (ConstraintHelper.multipleBlocksizesModeled(scope)) {
-            Set<DerivationType> requiredDerivations = new HashSet<>();
-            requiredDerivations.add(DerivationType.CIPHERSUITE);
-            
 
-            //msg length must not exceed blocklength
-            condConstraints.add(new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(DerivationType.APP_MSG_LENGHT.name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter msgLenParam, DerivationParameter cipherSuite) -> {
-                int msgLen = (Integer) msgLenParam.getSelectedValue();
-                CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-                return AlgorithmResolver.getCipher(cipherDev.getSelectedValue()).getBlocksize() >= msgLen;
-            })));
+        if (ConstraintHelper.multipleBlocksizesModeled(scope)) {
+            condConstraints.add(getMustBeWithinBlocksizeConstraint());
         }
         return condConstraints;
+    }
+
+    private ConditionalConstraint getMustBeWithinBlocksizeConstraint() {
+        Set<DerivationType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(DerivationType.CIPHERSUITE);
+
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(DerivationType.APP_MSG_LENGHT.name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter msgLenParam, DerivationParameter cipherSuite) -> {
+            int msgLen = (Integer) msgLenParam.getSelectedValue();
+            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
+            return AlgorithmResolver.getCipher(cipherDev.getSelectedValue()).getBlocksize() >= msgLen;
+        }));
     }
 
 }

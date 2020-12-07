@@ -10,8 +10,9 @@
 package de.rub.nds.tlstest.framework.model.constraint;
 
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
-import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
+import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.HKDFAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
@@ -24,6 +25,7 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivat
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
+import de.rub.nds.tlstest.framework.model.derivationParameter.SignatureBitmaskDerivation;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -156,6 +158,37 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter> values = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         return values.stream().anyMatch(param -> ((SigAndHashDerivation)param).getSelectedValue().name().contains("PSS"));
+    }
+    
+    public static boolean signatureLengthConstraintApplicable(DerivationScope scope) {
+        CertificateDerivation certDeriv = (CertificateDerivation) DerivationFactory.getInstance(DerivationType.CERTIFICATE);
+        SignatureBitmaskDerivation sigBitmaskDeriv = (SignatureBitmaskDerivation) DerivationFactory.getInstance(DerivationType.SIGNATURE_BITMASK);
+        List<DerivationParameter> bytePositions = sigBitmaskDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        int maxBytePosition = (int)bytePositions.get(bytePositions.size() - 1).getSelectedValue();
+        for(DerivationParameter certDerivationValue: certDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope)) {
+            CertificateKeyPair certKeyPair = (CertificateKeyPair) certDerivationValue.getSelectedValue();
+            int signatureLength;
+            switch(certKeyPair.getCertPublicKeyType()) {
+                case RSA:
+                    signatureLength = sigBitmaskDeriv.computeEstimatedSignatureSize(SignatureAlgorithm.RSA, certKeyPair.getPublicKey().keySize());
+                    break;
+                case ECDH:  
+                case ECDSA:
+                    signatureLength = sigBitmaskDeriv.computeEstimatedSignatureSize(SignatureAlgorithm.ECDSA, certKeyPair.getPublicKey().keySize());
+                    break;
+                case DSS:  
+                    signatureLength = sigBitmaskDeriv.computeEstimatedSignatureSize(SignatureAlgorithm.DSA, certKeyPair.getPublicKey().keySize());
+                    break;
+                default:
+                    throw new RuntimeException("Can not compute signature size for CertPublicKeyType " + certKeyPair.getCertPublicKeyType());
+            }
+            
+            if(maxBytePosition >= SignatureBitmaskDerivation.computeSignatureSizeForCertKeyPair(certKeyPair)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     //TODO: integrate into AlgorithmResolver?

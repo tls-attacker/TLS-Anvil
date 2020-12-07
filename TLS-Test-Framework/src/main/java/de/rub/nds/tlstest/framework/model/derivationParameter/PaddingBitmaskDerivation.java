@@ -44,7 +44,7 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         int maxCipherTextByteLen = 0;
         Set<CipherSuite> cipherSuiteList = context.getSiteReport().getCipherSuites();
-        if(scope.isTls13Test()) {
+        if (scope.isTls13Test()) {
             cipherSuiteList = context.getSiteReport().getSupportedTls13CipherSuites();
         }
         for (CipherSuite cipherSuite : cipherSuiteList) {
@@ -69,33 +69,39 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         if (ConstraintHelper.multipleBlocksizesModeled(scope)) {
-            Set<DerivationType> requiredDerivations = new HashSet<>();
-            requiredDerivations.add(DerivationType.CIPHERSUITE);
-            //ensure that the selected byte is within (blocksize - 1) of ciphersuite
-            condConstraints.add(new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePos, DerivationParameter cipherSuite) -> {
-                int chosenBytePos = (Integer) bytePos.getSelectedValue();
-                CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-                return AlgorithmResolver.getCipher(cipherDev.getSelectedValue()).getBlocksize() - 1 > chosenBytePos;
-            })));
+            condConstraints.add(getMustBeWithinBlocksizeConstraint());
         }
 
+        condConstraints.add(getMustNotExceedPaddingLengthConstraint(scope));
+
+        return condConstraints;
+    }
+
+    private ConditionalConstraint getMustBeWithinBlocksizeConstraint() {
+        Set<DerivationType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(DerivationType.CIPHERSUITE);
+
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePos, DerivationParameter cipherSuite) -> {
+            int chosenBytePos = (Integer) bytePos.getSelectedValue();
+            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
+            return AlgorithmResolver.getCipher(cipherDev.getSelectedValue()).getBlocksize() - 1 > chosenBytePos;
+        }));
+    }
+
+    private ConditionalConstraint getMustNotExceedPaddingLengthConstraint(DerivationScope scope) {
         Set<DerivationType> requiredDerivationsAppMsg = new HashSet<>();
         requiredDerivationsAppMsg.add(DerivationType.CIPHERSUITE);
         requiredDerivationsAppMsg.add(DerivationType.APP_MSG_LENGHT);
 
-        //ensure that the selected byte is applicable for the selected 
-        //app length + ciphersuite
-        condConstraints.add(new ConditionalConstraint(requiredDerivationsAppMsg, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name(), DerivationType.APP_MSG_LENGHT.name()).by((DerivationParameter bytePos, DerivationParameter cipherSuite, DerivationParameter appMsgLenParam) -> {
+        return new ConditionalConstraint(requiredDerivationsAppMsg, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name(), DerivationType.APP_MSG_LENGHT.name()).by((DerivationParameter bytePos, DerivationParameter cipherSuite, DerivationParameter appMsgLenParam) -> {
             int chosenBytePos = (Integer) bytePos.getSelectedValue();
             int appMsgLen = (Integer) appMsgLenParam.getSelectedValue();
-            
+
             int macLen = AlgorithmResolver.getMacAlgorithm(scope.getTargetVersion(), (CipherSuite) cipherSuite.getSelectedValue()).getSize();
             int blocksize = AlgorithmResolver.getCipher((CipherSuite) cipherSuite.getSelectedValue()).getBlocksize();
             int paddingLen = blocksize - (appMsgLen + macLen % blocksize);
             return paddingLen > chosenBytePos;
-        })));
-
-        return condConstraints;
+        }));
     }
 
 }

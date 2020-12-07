@@ -128,7 +128,7 @@ public class CertificateVerify extends Tls13Test {
             "the signature field. If the verification fails, " +
             "the receiver MUST terminate the handshake with a \"decrypt_error\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.MEDIUM)
+    @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

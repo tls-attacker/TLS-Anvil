@@ -26,6 +26,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
@@ -118,7 +119,7 @@ public class AlertProtocol extends Tls12Test {
 
         workflowTrace.addTlsActions(
             new SendAction(alert),
-            new SendAction(true, new ChangeCipherSpecMessage(), new FinishedMessage()),
+            new SendAction(ActionOption.MAY_FAIL, new ChangeCipherSpecMessage(), new FinishedMessage()),
             new ReceiveAction(new AlertMessage())
         );
 

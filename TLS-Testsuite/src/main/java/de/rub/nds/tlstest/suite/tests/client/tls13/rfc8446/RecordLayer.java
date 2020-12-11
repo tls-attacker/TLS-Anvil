@@ -24,6 +24,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
@@ -72,7 +73,7 @@ public class RecordLayer extends Tls13Test {
         SendAction serverHello = new SendAction(new ServerHelloMessage(c));
         serverHello.setRecords(record);
         trace.addTlsAction(1, serverHello);
-        ((SendAction) trace.getTlsActions().get(2)).setOptional(true);
+        ((SendAction) trace.getTlsActions().get(2)).addActionOption(ActionOption.MAY_FAIL);
 
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }

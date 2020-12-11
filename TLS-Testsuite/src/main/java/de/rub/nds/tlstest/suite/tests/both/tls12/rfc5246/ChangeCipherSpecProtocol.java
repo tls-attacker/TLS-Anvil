@@ -18,6 +18,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -54,7 +55,7 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         workflowTrace.addTlsActions(
                 new SendAction(changeCipherSpecMessage),
-                new SendAction(true, new FinishedMessage()),
+                new SendAction(ActionOption.MAY_FAIL, new FinishedMessage()),
                 new ReceiveAction(new AlertMessage())
         );
 

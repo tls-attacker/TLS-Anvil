@@ -25,6 +25,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
@@ -56,6 +57,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
     @TlsTest(description = "A client MAY select one or more GREASE cipher suite values and advertise them in the \"cipher_suites\" field." +
             "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @Interoperability(SeverityLevel.HIGH)
+    @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
     public void advertiseGreaseCiphersuites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         
@@ -77,6 +79,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
             "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @Interoperability(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
+    @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
     public void advertiseGreaseExtensions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ExtensionType greaseExtension = derivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
@@ -99,6 +102,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
             "For each of these, the \"key_exchange\" ﬁeld MAY be any value. " +
             "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @Interoperability(SeverityLevel.HIGH)
+    @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
     public void advertiseGreaseNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -118,6 +122,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
             "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @Interoperability(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
+    @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
     public void advertiseGreaseSignatureAlgorithms(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         SignatureAndHashAlgorithm greaseSigHash = derivationContainer.getDerivation(GreaseSigHashDerivation.class).getSelectedValue();
@@ -140,6 +145,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
             "and advertise them in the \"application_layer_protocol_negotiation\" extension, if sent. " +
             "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @Interoperability(SeverityLevel.HIGH)
+    @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
     public void advertiseGreaseALPNIdentifiers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddAlpnExtension(true);

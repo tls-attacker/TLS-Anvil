@@ -36,6 +36,7 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
@@ -109,6 +110,8 @@ public class Extensions extends Tls13Test {
 
             workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class).addExtension(ext);
         } else if (selectedExtension == ExtensionType.ALPN) {
+            c.setDefaultProposedAlpnProtocols("http/1.1", "spdy/1", "spdy/2", "spdy/3", "stun.turn",
+                "stun.nat-discovery", "h2", "h2c", "webrtc", "c-webrtc", "ftp", "imap", "pop3", "managesieve");
             AlpnExtensionMessage ext = new AlpnExtensionMessage(c);
             workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class).addExtension(ext);
         } else if (selectedExtension == ExtensionType.SERVER_NAME_INDICATION) {

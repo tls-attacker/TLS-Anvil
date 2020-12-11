@@ -126,7 +126,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     public void sendServerHelloGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         ExtensionType selectedGreaseExt = derivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
 
@@ -145,7 +145,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     public void sendEncryptedExtensionsGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         ExtensionType selectedGreaseExt = derivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
 

@@ -106,6 +106,7 @@ public class RecordLayer extends Tls13Test {
             + "with other record types.")
     @Security(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.MEDIUM)
+    @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

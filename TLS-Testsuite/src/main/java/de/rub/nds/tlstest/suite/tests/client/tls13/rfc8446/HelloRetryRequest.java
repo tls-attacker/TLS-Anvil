@@ -212,12 +212,8 @@ public class HelloRetryRequest extends Tls13Test {
         NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
         CipherSuite helloRetryCipherSuite = derivationContainer.getDerivation(MirroredCipherSuiteDerivation.class).getSelectedValue();
 
-        WorkflowTrace workflowTrace;
-        if (c.getTls13BackwardsCompatibilityMode()) {
-            workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
-        } else {
-            workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
-        }
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
+
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
         ServerHelloMessage helloRetryRequest = (ServerHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);

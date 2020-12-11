@@ -57,7 +57,7 @@ public class PointFormatExtension extends Tls12Test {
             "still be included and contain exactly one value: the uncompressed" +
             "point format (0).")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    public void serverSupportsUncompressedPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void serverSupportsAdvertisesOnlyUncompressedPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddEllipticCurveExtension(true);

@@ -31,6 +31,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.Arrays;
 
 import java.util.List;
 
@@ -93,7 +94,8 @@ public class RespectClientExtensions extends Tls12Test {
             assertNotNull(AssertMsgs.ServerKxNotReceived, message);
 
             ClientHelloMessage sentChm = trace.getFirstSendMessage(ClientHelloMessage.class);
-            byte[] sentEllipticCurve = sentChm.getExtension(EllipticCurvesExtensionMessage.class).getSupportedGroups().getValue();
+            byte[] allSentCurves = sentChm.getExtension(EllipticCurvesExtensionMessage.class).getSupportedGroups().getValue();
+            byte[] sentEllipticCurve = Arrays.copyOfRange(allSentCurves, 0, 2);
             byte[] receivedEllipticCurve = message.getNamedGroup().getValue();
             assertArrayEquals("Unexpected named group", sentEllipticCurve, receivedEllipticCurve);
         });

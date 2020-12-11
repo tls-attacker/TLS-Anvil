@@ -20,6 +20,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
@@ -60,6 +61,7 @@ public class EncThenMacExtension extends Tls12Test {
     @TlsTest(description = "Test if the server supports the encrypt-then-mac extension")
     @Security(SeverityLevel.MEDIUM)
     @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isBlockCipher")
+    @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     public void supportsEncThenMacExt(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);
@@ -79,6 +81,7 @@ public class EncThenMacExtension extends Tls12Test {
     @Interoperability(SeverityLevel.MEDIUM)
     @Security(SeverityLevel.LOW)
     @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isNotBlockCipher")
+    @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     public void negotiatesEncThenMacExtOnlyWithBckCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);

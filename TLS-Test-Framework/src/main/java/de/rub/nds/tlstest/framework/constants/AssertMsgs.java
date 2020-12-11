@@ -10,6 +10,7 @@
 package de.rub.nds.tlstest.framework.constants;
 
 public class AssertMsgs {
+    public final static String WorkflowNotExecutedBeforeAlert = "The workflow execution failed before reaching the expected alert!";
     public final static String WorkflowNotExecuted = "The workflow could not be executed as planned!";
     public final static String ClientHelloNotReceived = "ClientHello not received!";
     public final static String ServerHelloNotReceived = "ServerHello not received!";

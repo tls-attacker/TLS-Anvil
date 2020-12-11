@@ -9,10 +9,13 @@
  */
 package de.rub.nds.tlstest.framework.model;
 
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
+import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
+import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rwth.swc.coffee4j.model.InputParameterModel;
 import static de.rwth.swc.coffee4j.model.InputParameterModel.inputParameterModel;
@@ -40,7 +43,7 @@ public class ParameterModelFactory {
 
     public static List<DerivationType> getDerivationsForScope(DerivationScope derivationScope) {
         List<DerivationType> resultingDerivations = new LinkedList<>();
-        List<DerivationType> derivationsOfModel = getDerivationsOfModel(derivationScope.getBaseModel());
+        List<DerivationType> derivationsOfModel = getDerivationsOfModel(derivationScope);
         for (DerivationType derivationType : DerivationType.values()) {
             if (!isBeyondScope(derivationType, derivationsOfModel, derivationScope.getScopeLimits(), derivationScope.getScopeExtensions())) {
                 resultingDerivations.add(derivationType);
@@ -50,19 +53,28 @@ public class ParameterModelFactory {
         return resultingDerivations;
     }
 
-    private static List<DerivationType> getDerivationsOfModel(ModelType baseModel) {
+    private static List<DerivationType> getDerivationsOfModel(DerivationScope derivationScope) {
+        return getDerivationsOfModel(derivationScope, derivationScope.getBaseModel());
+    }
+
+    private static List<DerivationType> getDerivationsOfModel(DerivationScope derivationScope, ModelType baseModel) {
         LinkedList<DerivationType> derivationsOfModel = new LinkedList<>();
         switch (baseModel) {
             case EMPTY:
                 break;
+            case LENGTHFIELD:
+                List<DerivationType> lengthfieldDerivations = getDerivationsOfModel(derivationScope, ModelType.CERTIFICATE);
+                lengthfieldDerivations.remove(DerivationType.RECORD_LENGTH);
+                lengthfieldDerivations.remove(DerivationType.TCP_FRAGMENTATION);
+                return lengthfieldDerivations;
             case CERTIFICATE:
-                if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
+                if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
                     derivationsOfModel.add(DerivationType.CERTIFICATE);
                     derivationsOfModel.add(DerivationType.SIG_HASH_ALGORIHTM);
                 }
             case GENERIC:
             default:
-                derivationsOfModel.addAll(getBasicModelDerivations());
+                derivationsOfModel.addAll(getBasicModelDerivations(derivationScope));
         }
         return derivationsOfModel;
     }
@@ -107,12 +119,53 @@ public class ParameterModelFactory {
         return false;
     }
 
-    private static List<DerivationType> getBasicModelDerivations() {
+    private static List<DerivationType> getBasicModelDerivations(DerivationScope derivationScope) {
         List<DerivationType> derivationTypes = new LinkedList<>();
         derivationTypes.add(DerivationType.CIPHERSUITE);
         derivationTypes.add(DerivationType.NAMED_GROUP);
         derivationTypes.add(DerivationType.RECORD_LENGTH);
         derivationTypes.add(DerivationType.TCP_FRAGMENTATION);
+
+        if (derivationScope.isTls13Test()) {
+            derivationTypes.add(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC);
+        }
+
+        List<ExtensionType> supportedExtensions = TestContext.getInstance().getSiteReport().getSupportedExtensions();
+        if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER
+                && TestContext.getInstance().getSiteReport().getSupportedExtensions() != null) {
+            //we add all extension regardless if the server negotiates them
+            derivationTypes.add(DerivationType.INCLUDE_ALPN_EXTENSION);
+            derivationTypes.add(DerivationType.INCLUDE_HEARTBEAT_EXTENSION);
+            derivationTypes.add(DerivationType.INCLUDE_PADDING_EXTENSION);
+            derivationTypes.add(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION);
+            derivationTypes.add(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
+            
+            //we must know if the server negotiates Encrypt-Then-Mac to be able
+            //to define correct constraints for padding tests
+            if (supportedExtensions.contains(ExtensionType.ENCRYPT_THEN_MAC)) {
+                derivationTypes.add(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
+            }
+            
+            if (derivationScope.isTls13Test()) {
+                derivationTypes.add(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION);
+            }
+        }
+        
+        if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER 
+                && TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.TOLERATES_GREASE_CIPHER_SUITE) == TestResult.TRUE) {
+            derivationTypes.add(DerivationType.INCLUDE_GREASE_CIPHER_SUITES);
+        }
+        
+        if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER 
+                && TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.TOLERATES_GREASE_NAMED_GROUP) == TestResult.TRUE) {
+            derivationTypes.add(DerivationType.INCLUDE_GREASE_NAMED_GROUPS);
+        }
+        
+        if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER 
+                && TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.TOLERATES_GREASE_SIGNATURE_AND_HASH_ALGORITHM) == TestResult.TRUE) {
+            derivationTypes.add(DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS);
+        }
+        
         return derivationTypes;
     }
 

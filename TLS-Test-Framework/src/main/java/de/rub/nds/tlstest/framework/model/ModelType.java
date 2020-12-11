@@ -16,5 +16,6 @@ package de.rub.nds.tlstest.framework.model;
 public enum ModelType {
    EMPTY,
    GENERIC,
-   CERTIFICATE
+   CERTIFICATE,
+   LENGTHFIELD
 }

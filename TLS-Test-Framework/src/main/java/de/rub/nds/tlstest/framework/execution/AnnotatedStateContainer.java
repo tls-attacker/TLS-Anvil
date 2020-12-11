@@ -142,8 +142,12 @@ public class  AnnotatedStateContainer {
         }
 
         if (failureInducingCombinations != null) {
-            String tmp = failureInducingCombinations.stream().map(DerivationContainer::toString).collect(Collectors.joining("\n\t"));
-            LOGGER.info("The following parameters resulted in test failures for test " + testMethodConfig.getMethodName() + ":\n\t{}", tmp);
+            if(anyStateSucceeded()) {
+                String tmp = failureInducingCombinations.stream().map(DerivationContainer::toString).collect(Collectors.joining("\n\t"));
+                LOGGER.info("The following parameters resulted in test failures for test " + testMethodConfig.getMethodName() + ":\n\t{}", tmp);
+            } else {
+                LOGGER.info("All generated inputs resulted in failures for test " + testMethodConfig.getMethodName());
+            }
         }
     }
 
@@ -200,6 +204,10 @@ public class  AnnotatedStateContainer {
 
     public void setElapsedTime(Long elapsedTime) {
         this.elapsedTime = elapsedTime;
+    }
+    
+    private boolean anyStateSucceeded() {
+        return states.stream().anyMatch(state -> state.getResult() == TestResult.SUCCEEDED);
     }
 
     public List<DerivationContainer> getFailureInducingCombinations() {

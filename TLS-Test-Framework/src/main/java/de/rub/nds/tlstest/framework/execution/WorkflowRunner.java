@@ -266,12 +266,10 @@ public class WorkflowRunner {
         trace.getTlsActions().add(0, new SendAction(helloRetryRequest));
         trace.getTlsActions().add(0, new ReceiveAction(failingClientHello));
         
-        if(preparedConfig.getTls13BackwardsCompatibilityMode()) {
-            ChangeCipherSpecMessage compatibilityCCS = new ChangeCipherSpecMessage();
-            compatibilityCCS.setRequired(false);
-            //OpenSSL sends  ChangeCipherSpec || ClientHello upon HelloRetry
-            ((ReceiveAction)trace.getTlsActions().get(2)).getExpectedMessages().add(0, compatibilityCCS); 
-        }        
+        ChangeCipherSpecMessage compatibilityCCS = new ChangeCipherSpecMessage();
+        compatibilityCCS.setRequired(false);
+        //OpenSSL sends  ChangeCipherSpec || ClientHello upon HelloRetry
+        ((ReceiveAction)trace.getTlsActions().get(2)).getExpectedMessages().add(0, compatibilityCCS);        
     } 
 
     public Boolean isAutoHelloRetryRequest() {

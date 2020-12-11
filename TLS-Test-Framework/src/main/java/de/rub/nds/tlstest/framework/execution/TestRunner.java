@@ -229,7 +229,8 @@ public class TestRunner {
                 ProbeType.EC_POINT_FORMAT,
                 ProbeType.RESUMPTION,
                 ProbeType.EXTENSIONS,
-                ProbeType.RECORD_FRAGMENTATION
+                ProbeType.RECORD_FRAGMENTATION,
+                ProbeType.GREASE
         );
         scannerConfig.setOverallThreads(1);
         scannerConfig.setParallelProbes(1);

@@ -70,6 +70,28 @@ public class DerivationFactory {
                 return new CertificateDerivation();
             case SIGNATURE_BITMASK:
                 return new SignatureBitmaskDerivation();
+            case INCLUDE_ALPN_EXTENSION:
+                return new IncludeALPNExtensionDerivation();
+            case INCLUDE_CHANGE_CIPHER_SPEC:
+                return new IncludeChangeCipherSpecDerivation();
+            case INCLUDE_ENCRYPT_THEN_MAC_EXTENSION:
+                return new IncludeEncryptThenMacExtensionDerivation();
+            case INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION:
+                return new IncludeExtendedMasterSecretExtensionDerivation();
+            case INCLUDE_HEARTBEAT_EXTENSION:
+                return new IncludeHeartbeatExtensionDerivation();
+            case INCLUDE_PADDING_EXTENSION:
+                return new IncludePaddingExtensionDerivation();
+            case INCLUDE_PSK_EXCHANGE_MODES_EXTENSION:
+                return new IncludePSKExchangeModesExtensionDerivation();
+            case INCLUDE_RENEGOTIATION_EXTENSION:
+                return new IncludeRenegotiationExtensionDerivation();
+            case INCLUDE_GREASE_CIPHER_SUITES:
+                return new IncludeGreaseCipherSuitesDerivation();
+            case INCLUDE_GREASE_NAMED_GROUPS:
+                return new IncludeGreaseNamedGroupsDerivation();
+            case INCLUDE_GREASE_SIG_HASH_ALGORITHMS:
+                return new IncludeGreaseSigHashDerivation();
             default:
                 throw new UnsupportedOperationException("Derivation Type not implemented");
         }

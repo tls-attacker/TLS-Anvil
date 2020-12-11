@@ -11,9 +11,11 @@ package de.rub.nds.tlstest.framework;
 
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
+import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
@@ -27,6 +29,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -40,9 +43,14 @@ public class Validator {
 
     public static void receivedFatalAlert(AnnotatedState i, boolean checkExecutedAsPlanned) {
         WorkflowTrace trace = i.getWorkflowTrace();
-
-        if (checkExecutedAsPlanned) {
-            assertTrue(AssertMsgs.WorkflowNotExecuted, Validator.smartExecutedAsPlanned(trace));
+        
+        if (checkExecutedAsPlanned && !Validator.smartExecutedAsPlanned(trace)) {
+            if(traceFailedBeforeAlertAction(trace)) {
+                throw new AssertionError(AssertMsgs.WorkflowNotExecutedBeforeAlert);
+            } else {
+                ReceivingAction alertReceivingAction = (ReceivingAction) WorkflowTraceUtil.getFirstReceivingActionForMessage(ProtocolMessageType.ALERT, trace);
+                throw new AssertionError("Workflow failed at Alert receiving action. Received: " + alertReceivingAction.getReceivedMessages().stream().map(ProtocolMessage::toString).collect(Collectors.joining(",")));
+            } 
         }
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
@@ -150,6 +158,12 @@ public class Validator {
         }
 
         return false;
+    }
+    
+    private static boolean traceFailedBeforeAlertAction(WorkflowTrace workflowTrace) {
+        TlsAction alertReceivingAction = WorkflowTraceUtil.getFirstReceivingActionForMessage(ProtocolMessageType.ALERT, workflowTrace);
+        TlsAction firstFailed = WorkflowTraceUtil.getFirstFailedAction(workflowTrace);
+        return firstFailed != alertReceivingAction && workflowTrace.getTlsActions().indexOf(firstFailed) < workflowTrace.getTlsActions().indexOf(alertReceivingAction);
     }
 
 }

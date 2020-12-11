@@ -12,7 +12,6 @@ package de.rub.nds.tlstest.framework.model;
 import com.fasterxml.jackson.annotation.JsonValue;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rwth.swc.coffee4j.model.Combination;
 import org.apache.logging.log4j.LogManager;

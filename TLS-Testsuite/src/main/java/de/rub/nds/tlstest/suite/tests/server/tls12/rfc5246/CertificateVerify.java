@@ -62,5 +62,5 @@ public class CertificateVerify extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
-
+    
 }

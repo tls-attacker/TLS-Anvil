@@ -186,7 +186,21 @@ public class RecordProtocol extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-
+    @TlsTest(description = "All encrypted TLS records can be padded to inflate the size of the " +
+            "TLSCiphertext.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ScopeExtensions(DerivationType.ADDITIONAL_PADDING_LENGTH)
+    @Interoperability(SeverityLevel.MEDIUM)
+    public void acceptsOptionalPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.executedAsPlanned(i);
+        });
+    }
+    
     @TlsTest(description = "The length MUST NOT exceed 2^14 + 256 bytes. " +
             "An endpoint that receives a record that exceeds this " +
             "length MUST terminate the connection with a \"record_overflow\" alert.")

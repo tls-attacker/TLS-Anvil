@@ -19,10 +19,14 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExte
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
+import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
@@ -37,7 +41,9 @@ import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
@@ -76,6 +82,14 @@ public class RespectClientExtensions extends Tls12Test {
         c.setAddECPointFormatExtension(false);
         constructTest(runner, c);
 
+    }
+    
+    @Test
+    @TestDescription("If the client has used a " +
+            "Supported Elliptic Curves Extension, the public key in the server’s " +
+            "certificate MUST respect the client’s choice of elliptic curves")
+    public void respectsChosenCurveForCertificates() {
+        assertTrue("The server does not respect the client's supported curves when selecting the certificate", TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.IGNORES_ECDSA_GROUP_DISPARITY) != TestResult.TRUE);
     }
 
     private void constructTest(WorkflowRunner runner, Config c) {

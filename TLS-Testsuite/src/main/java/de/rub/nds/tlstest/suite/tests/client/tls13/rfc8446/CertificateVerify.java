@@ -15,6 +15,7 @@ import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -24,6 +25,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
@@ -147,6 +149,33 @@ public class CertificateVerify extends Tls13Test {
             AlertMessage amsg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
             if (amsg == null) return;
             Validator.testAlertDescription(i, AlertDescription.DECRYPT_ERROR, amsg);
+        });
+    }
+    
+    public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms() {
+        List<DerivationParameter> unsupportedAlgorithms = new LinkedList<>();
+        SignatureAndHashAlgorithm.getImplemented().stream()
+                .filter(algorithm -> !TestContext.getInstance().getSiteReport().getSupportedSignatureAndHashAlgorithms().contains(algorithm))
+                .filter(algorithm -> algorithm.getSignatureAlgorithm() != SignatureAlgorithm.ANONYMOUS)
+                .forEach(algorithm -> unsupportedAlgorithms.add(new SigAndHashDerivation(algorithm)));
+        return unsupportedAlgorithms;
+    }
+    
+    @TlsTest(description = "If the CertificateVerify message is sent by a server, the signature " +
+        "algorithm MUST be one offered in the client's \"signature_algorithms\" " +
+        "extension unless no valid certificate chain can be produced without " +
+        "unsupported algorithms")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @Security(SeverityLevel.CRITICAL)
+    @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
+    public void acceptsUnproposedSignatureAndHash(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
         });
     }
 

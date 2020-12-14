@@ -92,6 +92,8 @@ public class DerivationFactory {
                 return new IncludeGreaseNamedGroupsDerivation();
             case INCLUDE_GREASE_SIG_HASH_ALGORITHMS:
                 return new IncludeGreaseSigHashDerivation();
+            case ADDITIONAL_PADDING_LENGTH:
+                return new AdditionalPaddingLengthDerivation();
             default:
                 throw new UnsupportedOperationException("Derivation Type not implemented");
         }

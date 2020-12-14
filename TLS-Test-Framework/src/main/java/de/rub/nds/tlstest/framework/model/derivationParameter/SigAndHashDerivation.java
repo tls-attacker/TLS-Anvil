@@ -100,6 +100,8 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
 
     @Override
     public void applyToConfig(Config config, TestContext context) {
+        config.setAutoAdjustSignatureAndHashAlgorithm(false);
+        config.setDefaultSelectedSignatureAndHashAlgorithm(getSelectedValue());
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             config.setDefaultClientSupportedSignatureAndHashAlgorithms(getSelectedValue());
         } else {

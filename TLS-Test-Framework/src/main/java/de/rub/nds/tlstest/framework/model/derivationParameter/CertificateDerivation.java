@@ -24,7 +24,7 @@ import java.util.StringJoiner;
 public class CertificateDerivation extends DerivationParameter<CertificateKeyPair> {
     
     private final int MIN_RSA_KEY_LEN = 1024;
-    private final boolean ALLOW_DSS = false;
+    private final boolean ALLOW_DSS = true;
 
     public CertificateDerivation() {
         super(DerivationType.CERTIFICATE, CertificateKeyPair.class);

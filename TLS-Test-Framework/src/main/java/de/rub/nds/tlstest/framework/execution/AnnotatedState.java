@@ -55,6 +55,7 @@ public class AnnotatedState {
     @JsonProperty("DisplayName")
     private String displayName;
 
+    @JsonProperty("DerivationContainer")
     private DerivationContainer derivationContainer;
 
     private List<String> additionalResultInformation = null;
@@ -232,5 +233,9 @@ public class AnnotatedState {
 
     public ExtensionContext getExtensionContext() {
         return extensionContext;
+    }
+
+    public DerivationContainer getDerivationContainer() {
+        return derivationContainer;
     }
 }

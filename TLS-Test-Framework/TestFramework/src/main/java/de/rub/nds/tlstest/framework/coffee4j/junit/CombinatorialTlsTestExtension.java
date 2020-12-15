@@ -1,10 +1,11 @@
 package de.rub.nds.tlstest.framework.coffee4j.junit;
 
-import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.TestChooser;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
 import de.rwth.swc.coffee4j.junit.CombinatorialTest;
+import de.rwth.swc.coffee4j.junit.CombinatorialTestExecutionCallback;
+import de.rwth.swc.coffee4j.junit.CombinatorialTestExtension;
+import de.rwth.swc.coffee4j.junit.CombinatorialTestInvocationContext;
+import de.rwth.swc.coffee4j.junit.CombinatorialTestMethodContext;
 import de.rwth.swc.coffee4j.junit.provider.configuration.ConfigurationLoader;
 import de.rwth.swc.coffee4j.junit.provider.model.ModelLoader;
 import de.rwth.swc.coffee4j.model.Combination;
@@ -35,7 +36,7 @@ import static org.junit.platform.commons.util.AnnotationUtils.isAnnotated;
  * This extension is more or less a copy of {@link org.junit.jupiter.params.ParameterizedTestExtension} in the
  * junit-jupiter-params project.
  */
-public class CombinatorialTestExtension implements TestTemplateInvocationContextProvider {
+public class CombinatorialTlsTestExtension extends CombinatorialTestExtension {
     
     @Override
     public boolean supportsTestTemplate(ExtensionContext extensionContext) {
@@ -51,10 +52,6 @@ public class CombinatorialTestExtension implements TestTemplateInvocationContext
         return CombinatorialTestMethodContext.checkAggregatorOrder(testMethod);
     }
     
-    static Store getStore(ExtensionContext extensionContext) {
-        return extensionContext.getStore(Namespace.create(CombinatorialTestExtension.class, extensionContext.getRequiredTestMethod(), extensionContext.getRequiredTestClass()));
-    }
-    
     @Override
     public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext extensionContext) {
         final Method testMethod = extensionContext.getRequiredTestMethod();
@@ -67,11 +64,11 @@ public class CombinatorialTestExtension implements TestTemplateInvocationContext
 
         manager.generateInitialTests();
         
-        getStore(extensionContext).put(CombinatorialTestExecutionCallback.REPORTERS_KEY, configuration.getExecutionReporters());
-        getStore(extensionContext).put(CombinatorialTestExecutionCallback.MANAGER_KEY, manager);
+        CombinatorialTestExtension.getStore(extensionContext).put(CombinatorialTestExecutionCallback.REPORTERS_KEY, configuration.getExecutionReporters());
+        CombinatorialTestExtension.getStore(extensionContext).put(CombinatorialTestExecutionCallback.MANAGER_KEY, manager);
         
         final CombinatorialTestMethodContext methodContext = new CombinatorialTestMethodContext(testMethod, model);
-        final CombinatorialTestNameFormatter nameFormatter = createNameFormatter(testMethod);
+        final TlsTestCombinatorialTestNameFormatter nameFormatter = createNameFormatter(testMethod);
         
         Preconditions.condition(iterator.hasNext(), "Error: no test inputs were generated!");
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false)
@@ -88,13 +85,13 @@ public class CombinatorialTestExtension implements TestTemplateInvocationContext
         }
     }
 
-    private CombinatorialTestNameFormatter createNameFormatter(Method testMethod) {
+    private TlsTestCombinatorialTestNameFormatter createNameFormatter(Method testMethod) {
         final TestChooser combinatorialTest = findAnnotation(testMethod, TestChooser.class).orElseThrow(() -> new JUnitException("Illegal state: could not find combinatorial test annotation"));
         final String name = Preconditions.notBlank(combinatorialTest.name().trim(), () -> "Configuration error: @" + TestChooser.class.getSimpleName() + " on method " + testMethod.getName() + " must be declared with a non-empty name.");
-        return new CombinatorialTestNameFormatter(name);
+        return new TlsTestCombinatorialTestNameFormatter(name);
     }
     
-    private TestTemplateInvocationContext createInvocationContext(CombinatorialTestNameFormatter nameFormatter, CombinatorialTestMethodContext methodContext, Combination testInput) {
+    private TestTemplateInvocationContext createInvocationContext(TlsTestCombinatorialTestNameFormatter nameFormatter, CombinatorialTestMethodContext methodContext, Combination testInput) {
         return new CombinatorialTestInvocationContext(nameFormatter, methodContext, testInput);
     }
 }

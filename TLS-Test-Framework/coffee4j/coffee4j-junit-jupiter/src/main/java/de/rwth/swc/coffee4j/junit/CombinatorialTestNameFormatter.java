@@ -20,15 +20,15 @@ import java.util.Map;
  * This class is more a less a copy of {@link org.junit.jupiter.params.ParameterizedTestNameFormatter} from the
  * junit-jupiter-params project.
  */
-class CombinatorialTestNameFormatter {
+public class CombinatorialTestNameFormatter {
     
-    private final String namePattern;
-    
-    CombinatorialTestNameFormatter(String namePattern) {
+    protected final String namePattern;
+
+    public CombinatorialTestNameFormatter(String namePattern) {
         this.namePattern = namePattern;
     }
     
-    String format(int invocationIndex, Combination testInput) {
+    public String format(int invocationIndex, Combination testInput) {
         final String invocationIndexReplacedPattern = replaceInvocationIndex(namePattern, invocationIndex);
         final String parameterNamesReplacedPattern = replaceParameterNamesWithValues(invocationIndexReplacedPattern, testInput);
         

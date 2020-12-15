@@ -3,6 +3,7 @@ package de.rub.nds.tlstest.framework.coffee4j.junit;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rwth.swc.coffee4j.junit.CombinatorialTest;
+import de.rwth.swc.coffee4j.junit.CombinatorialTestNameFormatter;
 import de.rwth.swc.coffee4j.model.Combination;
 import de.rwth.swc.coffee4j.model.Parameter;
 import de.rwth.swc.coffee4j.model.Value;
@@ -25,21 +26,21 @@ import java.util.Map;
  * This class is more a less a copy of {@link org.junit.jupiter.params.ParameterizedTestNameFormatter} from the
  * junit-jupiter-params project.
  */
-public class CombinatorialTestNameFormatter {
-    
-    private final String namePattern;
-    
-    public CombinatorialTestNameFormatter(String namePattern) {
-        this.namePattern = namePattern;
+public class TlsTestCombinatorialTestNameFormatter extends CombinatorialTestNameFormatter {
+
+
+    public TlsTestCombinatorialTestNameFormatter(String namePattern) {
+        super(namePattern);
     }
-    
+
+    @Override
     public String format(int invocationIndex, Combination testInput) {
         final String invocationIndexReplacedPattern = replaceInvocationIndex(namePattern, invocationIndex);
         final String parameterNamesReplacedPattern = replaceParameterNamesWithValues(invocationIndexReplacedPattern, testInput);
         
         return replaceCombinations(parameterNamesReplacedPattern, testInput);
     }
-    
+
     public String format(int invocationIndex, List<DerivationParameter> testInput) {
         final String invocationIndexReplacedPattern = replaceInvocationIndex(namePattern, invocationIndex);
         return replaceCombinations(invocationIndexReplacedPattern, testInput);

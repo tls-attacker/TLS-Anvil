@@ -14,7 +14,7 @@ import java.util.List;
  * This is more or less a copy of {@link org.junit.jupiter.params.ParameterizedTestInvocationContext} from the
  * junit-jupiter-params project.
  */
-class CombinatorialTestInvocationContext implements TestTemplateInvocationContext {
+public class CombinatorialTestInvocationContext implements TestTemplateInvocationContext {
     
     private final CombinatorialTestNameFormatter nameFormatter;
     
@@ -22,7 +22,7 @@ class CombinatorialTestInvocationContext implements TestTemplateInvocationContex
     
     private final Combination testInput;
     
-    CombinatorialTestInvocationContext(CombinatorialTestNameFormatter nameFormatter, CombinatorialTestMethodContext methodContext, Combination testInput) {
+    public CombinatorialTestInvocationContext(CombinatorialTestNameFormatter nameFormatter, CombinatorialTestMethodContext methodContext, Combination testInput) {
         this.nameFormatter = nameFormatter;
         this.methodContext = methodContext;
         this.testInput = testInput;

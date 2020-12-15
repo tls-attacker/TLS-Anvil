@@ -286,16 +286,19 @@ public class Ben extends SuspiciousCombinationAlgorithm {
         final IntArrayWrapper newTestInput = wrap(newTestInputArray);
         final Random random = new Random();
         
-        for (int i = 0; i < maxGenerationAttempts && testResults.containsKey(newTestInput) && getChecker().isValid(newTestInputArray); i++) {
+        for (int i = 0; i < maxGenerationAttempts; i++) {
             final int changingParameter = environmentParameters.getInt(random.nextInt(environmentParameters.size()));
             final IntList valueRanking = parameterValueRanking[changingParameter];
             final int currentValue = newTestInputArray[changingParameter];
             final int nextValueIndex = (valueRanking.indexOf(currentValue) + 1) % valueRanking.size();
             final int nextValue = valueRanking.getInt(nextValueIndex);
             newTestInputArray[changingParameter] = nextValue;
+            if (!testResults.containsKey(newTestInput) && getChecker().isValid(newTestInputArray)) {
+                break;
+            }
         }
         
-        return testResults.containsKey(newTestInput) ? null : newTestInput;
+        return testResults.containsKey(newTestInput) || !getChecker().isValid(newTestInputArray) ? null : newTestInput;
     }
     
     private IntList[] computeParameterValueRanking(Object2DoubleMap<Component> componentSuspiciousnessMap) {

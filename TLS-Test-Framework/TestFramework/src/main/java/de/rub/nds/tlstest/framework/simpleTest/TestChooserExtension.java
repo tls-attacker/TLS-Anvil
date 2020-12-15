@@ -2,7 +2,7 @@ package de.rub.nds.tlstest.framework.simpleTest;
 
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.TestChooser;
-import de.rub.nds.tlstest.framework.coffee4j.junit.CombinatorialTestExtension;
+import de.rub.nds.tlstest.framework.coffee4j.junit.CombinatorialTlsTestExtension;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
 import java.lang.reflect.Method;
@@ -32,7 +32,7 @@ public class TestChooserExtension implements TestTemplateInvocationContextProvid
         if(ParameterModelFactory.mustUseSimpleModel(TestContext.getInstance(), scope)) {
             return new SimpleTestExtension().supportsTestTemplate(extensionContext);
         } else {
-            return new CombinatorialTestExtension().supportsTestTemplate(extensionContext);
+            return new CombinatorialTlsTestExtension().supportsTestTemplate(extensionContext);
         }
     }
 
@@ -42,7 +42,7 @@ public class TestChooserExtension implements TestTemplateInvocationContextProvid
         if(ParameterModelFactory.mustUseSimpleModel(TestContext.getInstance(), scope)) {
             return new SimpleTestExtension().provideTestTemplateInvocationContexts(extensionContext);
         } else {
-            return new CombinatorialTestExtension().provideTestTemplateInvocationContexts(extensionContext);
+            return new CombinatorialTlsTestExtension().provideTestTemplateInvocationContexts(extensionContext);
         }
     }
 

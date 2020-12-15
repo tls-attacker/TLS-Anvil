@@ -30,7 +30,7 @@ import static org.junit.platform.commons.util.AnnotationUtils.isAnnotated;
  * This is more or less a copy of {@link org.junit.jupiter.params.ParameterizedTestMethodContext} from the
  * junit-jupiter-params project.
  */
-class CombinatorialTestMethodContext {
+public class CombinatorialTestMethodContext {
     
     private final ResolverType[] resolverTypes;
     
@@ -40,7 +40,7 @@ class CombinatorialTestMethodContext {
     
     private int indexOfFirstAggregator = -1;
     
-    CombinatorialTestMethodContext(Method testMethod, InputParameterModel model) {
+    public CombinatorialTestMethodContext(Method testMethod, InputParameterModel model) {
         Parameter[] parameters = testMethod.getParameters();
         this.resolverTypes = new ResolverType[parameters.length];
         this.resolvers = new Resolver[parameters.length];
@@ -58,7 +58,7 @@ class CombinatorialTestMethodContext {
         }
     }
     
-    static boolean checkAggregatorOrder(Method testMethod) {
+    public static boolean checkAggregatorOrder(Method testMethod) {
         final Parameter[] parameters = testMethod.getParameters();
         
         int indexOfPreviousAggregator = -1;

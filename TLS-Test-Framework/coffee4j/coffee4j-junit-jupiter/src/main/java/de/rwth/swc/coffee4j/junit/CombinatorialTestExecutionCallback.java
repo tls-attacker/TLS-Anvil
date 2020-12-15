@@ -16,14 +16,14 @@ import java.util.Optional;
  * {@link ExecutionReporter#testInputExecutionFinished(Combination, TestResult)} method for registered reporters
  * and generate new test inputs based on test results (for example for fault characterization).
  */
-class CombinatorialTestExecutionCallback implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
+public class CombinatorialTestExecutionCallback implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
     
-    static final String MANAGER_KEY = "manager";
-    static final String REPORTERS_KEY = "reporter";
+    public static final String MANAGER_KEY = "manager";
+    public static final String REPORTERS_KEY = "reporter";
     
     private final Combination testInput;
     
-    CombinatorialTestExecutionCallback(Combination testInput) {
+    public CombinatorialTestExecutionCallback(Combination testInput) {
         this.testInput = testInput;
     }
     

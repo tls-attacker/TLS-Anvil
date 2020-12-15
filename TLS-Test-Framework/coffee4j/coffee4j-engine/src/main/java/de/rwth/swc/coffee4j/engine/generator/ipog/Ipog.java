@@ -50,7 +50,7 @@ public class Ipog implements TestInputGroupGenerator {
                             .checker(factory.createConstraintChecker(model))
                             .build()).generate();
             final FaultCharacterizationConfiguration faultCharacterizationConfiguration
-                    = new FaultCharacterizationConfiguration(model, reporter);
+                    = new FaultCharacterizationConfiguration(model, factory.createConstraintChecker(model), reporter);
 
             return new TestInputGroup(DISPLAY_NAME, testInputs, faultCharacterizationConfiguration);
         });

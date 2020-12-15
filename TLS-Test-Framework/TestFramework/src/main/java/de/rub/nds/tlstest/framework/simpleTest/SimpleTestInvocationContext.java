@@ -1,6 +1,6 @@
 package de.rub.nds.tlstest.framework.simpleTest;
 
-import de.rub.nds.tlstest.framework.coffee4j.junit.CombinatorialTestNameFormatter;
+import de.rub.nds.tlstest.framework.coffee4j.junit.TlsTestCombinatorialTestNameFormatter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
  */
 public class SimpleTestInvocationContext implements TestTemplateInvocationContext {
     
-    private final CombinatorialTestNameFormatter nameFormatter;
+    private final TlsTestCombinatorialTestNameFormatter nameFormatter;
     
     private final List<DerivationParameter> testInput;
 
@@ -24,7 +24,7 @@ public class SimpleTestInvocationContext implements TestTemplateInvocationContex
     
     public SimpleTestInvocationContext() {
         this.testInput = new LinkedList<>();
-        this.nameFormatter = new CombinatorialTestNameFormatter("[{index}] {combination}");
+        this.nameFormatter = new TlsTestCombinatorialTestNameFormatter("[{index}] {combination}");
     }
     
     @Override

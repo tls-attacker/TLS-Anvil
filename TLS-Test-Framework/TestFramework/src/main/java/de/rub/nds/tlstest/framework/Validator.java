@@ -114,7 +114,7 @@ public class Validator {
             return;
 
         TcpFragmentationDerivation tcpFragmentation = state.getDerivationContainer().getDerivation(TcpFragmentationDerivation.class);
-        boolean onlyCheckActionsBeforeLastSendingAction = tcpFragmentation != null && !tcpFragmentation.getSelectedValue();
+        boolean onlyCheckActionsBeforeLastSendingFlight = tcpFragmentation != null && tcpFragmentation.getSelectedValue();
 
         List<TlsAction> tlsActions = trace.getTlsActions();
         TlsAction lastSendingAction = (TlsAction)trace.getLastSendingAction();
@@ -131,7 +131,11 @@ public class Validator {
                 lastSendingFlightIndex = i;
             }
 
-            if (i < lastReceivingFlightIndex && (i < lastSendingFlightIndex || onlyCheckActionsBeforeLastSendingAction)) {
+            // onlyCheckActionsBeforeLastSendingFlight = true
+            //   <=> if (i < lastReceivingFlightIndex && i < lastSendingFlightIndex)
+            // onlyCheckActionsBeforeLastSendingFlight = false
+            //   <=> if (i < lastReceivingFlightIndex)
+            if (i < lastReceivingFlightIndex && (i < lastSendingFlightIndex || !onlyCheckActionsBeforeLastSendingFlight)) {
                 if (!action.executedAsPlanned()) {
                     throw new AssertionError(String.format("Action at index %d could not be executed as planned", i));
                 }

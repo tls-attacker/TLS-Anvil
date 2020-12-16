@@ -34,17 +34,21 @@ import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.mirrored.MirroredCipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import de.rub.nds.tlstest.suite.tests.client.tls13.rfc8701.ServerInitiatedExtensionPoints;
 import java.util.LinkedList;
 import java.util.List;
 import static org.junit.Assert.assertFalse;
@@ -227,5 +231,81 @@ public class HelloRetryRequest extends Tls13Test {
             }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
+    }
+    
+    
+    @TlsTest(description = "A client which receives a legacy_session_id_echo " +
+            "field that does not match what it sent in the ClientHello MUST " +
+            "abort the handshake with an \"illegal_parameter\" alert.")
+    @Interoperability(SeverityLevel.HIGH)
+    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    public void helloRetryLegacySessionId(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
+        ServerHello.sharedSessionIdTest(workflowTrace, runner);
+    }
+    
+    
+    @TlsTest(description = "legacy_compression_method: A single byte which " +
+            "MUST have the value 0.")
+    @Interoperability(SeverityLevel.HIGH)
+    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    public void helloRetryCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
+        ServerHello.sharedCompressionValueTest(workflowTrace, runner);
+    }
+    
+    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
+            "In particular, the client MUST fail the connection " +
+            "if a GREASE value appears in any of the following: " +
+            "The \"cipher_suite\" value in a ServerHello")
+    @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
+    @Interoperability(SeverityLevel.HIGH)
+    @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
+    @ScopeLimitations(DerivationType.CIPHERSUITE)
+    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    public void helloRetryGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
+        ServerInitiatedExtensionPoints.sharedGreaseCipherSuiteTest(workflowTrace, runner, derivationContainer);
+    }
+    
+    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
+            "In particular, the client MUST fail the connection " +
+            "if a GREASE value appears in any of the following: " +
+            "Any ServerHello extension")
+    @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @Interoperability(SeverityLevel.CRITICAL)
+    @ScopeExtensions(DerivationType.GREASE_EXTENSION)
+    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    public void helloRetryGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
+        ServerInitiatedExtensionPoints.sharedServerHelloGreaseExtensionTest(workflowTrace, runner, derivationContainer);
+    }
+    
+    
+    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
+            "In particular, the client MUST fail the connection " +
+            "if a GREASE value appears in any of the following: " +
+            "The \"version\" value in a ServerHello or HelloRetryRequest")
+    @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @Interoperability(SeverityLevel.CRITICAL)
+    @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
+    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    public void helloRetryGreaseVersionSelected(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
+        ServerInitiatedExtensionPoints.sharedGreaseVersionTest(workflowTrace, runner, derivationContainer);
+    }
+    
+    
+    private WorkflowTrace getSharedTestWorkflowTrace(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        runner.setAutoHelloRetryRequest(false);
+        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
+        
+        return workflowTrace;
     }
 }

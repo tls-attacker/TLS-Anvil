@@ -9,20 +9,44 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8422;
 
+import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.tlsattacker.attacks.ec.InvalidCurvePoint;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ECPointFormat;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
+import de.rub.nds.tlsattacker.core.crypto.ec.CurveFactory;
+import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurve;
+import de.rub.nds.tlsattacker.core.crypto.ec.FieldElementFp;
+import de.rub.nds.tlsattacker.core.crypto.ec.Point;
+import de.rub.nds.tlsattacker.core.crypto.ec.PointFormatter;
+import de.rub.nds.tlsattacker.core.crypto.ec.RFC7748Curve;
+import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
+import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import java.util.Set;
@@ -30,6 +54,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 
 @RFC(number = 8422, section = "4. TLS Extensions for ECC")
@@ -126,4 +151,35 @@ public class TLSExtensionForECC extends Tls12Test {
         return false;
     }
     
+    public boolean isInvalidCurveApplicableNamedGroup(NamedGroup group) {
+        if(group != null && group.isCurve() && !group.isGost() && !(CurveFactory.getCurve(group) instanceof RFC7748Curve)) {
+            return true;
+        }
+        return false;
+    }
+    
+    @TlsTest(description = "A lack of point validation might enable Invalid Curve Attacks")
+    @Security(SeverityLevel.HIGH)
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
+    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isInvalidCurveApplicableNamedGroup")
+    public void rejectsInvalidCurvePoints(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+
+        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+        EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
+        InvalidCurvePoint invalidCurvePoint = InvalidCurvePoint.smallOrder(selectedGroup);
+        Point serializablePoint =
+            new Point(new FieldElementFp(invalidCurvePoint.getPublicPointBaseX(), curve.getModulus()), new FieldElementFp(
+                invalidCurvePoint.getPublicPointBaseY(), curve.getModulus()));
+        byte[] serializedPoint = PointFormatter.formatToByteArray(selectedGroup, serializablePoint, ECPointFormat.UNCOMPRESSED);
+        
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        ECDHEServerKeyExchangeMessage serverKeyExchangeMessage = (ECDHEServerKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
+        serverKeyExchangeMessage.setPublicKey(Modifiable.explicit(serializedPoint));
+        
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+    }
 }

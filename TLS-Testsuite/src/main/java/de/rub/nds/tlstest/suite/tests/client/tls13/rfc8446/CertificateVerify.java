@@ -194,7 +194,9 @@ public class CertificateVerify extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
+    @TlsTest(description = "The receiver of a CertificateVerify message MUST verify the signature " +
+            "field.  [...] If the verification fails, the receiver MUST terminate the handshake " +
+            "with a \"decrypt_error\" alert.")
     @Security(SeverityLevel.CRITICAL)
     public void emptySignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -209,7 +211,13 @@ public class CertificateVerify extends Tls13Test {
                 .setSignature(Modifiable.explicit(new byte[]{}));
 
 
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(trace, c).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+
+            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            if (alert == null) return;
+            Validator.testAlertDescription(i, AlertDescription.DECRYPT_ERROR, alert);
+        });
     }
 
     @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")

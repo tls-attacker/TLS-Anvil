@@ -31,12 +31,14 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseCipherSuiteDerivation;
@@ -86,14 +88,17 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        ProtocolVersion selectedGreaseVersion = derivationContainer.getDerivation(GreaseProtocolVersionDerivation.class).getSelectedValue();
-
+        sharedGreaseVersionTest(workflowTrace, runner, derivationContainer);
+    }
+    
+    public static void sharedGreaseVersionTest(WorkflowTrace workflowTrace, WorkflowRunner runner, DerivationContainer externalDerivationContainer) {
+        ProtocolVersion selectedGreaseVersion = externalDerivationContainer.getDerivation(GreaseProtocolVersionDerivation.class).getSelectedValue();
+        
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         SupportedVersionsExtensionMessage ext = sh.getExtension(SupportedVersionsExtensionMessage.class);
         ext.setSupportedVersions(Modifiable.explicit(selectedGreaseVersion.getValue()));
 
-
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(Validator::receivedFatalAlert);
     }
 
 
@@ -104,17 +109,22 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
+    @ScopeLimitations(DerivationType.CIPHERSUITE)
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        CipherSuite selectedGreaseCipherSuite = derivationContainer.getDerivation(GreaseCipherSuiteDerivation.class).getSelectedValue();
+        sharedGreaseCipherSuiteTest(workflowTrace, runner, derivationContainer);
+    }
+    
+    public static void sharedGreaseCipherSuiteTest(WorkflowTrace workflowTrace, WorkflowRunner runner, DerivationContainer externalDerivationContainer) {
+        CipherSuite selectedGreaseCipherSuite = externalDerivationContainer.getDerivation(GreaseCipherSuiteDerivation.class).getSelectedValue();
 
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.setSelectedCipherSuite(Modifiable.explicit(selectedGreaseCipherSuite.getByteValue()));
 
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(Validator::receivedFatalAlert);
     }
 
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
@@ -128,12 +138,17 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        ExtensionType selectedGreaseExt = derivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
+        sharedServerHelloGreaseExtensionTest(workflowTrace, runner, derivationContainer);
+    }
+    
+    
+    public static void sharedServerHelloGreaseExtensionTest(WorkflowTrace workflowTrace, WorkflowRunner runner, DerivationContainer externalDerivationContainer) {
+        ExtensionType selectedGreaseExt = externalDerivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
 
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.addExtension(new GreaseExtensionMessage(selectedGreaseExt, 25));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(Validator::receivedFatalAlert);
     }
 
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +

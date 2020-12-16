@@ -21,13 +21,16 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
@@ -63,6 +66,14 @@ public class EncThenMacExtension extends Tls12Test {
             return false;
         }
     }
+    
+    public boolean isBlockCipher(CipherSuite cipherSuite) {
+        try {
+            return AlgorithmResolver.getCipherType(cipherSuite) == CipherType.BLOCK;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     @RFC(number = 7366, section = "3.  Applying Encrypt-then-MAC")
     @TlsTest(description = "If a server receives an encrypt-then-MAC request extension from a client and then "
@@ -72,6 +83,7 @@ public class EncThenMacExtension extends Tls12Test {
     @Security(SeverityLevel.LOW)
     @Interoperability(SeverityLevel.MEDIUM)
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNotBlockCipher")
+    @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     public void sendEncThenMacExtWithNonBlockCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);
@@ -82,5 +94,20 @@ public class EncThenMacExtension extends Tls12Test {
             assertFalse("Workflow executed as expected", i.getWorkflowTrace().executedAsPlanned());
             Validator.receivedFatalAlert(i, false);
         });
+    }
+    
+    @Security(SeverityLevel.MEDIUM)
+    @TlsTest(description = "Test if the client can complete the handshake if encrypt-then-MAC is negotiated")
+    @MethodCondition(method = "supportsExtension")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isBlockCipher")
+    @Interoperability(SeverityLevel.CRITICAL)
+    @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    public void encryptThenMacTest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        c.setAddEncryptThenMacExtension(true);
+        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        
+        runner.execute(trace, c).validateFinal(Validator::executedAsPlanned);
     }
 }

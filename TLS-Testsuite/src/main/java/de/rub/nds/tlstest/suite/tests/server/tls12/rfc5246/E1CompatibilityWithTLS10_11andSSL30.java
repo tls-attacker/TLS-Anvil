@@ -24,8 +24,10 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
@@ -33,7 +35,10 @@ import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.LinkedList;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 import java.util.List;
@@ -145,6 +150,38 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         );
 
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+    }
+    
+    public List<DerivationParameter> getInvalidHighRecordVersion() {
+        List<DerivationParameter> parameterValues = new LinkedList<>();
+        parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x00}));
+        parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x03}));
+        parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x0F}));
+        return parameterValues;
+    }
+    
+    @TlsTest(description = "Thus, TLS server compliant with this specification MUST accept any value {03,XX} as the " +
+            "record layer version number for ClientHello.")
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getInvalidHighRecordVersion")
+    @Interoperability(SeverityLevel.LOW)
+    public void rejectHigherRecordVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        byte[] selectedRecordVersion = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();
+                
+        Record record = new Record();
+        record.setProtocolVersion(Modifiable.explicit(selectedRecordVersion));
+        SendAction sendAction = new SendAction(new ClientHelloMessage(c));
+        sendAction.setRecords(record);
+
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        workflowTrace.addTlsActions(
+                sendAction,
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
 

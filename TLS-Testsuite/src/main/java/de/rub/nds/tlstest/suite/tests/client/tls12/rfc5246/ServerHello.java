@@ -12,7 +12,9 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
+import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NameType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
@@ -24,17 +26,25 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.RenegotiationInfoE
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ServerNameIndicationExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.ServerNamePair;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.CompressionMethodDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import java.util.ArrayList;
@@ -107,5 +117,28 @@ public class ServerHello extends Tls12Test {
             Validator.testAlertDescription(i, AlertDescription.UNSUPPORTED_EXTENSION, alertMsg);
         });
 
+    }
+    
+    public boolean isUnproposedCompressionMethod(CompressionMethod compressionMethod) {
+        List<CompressionMethod> proposedCompressionMethods = CompressionMethod.getCompressionMethods(TestContext.getInstance().getSiteReport().getReceivedClientHello().getCompressions().getValue());
+        return !proposedCompressionMethods.contains(compressionMethod);
+    }
+    
+    @TlsTest(description = "The single compression algorithm selected by the server from the" +
+            "list in ClientHello.compression_methods.")
+    @Interoperability(SeverityLevel.LOW)
+    @ScopeExtensions(DerivationType.COMPRESSION_METHOD)
+    @DynamicValueConstraints(affectedTypes = DerivationType.COMPRESSION_METHOD, methods = "isUnproposedCompressionMethod")
+    public void selectUnproposedCompressionMethod(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        CompressionMethod selectedCompressionMethod = derivationContainer.getDerivation(CompressionMethodDerivation.class).getSelectedValue();
+        
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+
+        ServerHelloMessage serverHello = (ServerHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
+        serverHello.setSelectedCompressionMethod(Modifiable.explicit(selectedCompressionMethod.getValue()));
+        
+        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 }

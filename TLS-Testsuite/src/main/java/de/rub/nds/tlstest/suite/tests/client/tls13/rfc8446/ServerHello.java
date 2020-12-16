@@ -64,12 +64,15 @@ public class ServerHello extends Tls13Test {
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
-
+        sharedSessionIdTest(workflowTrace, runner);
+    }
+    
+    public static void sharedSessionIdTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.setSessionId(Modifiable.explicit(new byte[]{0x01, 0x02, 0x03, 0x04}));
 
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
+        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
             Validator.receivedFatalAlert(i);
 
@@ -125,11 +128,14 @@ public class ServerHello extends Tls13Test {
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
-
+        sharedCompressionValueTest(workflowTrace, runner);
+    }
+    
+    public static void sharedCompressionValueTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.setSelectedCompressionMethod(Modifiable.explicit((byte) 0x01));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
+        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
             Validator.receivedFatalAlert(i);
 

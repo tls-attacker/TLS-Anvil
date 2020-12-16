@@ -19,11 +19,13 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
+import de.rub.nds.tlstest.framework.model.derivationParameter.TcpFragmentationDerivation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,14 +45,19 @@ public class Validator {
 
     public static void receivedFatalAlert(AnnotatedState i, boolean checkExecutedAsPlanned) {
         WorkflowTrace trace = i.getWorkflowTrace();
-        
-        if (checkExecutedAsPlanned && !Validator.smartExecutedAsPlanned(trace)) {
-            if(traceFailedBeforeAlertAction(trace)) {
-                throw new AssertionError(AssertMsgs.WorkflowNotExecutedBeforeAlert);
-            } else {
-                ReceivingAction alertReceivingAction = (ReceivingAction) WorkflowTraceUtil.getFirstReceivingActionForMessage(ProtocolMessageType.ALERT, trace);
-                throw new AssertionError("Workflow failed at Alert receiving action. Received: " + alertReceivingAction.getReceivedMessages().stream().map(ProtocolMessage::toCompactString).collect(Collectors.joining(",")));
-            } 
+
+        if (checkExecutedAsPlanned) {
+            try {
+                Validator.smartExecutedAsPlanned(i);
+            } catch (Throwable e) {
+                if(traceFailedBeforeAlertAction(trace)) {
+                    i.addAdditionalResultInfo(AssertMsgs.WorkflowNotExecutedBeforeAlert);
+                } else {
+                    ReceivingAction alertReceivingAction = (ReceivingAction) WorkflowTraceUtil.getFirstReceivingActionForMessage(ProtocolMessageType.ALERT, trace);
+                    i.addAdditionalResultInfo("Workflow failed at Alert receiving action. Received: " + alertReceivingAction.getReceivedMessages().stream().map(ProtocolMessage::toCompactString).collect(Collectors.joining(",")));
+                }
+                throw e;
+            }
         }
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
@@ -76,7 +83,7 @@ public class Validator {
 
     public static void receivedWarningAlert(AnnotatedState i) {
         WorkflowTrace trace = i.getWorkflowTrace();
-        assertTrue(AssertMsgs.WorkflowNotExecuted, Validator.smartExecutedAsPlanned(trace));
+        Validator.smartExecutedAsPlanned(i);
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
         assertNotNull(AssertMsgs.NoWarningAlert, msg);
@@ -100,24 +107,43 @@ public class Validator {
     }
 
 
-    public static boolean smartExecutedAsPlanned(WorkflowTrace trace) {
+    public static void smartExecutedAsPlanned(AnnotatedState state) {
+        WorkflowTrace trace = state.getWorkflowTrace();
         boolean executedAsPlanned = trace.executedAsPlanned();
         if (executedAsPlanned)
-            return true;
+            return;
+
+        TcpFragmentationDerivation tcpFragmentation = state.getDerivationContainer().getDerivation(TcpFragmentationDerivation.class);
+        boolean onlyCheckActionsBeforeLastSendingAction = tcpFragmentation != null && !tcpFragmentation.getSelectedValue();
 
         List<TlsAction> tlsActions = trace.getTlsActions();
-        for (TlsAction action : tlsActions.subList(0, tlsActions.size() - 1)) {
-            if (!action.executedAsPlanned()) {
-                return false;
+        TlsAction lastSendingAction = (TlsAction)trace.getLastSendingAction();
+        TlsAction lastReceivingAction = (TlsAction)trace.getLastReceivingAction();
+        int lastReceivingFlightIndex = lastReceivingAction != null ? tlsActions.indexOf(lastReceivingAction) : tlsActions.size();
+        int lastSendingFlightIndex = lastSendingAction != null ? tlsActions.indexOf(lastSendingAction) : tlsActions.size();
+
+        for (int i = tlsActions.size() - 1; i > 0; i--) {
+            TlsAction action = tlsActions.get(i);
+            if (action instanceof ReceivingAction && i == lastReceivingFlightIndex - 1) {
+                lastReceivingFlightIndex = i;
+            }
+            if (action instanceof SendingAction && i == lastSendingFlightIndex - 1) {
+                lastSendingFlightIndex = i;
+            }
+
+            if (i < lastReceivingFlightIndex && (i < lastSendingFlightIndex || onlyCheckActionsBeforeLastSendingAction)) {
+                if (!action.executedAsPlanned()) {
+                    throw new AssertionError(String.format("Action at index %d could not be executed as planned", i));
+                }
             }
         }
 
         if (!ReceivingAction.class.isAssignableFrom(trace.getLastMessageAction().getClass())) {
-            return false;
+            throw new AssertionError("Last action is not a receiving action");
         }
 
-        if (trace.getLastReceivingAction().getClass().equals(ReceiveAction.class)) {
-            ReceiveAction action = (ReceiveAction) trace.getLastReceivingAction();
+        if (lastReceivingAction instanceof ReceiveAction) {
+            ReceiveAction action = (ReceiveAction) lastReceivingAction;
             List<ProtocolMessage> expectedMessages = action.getExpectedMessages();
             List<ProtocolMessage> receivedMessages = action.getReceivedMessages();
             if (receivedMessages == null) {
@@ -132,7 +158,7 @@ public class Validator {
                         boolean isFatalAlert =
                                 AlertLevel.FATAL == AlertLevel.getAlertLevel(((AlertMessage)lastReceivedMessage).getLevel().getValue());
                         if (isFatalAlert) {
-                            return true;
+                            return;
                         }
                     }
                 }
@@ -143,23 +169,27 @@ public class Validator {
                     expectedMessages.remove(lastExpected);
                 }
 
-                return trace.executedAsPlanned();
+                if (expectedMessages.size() > 0 && !action.executedAsPlanned()) {
+                    throw new AssertionError("Last receive action did not execute as planned");
+                }
+
+                return;
             }
-        } else if (trace.getLastReceivingAction().getClass().equals(ReceiveTillAction.class)) {
-            ReceiveTillAction action = (ReceiveTillAction) trace.getLastReceivingAction();
+        } else if (lastReceivingAction instanceof ReceiveTillAction) {
+            ReceiveTillAction action = (ReceiveTillAction) lastReceivingAction;
             ProtocolMessage expectedMessage = action.getWaitTillMessage();
             List<ProtocolMessage> messages = action.getReceivedMessages();
 
             if (action.getReceivedMessages().size() == 0 && expectedMessage.getClass().equals(AlertMessage.class)) {
-                return true;
+                return;
             } else if (messages.get(messages.size() - 1).getClass().equals(AlertMessage.class)) {
-                return true;
+                return;
             }
         }
 
-        return false;
+        throw new AssertionError("Last action is not a receiving action");
     }
-    
+
     private static boolean traceFailedBeforeAlertAction(WorkflowTrace workflowTrace) {
         TlsAction alertReceivingAction = WorkflowTraceUtil.getFirstReceivingActionForMessage(ProtocolMessageType.ALERT, workflowTrace);
         TlsAction firstFailed = WorkflowTraceUtil.getFirstFailedAction(workflowTrace);

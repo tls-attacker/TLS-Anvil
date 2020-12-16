@@ -55,6 +55,7 @@ public class AnnotatedState {
     @JsonProperty("DisplayName")
     private String displayName;
 
+    @JsonProperty("DerivationContainer")
     private DerivationContainer derivationContainer;
 
     private List<String> additionalResultInformation = null;
@@ -112,10 +113,7 @@ public class AnnotatedState {
             }
 
             if (state.getTlsContext().isReceivedTransportHandlerException()) {
-                TransportHandlerExpection error = new TransportHandlerExpection("Received transportHandler excpetion", err);
-                setFailedReason(error);
-                associatedContainer.stateFinished(result);
-                throw error;
+                this.addAdditionalResultInfo("Received TransportHandler excpetion");
             }
 
             setFailedReason(err);

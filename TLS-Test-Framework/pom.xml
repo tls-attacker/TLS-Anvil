@@ -5,93 +5,28 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.rub.nds.tlstest</groupId>
-    <artifactId>TLS-Test-Framework</artifactId>
+    <artifactId>TLS-Test-Framework-Aggregator</artifactId>
     <packaging>pom</packaging>
-    <version>2.0-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
+    <name>TLS-Test-Framework-Aggregator</name>
 
     <modules>
         <module>coffee4j</module>
         <module>TestFramework</module>
     </modules>
 
-    <name>TLS-Test-Framework</name>
 
     <dependencies>
         <dependency>
-            <groupId>de.rwth.swc.coffee4j</groupId>
-            <artifactId>coffee4j-engine</artifactId>
-            <version>1.0.6</version>
-        </dependency>
-        <dependency>
-            <groupId>de.rwth.swc.coffee4j</groupId>
-            <artifactId>coffee4j-model</artifactId>
-            <version>1.0.6</version>
-        </dependency>
-        <dependency>
-            <groupId>de.rwth.swc.coffee4j</groupId>
-            <artifactId>coffee4j-junit-jupiter</artifactId>
-            <version>1.0.6</version>
-        </dependency>
-        <dependency>
             <groupId>de.rub.nds.tlstest</groupId>
-            <artifactId>TLS-Test-Framework-Core</artifactId>
+            <artifactId>TLS-Test-Framework</artifactId>
             <version>2.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>${project.packaging}</type>
-                                    <destFileName>${project.build.finalName}.${project.packaging}</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>${basedir}/apps</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}/apps/lib</outputDirectory>
-                            <!--Ensures only runnable dependencies are included-->
-                            <includeScope>compile</includeScope>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <!-- Build an executable JAR -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.6</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>de.rub.nds.tlstest.framework.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
+
         </plugins>
 
     </build>

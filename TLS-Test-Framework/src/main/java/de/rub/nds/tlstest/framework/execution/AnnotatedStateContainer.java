@@ -145,6 +145,7 @@ public class  AnnotatedStateContainer {
             if(anyStateSucceeded()) {
                 String tmp = failureInducingCombinations.stream().map(DerivationContainer::toString).collect(Collectors.joining("\n\t"));
                 LOGGER.info("The following parameters resulted in test failures for test " + testMethodConfig.getMethodName() + ":\n\t{}", tmp);
+                printFailedContainers();
             } else {
                 LOGGER.info("All generated inputs resulted in failures for test " + testMethodConfig.getMethodName());
             }
@@ -153,6 +154,12 @@ public class  AnnotatedStateContainer {
 
     public void stateFinished(TestResult result) {
         setResultRaw(this.resultRaw | result.getValue());
+    }
+    
+    private void printFailedContainers() {
+        LOGGER.info("Individual failed Containers:");
+        states.stream().filter(state -> state.getResult() != TestResult.SUCCEEDED)
+                .forEach(state -> LOGGER.info(state.getDerivationContainer().toString()));
     }
 
     public List<AnnotatedState> getStates() {

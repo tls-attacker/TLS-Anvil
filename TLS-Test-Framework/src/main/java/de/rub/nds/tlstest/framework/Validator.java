@@ -49,7 +49,7 @@ public class Validator {
                 throw new AssertionError(AssertMsgs.WorkflowNotExecutedBeforeAlert);
             } else {
                 ReceivingAction alertReceivingAction = (ReceivingAction) WorkflowTraceUtil.getFirstReceivingActionForMessage(ProtocolMessageType.ALERT, trace);
-                throw new AssertionError("Workflow failed at Alert receiving action. Received: " + alertReceivingAction.getReceivedMessages().stream().map(ProtocolMessage::toString).collect(Collectors.joining(",")));
+                throw new AssertionError("Workflow failed at Alert receiving action. Received: " + alertReceivingAction.getReceivedMessages().stream().map(ProtocolMessage::toCompactString).collect(Collectors.joining(",")));
             } 
         }
 

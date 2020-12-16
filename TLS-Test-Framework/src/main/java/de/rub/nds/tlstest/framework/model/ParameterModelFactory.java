@@ -120,6 +120,17 @@ public class ParameterModelFactory {
     }
 
     private static List<DerivationType> getBasicModelDerivations(DerivationScope derivationScope) {
+        List<DerivationType> derivationTypes = getBasicDerivationsForBoth(derivationScope);
+        
+        if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
+            getBasicDerivationsForServer(derivationScope);
+        } else {
+            getBasicDerivationsForClient(derivationScope);
+        }
+        return derivationTypes;
+    }
+    
+    private static List<DerivationType> getBasicDerivationsForBoth(DerivationScope derivationScope) {
         List<DerivationType> derivationTypes = new LinkedList<>();
         derivationTypes.add(DerivationType.CIPHERSUITE);
         derivationTypes.add(DerivationType.NAMED_GROUP);
@@ -129,10 +140,14 @@ public class ParameterModelFactory {
         if (derivationScope.isTls13Test()) {
             derivationTypes.add(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC);
         }
-
+        
+        return derivationTypes;
+    }
+    
+    private static List<DerivationType> getBasicDerivationsForServer(DerivationScope derivationScope) {
+        List<DerivationType> derivationTypes = new LinkedList<>();
         List<ExtensionType> supportedExtensions = TestContext.getInstance().getSiteReport().getSupportedExtensions();
-        if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER
-                && TestContext.getInstance().getSiteReport().getSupportedExtensions() != null) {
+        if (supportedExtensions != null) {
             //we add all extension regardless if the server negotiates them
             derivationTypes.add(DerivationType.INCLUDE_ALPN_EXTENSION);
             derivationTypes.add(DerivationType.INCLUDE_HEARTBEAT_EXTENSION);
@@ -151,21 +166,31 @@ public class ParameterModelFactory {
             }
         }
         
-        if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER 
-                && TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.TOLERATES_GREASE_CIPHER_SUITE) == TestResult.TRUE) {
+        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.TOLERATES_GREASE_CIPHER_SUITE) == TestResult.TRUE) {
             derivationTypes.add(DerivationType.INCLUDE_GREASE_CIPHER_SUITES);
         }
         
-        if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER 
-                && TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.TOLERATES_GREASE_NAMED_GROUP) == TestResult.TRUE) {
+        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.TOLERATES_GREASE_NAMED_GROUP) == TestResult.TRUE) {
             derivationTypes.add(DerivationType.INCLUDE_GREASE_NAMED_GROUPS);
         }
         
-        if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER 
-                && TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.TOLERATES_GREASE_SIGNATURE_AND_HASH_ALGORITHM) == TestResult.TRUE) {
+        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.TOLERATES_GREASE_SIGNATURE_AND_HASH_ALGORITHM) == TestResult.TRUE) {
             derivationTypes.add(DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS);
         }
-        
+        return derivationTypes;
+    }
+    
+    private static List<DerivationType> getBasicDerivationsForClient(DerivationScope derivationScope) {
+        List<DerivationType> derivationTypes = new LinkedList<>();
+        if(!derivationScope.isTls13Test()) {
+            if(TestContext.getInstance().getSiteReport().getReceivedClientHello().containsExtension(ExtensionType.ENCRYPT_THEN_MAC)) {
+                derivationTypes.add(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
+            }
+            
+            if(TestContext.getInstance().getSiteReport().getReceivedClientHello().containsExtension(ExtensionType.EXTENDED_MASTER_SECRET)) {
+                derivationTypes.add(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
+            }
+        }
         return derivationTypes;
     }
 

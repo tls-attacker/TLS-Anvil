@@ -233,4 +233,8 @@ public class AnnotatedState {
     public ExtensionContext getExtensionContext() {
         return extensionContext;
     }
+
+    public DerivationContainer getDerivationContainer() {
+        return derivationContainer;
+    }
 }

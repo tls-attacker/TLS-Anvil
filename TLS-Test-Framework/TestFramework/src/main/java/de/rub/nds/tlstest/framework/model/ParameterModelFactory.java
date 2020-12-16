@@ -123,9 +123,9 @@ public class ParameterModelFactory {
         List<DerivationType> derivationTypes = getBasicDerivationsForBoth(derivationScope);
         
         if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-            getBasicDerivationsForServer(derivationScope);
+            derivationTypes.addAll(getBasicDerivationsForServer(derivationScope));
         } else {
-            getBasicDerivationsForClient(derivationScope);
+            derivationTypes.addAll(getBasicDerivationsForClient(derivationScope));
         }
         return derivationTypes;
     }

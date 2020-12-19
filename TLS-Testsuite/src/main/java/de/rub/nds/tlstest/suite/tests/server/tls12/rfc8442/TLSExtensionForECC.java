@@ -22,6 +22,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
@@ -48,6 +49,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -72,7 +74,7 @@ public class TLSExtensionForECC extends Tls12Test {
             "message if it does not propose any ECC cipher suites.")
     @Security(SeverityLevel.INFORMATIONAL)
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    public void BothECExtensions_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void bothECExtensions_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddEllipticCurveExtension(true);
@@ -85,7 +87,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
             "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    public void ECExtension_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void ecExtension_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddEllipticCurveExtension(true);
@@ -98,13 +100,33 @@ public class TLSExtensionForECC extends Tls12Test {
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
             "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    public void ECPointFormatExtension_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void ecPointFormatExtension_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddEllipticCurveExtension(false);
         c.setAddECPointFormatExtension(true);
 
         execute(runner, c);
+    }
+    
+    @RFC(number = 8422, section = "5.1. Client Hello Extensions")
+    @TlsTest(description = "A server that receives a ClientHello containing one or both of these " +
+            "extensions MUST use the client's enumerated capabilities to guide its " +
+            "selection of an appropriate cipher suite.  One of the proposed ECC ")
+    @Interoperability(SeverityLevel.HIGH)
+    @KeyExchange(supported = KeyExchangeType.ECDH)
+    public void addUnknownEllipticCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+
+        c.setAddEllipticCurveExtension(true);
+        c.setAddECPointFormatExtension(true);
+
+        ClientHelloMessage chm = new ClientHelloMessage(c);
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        chm.getExtension(EllipticCurvesExtensionMessage.class).setSupportedGroups(Modifiable.insert(new byte[]{(byte) 123, 124}, 0));
+
+        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
 
@@ -116,7 +138,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @Interoperability(SeverityLevel.LOW)
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    public void InvalidEllipticCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void onlyInvalidEllipticCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddEllipticCurveExtension(true);
@@ -146,7 +168,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @ManualConfig(DerivationType.CIPHERSUITE)
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    public void InvalidEllipticCurve_WithNonECCCiphersuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void invalidEllipticCurve_WithNonECCCiphersuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.setAddEllipticCurveExtension(true);

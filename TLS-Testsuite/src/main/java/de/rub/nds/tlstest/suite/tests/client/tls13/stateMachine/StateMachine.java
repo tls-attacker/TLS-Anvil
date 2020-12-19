@@ -19,15 +19,19 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
+@Tag("statemachine")
 @ClientTest
-public class Finished extends Tls13Test {
+public class StateMachine extends Tls13Test {
 
     @TlsTest(description = "CVE-2020-24613, Send Finished without Certificate")
     @Security(SeverityLevel.CRITICAL)

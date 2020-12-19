@@ -12,10 +12,18 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
+import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
@@ -27,6 +35,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import java.util.Arrays;
+import static org.junit.Assert.assertFalse;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -56,6 +66,22 @@ public class ClientHello extends Tls13Test {
             }
             Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, alert);
         });
+    }
+    
+    @TlsTest(description = "If the list contains cipher suites that the server " +
+            "does not recognize, support, or wish to use, the server MUST " +
+            "ignore those cipher suites and process the remaining ones as " +
+            "usual.")
+    @Interoperability(SeverityLevel.HIGH)
+    public void includeUnknownCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+
+        ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
+        clientHelloMessage.setCipherSuites(Modifiable.insert(new byte[]{(byte)0xfe, 0x00}, 0));
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+
+        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
     @TlsTest(description = "In TLS 1.3, the client indicates its version preferences " +
@@ -141,6 +167,29 @@ public class ClientHello extends Tls13Test {
                 return;
             }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
+        });
+    }
+    
+    @TlsTest(description = "Servers MUST ignore unrecognized extensions.")
+    @Interoperability(SeverityLevel.CRITICAL)
+    public void includeUnknownExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        
+        //we use a Grease Extension for which we modify the type
+        GreaseExtensionMessage greaseHelperExtension = new GreaseExtensionMessage(ExtensionType.GREASE_00, 32);
+        greaseHelperExtension.setExtensionType(Modifiable.explicit(new byte[]{(byte) 0xBA, (byte) 0x9F}));
+        
+        ClientHelloMessage clientHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+        clientHello.addExtension(greaseHelperExtension);
+        
+        runner.execute(workflowTrace, config).validateFinal(i -> {
+            Validator.executedAsPlanned(i);
+            
+            ServerHelloMessage serverHello = (ServerHelloMessage) WorkflowTraceUtil.getFirstReceivedMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
+            for(ExtensionMessage extension : serverHello.getExtensions()) {
+                assertFalse("Server negotiated the undefined Extension", Arrays.equals(extension.getExtensionType().getValue(), greaseHelperExtension.getType().getValue()));
+            }
         });
     }
 

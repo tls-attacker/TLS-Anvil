@@ -9,13 +9,17 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
+import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -142,5 +146,19 @@ public class SignatureAlgorithms extends Tls13Test {
         );
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+    }
+    
+    @TlsTest(description = "Perform a Handshake where the Signature and Hash Algorithms Extension contains an additional, undefined algorithm")
+    @Interoperability(SeverityLevel.HIGH)
+    public void includeUnknownSignatureAndHashAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        c.setAddSignatureAndHashAlgorithmsExtension(true);
+        
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        ClientHelloMessage clientHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+        SignatureAndHashAlgorithmsExtensionMessage algorithmsExtension = clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
+        algorithmsExtension.setSignatureAndHashAlgorithms(Modifiable.insert(new byte[]{(byte)0xfe, 0x44}, 0));
+        
+        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 }

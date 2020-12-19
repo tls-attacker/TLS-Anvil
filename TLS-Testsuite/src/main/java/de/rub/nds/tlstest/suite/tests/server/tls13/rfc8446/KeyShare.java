@@ -9,6 +9,8 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
+import de.rub.nds.modifiablevariable.util.ArrayConverter;
+import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
@@ -16,7 +18,9 @@ import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -176,4 +180,28 @@ public class KeyShare extends Tls13Test {
             }
         });
     }
+    
+    @TlsTest(description = "Send a Client Hello with an undefined Named Group")
+    @Interoperability(SeverityLevel.CRITICAL)
+    public void includeUnknownGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        
+        byte[] undefinedGroup = new byte[]{(byte) 123, 124};
+        byte[] dummyLength = new byte[]{(byte) 0 , 56};
+        byte[] dummyPublicKey = new byte[56];
+        
+        byte[] completeEntry = ArrayConverter.concatenate(undefinedGroup, dummyLength, dummyPublicKey);
+
+        ClientHelloMessage clientHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+        EllipticCurvesExtensionMessage ellipticCurvesExtension = clientHello.getExtension(EllipticCurvesExtensionMessage.class);
+        ellipticCurvesExtension.setSupportedGroups(Modifiable.insert(undefinedGroup, 0));
+        
+        KeyShareExtensionMessage keyShareExtension = clientHello.getExtension(KeyShareExtensionMessage.class);
+        keyShareExtension.setKeyShareListBytes(Modifiable.insert(completeEntry, 0));
+        
+        runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
+    }
+    
+    
 }

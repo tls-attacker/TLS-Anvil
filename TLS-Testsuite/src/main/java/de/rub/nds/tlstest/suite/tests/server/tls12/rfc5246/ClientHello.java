@@ -11,11 +11,18 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
@@ -24,6 +31,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.Arrays;
+import static org.junit.Assert.assertFalse;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -65,5 +74,32 @@ public class ClientHello extends Tls12Test {
         );
 
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+    }
+    
+    @RFC(number = 5246, section = "7.4.1.4.1 Signature Algorithms")
+    @TlsTest(description = "The rules specified in [TLSEXT] " +
+            "require servers to ignore extensions they do not understand.")
+    @Interoperability(SeverityLevel.CRITICAL)
+    public void includeUnknownExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        
+        //we use a Grease Extension for which we modify the type
+        GreaseExtensionMessage greaseHelperExtension = new GreaseExtensionMessage(ExtensionType.GREASE_00, 32);
+        greaseHelperExtension.setExtensionType(Modifiable.explicit(new byte[]{(byte) 0xBA, (byte) 0x9F}));
+        
+        ClientHelloMessage clientHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+        clientHello.addExtension(greaseHelperExtension);
+        
+        runner.execute(workflowTrace, config).validateFinal(i -> {
+            Validator.executedAsPlanned(i);
+            
+            ServerHelloMessage serverHello = (ServerHelloMessage) WorkflowTraceUtil.getFirstReceivedMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
+            if(serverHello.getExtensions() != null) {
+                for(ExtensionMessage extension : serverHello.getExtensions()) {
+                    assertFalse("Server negotiated the undefined Extension", Arrays.equals(extension.getExtensionType().getValue(), greaseHelperExtension.getType().getValue()));
+                }
+            }
+        });
     }
 }

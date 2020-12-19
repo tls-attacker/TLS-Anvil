@@ -74,7 +74,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
             assertEquals("Server selected wrong ciphersuite", selectedCipherSuite, i.getState().getTlsContext().getSelectedCipherSuite());
         });
     }
-
+    
     @TlsTest(description = "A client MAY select one or more GREASE extension values and advertise them as extensions with varying length and contents." +
             "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @Interoperability(SeverityLevel.HIGH)

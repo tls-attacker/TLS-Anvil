@@ -21,6 +21,8 @@ import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -37,7 +39,9 @@ import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolMessageTypeDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import static org.junit.Assert.assertFalse;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -259,14 +263,15 @@ public class RecordProtocol extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.HIGH)
+    @ScopeExtensions(DerivationType.PROTOCOL_MESSAGE_TYPE)
     @Tag("emptyRecord")
-    public void sendEmptyApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendEmptyRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-
+        ProtocolMessageType selectedRecordContentType = derivationContainer.getDerivation(ProtocolMessageTypeDerivation.class).getSelectedValue();
         ApplicationMessage appMsg = new ApplicationMessage(c);
 
         Record r = new Record();
-        r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
+        r.setContentType(Modifiable.explicit(selectedRecordContentType.getValue()));
         r.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
         r.setMaxRecordLengthConfig(0);
         SendAction sendAction = new SendAction(appMsg);
@@ -279,6 +284,32 @@ public class RecordProtocol extends Tls13Test {
         );
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+    }
+    
+    @TlsTest(description = "Zero-length" +
+            "fragments of Application Data MAY be sent, as they are potentially " +
+            "useful as a traffic analysis countermeasure.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @Security(SeverityLevel.CRITICAL)
+    @Interoperability(SeverityLevel.HIGH)
+    public void sendEmptyApplicationMessage(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        ApplicationMessage appMsg = new ApplicationMessage(c);
+        appMsg.setData(Modifiable.explicit(new byte[0]));
+        
+        Record r = new Record();
+        SendAction sendAction = new SendAction(appMsg);
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        workflowTrace.addTlsActions(
+                sendAction,
+                new GenericReceiveAction()
+        );
+
+        runner.execute(workflowTrace, c).validateFinal(state -> {
+            Validator.executedAsPlanned(state);
+            assertFalse("Target did not accept an Application Data message without content", WorkflowTraceUtil.didReceiveMessage(ProtocolMessageType.ALERT, state.getWorkflowTrace()));
+        });
     }
 
 }

@@ -9,17 +9,22 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
+import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
@@ -31,6 +36,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import de.rub.nds.tlstest.suite.tests.both.lengthField.extensions.SignatureAndHashAlgorithmsExtension;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 import java.util.ArrayList;
@@ -140,5 +146,19 @@ public class SignatureAlgorithms extends Tls12Test {
             assertEquals(SignatureAlgorithm.ECDSA, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getSignatureAlgorithm());
             assertEquals(HashAlgorithm.SHA1, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm());
         });
+    }
+    
+    @TlsTest(description = "Perform a Handshake where the Signature and Hash Algorithms Extension contains an additional, undefined algorithm")
+    @Interoperability(SeverityLevel.HIGH)
+    public void includeUnknownSignatureAndHashAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        c.setAddSignatureAndHashAlgorithmsExtension(true);
+        
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        ClientHelloMessage clientHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+        SignatureAndHashAlgorithmsExtensionMessage algorithmsExtension = clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
+        algorithmsExtension.setSignatureAndHashAlgorithms(Modifiable.insert(new byte[]{(byte)0xfe, 0x44}, 0));
+        
+        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 }

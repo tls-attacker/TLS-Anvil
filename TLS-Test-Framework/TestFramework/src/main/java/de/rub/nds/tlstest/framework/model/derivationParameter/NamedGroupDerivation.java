@@ -28,10 +28,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- *
- * @author marcel
- */
 public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
 
     public NamedGroupDerivation() {

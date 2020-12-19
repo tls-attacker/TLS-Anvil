@@ -16,10 +16,6 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- *
- * @author marcel
- */
 public class BitPositionDerivation extends DerivationParameter<Integer> {
 
     public BitPositionDerivation() {

@@ -11,10 +11,6 @@ package de.rub.nds.tlstest.framework.model.constraint;
 
 import de.rub.nds.tlstest.framework.model.DerivationType;
 
-/**
- *
- * @author marcel
- */
 public class ValueConstraint {
 
     private final DerivationType affectedType;

@@ -18,10 +18,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- *
- * @author marcel
- */
 public class AlertDerivation extends DerivationParameter<AlertDescription>  {
 
     public AlertDerivation() {

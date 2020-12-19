@@ -12,10 +12,6 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
-/**
- *
- * @author marcel
- */
 public class ExtensionContextResolver implements ParameterResolver {
     private static final Logger LOGGER = LogManager.getLogger();
 

@@ -26,10 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-/**
- *
- * @author marcel
- */
 public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
 
     public CipherTextBitmaskDerivation() {

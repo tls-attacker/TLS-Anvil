@@ -16,10 +16,6 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- *
- * @author marcel
- */
 public class InvalidCCSContentDerivation extends DerivationParameter<byte[]> {
 
     public InvalidCCSContentDerivation() {

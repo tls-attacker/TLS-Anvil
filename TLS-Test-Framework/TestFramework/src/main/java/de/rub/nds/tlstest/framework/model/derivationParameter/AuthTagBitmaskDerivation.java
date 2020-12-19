@@ -23,10 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-/**
- *
- * @author marcel
- */
 public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
 
     public AuthTagBitmaskDerivation() {

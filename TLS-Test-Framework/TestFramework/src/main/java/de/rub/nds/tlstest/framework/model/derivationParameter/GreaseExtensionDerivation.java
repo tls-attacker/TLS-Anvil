@@ -17,10 +17,6 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- *
- * @author marcel
- */
 public class GreaseExtensionDerivation extends DerivationParameter<ExtensionType> {
     
     public GreaseExtensionDerivation() {

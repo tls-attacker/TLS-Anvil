@@ -16,10 +16,6 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- *
- * @author marcel
- */
 public class RecordLengthDerivation extends DerivationParameter<Integer>  {
 
     public RecordLengthDerivation() {

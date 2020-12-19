@@ -28,10 +28,6 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- *
- * @author marcel
- */
 public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
 
     private static final Logger LOGGER = LogManager.getLogger();

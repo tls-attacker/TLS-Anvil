@@ -13,10 +13,6 @@ import de.rwth.swc.coffee4j.model.constraints.Constraint;
 import java.util.List;
 import java.util.Set;
 
-/**
- *
- * @author marcel
- */
 public class ConditionalConstraint {
     private final Set<DerivationType> requiredDerivations;
     private final Constraint constraint;

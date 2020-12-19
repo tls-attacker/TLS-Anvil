@@ -9,10 +9,6 @@
  */
 package de.rub.nds.tlstest.framework.model;
 
-/**
- *
- * @author marcel
- */
 public enum ModelType {
    EMPTY,
    GENERIC,

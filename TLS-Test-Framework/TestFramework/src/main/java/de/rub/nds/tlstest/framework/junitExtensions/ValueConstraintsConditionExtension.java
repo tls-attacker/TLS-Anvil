@@ -23,10 +23,6 @@ import java.util.List;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-/**
- *
- * @author marcel
- */
 public class ValueConstraintsConditionExtension extends BaseCondition {
     @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext extensionContext) {

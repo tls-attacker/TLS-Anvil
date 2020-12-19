@@ -86,6 +86,8 @@ public class DerivationFactory {
                 return new IncludePSKExchangeModesExtensionDerivation();
             case INCLUDE_RENEGOTIATION_EXTENSION:
                 return new IncludeRenegotiationExtensionDerivation();
+            case INCLUDE_SESSION_TICKET_EXTENSION:
+                return new IncludeSessionTicketExtensionDerivation();
             case INCLUDE_GREASE_CIPHER_SUITES:
                 return new IncludeGreaseCipherSuitesDerivation();
             case INCLUDE_GREASE_NAMED_GROUPS:
@@ -96,6 +98,8 @@ public class DerivationFactory {
                 return new AdditionalPaddingLengthDerivation();
             case COMPRESSION_METHOD:
                 return new CompressionMethodDerivation();
+            case PROTOCOL_MESSAGE_TYPE:
+                return new ProtocolMessageTypeDerivation();
             default:
                 throw new UnsupportedOperationException("Derivation Type not implemented");
         }

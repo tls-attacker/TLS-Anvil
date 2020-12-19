@@ -19,10 +19,12 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -88,6 +90,10 @@ public class WorkflowRunner {
     public AnnotatedState execute(WorkflowTrace trace, Config config) {
         if(shouldInsertHelloRetryRequest()) {
             insertHelloRetryRequest(trace, config.getDefaultSelectedNamedGroup());
+        }
+        
+        if(shouldInsertNewSessionTicket()) {
+            insertNewSessionTicket(trace);
         }
         
         AnnotatedState annotatedState = new AnnotatedState(extensionContext, new State(config, trace), derivationContainer);
@@ -247,7 +253,7 @@ public class WorkflowRunner {
         this.derivationContainer = derivationContainer;
     }
     
-    private boolean shouldInsertHelloRetryRequest(){
+    public boolean shouldInsertHelloRetryRequest(){
         if(!autoHelloRetryRequest 
                 || context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER
                 || preparedConfig.getHighestProtocolVersion() != ProtocolVersion.TLS13
@@ -256,6 +262,26 @@ public class WorkflowRunner {
             return false;
         }
         return true;
+    }
+    
+    private boolean shouldInsertNewSessionTicket() {
+        if(context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER
+                && preparedConfig.getHighestProtocolVersion() == ProtocolVersion.TLS12
+                && preparedConfig.isAddSessionTicketTLSExtension()) {
+            return true;
+        }
+        return false;
+    }
+    
+    public void insertNewSessionTicket(WorkflowTrace trace) {
+        ReceiveAction receiveChangeCipherSpec = (ReceiveAction) WorkflowTraceUtil.getFirstReceivingActionForMessage(ProtocolMessageType.CHANGE_CIPHER_SPEC, trace);
+        
+        //not all WorkflowTraces reach a ChangeCipherSpec
+        if(receiveChangeCipherSpec != null) {
+            NewSessionTicketMessage newSessionTicket = new NewSessionTicketMessage();
+            newSessionTicket.setRequired(false);
+            receiveChangeCipherSpec.getExpectedMessages().add(0, newSessionTicket);
+        }
     }
     
     public void insertHelloRetryRequest(WorkflowTrace trace, NamedGroup requestedGroup) {

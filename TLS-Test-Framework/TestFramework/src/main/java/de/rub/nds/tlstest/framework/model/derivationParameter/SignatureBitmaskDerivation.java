@@ -170,7 +170,7 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> conditionalConstraints = new LinkedList<>();
         if (ConstraintHelper.signatureLengthConstraintApplicable(scope)) {
             conditionalConstraints.add(getMustBeWithinSignatureSizeConstraint());

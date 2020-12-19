@@ -96,7 +96,7 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     }
 
     @Override
-    public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
         if (!scope.isTls13Test() && ConstraintHelper.ecdhCipherSuiteModeled(scope) && ConstraintHelper.nullModeled(scope, getType())) {
             condConstraints.add(getMustNotBeNullForECDHConstraint());

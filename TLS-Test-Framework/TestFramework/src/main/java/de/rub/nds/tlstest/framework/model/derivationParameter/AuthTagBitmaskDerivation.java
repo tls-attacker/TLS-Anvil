@@ -66,7 +66,7 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         if (ConstraintHelper.multipleTagSizesModeled(scope)) {

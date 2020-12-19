@@ -39,7 +39,7 @@ public class MirroredCipherSuiteDerivation extends MirroredDerivationParameter<C
     }
 
     @Override
-    public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);

@@ -154,6 +154,7 @@ public class ParameterModelFactory {
             derivationTypes.add(DerivationType.INCLUDE_PADDING_EXTENSION);
             derivationTypes.add(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION);
             derivationTypes.add(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
+            derivationTypes.add(DerivationType.INCLUDE_SESSION_TICKET_EXTENSION);
             
             //we must know if the server negotiates Encrypt-Then-Mac to be able
             //to define correct constraints for padding tests

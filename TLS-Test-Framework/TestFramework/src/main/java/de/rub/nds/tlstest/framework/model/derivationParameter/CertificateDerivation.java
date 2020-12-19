@@ -77,7 +77,7 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
     }
     
     @Override
-    public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         if(!scope.isTls13Test() && ConstraintHelper.multipleCertPublicKeyTypesModeled(scope)) {

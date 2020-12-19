@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import de.rub.nds.tlstest.framework.annotations.ExplicitModelingConstraints;
 
 /**
  * Defines which TLS parameters are used for the test derivation and how they
@@ -43,22 +44,20 @@ public class DerivationScope {
     private final List<DerivationType> scopeExtensions;
     private final KeyX keyExchangeRequirements;
     private final List<ValueConstraint> valueConstraints;
-    private final ProtocolVersion targetVersion;
     private final Map<DerivationType, String> explicitValues;
+    private final Map<DerivationType, String> explicitModelingConstraints;
     private final ExtensionContext extensionContext;
     private final Set<DerivationType> manualConfigTypes;
-    
+  
     public DerivationScope(ExtensionContext context) {
         this.keyExchangeRequirements = (KeyX)KeyX.resolveKexAnnotation(context);
         this.scopeLimits = resolveScopeLimits(context);
         this.scopeExtensions = resolveScopeExtensions(context);
         this.valueConstraints = resolveValueConstraints(context);
         this.explicitValues = resolveExplicitValues(context);
+        this.explicitModelingConstraints = resolveExplicitModelingConstraints(context);
         this.manualConfigTypes = resolveManualConfigTypes(context);
         this.extensionContext = context;
-        
-        TestMethodConfig tmpConfig = new TestMethodConfig(context);
-        this.targetVersion = tmpConfig.getTlsVersion().supported();
     }
     
     public DerivationScope(ExtensionContext context, ModelFromScope modelFromScope) {
@@ -159,6 +158,26 @@ public class DerivationScope {
         return valueMap;
     }
     
+    private Map<DerivationType, String> resolveExplicitModelingConstraints(ExtensionContext context) {
+        Map<DerivationType, String> valueMap = new HashMap<>();
+        Method testMethod = context.getRequiredTestMethod();
+        if(testMethod.isAnnotationPresent(ExplicitModelingConstraints.class)) {
+            ExplicitModelingConstraints explicitConstraints = testMethod.getAnnotation(ExplicitModelingConstraints.class);
+            DerivationType[] affectedTypes = explicitConstraints.affectedTypes();
+            String[] methods = explicitConstraints.methods();
+            if(methods.length != affectedTypes.length) {
+                throw new RuntimeException("Unable to resolve ExplicitModelParameterConstraints - argument count mismatch");
+            }
+            for(int i = 0; i < affectedTypes.length; i++) {
+                if(valueMap.containsKey(affectedTypes[i])) {
+                    throw new RuntimeException("Unable to resolve ExplicitModelParameterConstraints - multiple explicit values derfined for " + affectedTypes[i]);
+                }
+                valueMap.put(affectedTypes[i], methods[i]);
+            }
+        }
+        return valueMap;
+    }
+    
     private Set<DerivationType> resolveManualConfigTypes(ExtensionContext context) {
         Set<DerivationType> manualConfigTypes = new HashSet<>();
         Method testMethod = context.getRequiredTestMethod();
@@ -172,6 +191,10 @@ public class DerivationScope {
     
     public boolean hasExplicitValues(DerivationType type) {
         return explicitValues.containsKey(type);
+    }
+    
+    public boolean hasExplicitModelingConstraints(DerivationType type) {
+        return explicitModelingConstraints.containsKey(type);
     }
 
     public List<ValueConstraint> getValueConstraints() {
@@ -188,6 +211,10 @@ public class DerivationScope {
 
     public String getExplicitValueMethod(DerivationType type) {
         return explicitValues.get(type);
+    }
+    
+    public String getExplicitModelingConstraintMethod(DerivationType type) {
+        return explicitModelingConstraints.get(type);
     }
 
     public ExtensionContext getExtensionContext() {

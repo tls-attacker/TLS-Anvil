@@ -62,8 +62,16 @@ public abstract class DerivationParameter<T> {
         return parameterValues;
     }
 
-    public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         return new LinkedList<>();
+    }
+    
+    public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
+        if(scope.hasExplicitModelingConstraints(type)) {
+            return getExplicitModelingConstraints(scope);
+        } else {
+            return getDefaultConditionalConstraints(scope);
+        }
     }
     
     public boolean canBeModeled(TestContext context, DerivationScope scope) {
@@ -133,7 +141,20 @@ public abstract class DerivationParameter<T> {
 
             return (List<DerivationParameter>) method.invoke(constructor.newInstance());
         } catch (NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException ex) {
-            LOGGER.error("", ex);
+            LOGGER.error("Was unable to fetch explicit values for type " + type, ex);
+            return new LinkedList<>();
+        }
+    }
+    
+    public List<ConditionalConstraint> getExplicitModelingConstraints(DerivationScope scope) {
+        try {
+            String methodName = scope.getExplicitModelingConstraintMethod(type);
+            Method method = scope.getExtensionContext().getRequiredTestClass().getMethod(methodName, DerivationScope.class);
+            Constructor constructor = scope.getExtensionContext().getRequiredTestClass().getConstructor();
+
+            return (List<ConditionalConstraint>) method.invoke(constructor.newInstance(), scope);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException ex) {
+            LOGGER.error("Was unable to fetch explicit constraints for type " + type, ex);
             return new LinkedList<>();
         }
     }

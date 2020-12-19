@@ -39,13 +39,12 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class ProhibitingSSLv2 extends Tls12Test {
 
-    @Test
     @Interoperability(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
-    @TestDescription("TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT-"
+    @TlsTest(description = "TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT-"
             + "HELLO message format.")
-    public void sendSSL2CompatibleClientHello(WorkflowRunner runner) {
-        Config c = this.getConfig();
+    public void sendSSL2CompatibleClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(

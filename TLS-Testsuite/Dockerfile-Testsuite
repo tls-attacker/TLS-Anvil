@@ -1,0 +1,8 @@
+FROM openjdk:14-buster
+RUN apt-get update && apt-get install -y tcpdump
+COPY out/artifacts/TLS_Testsuite_jar/ /apps/
+COPY entrypoint.sh /apps/
+ENV DOCKER=1
+WORKDIR /output/
+VOLUME /output
+ENTRYPOINT ["/apps/entrypoint.sh"]

@@ -233,4 +233,8 @@ public class DerivationScope {
     public boolean isAutoApplyToConfig(DerivationType type) {
         return !manualConfigTypes.contains(type);
     }
+
+    public Map<DerivationType, String> getExplicitTypeValues() {
+        return explicitValues;
+    }
 }

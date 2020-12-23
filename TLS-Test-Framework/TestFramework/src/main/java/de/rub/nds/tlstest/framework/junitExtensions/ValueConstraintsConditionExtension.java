@@ -37,6 +37,13 @@ public class ValueConstraintsConditionExtension extends BaseCondition {
                 return ConditionEvaluationResult.disabled("Host does not support required value for parameter " + derivationParam.getType());
             }
         }
+        
+        for(DerivationType explicitType : derivationScope.getExplicitTypeValues().keySet()) {
+            DerivationParameter derivationParam = DerivationFactory.getInstance(explicitType);
+            if(derivationParam.hasNoApplicableValues(TestContext.getInstance(), derivationScope)) {
+                return ConditionEvaluationResult.disabled("Host does not support required value for parameter " + explicitType);
+            }
+        }
         return ConditionEvaluationResult.enabled("");
     }
 }

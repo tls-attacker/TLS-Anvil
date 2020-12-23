@@ -284,8 +284,8 @@ public class TestRunner {
             }
         }
         
-        ParallelExecutor executor = new ParallelExecutor(testConfig.getParallel() * 3, 2);
-        LOGGER.info("Executing client exploration...");
+        ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
+        LOGGER.info("Executing client exploration with {} parallel threads...", testConfig.getParallelHandshakes());
         executor.bulkExecuteTasks(tasks);
         
 
@@ -418,7 +418,7 @@ public class TestRunner {
             return;
         }
 
-        ParallelExecutor executor = new ParallelExecutor(testConfig.getParallel(), 2);
+        ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
         executor.setTimeoutAction(testConfig.getTimeoutActionScript());
         executor.armTimeoutAction();
         testContext.setStateExecutor(executor);
@@ -499,9 +499,12 @@ public class TestRunner {
                 .selectors(
                     selectPackage(packageName)
                 )
+                // https://junit.org/junit5/docs/current/user-guide/#writing-tests-parallel-execution
+                .configurationParameter("junit.jupiter.execution.parallel.mode.default", "same_thread")
+                .configurationParameter("junit.jupiter.execution.parallel.mode.classes.default", "concurrent")
                 .configurationParameter("junit.jupiter.execution.parallel.config.strategy", "fixed")
                 .configurationParameter("junit.jupiter.execution.parallel.config.fixed.parallelism",
-                        String.valueOf(Math.min(testConfig.getParallel() * 3, Runtime.getRuntime().availableProcessors()))
+                        String.valueOf(testConfig.getParallelTests())
                 );
         
         if (testConfig.getTags().size() > 0) {

@@ -36,7 +36,6 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import de.rub.nds.tlstest.suite.tests.both.lengthField.extensions.SignatureAndHashAlgorithmsExtension;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-import { SeverityLevel } from '../../../lib/const';
+import { SeverityLevel, CategoriesStrings } from '../../../lib/const';
 
 
 export interface IScore {
@@ -8,11 +8,9 @@ export interface IScore {
   SeverityLevel: SeverityLevel
 }
 
-export interface IScoreMap {
-  INTEROPERABILITY: IScore,
-  SECURITY: IScore,
-  COMPLIANCE: IScore
-}
+export type IScoreMap = {
+  [identifier in CategoriesStrings]: IScore;
+};
 
 
 export const ScoreSchemaObject = {
@@ -28,4 +26,3 @@ export const ScoreMapSchmaObject = {
   SECURITY: ScoreSchemaObject,
   COMPLIANCE: ScoreSchemaObject
 }
-

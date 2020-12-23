@@ -44,7 +44,7 @@
         >Download Keylogfile</b-button>
       </b-col>
     </b-row>
-    <b-row style="margin-top: 20px">
+    <!-- <b-row style="margin-top: 20px">
       <b-col cols="2">
         <b-form-group label="Hightlight rows">
           <b-form-radio-group
@@ -107,6 +107,14 @@
             stacked
           ></b-form-checkbox-group>
         </b-form-group>
+      </b-col>
+    </b-row> -->
+    <b-row>
+      <b-col>
+        <TableFilter
+          v-model="filter"
+          :filterPossibilities="filterInputModel"
+        ></TableFilter>
       </b-col>
     </b-row>
 
@@ -174,9 +182,11 @@
 </template>
 
 <script>
-import { allSeverityLevels, allStatus, resolveSeverityLevel } from '@/lib/const'
 import * as analyzer from '@/lib/analyzer'
 import VueJsonPretty from 'vue-json-pretty'
+import TableFilter from '@/components/TableFilter'
+import { FilterInputModels } from "@/lib/filter/filterInputModels";
+import { filter } from "@/lib/filter/filter"
 
 let reports = []
 export default {
@@ -192,14 +202,8 @@ export default {
       currentSelection: "",
       regex: "",
       guardNavigation: 0,
-      options: {
-        severity: allSeverityLevels.map(i => {return {text: resolveSeverityLevel(i), value: i}}),
-        status: allStatus,
-        hightlight: analyzer.hightlightOptions,
-        difference: analyzer.differenceFilterOptions
-      },
-      hightlightOption: null, 
-      filter: analyzer.filterObj,
+      filterInputModel: FilterInputModels.analyzer,
+      filter: [],
       showDetails: false,
       modalContent: null,
       fields: [
@@ -325,6 +329,14 @@ export default {
       const start = new Date().getTime()
       try {
         const res = analyzer.itemProvider(ctx, this.reports)
+        for (let i = 0; i < res.length; i++) {
+          const row = res[i]
+          if (!filter(this.filterInputModel, this.filter, row)) {
+            res.splice(i, 1)
+            i--;
+          }
+        }
+        
         console.log(`Finished in ${new Date().getTime() - start}ms (${res.length})`)
         console.log(res)
         return res
@@ -341,7 +353,7 @@ export default {
         return ["newClass", "stickyColumn", "notSelectable"]
       }
 
-      return analyzer.getRowClass(item, this.hightlightOption)
+      return analyzer.getRowClass(item)
     },
     onRowSelected(items) {
       this.$refs.table.clearSelected()
@@ -459,7 +471,8 @@ export default {
     next()
   },
   components: {
-    VueJsonPretty
+    VueJsonPretty,
+    TableFilter
   }
 };
 </script>

@@ -38,7 +38,8 @@ async function main() {
   for (const f of files) {
     try {
       const dir = path.dirname(f)
-      //if (uploadedIdentifiers.includes(basename(dir))) continue;
+      if (uploadedIdentifiers.includes(basename(dir))) continue;
+      console.log(basename(dir))
 
       const pcap = path.join(dir, 'dump.pcap')
       const keyfile = path.join(dir, 'keyfile.log')
@@ -66,6 +67,7 @@ async function main() {
 
 
       if (remote) {
+        console.log("Upload via remote")
         await new Promise((res) => {
           //axios.post('https://report:p4ssw0rd123@reportanalyzer.alphanudel.de/api/v1/uploadReport', uploadData, {
           axios.post(baseurl + '/uploadReport', uploadData, {

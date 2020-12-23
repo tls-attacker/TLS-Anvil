@@ -7,14 +7,16 @@ import { IScoreMap, ScoreMapSchmaObject } from './score';
 export interface ITestResult extends Document {
   ContainerId: ITestResultContainer['_id'],
   TestMethod: ITestMethod,
-  Status: string,
+  Result: string,
   DisabledReason?: string,
   FailedReason?: string,
   FailedStacktrace?: string,
   ElapsedTime: number,
   States: IState[],
+  StatesCount: number,
   StateIndexMap: Map<string, number>,
-  Score: IScoreMap
+  Score: IScoreMap,
+  FailureInducingCombinations: Map<string, string>[]
 }
 
 export const TestResultSchema = new Schema({
@@ -24,7 +26,7 @@ export const TestResultSchema = new Schema({
     required: true
   },
   TestMethod: TestMethodSchemaObject,
-  Status: String,
+  Result: String,
   DisabledReason: String,
   FailedReason: String,
   FailedStacktrace: String,
@@ -33,12 +35,18 @@ export const TestResultSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'TestResultState',
   }],
+  StatesCount: Number,
   StateIndexMap: {
     type: Schema.Types.Map,
     of: Number,
     default: new Map()
   },
-  Score: ScoreMapSchmaObject
+  Score: ScoreMapSchmaObject,
+  FailureInducingCombinations: [{
+    type: Schema.Types.Map,
+    of: String,
+    default: new Map()
+  }]
 })
 
 TestResultSchema.index({ContainerId: 1})

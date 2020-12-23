@@ -1,4 +1,4 @@
-import { TestStatus } from './TestStatus'
+import { TestResult } from './TestStatus'
 
 export enum SeverityLevel {
   INFORMATIONAL = "INFORMATIONAL",
@@ -29,20 +29,20 @@ export function resolveSeverityLevel(level: string) {
 }
 
 
-function scoreForStatus(status: TestStatus, total: number): number {
+function scoreForStatus(status: TestResult, total: number): number {
   switch (status) {
-    case TestStatus.SUCCEEDED:
+    case TestResult.SUCCEEDED:
       return 1.0 * total
-    case TestStatus.PARTIALLY_SUCCEEDED:
+    case TestResult.PARTIALLY_SUCCEEDED:
       return 0.8 * total
-    case TestStatus.PARTIALLY_FAILED:
+    case TestResult.PARTIALLY_FAILED:
       return 0.2 * total
     default:
       return 0
   }
 }
 
-export function score(severityLevel: SeverityLevel, status: TestStatus): number {
+export function score(severityLevel: SeverityLevel, status: TestResult): number {
   switch (severityLevel) {
     case SeverityLevel.INFORMATIONAL:
       return scoreForStatus(status, 20)

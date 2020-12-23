@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import { Readable } from 'stream';
 import { IState, ITestResult, ITestResultContainer, StateSchema, TestResultContainerSchema, TestResultSchema } from './models';
 import { BadRequest } from '../errors';
-import { TestStatus, SeverityLevel, SeverityLevelStrings, score } from '../../lib/const'
 
 export enum FileType {
   pcap,
@@ -72,22 +71,22 @@ class Database {
       const uuids: string[] = []
       let uuidsAreUnique = true
       for (let state of result.States) {
+        if (uuids.includes(state.uuid)) {
+          uuidsAreUnique = false
+          console.warn(`uuids are not unique (${result.TestMethod.ClassName}.${result.TestMethod.MethodName}) ${state.uuid}`)
+          continue
+        }
         state.TestResultId = testResultDoc._id
         state.ContainerId = containerDoc._id
         const stateDoc = new this.testResultState(state)
         stateIds.push(stateDoc._id)
-        if (uuids.includes(stateDoc.uuid)) {
-          uuidsAreUnique = false
-          console.warn(`uuids are not unique (${result.TestMethod.ClassName}.${result.TestMethod.MethodName})`)
-          continue
-        }
         uuids.push(stateDoc.uuid)
         testResultDoc.StateIndexMap.set(stateDoc.uuid, stateIds.length - 1)
         stateDocs.push(stateDoc)
       }
 
       if (!uuidsAreUnique) {
-        testResultDoc.Status = "PARSER_ERROR"
+        testResultDoc.Result = "PARSER_ERROR"
       }
 
       testResultDoc.States = stateIds
@@ -98,18 +97,32 @@ class Database {
     containerDoc.TestResults = testResultDocs.map(i => i._id)
 
     const promises: Promise<any>[] = []
+    console.log("upload")
     promises.push(this.uploadFile(FileType.pcap, pcap, containerDoc.Identifier))
+    console.log("upload2")
     promises.push(this.uploadFile(FileType.keylog, keylogfile, containerDoc.Identifier))
 
     return Promise.all(promises).then((vals) => { 
+      console.log("upload3")
       containerDoc.PcapStorageId = vals[0]
       containerDoc.KeylogfileStorageId = vals[1]
-      promises.push(containerDoc.save())
-      promises.push(this.testResult.insertMany(testResultDocs))
-      promises.push(this.testResultState.insertMany(stateDocs))
-      return Promise.all(promises)
+      const promises2: Promise<any>[] = []
+      promises2.push(containerDoc.save())
+      for (let result of testResultDocs) {
+        promises2.push(result.save())
+      }
+
+      for (let state of stateDocs) {
+        promises2.push(state.save())
+      }
+
+      return Promise.all(promises2)
     }).then(() => {
       return
+    }).catch((e) => {
+      console.log(e)
+      console.log(e.stack)
+      throw e
     })
   }
 
@@ -142,6 +155,7 @@ class Database {
       const id = uploadStream.id
       readableStream.pipe(uploadStream)
       uploadStream.on('error', (e) => {
+        console.error('onerror' ,e)
         rej(e)
       })
 

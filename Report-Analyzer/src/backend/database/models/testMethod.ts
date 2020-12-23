@@ -4,6 +4,7 @@ import { IScoreMap, ScoreMapSchmaObject, ScoreSchemaObject } from './score';
 
 export interface ITestMethod {
   Description: string,
+  TestDescription: string,
   TlsVersion: string,
   RFC: {
     Section: string,
@@ -16,6 +17,7 @@ export interface ITestMethod {
 
 export const TestMethodSchemaObject = {
   Description: String,
+  TestDescription: String,
   TlsVersion: String,
   RFC: {
     Section: String,

@@ -1,5 +1,5 @@
 import { IState, ITestResult, ITestResultContainer } from '../backend/database/models';
-import { allStatus, HighlightOptions, HighlightOptionsStrings, IItemProviderContext, Optional, resolveStatus, TestStatus } from './const';
+import { allResults, IItemProviderContext, Optional, resolveStatus, TestResult } from './const';
 
 //@ts-ignore
 interface ITestResultContainerBrowser extends ITestResultContainer {
@@ -12,30 +12,8 @@ interface ITestResultTable extends ITestResult {
   StateIndexMap: {[key: string]: number}
 }
 
-interface IStateTable extends IState {
+export interface IStateTable extends IState {
   statusIcons: string
-}
-
-interface IFilter {
-  status: TestStatus[]
-  properties: string[]
-}
-
-export const hightlightOptions = [
-  {text: "None", value: null},
-  {text: "Different status", value: HighlightOptions.differentStates}
-]
-
-const additionalInformationFilter = "ADDITIONAL_INFORMATION"
-
-export const differenceFilterOptions = [
-  {text: "Different status", value: HighlightOptions.differentStates},
-  {text: "Additional information", value: additionalInformationFilter}
-]
-
-export const filterObj: IFilter = {
-  status: [...allStatus],
-  properties: []
 }
 
 
@@ -60,10 +38,10 @@ export function itemProvider(ctx: IItemProviderContext, results: ITestResultTabl
 
   for (let i = 0; i < results.length; i++) {
     const result = results[i]
-    items[0][result.Identifier] = {statusIcons: result.States.filter((j) => j.Status == TestStatus.SUCCEEDED).length}
-    items[1][result.Identifier] = {statusIcons: result.States.filter((j) => j.Status == TestStatus.PARTIALLY_SUCCEEDED).length}
-    items[2][result.Identifier] = {statusIcons: result.States.filter((j) => j.Status == TestStatus.FAILED).length}
-    items[3][result.Identifier] = {statusIcons: result.States.filter((j) => j.Status == TestStatus.PARTIALLY_FAILED).length}
+    items[0][result.Identifier] = {statusIcons: result.States.filter((j) => j.Result == TestResult.SUCCEEDED).length}
+    items[1][result.Identifier] = {statusIcons: result.States.filter((j) => j.Result == TestResult.PARTIALLY_SUCCEEDED).length}
+    items[2][result.Identifier] = {statusIcons: result.States.filter((j) => j.Result == TestResult.FAILED).length}
+    items[3][result.Identifier] = {statusIcons: result.States.filter((j) => j.Result == TestResult.PARTIALLY_FAILED).length}
 
     for (const state of result.States) {
       uuidSet.add(state.uuid)
@@ -119,22 +97,6 @@ export function itemProvider(ctx: IItemProviderContext, results: ITestResultTabl
       }
     }
 
-    if (resultA?.TransformationDescription && resultB?.TransformationDescription) {
-      if (resultA.TransformationDescription == resultB.TransformationDescription) {
-        return 0
-      } else if (resultA.TransformationDescription < resultB.TransformationDescription) {
-        return -1
-      } else {
-        return 1
-      }
-    }
-    if (resultA?.TransformationDescription && !resultB?.TransformationDescription) {
-      return 1
-    }
-    if (!resultA?.TransformationDescription && resultB?.TransformationDescription) {
-      return -1
-    }
-
     if (a < b) {
       return -1
     } else if (b < a) {
@@ -161,7 +123,7 @@ export function itemProvider(ctx: IItemProviderContext, results: ITestResultTabl
       if (position != -1) {
         const column = <IStateTable>results[i3].States[position]
 
-        column.statusIcons = resolveStatus(column.Status)
+        column.statusIcons = resolveStatus(column.Result)
         if (column.AdditionalResultInformation) {
           column.statusIcons += "❗️"
         }
@@ -174,16 +136,14 @@ export function itemProvider(ctx: IItemProviderContext, results: ITestResultTabl
       }
     }
 
-    if (filterRowItem(item, ctx.filter)) {
-      items.push(item)
-    }
+    items.push(item)
   }
   
   return items
 }
 
 
-export function getRowClass(item: any[], highlightOption: HighlightOptionsStrings) {
+export function getRowClass(item: any[]) {
   if (!item) return []
 
   const classes = []
@@ -192,50 +152,16 @@ export function getRowClass(item: any[], highlightOption: HighlightOptionsString
     classes.push("newClass", "stickyColumn")
   }
 
-  let lastStatus = null
   for (const key in item) {
     if (key == "uuid") continue
     const state : Optional<IStateTable> = item[key]
 
-    if (state && !state.Status) {
+    if (state && !state.Result) {
       // if the state does not exists for the target, it is null
       classes.push("notSelectable")
       break 
     }
-
-    if (state && state.Status != lastStatus) {
-      if (!lastStatus) {
-        lastStatus = state.Status
-      } else if (highlightOption == HighlightOptions.differentStates) {
-        classes.push("highlight")
-        break
-      }
-    }
   }
 
   return classes
-}
-
-
-function filterRowItem(item: any, filter: IFilter): boolean {
-  let ret = true
-  let filterStatus = false
-  for (const key in item) {
-    if (key == "uuid" || !item[key]) continue
-
-    const result : IStateTable = item[key]
-    if (filter.status.includes(<TestStatus>result.Status)) {
-      filterStatus = true;
-    }
-
-    if (filter.properties.includes(additionalInformationFilter) && !result.AdditionalResultInformation) {
-      return false || filterStatus
-    }
-  }
-
-  if (filter.properties.includes(HighlightOptions.differentStates)) {
-    ret = getRowClass(item, HighlightOptions.differentStates).includes('highlight')
-  }
-
-  return ret && filterStatus
 }

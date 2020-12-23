@@ -1,4 +1,4 @@
-export enum TestStatus {
+export enum TestResult {
   SUCCEEDED = "SUCCEEDED",
   FAILED = "FAILED",
   PARTIALLY_FAILED = "PARTIALLY_FAILED",
@@ -8,22 +8,22 @@ export enum TestStatus {
   NOT_SPECIFIED = "NOT_SPECIFIED"
 }
 
-export type TestStatusStrings = keyof typeof TestStatus
-export const allStatus = [TestStatus.SUCCEEDED, TestStatus.PARTIALLY_SUCCEEDED, TestStatus.FAILED, TestStatus.PARTIALLY_FAILED]
+export type TestResultStrings = keyof typeof TestResult
+export const allResults = [TestResult.SUCCEEDED, TestResult.PARTIALLY_SUCCEEDED, TestResult.FAILED, TestResult.PARTIALLY_FAILED]
 
 export function resolveStatus(status: string) {
   switch (status) {
-    case TestStatus.SUCCEEDED:
+    case TestResult.SUCCEEDED:
       return "✅";
-    case TestStatus.FAILED:
+    case TestResult.FAILED:
       return "❌"
-    case TestStatus.PARTIALLY_FAILED:
+    case TestResult.PARTIALLY_FAILED:
       return "⚠️❌"
-    case TestStatus.PARTIALLY_SUCCEEDED:
+    case TestResult.PARTIALLY_SUCCEEDED:
       return "⚠️✅"
-    case TestStatus.DISABLED:
+    case TestResult.DISABLED:
       return ""
-    case TestStatus.PARSER_ERROR:
+    case TestResult.PARSER_ERROR:
       return '☢️'
     default:
       return "UNKNOWN"

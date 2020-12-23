@@ -1,12 +1,12 @@
-import { TestStatus } from './TestStatus';
+import { TestResult } from './TestStatus';
 
 export interface IStatusFilter {
-  status: TestStatus[]
+  status: TestResult[]
 }
 
 export const statusFilterOptions = [
-  TestStatus.SUCCEEDED,
-  TestStatus.PARTIALLY_SUCCEEDED,
-  TestStatus.FAILED,
-  TestStatus.PARTIALLY_FAILED
+  TestResult.SUCCEEDED,
+  TestResult.PARTIALLY_SUCCEEDED,
+  TestResult.FAILED,
+  TestResult.PARTIALLY_FAILED
 ]

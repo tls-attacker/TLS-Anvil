@@ -4,6 +4,8 @@ export enum ScoreCategories {
   COMPLIANCE = "COMPLIANCE"
 }
 
+export type CategoriesStrings = keyof typeof ScoreCategories
+
 export const allScoreCategories = [
   ScoreCategories.SECURITY,
   ScoreCategories.INTEROPERABILITY,

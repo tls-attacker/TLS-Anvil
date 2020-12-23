@@ -4,17 +4,16 @@ import { ITestResultContainer } from './testResultContainer';
 export interface IState extends Document {
   TestResultId: ITestResult['_id']
   ContainerId: ITestResultContainer['_id']
-  TransformationDescription: string,
-  Status: string,
-  InspectedCiphersuite: string,
-  TransformationParentUuid?: string,
-  AdditionalResultInformation: string,
-  AdditionalTestInformation: string,
-  SrcPort: number,
-  DstPort: number,
-  StartTimestamp: string,
-  EndTimestamp: string,
-  uuid: string,
+  DerivationContainer: {[identifier: string] : string}
+  DisplayName: string
+  Result: string
+  AdditionalResultInformation: string
+  AdditionalTestInformation: string
+  SrcPort: number
+  DstPort: number
+  StartTimestamp: string
+  EndTimestamp: string
+  uuid: string
   Stacktrace?: string
 }
 
@@ -29,10 +28,13 @@ export const StateSchema = new Schema({
     ref: 'TestContainer',
     required: true,
   },
-  TransformationDescription: String,
-  Status: String,
-  InspectedCiphersuite: String,
-  TransformationParentUuid: String,
+  DerivationContainer: {
+    type: Schema.Types.Map,
+    of: String,
+    default: new Map()
+  },
+  DisplayName: String,
+  Result: String,
   AdditionalResultInformation: String,
   AdditionalTestInformation: String,
   SrcPort: Number,

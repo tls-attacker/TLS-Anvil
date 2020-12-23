@@ -17,6 +17,7 @@ export interface ITestResultContainer extends Document, ITimestamp {
   TestClasses?: ITestResultContainer[]
   TestResults: ITestResult[]
   TestResultClassMethodIndexMap: Map<string, number>,
+  StatesCount: number
   Score: IScoreMap
 }
 
@@ -40,6 +41,7 @@ export const TestResultContainerSchema = new Schema({
   SucceededTests: Number,
   DisabledTests: Number,
   Score: ScoreMapSchmaObject,
+  StatesCount: Number,
   TestResults: [{
     type: Schema.Types.ObjectId,
     ref: 'TestResult'

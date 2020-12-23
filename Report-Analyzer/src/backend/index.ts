@@ -28,7 +28,7 @@ new UploadReportEndpoint.Controller(router)
 
 router.get("/testReportIdentifiers", async (req, res, next) => {
   const results = await DB.testResultContainer.find().select({Identifier: 1}).lean().exec()
-  const identifiers = results.map((i) => i.Identifier)
+  const identifiers = results.map((i: any) => i.Identifier)
   identifiers.sort()
   res.send(identifiers)
 })

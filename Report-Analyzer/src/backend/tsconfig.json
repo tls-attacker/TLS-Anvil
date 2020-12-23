@@ -13,7 +13,11 @@
             "*": [
                 "../../node_modules/*",
             ]
-        }
+        },
+        "lib": [
+            "ES2019.Array"
+        ],
+        "skipLibCheck": true
     },
     "include": [
         "./**/*",

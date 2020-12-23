@@ -1,8 +1,8 @@
 version: '3.7'
 
 volumes:
-  mongodb_DB:
-  mongodb_conf:
+  mongodb_DB2:
+  mongodb_conf2:
 
 services:
   mongo:
@@ -11,8 +11,8 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - mongodb_DB:/data/db
-      - mongodb_conf:/data/configdb
+      - mongodb_DB2:/data/db
+      - mongodb_conf2:/data/configdb
 
   mongo-express:
     image: mongo-express

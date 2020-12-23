@@ -9,7 +9,10 @@
 				"$tsc-watch"
 			],
 			"group": "build",
-			"label": "tsc: Überwachen – tsconfig.json"
+			"label": "tsc: Überwachen – tsconfig.json",
+			"runOptions": {
+				"runOn": "folderOpen"
+			}
 		},
 		{
 			"type": "typescript",
@@ -19,6 +22,25 @@
 			],
 			"group": "build",
 			"label": "tsc: build – tsconfig.json"
+		},
+		{
+			"type": "npm",
+			"runOptions": {
+				"runOn": "folderOpen",
+			},
+			"dependsOn": "tsc: build – tsconfig.json",
+			"dependsOrder": "sequence",
+			"script": "serve",
+			"group": "build",
+			"label": "npm run serve",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated",
+				"showReuseMessage": true,
+				"clear": true
+			}
 		}
 	]
 }

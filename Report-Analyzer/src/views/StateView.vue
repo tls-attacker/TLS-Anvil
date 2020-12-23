@@ -24,6 +24,10 @@
         </div>
       </template>
       <template v-else-if="detailsMode == 1">
+        <template v-if="failureInducingCombinations"></template>
+        <vue-json-pretty id="fds" :data="failureInducingCombinations">
+        </vue-json-pretty>
+        <div style="height: 50px"></div>
         <div v-for="k in selectedColumn" :key="k.uuid">
           <p style="font-weight: bold;">{{ k.uuid }}</p>
           <vue-json-pretty
@@ -48,36 +52,12 @@
       </template>
     </b-modal>
 
-    <b-row style="margin-top: 20px">
-      <b-col cols="4">
-        <b-form-group label="Hightlight rows">
-          <b-form-radio-group
-            v-model="hightlightOption"
-            :options="options.hightlight"
-            name="radios-stacked"
-            stacked
-          ></b-form-radio-group>
-        </b-form-group>
-        <b-form-group label="Show only rows with:">
-          <b-form-checkbox-group
-            id="filterProperties"
-            v-model="filter.properties"
-            :options="options.difference"
-            name="filterProperties"
-            stacked
-          ></b-form-checkbox-group>
-        </b-form-group>
-      </b-col>
-      <b-col cols="3">
-        <b-form-group label="Filter test results:">
-          <b-form-checkbox-group
-            id="filterStatus"
-            v-model="filter.status"
-            :options="options.status"
-            name="filterStatus"
-            stacked
-          ></b-form-checkbox-group>
-        </b-form-group>
+    <b-row>
+      <b-col>
+        <TableFilter 
+          :filterPossibilities="filterOptions"
+          v-model="filter"
+        ></TableFilter>
       </b-col>
     </b-row>
 
@@ -120,9 +100,7 @@
                 customClass: 'uuidPopover',
                 trigger: 'hover',
                 html: true,
-                content: [data.value.state.InspectedCiphersuite, data.value.state.AdditionalTestInformation, data.value.state.TransformationDescription]
-                .filter(i => i)
-                .join('<br/>')
+                content: data.value.state.DisplayName
               }"
               @click="uuidColumnClicked(data.item, $event)"
             >{{data.value.value}}</span>
@@ -152,6 +130,9 @@
 import * as stateview from '@/lib/stateview'
 import VueJsonPretty from 'vue-json-pretty'
 import { allStatus } from '../lib/const';
+import { FilterInputModels } from "@/lib/filter/filterInputModels";
+import TableFilter from '@/components/TableFilter'
+import { filter } from "@/lib/filter/filter"
 
 export default {
   name: "StateView",
@@ -163,12 +144,9 @@ export default {
       methodName: null,
       testMethod: null,
       guardNavigation: 0,
-      options: {
-        hightlight: stateview.hightlightOptions,
-        status: allStatus,
-        difference: stateview.differenceFilterOptions
-      },
-      filter: stateview.filterObj,
+      filterInputModel: FilterInputModels.states,
+      filter: [],
+      derivationFilters: null,
       hightlightOption: null, 
       selectedRow: {},
       selectedColumn: [],
@@ -186,6 +164,15 @@ export default {
           key: "dummy",
           label: "",
         }
+      ]
+    }
+  },
+  computed: {
+    filterOptions() {
+      const additional = this.derivationFilters ? this.derivationFilters : []
+      return [
+        ...this.filterInputModel,
+        ...additional
       ]
     }
   },
@@ -232,6 +219,8 @@ export default {
       })
 
       const promises = []
+      const derivations = new Set()
+      const derivationValues = {}
       for (const i of newIdentifiers) {
         const p = this.$http.get(`testReport/${i}/testResult/${this.className}/${this.methodName}`).then((res) => {
           console.log(`finished req ${i}`)
@@ -239,6 +228,19 @@ export default {
           this.testResults.push(res.data)
           if (!this.testMethod && res.data.TestMethod) {
             this.testMethod = res.data.TestMethod
+          }
+
+          if (res.data.States) {
+            for (const s of res.data.States) {
+              if (!s.DerivationContainer) continue;
+              for (const d in s.DerivationContainer) {
+                derivations.add(d)
+                if (!derivationValues[d]) {
+                  derivationValues[d] = new Set()
+                }
+                derivationValues[d].add(s.DerivationContainer[d])
+              }
+            }
           }
         }).catch((e) => {
           console.error(e)
@@ -248,6 +250,37 @@ export default {
       }
 
       Promise.all(promises).then(() => {
+        this.derivationFilters = []
+        for (const derivation of derivations) {
+          let comparator = FilterInputModels.Comparator.constants
+          const values = Array.from(derivationValues[derivation])
+          values.sort()
+          if (derivation.toLocaleLowerCase() == "ciphersuite") {
+            comparator = ["==", "!=", "contains", "!contains"]
+          } else if (!isNaN(values[0])) {
+            comparator = FilterInputModels.Comparator.all
+            values.sort((i,j) =>{
+              const ni = parseInt(i)
+              const nj = parseInt(j)
+              if (ni == nj) return 0
+              if (ni < nj) return -1
+              if (ni > nj) return 1
+            })
+            
+          }
+
+          this.derivationFilters.push({
+            key: {
+              type: 'derivation',
+              mode: derivation
+            },
+            displayName: derivation,
+            type: 'selector',
+            values: values,
+            comparators: comparator
+          })
+        }
+
         this.$refs.table.refresh()
       })
     },
@@ -256,6 +289,13 @@ export default {
       const start = new Date().getTime()
       try {
         const res = stateview.itemProvider(ctx, this.testResults)
+        for (let i = 0; i < res.length; i++) {
+          const row = res[i]
+          if (!filter(this.filterOptions, this.filter, row)) {
+            res.splice(i, 1)
+            i--;
+          }
+        }
         console.log(`Finished in ${new Date().getTime() - start}ms (${res.length})`)
         this.currentlyVisibleRows = res
         return res
@@ -302,16 +342,18 @@ export default {
       const identifier = field.key
       const result = this.testResults.filter(i => i.Identifier == identifier)[0]
       let states = result.States
+      console.log(this.currentlyVisibleRows)
       if (this.currentlyVisibleRows) {
         states = []
         for (const row of this.currentlyVisibleRows) {
-          if (row[identifier] && row[identifier].Status)
+          if (row[identifier] && row[identifier].Result)
             states.push(row[identifier])
         }
       }
 
       states.map((i) => i.Identifier = identifier)
-
+      console.log(result)
+      this.failureInducingCombinations = result.FailureInducingCombinations
       this.selectedColumn = states
       this.detailsMode = 1
       this.showDetails = true
@@ -343,6 +385,7 @@ export default {
       if (!sameSelection || className !== this.className || methodName !== this.methodName) {
         this.testResults = []
         this.testMethod = null
+        this.derivationFilters = null
         if (this.fields.length > 2) {
           this.fields.splice(1, this.fields.length - 2)
         }
@@ -358,7 +401,7 @@ export default {
       this.$http.get(`/testReport/${selectedCell.ContainerId}/testResult/${this.className}/${this.methodName}/${selectedCell.uuid}/pcap`).then((res) => {
         target.innerHTML = `<div class="packetWrapper">${res.data}</div>`
         ev.target.hidden = true
-      }).catch(e => {
+      }).catch(() => {
         ev.target.innerHTML = "Error..."
         ev.target.disabled = false
       })
@@ -412,7 +455,8 @@ export default {
     this.updateParameters(this.$route)
   },
   components: {
-    VueJsonPretty
+    VueJsonPretty,
+    TableFilter
   }
 };
 </script>

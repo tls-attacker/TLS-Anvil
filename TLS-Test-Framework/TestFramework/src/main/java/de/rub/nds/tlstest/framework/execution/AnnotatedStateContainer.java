@@ -46,12 +46,16 @@ import java.util.stream.Collectors;
 public class  AnnotatedStateContainer {
     private static final Logger LOGGER = LogManager.getLogger();
     private boolean finished = false;
+    private final long startTime = System.currentTimeMillis();
+    private int resultRaw = 0;
+    private String uniqueId;
 
     @XmlElement(name = "TestMethod")
     @JsonProperty("TestMethod")
     private TestMethodConfig testMethodConfig;
 
-    private int resultRaw = 0;
+    @JsonProperty("Result")
+    private TestResult result;
 
     @XmlElement(name = "DisabledReason")
     @JsonProperty("DisabledReason")
@@ -65,6 +69,12 @@ public class  AnnotatedStateContainer {
     @JsonProperty("ElapsedTime")
     private long elapsedTime = 0;
 
+    @JsonProperty("StatesCount")
+    private int statesCount;
+
+    @JsonProperty("FailureInducingCombinations")
+    List<DerivationContainer> failureInducingCombinations;
+
     @XmlElementWrapper(name = "States")
     @XmlElement(name = "State")
     @JsonProperty("States")
@@ -72,12 +82,6 @@ public class  AnnotatedStateContainer {
 
     @JsonUnwrapped
     private ScoreContainer scoreContainer;
-
-    private String uniqueId;
-
-    @JsonProperty("FailureInducingCombinations")
-    List<DerivationContainer> failureInducingCombinations;
-
 
     private AnnotatedStateContainer(ExtensionContext extensionContext) {
         this.uniqueId = extensionContext.getUniqueId();
@@ -114,6 +118,8 @@ public class  AnnotatedStateContainer {
     public void finished() {
         TestContext.getInstance().testFinished();
         finished = true;
+        elapsedTime = System.currentTimeMillis() - startTime;
+        statesCount = states.size();
         List<String> uuids = new ArrayList<>();
         List<Throwable> errors = new ArrayList<>();
         boolean failed = false;
@@ -180,13 +186,12 @@ public class  AnnotatedStateContainer {
 
     public void setResultRaw(int resultRaw) {
         this.resultRaw = resultRaw;
-        scoreContainer.updateForResult(getResult());
+        result = TestResult.resultForBitmask(resultRaw);
+        scoreContainer.updateForResult(result);
     }
 
-    @XmlElement(name = "Result")
-    @JsonProperty("Result")
     public TestResult getResult() {
-        return TestResult.resultForBitmask(resultRaw);
+        return result;
     }
 
     public TestMethodConfig getTestMethodConfig() {
@@ -207,10 +212,6 @@ public class  AnnotatedStateContainer {
 
     public Long getElapsedTime() {
         return elapsedTime;
-    }
-
-    public void setElapsedTime(Long elapsedTime) {
-        this.elapsedTime = elapsedTime;
     }
     
     private boolean anyStateSucceeded() {

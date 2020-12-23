@@ -12,6 +12,9 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
+import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
+import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -36,6 +39,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 
@@ -152,8 +156,9 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. " +
-            "The length MUST NOT exceed 2^14 + 2048.")
+    
+    @TlsTest(description = "The length (in bytes) of the following TLSPlaintext.fragment. " +
+            "The length MUST NOT exceed 2^14.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
@@ -165,10 +170,16 @@ public class Fragmentation extends Tls12Test {
 
         ApplicationMessage msg = new ApplicationMessage(c);
         msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
+        
+        Record overflowRecord = new Record();
+        overflowRecord.setCleanProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
+        //add dummy Application Message
+        SendAction sendOverflow = new SendAction(new ApplicationMessage(c));
+        sendOverflow.setRecords(overflowRecord);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
-                new SendAction(msg),
+                sendOverflow,
                 new ReceiveAction(new AlertMessage())
         );
 
@@ -180,8 +191,8 @@ public class Fragmentation extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "The length (in bytes) of the following TLSPlaintext.fragment. " +
-            "The length MUST NOT exceed 2^14.")
+    @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. " +
+            "The length MUST NOT exceed 2^14 + 2048.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
     public void sendRecordWithCiphertextOver2pow14plus1(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -190,12 +201,15 @@ public class Fragmentation extends Tls12Test {
         c.getDefaultClientConnection().setTimeout(5000);
         c.getDefaultServerConnection().setTimeout(5000);
 
-        ApplicationMessage msg = new ApplicationMessage(c);
-        msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 2049]));
-
+        Record overflowRecord = new Record();
+        overflowRecord.setProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 2049]));
+        //add dummy Application Message
+        SendAction sendOverflow = new SendAction(new ApplicationMessage(c));
+        sendOverflow.setRecords(overflowRecord);
+        
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
-                new SendAction(msg),
+                sendOverflow,
                 new ReceiveAction(new AlertMessage())
         );
 
@@ -205,5 +219,5 @@ public class Fragmentation extends Tls12Test {
             if (alert == null) return;
             Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW, alert);
         });
-    }
+    }  
 }

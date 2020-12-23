@@ -135,9 +135,9 @@ public class RecordProtocol extends Tls13Test {
     }
 
     @TlsTest(description = "The length (in bytes) of the following " +
-            "TLSPlaintext.fragment. The length MUST NOT exceed 2^14 + 256 bytes. " +
-            "An endpoint that receives a record that exceeds this " +
-            "length MUST terminate the connection with a \"record_overflow\" alert.")
+            "TLSPlaintext.fragment.  The length MUST NOT exceed 2^14 bytes.  An " +
+            "endpoint that receives a record that exceeds this length MUST " +
+            "terminate the connection with a \"record_overflow\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.HIGH)
     @RFC(number = 8446, section = "5.1. Record Layer")
@@ -149,11 +149,14 @@ public class RecordProtocol extends Tls13Test {
         c.getDefaultServerConnection().setTimeout(5000);
 
         ApplicationMessage msg = new ApplicationMessage(c);
-        msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
+        Record overflowRecord = new Record();
+        overflowRecord.setCleanProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
+        SendAction sendOverflow = new SendAction(msg);
+        sendOverflow.setRecords(overflowRecord);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
-                new SendAction(msg),
+                sendOverflow,
                 new ReceiveAction(new AlertMessage())
         );
 
@@ -218,12 +221,15 @@ public class RecordProtocol extends Tls13Test {
         c.getDefaultClientConnection().setTimeout(5000);
         c.getDefaultServerConnection().setTimeout(5000);
 
-        ApplicationMessage msg = new ApplicationMessage(c);
-        msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 266]));
+        Record overflowRecord = new Record();
+        overflowRecord.setProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 257]));
+        //add dummy Application Message
+        SendAction sendOverflow = new SendAction(new ApplicationMessage(c));
+        sendOverflow.setRecords(overflowRecord);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
-                new SendAction(msg),
+                sendOverflow,
                 new ReceiveAction(new AlertMessage())
         );
 

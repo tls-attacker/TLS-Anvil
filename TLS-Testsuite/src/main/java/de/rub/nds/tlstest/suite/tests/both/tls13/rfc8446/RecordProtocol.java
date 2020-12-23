@@ -142,7 +142,7 @@ public class RecordProtocol extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @RFC(number = 8446, section = "5.1. Record Layer")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    public void sendRecordWithPlaintextOver2pow14plus1(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.getDefaultClientConnection().setTimeout(5000);
@@ -215,7 +215,7 @@ public class RecordProtocol extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
-    public void sendRecordWithCiphertextOver2pow14plus1(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendRecordWithCiphertextOver2pow14plus256(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.getDefaultClientConnection().setTimeout(5000);

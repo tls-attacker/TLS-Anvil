@@ -162,7 +162,7 @@ public class Fragmentation extends Tls12Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
-    public void sendRecordWithPlaintextOver2pow14plus1(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.getDefaultClientConnection().setTimeout(5000);
@@ -195,7 +195,7 @@ public class Fragmentation extends Tls12Test {
             "The length MUST NOT exceed 2^14 + 2048.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
-    public void sendRecordWithCiphertextOver2pow14plus1(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendRecordWithCiphertextOver2pow14plus2048(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         c.getDefaultClientConnection().setTimeout(5000);

@@ -17,18 +17,23 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
@@ -40,7 +45,12 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import org.junit.jupiter.api.Tag;
@@ -184,6 +194,52 @@ public class ServerHello extends Tls13Test {
             }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
+    }
+    
+    public List<DerivationParameter> getUnsupportedProtocolVersions() {
+        SupportedVersionsExtensionMessage clientSupportedVersions = TestContext.getInstance().getReceivedClientHelloMessage().getExtension(SupportedVersionsExtensionMessage.class);
+        List<DerivationParameter> parameterValues = new LinkedList<>();
+        getUnsupportedTlsVersions(clientSupportedVersions).forEach(version -> parameterValues.add(new ProtocolVersionDerivation(version.getValue())));
+        return parameterValues;
+    }
+    
+    private List<ProtocolVersion> getUnsupportedTlsVersions(SupportedVersionsExtensionMessage clientSupportedVersions) {
+        //negotiating SSL3 is a separate test
+        List<ProtocolVersion> versions = new LinkedList<>();
+        versions.add(ProtocolVersion.TLS10);
+        versions.add(ProtocolVersion.TLS11);
+        versions.add(ProtocolVersion.TLS12);
+        
+        byte[] supportedVersions = clientSupportedVersions.getSupportedVersions().getValue();
+        int versionLength = clientSupportedVersions.getSupportedVersionsLength().getValue();
+        
+        for(int i = 0; i < versionLength; i+=2) {
+            ProtocolVersion version = ProtocolVersion.getProtocolVersion(Arrays.copyOfRange(supportedVersions, i, i + 2));
+            versions.remove(version);
+        }
+        
+        return versions;
+    }
+    
+    @TlsTest(description = "TLS 1.3 clients receiving a ServerHello indicating TLS 1.2 or below MUST " +
+            "check that the last 8 bytes are not equal to either of these values. " +
+            "If a match is found, the client MUST abort the handshake " +
+            "with an \"illegal_parameter\" alert.")
+    @Security(SeverityLevel.HIGH)
+    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getUnsupportedProtocolVersions")
+    @KeyExchange(supported = KeyExchangeType.ALL12)
+    public void selectUnsupportedProtocolVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+        byte[] oldProtocolVersion = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();
+        
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
+        ServerHelloMessage serverHello = new ServerHelloMessage(config);
+        serverHello.setProtocolVersion(Modifiable.explicit(oldProtocolVersion));
+        workflowTrace.addTlsAction(new SendAction(serverHello));
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        
+        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
 }

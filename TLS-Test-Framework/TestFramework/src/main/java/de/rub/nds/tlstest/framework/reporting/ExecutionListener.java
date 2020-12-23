@@ -41,7 +41,6 @@ public class ExecutionListener implements TestExecutionListener {
 
     private long start;
 
-    private Map<String, Long> testElapsedTimes = new HashMap<>();
     private Map<String, Long> containerElapsedTimes = new HashMap<>();
 
     @Override
@@ -155,9 +154,7 @@ public class ExecutionListener implements TestExecutionListener {
     @Override
     public void executionStarted(TestIdentifier testIdentifier) {
         LOGGER.trace(testIdentifier.getDisplayName() + " started");
-        if (testIdentifier.isTest()) {
-            testElapsedTimes.put(testIdentifier.getUniqueId(), System.currentTimeMillis());
-        } else if (testIdentifier.isContainer()) {
+        if (testIdentifier.isContainer()) {
             containerElapsedTimes.put(testIdentifier.getUniqueId(), System.currentTimeMillis());
         }
     }
@@ -165,17 +162,7 @@ public class ExecutionListener implements TestExecutionListener {
     @Override
     public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
         LOGGER.trace(testIdentifier.getDisplayName() + " finished");
-        if (testIdentifier.isTest()) {
-            Long startTime = testElapsedTimes.get(testIdentifier.getUniqueId());
-            if (startTime != null) {
-                long elapsedTime = System.currentTimeMillis() - startTime;
-                AnnotatedStateContainer result = TestContext.getInstance().getTestResults().get(testIdentifier.getUniqueId());
-                if (result != null)
-                    result.setElapsedTime(elapsedTime);
-
-                testElapsedTimes.remove(testIdentifier.getUniqueId());
-            }
-        } else if (testIdentifier.isContainer()) {
+        if (testIdentifier.isContainer()) {
             Long startTime = containerElapsedTimes.get(testIdentifier.getUniqueId());
             if (startTime != null) {
                 long elapsedTime = System.currentTimeMillis() - startTime;

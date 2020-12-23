@@ -19,11 +19,6 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
-import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurve;
-import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurveSECP256R1;
-import de.rub.nds.tlsattacker.core.crypto.ec.Point;
-import de.rub.nds.tlsattacker.core.crypto.ec.PointFormatter;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareStoreEntry;
 import de.rub.nds.tlsscanner.serverscanner.report.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
@@ -60,7 +55,7 @@ public class TestConfig extends TLSDelegateConfig {
     private Callable<Integer> timeoutActionScript;
 
 
-    @Parameter(names = "-tags", description = "Run only tests containing on of the specified tags", variableArity = true)
+    @Parameter(names = "-tags", description = "Run only tests containing on of the specified tags")
     private List<String> tags = new ArrayList<>();
 
     @Parameter(names = "-testPackage", description = "Run only tests included in the specified package")
@@ -76,8 +71,11 @@ public class TestConfig extends TLSDelegateConfig {
     @Parameter(names = "-outputFormat", description = "Defines the format of the output. Supported: xml or json")
     private String outputFormat = "";
 
-    @Parameter(names = "-parallel", description = "How many TLS-Handshakes should be executed in parallel? (Default value: 5)")
-    private int parallel = 5;
+    @Parameter(names = "-parallelHandshakes", description = "How many TLS-Handshakes should be executed in parallel? (Default value: 5)")
+    private int parallelHandshakes = 5;
+
+    @Parameter(names = "-parallelTests", description = "How many tests should be executed in parallel? (Default value: parallelHandshakes * 1.5)")
+    private Integer parallelTests = null;
 
     @Parameter(names = "-timeoutActionScript", description = "Script to execute, if the execution of the testsuite " +
             "seems to make no progress", variableArity = true)
@@ -221,6 +219,11 @@ public class TestConfig extends TLSDelegateConfig {
             throw new ParameterException(e);
         }
 
+        parallelHandshakes = Math.min(parallelHandshakes, Runtime.getRuntime().availableProcessors());
+        if (parallelTests == null) {
+            parallelTests = (int)Math.ceil(parallelHandshakes * 1.5);
+        }
+
         parsedArgs = true;
     }
 
@@ -279,7 +282,7 @@ public class TestConfig extends TLSDelegateConfig {
         Config config = super.createConfig();
 
         // Server test -> TLS-Attacker acts as Client
-        config.getDefaultClientConnection().setFirstTimeout((parallel + 1) * 1000);
+        config.getDefaultClientConnection().setFirstTimeout((parallelHandshakes + 1) * 1000);
         config.getDefaultClientConnection().setTimeout(1000);
         config.getDefaultClientConnection().setConnectionTimeout(0);
 
@@ -408,12 +411,12 @@ public class TestConfig extends TLSDelegateConfig {
         return parsedArgs;
     }
 
-    public int getParallel() {
-        return parallel;
+    public int getParallelHandshakes() {
+        return parallelHandshakes;
     }
 
-    public void setParallel(int parallel) {
-        this.parallel = parallel;
+    public void setParallelHandshakes(int parallelHandshakes) {
+        this.parallelHandshakes = parallelHandshakes;
     }
 
     public List<ProtocolVersion> getSupportedVersions() {
@@ -450,5 +453,13 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public int getParallelTests() {
+        return parallelTests;
+    }
+
+    public void setParallelTests(int parallelTests) {
+        this.parallelTests = parallelTests;
     }
 }

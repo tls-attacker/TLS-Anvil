@@ -79,6 +79,9 @@ public class TestResultContainer {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String additionalInformation;
 
+    @JsonProperty("StatesCount")
+    private int statesCount = 0;
+
 
     @JsonUnwrapped
     private ScoreContainer scoreContainer = ScoreContainer.forEveryCategory();
@@ -217,6 +220,8 @@ public class TestResultContainer {
                 this.testsDisabled++;
                 break;
         }
+
+        statesCount += result.getStates().size();
 
         for (TestCategory i : result.getScoreContainer().getScoreMap().keySet()) {
             scoreContainer.getScoreMap().get(i).setReached(scoreContainer.getScoreMap().get(i).getReached() + result.getScoreContainer().getScoreMap().get(i).getReached());

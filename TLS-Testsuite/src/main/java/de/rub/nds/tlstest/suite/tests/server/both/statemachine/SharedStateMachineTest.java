@@ -20,6 +20,7 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 public class SharedStateMachineTest {
     
     public static void sharedBeginWithApplicationDataTest(Config config, WorkflowRunner runner) {
+        runner.setPreparedConfig(config);
         config.setDefaultApplicationMessageData("Test");
         WorkflowTrace workflowTrace = new WorkflowTrace();
         ApplicationMessage applicationMessage = new ApplicationMessage(config);
@@ -29,6 +30,7 @@ public class SharedStateMachineTest {
     }
     
     public static void sharedBeginWithChangeCipherSpecTest(Config config, WorkflowRunner runner) {
+       runner.setPreparedConfig(config);
        WorkflowTrace workflowTrace = new WorkflowTrace();
        workflowTrace.addTlsAction(new SendAction(new ChangeCipherSpecMessage()));
        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
@@ -36,6 +38,7 @@ public class SharedStateMachineTest {
     }
     
     public static void sharedBeginWithFinishedTest(Config config, WorkflowRunner runner) {
+        runner.setPreparedConfig(config);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsAction(new SendAction(new FinishedMessage(config)));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));

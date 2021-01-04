@@ -85,7 +85,9 @@ public class TestConfig extends TLSDelegateConfig {
             "Defaults to the hostname of the target or the port. The identifier is visible in the test report.")
     private String identifier = null;
 
-
+    @Parameter(names = "-strength", description = "Strength of the pairwise test. (Default value: 4)")
+    private int strength = 4;
+    
     public TestConfig() {
         super(new GeneralDelegate());
         this.testServerDelegate = new TestServerDelegate();
@@ -461,5 +463,13 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setParallelTests(int parallelTests) {
         this.parallelTests = parallelTests;
+    }
+
+    public int getStrength() {
+        return strength;
+    }
+
+    public void setStrength(int strength) {
+        this.strength = strength;
     }
 }

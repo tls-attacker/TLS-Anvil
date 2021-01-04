@@ -542,7 +542,8 @@ public class TestRunner {
 
         LOGGER.info("Server tests, TLS 1.2: {}, TLS 1.3: {}", serverTls12 + bothTls12, serverTls13 + bothTls13);
         LOGGER.info("Client tests, TLS 1.2: {}, TLS 1.3: {}", clientTls12 + bothTls12, clientTls13 + bothTls13);
-
+        LOGGER.info("Testing using strength " + TestContext.getInstance().getConfig().getStrength());
+        logCommonDerivationValues();
         testContext.setTotalTests(testcases);
         long start = System.currentTimeMillis();
 
@@ -600,5 +601,16 @@ public class TestRunner {
             }
         }
         return states;
+    }
+    
+    private void logCommonDerivationValues() {
+        LOGGER.info("Supported NamedGroups:  " + TestContext.getInstance().getSiteReport().getSupportedNamedGroups().stream().map(NamedGroup::toString).collect(Collectors.joining(",")));
+        LOGGER.info("Supported CipherSuites: " + TestContext.getInstance().getSiteReport().getCipherSuites().stream().map(CipherSuite::toString).collect(Collectors.joining(",")));
+        if(TestContext.getInstance().getSiteReport().getSupportedTls13Groups() != null) {
+            LOGGER.info("Supported TLS 1.3 NamedGroups: " + TestContext.getInstance().getSiteReport().getSupportedTls13Groups().stream().map(NamedGroup::toString).collect(Collectors.joining(",")));
+        }
+        if(TestContext.getInstance().getSiteReport().getSupportedTls13CipherSuites() != null) {
+            LOGGER.info("Supported TLS 1.3 CipherSuites: " + TestContext.getInstance().getSiteReport().getSupportedTls13CipherSuites().stream().map(CipherSuite::toString).collect(Collectors.joining(",")));
+        }
     }
 }

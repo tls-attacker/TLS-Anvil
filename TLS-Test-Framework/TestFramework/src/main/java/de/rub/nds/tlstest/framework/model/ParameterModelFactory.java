@@ -38,7 +38,7 @@ public class ParameterModelFactory {
         Parameter.Builder[] builders = getModelParameters(derivationTypes, testContext, derivationScope);
         Constraint[] constraints = getModelConstraints(derivationTypes, derivationScope);
 
-        return inputParameterModel("dynamic-model").strength(2).parameters(builders).exclusionConstraints(constraints).build();
+        return inputParameterModel("dynamic-model").strength(TestContext.getInstance().getConfig().getStrength()).parameters(builders).exclusionConstraints(constraints).build();
     }
 
     public static List<DerivationType> getDerivationsForScope(DerivationScope derivationScope) {

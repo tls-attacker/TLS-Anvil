@@ -113,7 +113,10 @@ public class Validator {
         if (executedAsPlanned)
             return;
 
-        TcpFragmentationDerivation tcpFragmentation = state.getDerivationContainer().getDerivation(TcpFragmentationDerivation.class);
+        TcpFragmentationDerivation tcpFragmentation = null;
+        if(state.getDerivationContainer() != null) {
+            tcpFragmentation = state.getDerivationContainer().getDerivation(TcpFragmentationDerivation.class);
+        }
         boolean onlyCheckActionsBeforeLastSendingFlight = tcpFragmentation != null && tcpFragmentation.getSelectedValue();
 
         List<TlsAction> tlsActions = trace.getTlsActions();

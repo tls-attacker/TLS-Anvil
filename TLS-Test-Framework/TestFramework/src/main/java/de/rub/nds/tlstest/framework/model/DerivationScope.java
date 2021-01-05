@@ -10,6 +10,7 @@
 package de.rub.nds.tlstest.framework.model;
 
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
@@ -33,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import de.rub.nds.tlstest.framework.annotations.ExplicitModelingConstraints;
+import de.rub.nds.tlstest.framework.annotations.TestStrength;
 
 /**
  * Defines which TLS parameters are used for the test derivation and how they
@@ -48,6 +50,7 @@ public class DerivationScope {
     private final Map<DerivationType, String> explicitModelingConstraints;
     private final ExtensionContext extensionContext;
     private final Set<DerivationType> manualConfigTypes;
+    private final int testStrength;
   
     public DerivationScope(ExtensionContext context) {
         this.keyExchangeRequirements = (KeyX)KeyX.resolveKexAnnotation(context);
@@ -58,6 +61,7 @@ public class DerivationScope {
         this.explicitModelingConstraints = resolveExplicitModelingConstraints(context);
         this.manualConfigTypes = resolveManualConfigTypes(context);
         this.extensionContext = context;
+        this.testStrength = resolveTestStrength(context);
     }
     
     public DerivationScope(ExtensionContext context, ModelFromScope modelFromScope) {
@@ -189,6 +193,15 @@ public class DerivationScope {
         return manualConfigTypes;
     }
     
+    private int resolveTestStrength(ExtensionContext context) {
+        Method testMethod = context.getRequiredTestMethod();
+        if(testMethod.isAnnotationPresent(TestStrength.class)) {
+            TestStrength testStrength = testMethod.getAnnotation(TestStrength.class); 
+            return testStrength.value();
+        }
+        return TestContext.getInstance().getConfig().getStrength();
+    }
+    
     public boolean hasExplicitValues(DerivationType type) {
         return explicitValues.containsKey(type);
     }
@@ -237,4 +250,9 @@ public class DerivationScope {
     public Map<DerivationType, String> getExplicitTypeValues() {
         return explicitValues;
     }
+
+    public int getTestStrength() {
+        return testStrength;
+    }
+    
 }

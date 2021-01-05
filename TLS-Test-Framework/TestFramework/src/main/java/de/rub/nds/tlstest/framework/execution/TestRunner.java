@@ -542,7 +542,7 @@ public class TestRunner {
 
         LOGGER.info("Server tests, TLS 1.2: {}, TLS 1.3: {}", serverTls12 + bothTls12, serverTls13 + bothTls13);
         LOGGER.info("Client tests, TLS 1.2: {}, TLS 1.3: {}", clientTls12 + bothTls12, clientTls13 + bothTls13);
-        LOGGER.info("Testing using strength " + TestContext.getInstance().getConfig().getStrength());
+        LOGGER.info("Testing using default strength " + TestContext.getInstance().getConfig().getStrength());
         logCommonDerivationValues();
         testContext.setTotalTests(testcases);
         long start = System.currentTimeMillis();

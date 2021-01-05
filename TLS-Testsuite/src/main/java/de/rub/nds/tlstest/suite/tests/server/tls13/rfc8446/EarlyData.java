@@ -94,7 +94,7 @@ public class EarlyData extends Tls13Test {
     }
 
     @TlsTest(description = "If the server supplies an \"early_data\" extension, the client MUST"
-            + "verify that the server's selected_identity is 0.") //todo: does this suffice as an implicit instruction for the server?
+            + "verify that the server's selected_identity is 0.") 
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "supports0rtt")
     @Interoperability(SeverityLevel.HIGH)

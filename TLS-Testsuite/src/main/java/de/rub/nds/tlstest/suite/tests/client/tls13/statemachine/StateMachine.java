@@ -10,6 +10,7 @@
 package de.rub.nds.tlstest.suite.tests.client.tls13.statemachine;
 
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -17,6 +18,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.DHEServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.EndOfEarlyDataMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
@@ -31,6 +33,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -178,5 +181,22 @@ public class StateMachine extends Tls13Test {
     public void sendServerHelloTwice(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner);   
+    }
+    
+    @RFC(number = 8446, section = "4.5. End of Early Data")
+    @TlsTest(description = "Servers MUST NOT send this message, and clients receiving it MUST" +
+            "terminate the connection with an \"unexpected_message\" alert.")
+    @Interoperability(SeverityLevel.LOW)
+    public void sendEndOfEarlyDataAsServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.FINISHED);
+        workflowTrace.addTlsAction(new SendAction(new EndOfEarlyDataMessage()));
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        
+        runner.execute(workflowTrace, config).validateFinal(i -> { 
+            Validator.receivedFatalAlert(i);
+            AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, msg);
+        });
     }
 }

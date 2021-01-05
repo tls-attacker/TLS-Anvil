@@ -13,6 +13,7 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
@@ -20,6 +21,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PaddingExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -49,9 +51,13 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivati
 import de.rub.nds.tlstest.framework.model.derivationParameter.mirrored.MirroredCipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.tests.client.tls13.rfc8701.ServerInitiatedExtensionPoints;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.junit.Assert;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -307,5 +313,73 @@ public class HelloRetryRequest extends Tls13Test {
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
         
         return workflowTrace;
+    }
+    
+    @RFC(number = 8446, section = "4.1.2 Client Hello")
+    @TlsTest(description = "The client will also send a\n" +
+            "ClientHello when the server has responded to its ClientHello with a " +
+            "HelloRetryRequest. In that case, the client MUST send the same " +
+            "ClientHello without modification, except as follows: [...]")
+    @Interoperability(SeverityLevel.MEDIUM)
+    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    public void helloRetryIsUnmodifiedExceptAllowed(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
+        
+        runner.execute(trace, c).validateFinal(i -> {
+            WorkflowTrace executedTrace = i.getWorkflowTrace();
+            Validator.executedAsPlanned(i);
+            
+            ClientHelloMessage firstClientHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstReceivedMessage(HandshakeMessageType.CLIENT_HELLO, trace);
+            ClientHelloMessage retryClientHello = (ClientHelloMessage) WorkflowTraceUtil.getLastReceivedMessage(HandshakeMessageType.CLIENT_HELLO, trace);
+            assertTrue("Did not receive two Client Hello messages", firstClientHello != null && retryClientHello != null && firstClientHello != retryClientHello);
+            testIfExtensionsAreEqual(firstClientHello, retryClientHello);
+            testIfClientHelloFieldsAreEqual(firstClientHello, retryClientHello);
+        });
+    }
+    
+    private void testIfExtensionsAreEqual(ClientHelloMessage firstClientHello, ClientHelloMessage retryClientHello) {
+        // the client MUST send the same ClientHello without modification, except as follows:
+        // -If a "key_share" extension was supplied in the HelloRetryRequest, replacing the list of shares with a list containing a single
+        //  KeyShareEntry from the indicated group.
+        // (-Including a "cookie" extension if one was provided in the HelloRetryRequest)
+        // -Updating the "pre_shared_key" extension if present by recomputing the "obfuscated_ticket_age" and binder values
+        //  and (optionally) removing any PSKs which are incompatible with the server’s indicated cipher suite.
+        // -Optionally adding, removing, or changing the length of the "padding" extension
+        List<ExtensionType> extensionsInSecondHello = new LinkedList<>();
+        retryClientHello.getExtensions().forEach(extension -> extensionsInSecondHello.add(extension.getExtensionTypeConstant()));
+        for(ExtensionMessage extension : firstClientHello.getExtensions()) {
+            
+            assertTrue("Extensions List not equal - second Client Hello did not contain " + extension.getExtensionTypeConstant(), retryClientHello.containsExtension(extension.getExtensionTypeConstant()) 
+                    || extension.getExtensionTypeConstant() == ExtensionType.PADDING
+                    || extension.getExtensionTypeConstant() == ExtensionType.EARLY_DATA
+                    || extension.getExtensionTypeConstant() == ExtensionType.COOKIE
+                    || extension.getExtensionTypeConstant() == ExtensionType.PRE_SHARED_KEY);
+
+            if(extension.getExtensionTypeConstant() != ExtensionType.KEY_SHARE 
+                    && extension.getExtensionTypeConstant() != ExtensionType.PADDING
+                    && extension.getExtensionTypeConstant() != ExtensionType.PRE_SHARED_KEY
+                    && extension.getExtensionTypeConstant() != ExtensionType.EARLY_DATA
+                    && extension.getExtensionTypeConstant() != ExtensionType.COOKIE) {
+                assertTrue("Extension " + extension.getExtensionTypeConstant() + " is not identical to second Client Hello", Arrays.equals(extension.getExtensionBytes().getValue(), retryClientHello.getExtension(extension.getClass()).getExtensionBytes().getValue()));
+            }
+            extensionsInSecondHello.remove(extension.getExtensionTypeConstant());
+        }
+        
+        //only these extensions may be added to retry Hello
+        //we are not requesting a cookie value
+        if(extensionsInSecondHello.size() > 0) {
+            extensionsInSecondHello.remove(ExtensionType.PADDING);
+            extensionsInSecondHello.remove(ExtensionType.KEY_SHARE);
+        }
+        assertTrue("Second Client Hello contained additional Extensions: " + extensionsInSecondHello.stream().map(ExtensionType::toString).collect(Collectors.joining(",")), extensionsInSecondHello.isEmpty());
+    }
+    
+    private void testIfClientHelloFieldsAreEqual(ClientHelloMessage firstClientHello, ClientHelloMessage retryClientHello) {
+        assertTrue("Offered CipherSuites are not identical", Arrays.equals(firstClientHello.getCipherSuites().getValue(), retryClientHello.getCipherSuites().getValue()));
+        assertTrue("Offered CompressionList lengths are not identical", firstClientHello.getCompressionLength().getValue().equals(retryClientHello.getCompressionLength().getValue()));
+        assertTrue("Selected ClientRandoms are not identical", Arrays.equals(firstClientHello.getRandom().getValue(), retryClientHello.getRandom().getValue())); 
+        assertTrue("Selected ProtocolVersions are not identical", Arrays.equals(firstClientHello.getProtocolVersion().getValue(), retryClientHello.getProtocolVersion().getValue()));
+        assertTrue("TLS 1.3 compatibility SessionIDs are not identical", Arrays.equals(firstClientHello.getSessionId().getValue(), retryClientHello.getSessionId().getValue()));
     }
 }

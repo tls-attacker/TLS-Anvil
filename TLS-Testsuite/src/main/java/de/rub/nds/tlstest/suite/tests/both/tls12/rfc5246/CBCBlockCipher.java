@@ -91,11 +91,11 @@ public class CBCBlockCipher extends Tls12Test {
 
     }
 
-    @TlsTest(description = "The padding length MUST be such that the total size of the " +
-            "GenericBlockCipher structure is a multiple of the cipher’s block " +
-            "length. Legal values range from zero to 255, inclusive. This " +
-            "length specifies the length of the padding field exclusive of the " +
-            "padding_length field itself.")
+    @TlsTest(description = "bad_record_mac - [...] This alert also MUST be returned if an alert is sent because " +
+            "a TLSCiphertext decrypted in an invalid way: either it wasn’t an " +
+            "even multiple of the block length, or its padding values, when " +
+            "checked, weren’t correct.")
+    @RFC(number = 5446, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.CIPHERTEXT_BITMASK)
@@ -126,18 +126,22 @@ public class CBCBlockCipher extends Tls12Test {
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
-            if (msg == null || msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
-                throw new AssertionError("Received non expected alert message with invalid CBC padding");
+            if(msg != null && msg.getDescription().getValue() == AlertDescription.DECRYPTION_FAILED_RESERVED.getValue()) {
+                //7.2.2. Error Alerts - decryption_failed_RESERVED
+                //This alert was used in some earlier versions of TLS, and may have
+                //permitted certain attacks against the CBC mode [CBCATT]. It MUST
+                //NOT be sent by compliant implementations.
+                throw new AssertionError("Target sent deprecated decryption_failed_RESERVERD alert in response to invalid Ciphertext");
+            } else if (msg == null || msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
+                throw new AssertionError("Received non expected alert message with invalid Ciphertext");
             }
         });
     }
 
 
-    @TlsTest(description = "The padding length MUST be such that the total size of the " +
-            "GenericBlockCipher structure is a multiple of the cipher’s block " +
-            "length. Legal values range from zero to 255, inclusive. This " +
-            "length specifies the length of the padding field exclusive of the " +
-            "padding_length field itself.")
+    @TlsTest(description = "bad_record_mac - This alert is returned if a record is received with an incorrect " +
+            "MAC.")
+    @RFC(number = 5446, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.MAC_BITMASK)
@@ -168,7 +172,7 @@ public class CBCBlockCipher extends Tls12Test {
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
             if (msg == null || msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
-                throw new AssertionError("Received non expected alert message with invalid CBC padding");
+                throw new AssertionError("Received non expected alert message with invalid CBC MAC");
             }
         });
     }
@@ -186,11 +190,9 @@ public class CBCBlockCipher extends Tls12Test {
         return condConstraints;
     }
     
-    @TlsTest(description = "The padding length MUST be such that the total size of the " +
-            "GenericBlockCipher structure is a multiple of the cipher’s block " +
-            "length. Legal values range from zero to 255, inclusive. This " +
-            "length specifies the length of the padding field exclusive of the " +
-            "padding_length field itself.")
+    @TlsTest(description = "bad_record_mac - This alert is returned if a record is received with an incorrect " +
+            "MAC.")
+    @RFC(number = 5446, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.HIGH)
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
@@ -247,7 +249,7 @@ public class CBCBlockCipher extends Tls12Test {
                 AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
                 Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
                 if (msg == null || msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
-                    throw new AssertionError("Received non expected alert message with invalid CBC padding");
+                    throw new AssertionError("Received non expected alert message with invalid CBC MAC or Padding");
                 }
             }
         });

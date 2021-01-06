@@ -123,7 +123,12 @@ public class AlertProtocol extends Tls12Test {
             new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(i ->{
+            Validator.receivedFatalAlert(i);
+            if (Validator.socketClosed(i)) {
+                i.setResult(TestResult.SUCCEEDED);
+            }
+        });
     }
     
 
@@ -146,7 +151,12 @@ public class AlertProtocol extends Tls12Test {
                     new ReceiveAction(new AlertMessage())
         );
         
-        runner.execute(workflowTrace,c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace,c).validateFinal(i ->{
+            Validator.receivedFatalAlert(i);
+            if (Validator.socketClosed(i)) {
+                i.setResult(TestResult.SUCCEEDED);
+            }
+        });
     }
 }
 

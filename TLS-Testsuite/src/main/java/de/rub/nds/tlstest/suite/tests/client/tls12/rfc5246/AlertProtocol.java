@@ -104,7 +104,12 @@ public class AlertProtocol extends Tls12Test {
         SendAction serverHelloAction = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
         serverHelloAction.getSendMessages().add(0, alert);
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(i ->{
+            Validator.receivedFatalAlert(i);
+            if (Validator.socketClosed(i)) {
+                i.setResult(TestResult.SUCCEEDED);
+            }
+        });
     }
 
     @TlsTest
@@ -130,6 +135,11 @@ public class AlertProtocol extends Tls12Test {
             serverHelloAction.getSendMessages().add(serverHelloAction.getSendMessages().size() - 1, alert);
 
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(i ->{
+            Validator.receivedFatalAlert(i);
+            if (Validator.socketClosed(i)) {
+                i.setResult(TestResult.SUCCEEDED);
+            }
+        });
     }
 }

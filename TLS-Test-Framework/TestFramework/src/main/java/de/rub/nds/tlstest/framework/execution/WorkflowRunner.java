@@ -17,8 +17,10 @@ import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
+import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.state.State;
@@ -27,8 +29,10 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
+import de.rub.nds.tlsattacker.core.workflow.action.ResetConnectionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
@@ -88,13 +92,25 @@ public class WorkflowRunner {
      * @return
      */
     public AnnotatedState execute(WorkflowTrace trace, Config config) {
+        if(preparedConfig == null) {
+            LOGGER.warn("Config was not set before execution - WorkflowTrace may me invalid for Test:" + extensionContext.getRequiredTestMethod().getName());
+            preparedConfig = config;
+        }
+        
         if(shouldInsertHelloRetryRequest()) {
             insertHelloRetryRequest(trace, config.getDefaultSelectedNamedGroup());
         }
         
         if(shouldInsertNewSessionTicket()) {
-            insertNewSessionTicket(trace);
+            insertTls12NewSessionTicket(trace);
         }
+        
+        if(preparedConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13) {
+            allowOptionalTls13NewSessionTickets(trace);
+            disableQuickReceiveForTls13PostHandshakeServerTests(trace, config);
+        }
+        
+        allowOptionalClientApplicationMessage(trace);
         
         AnnotatedState annotatedState = new AnnotatedState(extensionContext, new State(config, trace), derivationContainer);
 
@@ -273,7 +289,7 @@ public class WorkflowRunner {
         return false;
     }
     
-    public void insertNewSessionTicket(WorkflowTrace trace) {
+    public void insertTls12NewSessionTicket(WorkflowTrace trace) {
         ReceiveAction receiveChangeCipherSpec = (ReceiveAction) WorkflowTraceUtil.getFirstReceivingActionForMessage(ProtocolMessageType.CHANGE_CIPHER_SPEC, trace);
         
         //not all WorkflowTraces reach a ChangeCipherSpec
@@ -297,6 +313,66 @@ public class WorkflowRunner {
         //OpenSSL sends  ChangeCipherSpec || ClientHello upon HelloRetry
         ((ReceiveAction)trace.getTlsActions().get(2)).getExpectedMessages().add(0, compatibilityCCS);        
     } 
+    
+    public void allowOptionalTls13NewSessionTickets(WorkflowTrace trace) {
+        boolean mayReceiveNewSessionTicketFromNow = false;
+        for(TlsAction action : trace.getTlsActions()) {
+            if(action instanceof ReceiveAction) {
+                ReceiveAction receiveAction = (ReceiveAction) action;
+                if(receiveAction.getExpectedMessages().stream().anyMatch(message -> message instanceof FinishedMessage)) {
+                    mayReceiveNewSessionTicketFromNow = true;
+                }
+                if(mayReceiveNewSessionTicketFromNow) {
+                    receiveAction.getActionOptions().add(ActionOption.IGNORE_UNEXPECTED_NEW_SESSION_TICKETS);
+                }
+            } else if(action instanceof ResetConnectionAction) {
+                mayReceiveNewSessionTicketFromNow = false;
+            }
+        }
+    }
+    
+    public void allowOptionalClientApplicationMessage(WorkflowTrace trace) {
+        if(context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
+            boolean mayReceiveApplicationDataFromNow = false;
+            for(TlsAction action : trace.getTlsActions()) {
+                if(action instanceof ReceiveAction) {
+                    ReceiveAction receiveAction = (ReceiveAction) action;
+                    if(receiveAction.getExpectedMessages().stream().anyMatch(message -> message instanceof FinishedMessage)) {
+                        mayReceiveApplicationDataFromNow = true;
+                    
+                        //only allow *after* Finished
+                        ApplicationMessage optionalAppMsg = new ApplicationMessage();
+                        optionalAppMsg.setRequired(false);
+                        receiveAction.getExpectedMessages().add(optionalAppMsg);
+                    } else {
+                        if(mayReceiveApplicationDataFromNow) {
+                            ApplicationMessage optionalAppMsg = new ApplicationMessage();
+                            optionalAppMsg.setRequired(false);
+                            receiveAction.getExpectedMessages().add(0, optionalAppMsg);
+                        }
+                    }
+                
+                } else if(action instanceof ResetConnectionAction) {
+                    mayReceiveApplicationDataFromNow = false;
+                }
+            }
+        }
+    }
+    
+    /**
+     * TLS 1.3 servers may always send a NewSessionTicket message first
+     * this could interfere with a Receive Action that waits for an Alert if
+     * quick receive is set in Config.
+     */
+    public void disableQuickReceiveForTls13PostHandshakeServerTests(WorkflowTrace trace, Config config) {
+        if(context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
+            List<ReceivingAction> receivingActions = trace.getReceivingActions();
+            ReceivingAction receiveFinished = (ReceivingAction) WorkflowTraceUtil.getFirstReceivingActionForMessage(HandshakeMessageType.FINISHED, trace);
+            if(receiveFinished != null && receivingActions.indexOf(receiveFinished) < receivingActions.size() - 1) {
+                config.setQuickReceive(false);
+            }
+        }
+    }
 
     public Boolean isAutoHelloRetryRequest() {
         return autoHelloRetryRequest;

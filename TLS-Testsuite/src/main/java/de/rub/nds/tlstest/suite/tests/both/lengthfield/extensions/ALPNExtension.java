@@ -33,7 +33,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class ALPNExtension extends TlsGenericTest {
     
     public ConditionEvaluationResult targetCanBeTested() {
-        if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER ||
+        if((TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER && TestContext.getInstance().getSiteReport().getSupportedExtensions() != null) ||
                 TestContext.getInstance().getSiteReport().getReceivedClientHello().containsExtension(ExtensionType.ALPN)) {
             return ConditionEvaluationResult.enabled("The Extension can be tested");
         }
@@ -50,8 +50,6 @@ public class ALPNExtension extends TlsGenericTest {
     public void alpnExtensionLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         config.setAddAlpnExtension(true);
-        config.setDefaultProposedAlpnProtocols("http/1.1", "spdy/1", "spdy/2", "spdy/3", "stun.turn",
-                "stun.nat-discovery", "h2", "h2c", "webrtc", "c-webrtc", "ftp", "imap", "pop3", "managesieve");
         genericExtensionLengthTest(runner, argumentAccessor, config, AlpnExtensionMessage.class);
     }
 
@@ -77,8 +75,6 @@ public class ALPNExtension extends TlsGenericTest {
     public void alpnExtensionLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddAlpnExtension(true);
-        config.setDefaultProposedAlpnProtocols("http/1.1", "spdy/1", "spdy/2", "spdy/3", "stun.turn",
-                "stun.nat-discovery", "h2", "h2c", "webrtc", "c-webrtc", "ftp", "imap", "pop3", "managesieve");
         genericExtensionLengthTest(runner, argumentAccessor, config, AlpnExtensionMessage.class);
     }
 
@@ -96,8 +92,6 @@ public class ALPNExtension extends TlsGenericTest {
 
     private void alpnExtensionProposedAlpnProtocolsLengthTest(Config versionBasedConfig, WorkflowRunner runner, ArgumentsAccessor argumentAccessor) {
         versionBasedConfig.setAddAlpnExtension(true);
-        versionBasedConfig.setDefaultProposedAlpnProtocols("http/1.1", "spdy/1", "spdy/2", "spdy/3", "stun.turn",
-                "stun.nat-discovery", "h2", "h2c", "webrtc", "c-webrtc", "ftp", "imap", "pop3", "managesieve");
         WorkflowTrace workflowTrace = setupLengthFieldTestForConfig(versionBasedConfig, runner, argumentAccessor);
         AlpnExtensionMessage alpnExtension = getTargetedExtension(AlpnExtensionMessage.class, workflowTrace);
         alpnExtension.setProposedAlpnProtocolsLength(Modifiable.add(10));

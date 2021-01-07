@@ -382,4 +382,18 @@ public class HelloRetryRequest extends Tls13Test {
         assertTrue("Selected ProtocolVersions are not identical", Arrays.equals(firstClientHello.getProtocolVersion().getValue(), retryClientHello.getProtocolVersion().getValue()));
         assertTrue("TLS 1.3 compatibility SessionIDs are not identical", Arrays.equals(firstClientHello.getSessionId().getValue(), retryClientHello.getSessionId().getValue()));
     }
+    
+    public List<DerivationParameter> getTls12CipherSuites() {
+        List<DerivationParameter> parameterValues = new LinkedList<>();
+        context.getSiteReport().getCipherSuites().forEach(cipherSuite -> parameterValues.add(new CipherSuiteDerivation(cipherSuite)));
+        return parameterValues;
+    }
+
+    @TlsTest(description = "Enforce a TLS 1.3 HelloRetryRequest but select a TLS 1.2 Cipher Suite")
+    @Interoperability(SeverityLevel.MEDIUM)
+    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getTls12CipherSuites")
+    public void helloRetryRequestsTls12CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        performHelloRetryRequestTest(argumentAccessor, runner);
+    }
 }

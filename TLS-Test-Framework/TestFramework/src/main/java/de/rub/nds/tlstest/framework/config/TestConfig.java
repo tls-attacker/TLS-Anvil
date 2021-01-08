@@ -324,7 +324,6 @@ public class TestConfig extends TLSDelegateConfig {
                 SignatureAndHashAlgorithm.RSA_SHA256,
                 SignatureAndHashAlgorithm.RSA_SHA384,
                 SignatureAndHashAlgorithm.RSA_SHA512,
-                SignatureAndHashAlgorithm.ED25519,
                 SignatureAndHashAlgorithm.ECDSA_SHA256,
                 SignatureAndHashAlgorithm.ECDSA_SHA384,
                 SignatureAndHashAlgorithm.ECDSA_SHA512

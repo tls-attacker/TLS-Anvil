@@ -159,6 +159,7 @@ public class SupportedVersions extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.executedAsPlanned(i);
             WorkflowTrace trace = i.getWorkflowTrace();
             ServerHelloMessage serverHello = trace.getFirstReceivedMessage(ServerHelloMessage.class);
             SupportedVersionsExtensionMessage supportedVersions = serverHello.getExtension(SupportedVersionsExtensionMessage.class);

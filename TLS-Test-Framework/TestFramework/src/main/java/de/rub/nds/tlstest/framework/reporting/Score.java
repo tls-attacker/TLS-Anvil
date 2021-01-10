@@ -58,7 +58,7 @@ public class Score {
 
     @JsonProperty("Percentage")
     public double getPercentage() {
-        if (total == 0) return 0;
+        if (total == 0) return 100;
         return reached / total * 100;
     }
 
@@ -84,6 +84,11 @@ public class Score {
 
     public void updateForTestResult(TestResult result) {
         if (overwritten) return;
+        if (result == TestResult.DISABLED) {
+            setReached(0);
+            setTotal(0);
+            return;
+        }
         setReached((result.getScorePercentage() / 100.0) * severityLevel.getMaxScore() * (max / 100.0));
     }
 

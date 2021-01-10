@@ -51,6 +51,16 @@ public class ExecutionListener implements TestExecutionListener {
 
     @Override
     public void testPlanExecutionFinished(TestPlan testPlan) {
+        try {
+            realTestPlanExecutionFinished(testPlan);
+        } catch (Exception e) {
+            LOGGER.error("", e);
+            throw e;
+        }
+    }
+
+
+    private void realTestPlanExecutionFinished(TestPlan testPlan) {
         LOGGER.trace(testPlan.toString() + " finished");
         long elapsedTime = System.currentTimeMillis() - start;
 

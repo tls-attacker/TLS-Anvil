@@ -177,6 +177,7 @@ public class Validator {
                 }
 
                 if (expectedMessages.size() > 0 && !action.executedAsPlanned()) {
+                    expectedMessages.add(lastExpected);
                     throw new AssertionError("Last receive action did not execute as planned");
                 }
 

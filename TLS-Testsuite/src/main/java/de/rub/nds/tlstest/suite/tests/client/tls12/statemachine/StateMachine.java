@@ -10,6 +10,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ActivateEncryptionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.DeactivateEncryptionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -26,6 +27,7 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.tests.client.both.statemachine.SharedStateMachineTest;
+import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -90,15 +92,14 @@ public class StateMachine extends Tls12Test {
     @TlsTest(description = "Send a second ServerHello after the client's Finished has been received")
     public void sendSecondServerHelloAfterClientFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         ServerHelloMessage secondServerHello = new ServerHelloMessage(config);
+        secondServerHello.setIncludeInDigest(false);
         secondServerHello.setAdjustContext(false);
         workflowTrace.addTlsAction(new SendAction(secondServerHello));
-        workflowTrace.addTlsAction(new ActivateEncryptionAction(false));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         
         //There is no renegotiation in TLS 1.3 and TLS 1.2 requires a completed handshake
-        //we aren't able to decrypt the alert here for OpenSSL
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
     

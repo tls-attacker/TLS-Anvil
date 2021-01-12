@@ -106,7 +106,13 @@ public class CBCBlockCipher extends Tls12Test {
         
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
-        record.getComputations().setCiphertext(Modifiable.xor(modificationBitmask, 0));
+        if(c.isAddEncryptThenMacExtension()) {
+           //modify record bytes as ciphertext is used to compute mac
+           record.setProtocolMessageBytes(Modifiable.xor(modificationBitmask, 0));
+        } else {
+           record.getComputations().setCiphertext(Modifiable.xor(modificationBitmask, 0)); 
+        }
+        
 
         ApplicationMessage appData = new ApplicationMessage();
         appData.setData(Modifiable.explicit("test".getBytes()));

@@ -1,5 +1,6 @@
 package de.rub.nds.tlstest.suite.tests.client.tls12.statemachine;
 
+import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
@@ -94,8 +95,8 @@ public class StateMachine extends Tls12Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         ServerHelloMessage secondServerHello = new ServerHelloMessage(config);
-        secondServerHello.setIncludeInDigest(false);
-        secondServerHello.setAdjustContext(false);
+        secondServerHello.setIncludeInDigest(Modifiable.explicit(false));
+        secondServerHello.setAdjustContext(Modifiable.explicit(false));
         workflowTrace.addTlsAction(new SendAction(secondServerHello));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         

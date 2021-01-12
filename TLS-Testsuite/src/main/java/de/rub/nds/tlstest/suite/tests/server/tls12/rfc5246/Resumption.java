@@ -150,8 +150,8 @@ public class Resumption extends Tls12Test {
         AlertDescription alertDescr = derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
 
         AlertMessage alert = new AlertMessage();
-        alert.setLevel(AlertLevel.FATAL.getValue());
-        alert.setDescription(alertDescr.getValue());
+        alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
+        alert.setDescription(Modifiable.explicit(alertDescr.getValue()));
 
         SendAction finSend = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.FINISHED, workflowTrace);
         finSend.getSendMessages().add(alert);

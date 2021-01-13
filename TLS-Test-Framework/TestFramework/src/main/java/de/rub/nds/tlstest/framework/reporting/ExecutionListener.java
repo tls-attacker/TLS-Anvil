@@ -83,6 +83,7 @@ public class ExecutionListener implements TestExecutionListener {
             Map<String, AnnotatedStateContainer> results = TestContext.getInstance().getTestResults();
             LOGGER.debug("{}", containers.stream().map(TestIdentifier::getUniqueId).collect(Collectors.toList()));
 
+            boolean errorOccurred = false;
             for (TestIdentifier container : containers) {
                 if (results.get(container.getUniqueId()) != null) {
                     tests.add(container);
@@ -95,7 +96,13 @@ public class ExecutionListener implements TestExecutionListener {
                 } catch (Exception E) {
                     root.addAdditionalInformation("Problem occurred by adding " + container.getUniqueId());
                     LOGGER.error("Problem occurred by adding {}", container.getUniqueId(), E);
+                    errorOccurred = true;
                 }
+            }
+
+            if (errorOccurred) {
+                LOGGER.error(containers);
+                LOGGER.error(results);
             }
 
             Set<TestIdentifier> notAddedTests = new HashSet<>(identifiers).stream()

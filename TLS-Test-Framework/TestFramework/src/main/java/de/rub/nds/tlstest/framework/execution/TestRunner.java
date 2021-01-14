@@ -12,8 +12,12 @@ package de.rub.nds.tlstest.framework.execution;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
+import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
+import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
+import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
@@ -363,12 +367,26 @@ public class TestRunner {
         task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getTriggerScript());
         executor.bulkExecuteTasks(task);
         boolean supportsRecordFragmentation = state.getWorkflowTrace().executedAsPlanned();
-
+        
+        List<CipherSuite> tls12RsaCipherSuites = tls12CipherSuites.stream().filter(cipherSuite -> AlgorithmResolver.getCertificateKeyType(cipherSuite) == CertificateKeyType.RSA).collect(Collectors.toList());
+        int minimumRsaKeySize = this.testConfig.createConfig().getPrefferedCertRsaKeySize();
+        if(tls12RsaCipherSuites.size() > 0) {
+            List<State> rsaCertStates = getClientRSACertMinimumKeyLengthStates(tls12RsaCipherSuites);
+            List<TlsTask> rsaCertTasks = buildStateExecutionServerTasksFromStates(rsaCertStates);
+            executor.bulkExecuteTasks(rsaCertTasks);
+            for(State executedState: rsaCertStates) {
+                if(executedState.getWorkflowTrace().executedAsPlanned() && executedState.getConfig().getPrefferedCertRsaKeySize() < minimumRsaKeySize) {
+                    minimumRsaKeySize = executedState.getConfig().getPrefferedCertRsaKeySize();
+                }
+            }
+        }
+        
         TestSiteReport report = new TestSiteReport("");
         report.addCipherSuites(tls12CipherSuites);
         report.addCipherSuites(tls13CipherSuites);
         report.setReceivedClientHello(clientHello);
         report.setSupportsRecordFragmentation(supportsRecordFragmentation);
+        report.setMinimumRsaCertKeySize(minimumRsaKeySize);
         additionalTls13Groups.addAll(report.getClientHelloKeyShareGroups());
         report.setSupportedTls13Groups(additionalTls13Groups);
 
@@ -524,7 +542,7 @@ public class TestRunner {
                         .enableTestExecutionListenerAutoRegistration(false)
                         .addTestExecutionListeners(listener)
                         .addTestExecutionListeners(reporting)
-                        //.addTestExecutionListeners(listenerLog)
+                         //.addTestExecutionListeners(listenerLog)
                         .build()
         );
         
@@ -601,6 +619,37 @@ public class TestRunner {
             }
         }
         return states;
+    }
+    
+    private List<State> getClientRSACertMinimumKeyLengthStates(List<CipherSuite> supportedRSACipherSuites) {
+        Set<Integer> rsaKeySizes = new HashSet<>();
+        CertificateByteChooser.getInstance().getCertificateKeyPairList().forEach(certKeyPair -> {
+            if(certKeyPair.getCertPublicKeyType() == CertificateKeyType.RSA) {
+                rsaKeySizes.add(certKeyPair.getPublicKey().keySize());
+            }
+        });
+        rsaKeySizes.remove(512);
+
+        List<State> testStates = new LinkedList<>();
+        for(Integer keySize: rsaKeySizes) {
+            Config config = this.testConfig.createConfig();
+            config.setPrefferedCertRsaKeySize(keySize);
+            config.setDefaultServerSupportedCipherSuites(supportedRSACipherSuites);
+            config.setDefaultSelectedCipherSuite(supportedRSACipherSuites.get(0));
+            State state = new State(config, new WorkflowConfigurationFactory(config).createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER));
+            testStates.add(state);
+        }
+        return testStates;
+    }
+    
+    private List<TlsTask> buildStateExecutionServerTasksFromStates(List<State> states) {
+        List<TlsTask> testTasks = new LinkedList<>();
+        states.forEach(state -> {
+            StateExecutionServerTask task = new StateExecutionServerTask(state, testConfig.getTestClientDelegate().getServerSocket(), 2);
+            task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getTriggerScript());
+            testTasks.add(task);
+        });
+        return testTasks;
     }
     
     private void logCommonDerivationValues() {

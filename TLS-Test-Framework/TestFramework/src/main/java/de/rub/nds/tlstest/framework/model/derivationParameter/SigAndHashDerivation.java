@@ -117,11 +117,11 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
             condConstraints.add(getMustNotBePSSWithShortRSAKeyConstraint());
         }
 
-        if (ConstraintHelper.multipleCertPublicKeyTypesModeled(scope) && ConstraintHelper.multipleSigAlgorithmsModeled(scope)) {
+        if (ConstraintHelper.multipleCertPublicKeyTypesModeled(scope) || ConstraintHelper.multipleSigAlgorithmRequiredKeyTypesModeled(scope)) {
             condConstraints.add(getMustMatchPkOfCertificateConstraint());
         }
 
-        if (!scope.isTls13Test() && TestContext.getInstance().getSiteReport().getSupportedSignatureAndHashAlgorithms() == null && ConstraintHelper.multipleSigAlgorithmsModeled(scope)) {
+        if (!scope.isTls13Test() && TestContext.getInstance().getSiteReport().getSupportedSignatureAndHashAlgorithms() == null && ConstraintHelper.multipleSigAlgorithmRequiredKeyTypesModeled(scope)) {
             condConstraints.add(getDefaultAlgorithmMustMatchCipherSuite());
         }
 

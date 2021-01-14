@@ -130,7 +130,13 @@ public class TestResultContainer {
         container.addResult(result);
 
         while (container != null) {
-            container.updateTestStats(result);
+            try {
+                container.updateTestStats(result);
+            } catch(Exception e) {
+                LOGGER.error("", e);
+                LOGGER.error(result.toString());
+            }
+
             container = container.parent;
         }
     }

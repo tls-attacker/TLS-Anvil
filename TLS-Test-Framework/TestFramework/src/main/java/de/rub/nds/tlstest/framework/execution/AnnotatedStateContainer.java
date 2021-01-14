@@ -83,6 +83,15 @@ public class  AnnotatedStateContainer {
     @JsonUnwrapped
     private ScoreContainer scoreContainer;
 
+    @Override
+    public String toString() {
+        return String.format("AnnotatedStateContainer{displayName = %s, result = %s}",
+                testMethodConfig != null ? testMethodConfig.getClassName() + "." + testMethodConfig.getMethodName() : "null",
+                result != null ? result.name() : "null"
+        );
+
+    }
+
     private AnnotatedStateContainer(ExtensionContext extensionContext) {
         this.uniqueId = extensionContext.getUniqueId();
         this.scoreContainer = new ScoreContainer(extensionContext);

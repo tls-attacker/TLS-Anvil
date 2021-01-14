@@ -35,9 +35,11 @@ import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.tests.client.both.statemachine.SharedStateMachineTest;
 import org.junit.jupiter.api.Tag;
@@ -55,6 +57,7 @@ public class StateMachine extends Tls13Test {
 
     @TlsTest(description = "CVE-2020-24613, Send Finished without Certificate")
     @Security(SeverityLevel.CRITICAL)
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void sendFinishedWithoutCert(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE);
@@ -73,6 +76,7 @@ public class StateMachine extends Tls13Test {
     @RFC(number = 8446, section = "5. Record Protocol")
     @Security(SeverityLevel.LOW)
     @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void sendHandshakeTrafficSecretEncryptedChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         config.setTls13BackwardsCompatibilityMode(true);
@@ -95,6 +99,7 @@ public class StateMachine extends Tls13Test {
         "handshake with an \"unexpected_message\" alert.")
     @RFC(number = 8446, section = "5. Record Protocol")
     @Security(SeverityLevel.LOW)
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void sendAppTrafficSecretEncryptedChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -117,6 +122,7 @@ public class StateMachine extends Tls13Test {
         "not be able to distinguish these cases from allowed cases).")
     @RFC(number = 8446, section = "5. Record Protocol")
     @Security(SeverityLevel.LOW)
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void sendLegacyChangeCipherSpecAfterFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -127,6 +133,7 @@ public class StateMachine extends Tls13Test {
     }
     
     @TlsTest(description = "Negotiate TLS 1.3 but send an unencrypted Certificate Message")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void sendLegacyFlowCertificate(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
@@ -139,6 +146,7 @@ public class StateMachine extends Tls13Test {
     }
     
     @TlsTest(description = "Negotiate TLS 1.3 but send an unencrypted Certificate Message and legacy ECDHE Key Exchange Message")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void sendLegacyFlowECDHEKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
@@ -151,6 +159,7 @@ public class StateMachine extends Tls13Test {
     }
     
     @TlsTest(description = "Negotiate TLS 1.3 but send an unencrypted Certificate Message and legacy DHE Key Exchange Message")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void sendLegacyFlowDHEKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
@@ -187,6 +196,7 @@ public class StateMachine extends Tls13Test {
     @TlsTest(description = "Servers MUST NOT send this message, and clients receiving it MUST" +
             "terminate the connection with an \"unexpected_message\" alert.")
     @Interoperability(SeverityLevel.LOW)
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void sendEndOfEarlyDataAsServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.FINISHED);

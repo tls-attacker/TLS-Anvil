@@ -24,8 +24,10 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.tests.client.both.statemachine.SharedStateMachineTest;
 import static org.junit.Assert.assertTrue;
@@ -48,6 +50,7 @@ public class StateMachine extends Tls12Test {
     
     @TlsTest(description = "Omit the Certificate Message for non-anonymous Cipher Suite")
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNotAnonCipherSuite")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeLimitations({DerivationType.CERTIFICATE})
     public void omitCertificate(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -62,6 +65,7 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Omit the Change Cipher Spec Message and send Finished unencrypted")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void omitChangeCipherSpecUnencryptedFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -73,6 +77,7 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Omit the Change Cipher Spec Message and send Finished encrypted")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void omitChangeCipherSpecEncryptedFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -91,6 +96,7 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Send a second ServerHello after the client's Finished has been received")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void sendSecondServerHelloAfterClientFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -116,7 +122,7 @@ public class StateMachine extends Tls12Test {
     }
     
     @Test
-    @TestDescription("Begin the Handshake witha Finished Message")
+    @TestDescription("Begin the Handshake with a Finished Message")
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);

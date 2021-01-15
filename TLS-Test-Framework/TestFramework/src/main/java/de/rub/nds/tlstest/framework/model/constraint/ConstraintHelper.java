@@ -15,6 +15,7 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.HKDFAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
@@ -176,8 +177,27 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
     
     public static boolean pssSigAlgoModeled(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
-        List<DerivationParameter> values = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
-        return values.stream().anyMatch(param -> ((SigAndHashDerivation)param).getSelectedValue().name().contains("PSS"));
+        List<DerivationParameter> algorithms = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        return algorithms.stream().anyMatch(param -> ((SigAndHashDerivation)param).getSelectedValue().name().contains("PSS"));
+    }
+    
+    public static boolean rsaPkMightNotSufficeForPss(DerivationScope scope) {
+        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
+        List<DerivationParameter> algorithms = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        CertificateDerivation certDerivation = (CertificateDerivation)DerivationFactory.getInstance(DerivationType.CERTIFICATE);
+        List<DerivationParameter> certificates = certDerivation.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        boolean pssWithSha512modeled = algorithms.stream().anyMatch(algorithm -> 
+            (((SigAndHashDerivation)algorithm).getSelectedValue().getSignatureAlgorithm() == SignatureAlgorithm.RSA_PSS_PSS || ((SigAndHashDerivation)algorithm).getSelectedValue().getSignatureAlgorithm() == SignatureAlgorithm.RSA_PSS_RSAE)
+                    && ((SigAndHashDerivation)algorithm).getSelectedValue().getHashAlgorithm() == HashAlgorithm.SHA512);
+        
+        boolean rsaCertWithKeyBelow1024bitModeled = certificates.stream().anyMatch(certificate -> ((CertificateDerivation)certificate).getSelectedValue().getCertPublicKeyType() == CertificateKeyType.RSA 
+                && ((CertificateDerivation)certificate).getSelectedValue().getPublicKey().keySize() < 1024);
+        boolean rsaCertWithKeyBelow2048bitModeled = certificates.stream().anyMatch(certificate -> ((CertificateDerivation)certificate).getSelectedValue().getCertPublicKeyType() == CertificateKeyType.RSA 
+                && ((CertificateDerivation)certificate).getSelectedValue().getPublicKey().keySize() < 2048);
+        if(rsaCertWithKeyBelow1024bitModeled || (rsaCertWithKeyBelow2048bitModeled && pssWithSha512modeled)) {
+            return true;
+        }
+        return false;
     }
     
     public static boolean signatureLengthConstraintApplicable(DerivationScope scope) {

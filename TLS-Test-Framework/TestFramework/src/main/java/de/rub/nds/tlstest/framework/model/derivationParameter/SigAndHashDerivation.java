@@ -113,7 +113,7 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
-        if (ConstraintHelper.pssSigAlgoModeled(scope)) {
+        if (ConstraintHelper.pssSigAlgoModeled(scope) && ConstraintHelper.rsaPkMightNotSufficeForPss(scope)) {
             condConstraints.add(getMustNotBePSSWithShortRSAKeyConstraint());
         }
 

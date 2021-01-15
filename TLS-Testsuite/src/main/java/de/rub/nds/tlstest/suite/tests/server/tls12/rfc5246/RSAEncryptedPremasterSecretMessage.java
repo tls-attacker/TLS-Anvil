@@ -25,6 +25,8 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -47,6 +49,8 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
             "randomly generated premaster secret.")
     @KeyExchange(supported = KeyExchangeType.RSA)
     @Security(SeverityLevel.CRITICAL)
+    @Crypto(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.HIGH)
     public void PMWithWrongClientVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -71,6 +75,9 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
             "is not as expected.  Instead, it MUST continue the handshake with a " +
             "randomly generated premaster secret.")
     @KeyExchange(supported = KeyExchangeType.RSA)
+    @Security(SeverityLevel.CRITICAL)
+    @Crypto(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.HIGH)
     public void PMWithWrongPKCS1Padding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

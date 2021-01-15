@@ -23,6 +23,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -34,11 +35,12 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "4.4.4. Finished")
 public class Finished extends Tls13Test {
 
-    @TlsTest(description = "Recipients of Finished messages MUST verify " +
-            "that the contents are correct and if incorrect MUST terminate " +
-            "the connection with a \"decrypt_error\" alert.")
+    @TlsTest(description = "Recipients of Finished messages MUST verify "
+            + "that the contents are correct and if incorrect MUST terminate "
+            + "the connection with a \"decrypt_error\" alert.")
     @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.PRF_BITMASK)
+    @Handshake(SeverityLevel.CRITICAL)
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -50,13 +52,15 @@ public class Finished extends Tls13Test {
 
         byte[] modificationBitmask = derivationContainer.buildBitmask();
         workflowTrace.getFirstSendMessage(FinishedMessage.class)
-            .setVerifyData(Modifiable.xor(modificationBitmask, 0));
+                .setVerifyData(Modifiable.xor(modificationBitmask, 0));
 
         runner.execute(workflowTrace, config).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
 
             AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (msg == null) return;
+            if (msg == null) {
+                return;
+            }
             Validator.testAlertDescription(i, AlertDescription.DECRYPT_ERROR, msg);
         });
     }

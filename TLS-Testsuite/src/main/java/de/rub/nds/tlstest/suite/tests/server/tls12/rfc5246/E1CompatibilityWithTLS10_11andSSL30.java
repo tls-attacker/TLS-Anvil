@@ -31,6 +31,9 @@ import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -55,7 +58,10 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     @TlsTest(description = "If a TLS server receives a ClientHello containing a version number " +
             "greater than the highest version supported by the server, it MUST " +
             "reply according to the highest version supported by the server.")
-    @Interoperability(SeverityLevel.CRITICAL)
+    @Interoperability(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void versionGreaterThanSupportedByServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

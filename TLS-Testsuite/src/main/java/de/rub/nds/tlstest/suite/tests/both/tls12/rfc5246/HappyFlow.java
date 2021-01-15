@@ -36,6 +36,8 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -66,6 +68,8 @@ public class HappyFlow extends Tls12Test {
     @TlsTest(description = "A benign handshake executed with all parameter combinations "
             + " that affect a regular handshake")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @Handshake(SeverityLevel.HIGH)
+    @Interoperability(SeverityLevel.CRITICAL)
     public void happyFlow(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);

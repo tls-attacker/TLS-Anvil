@@ -25,23 +25,26 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 5264, section = "6.2.1 Fragmentation")
 @ClientTest
 public class Fragmentation extends Tls12Test {
 
-    @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, " +
-            "Alert, or ChangeCipherSpec content types. Zero-length fragments of " +
-            "Application data MAY be sent as they are potentially useful as a " +
-            "traffic analysis countermeasure.")
-    @Interoperability(SeverityLevel.MEDIUM)
+    @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, "
+            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
+            + "Application data MAY be sent as they are potentially useful as a "
+            + "traffic analysis countermeasure.")
+    @Interoperability(SeverityLevel.HIGH)
+    @RecordLayer(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.MEDIUM)
     public void sendZeroLengthRecord_SH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -55,20 +58,22 @@ public class Fragmentation extends Tls12Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        SendAction action = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
+        SendAction action = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
         action.setRecords(r);
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-
     @TlsTest
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @TestDescription("Implementations should accept multiple Handshake messages sent within a single record.")
+    @Interoperability(SeverityLevel.HIGH)
+    @RecordLayer(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.HIGH)
     public void sendHandshakeMessagesWithinSingleRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setCreateIndividualRecords(false);
-        
+
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }

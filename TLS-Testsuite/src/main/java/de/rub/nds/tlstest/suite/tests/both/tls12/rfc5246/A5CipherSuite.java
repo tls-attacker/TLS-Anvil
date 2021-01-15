@@ -12,7 +12,7 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -31,6 +31,7 @@ public class A5CipherSuite extends Tls12Test {
     @Test
     @Security(SeverityLevel.CRITICAL)
     @TestDescription("The initial Cipher Suite state with NULL algorithms must not be negotiated")
+    @Handshake(SeverityLevel.MEDIUM)
     public void negotiateTLS_NULL_WITH_NULL_NULL() {
         List<CipherSuite> suites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         if (suites.contains(CipherSuite.TLS_NULL_WITH_NULL_NULL)) {
@@ -41,8 +42,9 @@ public class A5CipherSuite extends Tls12Test {
     /*@TlsTest(description = "These cipher suites MUST NOT be used by TLS 1.2 implementations unless the application " +
             "layer has specifically requested to allow anonymous key exchange", securitySeverity = SeverityLevel.HIGH)*/
     @Test
-    @Security(SeverityLevel.HIGH)
+    @Security(SeverityLevel.CRITICAL)
     @TestDescription("Anonymous Cipher Suites must not be used unless requested by application layer")
+    @Handshake(SeverityLevel.MEDIUM)
     public void anonCipherSuites() {
         List<CipherSuite> suites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         List<CipherSuite> forbidden = CipherSuite.getImplemented();

@@ -22,9 +22,17 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -41,6 +49,9 @@ public class PreSharedKeyExchangeModes extends Tls13Test {
 
     @TlsTest(description = "The server MUST NOT send a \"psk_key_exchange_modes\" extension.")
     @MethodCondition(method = "supportsPSKModeExtension")
+    @Interoperability(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendPSKModeExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

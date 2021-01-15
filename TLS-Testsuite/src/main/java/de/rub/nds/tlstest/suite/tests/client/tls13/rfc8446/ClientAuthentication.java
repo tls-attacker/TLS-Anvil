@@ -16,11 +16,12 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
@@ -31,6 +32,8 @@ public class ClientAuthentication extends Tls13Test {
             "suitable certificate is available, the client MUST send a " +
             "Certificate message containing no certificates.")
     @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.MEDIUM)
     public void clientSendsCertificateMessage(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setClientAuthentication(true);

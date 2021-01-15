@@ -3,13 +3,11 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.statemachine;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.KeyExchangeAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.HeartbeatMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
@@ -22,16 +20,20 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.tests.server.both.statemachine.SharedStateMachineTest;
 import org.junit.jupiter.api.Disabled;
@@ -52,25 +54,28 @@ public class StateMachine extends Tls12Test {
 
     //Figure 2: path 0, 1, 10
     @TlsTest(description = "Send a Heartbeat Request after sending the Client Hello Message and observe the response")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendHeartbeatRequestAfterClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         genericHeartbeatStateTest(runner, workflowTrace, config);
     }
-    
+
     //Figure 2: path 0, 1, 10
     @TlsTest(description = "Send a Heartbeat Request after sending the Client Key Exchange Message and observer the response")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendHeartbeatRequestAfterClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         genericHeartbeatStateTest(runner, workflowTrace, config);
     }
-    
+
     //Figure 2: path 0, 1, 10 and Figure 4: path 0, 1, 3, 5, 8
     @TlsTest(description = "Send a Heartbeat Request after sending the Change Cipher Spec Message and observer the response")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendHeartbeatRequestAfterChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -79,7 +84,9 @@ public class StateMachine extends Tls12Test {
 
     //Figure 2: 0, 1, 3, 5 and Figure 4: path 0, 1, 3, 4 
     @TlsTest(description = "Send a Client Hello Message after sending a Client Key Exchange Message")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.MEDIUM)
     public void secondClientHelloAfterClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -90,7 +97,9 @@ public class StateMachine extends Tls12Test {
     }
 
     //Figure 3: path 0, 1, 3, 5, 6, 2
-    @TlsTest(description = "Send a Client Hello Message after completing the handshake")
+    @TlsTest(description = "Send a Finished Message after the ServerHello")
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.CRITICAL)
     public void sendFinishedAfterServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -103,17 +112,19 @@ public class StateMachine extends Tls12Test {
     //Figure 4: path 0, 2
     @Test
     @TestDescription("Begin the Handshake with a Finished Message")
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.CRITICAL)
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
     }
-    
-    
 
     //Figure 4: path 0, 1, 3, 2
     @TlsTest(description = "Send two Client Key Exchange Messages")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.HIGH)
     public void secondClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -127,7 +138,9 @@ public class StateMachine extends Tls12Test {
 
     //Figure 4: path 0, 1, 3, 2
     @TlsTest(description = "Send two Client Key Exchange Messages with different Send Actions")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.HIGH)
     public void secondClientKeyExchangeDifferentAction(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -142,7 +155,9 @@ public class StateMachine extends Tls12Test {
 
     //Figure 4: path 0, 1, 3, 5, 2
     @TlsTest(description = "Send a second Client Key Exchange Message after sending Change Cipher Spec")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.MEDIUM)
     public void secondClientKeyExchangeAfterChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -156,7 +171,9 @@ public class StateMachine extends Tls12Test {
 
     //Figure 4: path 0, 1, 3, 5, 2
     @TlsTest(description = "Send a second unencrypted Client Key Exchange Message after sending Change Cipher Spec")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.MEDIUM)
     public void secondClientKeyExchangeAfterChangeCipherSpecUnencrypted(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -174,18 +191,20 @@ public class StateMachine extends Tls12Test {
     //Figure 7: path 0,2
     @Test
     @TestDescription("Begin the Handshake with Change Cipher Spec")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.HIGH)
     public void beginWithChangeCipherSpec(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithChangeCipherSpecTest(config, runner);
     }
-    
-    
 
     //Figure 7: path 0,3
     @TlsTest(description = "Begin the Handshake with Application Data")
-    @Security(SeverityLevel.CRITICAL)
     @Disabled
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.CRITICAL)
     public void beginWithEmptyApplicationData(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         config.setDefaultApplicationMessageData("Test");
@@ -204,18 +223,20 @@ public class StateMachine extends Tls12Test {
 
     //Figure 7: path 0,3 (with content in Application Message)
     @Test
-    @Security(SeverityLevel.CRITICAL)
     @TestDescription("Begin the Handshake with Application Data")
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.CRITICAL)
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);
     }
-    
-    
 
     //Figure 7: 0, 1, 5, 6, 7, 8
     @TlsTest(description = "Send a second Change Cipher Spec after receiving the servers Finished Message")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.HIGH)
     public void secondChangeCipherSpecAfterHandshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -226,7 +247,9 @@ public class StateMachine extends Tls12Test {
 
     //Figure 7: 0, 1, 5, 6, 7, 8
     @TlsTest(description = "Send a second Change Cipher Spec after receiving the servers Finished Message")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.HIGH)
     public void secondChangeCipherSpecAfterHandshakeUnencrypted(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -239,25 +262,28 @@ public class StateMachine extends Tls12Test {
 
     //Figure 7: path 0, 1, 4
     @TlsTest(description = "Send a second Client Hello after receiving the first batch of server messages")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.HIGH)
     public void secondClientHelloAfterServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSecondClientHelloAfterServerHelloTest(config, runner);
     }
-    
-    
 
     //Figure 7: path 0, 1, 4
     @TlsTest(description = "Send two Client Hello Messages at the beginning of the Handshake")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.HIGH)
     public void secondClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSecondClientHelloTest(config, runner);
     }
 
-
     //Figure 8: path 0, 1, 6
     @TlsTest(description = "Send a Change Cipher Spec before the Client Key Exchange Message")
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.CRITICAL)
     public void earlyChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

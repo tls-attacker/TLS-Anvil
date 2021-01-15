@@ -13,6 +13,7 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -25,7 +26,8 @@ public class MandatoryCipherSuites extends Tls12Test {
     //@TlsTest(description = "A TLS-compliant application MUST implement the cipher suite TLS_RSA_WITH_AES_128_CBC_SHA")
     @Test
     @TestDescription("TLS_RSA_WITH_AES_128_CBC_SHA must be supported by all TLS 1.2 implementations")
-    @Interoperability(SeverityLevel.MEDIUM)
+    @Interoperability(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.MEDIUM)
     public void verify() {
         if (!context.getSiteReport().getCipherSuites().contains(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA)) {
             throw new AssertionError("Target does not support mandatory ciphersuite TLS_RSA_WITH_AES_128_CBC_SHA");

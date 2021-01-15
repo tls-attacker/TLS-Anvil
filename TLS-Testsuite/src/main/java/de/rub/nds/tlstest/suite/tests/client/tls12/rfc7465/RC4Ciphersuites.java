@@ -18,22 +18,20 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 7465, section = "2")
@@ -45,8 +43,10 @@ public class RC4Ciphersuites extends Tls12Test {
     }
 
     @Test
-    @Security(SeverityLevel.CRITICAL)
     @TestDescription("TLS clients MUST NOT include RC4 cipher suites in the ClientHello message.")
+    @Security(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @DeprecatedFeature(SeverityLevel.HIGH)
     public void offersRC4Ciphersuites() {
         List<CipherSuite> supported = new ArrayList<>(this.context.getSiteReport().getCipherSuites());
         supported.removeIf(i -> !i.toString().contains("RC4"));
@@ -57,8 +57,10 @@ public class RC4Ciphersuites extends Tls12Test {
 
     @TlsTest(description = "TLS servers MUST NOT select an RC4 cipher suite when a TLS client sends such " +
             "a cipher suite in the ClientHello message.")
-    @Security(SeverityLevel.CRITICAL)
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isRC4CipherSuite")
+    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @DeprecatedFeature(SeverityLevel.HIGH)
     public void selectRC4CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

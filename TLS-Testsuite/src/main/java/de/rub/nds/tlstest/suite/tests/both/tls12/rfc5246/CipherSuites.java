@@ -15,8 +15,9 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsscanner.serverscanner.report.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
@@ -34,6 +35,8 @@ public class CipherSuites extends Tls12Test {
     @Test
     @Security(SeverityLevel.CRITICAL)
     @TestDescription("IDEA and DES cipher suites must not be used for TLS 1.2")
+    @Handshake(SeverityLevel.MEDIUM)
+    @DeprecatedFeature(SeverityLevel.MEDIUM)
     public void supportOfDeprectedCipherSuites() {
         List<VersionSuiteListPair> versionSuiteListPairList = context.getSiteReport().getVersionSuitePairs();
         List<CipherSuite> suites = versionSuiteListPairList.stream()

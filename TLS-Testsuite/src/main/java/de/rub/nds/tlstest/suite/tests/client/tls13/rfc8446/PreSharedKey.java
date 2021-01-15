@@ -15,7 +15,15 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -23,6 +31,7 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 @ClientTest
 @RFC(number = 8446, section = "4.2.11. Pre-Shared Key Extension")
 public class PreSharedKey extends Tls13Test {
+
     public ConditionEvaluationResult sendsPSKExtension() {
         if (context.getReceivedClientHelloMessage().getExtension(PreSharedKeyExtensionMessage.class) != null) {
             return ConditionEvaluationResult.enabled("");
@@ -37,6 +46,10 @@ public class PreSharedKey extends Tls13Test {
     @Test
     @MethodCondition(method = "sendsPSKExtension")
     @TestDescription("The Pre-Shared Key extension must me the last extension of the Client Hello")
+    @Interoperability(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.HIGH)
     public void isLastExtension() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         if (!chm.getExtensions().get(chm.getExtensions().size() - 1).getClass().equals(PreSharedKeyExtensionMessage.class)) {

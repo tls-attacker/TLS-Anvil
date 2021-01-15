@@ -18,7 +18,16 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -44,6 +53,11 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class CertificateVerify extends Tls13Test {
 
     @TlsTest(description = "Test if the Server sends Certificate Verify Messages with valid signatures")
+    @Interoperability(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.CRITICAL)
+    @Crypto(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.CRITICAL)
     public void signatureIsValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);

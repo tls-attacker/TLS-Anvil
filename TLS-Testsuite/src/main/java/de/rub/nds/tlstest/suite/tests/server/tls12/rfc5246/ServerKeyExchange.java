@@ -1,5 +1,6 @@
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
+import com.google.errorprone.annotations.CompatibleWith;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -19,7 +20,11 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -46,6 +51,9 @@ public class ServerKeyExchange extends Tls12Test {
     
     @TlsTest(description = "Test if the Server sends Key Exchange Messages with valid signatures")
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
+    @Crypto(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.CRITICAL)
+    @Interoperability(SeverityLevel.CRITICAL)
     public void signatureIsValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);

@@ -18,25 +18,26 @@ import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
@@ -58,10 +59,15 @@ public class EncThenMacExtension extends Tls12Test {
         }
     }
 
+    //TODO RM: Do we want to keep this test? Shouldn't this be the task of the scanner? (I think there the probe does not work properly)
     @TlsTest(description = "Test if the server supports the encrypt-then-mac extension")
-    @Security(SeverityLevel.MEDIUM)
     @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isBlockCipher")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @Handshake(SeverityLevel.INFORMATIONAL)
+    @Compliance(SeverityLevel.INFORMATIONAL)
+    @Crypto(SeverityLevel.INFORMATIONAL)
+    @RecordLayer(SeverityLevel.LOW)
+    @Security(SeverityLevel.LOW)
     public void supportsEncThenMacExt(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);
@@ -78,10 +84,11 @@ public class EncThenMacExtension extends Tls12Test {
     @TlsTest(description = "If a server receives an encrypt-then-MAC request extension from a client and then " +
             "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, " +
             "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Security(SeverityLevel.LOW)
     @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isNotBlockCipher")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.MEDIUM)
     public void negotiatesEncThenMacExtOnlyWithBckCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);

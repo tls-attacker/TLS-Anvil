@@ -8,13 +8,14 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -28,6 +29,8 @@ public class Certificate extends TlsGenericTest {
     @TlsTest(description = "Send a Certificate Message with a modified length value")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void certificateMessageLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         certificateMessagLengthTest(workflowTrace, runner);
@@ -38,6 +41,8 @@ public class Certificate extends TlsGenericTest {
     @TlsTest(description = "Send a Certificate Message with a modified certificate list length value")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void certificateListLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         certificateListLengthTest(workflowTrace, runner);
@@ -48,6 +53,8 @@ public class Certificate extends TlsGenericTest {
     @TlsTest(description = "Send a Certificate Message with a modified length value")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void certificateMessageLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         certificateMessagLengthTest(workflowTrace, runner);
@@ -58,6 +65,8 @@ public class Certificate extends TlsGenericTest {
     @TlsTest(description = "Send a Certificate Message with a modified certificate list length value")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void certificateListLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         certificateListLengthTest(workflowTrace, runner);
@@ -68,6 +77,8 @@ public class Certificate extends TlsGenericTest {
     @TlsTest(description = "Send a Certificate Message with a modified request context length value")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void certificateRequestContextLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         CertificateMessage certificateMessage = (CertificateMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CERTIFICATE, workflowTrace);

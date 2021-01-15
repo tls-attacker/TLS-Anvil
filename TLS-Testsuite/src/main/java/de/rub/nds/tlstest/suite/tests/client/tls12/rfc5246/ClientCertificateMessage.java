@@ -16,6 +16,11 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
@@ -28,6 +33,9 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class ClientCertificateMessage extends Tls12Test {
 
     @TlsTest(description = "If no suitable certificate is available, the client MUST send a certificate message containing no certificates.")
+    @Compliance(SeverityLevel.MEDIUM)
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.HIGH)
     public void clientMustSendCertMsg(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

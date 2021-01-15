@@ -29,6 +29,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -46,6 +47,7 @@ public class Finished extends Tls12Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.PRF_BITMASK)
+    @Handshake(SeverityLevel.CRITICAL)
     public void verifyFinishedMessageCorrect(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = derivationContainer.buildBitmask();
@@ -61,9 +63,11 @@ public class Finished extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
+    //TODO I think this test does not make alot of sense - its basically the same as the test before
     @TlsTest(description = "For the PRF defined in Section 5, the Hash MUST be the Hash used as the basis for the PRF.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.CRITICAL)
     public void invalidPRF(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -86,10 +90,12 @@ public class Finished extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
+    //TODO I think this should be a statemachine test
     @TlsTest(description = "It is a fatal error if a Finished message is not preceded by a ChangeCipherSpec " +
             "message at the appropriate point in the handshake.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.CRITICAL)
     public void omitCCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

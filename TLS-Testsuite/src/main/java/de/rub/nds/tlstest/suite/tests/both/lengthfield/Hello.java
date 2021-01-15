@@ -17,8 +17,11 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
@@ -34,6 +37,8 @@ public class Hello extends TlsGenericTest {
     @TlsTest(description = "Send a Hello Message with a modified Session ID length value")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void helloSessionIdLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         sessionIdLengthTest(workflowTrace, runner);
@@ -45,6 +50,8 @@ public class Hello extends TlsGenericTest {
     @TlsTest(description = "Send a Hello Message with a modified Session ID length value")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void helloSessionIdLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         sessionIdLengthTest(workflowTrace, runner);
@@ -56,6 +63,8 @@ public class Hello extends TlsGenericTest {
     @TlsTest(description = "Send a Hello Message with a modified length value")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void helloLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         helloLenghtTest(workflowTrace, runner);
@@ -67,6 +76,8 @@ public class Hello extends TlsGenericTest {
     @TlsTest(description = "Send a Hello Message with a modified length value")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void helloLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         helloLenghtTest(workflowTrace, runner);
@@ -78,6 +89,8 @@ public class Hello extends TlsGenericTest {
     @TlsTest(description = "Send a Hello Message with a modified Extension list length value")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void helloExtensionsLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         helloExtensionsLengthTest(workflowTrace, runner); 
@@ -89,6 +102,8 @@ public class Hello extends TlsGenericTest {
     @TlsTest(description = "Send a Hello Message with a modified Extension list length value")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void helloExtensionsLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         helloExtensionsLengthTest(workflowTrace, runner); 
@@ -101,6 +116,8 @@ public class Hello extends TlsGenericTest {
     @TlsTest(description = "Send a Client Hello Message with a modified Cipher Suite list length value")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void clientHelloCipherSuitesLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         clientHelloCipherSuitesLengthTest(workflowTrace, runner); 
@@ -113,6 +130,8 @@ public class Hello extends TlsGenericTest {
     @TlsTest(description = "Send a Client Hello Message with a modified Cipher Suite list length value")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void clientHelloCipherSuitesLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         clientHelloCipherSuitesLengthTest(workflowTrace, runner); 
@@ -125,6 +144,8 @@ public class Hello extends TlsGenericTest {
     @TlsTest(description = "Send a Client Hello Message with a modified compression list length value")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void clientHelloCompressionLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         clientHelloCompressionLengthTest(workflowTrace, runner); 
@@ -137,6 +158,8 @@ public class Hello extends TlsGenericTest {
     @TlsTest(description = "Send a Client Hello Message with a modified compression list length value")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void clientHelloCompressionLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         clientHelloCompressionLengthTest(workflowTrace, runner); 

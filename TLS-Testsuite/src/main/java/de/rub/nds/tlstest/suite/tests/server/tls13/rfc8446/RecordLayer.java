@@ -25,24 +25,30 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @RFC(number = 8446, section = "5.1. Record Layer")
 public class RecordLayer extends Tls13Test {
 
-
-    @TlsTest(description = "Implementations MUST NOT send " +
-            "zero-length fragments of Handshake types, even " +
-            "if those fragments contain padding.")
-    @Interoperability(SeverityLevel.MEDIUM)
+    @TlsTest(description = "Implementations MUST NOT send "
+            + "zero-length fragments of Handshake types, even "
+            + "if those fragments contain padding.")
+    @Interoperability(SeverityLevel.HIGH)
+    @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -61,10 +67,12 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Implementations MUST NOT send " +
-            "zero-length fragments of Handshake types, even " +
-            "if those fragments contain padding.")
-    @Interoperability(SeverityLevel.MEDIUM)
+    @TlsTest(description = "Implementations MUST NOT send "
+            + "zero-length fragments of Handshake types, even "
+            + "if those fragments contain padding.")
+    @Interoperability(SeverityLevel.HIGH)
+    @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_Finished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -77,18 +85,18 @@ public class RecordLayer extends Tls13Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        SendAction finished = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.FINISHED, trace);
+        SendAction finished = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.FINISHED, trace);
         finished.setRecords(record);
-
 
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Handshake messages MUST NOT be interleaved " +
-            "with other record types.")
-    @Interoperability(SeverityLevel.CRITICAL)
-    @Security(SeverityLevel.MEDIUM)
+    @TlsTest(description = "Handshake messages MUST NOT be interleaved "
+            + "with other record types.")
     @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
+    @Interoperability(SeverityLevel.HIGH)
+    @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.MEDIUM)
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

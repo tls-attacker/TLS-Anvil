@@ -22,6 +22,11 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -46,6 +51,9 @@ public class StateMachine extends Tls12Test {
     @TlsTest(description = "Omit the Certificate Message for non-anonymous Cipher Suite")
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNotAnonCipherSuite")
     @ScopeLimitations({DerivationType.CERTIFICATE})
+    @Handshake(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.HIGH)
     public void omitCertificate(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -59,6 +67,9 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Omit the Change Cipher Spec Message and send Finished unencrypted")
+    @Handshake(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.HIGH)
     public void omitChangeCipherSpecUnencryptedFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -70,6 +81,9 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Omit the Change Cipher Spec Message and send Finished encrypted")
+    @Handshake(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.LOW)
     public void omitChangeCipherSpecEncryptedFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -82,12 +96,16 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Send two Server Hellos as the first server messages")
+    @Handshake(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.CRITICAL)
     public void sendServerHelloTwice(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner);
     }
     
     @TlsTest(description = "Send a second ServerHello after the client's Finished has been received")
+    @Handshake(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.CRITICAL)
     public void sendSecondServerHelloAfterClientFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -103,6 +121,8 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Send ServerHello, Change CipherSpec")
+    @Handshake(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.CRITICAL)
     public void sendResumptionMessageFlow(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -114,7 +134,9 @@ public class StateMachine extends Tls12Test {
     }
     
     @Test
-    @TestDescription("Begin the Handshake witha Finished Message")
+    @TestDescription("Begin the Handshake with a Finished Message")
+    @Handshake(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.CRITICAL)
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
@@ -122,6 +144,9 @@ public class StateMachine extends Tls12Test {
     
     @Test
     @TestDescription("Begin the Handshake with Application Data")
+    @Handshake(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.CRITICAL)
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);

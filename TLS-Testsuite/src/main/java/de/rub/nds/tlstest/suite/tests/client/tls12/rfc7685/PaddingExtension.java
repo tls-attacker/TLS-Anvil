@@ -14,7 +14,8 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.PaddingExtensionMe
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -22,7 +23,6 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @RFC(number = 7685, section = "3")
@@ -30,9 +30,11 @@ import org.junit.jupiter.api.Test;
 public class PaddingExtension extends Tls12Test {
 
     @Test
-    @Interoperability(SeverityLevel.HIGH)
-    @TestDescription("The client MUST fill the padding extension completely with zero " +
-            "bytes, although the padding extension_data field may be empty.")
+    @TestDescription("The client MUST fill the padding extension completely with zero "
+            + "bytes, although the padding extension_data field may be empty.")
+    @Compliance(SeverityLevel.LOW)
+    @Interoperability(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void paddingWithNonZero() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);

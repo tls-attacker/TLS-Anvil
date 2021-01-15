@@ -18,6 +18,14 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -29,122 +37,152 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /**
- * Contains tests to evaluate the target's state machine. Some test flows are based
- * on results found for TLS 1.2 servers in 
- * "Protocol State Fuzzing of TLS Implementations" (de Ruiter et al.)
+ * Contains tests to evaluate the target's state machine. Some test flows are
+ * based on results found for TLS 1.2 servers in "Protocol State Fuzzing of TLS
+ * Implementations" (de Ruiter et al.)
  */
 @Tag("statemachine")
 @ServerTest
 public class StateMachine extends Tls13Test {
-    
+
     @TlsTest(description = "Send two Client Hello Messages at the beginning of the Handshake")
-    @Security(SeverityLevel.CRITICAL)
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void secondClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSecondClientHelloTest(config, runner);
     }
-    
+
     @TlsTest(description = "Send a second Client Hello after receiving the server's Handshake messages")
-    @Security(SeverityLevel.CRITICAL)
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void secondClientHelloAfterServerHelloMessages(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSecondClientHelloAfterServerHelloTest(config, runner);
     }
-    
+
     @Test
-    @TestDescription("An implementation may receive an unencrypted record of type " +
-            "change_cipher_spec consisting of the single byte value 0x01 at any " +
-            "time after the first ClientHello message has been sent or received")   
-    @Security(SeverityLevel.CRITICAL)
+    @TestDescription("An implementation may receive an unencrypted record of type "
+            + "change_cipher_spec consisting of the single byte value 0x01 at any "
+            + "time after the first ClientHello message has been sent or received")
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void beginWithChangeCipherSpec(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithChangeCipherSpecTest(config, runner);
     }
-    
+
     @Test
-    @TestDescription("Begin the Handshake with Application Data")   
+    @TestDescription("Begin the Handshake with Application Data")
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.CRITICAL)
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);
     }
-    
+
     @Test
-    @TestDescription("Begin the Handshake with a Finished Message")   
-    @Security(SeverityLevel.CRITICAL)
+    @TestDescription("Begin the Handshake with a Finished Message")
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.CRITICAL)
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
     }
 
-    
-    @TlsTest(description = "If an implementation " +
-        "detects a change_cipher_spec record received before the first " +
-        "ClientHello message or after the peer's Finished message, it MUST be " +
-        "treated as an unexpected record type (though stateless servers may " +
-        "not be able to distinguish these cases from allowed cases).")
+    @TlsTest(description = "If an implementation "
+            + "detects a change_cipher_spec record received before the first "
+            + "ClientHello message or after the peer's Finished message, it MUST be "
+            + "treated as an unexpected record type (though stateless servers may "
+            + "not be able to distinguish these cases from allowed cases).")
     @RFC(number = 8446, section = "5. Record Protocol")
-    @Security(SeverityLevel.LOW)
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendLegacyChangeCipherSpecAfterFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsAction(new SendAction(new ChangeCipherSpecMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
-    
-    @TlsTest(description = "An" +
-        "implementation which receives any other change_cipher_spec value or " +
-        "which receives a protected change_cipher_spec record MUST abort the " +
-        "handshake with an \"unexpected_message\" alert.")
+
+    @TlsTest(description = "An"
+            + "implementation which receives any other change_cipher_spec value or "
+            + "which receives a protected change_cipher_spec record MUST abort the "
+            + "handshake with an \"unexpected_message\" alert.")
     @RFC(number = 8446, section = "5. Record Protocol")
-    @Security(SeverityLevel.LOW)
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendEncryptedChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        
+
         SendAction sendActionCCS = new SendAction(new ChangeCipherSpecMessage());
         Record ccsRecord = new Record();
         ccsRecord.setAllowEncryptedChangeCipherSpec(true);
         sendActionCCS.setRecords(ccsRecord);
-        
+
         workflowTrace.addTlsAction(sendActionCCS);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
-    
+
     @TlsTest(description = "Send a legacy ECDH Client Key Exchange Message instead of just a Finished")
-    @Security(SeverityLevel.LOW)
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendECDHClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsAction(new SendAction(new ECDHClientKeyExchangeMessage(config)));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
-    
+
     @TlsTest(description = "Send a legacy DH Client Key Exchange Message instead of just a Finished")
-    @Security(SeverityLevel.LOW)
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendDHClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsAction(new SendAction(new DHClientKeyExchangeMessage(config)));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
-    
+
     @TlsTest(description = "Send a legacy RSA Client Key Exchange Message instead of just a Finished")
-    @Security(SeverityLevel.LOW)
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendRSAClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsAction(new SendAction(new RSAClientKeyExchangeMessage(config)));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 }

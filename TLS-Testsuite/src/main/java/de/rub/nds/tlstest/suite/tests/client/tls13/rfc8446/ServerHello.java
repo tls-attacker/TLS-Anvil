@@ -9,34 +9,32 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import de.rub.nds.modifiablevariable.VariableModification;
-import de.rub.nds.modifiablevariable.bytearray.ByteArrayModificationFactory;
-import de.rub.nds.modifiablevariable.bytearray.ModifiableByteArray;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
@@ -45,15 +43,9 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
-import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
 import static org.junit.Assert.*;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 import java.util.Random;
@@ -62,11 +54,13 @@ import java.util.Random;
 @ClientTest
 public class ServerHello extends Tls13Test {
 
-    @TlsTest(description = "A client which receives a legacy_session_id_echo " +
-            "field that does not match what it sent in the ClientHello MUST " +
-            "abort the handshake with an \"illegal_parameter\" alert.")
+    @TlsTest(description = "A client which receives a legacy_session_id_echo "
+            + "field that does not match what it sent in the ClientHello MUST "
+            + "abort the handshake with an \"illegal_parameter\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.MEDIUM)
     public void testSessionId(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -76,11 +70,10 @@ public class ServerHello extends Tls13Test {
         );
         sharedSessionIdTest(workflowTrace, runner);
     }
-    
+
     public static void sharedSessionIdTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.setSessionId(Modifiable.explicit(new byte[]{0x01, 0x02, 0x03, 0x04}));
-
 
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
@@ -94,13 +87,15 @@ public class ServerHello extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "A client which receives a cipher suite that was " +
-            "not offered MUST abort the handshake with " +
-            "an \"illegal_parameter\" alert.")
+    @TlsTest(description = "A client which receives a cipher suite that was "
+            + "not offered MUST abort the handshake with "
+            + "an \"illegal_parameter\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.CRITICAL)
-    @Security(SeverityLevel.HIGH)
     @ScopeLimitations(DerivationType.CIPHERSUITE)
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.MEDIUM)
     public void testCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -111,7 +106,6 @@ public class ServerHello extends Tls13Test {
 
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.setSelectedCipherSuite(Modifiable.explicit(CipherSuite.GREASE_00.getByteValue()));
-
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
@@ -125,12 +119,14 @@ public class ServerHello extends Tls13Test {
         });
     }
 
-
-    @TlsTest(description = "legacy_compression_method: A single byte which " +
-            "MUST have the value 0.")
+    @TlsTest(description = "legacy_compression_method: A single byte which "
+            + "MUST have the value 0.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Security(SeverityLevel.MEDIUM)
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @DeprecatedFeature(SeverityLevel.HIGH)
+    @Security(SeverityLevel.HIGH)
     public void testCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -140,7 +136,7 @@ public class ServerHello extends Tls13Test {
         );
         sharedCompressionValueTest(workflowTrace, runner);
     }
-    
+
     public static void sharedCompressionValueTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.setSelectedCompressionMethod(Modifiable.explicit((byte) 0x01));
@@ -157,15 +153,16 @@ public class ServerHello extends Tls13Test {
         });
     }
 
-
-    @TlsTest(description = "TLS 1.3 clients receiving a ServerHello indicating TLS 1.2 or below MUST " +
-            "check that the last 8 bytes are not equal to either of these values. " +
-            "If a match is found, the client MUST abort the handshake " +
-            "with an \"illegal_parameter\" alert.")
+    @TlsTest(description = "TLS 1.3 clients receiving a ServerHello indicating TLS 1.2 or below MUST "
+            + "check that the last 8 bytes are not equal to either of these values. "
+            + "If a match is found, the client MUST abort the handshake "
+            + "with an \"illegal_parameter\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Security(SeverityLevel.HIGH)
     @KeyExchange(supported = KeyExchangeType.ALL12)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.CRITICAL)
     public void testRandomDowngradeValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
 

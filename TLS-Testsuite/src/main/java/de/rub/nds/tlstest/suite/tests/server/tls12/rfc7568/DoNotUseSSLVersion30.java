@@ -17,7 +17,6 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
-import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
@@ -29,12 +28,17 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.execution.AnnotatedState;
-import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
@@ -44,7 +48,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 7568, section = "3")
@@ -59,6 +62,9 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
             + "{03,00}. Any party receiving a Hello message with the protocol "
             + "version set to {03,00} MUST respond with a \"protocol_version\" alert "
             + "message and close the connection.")
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.CRITICAL)
+    @DeprecatedFeature(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
     public void sendClientHelloVersion0300(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -99,11 +105,13 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
     @TlsTest(description = "TLS servers MUST accept any value "
             + "{03,XX} (including {03,00}) as the record layer version number for "
             + "ClientHello, but they MUST NOT negotiate SSLv3.")
-    @Security(SeverityLevel.CRITICAL)
-    @Interoperability(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "get03ProtocolVersions")
     @ManualConfig(DerivationType.PROTOCOL_VERSION)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.CRITICAL)
+    @DeprecatedFeature(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.CRITICAL)
     public void sendClientHelloVersion0300WithDifferentVersionInTheRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         byte[] protocolVersionBytes = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();

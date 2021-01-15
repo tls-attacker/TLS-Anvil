@@ -28,6 +28,9 @@ import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -45,6 +48,7 @@ import java.util.List;
 import org.junit.jupiter.api.Tag;
 
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
 
 
 @RFC(number = 5264, section = "6.2.3.2 CBC Block Cipher")
@@ -58,6 +62,10 @@ public class CBCBlockCipher extends Tls12Test {
     @Security(SeverityLevel.HIGH)
     @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.PADDING_BITMASK})
     @ValueConstraints(affectedTypes = {DerivationType.CIPHERSUITE}, methods = "isCBC")
+    @Crypto(SeverityLevel.CRITICAL)
+    @RecordLayer(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.MEDIUM)
     public void invalidCBCPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = derivationContainer.buildBitmask();
@@ -100,6 +108,10 @@ public class CBCBlockCipher extends Tls12Test {
     @Security(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.CIPHERTEXT_BITMASK)
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
+    @Crypto(SeverityLevel.CRITICAL)
+    @RecordLayer(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.MEDIUM)
     public void invalidCipherText(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = derivationContainer.buildBitmask();
@@ -146,6 +158,10 @@ public class CBCBlockCipher extends Tls12Test {
     @Security(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.MAC_BITMASK)
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
+    @Crypto(SeverityLevel.HIGH)
+    @RecordLayer(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.MEDIUM)
     public void invalidMAC(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] bitmask = derivationContainer.buildBitmask();
@@ -196,6 +212,10 @@ public class CBCBlockCipher extends Tls12Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.HIGH)
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
+    @Crypto(SeverityLevel.HIGH)
+    @RecordLayer(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.MEDIUM)
     public void missingMAC(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -216,6 +236,10 @@ public class CBCBlockCipher extends Tls12Test {
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
     @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.PADDING_BITMASK})
     @ExplicitModelingConstraints(affectedTypes = DerivationType.PADDING_BITMASK, methods = "getPaddingBitmaskConstraints")
+    @Crypto(SeverityLevel.HIGH)
+    @RecordLayer(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.MEDIUM)
     public void missingMACinvalidPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         byte[] paddingBitmask = derivationContainer.buildBitmask();

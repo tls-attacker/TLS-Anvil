@@ -27,6 +27,14 @@ import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -69,7 +77,11 @@ public class RC4Ciphersuites extends Tls12Test {
     @ManualConfig(DerivationType.CIPHERSUITE)
     @MethodCondition(method = "supportsRC4")
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isNonRC4")
-    @Security(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Crypto(SeverityLevel.MEDIUM)
+    @DeprecatedFeature(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.HIGH)
     public void offerRC4AndOtherCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
@@ -97,8 +109,12 @@ public class RC4Ciphersuites extends Tls12Test {
     @TlsTest(description = "If the TLS client only offers RC4 cipher suites, the TLS server " +
             "MUST terminate the handshake. The TLS server MAY send the " +
             "insufficient_security fatal alert in this case.")
-    @Security(SeverityLevel.CRITICAL)
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isRC4")
+    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Crypto(SeverityLevel.MEDIUM)
+    @DeprecatedFeature(SeverityLevel.CRITICAL)
+    @Security(SeverityLevel.HIGH)
     public void onlyRC4Suites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

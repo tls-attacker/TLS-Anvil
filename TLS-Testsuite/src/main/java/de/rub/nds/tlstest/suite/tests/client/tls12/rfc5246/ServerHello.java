@@ -33,11 +33,12 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -49,22 +50,24 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-
 
 @ClientTest
 public class ServerHello extends Tls12Test {
 
     @RFC(number = 5246, section = "7.4.1.4. Hello Extensions")
-    @TlsTest(description = "If a client receives an extension type in ServerHello that it did "+
-            "not request in the associated ClientHello, it MUST abort the handshake with an " +
-            "unsupported_extension fatal alert.")
+    @TlsTest(description = "If a client receives an extension type in ServerHello that it did "
+            + "not request in the associated ClientHello, it MUST abort the handshake with an "
+            + "unsupported_extension fatal alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @Interoperability(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendAdditionalExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddRenegotiationInfoExtension(false);
-        
+
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
 
         List<ExtensionMessage> receivedExtensions = clientHello.getExtensions();
@@ -77,27 +80,27 @@ public class ServerHello extends Tls12Test {
 
         if (!types.contains(ExtensionType.ENCRYPT_THEN_MAC)) {
             extensionMessage = new EncryptThenMacExtensionMessage();
-        }
-        else if (!types.contains(ExtensionType.SERVER_NAME_INDICATION)) {
+        } else if (!types.contains(ExtensionType.SERVER_NAME_INDICATION)) {
             ServerNameIndicationExtensionMessage sni = new ServerNameIndicationExtensionMessage();
             ServerNamePair sniPair = new ServerNamePair();
             sniPair.setServerName(Modifiable.explicit("localhost".getBytes()));
             sniPair.setServerNameType(Modifiable.explicit(NameType.HOST_NAME.getValue()));
-            sni.setServerNameList(new ArrayList<ServerNamePair>(){{add(sniPair);}});
+            sni.setServerNameList(new ArrayList<ServerNamePair>() {
+                {
+                    add(sniPair);
+                }
+            });
 
             extensionMessage = sni;
-        }
-        else if (!types.contains(ExtensionType.RENEGOTIATION_INFO)) {
+        } else if (!types.contains(ExtensionType.RENEGOTIATION_INFO)) {
             RenegotiationInfoExtensionMessage rie = new RenegotiationInfoExtensionMessage();
             rie.setRenegotiationInfo(Modifiable.explicit("abc".getBytes()));
             extensionMessage = rie;
-        }
-        else if (!types.contains(ExtensionType.PADDING)) {
+        } else if (!types.contains(ExtensionType.PADDING)) {
             PaddingExtensionMessage pem = new PaddingExtensionMessage();
             pem.setExtensionBytes(Modifiable.explicit(new byte[10]));
             extensionMessage = pem;
-        }
-        else {
+        } else {
             throw new AssertionError("Every extension was sent by the client...");
         }
 
@@ -105,7 +108,6 @@ public class ServerHello extends Tls12Test {
         workflowTrace.addTlsActions(
                 new ReceiveAction(new AlertMessage())
         );
-
 
         ServerHelloMessage msg = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         msg.addExtension(extensionMessage);
@@ -118,27 +120,28 @@ public class ServerHello extends Tls12Test {
         });
 
     }
-    
+
     public boolean isUnproposedCompressionMethod(CompressionMethod compressionMethod) {
         List<CompressionMethod> proposedCompressionMethods = CompressionMethod.getCompressionMethods(TestContext.getInstance().getSiteReport().getReceivedClientHello().getCompressions().getValue());
         return !proposedCompressionMethods.contains(compressionMethod);
     }
-    
-    @TlsTest(description = "The single compression algorithm selected by the server from the" +
-            "list in ClientHello.compression_methods.")
-    @Interoperability(SeverityLevel.LOW)
+
+    @TlsTest(description = "The single compression algorithm selected by the server from the"
+            + "list in ClientHello.compression_methods.")
     @ScopeExtensions(DerivationType.COMPRESSION_METHOD)
     @DynamicValueConstraints(affectedTypes = DerivationType.COMPRESSION_METHOD, methods = "isUnproposedCompressionMethod")
+    @Interoperability(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.HIGH)
     public void selectUnproposedCompressionMethod(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CompressionMethod selectedCompressionMethod = derivationContainer.getDerivation(CompressionMethodDerivation.class).getSelectedValue();
-        
+
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         ServerHelloMessage serverHello = (ServerHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
         serverHello.setSelectedCompressionMethod(Modifiable.explicit(selectedCompressionMethod.getValue()));
-        
+
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 }

@@ -27,6 +27,8 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -47,12 +49,14 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class AlertProtocol extends Tls12Test {
 
-    @TlsTest(description = "Unless some other fatal alert has been transmitted, each party is " +
-            "required to send a close_notify alert before closing the write side " +
-            "of the connection. The other party MUST respond with a close_notify " +
-            "alert of its own and close down the connection immediately, " +
-            "discarding any pending writes.")
+    @TlsTest(description = "Unless some other fatal alert has been transmitted, each party is "
+            + "required to send a close_notify alert before closing the write side "
+            + "of the connection. The other party MUST respond with a close_notify "
+            + "alert of its own and close down the connection immediately, "
+            + "discarding any pending writes.")
     @Interoperability(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void close_notify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -85,9 +89,11 @@ public class AlertProtocol extends Tls12Test {
 
     @TlsTest
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
-    @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.ALERT)
     @TestDescription("A Fatal Alert must terminate the connection")
+    @Security(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void abortAfterFatalAlertServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         AlertDescription description = derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
@@ -101,10 +107,10 @@ public class AlertProtocol extends Tls12Test {
         alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
         alert.setDescription(Modifiable.explicit(description.getValue()));
 
-        SendAction serverHelloAction = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
+        SendAction serverHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
         serverHelloAction.getSendMessages().add(0, alert);
 
-        runner.execute(workflowTrace, c).validateFinal(i ->{
+        runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             if (Validator.socketClosed(i)) {
                 i.setResult(TestResult.SUCCEEDED);
@@ -131,11 +137,10 @@ public class AlertProtocol extends Tls12Test {
         alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
         alert.setDescription(Modifiable.explicit(description.getValue()));
 
-        SendAction serverHelloAction = (SendAction)WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
-            serverHelloAction.getSendMessages().add(serverHelloAction.getSendMessages().size() - 1, alert);
+        SendAction serverHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
+        serverHelloAction.getSendMessages().add(serverHelloAction.getSendMessages().size() - 1, alert);
 
-
-        runner.execute(workflowTrace, c).validateFinal(i ->{
+        runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             if (Validator.socketClosed(i)) {
                 i.setResult(TestResult.SUCCEEDED);

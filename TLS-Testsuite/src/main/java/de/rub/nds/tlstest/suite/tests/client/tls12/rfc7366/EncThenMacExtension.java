@@ -24,6 +24,8 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -34,12 +36,9 @@ import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -80,10 +79,11 @@ public class EncThenMacExtension extends Tls12Test {
             + "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, "
             + "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
     @MethodCondition(method = "supportsExtension")
-    @Security(SeverityLevel.LOW)
-    @Interoperability(SeverityLevel.MEDIUM)
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNotBlockCipher")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @Interoperability(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void sendEncThenMacExtWithNonBlockCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);
@@ -96,13 +96,14 @@ public class EncThenMacExtension extends Tls12Test {
         });
     }
     
-    @Security(SeverityLevel.MEDIUM)
     @TlsTest(description = "Test if the client can complete the handshake if encrypt-then-MAC is negotiated")
     @MethodCondition(method = "supportsExtension")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isBlockCipher")
-    @Interoperability(SeverityLevel.CRITICAL)
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @Interoperability(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void encryptThenMacTest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);

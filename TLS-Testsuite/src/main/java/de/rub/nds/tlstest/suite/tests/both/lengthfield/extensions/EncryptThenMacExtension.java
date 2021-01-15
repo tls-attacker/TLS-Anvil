@@ -11,8 +11,11 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -41,6 +44,8 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "targetCanBeTested")
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void encryptThenMacExtensionLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         config.setAddEncryptThenMacExtension(true);
@@ -51,9 +56,11 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @TlsTest(description = "Sending a Hello Message with a modified SessionID length")
+    @TlsTest(description = "Sending a Hello Message with a modified SessionID length")//TODO I think this description is wrong?
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructure(SeverityLevel.MEDIUM)
+    @Handshake(SeverityLevel.MEDIUM)
     public void encryptThenMacExtensionLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddEncryptThenMacExtension(true);

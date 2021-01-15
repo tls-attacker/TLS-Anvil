@@ -12,6 +12,7 @@ import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
@@ -27,6 +28,7 @@ import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
@@ -160,15 +162,23 @@ public class Resumption extends Tls12Test {
 
         SendAction finSend = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.FINISHED, workflowTrace);
         finSend.getSendMessages().add(alert);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(s -> {
             WorkflowTrace trace = s.getWorkflowTrace();
-            ClientHelloMessage cHello = trace.getLastSendMessage(ClientHelloMessage.class);
-            if (WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.SERVER_HELLO, trace)
-                    && trace.getLastReceivedMessage(ServerHelloMessage.class) != trace.getFirstReceivedMessage(ServerHelloMessage.class)) {
+            ClientHelloMessage resumptionClientHello = trace.getLastSendMessage(ClientHelloMessage.class);
+            ServerHelloMessage firstServerHello = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+            ServerHelloMessage secondServerHello = trace.getLastReceivedMessage(ServerHelloMessage.class);
+            
+            //for ticket-based resumption
+            ChangeCipherSpecMessage firstCcs = trace.getFirstReceivedMessage(ChangeCipherSpecMessage.class);
+            ChangeCipherSpecMessage secondCcs = trace.getLastReceivedMessage(ChangeCipherSpecMessage.class);
+            assertTrue("Did not receive both expected Server Hello messages", firstServerHello != null && secondServerHello != null && secondServerHello != firstServerHello);
+            if (resumptionClientHello.getSessionIdLength().getValue() > 0) {
                 ServerHelloMessage sHello = trace.getLastReceivedMessage(ServerHelloMessage.class);
-                assertTrue("Server accepted resumption after Fatal Alert", !Arrays.equals(cHello.getSessionId().getValue(), sHello.getSessionId().getValue()));
+                assertTrue("Server accepted resumption via SessionID after Fatal Alert", !Arrays.equals(resumptionClientHello.getSessionId().getValue(), sHello.getSessionId().getValue()));
+            } else {
+                assertTrue("Server accepted resumption via Tickets after Fatal Alert", secondCcs == null || secondCcs == firstCcs);
             }
         });
     }
@@ -176,6 +186,7 @@ public class Resumption extends Tls12Test {
     @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
+    @ScopeLimitations(DerivationType.INCLUDE_SESSION_TICKET_EXTENSION)
     @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.ALERT)
     @Handshake(SeverityLevel.MEDIUM)
@@ -193,7 +204,7 @@ public class Resumption extends Tls12Test {
             if (WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.SERVER_HELLO, trace)
                     && trace.getLastReceivedMessage(ServerHelloMessage.class) != trace.getFirstReceivedMessage(ServerHelloMessage.class)) {
                 ServerHelloMessage sHello = trace.getLastReceivedMessage(ServerHelloMessage.class);
-                assertTrue("Server accepted resumption after invalid Finished", !Arrays.equals(cHello.getSessionId().getValue(), sHello.getSessionId().getValue()));
+                assertTrue("Server accepted resumption after invalid Finished", !Arrays.equals(cHello.getSessionId().getValue(), sHello.getSessionId().getValue()) && cHello.getSessionIdLength().getValue() > 0);
             }
         });
     }

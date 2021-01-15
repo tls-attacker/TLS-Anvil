@@ -42,9 +42,11 @@ import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.tests.client.both.statemachine.SharedStateMachineTest;
 import org.junit.jupiter.api.Tag;
@@ -65,6 +67,7 @@ public class StateMachine extends Tls13Test {
     @Compliance(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
     @CVE(SeverityLevel.CRITICAL)
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     public void sendFinishedWithoutCert(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE);
@@ -82,6 +85,7 @@ public class StateMachine extends Tls13Test {
             + "handshake with an \"unexpected_message\" alert.")
     @RFC(number = 8446, section = "5. Record Protocol")
     @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)
@@ -107,6 +111,7 @@ public class StateMachine extends Tls13Test {
             + "which receives a protected change_cipher_spec record MUST abort the "
             + "handshake with an \"unexpected_message\" alert.")
     @RFC(number = 8446, section = "5. Record Protocol")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)
@@ -132,6 +137,7 @@ public class StateMachine extends Tls13Test {
             + "treated as an unexpected record type (though stateless servers may "
             + "not be able to distinguish these cases from allowed cases).")
     @RFC(number = 8446, section = "5. Record Protocol")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
@@ -145,6 +151,7 @@ public class StateMachine extends Tls13Test {
     }
 
     @TlsTest(description = "Negotiate TLS 1.3 but send an unencrypted Certificate Message")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
@@ -161,6 +168,7 @@ public class StateMachine extends Tls13Test {
     }
 
     @TlsTest(description = "Negotiate TLS 1.3 but send an unencrypted Certificate Message and legacy ECDHE Key Exchange Message")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
@@ -177,6 +185,7 @@ public class StateMachine extends Tls13Test {
     }
 
     @TlsTest(description = "Negotiate TLS 1.3 but send an unencrypted Certificate Message and legacy DHE Key Exchange Message")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
@@ -226,8 +235,9 @@ public class StateMachine extends Tls13Test {
     }
 
     @RFC(number = 8446, section = "4.5. End of Early Data")
-    @TlsTest(description = "Servers MUST NOT send this message, and clients receiving it MUST"
-            + "terminate the connection with an \"unexpected_message\" alert.")
+    @TlsTest(description = "Servers MUST NOT send this message, and clients receiving it MUST" +
+            "terminate the connection with an \"unexpected_message\" alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)

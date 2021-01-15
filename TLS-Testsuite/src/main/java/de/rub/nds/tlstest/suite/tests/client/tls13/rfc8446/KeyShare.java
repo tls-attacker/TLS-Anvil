@@ -146,8 +146,9 @@ public class KeyShare extends Tls13Test {
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
-
-    @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
+    
+    @Test
+    @TestDescription("RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @DeprecatedFeature(SeverityLevel.HIGH)

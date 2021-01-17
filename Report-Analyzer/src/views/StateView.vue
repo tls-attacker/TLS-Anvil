@@ -252,12 +252,10 @@ export default {
       Promise.all(promises).then(() => {
         this.derivationFilters = []
         for (const derivation of derivations) {
-          let comparator = FilterInputModels.Comparator.constants
+          let comparator = ["==", "!=", "contains", "!contains"]
           const values = Array.from(derivationValues[derivation])
           values.sort()
-          if (derivation.toLocaleLowerCase() == "ciphersuite") {
-            comparator = ["==", "!=", "contains", "!contains"]
-          } else if (!isNaN(values[0])) {
+          if (!isNaN(values[0])) {
             comparator = FilterInputModels.Comparator.all
             values.sort((i,j) =>{
               const ni = parseInt(i)

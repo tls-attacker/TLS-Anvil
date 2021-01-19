@@ -24,6 +24,7 @@ import java.util.StringJoiner;
 public class CertificateDerivation extends DerivationParameter<CertificateKeyPair> {
     
     private final int MIN_RSA_KEY_LEN = TestContext.getInstance().getSiteReport().getMinimumRsaCertKeySize();
+    private final int MIN_DSS_KEY_LEN = TestContext.getInstance().getSiteReport().getMinimumDssCertKeySize();
     private final boolean ALLOW_DSS = true;
 
     public CertificateDerivation() {
@@ -41,7 +42,9 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
         CertificateByteChooser.getInstance().getCertificateKeyPairList().stream()
                 .filter(cert -> certMatchesAnySupportedCipherSuite(cert, scope))
                 .filter(cert -> cert.getCertPublicKeyType() != CertificateKeyType.RSA 
-                        || cert.getPublicKey().keySize()>= MIN_RSA_KEY_LEN)
+                        || cert.getPublicKey().keySize() >= MIN_RSA_KEY_LEN)
+                .filter(cert -> cert.getCertPublicKeyType() != CertificateKeyType.DSS 
+                        || cert.getPublicKey().keySize() >= MIN_DSS_KEY_LEN)
                 .filter(cert -> cert.getCertSignatureType() != CertificateKeyType.DSS
                         || ALLOW_DSS)
                 .filter(cert -> (cert.getPublicKeyGroup() == null 

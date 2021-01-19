@@ -368,25 +368,16 @@ public class TestRunner {
         executor.bulkExecuteTasks(task);
         boolean supportsRecordFragmentation = state.getWorkflowTrace().executedAsPlanned();
         
-        List<CipherSuite> tls12RsaCipherSuites = tls12CipherSuites.stream().filter(cipherSuite -> AlgorithmResolver.getCertificateKeyType(cipherSuite) == CertificateKeyType.RSA).collect(Collectors.toList());
-        int minimumRsaKeySize = this.testConfig.createConfig().getPrefferedCertRsaKeySize();
-        if(tls12RsaCipherSuites.size() > 0) {
-            List<State> rsaCertStates = getClientRSACertMinimumKeyLengthStates(tls12RsaCipherSuites);
-            List<TlsTask> rsaCertTasks = buildStateExecutionServerTasksFromStates(rsaCertStates);
-            executor.bulkExecuteTasks(rsaCertTasks);
-            for(State executedState: rsaCertStates) {
-                if(executedState.getWorkflowTrace().executedAsPlanned() && executedState.getConfig().getPrefferedCertRsaKeySize() < minimumRsaKeySize) {
-                    minimumRsaKeySize = executedState.getConfig().getPrefferedCertRsaKeySize();
-                }
-            }
-        }
+        int rsaMinCertKeySize = getCertMinimumKeySize(executor, tls12CipherSuites, CertificateKeyType.RSA);
+        int dssMinCertKeySize = getCertMinimumKeySize(executor, tls12CipherSuites, CertificateKeyType.DSS);
         
         TestSiteReport report = new TestSiteReport("");
         report.addCipherSuites(tls12CipherSuites);
         report.addCipherSuites(tls13CipherSuites);
         report.setReceivedClientHello(clientHello);
         report.setSupportsRecordFragmentation(supportsRecordFragmentation);
-        report.setMinimumRsaCertKeySize(minimumRsaKeySize);
+        report.setMinimumRsaCertKeySize(rsaMinCertKeySize);
+        report.setMinimumDssCertKeySize(dssMinCertKeySize);
         additionalTls13Groups.addAll(report.getClientHelloKeyShareGroups());
         report.setSupportedTls13Groups(additionalTls13Groups);
 
@@ -621,21 +612,38 @@ public class TestRunner {
         return states;
     }
     
-    private List<State> getClientRSACertMinimumKeyLengthStates(List<CipherSuite> supportedRSACipherSuites) {
-        Set<Integer> rsaKeySizes = new HashSet<>();
+    private int getCertMinimumKeySize(ParallelExecutor executor, Set<CipherSuite> cipherSuites, CertificateKeyType keyType) {
+        List<CipherSuite> matchingCipherSuites = cipherSuites.stream().filter(cipherSuite -> AlgorithmResolver.getCertificateKeyType(cipherSuite) == keyType).collect(Collectors.toList());
+        int minimumKeySize = 0;
+        if(matchingCipherSuites.size() > 0) {
+            List<State> certStates = getClientCertMinimumKeyLengthStates(matchingCipherSuites, keyType);
+            List<TlsTask> certTasks = buildStateExecutionServerTasksFromStates(certStates);
+            executor.bulkExecuteTasks(certTasks);
+            for(State executedState: certStates) {
+                int certKeySize = executedState.getConfig().getDefaultExplicitCertificateKeyPair().getPublicKey().keySize();
+                if(executedState.getWorkflowTrace().executedAsPlanned() && (certKeySize < minimumKeySize || minimumKeySize == 0)) {
+                    minimumKeySize = certKeySize;
+                }
+            }
+        }
+        return minimumKeySize;
+    }
+    
+    private List<State> getClientCertMinimumKeyLengthStates(List<CipherSuite> supportedCipherSuites, CertificateKeyType keyType) {
+        Set<CertificateKeyPair> availableCerts = new HashSet<>();
         CertificateByteChooser.getInstance().getCertificateKeyPairList().forEach(certKeyPair -> {
-            if(certKeyPair.getCertPublicKeyType() == CertificateKeyType.RSA) {
-                rsaKeySizes.add(certKeyPair.getPublicKey().keySize());
+            if(certKeyPair.getCertPublicKeyType() == keyType && (keyType != CertificateKeyType.RSA || certKeyPair.getPublicKey().keySize() > 512)) {
+                availableCerts.add(certKeyPair);
             }
         });
-        rsaKeySizes.remove(512);
 
         List<State> testStates = new LinkedList<>();
-        for(Integer keySize: rsaKeySizes) {
+        for(CertificateKeyPair certKeyPair: availableCerts) {
             Config config = this.testConfig.createConfig();
-            config.setPrefferedCertRsaKeySize(keySize);
-            config.setDefaultServerSupportedCipherSuites(supportedRSACipherSuites);
-            config.setDefaultSelectedCipherSuite(supportedRSACipherSuites.get(0));
+            config.setAutoSelectCertificate(false);
+            config.setDefaultExplicitCertificateKeyPair(certKeyPair);
+            config.setDefaultServerSupportedCipherSuites(supportedCipherSuites);
+            config.setDefaultSelectedCipherSuite(supportedCipherSuites.get(0));
             State state = new State(config, new WorkflowConfigurationFactory(config).createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER));
             testStates.add(state);
         }

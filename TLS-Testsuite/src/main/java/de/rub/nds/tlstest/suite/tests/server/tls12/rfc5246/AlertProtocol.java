@@ -73,9 +73,9 @@ public class AlertProtocol extends Tls12Test {
             + "alert of its own and close down the connection immediately, "
             + "discarding any pending writes.")
     @RFC(number = 5246, section = "7.2.1 Closure Alerts")
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @Interoperability(SeverityLevel.LOW)
+    @Alert(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.LOW)
     public void close_notify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

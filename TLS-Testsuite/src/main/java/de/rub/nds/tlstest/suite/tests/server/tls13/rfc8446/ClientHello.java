@@ -53,6 +53,7 @@ public class ClientHello extends Tls13Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
+    //TODO MM: move to state machines?
     public void sendClientHelloAfterFinishedHandshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -77,9 +78,9 @@ public class ClientHello extends Tls13Test {
             + "does not recognize, support, or wish to use, the server MUST "
             + "ignore those cipher suites and process the remaining ones as "
             + "usual.")
-    @Interoperability(SeverityLevel.MEDIUM)
+    @Interoperability(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.CRITICAL)
     public void includeUnknownCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -189,7 +190,7 @@ public class ClientHello extends Tls13Test {
     @TlsTest(description = "Servers MUST ignore unrecognized extensions.")
     @Interoperability(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.MEDIUM)
     public void includeUnknownExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

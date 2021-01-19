@@ -46,7 +46,7 @@ public class PreSharedKey extends Tls13Test {
     @Test
     @MethodCondition(method = "sendsPSKExtension")
     @TestDescription("The Pre-Shared Key extension must me the last extension of the Client Hello")
-    @Interoperability(SeverityLevel.MEDIUM)
+    @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)

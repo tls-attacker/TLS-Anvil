@@ -23,6 +23,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -41,6 +42,7 @@ public class Finished extends Tls13Test {
     @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.PRF_BITMASK)
     @Handshake(SeverityLevel.CRITICAL)
+    @Crypto(SeverityLevel.CRITICAL)
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

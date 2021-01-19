@@ -87,7 +87,7 @@ public class SupportedVersions extends Tls13Test {
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getInvalidLegacyVersions")
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.MEDIUM)
     public void invalidLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -109,6 +109,7 @@ public class SupportedVersions extends Tls13Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
+    @Security(SeverityLevel.HIGH)
     public void selectOlderTlsVersionInTls12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
 
@@ -216,8 +217,8 @@ public class SupportedVersions extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
-    @Security(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Security(SeverityLevel.HIGH)
     public void negotiateUnproposedOldProtocolVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
         byte[] oldProtocolVersion = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();

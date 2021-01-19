@@ -33,8 +33,8 @@ public class PaddingExtension extends Tls12Test {
     @TestDescription("The client MUST fill the padding extension completely with zero "
             + "bytes, although the padding extension_data field may be empty.")
     @Compliance(SeverityLevel.LOW)
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
+    @Interoperability(SeverityLevel.LOW)
+    @Handshake(SeverityLevel.LOW)
     public void paddingWithNonZero() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);

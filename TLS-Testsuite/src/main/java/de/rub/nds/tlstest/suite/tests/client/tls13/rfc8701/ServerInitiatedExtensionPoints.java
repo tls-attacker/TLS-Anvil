@@ -33,6 +33,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -60,7 +61,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "clients MUST NOT treat GREASE values diﬀerently from any unknown value.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
-    @Interoperability(SeverityLevel.CRITICAL)
+    @Interoperability(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
     @Handshake(SeverityLevel.MEDIUM)
     public void advertiseGreaseExtensionsInSessionTicket(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -82,7 +83,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
     @Interoperability(SeverityLevel.CRITICAL)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -109,7 +110,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
     @ScopeLimitations(DerivationType.CIPHERSUITE)
     @Interoperability(SeverityLevel.CRITICAL)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -133,6 +134,8 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "Any ServerHello extension")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     public void sendServerHelloGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -157,7 +160,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     @Interoperability(SeverityLevel.CRITICAL)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
     public void sendEncryptedExtensionsGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -177,8 +180,10 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "The signature algorithm in a server CertiﬁcateVerify signature in TLS 1.3")
     @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
     @Interoperability(SeverityLevel.CRITICAL)
-    @Compliance(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.CRITICAL)
+    @Crypto(SeverityLevel.CRITICAL)
+    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
     public void sendCertificateVerifyGreaseSignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

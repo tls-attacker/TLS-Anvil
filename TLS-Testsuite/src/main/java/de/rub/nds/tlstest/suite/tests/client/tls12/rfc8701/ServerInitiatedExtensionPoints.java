@@ -57,6 +57,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
     @Handshake(SeverityLevel.MEDIUM)
     @Interoperability(SeverityLevel.HIGH)
+    /*Categories MM: Here I'd also argue that this does not affect interop.
+    (same for all tests below)*/
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

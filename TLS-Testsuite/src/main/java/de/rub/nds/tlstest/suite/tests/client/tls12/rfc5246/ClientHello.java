@@ -34,7 +34,7 @@ public class ClientHello extends Tls12Test {
             + "Thus, a client and server will always be able to agree on a compression method.")
     @Interoperability(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
     public void unknownCompressionMethod() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();

@@ -31,6 +31,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
@@ -86,7 +87,7 @@ public class Resumption extends Tls12Test {
     @MethodCondition(method = "supportsResumptionAndSniActive")
     @Security(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.LOW)
     @Interoperability(SeverityLevel.LOW)
     public void rejectSniDisparityResumption(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -126,7 +127,7 @@ public class Resumption extends Tls12Test {
     @MethodCondition(method = "supportsResumptionAndSniActive")
     @Security(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.LOW)
     @Interoperability(SeverityLevel.LOW)
     public void serverHelloSniInResumption(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -149,6 +150,8 @@ public class Resumption extends Tls12Test {
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
     @ScopeExtensions(DerivationType.ALERT)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.MEDIUM)
     @Security(SeverityLevel.MEDIUM)
     @Handshake(SeverityLevel.MEDIUM)
     public void rejectResumptionAfterFatalPostHandshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -188,6 +191,7 @@ public class Resumption extends Tls12Test {
     @MethodCondition(method = "supportsResumption")
     @ScopeLimitations(DerivationType.INCLUDE_SESSION_TICKET_EXTENSION)
     @Security(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.MEDIUM)
     @ScopeExtensions(DerivationType.ALERT)
     @Handshake(SeverityLevel.MEDIUM)
     public void rejectResumptionAfterInvalidFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

@@ -88,7 +88,9 @@ public class StateMachine extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM) 
+    /*Categories: remove Alert from these tests? the 1.2 client statemachine
+    tests did not have it anyway*/
     @Compliance(SeverityLevel.MEDIUM)
     public void sendHandshakeTrafficSecretEncryptedChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

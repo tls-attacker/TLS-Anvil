@@ -58,7 +58,7 @@ public class ServerHello extends Tls13Test {
     @TlsTest(description = "In TLS 1.3, the TLS server indicates its version using the \"supported_versions\" " +
             "extension (Section 4.2.1), and the legacy_version field MUST be " +
             "set to 0x0303, which is the version number for TLS 1.2.")
-    @Interoperability(SeverityLevel.MEDIUM)
+    @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     public void testLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -84,7 +84,7 @@ public class ServerHello extends Tls13Test {
             "below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random.")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @Interoperability(SeverityLevel.MEDIUM)
+    @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     public void testServerRandomFor12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

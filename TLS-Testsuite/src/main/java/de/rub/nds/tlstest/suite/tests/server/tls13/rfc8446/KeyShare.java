@@ -160,7 +160,7 @@ public class KeyShare extends Tls13Test {
     @Compliance(SeverityLevel.HIGH)
     @Crypto(SeverityLevel.HIGH)
     @DeprecatedFeature(SeverityLevel.HIGH)
-    @Security(SeverityLevel.HIGH)
+    @Security(SeverityLevel.LOW) //Categroies MM: see other deprecated groups...
     public void serverAcceptsDeprecatedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> groups = NamedGroup.getImplemented();
@@ -175,7 +175,7 @@ public class KeyShare extends Tls13Test {
     @Compliance(SeverityLevel.HIGH)
     @Crypto(SeverityLevel.HIGH)
     @DeprecatedFeature(SeverityLevel.HIGH)
-    @Security(SeverityLevel.HIGH)
+    @Security(SeverityLevel.LOW) //Categroies MM: see other deprecated groups...
     public void serverAcceptsDeprecatedGroupsAllAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> groups = NamedGroup.getImplemented();
@@ -204,7 +204,7 @@ public class KeyShare extends Tls13Test {
     @TlsTest(description = "Send a Client Hello with an undefined Named Group")
     @Interoperability(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.CRITICAL)
     public void includeUnknownGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

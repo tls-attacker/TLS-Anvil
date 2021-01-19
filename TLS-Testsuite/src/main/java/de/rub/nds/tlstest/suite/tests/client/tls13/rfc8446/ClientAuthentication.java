@@ -33,6 +33,7 @@ public class ClientAuthentication extends Tls13Test {
             "Certificate message containing no certificates.")
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
+    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.LOW)
     @Compliance(SeverityLevel.MEDIUM)
     public void clientSendsCertificateMessage(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

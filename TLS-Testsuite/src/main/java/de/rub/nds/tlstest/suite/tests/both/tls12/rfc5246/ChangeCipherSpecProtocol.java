@@ -51,7 +51,12 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
     @ScopeExtensions(DerivationType.INVALID_CCS_CONTENT)
     @Interoperability(SeverityLevel.MEDIUM)
     @Handshake(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.MEDIUM)
+    /*Categories MM: When a test has both @Interop and @Compliance set,
+    I often changed the values to be matching. While there are examples, where
+    their value is not identical, we might think about ditching one of these.
+    Isn't a lack of interoperability often caused by one implementation 
+    (blindly) relying on the RFC compliance of another?*/
     public void ccsContentTest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

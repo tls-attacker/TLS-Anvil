@@ -131,6 +131,7 @@ public class ServerHello extends Tls12Test {
     @ScopeExtensions(DerivationType.COMPRESSION_METHOD)
     @DynamicValueConstraints(affectedTypes = DerivationType.COMPRESSION_METHOD, methods = "isUnproposedCompressionMethod")
     @Interoperability(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.HIGH)
     public void selectUnproposedCompressionMethod(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

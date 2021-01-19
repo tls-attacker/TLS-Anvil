@@ -54,9 +54,9 @@ public class AlertProtocol extends Tls12Test {
             + "of the connection. The other party MUST respond with a close_notify "
             + "alert of its own and close down the connection immediately, "
             + "discarding any pending writes.")
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @Interoperability(SeverityLevel.LOW)
+    @Alert(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.LOW)
     public void close_notify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -122,6 +122,8 @@ public class AlertProtocol extends Tls12Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
     @Security(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.ALERT)
     @TestDescription("A Fatal Alert must terminate the connection")
     public void abortAfterFatalAlertServerHelloDone(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

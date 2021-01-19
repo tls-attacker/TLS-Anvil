@@ -58,7 +58,7 @@ public class RecordLayer extends Tls13Test {
             + "if those fragments contain padding.")
     @Interoperability(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void zeroLengthRecord_ServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -86,7 +86,7 @@ public class RecordLayer extends Tls13Test {
             + "if those fragments contain padding.")
     @Interoperability(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void zeroLengthRecord_Finished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -114,7 +114,14 @@ public class RecordLayer extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
     @Alert(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    /*TODO: is this test correct? by my understanding it tests if two different
+    record content type messages may be in the same record (with only 1 content
+    type given in the header) - the RFC states right below the quote from above 
+    "That is, if a handshake message is split over two or more records, there 
+    MUST NOT be any other records between them.
+    We aren't always fragmenting here so this description doesn't match.
+    */
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -145,6 +152,7 @@ public class RecordLayer extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.HIGH)
     public void sendEmptyZeroLengthRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         HandshakeMessageType affectedMessage = derivationContainer.getDerivation(ChosenHandshakeMessageDerivation.class).getSelectedValue();

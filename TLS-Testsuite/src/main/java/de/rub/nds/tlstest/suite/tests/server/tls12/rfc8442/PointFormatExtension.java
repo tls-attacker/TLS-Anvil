@@ -67,9 +67,10 @@ public class PointFormatExtension extends Tls12Test {
             + "still be included and contain exactly one value: the uncompressed"
             + "point format (0).")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @Interoperability(SeverityLevel.HIGH)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Interoperability(SeverityLevel.HIGH) 
+    @Handshake(SeverityLevel.MEDIUM) 
+    @Compliance(SeverityLevel.HIGH)
+    @DeprecatedFeature(SeverityLevel.MEDIUM)
     public void serverAdvertisesOnlyUncompressedPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -157,9 +158,12 @@ public class PointFormatExtension extends Tls12Test {
             + "return an illegal_parameter alert.")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @Interoperability(SeverityLevel.LOW)
+    /*Categories MM: This is another example where an implementation that does
+    _not_ follow the RFC could reach a higher interoperability*/
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)
+    @DeprecatedFeature(SeverityLevel.MEDIUM)
     public void deprecatedFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

@@ -26,6 +26,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
@@ -87,7 +88,20 @@ public class ServerKeyExchange extends Tls12Test {
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getUnproposedNamedGroups")
     @Handshake(SeverityLevel.MEDIUM)
-    @Interoperability(SeverityLevel.HIGH)
+    @Interoperability(SeverityLevel.HIGH) 
+    /* Categories MM: I think most of the (client) tests, where we choose invalid
+    values and expect the client to abort the handshake, do not affect
+    interoperability - here for example, a client that accepts an unproposed
+    group does not affect the interoperability - unless we use interoperability
+    in the spirit of GREASE (to prevent a spreading "bad habit" among implementations) 
+    
+    Up until a certain point, I marked some of the tests so we can find them
+    quickly later on if we want to remove the annotation - if anyone else shares
+    my definition of the category, please add a comment to the annotations of
+    tests I didn't mark
+    */
+    @Security(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.HIGH)
     public void acceptsUnproposedNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -174,6 +188,7 @@ public class ServerKeyExchange extends Tls12Test {
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
     @Handshake(SeverityLevel.MEDIUM)
     @Interoperability(SeverityLevel.MEDIUM)
+    //Categories MM: this is another interoperability-in-question example
     public void acceptsUnproposedSignatureAndHash(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

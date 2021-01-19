@@ -45,6 +45,7 @@ public class ClientHello extends Tls12Test {
     @TlsTest(description = "If the list contains cipher suites the server does not recognize, support, " +
             "or wish to use, the server MUST ignore those cipher suites, and process the remaining ones as usual.")
     @Interoperability(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     public void unknownCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -86,7 +87,7 @@ public class ClientHello extends Tls12Test {
     @TlsTest(description = "The rules specified in [TLSEXT] " +
             "require servers to ignore extensions they do not understand.")
     @Interoperability(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     public void includeUnknownExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

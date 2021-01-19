@@ -61,7 +61,7 @@ public class RespectClientExtensions extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void respectChosenCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -81,7 +81,7 @@ public class RespectClientExtensions extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void respectChosenCurveWithoutFormats(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

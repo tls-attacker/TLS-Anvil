@@ -40,7 +40,7 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @TlsTest(description = "Send an Encrypt-Then-Mac Extension in the Hello Message with a modified formats list length value")
+    @TlsTest(description = "Send an Encrypt-Then-Mac Extension in the Hello Message with a modified length value")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "targetCanBeTested")
@@ -56,7 +56,7 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @TlsTest(description = "Sending a Hello Message with a modified SessionID length")//TODO I think this description is wrong?
+    @TlsTest(description = "Send an Encrypt-Then-Mac Extension in the Hello Message with a modified length value")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructure(SeverityLevel.MEDIUM)

@@ -128,7 +128,7 @@ public class RecordProtocol extends Tls13Test {
     @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
     @Crypto(SeverityLevel.CRITICAL)
     @RecordLayer(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.LOW)
+    @Alert(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.MEDIUM)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -196,7 +196,7 @@ public class RecordProtocol extends Tls13Test {
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @Crypto(SeverityLevel.CRITICAL)
     @RecordLayer(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.LOW)
+    @Alert(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.MEDIUM)
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -276,6 +276,9 @@ public class RecordProtocol extends Tls13Test {
     @Security(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.HIGH)
     @Tag("emptyRecord")
+    /*TODO: MM maybe we should make this a state machine tests?
+    Also: does the content type do anything here? record type should be APP
+    does the 'encoded' record type ignore MaxRecordLengthConfig?*/
     public void sendEmptyFinishedRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

@@ -13,6 +13,7 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -45,6 +46,7 @@ public class A5CipherSuite extends Tls12Test {
     @Security(SeverityLevel.CRITICAL)
     @TestDescription("Anonymous Cipher Suites must not be used unless requested by application layer")
     @Handshake(SeverityLevel.MEDIUM)
+    @Interoperability(SeverityLevel.LOW)
     public void anonCipherSuites() {
         List<CipherSuite> suites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         List<CipherSuite> forbidden = CipherSuite.getImplemented();

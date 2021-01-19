@@ -48,7 +48,7 @@ public class RecordLayer extends Tls13Test {
             + "if those fragments contain padding.")
     @Interoperability(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void zeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -72,7 +72,7 @@ public class RecordLayer extends Tls13Test {
             + "if those fragments contain padding.")
     @Interoperability(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void zeroLengthRecord_Finished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -96,7 +96,7 @@ public class RecordLayer extends Tls13Test {
     @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
     @Interoperability(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

@@ -29,6 +29,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -48,6 +49,7 @@ public class Finished extends Tls12Test {
     @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.PRF_BITMASK)
     @Handshake(SeverityLevel.CRITICAL)
+    @Crypto(SeverityLevel.CRITICAL)
     public void verifyFinishedMessageCorrect(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = derivationContainer.buildBitmask();
@@ -68,6 +70,7 @@ public class Finished extends Tls12Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.CRITICAL)
+    @Crypto(SeverityLevel.CRITICAL)
     public void invalidPRF(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

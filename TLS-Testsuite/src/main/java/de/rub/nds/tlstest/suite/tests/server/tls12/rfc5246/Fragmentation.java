@@ -55,7 +55,7 @@ public class Fragmentation extends Tls12Test {
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
     @RecordLayer(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendZeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -84,7 +84,7 @@ public class Fragmentation extends Tls12Test {
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
     @RecordLayer(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendZeroLengthRecord_Alert(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);

@@ -44,6 +44,7 @@ public class TLSRecordProtocol extends Tls12Test {
             + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
             + "record type, it MUST send an unexpected_message alert.")
     @Interoperability(SeverityLevel.LOW)
+    //Categories MM: interoperability?
     @RecordLayer(SeverityLevel.LOW)
     @Alert(SeverityLevel.LOW)
     @Compliance(SeverityLevel.LOW)
@@ -73,6 +74,7 @@ public class TLSRecordProtocol extends Tls12Test {
             + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
             + "record type, it MUST send an unexpected_message alert.")
     @Interoperability(SeverityLevel.LOW)
+    //Categories MM: interoperability?
     @RecordLayer(SeverityLevel.LOW)
     @Alert(SeverityLevel.LOW)
     @Compliance(SeverityLevel.LOW)

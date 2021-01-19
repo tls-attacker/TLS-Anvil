@@ -40,7 +40,7 @@ public class CertificateStatusRequest extends Tls12Test {
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
-    public void moreThanOneNameOfTheSameType(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void doesNotSendUnrequestedCertificateStatus(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddCertificateStatusRequestExtension(false);
 

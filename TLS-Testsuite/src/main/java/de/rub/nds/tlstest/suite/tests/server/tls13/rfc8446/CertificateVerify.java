@@ -58,6 +58,7 @@ public class CertificateVerify extends Tls13Test {
     @Compliance(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
+    /* Categories MM: I think we should remove Security here*/
     public void signatureIsValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -65,7 +66,7 @@ public class CertificateVerify extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(i -> {
 
             Validator.executedAsPlanned(i);
-            assertTrue("Server Key Exchange Message contained an invalid signature", signatureValid(i));
+            assertTrue("Certificate Verify Message contained an invalid signature", signatureValid(i));
         });
     }
 

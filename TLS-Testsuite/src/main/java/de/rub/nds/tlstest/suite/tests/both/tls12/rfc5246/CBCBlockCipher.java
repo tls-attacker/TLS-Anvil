@@ -64,8 +64,8 @@ public class CBCBlockCipher extends Tls12Test {
     @ValueConstraints(affectedTypes = {DerivationType.CIPHERSUITE}, methods = "isCBC")
     @Crypto(SeverityLevel.CRITICAL)
     @RecordLayer(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.HIGH)
     public void invalidCBCPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = derivationContainer.buildBitmask();
@@ -110,8 +110,8 @@ public class CBCBlockCipher extends Tls12Test {
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
     @Crypto(SeverityLevel.CRITICAL)
     @RecordLayer(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.HIGH)
     public void invalidCipherText(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = derivationContainer.buildBitmask();
@@ -166,8 +166,8 @@ public class CBCBlockCipher extends Tls12Test {
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
     @Crypto(SeverityLevel.HIGH)
     @RecordLayer(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.HIGH)
     public void invalidMAC(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] bitmask = derivationContainer.buildBitmask();
@@ -220,8 +220,8 @@ public class CBCBlockCipher extends Tls12Test {
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
     @Crypto(SeverityLevel.HIGH)
     @RecordLayer(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.HIGH)
     public void missingMAC(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -244,8 +244,8 @@ public class CBCBlockCipher extends Tls12Test {
     @ExplicitModelingConstraints(affectedTypes = DerivationType.PADDING_BITMASK, methods = "getPaddingBitmaskConstraints")
     @Crypto(SeverityLevel.HIGH)
     @RecordLayer(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.HIGH)
     public void missingMACinvalidPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         byte[] paddingBitmask = derivationContainer.buildBitmask();

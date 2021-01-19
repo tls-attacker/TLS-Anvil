@@ -105,7 +105,7 @@ public class HelloRetryRequest extends Tls13Test {
     @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getUnofferedTls13CipherSuites")
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM) //Categories MM: remove this for all tests here as there is no specific alert?
     @Compliance(SeverityLevel.MEDIUM)
     public void helloRetryRequestsUnofferedTls13CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -185,7 +185,7 @@ public class HelloRetryRequest extends Tls13Test {
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendSecondHelloRetryRequest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -232,7 +232,7 @@ public class HelloRetryRequest extends Tls13Test {
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void cipherSuiteDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
@@ -263,7 +263,7 @@ public class HelloRetryRequest extends Tls13Test {
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void helloRetryLegacySessionId(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
         ServerHello.sharedSessionIdTest(workflowTrace, runner);
@@ -346,10 +346,10 @@ public class HelloRetryRequest extends Tls13Test {
             + "HelloRetryRequest. In that case, the client MUST send the same "
             + "ClientHello without modification, except as follows: [...]")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
-    @Interoperability(SeverityLevel.LOW)
+    @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void helloRetryIsUnmodifiedExceptAllowed(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);

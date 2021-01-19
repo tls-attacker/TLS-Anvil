@@ -73,7 +73,7 @@ public class KeyShare extends Tls13Test {
     @TestDescription("Each KeyShareEntry value MUST correspond "
             + "to a group offered in the \"supported_groups\" extension "
             + "and MUST appear in the same order.")
-    @Interoperability(SeverityLevel.LOW)
+    @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
     public void testOrderOfKeyshareEntries() {
@@ -152,7 +152,9 @@ public class KeyShare extends Tls13Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @DeprecatedFeature(SeverityLevel.HIGH)
-    @Security(SeverityLevel.HIGH)
+    @Security(SeverityLevel.MEDIUM)
+    //Categories MM: I reduced the security impact to MEDIUM bc most curves
+    //are still safe(?) - there is also a draft for Brainpool curves in TLS 1.3
     public void offeredDeprecatedGroups() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         boolean foundDeprecated = false;

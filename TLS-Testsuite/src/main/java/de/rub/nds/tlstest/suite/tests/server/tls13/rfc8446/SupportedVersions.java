@@ -129,7 +129,7 @@ public class SupportedVersions extends Tls13Test {
     @TlsTest(description = "[Servers] MUST ignore any unknown versions that are present in that extension.")
     @Interoperability(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.CRITICAL)
     public void unknownVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -150,7 +150,7 @@ public class SupportedVersions extends Tls13Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @Interoperability(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.CRITICAL)
     public void supportedVersionsWithoutTls13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
         c.setAddSupportedVersionsExtension(true);
@@ -174,7 +174,7 @@ public class SupportedVersions extends Tls13Test {
             + "It MUST set the ServerHello.legacy_version field to 0x0303 (TLS 1.2).")
     @Interoperability(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.CRITICAL)
     public void tls13Handshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -199,7 +199,7 @@ public class SupportedVersions extends Tls13Test {
             + "extension to determine client preferences.")
     @Interoperability(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.CRITICAL)
     public void setLegacyVersionTo0304(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

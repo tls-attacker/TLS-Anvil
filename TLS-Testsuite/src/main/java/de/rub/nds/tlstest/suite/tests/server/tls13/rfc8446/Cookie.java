@@ -35,7 +35,7 @@ public class Cookie extends Tls13Test {
     @TlsTest(description = "Clients MUST NOT use cookies in their initial ClientHello in subsequent connections.")
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void clientHelloContainsCookieExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

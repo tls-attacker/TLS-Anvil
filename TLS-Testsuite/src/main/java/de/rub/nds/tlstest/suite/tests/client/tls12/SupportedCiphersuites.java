@@ -60,7 +60,7 @@ public class SupportedCiphersuites extends Tls12Test {
     @Tag("ciphersuites")
     @Interoperability(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.CRITICAL)
     public void supportsLessCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
 

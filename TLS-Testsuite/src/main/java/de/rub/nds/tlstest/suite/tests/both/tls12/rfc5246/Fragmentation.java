@@ -60,7 +60,7 @@ public class Fragmentation extends Tls12Test {
             + "traffic analysis countermeasure.")
     @Interoperability(SeverityLevel.HIGH)
     @RecordLayer(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void sendZeroLengthRecord_CCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);

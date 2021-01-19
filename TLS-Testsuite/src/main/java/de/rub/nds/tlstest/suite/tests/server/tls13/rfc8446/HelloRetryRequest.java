@@ -45,7 +45,7 @@ public class HelloRetryRequest extends Tls13Test {
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     public void helloRetryRequestValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipher = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
@@ -79,7 +79,7 @@ public class HelloRetryRequest extends Tls13Test {
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.MEDIUM)
     public void selectsSameCipherSuiteAllAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -108,7 +108,7 @@ public class HelloRetryRequest extends Tls13Test {
             + "same cipher suite when receiving a conformant updated ClientHello")
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.MEDIUM)
     public void selectsSameCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

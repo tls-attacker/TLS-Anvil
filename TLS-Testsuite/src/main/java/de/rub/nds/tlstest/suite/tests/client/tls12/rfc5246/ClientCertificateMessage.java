@@ -33,7 +33,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class ClientCertificateMessage extends Tls12Test {
 
     @TlsTest(description = "If no suitable certificate is available, the client MUST send a certificate message containing no certificates.")
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.HIGH)
     public void clientMustSendCertMsg(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

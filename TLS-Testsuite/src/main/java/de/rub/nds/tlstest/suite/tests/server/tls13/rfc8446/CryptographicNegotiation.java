@@ -62,8 +62,8 @@ public class CryptographicNegotiation extends Tls13Test {
     @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getUnsupportedGroups")
     @Interoperability(SeverityLevel.MEDIUM)
     @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.HIGH)
+    @Compliance(SeverityLevel.HIGH)
     public void noOverlappingParameters(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

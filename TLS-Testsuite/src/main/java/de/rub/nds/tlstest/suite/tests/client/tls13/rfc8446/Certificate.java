@@ -38,6 +38,7 @@ public class Certificate extends Tls13Test {
     @Handshake(SeverityLevel.CRITICAL)
     @Compliance(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.HIGH)
+    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
     public void emptyCertificate(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

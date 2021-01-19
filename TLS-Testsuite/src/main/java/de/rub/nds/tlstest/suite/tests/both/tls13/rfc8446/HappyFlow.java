@@ -34,7 +34,7 @@ public class HappyFlow extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Handshake(SeverityLevel.HIGH)
     @Interoperability(SeverityLevel.CRITICAL)
-    public void defaultModel(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void happyFlow(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);

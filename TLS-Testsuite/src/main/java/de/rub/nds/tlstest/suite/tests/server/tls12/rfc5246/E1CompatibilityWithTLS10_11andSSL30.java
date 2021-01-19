@@ -60,7 +60,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             "reply according to the highest version supported by the server.")
     @Interoperability(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM) //Categories MM: remove this as there is no specific alert?
     @Handshake(SeverityLevel.MEDIUM)
     public void versionGreaterThanSupportedByServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -102,6 +102,8 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             "\"protocol_version\" alert message and close the connection.")
     @MethodCondition(method = "doesSupportLegacyVersions")
     @Interoperability(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.LOW)
+    @Alert(SeverityLevel.MEDIUM)
     public void versionLowerThanSupportedByServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -141,6 +143,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             "record layer version number for ClientHello.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.CRITICAL)
     public void acceptAnyRecordVersionNumber(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -172,6 +175,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getInvalidHighRecordVersion")
     @Interoperability(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.LOW)
     public void rejectHigherRecordVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] selectedRecordVersion = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();

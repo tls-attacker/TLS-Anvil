@@ -52,6 +52,8 @@ public class EncThenMacExtension extends Tls12Test {
 
     @Test
     @Security(SeverityLevel.MEDIUM)
+    //TODO: if we add more extension tests in the future, we could add
+    //an OptionalFeatures category
     @TestDescription("Test if the client supports the encrypt-then-mac extension")
     public void supportsEncThenMacExt() {
         EncryptThenMacExtensionMessage ext = context.getReceivedClientHelloMessage().getExtension(EncryptThenMacExtensionMessage.class);
@@ -102,7 +104,7 @@ public class EncThenMacExtension extends Tls12Test {
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isBlockCipher")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @Interoperability(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     public void encryptThenMacTest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

@@ -61,6 +61,11 @@ public class Validator {
         }
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        boolean multipleAlerts = false;
+        if(trace.getLastReceivedMessage(AlertMessage.class) != msg) {
+            i.addAdditionalResultInfo("Received multiple Alerts while waiting for Fatal Alert");
+            multipleAlerts = true;
+        }
         boolean socketClosed = socketClosed(i);
         if (msg == null && socketClosed) {
             i.addAdditionalResultInfo("Timeout");
@@ -71,6 +76,10 @@ public class Validator {
         assertNotNull("No Alert message received and socket is still open.", msg);
         assertEquals(AssertMsgs.NoFatalAlert, AlertLevel.FATAL.getValue(), msg.getLevel().getValue().byteValue());
         assertTrue("Socket still open after fatal alert", socketClosed);
+        
+        if(multipleAlerts) {
+            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
+        }
     }
 
     public static void receivedFatalAlert(AnnotatedState i) {
@@ -90,16 +99,20 @@ public class Validator {
         assertEquals(AssertMsgs.NoWarningAlert, AlertLevel.WARNING.getValue(), msg.getLevel().getValue().byteValue());
     }
 
-    public static void testAlertDescription(AnnotatedState i, AlertDescription expexted, AlertMessage msg) {
+    public static void testAlertDescription(AnnotatedState i, AlertDescription expected, AlertMessage msg) {
         if (msg == null) {
-            i.addAdditionalResultInfo("Unexpected Alert Description, no alert received!");
+            i.addAdditionalResultInfo("No alert received");
             return;
+        }
+        
+        if(WorkflowTraceUtil.getLastReceivedMessage(ProtocolMessageType.ALERT, i.getWorkflowTrace()) != msg) {
+            i.addAdditionalResultInfo("Received multiple Alerts");
         }
 
         AlertDescription received = AlertDescription.getAlertDescription(msg.getDescription().getValue());
-        if (expexted != received) {
+        if (expected != received) {
             i.addAdditionalResultInfo("Unexpected Alert Description");
-            i.addAdditionalResultInfo(String.format("Expected: %s", expexted));
+            i.addAdditionalResultInfo(String.format("Expected: %s", expected));
             i.addAdditionalResultInfo(String.format("Received: %s", received));
             i.setResult(TestResult.PARTIALLY_SUCCEEDED);
             LOGGER.debug(i.getAdditionalResultInformation());
@@ -162,9 +175,9 @@ public class Validator {
                 if (receivedMessages.size() > 0) {
                     ProtocolMessage lastReceivedMessage = receivedMessages.get(receivedMessages.size() - 1);
                     if (lastReceivedMessage.getClass().equals(AlertMessage.class)) {
-                        boolean isFatalAlert =
+                        boolean lastMessageIsFatalAlert =
                                 AlertLevel.FATAL == AlertLevel.getAlertLevel(((AlertMessage)lastReceivedMessage).getLevel().getValue());
-                        if (isFatalAlert) {
+                        if (lastMessageIsFatalAlert || onlyValidAlertsAfterFatalAlert(action)) {
                             return;
                         }
                     }
@@ -196,6 +209,41 @@ public class Validator {
         }
 
         throw new AssertionError("Last action is not a receiving action");
+    }
+    
+    /**
+     * This method is intended to allow cases where a Fatal Alert is followed
+     * by a Close Notify. Multiple other alerts are also acceptable but should
+     * be reviewed (we set an additional result info for this in
+     * receivedFatalAlert).
+     */
+    private static boolean onlyValidAlertsAfterFatalAlert(ReceiveAction lastReceive) {
+        List<ProtocolMessage> receivedMessages = lastReceive.getReceivedMessages();
+        
+        //upon calling this function, we already know there is at least 1
+        //alert at the end
+        if(receivedMessages.size() < 2) {
+            return false;
+        }
+        
+        boolean foundFatal = false;
+        for(ProtocolMessage msg: receivedMessages) {
+            if(msg instanceof AlertMessage) {
+                AlertMessage alert = (AlertMessage) msg;
+                if(alert.getLevel().getValue() == AlertLevel.FATAL.getValue()) {
+                    foundFatal = true;
+                } else if(alert.getLevel().getValue() != AlertLevel.WARNING.getValue()) {
+                    //If it's neither FATAL nor WARNING, we're probably interpreting
+                    //a single encrypted alert as multiple alerts. This is due to the
+                    //way we parse messages; return false to fail executedAsPlanned
+                    return false;
+                }
+            } else if(foundFatal) {
+                return false;
+            }
+        }
+        
+        return foundFatal;
     }
 
     private static boolean traceFailedBeforeAlertAction(WorkflowTrace workflowTrace) {

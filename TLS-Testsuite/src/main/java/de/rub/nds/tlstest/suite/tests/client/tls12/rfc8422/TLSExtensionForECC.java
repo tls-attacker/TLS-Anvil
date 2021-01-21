@@ -38,6 +38,7 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
@@ -76,6 +77,9 @@ public class TLSExtensionForECC extends Tls12Test {
     A client would never be able to offer exclusively TLS 1.3 ciphersuites and
     TLS 1.2 TLS_RSA ciphersuites at the same time (it's a weird example but
     still)*/
+    // JS; TLS 1.3 cipher suites are basically ECC cipher suites, so I think
+    // the client is able to propose these extensions in TLS 1.3
+    // but TLS-RSA + TLS 1.3 could be a nice corner case
     public void bothECExtensions_WithoutECCCipher() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
@@ -182,6 +186,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @Crypto(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.HIGH)
     public void rejectsInvalidCurvePoints(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

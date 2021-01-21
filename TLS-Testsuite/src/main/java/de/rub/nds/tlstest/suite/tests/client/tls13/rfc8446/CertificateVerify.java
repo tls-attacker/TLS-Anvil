@@ -33,6 +33,7 @@ import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
@@ -86,6 +87,7 @@ public class CertificateVerify extends Tls13Test {
     @Crypto(SeverityLevel.MEDIUM)
     @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
     @ExplicitValues(affectedTypes=DerivationType.SIG_HASH_ALGORIHTM,methods="getLegacyRSASAHAlgorithms")
     @ManualConfig(DerivationType.SIG_HASH_ALGORIHTM)
@@ -118,6 +120,7 @@ public class CertificateVerify extends Tls13Test {
     @Crypto(SeverityLevel.MEDIUM)
     @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     @MethodCondition(method = "supportsLegacyECDSASAHAlgorithms")
     public void selectLegacyECDSASignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -140,6 +143,7 @@ public class CertificateVerify extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.MEDIUM)
     @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -180,6 +184,7 @@ public class CertificateVerify extends Tls13Test {
     @Crypto(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
     public void acceptsUnproposedSignatureAndHash(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -197,6 +202,7 @@ public class CertificateVerify extends Tls13Test {
     @Security(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
     @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Interoperability(SeverityLevel.HIGH)
     //TODO: MM move to state machines?
@@ -244,6 +250,7 @@ public class CertificateVerify extends Tls13Test {
     @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
     @Security(SeverityLevel.HIGH)
     @Crypto(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.CRITICAL)
@@ -265,6 +272,7 @@ public class CertificateVerify extends Tls13Test {
     @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
     @Security(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.MEDIUM)
     @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.HIGH)
     public void emptyBoth(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

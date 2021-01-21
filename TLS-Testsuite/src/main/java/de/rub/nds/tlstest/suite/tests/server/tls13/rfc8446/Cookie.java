@@ -20,6 +20,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
@@ -36,6 +37,7 @@ public class Cookie extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void clientHelloContainsCookieExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

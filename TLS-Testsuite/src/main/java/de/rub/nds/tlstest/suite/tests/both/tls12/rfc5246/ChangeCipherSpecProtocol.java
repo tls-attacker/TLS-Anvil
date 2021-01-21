@@ -57,6 +57,14 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
     their value is not identical, we might think about ditching one of these.
     Isn't a lack of interoperability often caused by one implementation 
     (blindly) relying on the RFC compliance of another?*/
+    /* JS: I am still not sure what severity in the case of interoperability means:
+    does severity high mean that the TLS peers cannot communicate at all? ...and 
+    medium is that they cannot communicate with specific configurations? Or does
+    high mean that we cannot exchange any application data?
+    Thus, I would not concentrate on the rating now.
+    Regarding compliance: idea; could the level defined by MUST/SHOULD from the 
+    RFC?
+    */
     public void ccsContentTest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

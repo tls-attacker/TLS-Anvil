@@ -49,6 +49,7 @@ public class RecordLayer extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -73,6 +74,7 @@ public class RecordLayer extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_Finished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -97,6 +99,7 @@ public class RecordLayer extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

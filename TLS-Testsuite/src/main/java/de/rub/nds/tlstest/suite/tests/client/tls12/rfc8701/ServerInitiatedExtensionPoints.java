@@ -31,6 +31,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
@@ -59,6 +60,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @Interoperability(SeverityLevel.HIGH)
     /*Categories MM: Here I'd also argue that this does not affect interop.
     (same for all tests below)*/
+    @Alert(SeverityLevel.MEDIUM)
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -79,6 +81,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
     @Handshake(SeverityLevel.MEDIUM)
     @Interoperability(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite greaseCipher = derivationContainer.getDerivation(GreaseCipherSuiteDerivation.class).getSelectedValue();
@@ -99,6 +102,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     @Handshake(SeverityLevel.MEDIUM)
     @Interoperability(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendServerHelloGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ExtensionType greaseExtension = derivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
@@ -123,6 +127,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Interoperability(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void selectGreaseNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -144,6 +149,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Interoperability(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void selectGreaseSignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

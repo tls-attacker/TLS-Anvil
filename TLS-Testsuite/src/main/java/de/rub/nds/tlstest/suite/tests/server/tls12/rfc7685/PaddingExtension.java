@@ -19,6 +19,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
@@ -40,6 +41,7 @@ public class PaddingExtension extends Tls12Test {
     @Compliance(SeverityLevel.LOW)
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.LOW) 
+    @Alert(SeverityLevel.LOW)
     public void paddingWithNonZero(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

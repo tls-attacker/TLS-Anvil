@@ -22,6 +22,7 @@ import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -50,6 +51,7 @@ public class ServerNameIndication extends Tls12Test {
     @MethodCondition(method = "sniActive")
     @Handshake(SeverityLevel.LOW)
     @Compliance(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.HIGH)
     public void moreThanOneNameOfTheSameType(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddServerNameIndicationExtension(true);

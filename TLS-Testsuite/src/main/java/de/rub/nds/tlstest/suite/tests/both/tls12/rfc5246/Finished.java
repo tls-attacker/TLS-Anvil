@@ -29,6 +29,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
@@ -50,6 +51,7 @@ public class Finished extends Tls12Test {
     @ScopeExtensions(DerivationType.PRF_BITMASK)
     @Handshake(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.HIGH)
     public void verifyFinishedMessageCorrect(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = derivationContainer.buildBitmask();
@@ -66,6 +68,7 @@ public class Finished extends Tls12Test {
     }
 
     //TODO I think this test does not make alot of sense - its basically the same as the test before
+    // JS: Agreed: it will compute a wrong MAC in the end as the previous test, remove if you agree
     @TlsTest(description = "For the PRF defined in Section 5, the Hash MUST be the Hash used as the basis for the PRF.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)

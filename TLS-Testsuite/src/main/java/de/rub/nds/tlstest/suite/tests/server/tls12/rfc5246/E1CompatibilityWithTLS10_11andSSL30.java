@@ -60,7 +60,6 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             "reply according to the highest version supported by the server.")
     @Interoperability(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM) //Categories MM: remove this as there is no specific alert?
     @Handshake(SeverityLevel.MEDIUM)
     public void versionGreaterThanSupportedByServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -176,6 +175,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getInvalidHighRecordVersion")
     @Interoperability(SeverityLevel.LOW)
     @Compliance(SeverityLevel.LOW)
+    @Alert(SeverityLevel.MEDIUM)
     public void rejectHigherRecordVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] selectedRecordVersion = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();

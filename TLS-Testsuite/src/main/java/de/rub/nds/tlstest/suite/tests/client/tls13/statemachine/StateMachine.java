@@ -68,6 +68,7 @@ public class StateMachine extends Tls13Test {
     @Security(SeverityLevel.CRITICAL)
     @CVE(SeverityLevel.CRITICAL)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @Alert(SeverityLevel.HIGH)
     public void sendFinishedWithoutCert(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE);
@@ -143,6 +144,7 @@ public class StateMachine extends Tls13Test {
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendLegacyChangeCipherSpecAfterFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -158,6 +160,7 @@ public class StateMachine extends Tls13Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendLegacyFlowCertificate(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
@@ -175,6 +178,7 @@ public class StateMachine extends Tls13Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendLegacyFlowECDHEKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
@@ -192,6 +196,7 @@ public class StateMachine extends Tls13Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendLegacyFlowDHEKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
@@ -209,6 +214,7 @@ public class StateMachine extends Tls13Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.MEDIUM)
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);
@@ -220,6 +226,7 @@ public class StateMachine extends Tls13Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.MEDIUM)
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
@@ -231,6 +238,7 @@ public class StateMachine extends Tls13Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendServerHelloTwice(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner);

@@ -97,6 +97,7 @@ public class ClientHello extends Tls13Test {
             + "field MUST be set to 0x0303, which is the version number for TLS 1.2.")
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void invalidLegacyVersion_higher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -117,6 +118,7 @@ public class ClientHello extends Tls13Test {
             + "field MUST be set to 0x0303, which is the version number for TLS 1.2.")
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void invalidLegacyVersion_lower(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -141,6 +143,7 @@ public class ClientHello extends Tls13Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
     public void invalidLegacyVersion_ssl30(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

@@ -26,6 +26,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
@@ -57,6 +58,7 @@ public class ServerKeyExchange extends Tls12Test {
     @Security(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.HIGH)
     public void invalidServerKeyExchangeSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] bitmask = derivationContainer.buildBitmask();
@@ -102,6 +104,7 @@ public class ServerKeyExchange extends Tls12Test {
     */
     @Security(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.HIGH)
     public void acceptsUnproposedNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -121,6 +124,7 @@ public class ServerKeyExchange extends Tls12Test {
     @Security(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.HIGH)
     public void acceptsMissingSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -149,6 +153,7 @@ public class ServerKeyExchange extends Tls12Test {
     @Security(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.HIGH)
     public void acceptsAnonSignatureForNonAnonymousCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -189,6 +194,8 @@ public class ServerKeyExchange extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Interoperability(SeverityLevel.MEDIUM)
     //Categories MM: this is another interoperability-in-question example
+    //JS: Agreed. This belongs not to the interoperability category
+    @Alert(SeverityLevel.HIGH)
     public void acceptsUnproposedSignatureAndHash(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

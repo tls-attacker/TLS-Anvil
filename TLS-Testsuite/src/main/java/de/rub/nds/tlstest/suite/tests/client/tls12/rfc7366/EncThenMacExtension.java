@@ -24,7 +24,9 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
@@ -55,6 +57,7 @@ public class EncThenMacExtension extends Tls12Test {
     //TODO: if we add more extension tests in the future, we could add
     //an OptionalFeatures category
     @TestDescription("Test if the client supports the encrypt-then-mac extension")
+    @Crypto(SeverityLevel.MEDIUM)
     public void supportsEncThenMacExt() {
         EncryptThenMacExtensionMessage ext = context.getReceivedClientHelloMessage().getExtension(EncryptThenMacExtensionMessage.class);
         assertNotNull("Client does not support encrypt-then-mac extension", ext);
@@ -86,6 +89,7 @@ public class EncThenMacExtension extends Tls12Test {
     @Interoperability(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
     @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendEncThenMacExtWithNonBlockCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);

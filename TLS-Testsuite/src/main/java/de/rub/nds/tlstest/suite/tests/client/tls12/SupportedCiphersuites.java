@@ -35,7 +35,7 @@ public class SupportedCiphersuites extends Tls12Test {
     @TestDescription("Client exploration detected more supported ciphersuites than " +
             "advertised by the client in the ClientHello message.")
     @Tag("ciphersuites")
-    @Security(SeverityLevel.MEDIUM)
+    @Security(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     public void supportsMoreCiphersuitesThanAdvertised() {

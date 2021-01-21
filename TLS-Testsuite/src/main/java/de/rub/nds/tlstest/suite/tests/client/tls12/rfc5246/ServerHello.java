@@ -133,6 +133,7 @@ public class ServerHello extends Tls12Test {
     @Interoperability(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void selectUnproposedCompressionMethod(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CompressionMethod selectedCompressionMethod = derivationContainer.getDerivation(CompressionMethodDerivation.class).getSelectedValue();

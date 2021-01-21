@@ -74,6 +74,7 @@ public class AlertProtocol extends Tls12Test {
             + "discarding any pending writes.")
     @RFC(number = 5246, section = "7.2.1 Closure Alerts")
     @Interoperability(SeverityLevel.LOW)
+    // todo: JS: is this an interoperability issue?
     @Alert(SeverityLevel.LOW)
     @Compliance(SeverityLevel.LOW)
     public void close_notify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

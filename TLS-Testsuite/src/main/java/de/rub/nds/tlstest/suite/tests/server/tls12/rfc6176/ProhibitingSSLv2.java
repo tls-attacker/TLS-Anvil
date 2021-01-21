@@ -22,6 +22,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
@@ -41,6 +42,7 @@ public class ProhibitingSSLv2 extends Tls12Test {
     @Compliance(SeverityLevel.CRITICAL)
     @DeprecatedFeature(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.HIGH)
     public void sendSSL2CompatibleClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -60,6 +62,7 @@ public class ProhibitingSSLv2 extends Tls12Test {
     @Compliance(SeverityLevel.CRITICAL)
     @DeprecatedFeature(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.HIGH)
     public void sendClientHelloVersionLower0300(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

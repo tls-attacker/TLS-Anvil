@@ -87,6 +87,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.HIGH)
     public void secondClientHelloAfterClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -101,6 +102,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.HIGH)
     public void sendFinishedAfterServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -125,6 +127,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.HIGH)
     public void secondClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -141,6 +144,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.HIGH)
     public void secondClientKeyExchangeDifferentAction(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -158,6 +162,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.HIGH)
     public void secondClientKeyExchangeAfterChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -174,6 +179,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.HIGH)
     public void secondClientKeyExchangeAfterChangeCipherSpecUnencrypted(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -204,6 +210,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.HIGH)
     public void beginWithEmptyApplicationData(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -234,6 +241,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.HIGH)
     public void secondChangeCipherSpecAfterHandshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -247,6 +255,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.HIGH)
     public void secondChangeCipherSpecAfterHandshakeUnencrypted(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -262,6 +271,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.HIGH)
     public void secondClientHelloAfterServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSecondClientHelloAfterServerHelloTest(config, runner);
@@ -272,6 +282,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.HIGH)
     public void secondClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSecondClientHelloTest(config, runner);
@@ -282,6 +293,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.HIGH)
     public void earlyChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);

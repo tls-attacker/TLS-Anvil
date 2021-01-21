@@ -59,6 +59,7 @@ public class RecordLayer extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_ServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -87,6 +88,7 @@ public class RecordLayer extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_Finished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -153,6 +155,7 @@ public class RecordLayer extends Tls13Test {
     @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendEmptyZeroLengthRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         HandshakeMessageType affectedMessage = derivationContainer.getDerivation(ChosenHandshakeMessageDerivation.class).getSelectedValue();

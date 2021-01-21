@@ -127,6 +127,7 @@ public class ServerHello extends Tls13Test {
     @Compliance(SeverityLevel.HIGH)
     @DeprecatedFeature(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void testCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

@@ -224,6 +224,7 @@ public class SupportedVersions extends Tls13Test {
     @Interoperability(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void setLegacyVersionTo0304WithoutSVExt(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddSupportedVersionsExtension(false);

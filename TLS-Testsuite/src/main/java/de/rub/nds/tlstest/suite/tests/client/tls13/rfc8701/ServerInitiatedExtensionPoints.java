@@ -32,6 +32,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
@@ -85,6 +86,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @Interoperability(SeverityLevel.CRITICAL)
     @Compliance(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -112,6 +114,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @Interoperability(SeverityLevel.CRITICAL)
     @Compliance(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -137,6 +140,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @Compliance(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendServerHelloGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -162,6 +166,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @Interoperability(SeverityLevel.CRITICAL)
     @Compliance(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendEncryptedExtensionsGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -184,6 +189,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @Handshake(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
     @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendCertificateVerifyGreaseSignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

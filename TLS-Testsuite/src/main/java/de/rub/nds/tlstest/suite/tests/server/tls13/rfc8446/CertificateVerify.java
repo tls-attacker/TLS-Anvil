@@ -57,8 +57,6 @@ public class CertificateVerify extends Tls13Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
-    @Security(SeverityLevel.CRITICAL)
-    /* Categories MM: I think we should remove Security here*/
     public void signatureIsValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);

@@ -66,6 +66,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
     @Compliance(SeverityLevel.CRITICAL)
     @DeprecatedFeature(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.HIGH)
     public void sendClientHelloVersion0300(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -112,6 +113,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
     @Compliance(SeverityLevel.CRITICAL)
     @DeprecatedFeature(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.HIGH)
     public void sendClientHelloVersion0300WithDifferentVersionInTheRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         byte[] protocolVersionBytes = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();

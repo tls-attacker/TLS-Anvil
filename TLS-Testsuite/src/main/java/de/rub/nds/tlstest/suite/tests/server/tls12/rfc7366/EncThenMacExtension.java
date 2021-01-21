@@ -61,6 +61,7 @@ public class EncThenMacExtension extends Tls12Test {
 
     //TODO RM: Do we want to keep this test? Shouldn't this be the task of the scanner? (I think there the probe does not work properly)
     //MM: We're also testing if it gets negotiated for different cipher suites(...) - isn't that beyond the scope of the scanner?
+    // JS: it looks like a scanner task. If the method would also check other cipher suites beyond CBc, it would be fine
     @TlsTest(description = "Test if the server supports the encrypt-then-mac extension")
     @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isBlockCipher")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
@@ -90,6 +91,7 @@ public class EncThenMacExtension extends Tls12Test {
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.HIGH)
     public void negotiatesEncThenMacExtOnlyWithBlockCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);

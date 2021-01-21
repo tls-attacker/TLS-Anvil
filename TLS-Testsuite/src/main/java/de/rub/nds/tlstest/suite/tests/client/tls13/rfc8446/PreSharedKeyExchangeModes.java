@@ -52,6 +52,7 @@ public class PreSharedKeyExchangeModes extends Tls13Test {
     @Interoperability(SeverityLevel.MEDIUM)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendPSKModeExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

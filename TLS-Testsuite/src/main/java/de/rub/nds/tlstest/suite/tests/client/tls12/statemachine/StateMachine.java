@@ -24,6 +24,7 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
@@ -60,6 +61,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.CRITICAL)
     @Compliance(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void omitCertificate(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -77,6 +79,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.CRITICAL)
     @Compliance(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void omitChangeCipherSpecUnencryptedFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -92,6 +95,7 @@ public class StateMachine extends Tls12Test {
     @Handshake(SeverityLevel.CRITICAL)
     @Compliance(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.LOW)
+    @Alert(SeverityLevel.MEDIUM)
     public void omitChangeCipherSpecEncryptedFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -115,6 +119,7 @@ public class StateMachine extends Tls12Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Handshake(SeverityLevel.CRITICAL)
     @Compliance(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendSecondServerHelloAfterClientFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -131,6 +136,7 @@ public class StateMachine extends Tls12Test {
     @TlsTest(description = "Send ServerHello, Change CipherSpec")
     @Handshake(SeverityLevel.CRITICAL)
     @Compliance(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.MEDIUM)
     public void sendResumptionMessageFlow(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();

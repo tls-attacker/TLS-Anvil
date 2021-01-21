@@ -21,6 +21,7 @@ import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
@@ -61,6 +62,7 @@ public class RC4Ciphersuites extends Tls12Test {
     @Security(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
     @DeprecatedFeature(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void selectRC4CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

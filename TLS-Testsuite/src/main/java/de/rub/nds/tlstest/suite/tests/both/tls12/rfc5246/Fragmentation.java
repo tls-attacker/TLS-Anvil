@@ -122,6 +122,7 @@ public class Fragmentation extends Tls12Test {
     public void sendEmptyApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
+        // JS: this is misleading. why do you need to send an application message if the record is empty?
         ApplicationMessage appMsg = new ApplicationMessage(c);
 
         Record r = new Record();

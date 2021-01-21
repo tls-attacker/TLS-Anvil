@@ -112,6 +112,7 @@ public class ServerHello extends Tls13Test {
             "field that does not match what it sent in the ClientHello MUST " +
             "abort the handshake with an \"illegal_parameter\" alert.")
     @Interoperability(SeverityLevel.MEDIUM)
+    // todo: js: remove interoperability?
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)

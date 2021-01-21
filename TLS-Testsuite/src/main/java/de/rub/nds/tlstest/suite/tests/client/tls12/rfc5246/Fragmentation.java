@@ -26,6 +26,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
+import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -45,6 +46,7 @@ public class Fragmentation extends Tls12Test {
     @Interoperability(SeverityLevel.HIGH)
     @RecordLayer(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
     public void sendZeroLengthRecord_SH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -70,6 +72,7 @@ public class Fragmentation extends Tls12Test {
     @Interoperability(SeverityLevel.HIGH)
     @RecordLayer(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
+    @Handshake(SeverityLevel.MEDIUM)
     public void sendHandshakeMessagesWithinSingleRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setCreateIndividualRecords(false);

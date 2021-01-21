@@ -45,11 +45,12 @@ public class PreSharedKey extends Tls13Test {
             "the handshake with an \"illegal_parameter\" alert.")*/
     @Test
     @MethodCondition(method = "sendsPSKExtension")
-    @TestDescription("The Pre-Shared Key extension must me the last extension of the Client Hello")
+    @TestDescription("The Pre-Shared Key extension must be the last extension of the Client Hello")
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
+    // TODO JS: why is this security relevant
     public void isLastExtension() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         if (!chm.getExtensions().get(chm.getExtensions().size() - 1).getClass().equals(PreSharedKeyExtensionMessage.class)) {

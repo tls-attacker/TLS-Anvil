@@ -36,6 +36,9 @@ public class ClientHello extends Tls12Test {
     @Security(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
+    // TODO: ich bin mir noch nicht sicher, ob es andere Tests zu kompression gibt
+    // aber eigentlich sollte man checken ob es etwsa ausser von 0 gibt. dann gibt
+    // potentiell einen CRIME angriff und security ist CRITICAL
     public void unknownCompressionMethod() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         byte[] compression = clientHelloMessage.getCompressions().getValue();

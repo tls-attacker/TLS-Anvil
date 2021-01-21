@@ -22,6 +22,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -41,6 +42,7 @@ public class D5_SecurityRestrictions extends Tls13Test {
     @RFC(number = 8446, section = "D.5. Security Restrictions Related to Backward Compatibility")
     @Interoperability(SeverityLevel.MEDIUM)
     @RecordLayer(SeverityLevel.LOW)
+    @Compliance(SeverityLevel.MEDIUM)
     public void invalidRecordVersion_ssl30(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

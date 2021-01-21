@@ -109,6 +109,7 @@ public class KeyShare extends Tls13Test {
     @Interoperability(SeverityLevel.MEDIUM)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
+    @Alert(SeverityLevel.MEDIUM)
     public void selectInvalidKeyshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -180,6 +181,7 @@ public class KeyShare extends Tls13Test {
     @Crypto(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
     public void rejectsInvalidCurvePoints(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

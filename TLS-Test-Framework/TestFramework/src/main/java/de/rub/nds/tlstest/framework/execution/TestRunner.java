@@ -293,7 +293,7 @@ public class TestRunner {
             }
         }
         
-        ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes() * 4, 2);
+        ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
         LOGGER.info("Executing client exploration with {} parallel threads...", testConfig.getParallelHandshakes());
         executor.bulkExecuteTasks(tasks);
         

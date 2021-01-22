@@ -254,7 +254,7 @@ public class CBCBlockCipher extends Tls12Test {
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
             if (msg == null || msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
                 //for encrypt-then-MAC, this might result in a Decode Error
-                if(config.isAddEncryptThenMacExtension() && msg.getDescription().getValue() == AlertDescription.DECODE_ERROR.getValue()) {
+                if(config.isAddEncryptThenMacExtension() && msg != null && msg.getDescription().getValue() == AlertDescription.DECODE_ERROR.getValue()) {
                    i.addAdditionalResultInfo("Decode Error is plausible due to Encrypt-Then-Mac");
                 } else {
                    throw new AssertionError("Received non expected alert message with invalid CBC MAC or Padding"); 

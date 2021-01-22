@@ -185,8 +185,7 @@ public class StateMachine extends Tls13Test {
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);   
     }
     
-    @Test
-    @TestDescription("Begin the Handshake with two Server Hello Messages")
+    @TlsTest(description = "Send a second encrypted Server Hello")
     public void sendServerHelloTwice(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner);   

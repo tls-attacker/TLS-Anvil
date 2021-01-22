@@ -1,5 +1,6 @@
 package de.rub.nds.tlstest.suite.tests.client.both.statemachine;
 
+import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
@@ -26,7 +27,10 @@ public class SharedStateMachineTest {
         runner.setPreparedConfig(config);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsAction(new ReceiveAction(new ClientHelloMessage()));
-        workflowTrace.addTlsAction(new SendAction(new ServerHelloMessage(config), new ServerHelloMessage(config)));
+        ServerHelloMessage secondServerHello = new ServerHelloMessage(config);
+        secondServerHello.setIncludeInDigest(Modifiable.explicit(false));
+        secondServerHello.setAdjustContext(Modifiable.explicit(false));
+        workflowTrace.addTlsAction(new SendAction(new ServerHelloMessage(config), secondServerHello));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);

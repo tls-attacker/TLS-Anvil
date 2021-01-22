@@ -68,7 +68,7 @@ public class ClientHello extends Tls12Test {
     public void offeredSignatureAlgorithmsForAllCipherSuites() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         List<CipherSuite> proposedCipherSuites = CipherSuite.getCipherSuites(clientHelloMessage.getCipherSuites().getValue());
-        proposedCipherSuites = proposedCipherSuites.stream().filter(cipherSuite -> !cipherSuite.isTLS13()).collect(Collectors.toList());
+        proposedCipherSuites = proposedCipherSuites.stream().filter(cipherSuite -> !cipherSuite.isTLS13() && cipherSuite.isRealCipherSuite()).collect(Collectors.toList());
         List<CipherSuite> coveredCipherSuites = new LinkedList<>();
         for(CipherSuite cipherSuite : proposedCipherSuites) {
             boolean foundMatch = false;

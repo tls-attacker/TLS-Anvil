@@ -21,10 +21,13 @@ import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
+import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
+import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
@@ -45,6 +48,8 @@ import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsscanner.serverscanner.TlsScanner;
 import de.rub.nds.tlsscanner.serverscanner.config.ScannerConfig;
 import de.rub.nds.tlsscanner.serverscanner.constants.ProbeType;
+import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
+import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
@@ -288,7 +293,7 @@ public class TestRunner {
             }
         }
         
-        ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
+        ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes() * 4, 2);
         LOGGER.info("Executing client exploration with {} parallel threads...", testConfig.getParallelHandshakes());
         executor.bulkExecuteTasks(tasks);
         
@@ -355,21 +360,9 @@ public class TestRunner {
             throw new RuntimeException("Client preparation could not be completed.");
         }
 
-
-        Config config = this.testConfig.createConfig();
-        CipherSuite suite = tls12CipherSuites.iterator().next();
-        config.setDefaultServerSupportedCipherSuites(suite);
-        config.setDefaultSelectedCipherSuite(suite);
-        config.setDefaultMaxRecordData(50);
-
-        State state = new State(config, new WorkflowConfigurationFactory(config).createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER));
-        StateExecutionServerTask task = new StateExecutionServerTask(state, testConfig.getTestClientDelegate().getServerSocket(), 2);
-        task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getTriggerScript());
-        executor.bulkExecuteTasks(task);
-        boolean supportsRecordFragmentation = state.getWorkflowTrace().executedAsPlanned();
-        
         int rsaMinCertKeySize = getCertMinimumKeySize(executor, tls12CipherSuites, CertificateKeyType.RSA);
         int dssMinCertKeySize = getCertMinimumKeySize(executor, tls12CipherSuites, CertificateKeyType.DSS);
+        boolean supportsRecordFragmentation = clientSupportsRecordFragmentation(executor, tls12CipherSuites, tls13CipherSuites);
         
         TestSiteReport report = new TestSiteReport("");
         report.addCipherSuites(tls12CipherSuites);
@@ -413,7 +406,7 @@ public class TestRunner {
                 .map(i -> ExtensionType.getExtensionType(i.getExtensionType().getValue()))
                 .collect(Collectors.toList());
         report.setSupportedExtensions(extensions);
-
+        
         saveToCache(report);
 
         testContext.setReceivedClientHelloMessage(clientHello);
@@ -610,6 +603,36 @@ public class TestRunner {
             }
         }
         return states;
+    }
+    
+    
+    
+    private boolean clientSupportsRecordFragmentation(ParallelExecutor executor, Set<CipherSuite> tls12CipherSuites, Set<CipherSuite> tls13CipherSuites) {
+        Config config = getServerConfigBasedOnCipherSuites(tls12CipherSuites, tls13CipherSuites);
+        config.setDefaultMaxRecordData(50);
+
+        State state = new State(config, new WorkflowConfigurationFactory(config).createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER));
+        StateExecutionServerTask task = new StateExecutionServerTask(state, testConfig.getTestClientDelegate().getServerSocket(), 2);
+        task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getTriggerScript());
+        executor.bulkExecuteTasks(task);
+        return state.getWorkflowTrace().executedAsPlanned();
+    }
+    
+    private Config getServerConfigBasedOnCipherSuites(Set<CipherSuite> tls12CipherSuites, Set<CipherSuite> tls13CipherSuites) {
+        Config config;
+        CipherSuite suite;
+        if(!tls12CipherSuites.isEmpty()) {
+            config = this.testConfig.createConfig();
+            suite = tls12CipherSuites.iterator().next();     
+        } else if(!tls13CipherSuites.isEmpty()) {
+            config = this.testConfig.createTls13Config();
+            suite = tls13CipherSuites.iterator().next(); 
+        } else {
+           throw new RuntimeException("No cipher suites detected"); 
+        } 
+        config.setDefaultServerSupportedCipherSuites(suite);
+        config.setDefaultSelectedCipherSuite(suite);
+        return config;
     }
     
     private int getCertMinimumKeySize(ParallelExecutor executor, Set<CipherSuite> cipherSuites, CertificateKeyType keyType) {

@@ -88,7 +88,7 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
         }
         return condConstraints;
     }
-    
+      
     private ConditionalConstraint getCertPkTypeMustMatchCipherSuiteConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);

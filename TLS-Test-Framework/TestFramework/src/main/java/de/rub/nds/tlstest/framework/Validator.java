@@ -303,16 +303,22 @@ public class Validator {
                     //or decryption failed
                     state.addAdditionalResultInfo("Not all Application Messages were Alerts");
                     return false;
-                }
-                
-                if(potentialAlert != null && potentialAlert.getLevel().getValue() == AlertLevel.FATAL.getValue()) {
-                    //last is Fatal Alert
-                    return true;
-                } else if(!decryptedAlerts.isEmpty()) {
-                    //also allow additional (Warning) Alerts if they follow a Fatal Alert
-                    return onlyValidAlertsAfterFatalAlert(decryptedAlerts);
-                }
-            }  
+                }  
+            } 
+            
+            //replace messages for further evaluation
+            for(int i = expectedFirstEncryptedRecordIndex; i < receivedMessages.size(); i++) {
+                receivedMessages.remove(i);
+                receivedMessages.add(i, decryptedAlerts.get(i - expectedFirstEncryptedRecordIndex));
+            }
+            
+            if(potentialAlert != null && potentialAlert.getLevel().getValue() == AlertLevel.FATAL.getValue()) {
+                //last is Fatal Alert
+                return true;
+            } else if(!decryptedAlerts.isEmpty()) {
+                //also allow additional (Warning) Alerts if they follow a Fatal Alert
+                return onlyValidAlertsAfterFatalAlert(decryptedAlerts);
+            }
         }
         
         return false;

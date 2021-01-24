@@ -1,4 +1,4 @@
-import { Schema, Document, MongooseDocument } from "mongoose";
+import { Schema, Document } from "mongoose";
 import { ITimestamp } from './timestamps';
 import { ITestResult } from './testResult';
 import { IScoreMap, ScoreMapSchmaObject } from './score';
@@ -6,8 +6,8 @@ import { IScoreMap, ScoreMapSchmaObject } from './score';
 export interface ITestResultContainer extends Document, ITimestamp {
   Identifier: string,
   ShortIdentifier: string,
-  PcapStorageId: MongooseDocument['_id'],
-  KeylogfileStorageId: MongooseDocument['_id'],
+  PcapStorageId: any,
+  KeylogfileStorageId: any,
   Date: Date,
   DisplayName: string
   ElapsedTime: number,

@@ -63,6 +63,7 @@ class Database {
     const testResultDocs: ITestResult[] = []
     const stateDocs: IState[] = []
     
+    // console.time("prepareAdd")
     for (let i = 0; i < container.TestResults.length; i++) {
       const result = container.TestResults[i]
       result.ContainerId = containerDoc._id
@@ -93,20 +94,23 @@ class Database {
       testResultDocs.push(testResultDoc)
       containerDoc.TestResultClassMethodIndexMap.set(`${testResultDoc.TestMethod.ClassName}.${testResultDoc.TestMethod.MethodName}`.replace(/\./g, "||"), i)
     }
+    // console.timeEnd("prepareAdd")
 
     containerDoc.TestResults = testResultDocs.map(i => i._id)
 
     const promises: Promise<any>[] = []
-    console.log("upload")
+    // console.time("uploadFiles")
     promises.push(this.uploadFile(FileType.pcap, pcap, containerDoc.Identifier))
-    console.log("upload2")
     promises.push(this.uploadFile(FileType.keylog, keylogfile, containerDoc.Identifier))
 
     return Promise.all(promises).then((vals) => { 
-      console.log("upload3")
+      // console.timeEnd("uploadFiles")
       containerDoc.PcapStorageId = vals[0]
       containerDoc.KeylogfileStorageId = vals[1]
       const promises2: Promise<any>[] = []
+
+      // console.time("triggerSaves")
+      // console.time("saveTime")
       promises2.push(containerDoc.save())
       for (let result of testResultDocs) {
         promises2.push(result.save())
@@ -115,9 +119,11 @@ class Database {
       for (let state of stateDocs) {
         promises2.push(state.save())
       }
+      // console.timeEnd("triggerSaves")
 
       return Promise.all(promises2)
     }).then(() => {
+      // console.timeEnd("saveTime")
       return
     }).catch((e) => {
       console.log(e)
@@ -127,7 +133,7 @@ class Database {
   }
 
   async getResultContainer(identifier: string): Promise<Pick<ITestResultContainer, any>> {
-    return this.testResultContainer.findOne({ Identifier: identifier }).populate({path: 'TestResults', populate: {path: 'States'}}).lean().exec()
+    return this.testResultContainer.findOne({ Identifier: identifier }).populate({path: 'TestResults'}).lean().exec()
   }
 
   async getTestResult(identifier: string, className: string, methodName: string): Promise<Pick<ITestResult, any>> {

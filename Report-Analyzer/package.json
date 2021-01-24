@@ -19,6 +19,7 @@
     "mongoose": "^5.11.8",
     "mongoose-gridfs": "^1.2.48",
     "remove": "^0.1.5",
+    "threads": "^1.6.3",
     "typescript": "^3.9.6",
     "vue": "^2.6.11",
     "vue-axios": "^2.1.5",

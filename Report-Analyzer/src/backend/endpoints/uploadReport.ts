@@ -3,7 +3,8 @@ import { ITestResultContainer, ITestResult, IState } from '../database/models';
 import DB from '../database'
 import { BadRequest } from '../errors';
 import { TestReportService } from '../services';
-
+import { Uploader } from '../workers/upload'
+import { spawn, Thread, Worker } from "threads"
 
 
 export namespace UploadReportEndpoint {
@@ -47,10 +48,9 @@ export namespace UploadReportEndpoint {
         await DB.removeResultContainer(body.testReport.Identifier)
       }
 
-      const testReportService = new TestReportService(body.testReport)
-      const formattedReport = testReportService.prepareTestReport()
-      
-      DB.addResultContainer(formattedReport, body.pcapDump, body.keylog).then(() => {
+
+      const upload = await spawn<Uploader>(new Worker('../workers/upload'))
+      upload(body.testReport, body.pcapDump, body.keylog).then(() => {
         res.send({"success": true})
       }).catch((e) => {
         console.log("catched")

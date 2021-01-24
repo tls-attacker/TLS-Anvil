@@ -27,7 +27,7 @@
         <template v-if="failureInducingCombinations"></template>
         <vue-json-pretty id="fds" :data="failureInducingCombinations">
         </vue-json-pretty>
-        <div style="height: 50px"></div>
+        <!-- <div style="height: 50px"></div>
         <div v-for="k in selectedColumn" :key="k.uuid">
           <p style="font-weight: bold;">{{ k.uuid }}</p>
           <vue-json-pretty
@@ -38,7 +38,7 @@
           <div class="packetViewer"></div>
           <b-button variant="success" class="pcapInlineBtn" @click="downloadPcap(k, k.Identifier, $event)">Download</b-button>
           <b-button variant="primary" class="pcapInlineBtn" @click="showPcap(k, $event)">Show PCAP</b-button>
-        </div>
+        </div> -->
       </template>
       <template v-else-if="detailsMode == 2">
         <vue-json-pretty
@@ -48,7 +48,7 @@
         </vue-json-pretty>
         <div class="packetViewer"></div>
         <b-button variant="success" class="pcapInlineBtn" @click="downloadPcap(selectedCell, selectedCell.Identifier, $event)">Download</b-button>
-        <b-button variant="primary" class="pcapInlineBtn" @click="showPcap(selectedCell, $event)">Show PCAP</b-button>
+        <b-button variant="primary" class="pcapInlineBtn show download" @click="showPcap(selectedCell, $event)">Show PCAP</b-button>
       </template>
     </b-modal>
 
@@ -331,6 +331,8 @@ export default {
       ev.stopPropagation()
       ev.stopImmediatePropagation()
       this.detailsMode = 2
+      this.showPcap(data, null)
+
       data.Identifier = identifier
       this.selectedCell = data
       this.showDetails = true
@@ -392,18 +394,37 @@ export default {
         })
       } 
     },
+
     showPcap(selectedCell, ev) {
-      const target = ev.target.previousSibling.previousSibling
-      ev.target.innerHTML = 'Loading...'
-      ev.target.disabled = true
-      this.$http.get(`/testReport/${selectedCell.ContainerId}/testResult/${this.className}/${this.methodName}/${selectedCell.uuid}/pcap`).then((res) => {
-        target.innerHTML = `<div class="packetWrapper">${res.data}</div>`
-        ev.target.hidden = true
+      let target = null
+      if (ev) {
+        ev.target.innerHTML = 'Loading...'
+        ev.target.disabled = true
+        target = ev.target.previousSibling.previousSibling
+      }
+
+      this.$http.get(`/testReport/${selectedCell.ContainerId}/testResult/${this.className}/${this.methodName}/${selectedCell.uuid}/pcap`).then(async (res) => {
+
+        while (!document.querySelector(".packetViewer") && !ev) {
+          await new Promise((res) => setTimeout(() => res(), 500));
+        }
+
+        if (ev) {
+          ev.target.hidden = true
+        } else {
+          target = document.querySelector(".packetViewer")
+          document.querySelector(".pcapInlineBtn.download").hidden = true
+        }        
+
+        target.innerHTML = res.data
       }).catch(() => {
-        ev.target.innerHTML = "Error..."
-        ev.target.disabled = false
+        if (ev) {
+          ev.target.innerHTML = "Error..."
+          ev.target.disabled = false
+        }
       })
     },
+    
     downloadPcap(selectedCell, identifier, ev) {
       ev.target.innerHTML = 'Loading...'
       ev.target.disabled = true

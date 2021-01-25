@@ -74,6 +74,7 @@ public class ClientHello extends Tls12Test {
             boolean foundMatch = false;
             switch(AlgorithmResolver.getCertificateKeyType(cipherSuite)) {
                 case DH:
+                case DSS:
                     if(providedSignatureAlgorithm(SignatureAlgorithm.DSA)) {
                        foundMatch = true; 
                     }

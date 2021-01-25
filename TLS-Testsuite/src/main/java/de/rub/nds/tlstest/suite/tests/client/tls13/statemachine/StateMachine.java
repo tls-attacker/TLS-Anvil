@@ -186,7 +186,7 @@ public class StateMachine extends Tls13Test {
     }
     
     @TlsTest(description = "Send a second encrypted Server Hello")
-    public void sendServerHelloTwice(WorkflowRunner runner) {
+    public void sendServerHelloTwice(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner);   
     }

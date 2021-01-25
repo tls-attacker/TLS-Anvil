@@ -78,10 +78,10 @@ public class Validator {
         }
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        boolean multipleAlerts = false;
-        if(trace.getLastReceivedMessage(AlertMessage.class) != msg) {
-            i.addAdditionalResultInfo("Received multiple Alerts while waiting for Fatal Alert");
-            multipleAlerts = true;
+        List<ProtocolMessage> receivedAlerts = WorkflowTraceUtil.getAllReceivedMessages(trace, ProtocolMessageType.ALERT);
+        if(receivedAlerts.size() > 1) {
+            i.addAdditionalResultInfo("Received multiple Alerts while waiting for Fatal Alert (" + 
+                    receivedAlerts.stream().map(ProtocolMessage::toCompactString).collect(Collectors.joining(","))+ ")");
         }
         boolean socketClosed = socketClosed(i);
         if (msg == null && socketClosed) {
@@ -93,10 +93,6 @@ public class Validator {
         assertNotNull("No Alert message received and socket is still open.", msg);
         assertEquals(AssertMsgs.NoFatalAlert, AlertLevel.FATAL.getValue(), msg.getLevel().getValue().byteValue());
         assertTrue("Socket still open after fatal alert", socketClosed);
-        
-        if(multipleAlerts) {
-            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
-        }
     }
 
     public static void receivedFatalAlert(AnnotatedState i) {
@@ -123,7 +119,7 @@ public class Validator {
         }
         
         if(WorkflowTraceUtil.getLastReceivedMessage(ProtocolMessageType.ALERT, i.getWorkflowTrace()) != msg) {
-            i.addAdditionalResultInfo("Received multiple Alerts");
+            i.addAdditionalResultInfo("Received multiple Alerts - description of first Alert was tested");
         }
 
         AlertDescription received = AlertDescription.getAlertDescription(msg.getDescription().getValue());

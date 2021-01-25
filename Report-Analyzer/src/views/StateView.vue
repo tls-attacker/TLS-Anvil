@@ -129,7 +129,6 @@
 <script>
 import * as stateview from '@/lib/stateview'
 import VueJsonPretty from 'vue-json-pretty'
-import { allStatus } from '../lib/const';
 import { FilterInputModels } from "@/lib/filter/filterInputModels";
 import TableFilter from '@/components/TableFilter'
 import { filter } from "@/lib/filter/filter"

@@ -126,6 +126,9 @@ export function itemProvider(ctx: IItemProviderContext, reports: ITestResultCont
       } else {
         const result = <ITestResultTable>report.TestResults[testResultIndex]
         result.statusIcons = resolveStatus(result.Result)
+        if (result.HasStateWithAdditionalResultInformation) {
+          result.statusIcons += "❗️"
+        }
         item[report.Identifier] = result
       }
     }

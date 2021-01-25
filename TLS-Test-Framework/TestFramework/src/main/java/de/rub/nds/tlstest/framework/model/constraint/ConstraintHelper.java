@@ -19,6 +19,7 @@ import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.crypto.keys.CustomDSAPrivateKey;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -217,7 +218,7 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
                     signatureLength = sigBitmaskDeriv.computeEstimatedSignatureSize(SignatureAlgorithm.ECDSA, certKeyPair.getPublicKey().keySize());
                     break;
                 case DSS:  
-                    signatureLength = sigBitmaskDeriv.computeEstimatedSignatureSize(SignatureAlgorithm.DSA, certKeyPair.getPublicKey().keySize());
+                    signatureLength = sigBitmaskDeriv.computeEstimatedSignatureSize(SignatureAlgorithm.DSA, ((CustomDSAPrivateKey)certKeyPair.getPrivateKey()).getParams().getQ().bitLength());
                     break;
                 default:
                     throw new RuntimeException("Can not compute signature size for CertPublicKeyType " + certKeyPair.getCertPublicKeyType());

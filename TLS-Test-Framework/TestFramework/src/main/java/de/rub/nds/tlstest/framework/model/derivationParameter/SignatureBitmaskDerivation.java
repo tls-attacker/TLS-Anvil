@@ -8,6 +8,7 @@ import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.crypto.keys.CustomDSAPrivateKey;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -96,7 +97,11 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
         int pkSize = 0;
         for (CertificateKeyPair certKeyPair : certificateKeyPairs) {
             if (certKeyPair.getCertPublicKeyType() == requiredPublicKeyType && certKeyPair.getPublicKey().keySize() > pkSize) {
-                pkSize = certKeyPair.getPublicKey().keySize();
+                if(requiredPublicKeyType != CertificateKeyType.DH && requiredPublicKeyType != CertificateKeyType.DSS) {
+                    pkSize = certKeyPair.getPublicKey().keySize();
+                } else {
+                    pkSize = ((CustomDSAPrivateKey)certKeyPair.getPrivateKey()).getParams().getQ().bitLength();
+                }
             }
         }
         return pkSize;
@@ -139,8 +144,9 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
             case RSA_PSS_PSS:
             case RSA_PSS_RSAE:
                 return pkByteSize;
-            case ECDSA:
             case DSA:
+                return pkByteSize / 4;
+            case ECDSA:
                 //signature consists of tag || length || type || length || r
                 //                                    || type || length || s
                 //DER encoding may add an additional byte if the MSB of r or s is 1
@@ -163,7 +169,7 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
             case ECDSA:
                 return computeEstimatedSignatureSize(SignatureAlgorithm.ECDSA, certKeyPair.getPublicKey().keySize());
             case DSS:
-                return computeEstimatedSignatureSize(SignatureAlgorithm.DSA, certKeyPair.getPublicKey().keySize());
+                return computeEstimatedSignatureSize(SignatureAlgorithm.DSA, ((CustomDSAPrivateKey)certKeyPair.getPrivateKey()).getParams().getQ().bitLength());
             default:
                 throw new RuntimeException("Can not compute signature size for CertPublicKeyType " + certKeyPair.getCertPublicKeyType());
         }

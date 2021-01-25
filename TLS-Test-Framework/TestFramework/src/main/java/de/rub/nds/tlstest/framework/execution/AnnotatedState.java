@@ -145,7 +145,7 @@ public class AnnotatedState {
     @JsonProperty("AdditionalResultInformation")
     public String getAdditionalResultInformation() {
         if (additionalResultInformation == null) return "";
-        return String.join("\n", additionalResultInformation);
+        return String.join(";\n", additionalResultInformation);
     }
 
     public void addAdditionalResultInfo(String info) {
@@ -160,7 +160,7 @@ public class AnnotatedState {
     @JsonProperty("AdditionalTestInformation")
     public String getAdditionalTestInformation() {
         if (additionalTestInformation == null) return "";
-        return String.join("\n", additionalTestInformation);
+        return String.join(";\n", additionalTestInformation);
     }
 
     public void addAdditionalTestInfo(String info) {

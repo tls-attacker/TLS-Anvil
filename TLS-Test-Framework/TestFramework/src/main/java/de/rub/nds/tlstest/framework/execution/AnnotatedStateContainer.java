@@ -57,6 +57,9 @@ public class  AnnotatedStateContainer {
     @JsonProperty("Result")
     private TestResult result;
 
+    @JsonProperty("HasStateWithAdditionalResultInformation")
+    private Boolean hasStateWithAdditionalResultInformation = false;
+
     @XmlElement(name = "DisabledReason")
     @JsonProperty("DisabledReason")
     private String disabledReason;
@@ -136,6 +139,10 @@ public class  AnnotatedStateContainer {
             if (state.getResult() == TestResult.FAILED) {
                 errors.add(state.getFailedReason());
                 failed = true;
+            }
+
+            if (!state.getAdditionalResultInformation().isEmpty()) {
+                this.hasStateWithAdditionalResultInformation = true;
             }
 
             if (uuids.contains(state.getUuid())) {

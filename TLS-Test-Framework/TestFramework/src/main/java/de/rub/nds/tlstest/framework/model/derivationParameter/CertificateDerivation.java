@@ -38,6 +38,10 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
     
     @Override
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+        return getApplicableCertificates(context, scope, false);
+    }
+    
+    public List<DerivationParameter> getApplicableCertificates(TestContext context, DerivationScope scope, boolean allowUnsupportedPkGroups) {
         List<DerivationParameter> parameterValues = new LinkedList<>(); 
         CertificateByteChooser.getInstance().getCertificateKeyPairList().stream()
                 .filter(cert -> certMatchesAnySupportedCipherSuite(cert, scope))
@@ -48,7 +52,8 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
                 .filter(cert -> cert.getCertSignatureType() != CertificateKeyType.DSS
                         || ALLOW_DSS)
                 .filter(cert -> (cert.getPublicKeyGroup() == null 
-                        || context.getSiteReport().getSupportedNamedGroups().contains(cert.getPublicKeyGroup())))
+                        || context.getSiteReport().getSupportedNamedGroups().contains(cert.getPublicKeyGroup()))
+                        || allowUnsupportedPkGroups)
                 .filter(cert -> cert.getPublicKeyGroup() == null 
                         || !scope.isTls13Test()
                         || cert.getPublicKeyGroup().isTls13())
@@ -83,8 +88,13 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
-        if(!scope.isTls13Test() && ConstraintHelper.multipleCertPublicKeyTypesModeled(scope)) {
-            condConstraints.add(getCertPkTypeMustMatchCipherSuiteConstraint());
+        if(!scope.isTls13Test()) {
+            if(ConstraintHelper.staticEcdhCipherSuiteModeled(scope)) {
+               condConstraints.add(getCertPkMustMatchSelectedGroupIfStaticEcCipherSuite()); 
+            }
+            if(ConstraintHelper.multipleCertPublicKeyTypesModeled(scope)) {
+                condConstraints.add(getCertPkTypeMustMatchCipherSuiteConstraint());
+            }
         }
         return condConstraints;
     }
@@ -98,6 +108,26 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
                 CertificateKeyType requiredCertKeyType = AlgorithmResolver.getCertificateKeyType(cipherDev.getSelectedValue());
                 CertificateKeyPair possiblePair = certDev.getSelectedValue();
                 return possiblePair.isUsable(requiredCertKeyType, possiblePair.getCertSignatureType());
+        }));
+    }
+    
+    private ConditionalConstraint getCertPkMustMatchSelectedGroupIfStaticEcCipherSuite() {
+        Set<DerivationType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        requiredDerivations.add(DerivationType.NAMED_GROUP);
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(this.getType().name(), DerivationType.CIPHERSUITE.name(), DerivationType.NAMED_GROUP.name()).by((DerivationParameter certParameter, DerivationParameter cipherSuiteParameter, DerivationParameter namedGroupParameter) -> {
+                CipherSuiteDerivation cipherSuiteDerivation = (CipherSuiteDerivation) cipherSuiteParameter;
+                CertificateDerivation certDerivation = (CertificateDerivation) certParameter;
+                NamedGroupDerivation namedGroupDerivation = (NamedGroupDerivation) namedGroupParameter;
+                CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
+                CertificateKeyPair selectedCert = certDerivation.getSelectedValue();
+                if(!selectedCipherSuite.isTLS13() 
+                        && AlgorithmResolver.getKeyExchangeAlgorithm(selectedCipherSuite).isKeyExchangeEcdh() 
+                        && !selectedCipherSuite.isEphemeral() 
+                        && (selectedCert.getCertPublicKeyType() == CertificateKeyType.ECDSA || selectedCert.getCertPublicKeyType() == CertificateKeyType.ECDH)) {
+                    return namedGroupDerivation.getSelectedValue() == selectedCert.getPublicKeyGroup();
+                }   
+                return true;
         }));
     }
 

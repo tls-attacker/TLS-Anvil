@@ -45,6 +45,18 @@ import org.apache.logging.log4j.Logger;
 public class ConstraintHelper {
     
     private static final Logger LOGGER = LogManager.getLogger();
+    
+    public static boolean staticEcdhCipherSuiteModeled(DerivationScope scope) {
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        for (DerivationParameter param : values) {
+            CipherSuite cipherSuite = (CipherSuite) param.getSelectedValue();
+            if(!cipherSuite.isEphemeral() && AlgorithmResolver.getKeyExchangeAlgorithm(cipherSuite).isKeyExchangeEcdh()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static boolean multipleBlocksizesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationFactory.getInstance(DerivationType.CIPHERSUITE);

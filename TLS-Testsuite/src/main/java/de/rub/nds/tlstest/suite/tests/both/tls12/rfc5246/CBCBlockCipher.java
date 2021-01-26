@@ -31,6 +31,7 @@ import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -256,6 +257,9 @@ public class CBCBlockCipher extends Tls12Test {
                 //for encrypt-then-MAC, this might result in a Decode Error
                 if(config.isAddEncryptThenMacExtension() && msg != null && msg.getDescription().getValue() == AlertDescription.DECODE_ERROR.getValue()) {
                    i.addAdditionalResultInfo("Decode Error is plausible due to Encrypt-Then-Mac");
+                   if(Validator.socketClosed(i)) {
+                       i.setResult(TestResult.SUCCEEDED);
+                   }
                 } else {
                    throw new AssertionError("Received non expected alert message with invalid CBC MAC or Padding"); 
                 }

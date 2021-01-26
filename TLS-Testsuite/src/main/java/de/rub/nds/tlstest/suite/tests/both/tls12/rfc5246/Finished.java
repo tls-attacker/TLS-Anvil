@@ -95,7 +95,7 @@ public class Finished extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         workflowTrace.addTlsActions(
-                new SendAction(new FinishedMessage()),
+                new SendAction(new FinishedMessage(c)),
                 new ReceiveAction(new AlertMessage())
         );
 

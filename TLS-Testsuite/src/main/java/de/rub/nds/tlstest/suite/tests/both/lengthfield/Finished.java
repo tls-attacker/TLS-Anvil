@@ -31,7 +31,6 @@ public class Finished extends TlsGenericTest {
     @TlsTest(description = "Send a Finished Message with a modified length value")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
-    @Tag("finFix")
     public void finishedLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         finishedLengthTest(workflowTrace, runner);

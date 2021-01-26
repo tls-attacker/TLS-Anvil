@@ -90,7 +90,7 @@ public class AlertProtocol extends Tls12Test {
             Validator.smartExecutedAsPlanned(i);
 
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
-            if (message == null) {
+            if (message == null && Validator.socketClosed(i)) {
                 i.addAdditionalResultInfo("No close_notify alert received.");
                 i.setResult(TestResult.PARTIALLY_SUCCEEDED);
                 return;

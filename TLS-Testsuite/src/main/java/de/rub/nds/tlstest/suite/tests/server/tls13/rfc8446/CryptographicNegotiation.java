@@ -32,6 +32,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
@@ -49,7 +50,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "4.1.1 Cryptographic Negotiation")
 public class CryptographicNegotiation extends Tls13Test {
     
-    public List<DerivationParameter> getUnsupportedGroups() {
+    public List<DerivationParameter> getUnsupportedGroups(DerivationScope scope) {
         List<DerivationParameter> unsupportedGroups = new LinkedList<>();
         List<NamedGroup> supportedTls13Groups = context.getSiteReport().getSupportedTls13Groups();
         NamedGroup.getImplemented().stream().filter(group -> !supportedTls13Groups.contains(group))

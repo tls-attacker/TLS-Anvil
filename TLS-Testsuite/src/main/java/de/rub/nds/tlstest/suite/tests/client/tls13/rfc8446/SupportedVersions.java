@@ -38,6 +38,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
@@ -65,7 +66,7 @@ public class SupportedVersions extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
     
-    public List<DerivationParameter> getInvalidLegacyVersions() {
+    public List<DerivationParameter> getInvalidLegacyVersions(DerivationScope scope) {
        List<DerivationParameter> parameterValues = new LinkedList<>();
        parameterValues.add(new ProtocolVersionDerivation(new byte[]{0x05, 0x05}));
        parameterValues.add(new ProtocolVersionDerivation(new byte[]{0x03, 0x04}));
@@ -158,7 +159,7 @@ public class SupportedVersions extends Tls13Test {
     }
     
     
-    public List<DerivationParameter> getUnsupportedProtocolVersions() {
+    public List<DerivationParameter> getUnsupportedProtocolVersions(DerivationScope scope) {
         SupportedVersionsExtensionMessage clientSupportedVersions = TestContext.getInstance().getReceivedClientHelloMessage().getExtension(SupportedVersionsExtensionMessage.class);
         List<DerivationParameter> parameterValues = new LinkedList<>();
         getUnsupportedTlsVersions(clientSupportedVersions).forEach(version -> parameterValues.add(new ProtocolVersionDerivation(version.getValue())));

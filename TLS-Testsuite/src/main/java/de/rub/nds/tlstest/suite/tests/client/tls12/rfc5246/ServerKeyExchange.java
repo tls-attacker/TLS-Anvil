@@ -1,8 +1,10 @@
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
+import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.DigestAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
@@ -31,9 +33,12 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
@@ -67,13 +72,18 @@ public class ServerKeyExchange extends Tls12Test {
         });
     }
     
-    public List<DerivationParameter> getUnproposedNamedGroups() {
+    public List<DerivationParameter> getUnproposedNamedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         NamedGroup.getImplemented().stream()
                 .filter(group -> group.isCurve())
                 .filter(curve -> !context.getSiteReport().getSupportedNamedGroups().contains(curve))
                 .forEach(unofferedCurve -> parameterValues.add(new NamedGroupDerivation(unofferedCurve)));
         return parameterValues;
+    }
+    
+    public List<DerivationParameter> getCertsIncludingUnsupportedPkGroups(DerivationScope scope) {
+        CertificateDerivation certDerivation = (CertificateDerivation) DerivationFactory.getInstance(DerivationType.CERTIFICATE);
+        return certDerivation.getApplicableCertificates(context, scope, true);
     }
 
     @TlsTest(description = "A possible reason for a "
@@ -82,7 +92,7 @@ public class ServerKeyExchange extends Tls12Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.MEDIUM)
     @KeyExchange(supported = {KeyExchangeType.ECDH})
-    @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getUnproposedNamedGroups")
+    @ExplicitValues(affectedTypes = {DerivationType.NAMED_GROUP, DerivationType.CERTIFICATE}, methods = {"getUnproposedNamedGroups", "getCertsIncludingUnsupportedPkGroups"})
     public void acceptsUnproposedNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

@@ -35,6 +35,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
@@ -79,7 +80,7 @@ public class SignatureAlgorithms extends Tls13Test {
         });
     }
 
-    public List<DerivationParameter> getLegacySigHashAlgoritms() {
+    public List<DerivationParameter> getLegacySigHashAlgoritms(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<SignatureAndHashAlgorithm> algos = SignatureAndHashAlgorithm.getImplemented().stream()
                 .filter(i -> !i.suitedForSigningTls13Messages())
@@ -88,7 +89,7 @@ public class SignatureAlgorithms extends Tls13Test {
         return parameterValues;
     }
 
-    public List<DerivationParameter> getTls13SigHashAlgoritms() {
+    public List<DerivationParameter> getTls13SigHashAlgoritms(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<SignatureAndHashAlgorithm> algos = SignatureAndHashAlgorithm.getImplemented().stream()
                 .filter(i -> i.suitedForSigningTls13Messages())

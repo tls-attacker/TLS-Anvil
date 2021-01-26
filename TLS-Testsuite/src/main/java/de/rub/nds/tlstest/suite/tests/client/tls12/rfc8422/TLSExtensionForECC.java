@@ -48,8 +48,11 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.LinkedList;
+import java.util.List;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import org.junit.jupiter.api.Tag;
@@ -131,13 +134,13 @@ public class TLSExtensionForECC extends Tls12Test {
     @TestDescription("Deprecated groups should not be offered by a client")
     public void offeredDeprecatedGroup() {
         boolean deprecated = false;
+        List<NamedGroup> deprecatedFound = new LinkedList<>();
         for(NamedGroup group : context.getSiteReport().getSupportedNamedGroups()) {
             if(group.getIntValue() < NamedGroup.SECP256R1.getIntValue() || group == NamedGroup.EXPLICIT_CHAR2 || group == NamedGroup.EXPLICIT_PRIME) {
-                deprecated = true;
-                break;
+                deprecatedFound.add(group);
             }
         }
-        assertFalse("A deprecated group was offered", deprecated);
+        assertTrue("Found deprecated group: " + deprecatedFound.stream().map(NamedGroup::name).collect(Collectors.joining(",")), deprecatedFound.isEmpty());
     }
     
     private boolean isRfc8422Curve(NamedGroup group) {

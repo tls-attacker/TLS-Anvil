@@ -39,6 +39,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
@@ -67,7 +68,7 @@ public class CertificateVerify extends Tls13Test {
         return ConditionEvaluationResult.disabled("Client does not support legacy rsa signature and hash algorithms");
     }
     
-    public List<DerivationParameter> getLegacyRSASAHAlgorithms() {
+    public List<DerivationParameter> getLegacyRSASAHAlgorithms(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         for (SignatureAndHashAlgorithm algo : context.getSiteReport().getSupportedSignatureAndHashAlgorithms()) {
             if (algo.getSignatureAlgorithm() == SignatureAlgorithm.RSA) {
@@ -152,7 +153,7 @@ public class CertificateVerify extends Tls13Test {
         });
     }
     
-    public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms() {
+    public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(DerivationScope scope) {
         List<DerivationParameter> unsupportedAlgorithms = new LinkedList<>();
         SignatureAndHashAlgorithm.getImplemented().stream()
                 .filter(algorithm -> !TestContext.getInstance().getSiteReport().getSupportedSignatureAndHashAlgorithms().contains(algorithm))

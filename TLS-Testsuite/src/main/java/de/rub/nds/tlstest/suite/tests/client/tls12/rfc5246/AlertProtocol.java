@@ -69,15 +69,15 @@ public class AlertProtocol extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            Validator.executedAsPlanned(i);
+            Validator.smartExecutedAsPlanned(i);
 
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
-            if (message == null) {
-                i.addAdditionalResultInfo("No close_notify alert received.");
+            if (message == null && Validator.socketClosed(i)) {
+                i.addAdditionalResultInfo("No CLOSE NOTIFY Alert received.");
                 i.setResult(TestResult.PARTIALLY_SUCCEEDED);
                 return;
             }
-            assertEquals("Did not receive warning alert", AlertLevel.WARNING.getValue(), message.getLevel().getValue().byteValue());
+            Validator.receivedWarningAlert(i);
             Validator.testAlertDescription(i, AlertDescription.CLOSE_NOTIFY, message);
 
         });

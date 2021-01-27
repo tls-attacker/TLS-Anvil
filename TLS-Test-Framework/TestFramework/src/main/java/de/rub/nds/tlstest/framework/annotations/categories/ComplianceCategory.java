@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Interoperability {
+public @interface ComplianceCategory {
     SeverityLevel value();
 }

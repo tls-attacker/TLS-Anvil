@@ -16,8 +16,8 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -42,8 +42,8 @@ public class ServerNameIndication extends Tls12Test {
     @Test
     @MethodCondition(method = "sniActive")
     @TestDescription("The ServerNameList MUST NOT contain more than one name of the same name_type.")
-    @Handshake(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void moreThanOneNameOfTheSameType() {
         ServerNameIndicationExtensionMessage ext = context.getReceivedClientHelloMessage().getExtension(ServerNameIndicationExtensionMessage.class);
         List<ServerNamePair> snis = ext.getServerNameList();

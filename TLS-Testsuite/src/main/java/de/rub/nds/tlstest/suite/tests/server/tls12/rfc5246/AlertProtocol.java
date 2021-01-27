@@ -35,10 +35,10 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
@@ -73,9 +73,9 @@ public class AlertProtocol extends Tls12Test {
             + "alert of its own and close down the connection immediately, "
             + "discarding any pending writes.")
     @RFC(number = 5246, section = "7.2.1 Closure Alerts")
-    @Interoperability(SeverityLevel.LOW)
-    @Alert(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.LOW)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.LOW)
     public void close_notify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -110,9 +110,9 @@ public class AlertProtocol extends Tls12Test {
     @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both"
             + "parties immediately close the connection.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    @Security(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void abortAfterFatalAlert_sendBeforeCCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -139,9 +139,9 @@ public class AlertProtocol extends Tls12Test {
     @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both"
             + "parties immediately close the connection.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    @Security(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void abortAfterFatalAlert_sendAfterServerHelloDone(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

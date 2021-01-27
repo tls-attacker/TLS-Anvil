@@ -27,10 +27,10 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -45,9 +45,9 @@ public class TLSRecordProtocol extends Tls12Test {
             + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
             + "record type, it MUST send an unexpected_message alert.")
     @RecordLayerCategory(SeverityLevel.LOW)
-    @Alert(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.LOW)
     public void sendNotDefinedRecordTypesWithServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -74,9 +74,9 @@ public class TLSRecordProtocol extends Tls12Test {
             + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
             + "record type, it MUST send an unexpected_message alert.")
     @RecordLayerCategory(SeverityLevel.LOW)
-    @Alert(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.LOW)
     public void sendNotDefinedRecordTypesWithCCSAndFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

@@ -31,14 +31,14 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -67,10 +67,10 @@ public class PointFormatExtension extends Tls12Test {
             + "still be included and contain exactly one value: the uncompressed"
             + "point format (0).")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @Interoperability(SeverityLevel.HIGH) 
-    @Handshake(SeverityLevel.MEDIUM) 
-    @Compliance(SeverityLevel.HIGH)
-    @DeprecatedFeature(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH) 
+    @HandshakeCategory(SeverityLevel.MEDIUM) 
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     public void serverAdvertisesOnlyUncompressedPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -119,10 +119,10 @@ public class PointFormatExtension extends Tls12Test {
             + "this specification, then the server MUST abort the handshake and"
             + "return an illegal_parameter alert.")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void invalidPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -157,10 +157,10 @@ public class PointFormatExtension extends Tls12Test {
             + "this specification, then the server MUST abort the handshake and"
             + "return an illegal_parameter alert.")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @DeprecatedFeature(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     public void deprecatedFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

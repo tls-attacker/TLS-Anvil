@@ -36,10 +36,10 @@ import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -60,10 +60,10 @@ public class ServerHello extends Tls12Test {
             + "not request in the associated ClientHello, it MUST abort the handshake with an "
             + "unsupported_extension fatal alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendAdditionalExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddRenegotiationInfoExtension(false);
@@ -130,10 +130,10 @@ public class ServerHello extends Tls12Test {
             + "list in ClientHello.compression_methods.")
     @ScopeExtensions(DerivationType.COMPRESSION_METHOD)
     @DynamicValueConstraints(affectedTypes = DerivationType.COMPRESSION_METHOD, methods = "isUnproposedCompressionMethod")
-    @Interoperability(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.HIGH)
-    @Handshake(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void selectUnproposedCompressionMethod(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CompressionMethod selectedCompressionMethod = derivationContainer.getDerivation(CompressionMethodDerivation.class).getSelectedValue();

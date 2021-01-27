@@ -14,8 +14,8 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -34,8 +34,8 @@ public class ServerKeyExchange extends TlsGenericTest {
 
     @TlsTest(description = "Send a Server Key Exchange Message with a modified length value")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
-    @MessageStructure(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void serverKeyExchangeLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         ServerKeyExchangeMessage serverKeyExchange = (ServerKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
@@ -46,8 +46,8 @@ public class ServerKeyExchange extends TlsGenericTest {
     @TlsTest(description = "Send a Server Key Exchange Message with a modified signature length value")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNotAnonymousCipherSuite")
-    @MessageStructure(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void serverKeyExchangeSignatureLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         ServerKeyExchangeMessage serverKeyExchange = (ServerKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
@@ -57,8 +57,8 @@ public class ServerKeyExchange extends TlsGenericTest {
     
     @TlsTest(description = "Send a Server Key Exchange Message with a modified public key length value")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
-    @MessageStructure(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void serverKeyExchangePublicKeyLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         ServerKeyExchangeMessage serverKeyExchange = (ServerKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
@@ -69,8 +69,8 @@ public class ServerKeyExchange extends TlsGenericTest {
     @TlsTest(description = "Send a Diffie-Hellman Server Key Exchange Message with a modified modulus length value")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
-    @MessageStructure(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void modulusLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         DHEServerKeyExchangeMessage serverKeyExchange = (DHEServerKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
@@ -81,8 +81,8 @@ public class ServerKeyExchange extends TlsGenericTest {
     @TlsTest(description = "Send a Diffie-Hellman Server Key Exchange Message with a modified generator length value")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
-    @MessageStructure(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void generatorLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         DHEServerKeyExchangeMessage serverKeyExchange = (DHEServerKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);

@@ -33,16 +33,16 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.CVE;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CVECategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -64,12 +64,12 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class StateMachine extends Tls13Test {
 
     @TlsTest(description = "CVE-2020-24613, Send Finished without Certificate")
-    @Handshake(SeverityLevel.CRITICAL)
-    @Compliance(SeverityLevel.CRITICAL)
-    @Security(SeverityLevel.CRITICAL)
-    @CVE(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @CVECategory(SeverityLevel.CRITICAL)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Alert(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.HIGH)
     public void sendFinishedWithoutCert(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE);
@@ -88,10 +88,10 @@ public class StateMachine extends Tls13Test {
     @RFC(number = 8446, section = "5. Record Protocol")
     @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM) 
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM) 
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void sendHandshakeTrafficSecretEncryptedChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         config.setTls13BackwardsCompatibilityMode(true);
@@ -114,10 +114,10 @@ public class StateMachine extends Tls13Test {
             + "handshake with an \"unexpected_message\" alert.")
     @RFC(number = 8446, section = "5. Record Protocol")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void sendAppTrafficSecretEncryptedChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -140,10 +140,10 @@ public class StateMachine extends Tls13Test {
             + "not be able to distinguish these cases from allowed cases).")
     @RFC(number = 8446, section = "5. Record Protocol")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendLegacyChangeCipherSpecAfterFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -155,11 +155,11 @@ public class StateMachine extends Tls13Test {
 
     @TlsTest(description = "Negotiate TLS 1.3 but send an unencrypted Certificate Message")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Security(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendLegacyFlowCertificate(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
@@ -173,11 +173,11 @@ public class StateMachine extends Tls13Test {
 
     @TlsTest(description = "Negotiate TLS 1.3 but send an unencrypted Certificate Message and legacy ECDHE Key Exchange Message")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Security(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendLegacyFlowECDHEKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
@@ -191,11 +191,11 @@ public class StateMachine extends Tls13Test {
 
     @TlsTest(description = "Negotiate TLS 1.3 but send an unencrypted Certificate Message and legacy DHE Key Exchange Message")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Security(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendLegacyFlowDHEKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
@@ -209,11 +209,11 @@ public class StateMachine extends Tls13Test {
 
     @Test
     @TestDescription("Begin the Handshake with an Application Data Message")
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Security(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);
@@ -221,22 +221,22 @@ public class StateMachine extends Tls13Test {
 
     @Test
     @TestDescription("Begin the Handshake with a Finished Message")
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Security(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
     }
     
     @TlsTest(description = "Send a second encrypted Server Hello")
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.CRITICAL)
-    @Security(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendServerHelloTwice(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner); 
@@ -246,10 +246,10 @@ public class StateMachine extends Tls13Test {
     @TlsTest(description = "Servers MUST NOT send this message, and clients receiving it MUST" +
             "terminate the connection with an \"unexpected_message\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.HIGH)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void sendEndOfEarlyDataAsServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.FINISHED);
@@ -265,12 +265,12 @@ public class StateMachine extends Tls13Test {
     
     @RFC(number = 8446, section = "4.4.3. Certificate Verify")
     @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
-    @Security(SeverityLevel.CRITICAL)
-    @Crypto(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @CryptoCategory(SeverityLevel.CRITICAL)
     @CertificateCategory(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Interoperability(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
     public void omitCertificateVerify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

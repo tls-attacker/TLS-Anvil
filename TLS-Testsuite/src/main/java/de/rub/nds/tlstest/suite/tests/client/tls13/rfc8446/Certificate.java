@@ -21,11 +21,11 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -37,11 +37,11 @@ public class Certificate extends Tls13Test {
 
     @TlsTest(description = "If the server supplies an empty Certificate message, " +
             "the client MUST abort the handshake with a \"decode_error\" alert.")
-    @Handshake(SeverityLevel.CRITICAL)
-    @Compliance(SeverityLevel.CRITICAL)
-    @Security(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.HIGH)
     @CertificateCategory(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.HIGH)
     public void emptyCertificate(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

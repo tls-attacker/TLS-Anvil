@@ -28,14 +28,14 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -52,9 +52,9 @@ public class ClientHello extends Tls13Test {
             + "does not recognize, support, or wish to use, the server MUST "
             + "ignore those cipher suites and process the remaining ones as "
             + "usual.")
-    @Interoperability(SeverityLevel.CRITICAL)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.CRITICAL)
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
     public void includeUnknownCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -69,9 +69,9 @@ public class ClientHello extends Tls13Test {
     @TlsTest(description = "In TLS 1.3, the client indicates its version preferences "
             + "in the \"supported_versions\" extension (Section 4.2.1) and the legacy_version "
             + "field MUST be set to 0x0303, which is the version number for TLS 1.2.")
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void invalidLegacyVersion_higher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -90,9 +90,9 @@ public class ClientHello extends Tls13Test {
     @TlsTest(description = "In TLS 1.3, the client indicates its version preferences "
             + "in the \"supported_versions\" extension (Section 4.2.1) and the legacy_version "
             + "field MUST be set to 0x0303, which is the version number for TLS 1.2.")
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void invalidLegacyVersion_lower(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -114,10 +114,10 @@ public class ClientHello extends Tls13Test {
             + "ClientHello.legacy_version or ServerHello.legacy_version set to 0x0300 "
             + "MUST abort the handshake with a \"protocol_version\" alert.")
     @RFC(number = 8446, section = "D.5. Security Restrictions Related to Backward Compatibility")
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Security(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void invalidLegacyVersion_ssl30(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -137,10 +137,10 @@ public class ClientHello extends Tls13Test {
             + "exactly one byte, set to zero, which corresponds to the \"null\" compression method in prior "
             + "versions of TLS. If a TLS 1.3 ClientHello is received with any other value in this field, "
             + "the server MUST abort the handshake with an \"illegal_parameter\" alert.")
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Security(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void invalidCompression(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -165,10 +165,10 @@ public class ClientHello extends Tls13Test {
     }
 
     @TlsTest(description = "Servers MUST ignore unrecognized extensions.")
-    @Interoperability(SeverityLevel.CRITICAL)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.CRITICAL)
-    @Security(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.MEDIUM)
     public void includeUnknownExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

@@ -33,13 +33,13 @@ import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -84,12 +84,12 @@ public class CertificateVerify extends Tls13Test {
             "regardless of whether RSASSA-PKCS1-v1_5 algorithms " +
             "appear in \"signature_algorithms\". The SHA-1 algorithm " +
             "MUST NOT be used in any signatures of CertificateVerify messages.")
-    @Security(SeverityLevel.MEDIUM)
-    @DeprecatedFeature(SeverityLevel.MEDIUM)
-    @Crypto(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
+    @CryptoCategory(SeverityLevel.MEDIUM)
     @CertificateCategory(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
     @ExplicitValues(affectedTypes=DerivationType.SIG_HASH_ALGORIHTM,methods="getLegacyRSASAHAlgorithms")
     @ManualConfig(DerivationType.SIG_HASH_ALGORIHTM)
@@ -117,12 +117,12 @@ public class CertificateVerify extends Tls13Test {
             "regardless of whether RSASSA-PKCS1-v1_5 algorithms " +
             "appear in \"signature_algorithms\". The SHA-1 algorithm " +
             "MUST NOT be used in any signatures of CertificateVerify messages.")
-    @Security(SeverityLevel.MEDIUM)
-    @DeprecatedFeature(SeverityLevel.MEDIUM)
-    @Crypto(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
+    @CryptoCategory(SeverityLevel.MEDIUM)
     @CertificateCategory(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @MethodCondition(method = "supportsLegacyECDSASAHAlgorithms")
     public void selectLegacyECDSASignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -143,9 +143,9 @@ public class CertificateVerify extends Tls13Test {
             "the signature field. If the verification fails, " +
             "the receiver MUST terminate the handshake with a \"decrypt_error\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.CRITICAL)
-    @Crypto(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @CryptoCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @CertificateCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -182,11 +182,11 @@ public class CertificateVerify extends Tls13Test {
         "extension unless no valid certificate chain can be produced without " +
         "unsupported algorithms")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.HIGH)
-    @Crypto(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @CryptoCategory(SeverityLevel.HIGH)
     @CertificateCategory(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
     public void acceptsUnproposedSignatureAndHash(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -203,10 +203,10 @@ public class CertificateVerify extends Tls13Test {
     @TlsTest(description = "The receiver of a CertificateVerify message MUST verify the signature " +
             "field.  [...] If the verification fails, the receiver MUST terminate the handshake " +
             "with a \"decrypt_error\" alert.")
-    @Security(SeverityLevel.CRITICAL)
-    @Crypto(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @CryptoCategory(SeverityLevel.CRITICAL)
     @CertificateCategory(SeverityLevel.CRITICAL)
-    @Interoperability(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
     public void emptySignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -230,12 +230,12 @@ public class CertificateVerify extends Tls13Test {
     }
 
     @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
-    @Security(SeverityLevel.HIGH)
-    @Crypto(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @CryptoCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @CertificateCategory(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.CRITICAL)
-    @Interoperability(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     public void emptySigAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -252,11 +252,11 @@ public class CertificateVerify extends Tls13Test {
     }
 
     @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
-    @Security(SeverityLevel.CRITICAL)
-    @Crypto(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @CryptoCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @CertificateCategory(SeverityLevel.CRITICAL)
-    @Interoperability(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
     public void emptyBoth(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

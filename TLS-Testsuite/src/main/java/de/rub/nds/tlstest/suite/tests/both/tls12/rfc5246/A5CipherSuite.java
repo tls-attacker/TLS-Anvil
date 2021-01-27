@@ -12,10 +12,10 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
@@ -31,10 +31,10 @@ public class A5CipherSuite extends Tls12Test {
             "the first handshake on that channel, but MUST NOT be negotiated, as it provides no more protection " +
             "than an unsecured connection.", securitySeverity = SeverityLevel.CRITICAL)*/
     @Test
-    @Security(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
     @TestDescription("The initial Cipher Suite state with NULL algorithms must not be negotiated")
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void negotiateTLS_NULL_WITH_NULL_NULL() {
         List<CipherSuite> suites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         if (suites.contains(CipherSuite.TLS_NULL_WITH_NULL_NULL)) {
@@ -45,11 +45,11 @@ public class A5CipherSuite extends Tls12Test {
     /*@TlsTest(description = "These cipher suites MUST NOT be used by TLS 1.2 implementations unless the application " +
             "layer has specifically requested to allow anonymous key exchange", securitySeverity = SeverityLevel.HIGH)*/
     @Test
-    @Security(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
     @TestDescription("Anonymous Cipher Suites must not be used unless requested by application layer")
-    @Handshake(SeverityLevel.MEDIUM)
-    @Interoperability(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void anonCipherSuites() {
         List<CipherSuite> suites = new ArrayList<>(context.getSiteReport().getCipherSuites());
         List<CipherSuite> forbidden = CipherSuite.getImplemented();

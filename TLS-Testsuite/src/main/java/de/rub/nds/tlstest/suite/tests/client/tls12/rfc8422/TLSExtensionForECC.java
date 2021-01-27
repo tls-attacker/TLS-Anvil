@@ -38,12 +38,12 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 
 
 @RFC(number = 8422, section = "4. TLS Extensions for ECC")
@@ -73,9 +73,9 @@ public class TLSExtensionForECC extends Tls12Test {
     @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.RSA})
     @TestDescription("The client MUST NOT include these extensions in the ClientHello " +
             "message if it does not propose any ECC cipher suites.")
-    @Interoperability(SeverityLevel.HIGH)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void bothECExtensions_WithoutECCCipher() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
@@ -99,9 +99,9 @@ public class TLSExtensionForECC extends Tls12Test {
             "backwards compatibility purposes, the point format list extension MAY" +
             "still be included and contain exactly one value: the uncompressed" +
             "point format (0).")
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidPointFormat() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
@@ -142,10 +142,10 @@ public class TLSExtensionForECC extends Tls12Test {
     @Test
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @TestDescription("Deprecated groups should not be offered by a client")
-    @Crypto(SeverityLevel.MEDIUM)
-    @Security(SeverityLevel.MEDIUM)
-    @DeprecatedFeature(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
+    @CryptoCategory(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void offeredDeprecatedGroup() {
         boolean deprecated = false;
         List<NamedGroup> deprecatedFound = new LinkedList<>();
@@ -179,10 +179,10 @@ public class TLSExtensionForECC extends Tls12Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isInvalidCurveApplicableNamedGroup")
-    @Crypto(SeverityLevel.HIGH)
-    @Security(SeverityLevel.HIGH)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.HIGH)
+    @CryptoCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.HIGH)
     public void rejectsInvalidCurvePoints(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

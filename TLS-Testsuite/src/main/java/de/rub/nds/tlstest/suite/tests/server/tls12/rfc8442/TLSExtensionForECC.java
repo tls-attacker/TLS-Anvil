@@ -31,12 +31,12 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -76,9 +76,9 @@ public class TLSExtensionForECC extends Tls12Test {
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello "
             + "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void bothECExtensions_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -92,9 +92,9 @@ public class TLSExtensionForECC extends Tls12Test {
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello "
             + "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void ecExtension_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -108,9 +108,9 @@ public class TLSExtensionForECC extends Tls12Test {
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello "
             + "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void ecPointFormatExtension_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -125,9 +125,9 @@ public class TLSExtensionForECC extends Tls12Test {
             + "extensions MUST use the client's enumerated capabilities to guide its "
             + "selection of an appropriate cipher suite.  One of the proposed ECC ")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void addUnknownEllipticCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -149,9 +149,9 @@ public class TLSExtensionForECC extends Tls12Test {
             + "it MUST NOT negotiate the use of an ECC cipher suite.")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void onlyInvalidEllipticCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -181,9 +181,9 @@ public class TLSExtensionForECC extends Tls12Test {
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @ManualConfig(DerivationType.CIPHERSUITE)
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    @Interoperability(SeverityLevel.CRITICAL)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidEllipticCurve_WithNonECCCiphersuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -231,10 +231,10 @@ public class TLSExtensionForECC extends Tls12Test {
     @Test
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @TestDescription("Deprecated groups should not be supported")
-    @Crypto(SeverityLevel.MEDIUM)
-    @Security(SeverityLevel.LOW)
-    @DeprecatedFeature(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
+    @CryptoCategory(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.LOW)
+    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void supportsDeprecated(WorkflowRunner runner) {
         boolean deprecated = false;
         for (NamedGroup group : context.getSiteReport().getSupportedNamedGroups()) {

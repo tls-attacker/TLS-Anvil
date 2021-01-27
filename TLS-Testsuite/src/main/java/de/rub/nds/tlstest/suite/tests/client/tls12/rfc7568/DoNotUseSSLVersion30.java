@@ -15,9 +15,9 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
@@ -36,9 +36,9 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
             + "any version of TLS MUST NOT be permitted. "
             + "Pragmatically, clients MUST NOT send a ClientHello with "
             + "ClientHello.client_version set to {03,00}.")
-    @Security(SeverityLevel.CRITICAL)
-    @DeprecatedFeature(SeverityLevel.CRITICAL)
-    @Handshake(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void sendClientHelloVersion0300() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         assertFalse("ClientHello contains protocol version 0300",

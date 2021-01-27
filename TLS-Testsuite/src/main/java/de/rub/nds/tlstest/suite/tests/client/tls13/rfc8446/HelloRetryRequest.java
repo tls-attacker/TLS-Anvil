@@ -36,14 +36,14 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -85,10 +85,10 @@ public class HelloRetryRequest extends Tls13Test {
             + "alert.")
     @RFC(number = 8446, section = "4.2.8 Key Share")
     @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getUnofferedGroups")
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void helloRetryRequestsUnofferedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         performHelloRetryRequestTest(argumentAccessor, runner);
     }
@@ -104,10 +104,10 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "A client which receives a cipher suite that was not offered MUST "
             + "abort the handshake.")
     @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getUnofferedTls13CipherSuites")
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void helloRetryRequestsUnofferedTls13CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
@@ -130,10 +130,10 @@ public class HelloRetryRequest extends Tls13Test {
             + "\"illegal_parameter\" alert if the HelloRetryRequest would not result "
             + "in any change in the ClientHello.")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isKeyShareInInitialHello")
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void helloRetryRequestResultsInNoChanges(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         performHelloRetryRequestTest(argumentAccessor, runner);
     }
@@ -183,10 +183,10 @@ public class HelloRetryRequest extends Tls13Test {
             + "handshake with an \"unexpected_message\" alert.")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
     @MethodCondition(method = "supportsMultipleNamedGroups")
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void sendSecondHelloRetryRequest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -230,10 +230,10 @@ public class HelloRetryRequest extends Tls13Test {
     @ScopeExtensions(DerivationType.MIRRORED_CIPHERSUITE)
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
     @MethodCondition(method = "supportsMultipleCipherSuites")
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void cipherSuiteDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
@@ -261,10 +261,10 @@ public class HelloRetryRequest extends Tls13Test {
             + "field that does not match what it sent in the ClientHello MUST "
             + "abort the handshake with an \"illegal_parameter\" alert.")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void helloRetryLegacySessionId(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
         ServerHello.sharedSessionIdTest(workflowTrace, runner);
@@ -273,10 +273,10 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "legacy_compression_method: A single byte which "
             + "MUST have the value 0.")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void helloRetryCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
         ServerHello.sharedCompressionValueTest(workflowTrace, runner);
@@ -290,9 +290,9 @@ public class HelloRetryRequest extends Tls13Test {
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
     @ScopeLimitations(DerivationType.CIPHERSUITE)
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
-    @Interoperability(SeverityLevel.CRITICAL)
-    @Compliance(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void helloRetryGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
         ServerInitiatedExtensionPoints.sharedGreaseCipherSuiteTest(workflowTrace, runner, derivationContainer);
@@ -306,9 +306,9 @@ public class HelloRetryRequest extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
-    @Interoperability(SeverityLevel.CRITICAL)
-    @Compliance(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void helloRetryGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
         ServerInitiatedExtensionPoints.sharedServerHelloGreaseExtensionTest(workflowTrace, runner, derivationContainer);
@@ -322,9 +322,9 @@ public class HelloRetryRequest extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
-    @Interoperability(SeverityLevel.CRITICAL)
-    @Compliance(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void helloRetryGreaseVersionSelected(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
         ServerInitiatedExtensionPoints.sharedGreaseVersionTest(workflowTrace, runner, derivationContainer);
@@ -347,10 +347,10 @@ public class HelloRetryRequest extends Tls13Test {
             + "HelloRetryRequest. In that case, the client MUST send the same "
             + "ClientHello without modification, except as follows: [...]")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
-    @Interoperability(SeverityLevel.HIGH)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void helloRetryIsUnmodifiedExceptAllowed(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
@@ -421,11 +421,11 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "Enforce a TLS 1.3 HelloRetryRequest but select a TLS 1.2 Cipher Suite")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
     @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getTls12CipherSuites")
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
-    @Security(SeverityLevel.LOW)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.LOW)
     public void helloRetryRequestsTls12CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         performHelloRetryRequestTest(argumentAccessor, runner);
     }

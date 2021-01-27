@@ -24,11 +24,11 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -45,9 +45,9 @@ public class ProhibitingSSLv2 extends Tls12Test {
     
     @TlsTest(description = "TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT-"
             + "HELLO message format.")
-    @Security(SeverityLevel.CRITICAL)
-    @DeprecatedFeature(SeverityLevel.CRITICAL)
-    @Handshake(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void sendSSL2CompatibleClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -64,10 +64,10 @@ public class ProhibitingSSLv2 extends Tls12Test {
     @TlsTest(description = "TLS servers MUST NOT reply with an SSL 2.0 SERVER-HELLO with a"
             + "protocol version that is less than { 0x03, 0x00 } and instead MUST"
             + "abort the connection")
-    @Security(SeverityLevel.CRITICAL)
-    @DeprecatedFeature(SeverityLevel.CRITICAL)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendServerHelloVersionLower0300(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -84,9 +84,9 @@ public class ProhibitingSSLv2 extends Tls12Test {
 
     @Test
     @TestDescription("Clients MUST NOT send any ClientHello message that specifies a protocol version less than { 0x03, 0x00 }.")
-    @Security(SeverityLevel.CRITICAL)
-    @DeprecatedFeature(SeverityLevel.CRITICAL)
-    @Handshake(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void testClientHelloProtocolVersion() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertFalse("ClientHello protocol version is less than 0x0300", msg.getProtocolVersion().getValue()[0] < 3);

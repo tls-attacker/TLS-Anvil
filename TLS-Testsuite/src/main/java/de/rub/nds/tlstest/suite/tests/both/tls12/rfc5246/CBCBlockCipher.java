@@ -28,9 +28,9 @@ import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
@@ -48,7 +48,7 @@ import java.util.List;
 import org.junit.jupiter.api.Tag;
 
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 
@@ -60,13 +60,13 @@ public class CBCBlockCipher extends Tls12Test {
             "MUST check this padding and MUST use the bad_record_mac alert to " +
             "indicate padding errors.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.PADDING_BITMASK})
     @ValueConstraints(affectedTypes = {DerivationType.CIPHERSUITE}, methods = "isCBC")
-    @Crypto(SeverityLevel.CRITICAL)
+    @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void invalidCBCPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = derivationContainer.buildBitmask();
@@ -106,13 +106,13 @@ public class CBCBlockCipher extends Tls12Test {
             "checked, weren’t correct.")
     @RFC(number = 5446, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.CIPHERTEXT_BITMASK)
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
-    @Crypto(SeverityLevel.CRITICAL)
+    @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void invalidCipherText(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = derivationContainer.buildBitmask();
@@ -162,13 +162,13 @@ public class CBCBlockCipher extends Tls12Test {
             "MAC.")
     @RFC(number = 5446, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.MAC_BITMASK)
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
-    @Crypto(SeverityLevel.HIGH)
+    @CryptoCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void invalidMAC(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] bitmask = derivationContainer.buildBitmask();
@@ -217,12 +217,12 @@ public class CBCBlockCipher extends Tls12Test {
             "MAC.")
     @RFC(number = 5446, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
-    @Crypto(SeverityLevel.HIGH)
+    @CryptoCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void missingMAC(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -239,14 +239,14 @@ public class CBCBlockCipher extends Tls12Test {
             "length specifies the length of the padding field exclusive of the " +
             "padding_length field itself.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
     @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.PADDING_BITMASK})
     @ExplicitModelingConstraints(affectedTypes = DerivationType.PADDING_BITMASK, methods = "getPaddingBitmaskConstraints")
-    @Crypto(SeverityLevel.HIGH)
+    @CryptoCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void missingMACinvalidPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         byte[] paddingBitmask = derivationContainer.buildBitmask();

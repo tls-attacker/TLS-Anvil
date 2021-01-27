@@ -31,10 +31,10 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -56,9 +56,9 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             + "if a GREASE value appears in any of the following: "
             + "The \"version\" value in a ServerHello or HelloRetryRequest")
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Interoperability(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -77,9 +77,9 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             + "The \"cipher_suite\" value in a ServerHello")
     @ScopeLimitations(DerivationType.CIPHERSUITE)
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Interoperability(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite greaseCipher = derivationContainer.getDerivation(GreaseCipherSuiteDerivation.class).getSelectedValue();
@@ -98,9 +98,9 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             + "if a GREASE value appears in any of the following: "
             + "Any ServerHello extension")
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Interoperability(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendServerHelloGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ExtensionType greaseExtension = derivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
@@ -122,10 +122,10 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @ScopeExtensions(DerivationType.GREASE_NAMED_GROUP)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Interoperability(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void selectGreaseNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -144,10 +144,10 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             + "The signature algorithm in a ServerKeyExchange signature in TLS 1.2 or earlier")
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
     @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Interoperability(SeverityLevel.HIGH)
-    @Compliance(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void selectGreaseSignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

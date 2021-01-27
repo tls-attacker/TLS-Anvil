@@ -15,9 +15,9 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsE
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
@@ -33,9 +33,9 @@ public class ClientHello extends Tls13Test {
             "field MUST be set to 0x0303, which is the version number for TLS 1.2.")*/
     @Test
     @TestDescription("The client must set the legacy version field to TLS 1.2 and send a SupportedVersions Extension")
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.LOW)
+    @InteroperabilityCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.LOW)
     public void checkLegacyVersion() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
         byte[] version = clientHello.getProtocolVersion().getValue();

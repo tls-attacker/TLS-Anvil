@@ -32,14 +32,14 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -68,9 +68,9 @@ public class KeyShare extends Tls13Test {
             + "to a group offered in the \"supported_groups\" extension "
             + "and MUST appear in the same order.")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
-    @Interoperability(SeverityLevel.LOW)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void testOrderOfKeyshareEntries(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -108,9 +108,9 @@ public class KeyShare extends Tls13Test {
     @TlsTest(description = "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
             + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
             + "that the server has selected for the negotiated key exchange.")
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void serverOnlyOffersOneKeshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> supportedTls13 = context.getSiteReport().getSupportedTls13Groups();
@@ -122,9 +122,9 @@ public class KeyShare extends Tls13Test {
             + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
             + "that the server has selected for the negotiated key exchange.")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void serverOnlyOffersOneKeshareAllGroupsAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> supportedTls13 = context.getSiteReport().getSupportedTls13Groups();
@@ -156,12 +156,12 @@ public class KeyShare extends Tls13Test {
 
     @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
     @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getLegacyGroups")
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Crypto(SeverityLevel.HIGH)
-    @DeprecatedFeature(SeverityLevel.HIGH)
-    @Security(SeverityLevel.LOW) //Categroies MM: see other deprecated groups...
+    @InteroperabilityCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @CryptoCategory(SeverityLevel.HIGH)
+    @DeprecatedFeatureCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.LOW) //Categroies MM: see other deprecated groups...
     public void serverAcceptsDeprecatedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> groups = NamedGroup.getImplemented();
@@ -171,12 +171,12 @@ public class KeyShare extends Tls13Test {
 
     @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Crypto(SeverityLevel.HIGH)
-    @DeprecatedFeature(SeverityLevel.HIGH)
-    @Security(SeverityLevel.LOW) //Categroies MM: see other deprecated groups...
+    @InteroperabilityCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @CryptoCategory(SeverityLevel.HIGH)
+    @DeprecatedFeatureCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.LOW) //Categroies MM: see other deprecated groups...
     public void serverAcceptsDeprecatedGroupsAllAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> groups = NamedGroup.getImplemented();
@@ -203,9 +203,9 @@ public class KeyShare extends Tls13Test {
     }
 
     @TlsTest(description = "Send a Client Hello with an undefined Named Group")
-    @Interoperability(SeverityLevel.CRITICAL)
-    @Handshake(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.CRITICAL)
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
     public void includeUnknownGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

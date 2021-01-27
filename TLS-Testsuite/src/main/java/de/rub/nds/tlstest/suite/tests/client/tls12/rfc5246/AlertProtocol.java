@@ -27,11 +27,11 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
@@ -55,9 +55,9 @@ public class AlertProtocol extends Tls12Test {
             + "of the connection. The other party MUST respond with a close_notify "
             + "alert of its own and close down the connection immediately, "
             + "discarding any pending writes.")
-    @Interoperability(SeverityLevel.LOW)
-    @Alert(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.LOW)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.LOW)
     public void close_notify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -92,10 +92,10 @@ public class AlertProtocol extends Tls12Test {
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
     @ScopeExtensions(DerivationType.ALERT)
     @TestDescription("A Fatal Alert must terminate the connection")
-    @Security(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Handshake(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void abortAfterFatalAlertServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         AlertDescription description = derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
@@ -118,12 +118,12 @@ public class AlertProtocol extends Tls12Test {
     @TlsTest
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
-    @Security(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.ALERT)
     @TestDescription("A Fatal Alert must terminate the connection")
-    @Handshake(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void abortAfterFatalAlertServerHelloDone(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         AlertDescription description = derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();

@@ -34,11 +34,11 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Alert;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
@@ -58,10 +58,10 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Implementations MUST NOT send "
             + "zero-length fragments of Handshake types, even "
             + "if those fragments contain padding.")
-    @Interoperability(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_ServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -87,10 +87,10 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Implementations MUST NOT send "
             + "zero-length fragments of Handshake types, even "
             + "if those fragments contain padding.")
-    @Interoperability(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_Finished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -115,10 +115,10 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Handshake messages MUST NOT be interleaved "
             + "with other record types.")
     @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
-    @Interoperability(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
-    @Alert(SeverityLevel.LOW)
-    @Compliance(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.HIGH)
     /*TODO: is this test correct? by my understanding it tests if two different
     record content type messages may be in the same record (with only 1 content
     type given in the header) - the RFC states right below the quote from above 
@@ -153,11 +153,11 @@ public class RecordLayer extends Tls13Test {
     @ExplicitValues(affectedTypes = DerivationType.CHOSEN_HANDSHAKE_MSG, methods = "getModifiableHandshakeMessages")
     @ManualConfig(DerivationType.CHOSEN_HANDSHAKE_MSG)
     @Tag("emptyRecord")
-    @Interoperability(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @Security(SeverityLevel.CRITICAL)
-    @Compliance(SeverityLevel.HIGH)
-    @Alert(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendEmptyZeroLengthRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         HandshakeMessageType affectedMessage = derivationContainer.getDerivation(ChosenHandshakeMessageDerivation.class).getSelectedValue();

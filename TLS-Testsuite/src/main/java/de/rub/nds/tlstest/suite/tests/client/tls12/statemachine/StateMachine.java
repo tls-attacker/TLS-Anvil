@@ -24,7 +24,13 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
@@ -52,6 +58,10 @@ public class StateMachine extends Tls12Test {
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNotAnonCipherSuite")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeLimitations({DerivationType.CERTIFICATE})
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void omitCertificate(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -66,6 +76,10 @@ public class StateMachine extends Tls12Test {
     
     @TlsTest(description = "Omit the Change Cipher Spec Message and send Finished unencrypted")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void omitChangeCipherSpecUnencryptedFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -78,6 +92,10 @@ public class StateMachine extends Tls12Test {
     
     @TlsTest(description = "Omit the Change Cipher Spec Message and send Finished encrypted")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void omitChangeCipherSpecEncryptedFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -90,6 +108,8 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Send two Server Hellos as the first server messages")
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
     public void sendServerHelloTwice(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner);
@@ -97,6 +117,9 @@ public class StateMachine extends Tls12Test {
     
     @TlsTest(description = "Send a second ServerHello after the client's Finished has been received")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendSecondServerHelloAfterClientFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -111,6 +134,9 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Send ServerHello, Change CipherSpec")
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendResumptionMessageFlow(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -123,6 +149,8 @@ public class StateMachine extends Tls12Test {
     
     @Test
     @TestDescription("Begin the Handshake with a Finished Message")
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
@@ -130,6 +158,9 @@ public class StateMachine extends Tls12Test {
     
     @Test
     @TestDescription("Begin the Handshake with Application Data")
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);

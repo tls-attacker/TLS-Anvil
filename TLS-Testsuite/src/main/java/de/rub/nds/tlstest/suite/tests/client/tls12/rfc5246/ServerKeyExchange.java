@@ -28,7 +28,11 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -45,26 +49,29 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivati
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
 import java.util.List;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 
 @RFC(number = 8422, section = "5.4 Server Key Exchange")
 @ClientTest
 public class ServerKeyExchange extends Tls12Test {
-     
+
     @TlsTest(description = "The client must verify the signature of the ServerKeyExchange message")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.CRITICAL)
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
     @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @CryptoCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.HIGH)
     public void invalidServerKeyExchangeSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] bitmask = derivationContainer.buildBitmask();
-        
+
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         ServerKeyExchangeMessage serverKeyExchangeMsg = (ServerKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
         serverKeyExchangeMsg.setSignature(Modifiable.xor(bitmask, 0));
-        
+
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
@@ -90,9 +97,12 @@ public class ServerKeyExchange extends Tls12Test {
             + "fatal handshake failure is that the client's capabilities for "
             + "handling elliptic curves and point formats are exceeded")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.MEDIUM)
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @ExplicitValues(affectedTypes = {DerivationType.NAMED_GROUP, DerivationType.CERTIFICATE}, methods = {"getUnproposedNamedGroups", "getCertsIncludingUnsupportedPkGroups"})
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.HIGH)
     public void acceptsUnproposedNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -108,8 +118,11 @@ public class ServerKeyExchange extends Tls12Test {
             + "server's elliptic curve domain parameters and ephemeral ECDH public "
             + "key from the ServerKeyExchange message.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.CRITICAL)
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @CryptoCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.HIGH)
     public void acceptsMissingSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -131,11 +144,14 @@ public class ServerKeyExchange extends Tls12Test {
     @TlsTest(description = "The client verifies the signature (when present) and retrieves the "
             + "server's elliptic curve domain parameters and ephemeral ECDH public "
             + "key from the ServerKeyExchange message.")
-    @Security(SeverityLevel.CRITICAL)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeLimitations(DerivationType.SIG_HASH_ALGORIHTM)
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNotAnonCipherSuite")
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @CryptoCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.HIGH)
     public void acceptsAnonSignatureForNonAnonymousCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -166,20 +182,21 @@ public class ServerKeyExchange extends Tls12Test {
                 .forEach(algorithm -> unsupportedAlgorithms.add(new SigAndHashDerivation(algorithm)));
         return unsupportedAlgorithms;
     }
-    
-    @TlsTest(description = "If the client has offered the \"signature_algorithms\" extension, the " +
-            "signature algorithm and hash algorithm MUST be a pair listed in that " +
-            "extension. ")
+
+    @TlsTest(description = "If the client has offered the \"signature_algorithms\" extension, the "
+            + "signature algorithm and hash algorithm MUST be a pair listed in that "
+            + "extension. ")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.CRITICAL)
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.HIGH)
     public void acceptsUnproposedSignatureAndHash(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
         });

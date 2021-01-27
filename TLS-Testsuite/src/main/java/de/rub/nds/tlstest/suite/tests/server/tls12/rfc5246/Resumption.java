@@ -31,11 +31,13 @@ import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
@@ -46,7 +48,6 @@ import java.util.Arrays;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -83,8 +84,11 @@ public class Resumption extends Tls12Test {
             + "to resume the session if the server_name extension contains a "
             + "different name.")
     @RFC(number = 6066, section = "3.  Server Name Indication")
-    @Security(SeverityLevel.MEDIUM)
     @MethodCondition(method = "supportsResumptionAndSniActive")
+    @SecurityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.LOW)
+    @InteroperabilityCategory(SeverityLevel.LOW)
     public void rejectSniDisparityResumption(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
@@ -120,8 +124,11 @@ public class Resumption extends Tls12Test {
     @TlsTest(description = "When resuming a session, the server MUST "
             + "NOT include a server_name extension in the server hello.")
     @RFC(number = 6066, section = "3.  Server Name Indication")
-    @Interoperability(SeverityLevel.LOW)
     @MethodCondition(method = "supportsResumptionAndSniActive")
+    @SecurityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.LOW)
+    @InteroperabilityCategory(SeverityLevel.LOW)
     public void serverHelloSniInResumption(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
@@ -142,8 +149,11 @@ public class Resumption extends Tls12Test {
     @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
-    @Security(SeverityLevel.MEDIUM)
     @ScopeExtensions(DerivationType.ALERT)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void rejectResumptionAfterFatalPostHandshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
@@ -180,7 +190,10 @@ public class Resumption extends Tls12Test {
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
     @ScopeLimitations(DerivationType.INCLUDE_SESSION_TICKET_EXTENSION)
-    @Security(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @ScopeExtensions(DerivationType.ALERT)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void rejectResumptionAfterInvalidFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);

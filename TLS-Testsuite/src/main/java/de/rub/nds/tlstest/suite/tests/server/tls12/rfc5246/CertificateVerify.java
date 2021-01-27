@@ -23,15 +23,18 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 
 @ServerTest
 @RFC(number = 5246, section = "7.4.8. Certificate Verify")
@@ -48,7 +51,11 @@ public class CertificateVerify extends Tls12Test {
             "type and length fields of the handshake messages. This is the concatenation of all " +
             "the Handshake structures (as defined in Section 7.4) exchanged thus far.")
     @MethodCondition(method = "clientAuth")
-    @Security(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @CryptoCategory(SeverityLevel.CRITICAL)
+    @CertificateCategory(SeverityLevel.CRITICAL)
     public void invalidCertificateVerify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

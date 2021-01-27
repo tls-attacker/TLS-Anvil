@@ -18,7 +18,16 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -44,6 +53,10 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class CertificateVerify extends Tls13Test {
 
     @TlsTest(description = "Test if the Server sends Certificate Verify Messages with valid signatures")
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @CryptoCategory(SeverityLevel.CRITICAL)
     public void signatureIsValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -51,7 +64,7 @@ public class CertificateVerify extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(i -> {
 
             Validator.executedAsPlanned(i);
-            assertTrue("Server Key Exchange Message contained an invalid signature", signatureValid(i));
+            assertTrue("Certificate Verify Message contained an invalid signature", signatureValid(i));
         });
     }
 

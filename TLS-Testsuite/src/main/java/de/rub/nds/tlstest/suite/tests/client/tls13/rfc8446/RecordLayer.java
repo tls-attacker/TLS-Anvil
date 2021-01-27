@@ -34,10 +34,12 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -56,7 +58,10 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Implementations MUST NOT send "
             + "zero-length fragments of Handshake types, even "
             + "if those fragments contain padding.")
-    @Interoperability(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_ServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -82,7 +87,10 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Implementations MUST NOT send "
             + "zero-length fragments of Handshake types, even "
             + "if those fragments contain padding.")
-    @Interoperability(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_Finished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -106,9 +114,18 @@ public class RecordLayer extends Tls13Test {
 
     @TlsTest(description = "Handshake messages MUST NOT be interleaved "
             + "with other record types.")
-    @Security(SeverityLevel.CRITICAL)
-    @Interoperability(SeverityLevel.MEDIUM)
     @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    /*TODO: is this test correct? by my understanding it tests if two different
+    record content type messages may be in the same record (with only 1 content
+    type given in the header) - the RFC states right below the quote from above 
+    "That is, if a handshake message is split over two or more records, there 
+    MUST NOT be any other records between them.
+    We aren't always fragmenting here so this description doesn't match.
+    */
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -131,13 +148,16 @@ public class RecordLayer extends Tls13Test {
     }
 
     @TlsTest(description = "Send a record without any content.")
-    @Security(SeverityLevel.CRITICAL)
-    @Interoperability(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.CHOSEN_HANDSHAKE_MSG)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @ExplicitValues(affectedTypes = DerivationType.CHOSEN_HANDSHAKE_MSG, methods = "getModifiableHandshakeMessages")
     @ManualConfig(DerivationType.CHOSEN_HANDSHAKE_MSG)
     @Tag("emptyRecord")
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendEmptyZeroLengthRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         HandshakeMessageType affectedMessage = derivationContainer.getDerivation(ChosenHandshakeMessageDerivation.class).getSelectedValue();
@@ -165,6 +185,6 @@ public class RecordLayer extends Tls13Test {
             action.setRecords(r);
             trace.addTlsActions(action, new ReceiveAction(new AlertMessage()));
         }
-        runner.execute(trace,c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 }

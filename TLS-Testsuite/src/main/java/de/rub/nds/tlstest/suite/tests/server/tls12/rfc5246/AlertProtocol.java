@@ -35,7 +35,10 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
@@ -64,12 +67,15 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @Execution(ExecutionMode.SAME_THREAD)
 public class AlertProtocol extends Tls12Test {
 
-    @TlsTest(description = "Unless some other fatal alert has been transmitted, each party is " +
-            "required to send a close_notify alert before closing the write side " +
-            "of the connection. The other party MUST respond with a close_notify " +
-            "alert of its own and close down the connection immediately, " +
-            "discarding any pending writes.")
+    @TlsTest(description = "Unless some other fatal alert has been transmitted, each party is "
+            + "required to send a close_notify alert before closing the write side "
+            + "of the connection. The other party MUST respond with a close_notify "
+            + "alert of its own and close down the connection immediately, "
+            + "discarding any pending writes.")
     @RFC(number = 5246, section = "7.2.1 Closure Alerts")
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.LOW)
     public void close_notify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -101,12 +107,12 @@ public class AlertProtocol extends Tls12Test {
         });
     }
 
-    
-    @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both" +
-            "parties immediately close the connection.")
+    @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both"
+            + "parties immediately close the connection.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    @Security(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.ALERT)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void abortAfterFatalAlert_sendBeforeCCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -116,27 +122,26 @@ public class AlertProtocol extends Tls12Test {
         alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
         alert.setDescription(Modifiable.explicit(alertDescr.getValue()));
 
-
         workflowTrace.addTlsActions(
-            new SendAction(alert),
-            new SendAction(ActionOption.MAY_FAIL, new ChangeCipherSpecMessage(), new FinishedMessage()),
-            new ReceiveAction(new AlertMessage())
+                new SendAction(alert),
+                new SendAction(ActionOption.MAY_FAIL, new ChangeCipherSpecMessage(), new FinishedMessage()),
+                new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(workflowTrace, c).validateFinal(i ->{
+        runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             if (Validator.socketClosed(i)) {
                 i.setResult(TestResult.SUCCEEDED);
             }
         });
     }
-    
 
-    @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both" +
-            "parties immediately close the connection.")
+    @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both"
+            + "parties immediately close the connection.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    @Security(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.ALERT)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void abortAfterFatalAlert_sendAfterServerHelloDone(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -145,13 +150,13 @@ public class AlertProtocol extends Tls12Test {
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
         alert.setDescription(Modifiable.explicit(alertDescr.getValue()));
-        
+
         workflowTrace.addTlsActions(
-                    new SendAction(alert),
-                    new ReceiveAction(new AlertMessage())
+                new SendAction(alert),
+                new ReceiveAction(new AlertMessage())
         );
-        
-        runner.execute(workflowTrace,c).validateFinal(i ->{
+
+        runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             if (Validator.socketClosed(i)) {
                 i.setResult(TestResult.SUCCEEDED);
@@ -159,5 +164,3 @@ public class AlertProtocol extends Tls12Test {
         });
     }
 }
-
-

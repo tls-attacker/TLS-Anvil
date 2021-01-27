@@ -29,7 +29,10 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -44,8 +47,11 @@ public class Finished extends Tls12Test {
 
     @TlsTest( description = "Recipients of Finished messages MUST verify that the contents are correct.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.PRF_BITMASK)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @CryptoCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void verifyFinishedMessageCorrect(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = derivationContainer.buildBitmask();
@@ -60,46 +66,4 @@ public class Finished extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
-
-    @TlsTest(description = "For the PRF defined in Section 5, the Hash MUST be the Hash used as the basis for the PRF.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.CRITICAL)
-    public void invalidPRF(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-
-        PRFAlgorithm alg = AlgorithmResolver.getPRFAlgorithm(ProtocolVersion.TLS12, c.getDefaultSelectedCipherSuite());
-        PRFAlgorithm invalidAlg;
-        if (alg == PRFAlgorithm.TLS_PRF_SHA256) {
-            invalidAlg = PRFAlgorithm.TLS_PRF_SHA384;
-        } else {
-            invalidAlg = PRFAlgorithm.TLS_PRF_SHA256;
-        }
-        
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
-        workflowTrace.addTlsActions(
-                new ChangeContextValueAction<PRFAlgorithm>("prfAlgorithm", invalidAlg),
-                new SendAction(new FinishedMessage()),
-                new ReceiveAction(new AlertMessage())
-        );
-
-        c.setFiltersKeepUserSettings(false);
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
-    }
-
-    @TlsTest(description = "It is a fatal error if a Finished message is not preceded by a ChangeCipherSpec " +
-            "message at the appropriate point in the handshake.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.CRITICAL)
-    public void omitCCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
-        workflowTrace.addTlsActions(
-                new SendAction(new FinishedMessage(c)),
-                new ReceiveAction(new AlertMessage())
-        );
-
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
-    }
-    
 }

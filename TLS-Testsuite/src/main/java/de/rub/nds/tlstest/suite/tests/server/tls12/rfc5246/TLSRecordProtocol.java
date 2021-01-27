@@ -24,26 +24,28 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 @RFC(number = 5246, section = "6. The TLS Record Protocol")
 @ServerTest
 public class TLSRecordProtocol extends Tls12Test {
 
-    @TlsTest(description = "Implementations MUST NOT send record types not defined in this document " +
-            "unless negotiated by some extension. If a TLS implementation receives an unexpected " +
-            "record type, it MUST send an unexpected_message alert.")
-    @Interoperability(SeverityLevel.MEDIUM)
+    @TlsTest(description = "Implementations MUST NOT send record types not defined in this document "
+            + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
+            + "record type, it MUST send an unexpected_message alert.")
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.LOW)
     public void sendNotDefinedRecordTypesWithClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -67,10 +69,13 @@ public class TLSRecordProtocol extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "Implementations MUST NOT send record types not defined in this document " +
-            "unless negotiated by some extension. If a TLS implementation receives an unexpected " +
-            "record type, it MUST send an unexpected_message alert.")
-    @Interoperability(SeverityLevel.MEDIUM)
+    @TlsTest(description = "Implementations MUST NOT send record types not defined in this document "
+            + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
+            + "record type, it MUST send an unexpected_message alert.")
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.LOW)
     public void sendNotDefinedRecordTypesWithCCSAndFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

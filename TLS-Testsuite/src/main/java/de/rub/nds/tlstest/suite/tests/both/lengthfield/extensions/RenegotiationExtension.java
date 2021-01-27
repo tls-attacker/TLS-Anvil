@@ -10,8 +10,11 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
@@ -28,6 +31,8 @@ public class RenegotiationExtension extends TlsGenericTest {
     @TlsTest(description = "Send a Renegotiation Extension in the Hello Message with a modified length value")
     @ScopeLimitations(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void renegotiationExtensionLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         config.setAddRenegotiationInfoExtension(true);
@@ -40,6 +45,8 @@ public class RenegotiationExtension extends TlsGenericTest {
     @TlsTest(description = "Send a Renegotiation Extension in the Hello Message with a modified length value")
     @ScopeLimitations(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void renegotiationExtensionLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddRenegotiationInfoExtension(true);
@@ -52,6 +59,8 @@ public class RenegotiationExtension extends TlsGenericTest {
     @TlsTest(description = "Send a Renegotiation Extension in the Hello Message with a modified Extension Info length value")
     @ScopeLimitations(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void renegotiationExtensionInfoLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         renegotiationExtensionInfoLengthTest(config, runner, argumentAccessor);
@@ -63,6 +72,8 @@ public class RenegotiationExtension extends TlsGenericTest {
     @TlsTest(description = "Send a Renegotiation Extension in the Hello Message with a modified  Extension Info length value")
     @ScopeLimitations(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void renegotiationExtensionInfoLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         renegotiationExtensionInfoLengthTest(config, runner, argumentAccessor);

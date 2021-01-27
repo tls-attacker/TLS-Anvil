@@ -19,11 +19,15 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 7685, section = "3")
@@ -34,6 +38,10 @@ public class PaddingExtension extends Tls12Test {
 
     @TlsTest(description = "The client MUST fill the padding extension completely with zero " +
             "bytes, although the padding extension_data field may be empty.")
+    @ComplianceCategory(SeverityLevel.LOW)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.LOW) 
+    @AlertCategory(SeverityLevel.LOW)
     public void paddingWithNonZero(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

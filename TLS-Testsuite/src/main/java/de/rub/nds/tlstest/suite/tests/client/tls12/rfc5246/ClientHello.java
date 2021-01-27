@@ -20,38 +20,66 @@ import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import static org.junit.Assert.assertFalse;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
-@RFC(number = 5246, section = "7.4.1.2. Client Hello")
 @ClientTest
 public class ClientHello extends Tls12Test {
 
     @Test
-    @Interoperability(SeverityLevel.CRITICAL)
-    @TestDescription("This vector MUST contain, and all implementations MUST support, CompressionMethod.null. " +
-            "Thus, a client and server will always be able to agree on a compression method.")
-    public void unknownCompressionMethod() {
+    @RFC(number = 5246, section = "7.4.1.2. Client Hello")
+    @TestDescription("This vector MUST contain, and all implementations MUST support, CompressionMethod.null. "
+            + "Thus, a client and server will always be able to agree on a compression method.")
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    public void supportsNullcompressionMethod() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         byte[] compression = clientHelloMessage.getCompressions().getValue();
         boolean containsZero = false;
+        boolean containsOther = false;
         for (byte i : compression) {
             if (i == 0) {
                 containsZero = true;
+            }
+        }
+        assertTrue("ClientHello does not contain compression method null", containsZero);
+    }
+    
+    @Test
+    @RFC(number = 7457, section = "2.6.  Compression Attacks: CRIME, TIME, and BREACH")
+    @TestDescription("The CRIME attack (CVE-2012-4929) allows an active attacker to " +
+            "decrypt ciphertext (specifically, cookies) when TLS is used with TLS- " +
+            "level compression.")
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    public void offersNonNullCompressionMethod() {
+        ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
+        byte[] compression = clientHelloMessage.getCompressions().getValue();
+        boolean containsZero = false;
+        boolean containsOther = false;
+        for (byte i : compression) {
+            if (i != 0) {
+                containsOther = true;
                 break;
             }
         }
-
-        assertTrue("ClientHello does not contain compression method null", containsZero);
+        assertFalse("ClientHello contained compression method other than Null", containsOther);
     }
     
     public ConditionEvaluationResult sentSignatureAndHashAlgorithmsExtension() {
@@ -60,7 +88,7 @@ public class ClientHello extends Tls12Test {
     }
     
     @Test
-    @Interoperability(SeverityLevel.CRITICAL)
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @TestDescription("The client uses the \"signature_algorithms\" extension to indicate to " +
             "the server which signature/hash algorithm pairs may be used in " +
             "digital signatures.")

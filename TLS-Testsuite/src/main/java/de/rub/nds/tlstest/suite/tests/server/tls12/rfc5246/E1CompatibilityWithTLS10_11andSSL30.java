@@ -31,7 +31,10 @@ import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
@@ -56,7 +59,9 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     @TlsTest(description = "If a TLS server receives a ClientHello containing a version number " +
             "greater than the highest version supported by the server, it MUST " +
             "reply according to the highest version supported by the server.")
-    @Interoperability(SeverityLevel.CRITICAL)
+    @InteroperabilityCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void versionGreaterThanSupportedByServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -96,7 +101,9 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             "versions greater than client_version, it MUST send a " +
             "\"protocol_version\" alert message and close the connection.")
     @MethodCondition(method = "doesSupportLegacyVersions")
-    @Interoperability(SeverityLevel.LOW)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void versionLowerThanSupportedByServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -135,7 +142,8 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     @TlsTest(description = "Thus, TLS server compliant with this specification MUST accept any value {03,XX} as the " +
             "record layer version number for ClientHello.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @Interoperability(SeverityLevel.CRITICAL)
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
     public void acceptAnyRecordVersionNumber(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -166,7 +174,9 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getInvalidHighRecordVersion")
-    @Interoperability(SeverityLevel.LOW)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void rejectHigherRecordVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] selectedRecordVersion = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();

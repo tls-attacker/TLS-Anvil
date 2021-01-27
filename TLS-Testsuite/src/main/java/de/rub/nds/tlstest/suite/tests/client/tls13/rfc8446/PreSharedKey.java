@@ -15,7 +15,15 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -23,6 +31,7 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 @ClientTest
 @RFC(number = 8446, section = "4.2.11. Pre-Shared Key Extension")
 public class PreSharedKey extends Tls13Test {
+
     public ConditionEvaluationResult sendsPSKExtension() {
         if (context.getReceivedClientHelloMessage().getExtension(PreSharedKeyExtensionMessage.class) != null) {
             return ConditionEvaluationResult.enabled("");
@@ -36,7 +45,11 @@ public class PreSharedKey extends Tls13Test {
             "the handshake with an \"illegal_parameter\" alert.")*/
     @Test
     @MethodCondition(method = "sendsPSKExtension")
-    @TestDescription("The Pre-Shared Key extension must me the last extension of the Client Hello")
+    @TestDescription("The Pre-Shared Key extension must be the last extension of the Client Hello")
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
     public void isLastExtension() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         if (!chm.getExtensions().get(chm.getExtensions().size() - 1).getClass().equals(PreSharedKeyExtensionMessage.class)) {

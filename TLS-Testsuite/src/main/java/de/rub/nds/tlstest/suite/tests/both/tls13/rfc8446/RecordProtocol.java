@@ -31,8 +31,10 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
@@ -44,20 +46,25 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import static org.junit.Assert.assertFalse;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 @RFC(number = 8446, section = "5. Record Protocol")
 public class RecordProtocol extends Tls13Test {
 
-    @TlsTest(description = "Implementations MUST NOT send record types not " +
-            "defined in this document unless negotiated by some extension. " +
-            "If a TLS implementation receives an unexpected record type, " +
-            "it MUST terminate the connection with an \"unexpected_message\" alert.")
-    @Interoperability(SeverityLevel.LOW)
+    @TlsTest(description = "Implementations MUST NOT send record types not "
+            + "defined in this document unless negotiated by some extension. "
+            + "If a TLS implementation receives an unexpected record type, "
+            + "it MUST terminate the connection with an \"unexpected_message\" alert.")
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.LOW)
     public void invalidRecordContentType(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace trace;
         Record record = new Record();
-        record.setContentType(Modifiable.explicit((byte)0xff));
+        record.setContentType(Modifiable.explicit((byte) 0xff));
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             trace = new WorkflowTrace();
             trace.addTlsAction(new SendAction(new ClientHelloMessage(c)));
@@ -69,29 +76,32 @@ public class RecordProtocol extends Tls13Test {
 
         trace.getFirstAction(SendAction.class).setRecords(record);
 
-
         runner.execute(trace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
 
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) return;
+            if (alert == null) {
+                return;
+            }
             Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, alert);
         });
     }
-    
-    @TlsTest(description = "Implementations MUST NOT send record types not " +
-            "defined in this document unless negotiated by some extension. " +
-            "If a TLS implementation receives an unexpected record type, " +
-            "it MUST terminate the connection with an \"unexpected_message\" alert.")
+
+    @TlsTest(description = "Implementations MUST NOT send record types not "
+            + "defined in this document unless negotiated by some extension. "
+            + "If a TLS implementation receives an unexpected record type, "
+            + "it MUST terminate the connection with an \"unexpected_message\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.LOW)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.LOW)
     public void invalidRecordContentTypeAfterEncryption(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
         Record record = new Record();
-        record.setContentType(Modifiable.explicit((byte)0xff));
+        record.setContentType(Modifiable.explicit((byte) 0xff));
         FinishedMessage finished = new FinishedMessage(c);
         SendAction sendFinished = new SendAction(finished);
         sendFinished.setRecords(record);
@@ -99,26 +109,31 @@ public class RecordProtocol extends Tls13Test {
                 sendFinished,
                 new ReceiveAction(new AlertMessage())
         );
-        
+
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
 
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) return;
+            if (alert == null) {
+                return;
+            }
             Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, alert);
         });
     }
 
-
-    @TlsTest(description = "If the decryption fails, the receiver MUST " +
-            "terminate the connection with a \"bad_record_mac\" alert.")
+    @TlsTest(description = "If the decryption fails, the receiver MUST "
+            + "terminate the connection with a \"bad_record_mac\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
+    @CryptoCategory(SeverityLevel.CRITICAL)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = derivationContainer.buildBitmask();
-        
+
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
         record.getComputations().setAuthenticationTag(Modifiable.xor(modificationBitmask, 0));
@@ -134,14 +149,17 @@ public class RecordProtocol extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "The length (in bytes) of the following " +
-            "TLSPlaintext.fragment.  The length MUST NOT exceed 2^14 bytes.  An " +
-            "endpoint that receives a record that exceeds this length MUST " +
-            "terminate the connection with a \"record_overflow\" alert.")
+    @TlsTest(description = "The length (in bytes) of the following "
+            + "TLSPlaintext.fragment.  The length MUST NOT exceed 2^14 bytes.  An "
+            + "endpoint that receives a record that exceeds this length MUST "
+            + "terminate the connection with a \"record_overflow\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RFC(number = 8446, section = "5.1. Record Layer")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -163,17 +181,23 @@ public class RecordProtocol extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) return;
+            if (alert == null) {
+                return;
+            }
             Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW, alert);
         });
     }
 
-    @TlsTest(description = "If the decryption fails, the receiver MUST " +
-            "terminate the connection with a \"bad_record_mac\" alert.")
+    @TlsTest(description = "If the decryption fails, the receiver MUST "
+            + "terminate the connection with a \"bad_record_mac\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions({DerivationType.CIPHERTEXT_BITMASK, DerivationType.APP_MSG_LENGHT})
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
+    @CryptoCategory(SeverityLevel.CRITICAL)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = derivationContainer.buildBitmask();
@@ -193,28 +217,33 @@ public class RecordProtocol extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "All encrypted TLS records can be padded to inflate the size of the " +
-            "TLSCiphertext.")
+    @TlsTest(description = "All encrypted TLS records can be padded to inflate the size of the "
+            + "TLSCiphertext.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.ADDITIONAL_PADDING_LENGTH)
-    @Interoperability(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void acceptsOptionalPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        
+
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        
+
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);
         });
     }
-    
-    @TlsTest(description = "The length MUST NOT exceed 2^14 + 256 bytes. " +
-            "An endpoint that receives a record that exceeds this " +
-            "length MUST terminate the connection with a \"record_overflow\" alert.")
+
+    @TlsTest(description = "The length MUST NOT exceed 2^14 + 256 bytes. "
+            + "An endpoint that receives a record that exceeds this "
+            + "length MUST terminate the connection with a \"record_overflow\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Interoperability(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
+    @RecordLayerCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendRecordWithCiphertextOver2pow14plus256(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -236,39 +265,17 @@ public class RecordProtocol extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) return;
+            if (alert == null) {
+                return;
+            }
             Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW, alert);
         });
     }
 
-
-    @TlsTest(description = "Send a record without any content.")
-    @Security(SeverityLevel.CRITICAL)
-    @Interoperability(SeverityLevel.HIGH)
-    @Tag("emptyRecord")
-    public void sendEmptyFinishedRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-
-        Record r = new Record();
-        r.setContentMessageType(ProtocolMessageType.HANDSHAKE);
-        r.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
-        r.setMaxRecordLengthConfig(0);
-        SendAction fin = new SendAction(new FinishedMessage());
-        fin.setRecords(r);
-
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
-        workflowTrace.addTlsActions(
-                fin,
-                new ReceiveAction(new AlertMessage())
-        );
-
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
-    }
-
     @TlsTest(description = "Send a record without any content.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.CRITICAL)
-    @Interoperability(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.PROTOCOL_MESSAGE_TYPE)
     @Tag("emptyRecord")
     public void sendEmptyRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -291,18 +298,18 @@ public class RecordProtocol extends Tls13Test {
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
-    
-    @TlsTest(description = "Zero-length" +
-            "fragments of Application Data MAY be sent, as they are potentially " +
-            "useful as a traffic analysis countermeasure.")
+
+    @TlsTest(description = "Zero-length"
+            + "fragments of Application Data MAY be sent, as they are potentially "
+            + "useful as a traffic analysis countermeasure.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @Security(SeverityLevel.CRITICAL)
-    @Interoperability(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
     public void sendEmptyApplicationMessage(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ApplicationMessage appMsg = new ApplicationMessage(c);
         appMsg.setData(Modifiable.explicit(new byte[0]));
-        
+
         Record r = new Record();
         SendAction sendAction = new SendAction(appMsg);
 

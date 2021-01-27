@@ -17,27 +17,31 @@ import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 @ServerTest
 public class EncThenMacExtension extends Tls12Test {
@@ -57,11 +61,22 @@ public class EncThenMacExtension extends Tls12Test {
             return false;
         }
     }
+    
+    public ConditionEvaluationResult targetCanBeTested() {
+        if(context.getSiteReport().getSupportedExtensions() != null && context.getSiteReport().getSupportedExtensions().contains(ExtensionType.ENCRYPT_THEN_MAC)) {
+            return ConditionEvaluationResult.enabled("The Extension can be tested");
+        }
+        return ConditionEvaluationResult.disabled("Encrypt-Then-Mac Extension not supported");
+    }
 
     @TlsTest(description = "Test if the server supports the encrypt-then-mac extension")
-    @Security(SeverityLevel.MEDIUM)
     @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isBlockCipher")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @HandshakeCategory(SeverityLevel.INFORMATIONAL)
+    @ComplianceCategory(SeverityLevel.INFORMATIONAL)
+    @CryptoCategory(SeverityLevel.INFORMATIONAL)
+    @RecordLayerCategory(SeverityLevel.LOW)
+    @SecurityCategory(SeverityLevel.LOW)
     public void supportsEncThenMacExt(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);
@@ -78,11 +93,13 @@ public class EncThenMacExtension extends Tls12Test {
     @TlsTest(description = "If a server receives an encrypt-then-MAC request extension from a client and then " +
             "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, " +
             "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Security(SeverityLevel.LOW)
     @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isNotBlockCipher")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
-    public void negotiatesEncThenMacExtOnlyWithBckCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.HIGH)
+    public void negotiatesEncThenMacExtOnlyWithBlockCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);
 

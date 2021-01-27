@@ -25,8 +25,14 @@ import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -37,7 +43,6 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 8446, section = "4.1.3 Server Hello")
@@ -53,7 +58,9 @@ public class ServerHello extends Tls13Test {
     @TlsTest(description = "In TLS 1.3, the TLS server indicates its version using the \"supported_versions\" " +
             "extension (Section 4.2.1), and the legacy_version field MUST be " +
             "set to 0x0303, which is the version number for TLS 1.2.")
-    @Interoperability(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void testLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -77,8 +84,9 @@ public class ServerHello extends Tls13Test {
             "below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random.")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Security(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void testServerRandomFor12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
 
@@ -103,8 +111,11 @@ public class ServerHello extends Tls13Test {
     @TlsTest(description = "A client which receives a legacy_session_id_echo " +
             "field that does not match what it sent in the ClientHello MUST " +
             "abort the handshake with an \"illegal_parameter\" alert.")
-    @Interoperability(SeverityLevel.MEDIUM)
-    public void testSessionId(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    public void testSessionIdEchoed(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         byte[] sessionId = new byte[]{0x01, 0x02, 0x03, 0x04, 0x05};
@@ -128,8 +139,10 @@ public class ServerHello extends Tls13Test {
 
     @TlsTest(description = "legacy_compression_method: A single byte which " +
             "MUST have the value 0.")
-    @Interoperability(SeverityLevel.MEDIUM)
-    @Security(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.MEDIUM)
     public void testCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

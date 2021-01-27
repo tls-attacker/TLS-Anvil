@@ -3,18 +3,18 @@ package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.RenegotiationInfoExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -28,6 +28,8 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @TlsTest(description = "Send a Signature And Hash Algorithms Extension in the Hello Message with a modified length value")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void signatureAndHashAlgorithmsExtensionLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         config.setAddSignatureAndHashAlgorithmsExtension(true);
@@ -39,6 +41,8 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @TlsTest(description = "Send a Signature And Hash Algorithms Extension in the Hello Message with a modified length value")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void signatureAndHashAlgorithmsExtensionLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddSignatureAndHashAlgorithmsExtension(true);
@@ -51,6 +55,8 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @TlsTest(description = "Send a Signature And Hash Algorithms Extension in the Hello Message with a modified algorithm list length value")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void signatureAndHashAlgorithmsListLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         signatureAndHashAlgorithmsListLengthTest(config, runner, argumentAccessor);
@@ -61,6 +67,8 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @TlsTest(description = "Send a Signature And Hash Algorithms Extension in the Hello Message with a modified algorithm list length value")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void signatureAndHashAlgorithmsListLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         signatureAndHashAlgorithmsListLengthTest(config, runner, argumentAccessor);

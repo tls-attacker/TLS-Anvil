@@ -31,8 +31,12 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -50,11 +54,13 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 5264, section = "6.2.1 Fragmentation")
 public class Fragmentation extends Tls12Test {
 
-    @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, " +
-            "Alert, or ChangeCipherSpec content types. Zero-length fragments of " +
-            "Application data MAY be sent as they are potentially useful as a " +
-            "traffic analysis countermeasure.")
-    @Interoperability(SeverityLevel.HIGH)
+    @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, "
+            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
+            + "Application data MAY be sent as they are potentially useful as a "
+            + "traffic analysis countermeasure.")
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void sendZeroLengthRecord_CCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -75,12 +81,13 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-
-    @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, " +
-            "Alert, or ChangeCipherSpec content types. Zero-length fragments of " +
-            "Application data MAY be sent as they are potentially useful as a " +
-            "traffic analysis countermeasure.")
-    @Interoperability(SeverityLevel.HIGH)
+    @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, "
+            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
+            + "Application data MAY be sent as they are potentially useful as a "
+            + "traffic analysis countermeasure.")
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @RecordLayerCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
     public void sendZeroLengthApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -107,11 +114,10 @@ public class Fragmentation extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "Send a record without any content.")
+    @TlsTest(description = "Send a record without any content with Content Type Application Data.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Tag("emptyRecord")
-    @Security(SeverityLevel.CRITICAL)
-    @Interoperability(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.CRITICAL)
     public void sendEmptyApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -133,9 +139,9 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Send a record without any content.")
-    @Security(SeverityLevel.CRITICAL)
-    @Interoperability(SeverityLevel.HIGH)
+    @TlsTest(description = "Send a record without any content with Content Type Handshake.")
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
     @Tag("emptyRecord")
     public void sendEmptyFinishedRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -156,12 +162,14 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    
-    @TlsTest(description = "The length (in bytes) of the following TLSPlaintext.fragment. " +
-            "The length MUST NOT exceed 2^14.")
+    @TlsTest(description = "The length (in bytes) of the following TLSPlaintext.fragment. "
+            + "The length MUST NOT exceed 2^14.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @Interoperability(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -170,7 +178,7 @@ public class Fragmentation extends Tls12Test {
 
         ApplicationMessage msg = new ApplicationMessage(c);
         msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
-        
+
         Record overflowRecord = new Record();
         overflowRecord.setCleanProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
         //add dummy Application Message
@@ -186,15 +194,20 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) return;
+            if (alert == null) {
+                return;
+            }
             Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW, alert);
         });
     }
 
-    @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. " +
-            "The length MUST NOT exceed 2^14 + 2048.")
+    @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. "
+            + "The length MUST NOT exceed 2^14 + 2048.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @Interoperability(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendRecordWithCiphertextOver2pow14plus2048(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -206,7 +219,7 @@ public class Fragmentation extends Tls12Test {
         //add dummy Application Message
         SendAction sendOverflow = new SendAction(new ApplicationMessage(c));
         sendOverflow.setRecords(overflowRecord);
-        
+
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
                 sendOverflow,
@@ -216,8 +229,10 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) return;
+            if (alert == null) {
+                return;
+            }
             Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW, alert);
         });
-    }  
+    }
 }

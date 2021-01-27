@@ -22,22 +22,28 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import javax.print.attribute.standard.Severity;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-
 
 @RFC(number = 5246, section = "E.1. Compatibility with TLS 1.0/1.1 and SSL 3.0")
 @ClientTest
 public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
-    @TlsTest(description = "If the version chosen by the server is not supported by the client "+
-            "(or not acceptable), the client MUST send a \"protocol_version\" alert "+
-            "message and close the connection.")
-    @Interoperability(SeverityLevel.CRITICAL)
+    @TlsTest(description = "If the version chosen by the server is not supported by the client "
+            + "(or not acceptable), the client MUST send a \"protocol_version\" alert "
+            + "message and close the connection.")
+    @InteroperabilityCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void selectUnsupportedVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -49,7 +55,6 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         );
 
         workflowTrace.getFirstSendMessage(ServerHelloMessage.class).setProtocolVersion(protocolVersionSend);
-
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);

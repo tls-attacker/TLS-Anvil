@@ -11,8 +11,11 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
@@ -29,6 +32,8 @@ public class EncryptedExtensions extends TlsGenericTest {
     
     @TlsTest(description = "Send an Encrypted Extensions Message with a modified length value")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void encryptedExtensionsLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         EncryptedExtensionsMessage encryptedExtensions = (EncryptedExtensionsMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);
@@ -38,6 +43,8 @@ public class EncryptedExtensions extends TlsGenericTest {
     
     @TlsTest(description = "Send an Encrypted Extensions Message with a modified Extensions list length value")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void encryptedExtensionsExtensionsLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         EncryptedExtensionsMessage encryptedExtensions = (EncryptedExtensionsMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);

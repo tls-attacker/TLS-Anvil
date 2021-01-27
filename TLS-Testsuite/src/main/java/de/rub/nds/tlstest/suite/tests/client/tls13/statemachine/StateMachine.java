@@ -33,8 +33,16 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CVECategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -47,17 +55,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /**
- * Contains tests to evaluate the target's state machine. Some test flows are based
- * on results found for TLS 1.2 servers in 
- * "Protocol State Fuzzing of TLS Implementations" (de Ruiter et al.)
+ * Contains tests to evaluate the target's state machine. Some test flows are
+ * based on results found for TLS 1.2 servers in "Protocol State Fuzzing of TLS
+ * Implementations" (de Ruiter et al.)
  */
 @Tag("statemachine")
 @ClientTest
 public class StateMachine extends Tls13Test {
 
     @TlsTest(description = "CVE-2020-24613, Send Finished without Certificate")
-    @Security(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @CVECategory(SeverityLevel.CRITICAL)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @AlertCategory(SeverityLevel.HIGH)
     public void sendFinishedWithoutCert(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE);
@@ -68,72 +80,86 @@ public class StateMachine extends Tls13Test {
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
-    
-    @TlsTest(description = "An" +
-        "implementation which receives any other change_cipher_spec value or " +
-        "which receives a protected change_cipher_spec record MUST abort the " +
-        "handshake with an \"unexpected_message\" alert.")
+
+    @TlsTest(description = "An"
+            + "implementation which receives any other change_cipher_spec value or "
+            + "which receives a protected change_cipher_spec record MUST abort the "
+            + "handshake with an \"unexpected_message\" alert.")
     @RFC(number = 8446, section = "5. Record Protocol")
-    @Security(SeverityLevel.LOW)
     @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM) 
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void sendHandshakeTrafficSecretEncryptedChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         config.setTls13BackwardsCompatibilityMode(true);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastSendingMessage(WorkflowTraceType.HELLO, ProtocolMessageType.CHANGE_CIPHER_SPEC);
-        
+
         Record ccsRecord = new Record();
         ccsRecord.setAllowEncryptedChangeCipherSpec(true);
         SendAction sendActionEncryptedCCS = new SendAction(new ChangeCipherSpecMessage());
         sendActionEncryptedCCS.setRecords(ccsRecord);
-        
+
         workflowTrace.addTlsAction(sendActionEncryptedCCS);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
-    
-    @TlsTest(description = "An" +
-        "implementation which receives any other change_cipher_spec value or " +
-        "which receives a protected change_cipher_spec record MUST abort the " +
-        "handshake with an \"unexpected_message\" alert.")
+
+    @TlsTest(description = "An"
+            + "implementation which receives any other change_cipher_spec value or "
+            + "which receives a protected change_cipher_spec record MUST abort the "
+            + "handshake with an \"unexpected_message\" alert.")
     @RFC(number = 8446, section = "5. Record Protocol")
-    @Security(SeverityLevel.LOW)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void sendAppTrafficSecretEncryptedChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        
+
         Record ccsRecord = new Record();
         ccsRecord.setAllowEncryptedChangeCipherSpec(true);
         SendAction sendActionEncryptedCCS = new SendAction(new ChangeCipherSpecMessage());
         sendActionEncryptedCCS.setRecords(ccsRecord);
-        
+
         workflowTrace.addTlsAction(sendActionEncryptedCCS);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
-    
-    @TlsTest(description = "If an implementation " +
-        "detects a change_cipher_spec record received before the first " +
-        "ClientHello message or after the peer's Finished message, it MUST be " +
-        "treated as an unexpected record type (though stateless servers may " +
-        "not be able to distinguish these cases from allowed cases).")
+
+    @TlsTest(description = "If an implementation "
+            + "detects a change_cipher_spec record received before the first "
+            + "ClientHello message or after the peer's Finished message, it MUST be "
+            + "treated as an unexpected record type (though stateless servers may "
+            + "not be able to distinguish these cases from allowed cases).")
     @RFC(number = 8446, section = "5. Record Protocol")
-    @Security(SeverityLevel.LOW)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendLegacyChangeCipherSpecAfterFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsAction(new SendAction(new ChangeCipherSpecMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
-    
+
     @TlsTest(description = "Negotiate TLS 1.3 but send an unencrypted Certificate Message")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendLegacyFlowCertificate(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
@@ -141,12 +167,17 @@ public class StateMachine extends Tls13Test {
         workflowTrace.addTlsAction(new DeactivateEncryptionAction());
         workflowTrace.addTlsAction(new SendAction(new CertificateMessage(config)));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
-    
+
     @TlsTest(description = "Negotiate TLS 1.3 but send an unencrypted Certificate Message and legacy ECDHE Key Exchange Message")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendLegacyFlowECDHEKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
@@ -154,12 +185,17 @@ public class StateMachine extends Tls13Test {
         workflowTrace.addTlsAction(new DeactivateEncryptionAction());
         workflowTrace.addTlsAction(new SendAction(new CertificateMessage(config), new ECDHEServerKeyExchangeMessage(config)));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
-    
+
     @TlsTest(description = "Negotiate TLS 1.3 but send an unencrypted Certificate Message and legacy DHE Key Exchange Message")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendLegacyFlowDHEKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
@@ -167,45 +203,83 @@ public class StateMachine extends Tls13Test {
         workflowTrace.addTlsAction(new DeactivateEncryptionAction());
         workflowTrace.addTlsAction(new SendAction(new CertificateMessage(config), new DHEServerKeyExchangeMessage(config)));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
-    
+
     @Test
     @TestDescription("Begin the Handshake with an Application Data Message")
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
-        SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);   
+        SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);
     }
-    
+
     @Test
     @TestDescription("Begin the Handshake with a Finished Message")
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
-        SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);   
+        SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
     }
     
     @TlsTest(description = "Send a second encrypted Server Hello")
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendServerHelloTwice(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
-        SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner);   
+        SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner); 
     }
-    
+
     @RFC(number = 8446, section = "4.5. End of Early Data")
     @TlsTest(description = "Servers MUST NOT send this message, and clients receiving it MUST" +
             "terminate the connection with an \"unexpected_message\" alert.")
-    @Interoperability(SeverityLevel.LOW)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void sendEndOfEarlyDataAsServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.FINISHED);
         workflowTrace.addTlsAction(new SendAction(new EndOfEarlyDataMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
-        runner.execute(workflowTrace, config).validateFinal(i -> { 
+
+        runner.execute(workflowTrace, config).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, msg);
         });
+    }
+    
+    @RFC(number = 8446, section = "4.4.3. Certificate Verify")
+    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @CryptoCategory(SeverityLevel.CRITICAL)
+    @CertificateCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    public void omitCertificateVerify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+
+        WorkflowTrace trace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE_VERIFY);
+        trace.addTlsActions(
+                new SendAction(new FinishedMessage()),
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 }

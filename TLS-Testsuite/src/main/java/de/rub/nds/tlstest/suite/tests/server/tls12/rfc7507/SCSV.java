@@ -16,7 +16,6 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -25,13 +24,17 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.execution.AnnotatedState;
-import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -45,8 +48,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 @RFC(number = 7507, section = "3. Server Behavior")
 @ServerTest
@@ -95,9 +98,12 @@ public class SCSV extends Tls12Test {
             "The record layer version number for this alert MUST be set to either ClientHello.client_version " +
             "(as it would for the Server Hello message if the server was continuing the handshake) " +
             "or to the record layer version number used by the client.")
-    @Security(SeverityLevel.CRITICAL)
     @ExplicitValues(affectedTypes=DerivationType.CIPHERSUITE, methods="getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.HIGH)
     public void includeFallbackSCSV(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite cipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
@@ -130,9 +136,12 @@ public class SCSV extends Tls12Test {
             "The record layer version number for this alert MUST be set to either ClientHello.client_version " +
             "(as it would for the Server Hello message if the server was continuing the handshake) " +
             "or to the record layer version number used by the client.")
-    @Security(SeverityLevel.CRITICAL)
     @ExplicitValues(affectedTypes=DerivationType.CIPHERSUITE, methods="getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.HIGH)
     public void includeFallbackSCSV_nonRecommendedCipherSuiteOrder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite cipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();

@@ -17,8 +17,11 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
@@ -46,6 +49,8 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     @ScopeLimitations(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "supportsPsk")
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void preSharedKeyExtensionLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
@@ -57,6 +62,8 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     @ScopeLimitations(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "supportsPsk")
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void preSharedKeyExtensionIdentityListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
@@ -68,6 +75,8 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     @ScopeLimitations(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "supportsPsk")
+    @MessageStructureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void preSharedKeyExtensionBinderListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);

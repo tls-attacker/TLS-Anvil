@@ -27,7 +27,14 @@ import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -43,6 +50,7 @@ import java.util.List;
 import static org.junit.Assert.assertArrayEquals;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 @RFC(number = 7465, section = "2")
 @ServerTest
@@ -69,7 +77,11 @@ public class RC4Ciphersuites extends Tls12Test {
     @ManualConfig(DerivationType.CIPHERSUITE)
     @MethodCondition(method = "supportsRC4")
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isNonRC4")
-    @Security(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @CryptoCategory(SeverityLevel.MEDIUM)
+    @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.HIGH)
     public void offerRC4AndOtherCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
@@ -97,8 +109,13 @@ public class RC4Ciphersuites extends Tls12Test {
     @TlsTest(description = "If the TLS client only offers RC4 cipher suites, the TLS server " +
             "MUST terminate the handshake. The TLS server MAY send the " +
             "insufficient_security fatal alert in this case.")
-    @Security(SeverityLevel.CRITICAL)
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isRC4")
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @CryptoCategory(SeverityLevel.MEDIUM)
+    @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.HIGH)
     public void onlyRC4Suites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

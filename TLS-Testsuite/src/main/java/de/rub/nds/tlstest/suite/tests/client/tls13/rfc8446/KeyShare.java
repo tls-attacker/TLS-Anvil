@@ -36,13 +36,18 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -57,7 +62,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -66,10 +70,12 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class KeyShare extends Tls13Test {
 
     @Test
-    @Security(SeverityLevel.MEDIUM)
-    @TestDescription("Each KeyShareEntry value MUST correspond " +
-            "to a group offered in the \"supported_groups\" extension " +
-            "and MUST appear in the same order.")
+    @TestDescription("Each KeyShareEntry value MUST correspond "
+            + "to a group offered in the \"supported_groups\" extension "
+            + "and MUST appear in the same order.")
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void testOrderOfKeyshareEntries() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         EllipticCurvesExtensionMessage groups = chm.getExtension(EllipticCurvesExtensionMessage.class);
@@ -95,11 +101,15 @@ public class KeyShare extends Tls13Test {
         }
     }
 
-    @TlsTest(description = "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. " +
-            "This value MUST be in the same group as the KeyShareEntry value offered by the client " +
-            "that the server has selected for the negotiated key exchange.")
+    @TlsTest(description = "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
+            + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
+            + "that the server has selected for the negotiated key exchange.")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @InteroperabilityCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void selectInvalidKeyshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -116,8 +126,7 @@ public class KeyShare extends Tls13Test {
         if (groups.size() == 0) {
             KeyShareExtensionMessage keyShareExt = workflowTrace.getFirstSendMessage(ServerHelloMessage.class).getExtension(KeyShareExtensionMessage.class);
             keyShareExt.setKeyShareListBytes(Modifiable.explicit(new byte[]{0x50, 0x50, 0, 1, 1}));
-        }
-        else {
+        } else {
             EllipticCurve curve = CurveFactory.getCurve(groups.get(0));
             Point pubKey = curve.mult(c.getDefaultServerEcPrivateKey(), curve.getBasePoint());
             byte[] key = PointFormatter.toRawFormat(pubKey);
@@ -141,52 +150,56 @@ public class KeyShare extends Tls13Test {
     
     @Test
     @TestDescription("RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
-    @Interoperability(SeverityLevel.CRITICAL)
-    @Security(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @DeprecatedFeatureCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.MEDIUM)
     public void offeredDeprecatedGroups() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         boolean foundDeprecated = false;
-        for(KeyShareEntry ks : chm.getExtension(KeyShareExtensionMessage.class).getKeyShareList()) {
-            if(ks.getGroupConfig() != null && !ks.getGroupConfig().isTls13()) {
+        for (KeyShareEntry ks : chm.getExtension(KeyShareExtensionMessage.class).getKeyShareList()) {
+            if (ks.getGroupConfig() != null && !ks.getGroupConfig().isTls13()) {
                 foundDeprecated = true;
                 break;
             }
         }
         assertFalse("Deprecated or invalid group used for key share", foundDeprecated);
     }
-    
+
     public boolean isInvalidCurveApplicableNamedGroup(NamedGroup group) {
-        if(group.isCurve() && !group.isGost() && !(CurveFactory.getCurve(group) instanceof RFC7748Curve)) {
+        if (group.isCurve() && !group.isGost() && !(CurveFactory.getCurve(group) instanceof RFC7748Curve)) {
             return true;
         }
         return false;
     }
-    
+
     @TlsTest(description = "A lack of point validation might enable Invalid Curve Attacks")
-    @Security(SeverityLevel.HIGH)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isInvalidCurveApplicableNamedGroup")
+    @CryptoCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void rejectsInvalidCurvePoints(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
         EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
         InvalidCurvePoint invalidCurvePoint = InvalidCurvePoint.smallOrder(selectedGroup);
-        Point serializablePoint =
-            new Point(new FieldElementFp(invalidCurvePoint.getPublicPointBaseX(), curve.getModulus()), new FieldElementFp(
-                invalidCurvePoint.getPublicPointBaseY(), curve.getModulus()));
+        Point serializablePoint
+                = new Point(new FieldElementFp(invalidCurvePoint.getPublicPointBaseX(), curve.getModulus()), new FieldElementFp(
+                        invalidCurvePoint.getPublicPointBaseY(), curve.getModulus()));
         byte[] serializedPoint = PointFormatter.formatToByteArray(selectedGroup, serializablePoint, ECPointFormat.UNCOMPRESSED);
-        
+
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         ServerHelloMessage serverHello = (ServerHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
         KeyShareExtensionMessage keyShareExtension = serverHello.getExtension(KeyShareExtensionMessage.class);
-        
+
         byte[] keyShareListBytes = ArrayConverter.concatenate(selectedGroup.getValue(), ArrayConverter.intToBytes(serializedPoint.length, ExtensionByteLength.KEY_SHARE_LENGTH), serializedPoint);
         keyShareExtension.setKeyShareListBytes(Modifiable.explicit(keyShareListBytes));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
+
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
-    
-    
+
 }

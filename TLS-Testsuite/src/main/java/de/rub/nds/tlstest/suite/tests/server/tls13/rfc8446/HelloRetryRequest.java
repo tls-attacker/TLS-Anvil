@@ -16,7 +16,14 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -25,7 +32,6 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Arrays;
 import java.util.LinkedList;
 import static org.junit.Assert.assertTrue;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
@@ -37,11 +43,13 @@ public class HelloRetryRequest extends Tls13Test {
             + "ClientHello does not contain sufficient information to proceed with "
             + "the handshake.")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
-    @Interoperability(SeverityLevel.HIGH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     public void helloRetryRequestValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipher = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
-        
+
         //4.2.8 Key Share: "This vector MAY be empty if the client is requesting a HelloRetryRequest."
         c.setDefaultClientKeyShareNamedGroups(new LinkedList<>());
 
@@ -69,8 +77,10 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "Servers MUST ensure that they negotiate the "
             + "same cipher suite when receiving a conformant updated ClientHello")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
-    @ScopeLimitations(DerivationType.CIPHERSUITE)
-    @Interoperability(SeverityLevel.CRITICAL)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.MEDIUM)
     public void selectsSameCipherSuiteAllAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setDefaultClientSupportedCipherSuites(new LinkedList<>(context.getSiteReport().getSupportedTls13CipherSuites()));
@@ -96,7 +106,10 @@ public class HelloRetryRequest extends Tls13Test {
 
     @TlsTest(description = "Servers MUST ensure that they negotiate the "
             + "same cipher suite when receiving a conformant updated ClientHello")
-    @Interoperability(SeverityLevel.CRITICAL)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.MEDIUM)
     public void selectsSameCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();

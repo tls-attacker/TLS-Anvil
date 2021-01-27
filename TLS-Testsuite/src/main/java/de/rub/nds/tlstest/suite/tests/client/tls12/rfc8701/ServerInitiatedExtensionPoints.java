@@ -31,8 +31,10 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -43,22 +45,20 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseNamedGroupDe
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseSigHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
 public class ServerInitiatedExtensionPoints extends Tls12Test {
 
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
-            "In particular, the client MUST fail the connection " +
-            "if a GREASE value appears in any of the following: " +
-            "The \"version\" value in a ServerHello or HelloRetryRequest")
-    @Interoperability(SeverityLevel.HIGH)
+    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
+            + "In particular, the client MUST fail the connection "
+            + "if a GREASE value appears in any of the following: "
+            + "The \"version\" value in a ServerHello or HelloRetryRequest")
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -71,17 +71,19 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
-            "In particular, the client MUST fail the connection " +
-            "if a GREASE value appears in any of the following: " +
-            "The \"cipher_suite\" value in a ServerHello")
-    @Interoperability(SeverityLevel.HIGH)
+    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
+            + "In particular, the client MUST fail the connection "
+            + "if a GREASE value appears in any of the following: "
+            + "The \"cipher_suite\" value in a ServerHello")
     @ScopeLimitations(DerivationType.CIPHERSUITE)
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite greaseCipher = derivationContainer.getDerivation(GreaseCipherSuiteDerivation.class).getSelectedValue();
-        
+
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
@@ -91,12 +93,14 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
-            "In particular, the client MUST fail the connection " +
-            "if a GREASE value appears in any of the following: " +
-            "Any ServerHello extension")
-    @Interoperability(SeverityLevel.HIGH)
+    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
+            + "In particular, the client MUST fail the connection "
+            + "if a GREASE value appears in any of the following: "
+            + "Any ServerHello extension")
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendServerHelloGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ExtensionType greaseExtension = derivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
@@ -110,16 +114,18 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
-            "In particular, the client MUST fail the connection " +
-            "if a GREASE value appears in any of the following: " +
-            "The \"namedcurve\" value in a ServerKeyExchange for an Ephemeral Elliptic Curve DiﬃeHellman (ECDHE) " +
-            "cipher in TLS 1.2 [RFC5246] or earlier")
+    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
+            + "In particular, the client MUST fail the connection "
+            + "if a GREASE value appears in any of the following: "
+            + "The \"namedcurve\" value in a ServerKeyExchange for an Ephemeral Elliptic Curve DiﬃeHellman (ECDHE) "
+            + "cipher in TLS 1.2 [RFC5246] or earlier")
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
-    @Interoperability(SeverityLevel.HIGH)
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @ScopeExtensions(DerivationType.GREASE_NAMED_GROUP)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void selectGreaseNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -132,14 +138,16 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. " +
-            "In particular, the client MUST fail the connection " +
-            "if a GREASE value appears in any of the following: " +
-            "The signature algorithm in a ServerKeyExchange signature in TLS 1.2 or earlier")
-    @Interoperability(SeverityLevel.HIGH)
+    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
+            + "In particular, the client MUST fail the connection "
+            + "if a GREASE value appears in any of the following: "
+            + "The signature algorithm in a ServerKeyExchange signature in TLS 1.2 or earlier")
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
     @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void selectGreaseSignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

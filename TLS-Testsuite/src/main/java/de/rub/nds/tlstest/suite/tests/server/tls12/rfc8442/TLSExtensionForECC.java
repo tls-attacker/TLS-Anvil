@@ -31,8 +31,12 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -49,13 +53,12 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-
 @ServerTest
 public class TLSExtensionForECC extends Tls12Test {
+
     private static final Logger LOGGER = LogManager.getLogger();
 
     private void execute(WorkflowRunner runner, Config config) {
@@ -70,10 +73,12 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "4. TLS Extensions for ECC")
-    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
-            "message if it does not propose any ECC cipher suites.")
-    @Security(SeverityLevel.INFORMATIONAL)
+    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello "
+            + "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void bothECExtensions_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -84,9 +89,12 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "4. TLS Extensions for ECC")
-    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
-            "message if it does not propose any ECC cipher suites.")
+    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello "
+            + "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void ecExtension_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -97,9 +105,12 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "4. TLS Extensions for ECC")
-    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello " +
-            "message if it does not propose any ECC cipher suites.")
+    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello "
+            + "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void ecPointFormatExtension_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -108,13 +119,15 @@ public class TLSExtensionForECC extends Tls12Test {
 
         execute(runner, c);
     }
-    
+
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(description = "A server that receives a ClientHello containing one or both of these " +
-            "extensions MUST use the client's enumerated capabilities to guide its " +
-            "selection of an appropriate cipher suite.  One of the proposed ECC ")
-    @Interoperability(SeverityLevel.HIGH)
+    @TlsTest(description = "A server that receives a ClientHello containing one or both of these "
+            + "extensions MUST use the client's enumerated capabilities to guide its "
+            + "selection of an appropriate cipher suite.  One of the proposed ECC ")
     @KeyExchange(supported = KeyExchangeType.ECDH)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void addUnknownEllipticCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -129,15 +142,16 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(description = "If a server does not understand the Supported Elliptic Curves Extension, " +
-            "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake " +
-            "while restricting itself to the enumerated curves and point formats, " +
-            "it MUST NOT negotiate the use of an ECC cipher suite.")
-    @Interoperability(SeverityLevel.LOW)
+    @TlsTest(description = "If a server does not understand the Supported Elliptic Curves Extension, "
+            + "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake "
+            + "while restricting itself to the enumerated curves and point formats, "
+            + "it MUST NOT negotiate the use of an ECC cipher suite.")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @KeyExchange(supported = KeyExchangeType.ECDH)
+    @InteroperabilityCategory(SeverityLevel.LOW)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void onlyInvalidEllipticCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -158,16 +172,18 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(description = "If a server does not understand the Supported Elliptic Curves Extension, " +
-            "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake " +
-            "while restricting itself to the enumerated curves and point formats, " +
-            "it MUST NOT negotiate the use of an ECC cipher suite.")
-    @TestDescription("Send single non ECC cipher suite and all ECC cipher suites with an invalid curve. " +
-            "Check if the server selects the non ECC cipher suite.")
-    @Interoperability(SeverityLevel.CRITICAL)
+    @TlsTest(description = "If a server does not understand the Supported Elliptic Curves Extension, "
+            + "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake "
+            + "while restricting itself to the enumerated curves and point formats, "
+            + "it MUST NOT negotiate the use of an ECC cipher suite.")
+    @TestDescription("Send single non ECC cipher suite and all ECC cipher suites with an invalid curve. "
+            + "Check if the server selects the non ECC cipher suite.")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @ManualConfig(DerivationType.CIPHERSUITE)
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidEllipticCurve_WithNonECCCiphersuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -203,7 +219,7 @@ public class TLSExtensionForECC extends Tls12Test {
             );
         });
     }
-    
+
     @RFC(number = 8422, section = "5.1.1 Supported Elliptic Curves Extension")
     /*@TlsTest(description = " RFC 4492 defined 25 different curves in the NamedCurve registry (now\n" +
             "renamed the \"TLS Supported Groups\" registry, although the enumeration\n" +
@@ -213,13 +229,16 @@ public class TLSExtensionForECC extends Tls12Test {
             "curves with identifiers 0xFF01 and 0xFF02.  It also adds the new\n" +
             "curves defined in [RFC7748]", securitySeverity = SeverityLevel.LOW)*/
     @Test
-    @Security(SeverityLevel.LOW)
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @TestDescription("Deprecated groups should not be supported")
+    @CryptoCategory(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.LOW)
+    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void supportsDeprecated(WorkflowRunner runner) {
         boolean deprecated = false;
-        for(NamedGroup group : context.getSiteReport().getSupportedNamedGroups()) {
-            if(group.getIntValue() < NamedGroup.SECP256R1.getIntValue() || group == NamedGroup.EXPLICIT_CHAR2 || group == NamedGroup.EXPLICIT_PRIME) {
+        for (NamedGroup group : context.getSiteReport().getSupportedNamedGroups()) {
+            if (group.getIntValue() < NamedGroup.SECP256R1.getIntValue() || group == NamedGroup.EXPLICIT_CHAR2 || group == NamedGroup.EXPLICIT_PRIME) {
                 deprecated = true;
                 break;
             }

@@ -44,8 +44,6 @@ public class EncryptedExtensions extends Tls13Test {
             "the handshake with an \"illegal_parameter\" alert.")
     @Interoperability(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    // todo: js: why is alert here? remove?
     @Compliance(SeverityLevel.MEDIUM)
     public void includedInvalidExtensions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

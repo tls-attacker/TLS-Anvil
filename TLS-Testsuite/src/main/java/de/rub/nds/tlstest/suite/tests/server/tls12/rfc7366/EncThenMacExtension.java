@@ -17,6 +17,7 @@ import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
@@ -32,12 +33,14 @@ import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
@@ -58,10 +61,14 @@ public class EncThenMacExtension extends Tls12Test {
             return false;
         }
     }
+    
+    public ConditionEvaluationResult targetCanBeTested() {
+        if(context.getSiteReport().getSupportedExtensions() != null && context.getSiteReport().getSupportedExtensions().contains(ExtensionType.ENCRYPT_THEN_MAC)) {
+            return ConditionEvaluationResult.enabled("The Extension can be tested");
+        }
+        return ConditionEvaluationResult.disabled("Encrypt-Then-Mac Extension not supported");
+    }
 
-    //TODO RM: Do we want to keep this test? Shouldn't this be the task of the scanner? (I think there the probe does not work properly)
-    //MM: We're also testing if it gets negotiated for different cipher suites(...) - isn't that beyond the scope of the scanner?
-    // JS: it looks like a scanner task. If the method would also check other cipher suites beyond CBc, it would be fine
     @TlsTest(description = "Test if the server supports the encrypt-then-mac extension")
     @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isBlockCipher")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)

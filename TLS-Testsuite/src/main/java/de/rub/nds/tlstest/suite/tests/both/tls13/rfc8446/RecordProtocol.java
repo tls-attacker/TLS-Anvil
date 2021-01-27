@@ -273,32 +273,6 @@ public class RecordProtocol extends Tls13Test {
     }
 
     @TlsTest(description = "Send a record without any content.")
-    @Security(SeverityLevel.CRITICAL)
-    @Interoperability(SeverityLevel.HIGH)
-    @Tag("emptyRecord")
-    /*TODO: MM maybe we should make this a state machine tests?
-    Also: does the content type do anything here? record type should be APP
-    does the 'encoded' record type ignore MaxRecordLengthConfig?*/
-    public void sendEmptyFinishedRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-
-        Record r = new Record();
-        r.setContentMessageType(ProtocolMessageType.HANDSHAKE);
-        r.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
-        r.setMaxRecordLengthConfig(0);
-        SendAction fin = new SendAction(new FinishedMessage());
-        fin.setRecords(r);
-
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
-        workflowTrace.addTlsActions(
-                fin,
-                new ReceiveAction(new AlertMessage())
-        );
-
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
-    }
-
-    @TlsTest(description = "Send a record without any content.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.HIGH)

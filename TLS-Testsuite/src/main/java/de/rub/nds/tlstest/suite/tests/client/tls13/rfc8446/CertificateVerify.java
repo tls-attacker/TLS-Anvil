@@ -198,26 +198,6 @@ public class CertificateVerify extends Tls13Test {
     }
 
 
-    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
-    @Security(SeverityLevel.CRITICAL)
-    @Crypto(SeverityLevel.CRITICAL)
-    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    @Interoperability(SeverityLevel.HIGH)
-    //TODO: MM move to state machines?
-    public void omitCertificateVerify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-
-        WorkflowTrace trace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE_VERIFY);
-        trace.addTlsActions(
-                new SendAction(new FinishedMessage()),
-                new ReceiveAction(new AlertMessage())
-        );
-
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
-    }
-
     @TlsTest(description = "The receiver of a CertificateVerify message MUST verify the signature " +
             "field.  [...] If the verification fails, the receiver MUST terminate the handshake " +
             "with a \"decrypt_error\" alert.")

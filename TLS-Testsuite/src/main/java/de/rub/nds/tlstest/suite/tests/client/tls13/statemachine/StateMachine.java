@@ -264,4 +264,24 @@ public class StateMachine extends Tls13Test {
             Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, msg);
         });
     }
+    
+    @RFC(number = 8446, section = "4.4.3. Certificate Verify")
+    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
+    @Security(SeverityLevel.CRITICAL)
+    @Crypto(SeverityLevel.CRITICAL)
+    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    @Interoperability(SeverityLevel.HIGH)
+    public void omitCertificateVerify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+
+        WorkflowTrace trace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE_VERIFY);
+        trace.addTlsActions(
+                new SendAction(new FinishedMessage()),
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+    }
 }

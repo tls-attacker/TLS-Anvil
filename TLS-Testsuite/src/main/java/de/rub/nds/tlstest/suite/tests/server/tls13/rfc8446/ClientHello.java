@@ -47,32 +47,6 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "4.1.2 Client Hello")
 public class ClientHello extends Tls13Test {
 
-    @TlsTest(description = "Because TLS 1.3 forbids renegotiation, if a server has negotiated "
-            + "TLS 1.3 and receives a ClientHello at any other time, it MUST terminate the "
-            + "connection with an \"unexpected_message\" alert.")
-    @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM)
-    @Compliance(SeverityLevel.HIGH)
-    //TODO MM: move to state machines?
-    public void sendClientHelloAfterFinishedHandshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
-
-        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        trace.addTlsActions(
-                new SendAction(new ClientHelloMessage(config)),
-                new ReceiveAction(new AlertMessage())
-        );
-
-        runner.execute(trace, config).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
-
-            AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
-            Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, alert);
-        });
-    }
 
     @TlsTest(description = "If the list contains cipher suites that the server "
             + "does not recognize, support, or wish to use, the server MUST "

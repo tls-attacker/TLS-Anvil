@@ -21,35 +21,53 @@ import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import static org.junit.Assert.assertFalse;
 
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Test;
 
-@RFC(number = 5246, section = "7.4.1.2. Client Hello")
 @ClientTest
 public class ClientHello extends Tls12Test {
 
     @Test
+    @RFC(number = 5246, section = "7.4.1.2. Client Hello")
     @TestDescription("This vector MUST contain, and all implementations MUST support, CompressionMethod.null. "
             + "Thus, a client and server will always be able to agree on a compression method.")
     @Interoperability(SeverityLevel.CRITICAL)
-    @Security(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
-    // TODO: ich bin mir noch nicht sicher, ob es andere Tests zu kompression gibt
-    // aber eigentlich sollte man checken ob es etwsa ausser von 0 gibt. dann gibt
-    // potentiell einen CRIME angriff und security ist CRITICAL
-    public void unknownCompressionMethod() {
+    public void supportsNullcompressionMethod() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         byte[] compression = clientHelloMessage.getCompressions().getValue();
         boolean containsZero = false;
+        boolean containsOther = false;
         for (byte i : compression) {
             if (i == 0) {
                 containsZero = true;
+            }
+        }
+        assertTrue("ClientHello does not contain compression method null", containsZero);
+    }
+    
+    @Test
+    @RFC(number = 7457, section = "2.6.  Compression Attacks: CRIME, TIME, and BREACH")
+    @TestDescription("The CRIME attack (CVE-2012-4929) allows an active attacker to " +
+            "decrypt ciphertext (specifically, cookies) when TLS is used with TLS- " +
+            "level compression.")
+    @Security(SeverityLevel.CRITICAL)
+    @Compliance(SeverityLevel.CRITICAL)
+    @Handshake(SeverityLevel.MEDIUM)
+    public void offersNonNullCompressionMethod() {
+        ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
+        byte[] compression = clientHelloMessage.getCompressions().getValue();
+        boolean containsZero = false;
+        boolean containsOther = false;
+        for (byte i : compression) {
+            if (i != 0) {
+                containsOther = true;
                 break;
             }
         }
-
-        assertTrue("ClientHello does not contain compression method null", containsZero);
+        assertFalse("ClientHello contained compression method other than Null", containsOther);
     }
 }

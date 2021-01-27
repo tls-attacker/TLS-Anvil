@@ -111,12 +111,11 @@ public class ServerHello extends Tls13Test {
     @TlsTest(description = "A client which receives a legacy_session_id_echo " +
             "field that does not match what it sent in the ClientHello MUST " +
             "abort the handshake with an \"illegal_parameter\" alert.")
-    @Interoperability(SeverityLevel.MEDIUM)
-    // todo: js: remove interoperability?
+    @Interoperability(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)
-    public void testSessionId(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void testSessionIdEchoed(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         byte[] sessionId = new byte[]{0x01, 0x02, 0x03, 0x04, 0x05};

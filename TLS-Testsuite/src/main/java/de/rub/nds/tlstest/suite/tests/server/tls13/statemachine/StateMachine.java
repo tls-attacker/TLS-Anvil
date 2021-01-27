@@ -1,9 +1,11 @@
 package de.rub.nds.tlstest.suite.tests.server.tls13.statemachine;
 
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.DHClientKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ECDHClientKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.RSAClientKeyExchangeMessage;
@@ -184,5 +186,32 @@ public class StateMachine extends Tls13Test {
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+    }
+    
+    @RFC(number = 8446, section = "4.1.2 Client Hello")
+    @TlsTest(description = "Because TLS 1.3 forbids renegotiation, if a server has negotiated "
+            + "TLS 1.3 and receives a ClientHello at any other time, it MUST terminate the "
+            + "connection with an \"unexpected_message\" alert.")
+    @Handshake(SeverityLevel.MEDIUM)
+    @Alert(SeverityLevel.MEDIUM)
+    @Compliance(SeverityLevel.HIGH)
+    public void sendClientHelloAfterFinishedHandshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+
+        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        trace.addTlsActions(
+                new SendAction(new ClientHelloMessage(config)),
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.execute(trace, config).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+
+            AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
+            if (alert == null) {
+                return;
+            }
+            Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, alert);
+        });
     }
 }

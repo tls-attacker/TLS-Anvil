@@ -50,7 +50,6 @@ public class PreSharedKey extends Tls13Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Security(SeverityLevel.HIGH)
-    // TODO JS: why is this security relevant
     public void isLastExtension() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         if (!chm.getExtensions().get(chm.getExtensions().size() - 1).getClass().equals(PreSharedKeyExtensionMessage.class)) {

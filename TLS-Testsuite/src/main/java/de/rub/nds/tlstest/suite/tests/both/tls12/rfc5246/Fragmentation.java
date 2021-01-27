@@ -114,15 +114,13 @@ public class Fragmentation extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "Send a record without any content.")
+    @TlsTest(description = "Send a record without any content with Content Type Application Data.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Tag("emptyRecord")
     @Security(SeverityLevel.CRITICAL)
-    //TODO I think this test also needs some talking. What is it testing?
     public void sendEmptyApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        // JS: this is misleading. why do you need to send an application message if the record is empty?
         ApplicationMessage appMsg = new ApplicationMessage(c);
 
         Record r = new Record();
@@ -141,11 +139,10 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Send a record without any content.")
+    @TlsTest(description = "Send a record without any content with Content Type Handshake.")
     @Security(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.HIGH)
     @Tag("emptyRecord")
-    //TODO I think this test also needs some talking. What is it testing?
     public void sendEmptyFinishedRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

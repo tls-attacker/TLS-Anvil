@@ -158,7 +158,7 @@ public class ServerKeyExchange extends Tls12Test {
         });
     }
     
-    public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms() {
+    public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(DerivationScope scope) {
         List<DerivationParameter> unsupportedAlgorithms = new LinkedList<>();
         SignatureAndHashAlgorithm.getImplemented().stream()
                 .filter(algorithm -> !TestContext.getInstance().getSiteReport().getSupportedSignatureAndHashAlgorithms().contains(algorithm))

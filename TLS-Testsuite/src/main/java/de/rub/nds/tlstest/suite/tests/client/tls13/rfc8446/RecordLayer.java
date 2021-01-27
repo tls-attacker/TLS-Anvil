@@ -11,17 +11,21 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.AlertDescription;
+import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
@@ -30,6 +34,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
@@ -49,6 +54,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
@@ -112,27 +118,41 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
+    public ConditionEvaluationResult supportsRecordFragmentation() {
+        if (context.getSiteReport().getSupportsRecordFragmentation()) {
+            return ConditionEvaluationResult.enabled("");
+        }
+        return ConditionEvaluationResult.disabled("Target does not support Record fragmentation");
+    }
+    
     @TlsTest(description = "Handshake messages MUST NOT be interleaved "
-            + "with other record types.")
+            + "with other record types. That is, if a handshake message is split over two or more\n"
+            + "records, there MUST NOT be any other records between them.")
     @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
-    /*TODO: is this test correct? by my understanding it tests if two different
-    record content type messages may be in the same record (with only 1 content
-    type given in the header) - the RFC states right below the quote from above 
-    "That is, if a handshake message is split over two or more records, there 
-    MUST NOT be any other records between them.
-    We aren't always fragmenting here so this description doesn't match.
-    */
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @MethodCondition(method = "supportsRecordFragmentation")
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace trace = new WorkflowTrace();
+        trace.addTlsAction(new SendAction(new ClientHelloMessage(c)));
+        SendAction sendClientHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.CLIENT_HELLO, trace);
+        
+        Record clientHelloPart = new Record();
+        clientHelloPart.setMaxRecordLengthConfig(20);
+        Record alertRecord = new Record();
+        
+        //we add a record that will remain untouched by record layer but has
+        //an alert set as explicit content
+        alertRecord.setMaxRecordLengthConfig(0);
+        alertRecord.setContentType(Modifiable.explicit(ProtocolMessageType.ALERT.getValue()));
+        byte[] alertContent = new byte [] {AlertLevel.WARNING.getValue(), AlertDescription.UNRECOGNIZED_NAME.getValue()};
+        alertRecord.setProtocolMessageBytes(Modifiable.explicit(alertContent));
+        
+        sendClientHelloAction.setRecords(clientHelloPart, alertRecord);
 
-        c.setCreateIndividualRecords(false);
-        c.setFlushOnMessageTypeChange(false);
-
-        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);

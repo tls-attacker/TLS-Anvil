@@ -85,6 +85,11 @@
             <artifactId>coffee4j-junit-jupiter</artifactId>
             <version>1.0.6</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>TLS-Test-Framework</finalName>

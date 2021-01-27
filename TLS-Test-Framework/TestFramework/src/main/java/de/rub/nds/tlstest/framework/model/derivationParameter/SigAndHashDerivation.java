@@ -113,15 +113,15 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
-        if (ConstraintHelper.pssSigAlgoModeled(scope)) {
+        if (ConstraintHelper.pssSigAlgoModeled(scope) && ConstraintHelper.rsaPkMightNotSufficeForPss(scope)) {
             condConstraints.add(getMustNotBePSSWithShortRSAKeyConstraint());
         }
 
-        if (ConstraintHelper.multipleCertPublicKeyTypesModeled(scope) && ConstraintHelper.multipleSigAlgorithmsModeled(scope)) {
+        if (ConstraintHelper.multipleCertPublicKeyTypesModeled(scope) || ConstraintHelper.multipleSigAlgorithmRequiredKeyTypesModeled(scope)) {
             condConstraints.add(getMustMatchPkOfCertificateConstraint());
         }
 
-        if (!scope.isTls13Test() && TestContext.getInstance().getSiteReport().getSupportedSignatureAndHashAlgorithms() == null && ConstraintHelper.multipleSigAlgorithmsModeled(scope)) {
+        if (!scope.isTls13Test() && TestContext.getInstance().getSiteReport().getSupportedSignatureAndHashAlgorithms() == null && ConstraintHelper.multipleSigAlgorithmRequiredKeyTypesModeled(scope)) {
             condConstraints.add(getDefaultAlgorithmMustMatchCipherSuite());
         }
 

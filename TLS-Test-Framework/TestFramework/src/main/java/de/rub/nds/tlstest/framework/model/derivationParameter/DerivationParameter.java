@@ -136,12 +136,12 @@ public abstract class DerivationParameter<T> {
     public List<DerivationParameter> getExplicitValues(DerivationScope scope) {
         try {
             String methodName = scope.getExplicitValueMethod(type);
-            Method method = scope.getExtensionContext().getRequiredTestClass().getMethod(methodName);
+            Method method = scope.getExtensionContext().getRequiredTestClass().getMethod(methodName, DerivationScope.class);
             Constructor constructor = scope.getExtensionContext().getRequiredTestClass().getConstructor();
 
-            return (List<DerivationParameter>) method.invoke(constructor.newInstance());
+            return (List<DerivationParameter>) method.invoke(constructor.newInstance(), scope);
         } catch (NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException ex) {
-            LOGGER.error("Was unable to fetch explicit values for type " + type, ex);
+            LOGGER.error("Was unable to fetch explicit values for type " + type, ex); 
             return new LinkedList<>();
         }
     }

@@ -8,6 +8,7 @@ import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.crypto.keys.CustomDSAPrivateKey;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -95,8 +96,10 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
         List<CertificateKeyPair> certificateKeyPairs = CertificateByteChooser.getInstance().getCertificateKeyPairList();
         int pkSize = 0;
         for (CertificateKeyPair certKeyPair : certificateKeyPairs) {
-            if (certKeyPair.getCertPublicKeyType() == requiredPublicKeyType && certKeyPair.getPublicKey().keySize() > pkSize) {
+            if (requiredPublicKeyType != CertificateKeyType.DSS && certKeyPair.getCertPublicKeyType() == requiredPublicKeyType && certKeyPair.getPublicKey().keySize() > pkSize) {
                 pkSize = certKeyPair.getPublicKey().keySize();
+            } else if(requiredPublicKeyType == CertificateKeyType.DSS && certKeyPair.getCertPublicKeyType() == requiredPublicKeyType && ((CustomDSAPrivateKey)certKeyPair.getPrivateKey()).getParams().getQ().bitLength() > pkSize) {
+                pkSize = ((CustomDSAPrivateKey)certKeyPair.getPrivateKey()).getParams().getQ().bitLength(); 
             }
         }
         return pkSize;
@@ -139,11 +142,14 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
             case RSA_PSS_PSS:
             case RSA_PSS_RSAE:
                 return pkByteSize;
-            case ECDSA:
             case DSA:
+                //signature size is (#bits of Q) / 4
+                return (pkSize / 4) + 6; //+6 bytes because of DER (see below)
+            case ECDSA:
                 //signature consists of tag || length || type || length || r
                 //                                    || type || length || s
                 //DER encoding may add an additional byte if the MSB of r or s is 1
+                //we do not include these as we can't know beforehand 
                 int signatureLength = 6 + 2 * pkByteSize;
                 if (pkSize == 521) {
                     //SECP521R1 encoding differs from other groups
@@ -163,7 +169,7 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
             case ECDSA:
                 return computeEstimatedSignatureSize(SignatureAlgorithm.ECDSA, certKeyPair.getPublicKey().keySize());
             case DSS:
-                return computeEstimatedSignatureSize(SignatureAlgorithm.DSA, certKeyPair.getPublicKey().keySize());
+                return computeEstimatedSignatureSize(SignatureAlgorithm.DSA, ((CustomDSAPrivateKey)certKeyPair.getPrivateKey()).getParams().getQ().bitLength());
             default:
                 throw new RuntimeException("Can not compute signature size for CertPublicKeyType " + certKeyPair.getCertPublicKeyType());
         }
@@ -188,7 +194,12 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
             SigAndHashDerivation sigHashAlg = (SigAndHashDerivation) sigHashAlgorithmParam;
             CertificateDerivation cert = (CertificateDerivation) certParam;
 
-            int certificateKeySize = cert.getSelectedValue().getPublicKey().keySize();
+            int certificateKeySize; 
+            if(cert.getSelectedValue().getCertPublicKeyType() == CertificateKeyType.DSS) {
+                certificateKeySize = ((CustomDSAPrivateKey)cert.getSelectedValue().getPrivateKey()).getParams().getQ().bitLength();
+            } else {
+                certificateKeySize = cert.getSelectedValue().getPublicKey().keySize(); 
+            }
             SignatureAlgorithm sigAlg = sigHashAlg.getSelectedValue().getSignatureAlgorithm();
 
             return computeEstimatedSignatureSize(sigAlg, certificateKeySize) > bitmaskDerivation.getSelectedValue();

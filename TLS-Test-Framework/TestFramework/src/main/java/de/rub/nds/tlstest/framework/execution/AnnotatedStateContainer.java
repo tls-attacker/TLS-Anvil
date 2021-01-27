@@ -57,6 +57,9 @@ public class  AnnotatedStateContainer {
     @JsonProperty("Result")
     private TestResult result;
 
+    @JsonProperty("HasStateWithAdditionalResultInformation")
+    private Boolean hasStateWithAdditionalResultInformation = false;
+
     @XmlElement(name = "DisabledReason")
     @JsonProperty("DisabledReason")
     private String disabledReason;
@@ -82,6 +85,15 @@ public class  AnnotatedStateContainer {
 
     @JsonUnwrapped
     private ScoreContainer scoreContainer;
+
+    @Override
+    public String toString() {
+        return String.format("AnnotatedStateContainer{displayName = %s, result = %s}",
+                testMethodConfig != null ? testMethodConfig.getClassName() + "." + testMethodConfig.getMethodName() : "null",
+                result != null ? result.name() : "null"
+        );
+
+    }
 
     private AnnotatedStateContainer(ExtensionContext extensionContext) {
         this.uniqueId = extensionContext.getUniqueId();
@@ -127,6 +139,10 @@ public class  AnnotatedStateContainer {
             if (state.getResult() == TestResult.FAILED) {
                 errors.add(state.getFailedReason());
                 failed = true;
+            }
+
+            if (!state.getAdditionalResultInformation().isEmpty()) {
+                this.hasStateWithAdditionalResultInformation = true;
             }
 
             if (uuids.contains(state.getUuid())) {

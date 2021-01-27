@@ -94,9 +94,12 @@ public class KeyX implements KeyExchange {
 
         for (CipherSuite i : ciphers) {
             KeyExchangeAlgorithm kexalg = AlgorithmResolver.getKeyExchangeAlgorithm(i);
-            ServerKeyExchangeMessage skx = new WorkflowConfigurationFactory(Config.createConfig()).createServerKeyExchangeMessage(kexalg);
+            ServerKeyExchangeMessage serverKeyExchangeMessage = null;
+            if(i.isEphemeral() || i.isSrp()) {
+                serverKeyExchangeMessage = new WorkflowConfigurationFactory(Config.createConfig()).createServerKeyExchangeMessage(kexalg);
+            }
             for (KeyExchangeType t : this.supported()) {
-                if (kexalg == null || (requiresServerKeyExchMsg && skx == null)) {
+                if (kexalg == null || (requiresServerKeyExchMsg && serverKeyExchangeMessage == null)) {
                     continue;
                 }
                 if (kexalg.isKeyExchangeEcdh() && t == KeyExchangeType.ECDH) {
@@ -182,7 +185,10 @@ public class KeyX implements KeyExchange {
         // TLS 1.3 is handled above
         assert alg != null;
 
-        ServerKeyExchangeMessage skxm = new WorkflowConfigurationFactory(Config.createConfig()).createServerKeyExchangeMessage(alg);
+        ServerKeyExchangeMessage serverKeyExchangeMessage = null;
+        if(i.isEphemeral() || i.isSrp()) {
+           serverKeyExchangeMessage = new WorkflowConfigurationFactory(Config.createConfig()).createServerKeyExchangeMessage(alg); 
+        }
 
         boolean compatible = false;
         for (KeyExchangeType kext : this.supported()) {
@@ -192,13 +198,13 @@ public class KeyX implements KeyExchange {
                     break;
                 case DH:
                     // equivalent to alg.isKeyExchangeDh() && ((this.requiresServerKeyExchMsg && skxm != null) || !this.requiresServerKeyExchMsg)
-                    compatible |= alg.isKeyExchangeDh() && (!this.requiresServerKeyExchMsg || skxm != null);
+                    compatible |= alg.isKeyExchangeDh() && (!this.requiresServerKeyExchMsg || serverKeyExchangeMessage != null);
                     break;
                 case ECDH:
-                    compatible |= alg.isKeyExchangeEcdh() && (!this.requiresServerKeyExchMsg || skxm != null);
+                    compatible |= alg.isKeyExchangeEcdh() && (!this.requiresServerKeyExchMsg || serverKeyExchangeMessage != null);
                     break;
                 case ALL12:
-                    compatible |= AlgorithmResolver.getKeyExchangeAlgorithm(i) != null && (!this.requiresServerKeyExchMsg || skxm != null);
+                    compatible |= AlgorithmResolver.getKeyExchangeAlgorithm(i) != null && (!this.requiresServerKeyExchMsg || serverKeyExchangeMessage != null);
                     break;
                 case NOT_SPECIFIED:
                     break;

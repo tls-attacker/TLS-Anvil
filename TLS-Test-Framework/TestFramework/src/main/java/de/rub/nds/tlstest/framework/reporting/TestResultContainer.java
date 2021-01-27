@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.framework.reporting;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestCategory;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
@@ -81,6 +82,9 @@ public class TestResultContainer {
 
     @JsonProperty("StatesCount")
     private int statesCount = 0;
+    
+    @JsonProperty("Strength")
+    private int defaultStrength = TestContext.getInstance().getConfig().getStrength();
 
 
     @JsonUnwrapped
@@ -130,7 +134,13 @@ public class TestResultContainer {
         container.addResult(result);
 
         while (container != null) {
-            container.updateTestStats(result);
+            try {
+                container.updateTestStats(result);
+            } catch(Exception e) {
+                LOGGER.error("", e);
+                LOGGER.error(result.toString());
+            }
+
             container = container.parent;
         }
     }
@@ -287,5 +297,13 @@ public class TestResultContainer {
         } else {
             this.additionalInformation = this.additionalInformation.concat(",\n" + additionalInformation);
         }
+    }
+
+    public int getDefaultStrength() {
+        return defaultStrength;
+    }
+
+    public void setDefaultStrength(int defaultStrength) {
+        this.defaultStrength = defaultStrength;
     }
 }

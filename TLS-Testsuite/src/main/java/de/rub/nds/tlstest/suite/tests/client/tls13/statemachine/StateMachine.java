@@ -90,8 +90,6 @@ public class StateMachine extends Tls13Test {
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM) 
-    /*Categories: remove Alert from these tests? the 1.2 client statemachine
-    tests did not have it anyway*/
     @Compliance(SeverityLevel.MEDIUM)
     public void sendHandshakeTrafficSecretEncryptedChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -231,17 +229,16 @@ public class StateMachine extends Tls13Test {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
     }
-
-    @Test
-    @TestDescription("Begin the Handshake with two Server Hello Messages")
+    
+    @TlsTest(description = "Send a second encrypted Server Hello")
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)
-    public void sendServerHelloTwice(WorkflowRunner runner) {
-        Config config = getConfig();
-        SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner);
+    public void sendServerHelloTwice(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner); 
     }
 
     @RFC(number = 8446, section = "4.5. End of Early Data")

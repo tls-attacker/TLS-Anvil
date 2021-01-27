@@ -41,6 +41,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ExtensionDerivation;
@@ -58,7 +59,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class Extensions extends Tls13Test {
 
-    public List<DerivationParameter> getUnrequestedExtensions() {
+    public List<DerivationParameter> getUnrequestedExtensions(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<ExtensionType> extensions = new LinkedList<>();
         extensions.add(ExtensionType.SERVER_NAME_INDICATION);

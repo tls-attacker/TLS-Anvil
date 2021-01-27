@@ -37,6 +37,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
@@ -160,7 +161,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
     
-    public List<DerivationParameter> getInvalidHighRecordVersion() {
+    public List<DerivationParameter> getInvalidHighRecordVersion(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x00}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x03}));

@@ -1,8 +1,10 @@
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
+import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.DigestAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
@@ -35,9 +37,12 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
@@ -73,8 +78,8 @@ public class ServerKeyExchange extends Tls12Test {
             Validator.receivedFatalAlert(i);
         });
     }
-
-    public List<DerivationParameter> getUnproposedNamedGroups() {
+    
+    public List<DerivationParameter> getUnproposedNamedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         NamedGroup.getImplemented().stream()
                 .filter(group -> group.isCurve())
@@ -82,26 +87,19 @@ public class ServerKeyExchange extends Tls12Test {
                 .forEach(unofferedCurve -> parameterValues.add(new NamedGroupDerivation(unofferedCurve)));
         return parameterValues;
     }
+    
+    public List<DerivationParameter> getCertsIncludingUnsupportedPkGroups(DerivationScope scope) {
+        CertificateDerivation certDerivation = (CertificateDerivation) DerivationFactory.getInstance(DerivationType.CERTIFICATE);
+        return certDerivation.getApplicableCertificates(context, scope, true);
+    }
 
     @TlsTest(description = "A possible reason for a "
             + "fatal handshake failure is that the client's capabilities for "
             + "handling elliptic curves and point formats are exceeded")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ECDH})
-    @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getUnproposedNamedGroups")
+    @ExplicitValues(affectedTypes = {DerivationType.NAMED_GROUP, DerivationType.CERTIFICATE}, methods = {"getUnproposedNamedGroups", "getCertsIncludingUnsupportedPkGroups"})
     @Handshake(SeverityLevel.MEDIUM)
-    @Interoperability(SeverityLevel.HIGH) 
-    /* Categories MM: I think most of the (client) tests, where we choose invalid
-    values and expect the client to abort the handshake, do not affect
-    interoperability - here for example, a client that accepts an unproposed
-    group does not affect the interoperability - unless we use interoperability
-    in the spirit of GREASE (to prevent a spreading "bad habit" among implementations) 
-    
-    Up until a certain point, I marked some of the tests so we can find them
-    quickly later on if we want to remove the annotation - if anyone else shares
-    my definition of the category, please add a comment to the annotations of
-    tests I didn't mark
-    */
     @Security(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.HIGH)
@@ -175,8 +173,8 @@ public class ServerKeyExchange extends Tls12Test {
             Validator.receivedFatalAlert(i);
         });
     }
-
-    public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms() {
+    
+    public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(DerivationScope scope) {
         List<DerivationParameter> unsupportedAlgorithms = new LinkedList<>();
         SignatureAndHashAlgorithm.getImplemented().stream()
                 .filter(algorithm -> !TestContext.getInstance().getSiteReport().getSupportedSignatureAndHashAlgorithms().contains(algorithm))
@@ -192,9 +190,6 @@ public class ServerKeyExchange extends Tls12Test {
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
     @Handshake(SeverityLevel.MEDIUM)
-    @Interoperability(SeverityLevel.MEDIUM)
-    //Categories MM: this is another interoperability-in-question example
-    //JS: Agreed. This belongs not to the interoperability category
     @Alert(SeverityLevel.HIGH)
     public void acceptsUnproposedSignatureAndHash(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

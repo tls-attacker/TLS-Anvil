@@ -3,9 +3,12 @@ package de.rub.nds.tlstest.suite.tests.both.lengthfield;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
+import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
@@ -15,6 +18,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -51,7 +55,13 @@ public class Finished extends TlsGenericTest {
     
     private void finishedLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
        FinishedMessage finishedMessage = (FinishedMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.FINISHED, workflowTrace);
-       finishedMessage.setLength(Modifiable.add(10));   
-       runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest); 
+       finishedMessage.setLength(Modifiable.add(10)); 
+       if((runner.getPreparedConfig().getHighestProtocolVersion() != ProtocolVersion.TLS13 && context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT)
+               || (runner.getPreparedConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13 && context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER)) {
+           workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+           runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(Validator::receivedFatalAlert);
+       } else {
+           runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
+       }
     }
 }

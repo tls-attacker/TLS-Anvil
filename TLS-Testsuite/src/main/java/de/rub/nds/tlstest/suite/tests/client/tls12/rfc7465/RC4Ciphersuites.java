@@ -48,6 +48,7 @@ public class RC4Ciphersuites extends Tls12Test {
     @Security(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     @DeprecatedFeature(SeverityLevel.HIGH)
+    @Crypto(SeverityLevel.MEDIUM)
     public void offersRC4Ciphersuites() {
         List<CipherSuite> supported = new ArrayList<>(this.context.getSiteReport().getCipherSuites());
         supported.removeIf(i -> !i.toString().contains("RC4"));
@@ -63,6 +64,7 @@ public class RC4Ciphersuites extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @DeprecatedFeature(SeverityLevel.HIGH)
     @Alert(SeverityLevel.MEDIUM)
+    @Crypto(SeverityLevel.MEDIUM)
     public void selectRC4CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

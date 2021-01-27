@@ -26,7 +26,7 @@ public class MandatoryCipherSuites extends Tls12Test {
     //@TlsTest(description = "A TLS-compliant application MUST implement the cipher suite TLS_RSA_WITH_AES_128_CBC_SHA")
     @Test
     @TestDescription("TLS_RSA_WITH_AES_128_CBC_SHA must be supported by all TLS 1.2 implementations")
-    @Interoperability(SeverityLevel.LOW) //Categories MM: is this set to LOW because it's not a nice choice anymore?
+    @Interoperability(SeverityLevel.LOW)
     @Compliance(SeverityLevel.MEDIUM)
     public void verify() {
         if (!context.getSiteReport().getCipherSuites().contains(CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA)) {

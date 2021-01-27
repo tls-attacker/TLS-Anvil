@@ -80,8 +80,6 @@ public class RC4Ciphersuites extends Tls12Test {
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Crypto(SeverityLevel.MEDIUM)
-    //Categories MM: we didn't set crypto for the client test - either we should add or remove it for all ciphersuite related tests
-    //(also see IDEA and DES)
     @DeprecatedFeature(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.HIGH)
     public void offerRC4AndOtherCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

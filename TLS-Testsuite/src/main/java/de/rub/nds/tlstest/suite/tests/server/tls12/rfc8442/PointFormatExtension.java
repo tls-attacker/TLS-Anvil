@@ -157,9 +157,6 @@ public class PointFormatExtension extends Tls12Test {
             + "this specification, then the server MUST abort the handshake and"
             + "return an illegal_parameter alert.")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @Interoperability(SeverityLevel.LOW)
-    /*Categories MM: This is another example where an implementation that does
-    _not_ follow the RFC could reach a higher interoperability*/
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
     @Alert(SeverityLevel.MEDIUM)

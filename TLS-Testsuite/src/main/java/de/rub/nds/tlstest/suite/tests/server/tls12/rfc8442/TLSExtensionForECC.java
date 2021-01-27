@@ -79,7 +79,6 @@ public class TLSExtensionForECC extends Tls12Test {
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
-    /*Categories MM: same question as in 1.2 - does this apply with TLS 1.3 specified?*/
     public void bothECExtensions_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -234,7 +233,6 @@ public class TLSExtensionForECC extends Tls12Test {
     @TestDescription("Deprecated groups should not be supported")
     @Crypto(SeverityLevel.MEDIUM)
     @Security(SeverityLevel.LOW)
-    //Categories MM: I reduced this to LOW, too (see client test)
     @DeprecatedFeature(SeverityLevel.MEDIUM)
     @Handshake(SeverityLevel.MEDIUM)
     public void supportsDeprecated(WorkflowRunner runner) {

@@ -72,6 +72,7 @@ public class SupportedCiphersuites extends Tls12Test {
         supported.addAll(context.getSiteReport().getSupportedTls13CipherSuites());
 
         supported.forEach(advertised::remove);
+        advertised = advertised.stream().filter(cipherSuite -> CipherSuite.getImplemented().contains(cipherSuite)).collect(Collectors.toList());
 
         assertEquals("Client supports less ciphersuites than advertised. " +
                         advertised.parallelStream().map(Enum::name).collect(Collectors.joining(",")),

@@ -74,15 +74,15 @@ public class AlertProtocol extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            Validator.executedAsPlanned(i);
+            Validator.smartExecutedAsPlanned(i);
 
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
-            if (message == null) {
-                i.addAdditionalResultInfo("No close_notify alert received.");
+            if (message == null && Validator.socketClosed(i)) {
+                i.addAdditionalResultInfo("No CLOSE NOTIFY Alert received.");
                 i.setResult(TestResult.PARTIALLY_SUCCEEDED);
                 return;
             }
-            assertEquals("Did not receive warning alert", AlertLevel.WARNING.getValue(), message.getLevel().getValue().byteValue());
+            Validator.receivedWarningAlert(i);
             Validator.testAlertDescription(i, AlertDescription.CLOSE_NOTIFY, message);
 
         });
@@ -112,12 +112,7 @@ public class AlertProtocol extends Tls12Test {
         SendAction serverHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
         serverHelloAction.getSendMessages().add(0, alert);
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
-            if (Validator.socketClosed(i)) {
-                i.setResult(TestResult.SUCCEEDED);
-            }
-        });
+        runner.execute(workflowTrace, c).validateFinal(Validator::socketClosed);
     }
 
     @TlsTest
@@ -145,11 +140,7 @@ public class AlertProtocol extends Tls12Test {
         SendAction serverHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
         serverHelloAction.getSendMessages().add(serverHelloAction.getSendMessages().size() - 1, alert);
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
-            if (Validator.socketClosed(i)) {
-                i.setResult(TestResult.SUCCEEDED);
-            }
-        });
+
+        runner.execute(workflowTrace, c).validateFinal(Validator::socketClosed);
     }
 }

@@ -154,8 +154,6 @@ public class KeyShare extends Tls13Test {
     @Compliance(SeverityLevel.HIGH)
     @DeprecatedFeature(SeverityLevel.HIGH)
     @Security(SeverityLevel.MEDIUM)
-    //Categories MM: I reduced the security impact to MEDIUM bc most curves
-    //are still safe(?) - there is also a draft for Brainpool curves in TLS 1.3
     public void offeredDeprecatedGroups() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         boolean foundDeprecated = false;

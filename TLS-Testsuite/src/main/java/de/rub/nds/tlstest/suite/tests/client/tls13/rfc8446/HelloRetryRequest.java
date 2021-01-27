@@ -47,6 +47,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
@@ -68,7 +69,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "4.1.4 Hello Retry Request")
 public class HelloRetryRequest extends Tls13Test {
 
-    public List<DerivationParameter> getUnofferedGroups() {
+    public List<DerivationParameter> getUnofferedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<NamedGroup> offeredGroups = context.getSiteReport().getClientHelloNamedGroups();
         NamedGroup.getImplemented().stream().filter(group -> !offeredGroups.contains(group))
@@ -92,7 +93,7 @@ public class HelloRetryRequest extends Tls13Test {
         performHelloRetryRequestTest(argumentAccessor, runner);
     }
 
-    public List<DerivationParameter> getUnofferedTls13CipherSuites() {
+    public List<DerivationParameter> getUnofferedTls13CipherSuites(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<CipherSuite> offeredTls13 = CipherSuite.getCipherSuites(context.getReceivedClientHelloMessage().getCipherSuites().getValue());
         CipherSuite.getImplementedTls13CipherSuites().stream().filter(cipherSuite -> !offeredTls13.contains(cipherSuite))
@@ -105,7 +106,7 @@ public class HelloRetryRequest extends Tls13Test {
     @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getUnofferedTls13CipherSuites")
     @Interoperability(SeverityLevel.LOW)
     @Handshake(SeverityLevel.MEDIUM)
-    @Alert(SeverityLevel.MEDIUM) //Categories MM: remove this for all tests here as there is no specific alert?
+    @Alert(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.MEDIUM)
     public void helloRetryRequestsUnofferedTls13CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -410,8 +411,8 @@ public class HelloRetryRequest extends Tls13Test {
         assertTrue("Selected ProtocolVersions are not identical", Arrays.equals(firstClientHello.getProtocolVersion().getValue(), retryClientHello.getProtocolVersion().getValue()));
         assertTrue("TLS 1.3 compatibility SessionIDs are not identical", Arrays.equals(firstClientHello.getSessionId().getValue(), retryClientHello.getSessionId().getValue()));
     }
-
-    public List<DerivationParameter> getTls12CipherSuites() {
+    
+    public List<DerivationParameter> getTls12CipherSuites(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         context.getSiteReport().getCipherSuites().forEach(cipherSuite -> parameterValues.add(new CipherSuiteDerivation(cipherSuite)));
         return parameterValues;

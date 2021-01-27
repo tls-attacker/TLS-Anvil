@@ -1,15 +1,31 @@
 package de.rub.nds.tlstest.framework.constants;
 
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CVECategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 
 import java.lang.annotation.Annotation;
 
 public enum TestCategory {
-    INTEROPERABILITY(Interoperability.class),
-    COMPLIANCE(Compliance.class),
-    SECURITY(Security.class);
+    ALERT(AlertCategory.class),
+    CVE(CVECategory.class),
+    CERTIFICATE(CertificateCategory.class),
+    CRYPTO(CryptoCategory.class),
+    DEPRECATED(DeprecatedFeatureCategory.class),
+    HANDSHAKE(HandshakeCategory.class),
+    MESSAGESTRUCTURE(MessageStructureCategory.class),
+    RECORDLAYER(RecordLayerCategory.class),
+    INTEROPERABILITY(InteroperabilityCategory.class),
+    COMPLIANCE(ComplianceCategory.class),
+    SECURITY(SecurityCategory.class);
 
     private final Class<? extends Annotation> annoationClass;
 

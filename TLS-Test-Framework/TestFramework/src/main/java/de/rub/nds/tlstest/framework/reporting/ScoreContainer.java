@@ -1,9 +1,17 @@
 package de.rub.nds.tlstest.framework.reporting;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
-import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.Security;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CVECategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.TestCategory;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import org.apache.logging.log4j.LogManager;
@@ -30,13 +38,28 @@ public class ScoreContainer {
 
         for (TestCategory i : TestCategory.values()) {
             if (m.isAnnotationPresent(i.getAnnoationClass())) {
-
-                if (i.getAnnoationClass().equals(Compliance.class)) {
-                    scoreMap.put(i, new Score(((Compliance)m.getAnnotation(i.getAnnoationClass())).value()));
-                } else if (i.getAnnoationClass().equals(Interoperability.class)) {
-                    scoreMap.put(i, new Score(((Interoperability)m.getAnnotation(i.getAnnoationClass())).value()));
-                } else if (i.getAnnoationClass().equals(Security.class)) {
-                    scoreMap.put(i, new Score(((Security)m.getAnnotation(i.getAnnoationClass())).value()));
+                if (i.getAnnoationClass().equals(ComplianceCategory.class)) {
+                    scoreMap.put(i, new Score(((ComplianceCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                } else if (i.getAnnoationClass().equals(InteroperabilityCategory.class)) {
+                    scoreMap.put(i, new Score(((InteroperabilityCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                } else if (i.getAnnoationClass().equals(SecurityCategory.class)) {
+                    scoreMap.put(i, new Score(((SecurityCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                } else if (i.getAnnoationClass().equals(AlertCategory.class)) {
+                    scoreMap.put(i, new Score(((AlertCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                } else if (i.getAnnoationClass().equals(CVECategory.class)) {
+                    scoreMap.put(i, new Score(((CVECategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                } else if (i.getAnnoationClass().equals(CertificateCategory.class)) {
+                    scoreMap.put(i, new Score(((CertificateCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                } else if (i.getAnnoationClass().equals(RecordLayerCategory.class)) {
+                    scoreMap.put(i, new Score(((RecordLayerCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                } else if (i.getAnnoationClass().equals(CryptoCategory.class)) {
+                    scoreMap.put(i, new Score(((CryptoCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                } else if (i.getAnnoationClass().equals(DeprecatedFeatureCategory.class)) {
+                    scoreMap.put(i, new Score(((DeprecatedFeatureCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                } else if (i.getAnnoationClass().equals(HandshakeCategory.class)) {
+                    scoreMap.put(i, new Score(((HandshakeCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                } else if (i.getAnnoationClass().equals(MessageStructureCategory.class)) {
+                    scoreMap.put(i, new Score(((MessageStructureCategory)m.getAnnotation(i.getAnnoationClass())).value()));
                 } else {
                     throw new RuntimeException("Unknown TestCategory, cannot create ScoreContainer");
                 }

@@ -35,7 +35,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
@@ -59,7 +59,7 @@ public class Fragmentation extends Tls12Test {
             + "Application data MAY be sent as they are potentially useful as a "
             + "traffic analysis countermeasure.")
     @Interoperability(SeverityLevel.HIGH)
-    @RecordLayer(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     public void sendZeroLengthRecord_CCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -86,7 +86,7 @@ public class Fragmentation extends Tls12Test {
             + "Application data MAY be sent as they are potentially useful as a "
             + "traffic analysis countermeasure.")
     @Interoperability(SeverityLevel.CRITICAL)
-    @RecordLayer(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.CRITICAL)
     public void sendZeroLengthApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -167,7 +167,7 @@ public class Fragmentation extends Tls12Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
-    @RecordLayer(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.LOW)
     public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -205,7 +205,7 @@ public class Fragmentation extends Tls12Test {
             + "The length MUST NOT exceed 2^14 + 2048.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
-    @RecordLayer(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.LOW)
     public void sendRecordWithCiphertextOver2pow14plus2048(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

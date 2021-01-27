@@ -33,6 +33,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
@@ -188,7 +189,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @Compliance(SeverityLevel.CRITICAL)
     @Handshake(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
-    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
+    @CertificateCategory(SeverityLevel.CRITICAL)
     @Alert(SeverityLevel.MEDIUM)
     public void sendCertificateVerifyGreaseSignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

@@ -37,6 +37,7 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -58,7 +59,7 @@ public class RecordLayer extends Tls13Test {
             + "zero-length fragments of Handshake types, even "
             + "if those fragments contain padding.")
     @Interoperability(SeverityLevel.HIGH)
-    @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_ServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -87,7 +88,7 @@ public class RecordLayer extends Tls13Test {
             + "zero-length fragments of Handshake types, even "
             + "if those fragments contain padding.")
     @Interoperability(SeverityLevel.HIGH)
-    @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_Finished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -115,7 +116,7 @@ public class RecordLayer extends Tls13Test {
             + "with other record types.")
     @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
     @Interoperability(SeverityLevel.HIGH)
-    @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
     @Alert(SeverityLevel.LOW)
     @Compliance(SeverityLevel.HIGH)
     /*TODO: is this test correct? by my understanding it tests if two different
@@ -153,7 +154,7 @@ public class RecordLayer extends Tls13Test {
     @ManualConfig(DerivationType.CHOSEN_HANDSHAKE_MSG)
     @Tag("emptyRecord")
     @Interoperability(SeverityLevel.HIGH)
-    @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.CRITICAL)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.MEDIUM)

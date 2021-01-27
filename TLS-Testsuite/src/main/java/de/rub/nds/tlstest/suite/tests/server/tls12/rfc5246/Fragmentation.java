@@ -37,7 +37,7 @@ import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -54,7 +54,7 @@ public class Fragmentation extends Tls12Test {
             + "traffic analysis countermeasure.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
-    @RecordLayer(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     public void sendZeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -83,7 +83,7 @@ public class Fragmentation extends Tls12Test {
             + "traffic analysis countermeasure.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
-    @RecordLayer(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     public void sendZeroLengthRecord_Alert(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -112,7 +112,7 @@ public class Fragmentation extends Tls12Test {
     @ScopeLimitations({DerivationType.RECORD_LENGTH, DerivationType.TCP_FRAGMENTATION})
     @TestDescription("Handshake messages spread across different records should be accepted")
     @Interoperability(SeverityLevel.HIGH)
-    @RecordLayer(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCS_F(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -138,7 +138,7 @@ public class Fragmentation extends Tls12Test {
     @ScopeLimitations({DerivationType.RECORD_LENGTH, DerivationType.TCP_FRAGMENTATION})
     @TestDescription("Handshake messages spread across different records should be accepted")
     @Interoperability(SeverityLevel.HIGH)
-    @RecordLayer(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCSF(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

@@ -34,7 +34,6 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -48,6 +47,7 @@ import static org.junit.Assert.assertFalse;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 @RFC(number = 8446, section = "5. Record Protocol")
 public class RecordProtocol extends Tls13Test {
@@ -57,7 +57,7 @@ public class RecordProtocol extends Tls13Test {
             + "If a TLS implementation receives an unexpected record type, "
             + "it MUST terminate the connection with an \"unexpected_message\" alert.")
     @Interoperability(SeverityLevel.LOW)
-    @RecordLayer(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
     @Alert(SeverityLevel.LOW)
     @Compliance(SeverityLevel.LOW)
     public void invalidRecordContentType(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -93,7 +93,7 @@ public class RecordProtocol extends Tls13Test {
             + "it MUST terminate the connection with an \"unexpected_message\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Interoperability(SeverityLevel.LOW)
-    @RecordLayer(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
     @Alert(SeverityLevel.LOW)
     @Compliance(SeverityLevel.LOW)
     public void invalidRecordContentTypeAfterEncryption(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -127,7 +127,7 @@ public class RecordProtocol extends Tls13Test {
     @Security(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
     @Crypto(SeverityLevel.CRITICAL)
-    @RecordLayer(SeverityLevel.CRITICAL)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
     @Alert(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.MEDIUM)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -157,7 +157,7 @@ public class RecordProtocol extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @RFC(number = 8446, section = "5.1. Record Layer")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @RecordLayer(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.LOW)
     public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -195,7 +195,7 @@ public class RecordProtocol extends Tls13Test {
     @ScopeExtensions({DerivationType.CIPHERTEXT_BITMASK, DerivationType.APP_MSG_LENGHT})
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @Crypto(SeverityLevel.CRITICAL)
-    @RecordLayer(SeverityLevel.CRITICAL)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
     @Alert(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.MEDIUM)
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -222,7 +222,7 @@ public class RecordProtocol extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.ADDITIONAL_PADDING_LENGTH)
     @Interoperability(SeverityLevel.HIGH)
-    @RecordLayer(SeverityLevel.CRITICAL)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
     @Compliance(SeverityLevel.HIGH)
     public void acceptsOptionalPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -241,7 +241,7 @@ public class RecordProtocol extends Tls13Test {
     @Interoperability(SeverityLevel.HIGH)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
-    @RecordLayer(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.LOW)
     public void sendRecordWithCiphertextOver2pow14plus256(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

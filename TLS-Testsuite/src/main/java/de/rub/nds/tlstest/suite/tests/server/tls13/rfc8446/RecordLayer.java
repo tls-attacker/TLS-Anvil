@@ -32,6 +32,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -47,7 +48,7 @@ public class RecordLayer extends Tls13Test {
             + "zero-length fragments of Handshake types, even "
             + "if those fragments contain padding.")
     @Interoperability(SeverityLevel.HIGH)
-    @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -72,7 +73,7 @@ public class RecordLayer extends Tls13Test {
             + "zero-length fragments of Handshake types, even "
             + "if those fragments contain padding.")
     @Interoperability(SeverityLevel.HIGH)
-    @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.MEDIUM)
+    @RecordLayerCategory(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.MEDIUM)
     public void zeroLengthRecord_Finished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -97,7 +98,7 @@ public class RecordLayer extends Tls13Test {
             + "with other record types.")
     @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
     @Interoperability(SeverityLevel.HIGH)
-    @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.MEDIUM)
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

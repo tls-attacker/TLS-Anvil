@@ -34,6 +34,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Alert;
+import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
@@ -86,7 +87,7 @@ public class CertificateVerify extends Tls13Test {
     @Security(SeverityLevel.MEDIUM)
     @DeprecatedFeature(SeverityLevel.MEDIUM)
     @Crypto(SeverityLevel.MEDIUM)
-    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.MEDIUM)
+    @CertificateCategory(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.MEDIUM)
     @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
@@ -119,7 +120,7 @@ public class CertificateVerify extends Tls13Test {
     @Security(SeverityLevel.MEDIUM)
     @DeprecatedFeature(SeverityLevel.MEDIUM)
     @Crypto(SeverityLevel.MEDIUM)
-    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.MEDIUM)
+    @CertificateCategory(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.MEDIUM)
     @MethodCondition(method = "supportsLegacyECDSASAHAlgorithms")
@@ -145,7 +146,7 @@ public class CertificateVerify extends Tls13Test {
     @Security(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
     @Alert(SeverityLevel.MEDIUM)
-    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
+    @CertificateCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -183,7 +184,7 @@ public class CertificateVerify extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Security(SeverityLevel.HIGH)
     @Crypto(SeverityLevel.HIGH)
-    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.HIGH)
+    @CertificateCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     @Alert(SeverityLevel.MEDIUM)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
@@ -204,7 +205,7 @@ public class CertificateVerify extends Tls13Test {
             "with a \"decrypt_error\" alert.")
     @Security(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
-    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
+    @CertificateCategory(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.HIGH)
     public void emptySignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -232,7 +233,7 @@ public class CertificateVerify extends Tls13Test {
     @Security(SeverityLevel.HIGH)
     @Crypto(SeverityLevel.HIGH)
     @Alert(SeverityLevel.MEDIUM)
-    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.HIGH)
+    @CertificateCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.CRITICAL)
     public void emptySigAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -254,7 +255,7 @@ public class CertificateVerify extends Tls13Test {
     @Security(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
     @Alert(SeverityLevel.MEDIUM)
-    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
+    @CertificateCategory(SeverityLevel.CRITICAL)
     @Interoperability(SeverityLevel.HIGH)
     public void emptyBoth(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

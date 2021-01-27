@@ -44,6 +44,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -189,7 +190,7 @@ public class EarlyData extends Tls13Test {
     @Alert(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     @Crypto(SeverityLevel.HIGH)
-    @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.CRITICAL)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -254,7 +255,7 @@ public class EarlyData extends Tls13Test {
     @Alert(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     @Crypto(SeverityLevel.HIGH)
-    @de.rub.nds.tlstest.framework.annotations.categories.RecordLayer(SeverityLevel.CRITICAL)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
     @Security(SeverityLevel.CRITICAL)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

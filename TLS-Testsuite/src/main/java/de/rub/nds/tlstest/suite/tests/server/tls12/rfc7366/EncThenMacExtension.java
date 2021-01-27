@@ -30,7 +30,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructure;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.annotations.categories.Security;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
@@ -42,6 +41,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 @ServerTest
 public class EncThenMacExtension extends Tls12Test {
@@ -75,7 +75,7 @@ public class EncThenMacExtension extends Tls12Test {
     @Handshake(SeverityLevel.INFORMATIONAL)
     @Compliance(SeverityLevel.INFORMATIONAL)
     @Crypto(SeverityLevel.INFORMATIONAL)
-    @RecordLayer(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
     @Security(SeverityLevel.LOW)
     public void supportsEncThenMacExt(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

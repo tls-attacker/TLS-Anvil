@@ -31,7 +31,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -44,7 +44,7 @@ public class TLSRecordProtocol extends Tls12Test {
     @TlsTest(description = "Implementations MUST NOT send record types not defined in this document "
             + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
             + "record type, it MUST send an unexpected_message alert.")
-    @RecordLayer(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
     @Alert(SeverityLevel.LOW)
     @Compliance(SeverityLevel.LOW)
     @Handshake(SeverityLevel.LOW)
@@ -73,7 +73,7 @@ public class TLSRecordProtocol extends Tls12Test {
     @TlsTest(description = "Implementations MUST NOT send record types not defined in this document "
             + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
             + "record type, it MUST send an unexpected_message alert.")
-    @RecordLayer(SeverityLevel.LOW)
+    @RecordLayerCategory(SeverityLevel.LOW)
     @Alert(SeverityLevel.LOW)
     @Compliance(SeverityLevel.LOW)
     @Handshake(SeverityLevel.LOW)

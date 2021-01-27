@@ -35,6 +35,7 @@ import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Alert;
 import de.rub.nds.tlstest.framework.annotations.categories.CVE;
+import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Crypto;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeature;
@@ -266,7 +267,7 @@ public class StateMachine extends Tls13Test {
     @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
     @Security(SeverityLevel.CRITICAL)
     @Crypto(SeverityLevel.CRITICAL)
-    @de.rub.nds.tlstest.framework.annotations.categories.Certificate(SeverityLevel.CRITICAL)
+    @CertificateCategory(SeverityLevel.CRITICAL)
     @Alert(SeverityLevel.MEDIUM)
     @Compliance(SeverityLevel.HIGH)
     @Interoperability(SeverityLevel.HIGH)

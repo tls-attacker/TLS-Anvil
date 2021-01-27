@@ -28,12 +28,12 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.Compliance;
 import de.rub.nds.tlstest.framework.annotations.categories.Handshake;
 import de.rub.nds.tlstest.framework.annotations.categories.Interoperability;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayer;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 @RFC(number = 5264, section = "6.2.1 Fragmentation")
 @ClientTest
@@ -44,7 +44,7 @@ public class Fragmentation extends Tls12Test {
             + "Application data MAY be sent as they are potentially useful as a "
             + "traffic analysis countermeasure.")
     @Interoperability(SeverityLevel.HIGH)
-    @RecordLayer(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     public void sendZeroLengthRecord_SH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -70,7 +70,7 @@ public class Fragmentation extends Tls12Test {
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @TestDescription("Implementations should accept multiple Handshake messages sent within a single record.")
     @Interoperability(SeverityLevel.HIGH)
-    @RecordLayer(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
     @Compliance(SeverityLevel.HIGH)
     @Handshake(SeverityLevel.MEDIUM)
     public void sendHandshakeMessagesWithinSingleRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

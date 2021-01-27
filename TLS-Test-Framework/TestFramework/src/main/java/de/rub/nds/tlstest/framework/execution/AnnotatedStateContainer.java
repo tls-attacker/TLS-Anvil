@@ -59,6 +59,9 @@ public class  AnnotatedStateContainer {
 
     @JsonProperty("HasStateWithAdditionalResultInformation")
     private Boolean hasStateWithAdditionalResultInformation = false;
+    
+    @JsonProperty("HasVaryingAdditionalResultInformation")
+    private Boolean hasVaryingAdditionalResultInformation = false;
 
     @XmlElement(name = "DisabledReason")
     @JsonProperty("DisabledReason")
@@ -135,6 +138,8 @@ public class  AnnotatedStateContainer {
         List<String> uuids = new ArrayList<>();
         List<Throwable> errors = new ArrayList<>();
         boolean failed = false;
+        
+        String lastAdditionalResultInformation = "";
         for (AnnotatedState state : this.getStates()) {
             if (state.getResult() == TestResult.FAILED) {
                 errors.add(state.getFailedReason());
@@ -142,7 +147,12 @@ public class  AnnotatedStateContainer {
             }
 
             if (!state.getAdditionalResultInformation().isEmpty()) {
-                this.hasStateWithAdditionalResultInformation = true;
+                this.setHasStateWithAdditionalResultInformation((Boolean) true);
+                if(!state.getAdditionalResultInformation().equals(lastAdditionalResultInformation)
+                        && !lastAdditionalResultInformation.isEmpty()) {
+                    this.setHasVaryingAdditionalResultInformation((Boolean) true);
+                }
+                lastAdditionalResultInformation = state.getAdditionalResultInformation();
             }
 
             if (uuids.contains(state.getUuid())) {
@@ -265,5 +275,21 @@ public class  AnnotatedStateContainer {
 
     public boolean isFinished() {
         return finished;
+    }
+
+    public Boolean getHasStateWithAdditionalResultInformation() {
+        return hasStateWithAdditionalResultInformation;
+    }
+
+    public void setHasStateWithAdditionalResultInformation(Boolean hasStateWithAdditionalResultInformation) {
+        this.hasStateWithAdditionalResultInformation = hasStateWithAdditionalResultInformation;
+    }
+
+    public Boolean getHasVaryingAdditionalResultInformation() {
+        return hasVaryingAdditionalResultInformation;
+    }
+
+    public void setHasVaryingAdditionalResultInformation(Boolean hasVaryingAdditionalResultInformation) {
+        this.hasVaryingAdditionalResultInformation = hasVaryingAdditionalResultInformation;
     }
 }

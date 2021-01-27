@@ -85,7 +85,7 @@ public class Validator {
         }
         boolean socketClosed = socketClosed(i);
         if (msg == null && socketClosed) {
-            i.addAdditionalResultInfo("Timeout");
+            i.addAdditionalResultInfo("Socket Closed (" + i.getState().getTlsContext().getFinalSocketState() + ")");
             i.setResult(TestResult.PARTIALLY_SUCCEEDED);
             LOGGER.debug("Timeout");
             return;
@@ -166,7 +166,7 @@ public class Validator {
             //   <=> if (i < lastReceivingFlightIndex)
             if (i < lastReceivingFlightIndex && (i < lastSendingFlightIndex || !onlyCheckActionsBeforeLastSendingFlight)) {
                 if (!action.executedAsPlanned()) {
-                    throw new AssertionError(String.format("Action at index %d could not be executed as planned", i));
+                    throw new AssertionError(String.format("Action at index %d could not be executed as planned: %s", i, action.toString()));
                 }
             }
         }
@@ -198,7 +198,7 @@ public class Validator {
                         return;
                     }
                 }
-
+                
                 if (expectedMessages.size() > receivedMessages.size()) {
                     // try to delete the last expected AlertMessage and execute
                     // executedAsPlanned again. (In case of timeouts)
@@ -206,8 +206,10 @@ public class Validator {
                 }
 
                 if (expectedMessages.size() > 0 && !action.executedAsPlanned()) {
-                    expectedMessages.add(lastExpected);
-                    throw new AssertionError("Last receive action did not execute as planned");
+                    if(!expectedMessages.contains(lastExpected)) {
+                       expectedMessages.add(lastExpected); 
+                    }
+                    throw new AssertionError("Last receive action did not execute as planned: " + action.toString());
                 }
 
                 return;
@@ -342,5 +344,5 @@ public class Validator {
         TlsAction firstFailed = WorkflowTraceUtil.getFirstFailedAction(workflowTrace);
         return firstFailed != alertReceivingAction && workflowTrace.getTlsActions().indexOf(firstFailed) < workflowTrace.getTlsActions().indexOf(alertReceivingAction);
     }
-
+    
 }

@@ -128,20 +128,19 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Handshake messages MUST NOT be interleaved "
             + "with other record types. That is, if a handshake message is split over two or more\n"
             + "records, there MUST NOT be any other records between them.")
-    @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "supportsRecordFragmentation")
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        WorkflowTrace trace = new WorkflowTrace();
-        trace.addTlsAction(new SendAction(new ClientHelloMessage(c)));
-        SendAction sendClientHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.CLIENT_HELLO, trace);
+        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        SendAction sendServerHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, trace);
         
-        Record clientHelloPart = new Record();
-        clientHelloPart.setMaxRecordLengthConfig(20);
+        Record serverHelloPart = new Record();
+        serverHelloPart.setMaxRecordLengthConfig(20);
         Record alertRecord = new Record();
         
         //we add a record that will remain untouched by record layer but has
@@ -151,7 +150,7 @@ public class RecordLayer extends Tls13Test {
         byte[] alertContent = new byte [] {AlertLevel.WARNING.getValue(), AlertDescription.UNRECOGNIZED_NAME.getValue()};
         alertRecord.setProtocolMessageBytes(Modifiable.explicit(alertContent));
         
-        sendClientHelloAction.setRecords(clientHelloPart, alertRecord);
+        sendServerHelloAction.setRecords(serverHelloPart, alertRecord);
 
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
 

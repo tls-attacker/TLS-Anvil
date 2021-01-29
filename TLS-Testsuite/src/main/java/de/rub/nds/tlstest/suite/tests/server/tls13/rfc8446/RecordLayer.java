@@ -43,6 +43,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -110,19 +111,20 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Handshake messages MUST NOT be interleaved "
             + "with other record types. That is, if a handshake message is split over two or more\n"
             + "records, there MUST NOT be any other records between them.")
-    @ScopeLimitations({DerivationType.INCLUDE_CHANGE_CIPHER_SPEC, DerivationType.RECORD_LENGTH})
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @MethodCondition(method = "supportsRecordFragmentation")
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        SendAction sendServerHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, trace);
+        WorkflowTrace trace = new WorkflowTrace();
+        trace.addTlsAction(new SendAction(new ClientHelloMessage(c)));
+        SendAction sendClientHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.CLIENT_HELLO, trace);
         
-        Record serverHelloPart = new Record();
-        serverHelloPart.setMaxRecordLengthConfig(20);
+        Record clientHelloPart = new Record();
+        clientHelloPart.setMaxRecordLengthConfig(20);
         Record alertRecord = new Record();
         
         //we add a record that will remain untouched by record layer but has
@@ -132,7 +134,7 @@ public class RecordLayer extends Tls13Test {
         byte[] alertContent = new byte [] {AlertLevel.WARNING.getValue(), AlertDescription.UNRECOGNIZED_NAME.getValue()};
         alertRecord.setProtocolMessageBytes(Modifiable.explicit(alertContent));
         
-        sendServerHelloAction.setRecords(serverHelloPart, alertRecord);
+        sendClientHelloAction.setRecords(clientHelloPart, alertRecord);
 
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
 

@@ -52,6 +52,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 8446, section = "4.2.3 Signature Algorithms")
@@ -96,15 +97,6 @@ public class SignatureAlgorithms extends Tls13Test {
         return parameterValues;
     }
 
-    public List<DerivationParameter> getTls13SigHashAlgoritms(DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
-        List<SignatureAndHashAlgorithm> algos = SignatureAndHashAlgorithm.getImplemented().stream()
-                .filter(i -> i.suitedForSigningTls13Messages())
-                .collect(Collectors.toList());
-        algos.forEach(i -> parameterValues.add(new SigAndHashDerivation(i)));
-        return parameterValues;
-    }
-
     @TlsTest(description = "Clients offering these values MUST list "
             + "them (legacy algorithms) as the lowest priority (listed after all other "
             + "algorithms in SignatureSchemeList).")
@@ -144,6 +136,7 @@ public class SignatureAlgorithms extends Tls13Test {
             + "and \"signature_algorithms_cert\" for backward "
             + "compatibility with TLS 1.2.")
     @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
+    @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

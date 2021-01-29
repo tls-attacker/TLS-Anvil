@@ -88,10 +88,12 @@ public class ClientHello extends Tls12Test {
     }
     
     @Test
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @TestDescription("The client uses the \"signature_algorithms\" extension to indicate to " +
             "the server which signature/hash algorithm pairs may be used in " +
             "digital signatures.")
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "sentSignatureAndHashAlgorithmsExtension")
     public void offeredSignatureAlgorithmsForAllCipherSuites() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();

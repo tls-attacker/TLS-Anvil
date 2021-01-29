@@ -51,6 +51,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import org.junit.jupiter.api.Tag;
 
 @RFC(number = 8422, section = "5.4 Server Key Exchange")
 @ClientTest
@@ -97,13 +98,50 @@ public class ServerKeyExchange extends Tls12Test {
             + "fatal handshake failure is that the client's capabilities for "
             + "handling elliptic curves and point formats are exceeded")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @KeyExchange(supported = {KeyExchangeType.ECDH})
+    @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
     @ExplicitValues(affectedTypes = {DerivationType.NAMED_GROUP, DerivationType.CERTIFICATE}, methods = {"getUnproposedNamedGroups", "getCertsIncludingUnsupportedPkGroups"})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.HIGH)
     public void acceptsUnproposedNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+        });
+    }
+    
+    public boolean isStaticEcdhCipherSuite(CipherSuite cipherSuite) {
+        return AlgorithmResolver.getKeyExchangeAlgorithm(cipherSuite).isKeyExchangeEcdh() &&
+                !cipherSuite.isEphemeral();
+    }
+    
+    public List<DerivationParameter> getEcdhCertsForUnproposedGroups(DerivationScope scope) {
+        List<DerivationParameter> parameterValues = new LinkedList<>();
+        CertificateByteChooser.getInstance().getCertificateKeyPairList().stream().filter(certKeyPair -> {
+            return (certKeyPair.getCertPublicKeyType() == CertificateKeyType.ECDH || certKeyPair.getCertPublicKeyType() == CertificateKeyType.ECDSA)
+                    && !context.getSiteReport().getSupportedNamedGroups().contains(certKeyPair.getPublicKeyGroup());
+        }).forEach(certKeyPair -> parameterValues.add(new CertificateDerivation(certKeyPair)));
+        return parameterValues;
+    }
+    
+    @TlsTest(description = "A possible reason for a "
+            + "fatal handshake failure is that the client's capabilities for "
+            + "handling elliptic curves and point formats are exceeded")
+    @ModelFromScope(baseModel = ModelType.GENERIC)
+    @ScopeExtensions(DerivationType.CERTIFICATE)
+    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ExplicitValues(affectedTypes = DerivationType.CERTIFICATE, methods = "getEcdhCertsForUnproposedGroups")
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.HIGH)
+    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isStaticEcdhCipherSuite")
+    public void acceptsUnproposedNamedGroupStatic(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CLIENT_KEY_EXCHANGE);

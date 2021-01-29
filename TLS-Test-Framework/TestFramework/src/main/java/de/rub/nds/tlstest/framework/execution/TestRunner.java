@@ -239,7 +239,8 @@ public class TestRunner {
                 ProbeType.RESUMPTION,
                 ProbeType.EXTENSIONS,
                 ProbeType.RECORD_FRAGMENTATION,
-                ProbeType.GREASE
+                ProbeType.GREASE,
+                ProbeType.HELLO_RETRY
         );
         scannerConfig.setOverallThreads(1);
         scannerConfig.setParallelProbes(1);

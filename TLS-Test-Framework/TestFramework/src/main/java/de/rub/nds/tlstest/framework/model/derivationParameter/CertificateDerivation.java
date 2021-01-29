@@ -89,9 +89,6 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         if(!scope.isTls13Test()) {
-            if(ConstraintHelper.staticEcdhCipherSuiteModeled(scope)) {
-               condConstraints.add(getCertPkMustMatchSelectedGroupIfStaticEcCipherSuite()); 
-            }
             if(ConstraintHelper.multipleCertPublicKeyTypesModeled(scope)) {
                 condConstraints.add(getCertPkTypeMustMatchCipherSuiteConstraint());
             }
@@ -111,6 +108,10 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
         }));
     }
     
+    /**
+     * This turned out to be inefficient - we are currently testing a different
+     * aproach based on the NamedGroupDerivation
+     */
     private ConditionalConstraint getCertPkMustMatchSelectedGroupIfStaticEcCipherSuite() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);

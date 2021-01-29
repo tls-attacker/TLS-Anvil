@@ -32,6 +32,7 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.SignatureBitmaskDe
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,6 +57,36 @@ public class ConstraintHelper {
             }
         }
         return false;
+    }
+    
+    public static boolean staticCipherSuiteModeled(DerivationScope scope) {
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        for (DerivationParameter param : values) {
+            CipherSuite cipherSuite = (CipherSuite) param.getSelectedValue();
+            if(!cipherSuite.isEphemeral()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean ephemeralCipherSuiteModeled(DerivationScope scope) {
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        for (DerivationParameter param : values) {
+            CipherSuite cipherSuite = (CipherSuite) param.getSelectedValue();
+            if(cipherSuite.isEphemeral()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public static boolean nullSigHashModeled(DerivationScope scope) {
+        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
+        List<DerivationParameter> values = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        return values.stream().anyMatch(parameter -> parameter.getSelectedValue() == null);
     }
 
     public static boolean multipleBlocksizesModeled(DerivationScope scope) {
@@ -156,6 +187,7 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
     public static boolean multipleSigAlgorithmRequiredKeyTypesModeled(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter> values = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        values = removeNull(values);
         Set<CertificateKeyType> keyTypes = new HashSet<>();
         for(DerivationParameter param : values) {
             SignatureAlgorithm sigAlgorithm = ((SigAndHashDerivation)param).getSelectedValue().getSignatureAlgorithm();
@@ -191,12 +223,14 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
     public static boolean pssSigAlgoModeled(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter> algorithms = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        algorithms = removeNull(algorithms);
         return algorithms.stream().anyMatch(param -> ((SigAndHashDerivation)param).getSelectedValue().name().contains("PSS"));
     }
     
     public static boolean rsaPkMightNotSufficeForPss(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter> algorithms = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        algorithms = removeNull(algorithms);
         CertificateDerivation certDerivation = (CertificateDerivation)DerivationFactory.getInstance(DerivationType.CERTIFICATE);
         List<DerivationParameter> certificates = certDerivation.getConstrainedParameterValues(TestContext.getInstance(), scope);
         boolean pssWithSha512modeled = algorithms.stream().anyMatch(algorithm -> 
@@ -250,5 +284,9 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
             return 8;
         }
         return 16;
+    }
+    
+    private static List<DerivationParameter> removeNull(List<DerivationParameter> parameterValues) {
+        return parameterValues.stream().filter(value -> value.getSelectedValue() != null).collect(Collectors.toList());
     }
 }

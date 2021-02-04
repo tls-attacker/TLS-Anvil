@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 /**
  * Usually each test case performing a handshake is associated with a AnnotatedStateContainer.
  * This class contains a list of States / Handshakes that are the result
- * of the derication process.
+ * of the derivation process.
  */
 @XmlAccessorType(XmlAccessType.NONE)
 public class  AnnotatedStateContainer {

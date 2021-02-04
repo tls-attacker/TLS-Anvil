@@ -85,12 +85,19 @@ public class Validator {
         }
         boolean socketClosed = socketClosed(i);
         if (msg == null && socketClosed) {
-            i.addAdditionalResultInfo("Socket Closed (" + i.getState().getTlsContext().getFinalSocketState() + ")");
+            i.addAdditionalResultInfo("Only socket closed (" + i.getState().getTlsContext().getFinalSocketState() + ")");
             i.setResult(TestResult.PARTIALLY_SUCCEEDED);
             LOGGER.debug("Timeout");
             return;
         }
         assertNotNull("No Alert message received and socket is still open.", msg);
+        if(AlertLevel.WARNING.getValue() == msg.getLevel().getValue() 
+                && AlertDescription.CLOSE_NOTIFY.getValue() == msg.getDescription().getValue()
+                && socketClosed) {
+            i.addAdditionalResultInfo("Only sent Close Notify and closed socket (" + i.getState().getTlsContext().getFinalSocketState() + ")");
+            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
+            return;
+        }
         assertEquals(AssertMsgs.NoFatalAlert, AlertLevel.FATAL.getValue(), msg.getLevel().getValue().byteValue());
         assertTrue("Socket still open after fatal alert", socketClosed);
     }
@@ -114,7 +121,7 @@ public class Validator {
 
     public static void testAlertDescription(AnnotatedState i, AlertDescription expected, AlertMessage msg) {
         if (msg == null) {
-            i.addAdditionalResultInfo("No alert received");
+            i.addAdditionalResultInfo("No alert received to test description for");
             return;
         }
         

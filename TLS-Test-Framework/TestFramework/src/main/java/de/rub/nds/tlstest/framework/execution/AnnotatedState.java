@@ -113,7 +113,7 @@ public class AnnotatedState {
             }
 
             if (state.getTlsContext().isReceivedTransportHandlerException()) {
-                this.addAdditionalResultInfo("Received TransportHandler excpetion");
+                this.addAdditionalResultInfo("Received TransportHandler exception");
             }
 
             setFailedReason(err);

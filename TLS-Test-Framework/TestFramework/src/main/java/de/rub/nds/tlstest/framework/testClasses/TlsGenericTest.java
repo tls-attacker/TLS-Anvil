@@ -24,6 +24,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -72,15 +73,7 @@ public class TlsGenericTest extends TlsBaseTest {
     
     public void validateLengthTest(AnnotatedState i) {
         assertFalse("Workflow could be executed as planned for " + derivationContainer.toString(), i.getWorkflowTrace().executedAsPlanned());
-
-        SocketState socketState = i.getState().getTlsContext().getFinalSocketState();
-        boolean socketClosed = (socketState == SocketState.SOCKET_EXCEPTION || socketState == SocketState.CLOSED || socketState == SocketState.IO_EXCEPTION);
-        assertTrue("Socket not closed", socketClosed);
-
-        AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        if (msg == null) return;
-
-        assertEquals("No fatal alert received", AlertLevel.FATAL.getValue(), msg.getLevel().getValue().byteValue());
+        Validator.receivedFatalAlert(i, false);
     }
     
     public boolean isClientTest() {

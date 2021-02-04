@@ -192,6 +192,11 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
         return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CERTIFICATE.name(), DerivationType.SIG_HASH_ALGORIHTM.name()).by((DerivationParameter bitmaskParam, DerivationParameter certParam, DerivationParameter sigHashAlgorithmParam) -> {
             SignatureBitmaskDerivation bitmaskDerivation = (SignatureBitmaskDerivation) bitmaskParam;
             SigAndHashDerivation sigHashAlg = (SigAndHashDerivation) sigHashAlgorithmParam;
+            
+            if(sigHashAlg.getSelectedValue() == null) {
+                return false;
+            }
+            
             CertificateDerivation cert = (CertificateDerivation) certParam;
 
             int certificateKeySize; 

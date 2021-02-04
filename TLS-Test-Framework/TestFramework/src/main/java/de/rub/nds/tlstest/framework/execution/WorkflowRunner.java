@@ -105,7 +105,8 @@ public class WorkflowRunner {
             insertTls12NewSessionTicket(trace);
         }
         
-        if(preparedConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13) {
+        if(preparedConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13
+                && context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             allowOptionalTls13NewSessionTickets(trace);
             disableQuickReceiveForTls13PostHandshakeServerTests(trace, config);
         }
@@ -316,9 +317,11 @@ public class WorkflowRunner {
     
     public void allowOptionalTls13NewSessionTickets(WorkflowTrace trace) {
         boolean mayReceiveNewSessionTicketFromNow = false;
+        ReceiveAction lastReceive = null;
         for(TlsAction action : trace.getTlsActions()) {
             if(action instanceof ReceiveAction) {
                 ReceiveAction receiveAction = (ReceiveAction) action;
+                lastReceive = receiveAction;
                 if(receiveAction.getExpectedMessages().stream().anyMatch(message -> message instanceof FinishedMessage)) {
                     mayReceiveNewSessionTicketFromNow = true;
                 }
@@ -328,6 +331,16 @@ public class WorkflowRunner {
             } else if(action instanceof ResetConnectionAction) {
                 mayReceiveNewSessionTicketFromNow = false;
             }
+        }
+        
+        //add an optional NewSessionTicketMessage for Alert receiving action
+        //this facilitates the tolerance mechanisms of the Validator
+        if(lastReceive != null && lastReceive.getExpectedMessages() != null 
+                && lastReceive.getExpectedMessages().stream().anyMatch(message -> message.getProtocolMessageType() == ProtocolMessageType.ALERT)
+                && mayReceiveNewSessionTicketFromNow) {
+            NewSessionTicketMessage optionalExplicitNewSessionTicket = new NewSessionTicketMessage();
+            optionalExplicitNewSessionTicket.setRequired(false);
+            lastReceive.getExpectedMessages().add(0, optionalExplicitNewSessionTicket);
         }
     }
     
@@ -365,13 +378,11 @@ public class WorkflowRunner {
      * quick receive is set in Config.
      */
     public void disableQuickReceiveForTls13PostHandshakeServerTests(WorkflowTrace trace, Config config) {
-        if(context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-            List<ReceivingAction> receivingActions = trace.getReceivingActions();
-            ReceivingAction receiveFinished = (ReceivingAction) WorkflowTraceUtil.getFirstReceivingActionForMessage(HandshakeMessageType.FINISHED, trace);
-            if(receiveFinished != null && receivingActions.indexOf(receiveFinished) < receivingActions.size() - 1) {
-                config.setQuickReceive(false);
-            }
-        }
+        List<ReceivingAction> receivingActions = trace.getReceivingActions();
+        ReceivingAction receiveFinished = (ReceivingAction) WorkflowTraceUtil.getFirstReceivingActionForMessage(HandshakeMessageType.FINISHED, trace);
+        if(receiveFinished != null && receivingActions.indexOf(receiveFinished) < receivingActions.size() - 1) {
+            config.setQuickReceive(false);
+        }            
     }
 
     public Boolean isAutoHelloRetryRequest() {

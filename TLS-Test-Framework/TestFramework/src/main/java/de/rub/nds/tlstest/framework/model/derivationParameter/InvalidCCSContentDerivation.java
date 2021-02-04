@@ -33,6 +33,8 @@ public class InvalidCCSContentDerivation extends DerivationParameter<byte[]> {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new InvalidCCSContentDerivation(new byte[] {125}));
         parameterValues.add(new InvalidCCSContentDerivation(new byte[] {1, 1}));
+        parameterValues.add(new InvalidCCSContentDerivation(new byte[] {1, 2}));
+        parameterValues.add(new InvalidCCSContentDerivation(new byte[] {125, 1}));
         return parameterValues;
     }
 

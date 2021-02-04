@@ -60,11 +60,11 @@ public class PointFormatExtension extends Tls12Test {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @RFC(number = 8422, section = "5.2. Server Hello Extensions")
-    @TlsTest(description = "Implementations of this document MUST support the"
-            + "uncompressed format for all of their supported curves and MUST NOT"
-            + "support other formats for curves defined in this specification.  For"
-            + "backwards compatibility purposes, the point format list extension MAY"
-            + "still be included and contain exactly one value: the uncompressed"
+    @TlsTest(description = "Implementations of this document MUST support the "
+            + "uncompressed format for all of their supported curves and MUST NOT "
+            + "support other formats for curves defined in this specification.  For "
+            + "backwards compatibility purposes, the point format list extension MAY "
+            + "still be included and contain exactly one value: the uncompressed "
             + "point format (0).")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @InteroperabilityCategory(SeverityLevel.HIGH) 
@@ -113,10 +113,10 @@ public class PointFormatExtension extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(description = "If the client sends the extension and the extension does not contain"
-            + "the uncompressed point format, and the client has used the Supported"
-            + "Groups extension to indicate support for any of the curves defined in"
-            + "this specification, then the server MUST abort the handshake and"
+    @TlsTest(description = "If the client sends the extension and the extension does not contain "
+            + "the uncompressed point format, and the client has used the Supported "
+            + "Groups extension to indicate support for any of the curves defined in "
+            + "this specification, then the server MUST abort the handshake and "
             + "return an illegal_parameter alert.")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @InteroperabilityCategory(SeverityLevel.LOW)
@@ -141,20 +141,17 @@ public class PointFormatExtension extends Tls12Test {
                 .setPointFormats(Modifiable.explicit(new byte[]{(byte) 33}));
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.receivedFatalAlert(i, false);
+            Validator.receivedFatalAlert(i);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(description = "If the client sends the extension and the extension does not contain"
-            + "the uncompressed point format, and the client has used the Supported"
-            + "Groups extension to indicate support for any of the curves defined in"
-            + "this specification, then the server MUST abort the handshake and"
+    @TlsTest(description = "If the client sends the extension and the extension does not contain "
+            + "the uncompressed point format, and the client has used the Supported "
+            + "Groups extension to indicate support for any of the curves defined in "
+            + "this specification, then the server MUST abort the handshake and "
             + "return an illegal_parameter alert.")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -176,11 +173,8 @@ public class PointFormatExtension extends Tls12Test {
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.receivedFatalAlert(i, false);
+            Validator.receivedFatalAlert(i);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }

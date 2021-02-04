@@ -27,6 +27,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
@@ -42,6 +43,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -112,6 +114,7 @@ public class RecordLayer extends Tls13Test {
             + "with other record types. That is, if a handshake message is split over two or more\n"
             + "records, there MUST NOT be any other records between them.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeExtensions(DerivationType.ALERT)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -122,6 +125,7 @@ public class RecordLayer extends Tls13Test {
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsAction(new SendAction(new ClientHelloMessage(c)));
         SendAction sendClientHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.CLIENT_HELLO, trace);
+        AlertDescription selectedAlert = derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
         
         Record clientHelloPart = new Record();
         clientHelloPart.setMaxRecordLengthConfig(20);
@@ -131,7 +135,7 @@ public class RecordLayer extends Tls13Test {
         //an alert set as explicit content
         alertRecord.setMaxRecordLengthConfig(0);
         alertRecord.setContentType(Modifiable.explicit(ProtocolMessageType.ALERT.getValue()));
-        byte[] alertContent = new byte [] {AlertLevel.WARNING.getValue(), AlertDescription.UNRECOGNIZED_NAME.getValue()};
+        byte[] alertContent = new byte [] {AlertLevel.WARNING.getValue(), selectedAlert.getValue()};
         alertRecord.setProtocolMessageBytes(Modifiable.explicit(alertContent));
         
         sendClientHelloAction.setRecords(clientHelloPart, alertRecord);

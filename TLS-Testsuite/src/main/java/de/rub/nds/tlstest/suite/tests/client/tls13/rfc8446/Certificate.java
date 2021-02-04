@@ -53,7 +53,6 @@ public class Certificate extends Tls13Test {
             Validator.receivedFatalAlert(i);
 
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) return;
             Validator.testAlertDescription(i, AlertDescription.DECODE_ERROR, alert);
         });
     }

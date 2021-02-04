@@ -151,7 +151,7 @@ public class StateMachine extends Tls13Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    public void sendECDHClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendLegacyFlowECDHClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsAction(new SendAction(new ECDHClientKeyExchangeMessage(config)));
@@ -165,7 +165,7 @@ public class StateMachine extends Tls13Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    public void sendDHClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendLegacyFlowDHClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsAction(new SendAction(new DHClientKeyExchangeMessage(config)));
@@ -179,7 +179,7 @@ public class StateMachine extends Tls13Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    public void sendRSAClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendLegacyFlowRSAClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsAction(new SendAction(new RSAClientKeyExchangeMessage(config)));
@@ -208,9 +208,6 @@ public class StateMachine extends Tls13Test {
             Validator.receivedFatalAlert(i);
 
             AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, alert);
         });
     }

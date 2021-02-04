@@ -133,7 +133,6 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             Validator.receivedFatalAlert(i);
 
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) return;
             Validator.testAlertDescription(i, AlertDescription.PROTOCOL_VERSION, alert);
         });
 

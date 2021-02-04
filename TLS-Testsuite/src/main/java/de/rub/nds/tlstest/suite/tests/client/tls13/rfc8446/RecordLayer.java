@@ -48,6 +48,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ChosenHandshakeMessageDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -129,6 +130,7 @@ public class RecordLayer extends Tls13Test {
             + "with other record types. That is, if a handshake message is split over two or more\n"
             + "records, there MUST NOT be any other records between them.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeExtensions(DerivationType.ALERT)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -138,6 +140,8 @@ public class RecordLayer extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         SendAction sendServerHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, trace);
+        AlertDescription selectedAlert = derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
+        
         
         Record serverHelloPart = new Record();
         serverHelloPart.setMaxRecordLengthConfig(20);
@@ -147,7 +151,7 @@ public class RecordLayer extends Tls13Test {
         //an alert set as explicit content
         alertRecord.setMaxRecordLengthConfig(0);
         alertRecord.setContentType(Modifiable.explicit(ProtocolMessageType.ALERT.getValue()));
-        byte[] alertContent = new byte [] {AlertLevel.WARNING.getValue(), AlertDescription.UNRECOGNIZED_NAME.getValue()};
+        byte[] alertContent = new byte [] {AlertLevel.WARNING.getValue(), selectedAlert.getValue()};
         alertRecord.setProtocolMessageBytes(Modifiable.explicit(alertContent));
         
         sendServerHelloAction.setRecords(serverHelloPart, alertRecord);

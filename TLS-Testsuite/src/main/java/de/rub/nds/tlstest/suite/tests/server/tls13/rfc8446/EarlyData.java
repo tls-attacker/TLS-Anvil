@@ -235,9 +235,6 @@ public class EarlyData extends Tls13Test {
 
             Validator.receivedFatalAlert(i, false);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, alert);
         });
     }
@@ -300,9 +297,6 @@ public class EarlyData extends Tls13Test {
 
             Validator.receivedFatalAlert(i, false);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, alert);
         });
     }

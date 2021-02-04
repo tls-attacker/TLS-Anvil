@@ -128,9 +128,6 @@ public class SupportedVersions extends Tls13Test {
             Validator.receivedFatalAlert(i);
 
             AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (msg == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
     }
@@ -159,9 +156,6 @@ public class SupportedVersions extends Tls13Test {
             Validator.receivedFatalAlert(i);
 
             AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (msg == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
     }

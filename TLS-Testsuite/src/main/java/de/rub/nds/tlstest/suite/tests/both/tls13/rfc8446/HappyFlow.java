@@ -3,7 +3,6 @@ package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
-import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
@@ -16,8 +15,6 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
-import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -28,7 +25,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
  */
 @Tag("happyflow13")
 public class HappyFlow extends Tls13Test {
-
+    
     @TlsTest(description = "A benign handshake executed with all parameter combinations "
             + " that affect a regular handshake")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)

@@ -163,7 +163,6 @@ public class CertificateVerify extends Tls13Test {
             Validator.receivedFatalAlert(i);
 
             AlertMessage amsg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (amsg == null) return;
             Validator.testAlertDescription(i, AlertDescription.DECRYPT_ERROR, amsg);
         });
     }
@@ -224,7 +223,6 @@ public class CertificateVerify extends Tls13Test {
             Validator.receivedFatalAlert(i);
 
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) return;
             Validator.testAlertDescription(i, AlertDescription.DECRYPT_ERROR, alert);
         });
     }

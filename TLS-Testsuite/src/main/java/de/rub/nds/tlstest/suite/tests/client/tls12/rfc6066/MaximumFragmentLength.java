@@ -81,8 +81,6 @@ public class MaximumFragmentLength extends Tls12Test {
 
             WorkflowTrace trace = i.getWorkflowTrace();
             AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
-            if (alert == null) return;
-
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }
@@ -116,8 +114,6 @@ public class MaximumFragmentLength extends Tls12Test {
 
             WorkflowTrace trace = i.getWorkflowTrace();
             AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
-            if (alert == null) return;
-
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }

@@ -19,6 +19,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
@@ -77,14 +78,15 @@ public class EncThenMacExtension extends Tls12Test {
     @CryptoCategory(SeverityLevel.INFORMATIONAL)
     @RecordLayerCategory(SeverityLevel.LOW)
     @SecurityCategory(SeverityLevel.LOW)
-    public void supportsEncThenMacExt(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    @MethodCondition(method = "targetCanBeTested")
+    public void negotiatesEncThenMacExt(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);
         
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         runner.execute(trace, c).validateFinal(i -> {
-            assertTrue("encrypt then mac extension was not negotiated", i.getState().getTlsContext().isExtensionNegotiated(ExtensionType.ENCRYPT_THEN_MAC));
+            assertTrue("Encrypt then mac extension was not negotiated", i.getState().getTlsContext().isExtensionNegotiated(ExtensionType.ENCRYPT_THEN_MAC));
         });
     }
 
@@ -99,6 +101,7 @@ public class EncThenMacExtension extends Tls12Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.HIGH)
+    @MethodCondition(method = "targetCanBeTested")
     public void negotiatesEncThenMacExtOnlyWithBlockCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);
@@ -106,7 +109,7 @@ public class EncThenMacExtension extends Tls12Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         runner.execute(trace, c).validateFinal(i -> {
-            assertFalse("encrypt then mac extension was negotiated, although the selected ciphersuite did not use a block cipher",
+            assertFalse("Encrypt then mac extension was negotiated, although the selected ciphersuite did not use a block cipher",
                     i.getState().getTlsContext().isExtensionNegotiated(ExtensionType.ENCRYPT_THEN_MAC));
         });
     }

@@ -78,9 +78,6 @@ public class EncryptedExtensions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }
@@ -105,9 +102,6 @@ public class EncryptedExtensions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }
@@ -138,10 +132,6 @@ public class EncryptedExtensions extends Tls13Test {
 
             WorkflowTrace wtrace = i.getWorkflowTrace();
             AlertMessage alert = wtrace.getLastReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
-
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }
@@ -173,10 +163,6 @@ public class EncryptedExtensions extends Tls13Test {
 
             WorkflowTrace trace = i.getWorkflowTrace();
             AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
-
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }

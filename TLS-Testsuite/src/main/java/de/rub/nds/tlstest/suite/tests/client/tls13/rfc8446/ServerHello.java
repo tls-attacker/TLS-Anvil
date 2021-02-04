@@ -15,6 +15,7 @@ import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -77,12 +78,13 @@ public class ServerHello extends Tls13Test {
 
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
+            if(trace.getLastReceivedMessage(ClientHelloMessage.class) != null 
+                    && trace.getLastReceivedMessage(ClientHelloMessage.class).getSessionIdLength().getValue() == 0) {
+                i.addAdditionalResultInfo("Client did not set SessionID");
+            }
             Validator.receivedFatalAlert(i);
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            if (msg == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
     }
@@ -112,9 +114,6 @@ public class ServerHello extends Tls13Test {
             Validator.receivedFatalAlert(i);
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            if (msg == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
     }
@@ -187,9 +186,6 @@ public class ServerHello extends Tls13Test {
             Validator.receivedFatalAlert(i);
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            if (msg == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
     }

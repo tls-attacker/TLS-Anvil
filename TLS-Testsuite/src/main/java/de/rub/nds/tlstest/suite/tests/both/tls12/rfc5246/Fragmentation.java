@@ -23,6 +23,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
@@ -49,6 +50,7 @@ import org.junit.jupiter.api.Tag;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 5264, section = "6.2.1 Fragmentation")
@@ -102,15 +104,16 @@ public class Fragmentation extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
                 sendAction,
-                new ReceiveAction(new AlertMessage())
+                new GenericReceiveAction()
         );
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            assertFalse(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
+            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             assertNull("Received alert message", msg);
+            assertFalse("Socket was closed", Validator.socketClosed(i));
         });
     }
 
@@ -194,9 +197,6 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW, alert);
         });
     }
@@ -229,9 +229,6 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (alert == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW, alert);
         });
     }

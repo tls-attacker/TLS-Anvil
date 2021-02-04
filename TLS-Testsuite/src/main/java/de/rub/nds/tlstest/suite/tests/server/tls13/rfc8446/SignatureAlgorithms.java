@@ -81,9 +81,6 @@ public class SignatureAlgorithms extends Tls13Test {
             Validator.receivedFatalAlert(i);
 
             AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            if (msg == null) {
-                return;
-            }
             Validator.testAlertDescription(i, AlertDescription.MISSING_EXTENSION, msg);
         });
     }

@@ -47,7 +47,7 @@ public class ClientHello extends Tls12Test {
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    public void supportsNullcompressionMethod() {
+    public void supportsNullCompressionMethod() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         byte[] compression = clientHelloMessage.getCompressions().getValue();
         boolean containsZero = false;

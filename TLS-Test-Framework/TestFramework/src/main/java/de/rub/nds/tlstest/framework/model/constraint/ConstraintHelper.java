@@ -247,6 +247,33 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
         return false;
     }
     
+    public static boolean rsaPkBelow1024BitsModeled(DerivationScope scope) {
+        CertificateDerivation certDerivation = (CertificateDerivation)DerivationFactory.getInstance(DerivationType.CERTIFICATE);
+        List<DerivationParameter> certificates = certDerivation.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        return certificates.stream().anyMatch(selectedCert -> {
+            return ((CertificateDerivation)selectedCert).getSelectedValue().getCertPublicKeyType() == CertificateKeyType.RSA 
+                    && ((CertificateDerivation)selectedCert).getSelectedValue().getPublicKey().keySize() < 1024;
+        });
+    }
+    
+    public static boolean rsaShaAlgLongerThan256BitsModeled(DerivationScope scope) {
+        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
+        List<DerivationParameter> algorithms = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
+        return algorithms.stream().anyMatch(selectedAlgo -> {
+            if(((SigAndHashDerivation)selectedAlgo).getSelectedValue().name().contains("RSA")) {
+                switch(((SigAndHashDerivation)selectedAlgo).getSelectedValue().getHashAlgorithm()) {
+                    case SHA384:
+                    case SHA512:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            return false;
+        });
+    }
+    
     public static boolean signatureLengthConstraintApplicable(DerivationScope scope) {
         CertificateDerivation certDeriv = (CertificateDerivation) DerivationFactory.getInstance(DerivationType.CERTIFICATE);
         SignatureBitmaskDerivation sigBitmaskDeriv = (SignatureBitmaskDerivation) DerivationFactory.getInstance(DerivationType.SIGNATURE_BITMASK);

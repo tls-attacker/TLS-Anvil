@@ -126,6 +126,10 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
         if (ConstraintHelper.multipleCertPublicKeyTypesModeled(scope) || ConstraintHelper.multipleSigAlgorithmRequiredKeyTypesModeled(scope)) {
             condConstraints.add(getMustMatchPkOfCertificateConstraint());
         }
+        
+        if(ConstraintHelper.rsaPkBelow1024BitsModeled(scope) && ConstraintHelper.rsaShaAlgLongerThan256BitsModeled(scope)) {
+            condConstraints.add(getMustNotBeRSA512withHashAbove256BitsConstraint());
+        }
 
         if (!scope.isTls13Test()) {
             if (TestContext.getInstance().getSiteReport().getSupportedSignatureAndHashAlgorithms() == null && ConstraintHelper.multipleSigAlgorithmRequiredKeyTypesModeled(scope)) {
@@ -279,7 +283,7 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CERTIFICATE);
 
-        //RSA 521 bit key does not suffice for PSS signature
+        //RSA 512 bit key does not suffice for PSS signature
         return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CERTIFICATE.name()).by((DerivationParameter sigHashAlgParam, DerivationParameter certParam) -> {
             SigAndHashDerivation sigHashAlg = (SigAndHashDerivation) sigHashAlgParam;
             if (sigHashAlg.getSelectedValue() != null) {
@@ -297,6 +301,36 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
             }
             return true;
         }));
+    }
+    
+    private ConditionalConstraint getMustNotBeRSA512withHashAbove256BitsConstraint() {
+        Set<DerivationType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(DerivationType.CERTIFICATE);
+        
+        //RSA 512 bit key does not work with RSA_SHA[> 256] 
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CERTIFICATE.name()).by((DerivationParameter sigHashAlgParam, DerivationParameter certParam) -> {
+            SigAndHashDerivation sigHashAlg = (SigAndHashDerivation) sigHashAlgParam;
+            if (sigHashAlg.getSelectedValue() != null) {
+                CertificateDerivation cert = (CertificateDerivation) certParam;
+                SignatureAlgorithm sigAlg = sigHashAlg.getSelectedValue().getSignatureAlgorithm();
+                HashAlgorithm hashAlgo = sigHashAlg.getSelectedValue().getHashAlgorithm();
+
+                if (cert.getSelectedValue().getPublicKey().keySize() < 1024 && sigAlg.name().contains("RSA") && isSHAHashLongerThan256Bits(hashAlgo)) {
+                    return false;
+                }
+            }
+            return true;
+        }));
+    }
+    
+    private boolean isSHAHashLongerThan256Bits(HashAlgorithm hashAlgo) {
+        switch(hashAlgo) {
+            case SHA384:
+            case SHA512:
+                return true;
+            default:
+               return false;
+        }
     }
 
 }

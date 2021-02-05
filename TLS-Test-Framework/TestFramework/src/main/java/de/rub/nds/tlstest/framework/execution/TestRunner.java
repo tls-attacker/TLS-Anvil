@@ -656,7 +656,7 @@ public class TestRunner {
     private List<State> getClientCertMinimumKeyLengthStates(List<CipherSuite> supportedCipherSuites, CertificateKeyType keyType) {
         Set<CertificateKeyPair> availableCerts = new HashSet<>();
         CertificateByteChooser.getInstance().getCertificateKeyPairList().forEach(certKeyPair -> {
-            if(certKeyPair.getCertPublicKeyType() == keyType && (keyType != CertificateKeyType.RSA || certKeyPair.getPublicKey().keySize() > 512)) {
+            if(certKeyPair.getCertPublicKeyType() == keyType) {
                 availableCerts.add(certKeyPair);
             }
         });

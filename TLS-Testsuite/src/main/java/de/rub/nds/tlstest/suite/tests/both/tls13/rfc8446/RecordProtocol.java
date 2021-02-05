@@ -48,6 +48,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 @RFC(number = 8446, section = "5. Record Protocol")
 public class RecordProtocol extends Tls13Test {
@@ -293,13 +295,15 @@ public class RecordProtocol extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @InteroperabilityCategory(SeverityLevel.HIGH)
-    public void sendEmptyApplicationMessage(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendZeroLengthApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ApplicationMessage appMsg = new ApplicationMessage(c);
-        appMsg.setData(Modifiable.explicit(new byte[0]));
 
         Record r = new Record();
+        r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
+        r.setMaxRecordLengthConfig(0);
         SendAction sendAction = new SendAction(appMsg);
+        sendAction.setRecords(r);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
@@ -309,7 +313,9 @@ public class RecordProtocol extends Tls13Test {
 
         runner.execute(workflowTrace, c).validateFinal(state -> {
             Validator.executedAsPlanned(state);
-            assertFalse("Target did not accept an Application Data message without content", WorkflowTraceUtil.didReceiveMessage(ProtocolMessageType.ALERT, state.getWorkflowTrace()));
+            AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            assertNull("Received alert message", msg);
+            assertFalse("Socket was closed", Validator.socketClosed(state));
         });
     }
 

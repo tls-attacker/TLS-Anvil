@@ -29,6 +29,7 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SignatureBitmaskDerivation;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -278,7 +279,12 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
         CertificateDerivation certDeriv = (CertificateDerivation) DerivationFactory.getInstance(DerivationType.CERTIFICATE);
         SignatureBitmaskDerivation sigBitmaskDeriv = (SignatureBitmaskDerivation) DerivationFactory.getInstance(DerivationType.SIGNATURE_BITMASK);
         List<DerivationParameter> bytePositions = sigBitmaskDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
-        int maxBytePosition = (int)bytePositions.get(bytePositions.size() - 1).getSelectedValue();
+        int maxBytePosition = 0;
+        for(DerivationParameter selectablePosition: bytePositions) {
+            if(((SignatureBitmaskDerivation)selectablePosition).getSelectedValue() > maxBytePosition)  {
+                maxBytePosition = ((SignatureBitmaskDerivation)selectablePosition).getSelectedValue();
+            }
+        }
         for(DerivationParameter certDerivationValue: certDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope)) {
             CertificateKeyPair certKeyPair = (CertificateKeyPair) certDerivationValue.getSelectedValue();
             int signatureLength;

@@ -27,6 +27,7 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
@@ -41,6 +42,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
@@ -306,6 +308,13 @@ public class TestRunner {
         long failed = 0;
         for (State s: states) {
             try {
+                //allow additional app data sent by tls 1.3 client
+                if(s.getConfig().getDefaultSelectedCipherSuite().isTLS13()) {
+                    ReceiveAction lastReceive = (ReceiveAction)s.getWorkflowTrace().getReceivingActions().get(s.getWorkflowTrace().getReceivingActions().size() -1 );
+                    ApplicationMessage appMsg = new ApplicationMessage();
+                    appMsg.setRequired(false);
+                    lastReceive.getExpectedMessages().add(appMsg);
+                }
                 if (s.getWorkflowTrace().executedAsPlanned()) {
                     if (clientHello == null) {
                         clientHello = s.getWorkflowTrace().getFirstReceivedMessage(ClientHelloMessage.class);
@@ -325,7 +334,7 @@ public class TestRunner {
                 throw new RuntimeException(e);
             }
         }
-        
+             
         List<State> keyShareStates = new LinkedList<>();
         List<TlsTask> keyShareTasks = new LinkedList<>();
         if(clientHello.containsExtension(ExtensionType.ELLIPTIC_CURVES) && clientHello.containsExtension(ExtensionType.KEY_SHARE)) {

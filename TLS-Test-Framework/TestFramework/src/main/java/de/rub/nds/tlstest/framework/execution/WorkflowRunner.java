@@ -36,6 +36,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
+import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsattacker.transport.TransportHandlerType;
 import de.rub.nds.tlstest.framework.TestContext;
@@ -116,7 +117,15 @@ public class WorkflowRunner {
         AnnotatedState annotatedState = new AnnotatedState(extensionContext, new State(config, trace), derivationContainer);
 
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-            context.getStateExecutor().bulkExecuteClientStateTasks(annotatedState.getState());
+            StateExecutionTask task = new StateExecutionTask(annotatedState.getState(), context.getStateExecutor().getReexecutions());
+            TestContext.getInstance().increaseServerHandshakesSinceRestart();
+            if(TestContext.getInstance().getServerHandshakesSinceRestart() == TestContext.getInstance().getConfig().getRestartServerAfter()
+                    && TestContext.getInstance().getConfig().getTimeoutActionScript() != null) {
+                LOGGER.info("Scheduling server restart with task");
+                task.setBeforeConnectCallback(TestContext.getInstance().getConfig().getTimeoutActionScript());
+                TestContext.getInstance().resetServerHandshakesSinceRestart();
+            }
+            context.getStateExecutor().bulkExecuteTasks(task);
         } else {
             StateExecutionServerTask task = new StateExecutionServerTask(annotatedState.getState(), context.getConfig().getTestClientDelegate().getServerSocket(), 2);
             task.setBeforeAcceptCallback(context.getConfig().getTestClientDelegate().getTriggerScript());

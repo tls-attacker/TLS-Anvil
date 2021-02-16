@@ -76,6 +76,9 @@ public class TestConfig extends TLSDelegateConfig {
 
     @Parameter(names = "-parallelTests", description = "How many tests should be executed in parallel? (Default value: parallelHandshakes * 1.5)")
     private Integer parallelTests = null;
+    
+    @Parameter(names = "-restartServerAfter", description = "How many handshakes should be executed for a Server before a restart? (Default value: 0 = infinite)")
+    private Integer restartServerAfter = 0;
 
     @Parameter(names = "-timeoutActionScript", description = "Script to execute, if the execution of the testsuite " +
             "seems to make no progress", variableArity = true)
@@ -214,6 +217,7 @@ public class TestConfig extends TLSDelegateConfig {
                     ProcessBuilder processBuilder = new ProcessBuilder(timeoutActionCommand);
                     Process p = processBuilder.start();
                     p.waitFor();
+                    Thread.sleep(1500);
                     return p.exitValue();
                 };
             }
@@ -475,5 +479,13 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setStrength(int strength) {
         this.strength = strength;
+    }
+
+    public Integer getRestartServerAfter() {
+        return restartServerAfter;
+    }
+
+    public void setRestartServerAfter(Integer restartServerAfter) {
+        this.restartServerAfter = restartServerAfter;
     }
 }

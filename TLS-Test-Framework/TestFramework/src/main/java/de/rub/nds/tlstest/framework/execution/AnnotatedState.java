@@ -120,7 +120,7 @@ public class AnnotatedState {
             associatedContainer.stateFinished(result);
             throw err;
         }
-
+        
         associatedContainer.stateFinished(result);
     }
 

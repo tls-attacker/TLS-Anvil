@@ -49,7 +49,8 @@ public class TestContext {
 
     private ProgressBar proggressBar = null;
     private final Date startTime = new Date();
-
+    
+    private int serverHandshakesSinceRestart = 0;
 
     synchronized public static TestContext getInstance() {
         if (TestContext.instance == null) {
@@ -199,5 +200,17 @@ public class TestContext {
 
     public void setStateExecutor(ParallelExecutor stateExecutor) {
         this.stateExecutor = stateExecutor;
+    }
+
+    public synchronized int getServerHandshakesSinceRestart() {
+        return serverHandshakesSinceRestart;
+    }
+
+    public synchronized void resetServerHandshakesSinceRestart() {
+        this.serverHandshakesSinceRestart = 0;
+    }
+    
+    public synchronized void increaseServerHandshakesSinceRestart() {
+        this.serverHandshakesSinceRestart += 1;
     }
 }

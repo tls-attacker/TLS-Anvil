@@ -142,7 +142,8 @@ public class Validator {
 
     public static void smartExecutedAsPlanned(AnnotatedState state) {
         WorkflowTrace trace = state.getWorkflowTrace();
-        if(state.getState().getTlsContext().isReceivedMessageWithWrongTls13KeyType()) {
+        if(state.getState().getTlsContext().isReceivedMessageWithWrongTls13KeyType()
+                && state.getState().getTlsContext().getActiveKeySetTypeRead() != Tls13KeySetType.NONE) {
             throw new AssertionError("Peer used wrong TLS 1.3 KeySetType to protect records");
         }
         boolean executedAsPlanned = trace.executedAsPlanned();       

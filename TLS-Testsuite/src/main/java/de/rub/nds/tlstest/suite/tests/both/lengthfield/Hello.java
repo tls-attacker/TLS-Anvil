@@ -167,7 +167,7 @@ public class Hello extends TlsGenericTest {
     
     private void clientHelloCompressionLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
         ClientHelloMessage helloMessage = (ClientHelloMessage) getHelloMessage(workflowTrace);
-        helloMessage.setCipherSuiteLength(Modifiable.add(10)); 
+        helloMessage.setCompressionLength(Modifiable.add(10));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     

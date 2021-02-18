@@ -161,7 +161,7 @@ public class KeyShare extends Tls13Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)
     @DeprecatedFeatureCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.LOW) //Categroies MM: see other deprecated groups...
+    @SecurityCategory(SeverityLevel.LOW)
     public void serverAcceptsDeprecatedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> groups = NamedGroup.getImplemented();
@@ -176,7 +176,7 @@ public class KeyShare extends Tls13Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)
     @DeprecatedFeatureCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.LOW) //Categroies MM: see other deprecated groups...
+    @SecurityCategory(SeverityLevel.LOW)
     public void serverAcceptsDeprecatedGroupsAllAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> groups = NamedGroup.getImplemented();
@@ -197,7 +197,7 @@ public class KeyShare extends Tls13Test {
                 KeyShareExtensionMessage ksExt = trace.getFirstReceivedMessage(ServerHelloMessage.class).getExtension(KeyShareExtensionMessage.class);
                 assertFalse("Server accepted a deprecated group", groups.contains(ksExt.getKeyShareList().stream().map(KeyShareEntry::getGroupConfig).collect(Collectors.toList()).get(0)));
                 //other groups may not be used - even in HelloRetryRequest
-                assertTrue("Server selected an unsupported group", groups.contains(ksExt.getKeyShareList().stream().map(KeyShareEntry::getGroupConfig).collect(Collectors.toList()).get(0)));
+                assertTrue("Server selected an unproposed group", groups.contains(ksExt.getKeyShareList().stream().map(KeyShareEntry::getGroupConfig).collect(Collectors.toList()).get(0)));
             }
         });
     }

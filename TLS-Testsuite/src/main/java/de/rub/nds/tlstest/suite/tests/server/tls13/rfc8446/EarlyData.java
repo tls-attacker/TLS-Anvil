@@ -32,11 +32,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.*;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
@@ -177,6 +173,10 @@ public class EarlyData extends Tls13Test {
         });
     }
 
+    public boolean recordLengthAllowsModification(Integer lengthCandidate) {
+        return lengthCandidate >= 50;
+    }
+
     @TlsTest(description = "If the server chooses to accept the \"early_data\" extension, then it"
             + "MUST comply with the same error-handling requirements specified for"
             + "all records when processing early data records.  Specifically, if the\n"
@@ -186,6 +186,7 @@ public class EarlyData extends Tls13Test {
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "supports0rtt")
     @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.CIPHERTEXT_BITMASK})
+    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModifications")
     @InteroperabilityCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

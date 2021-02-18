@@ -15,6 +15,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ActivateEncryptionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.DeactivateEncryptionAction;
+import de.rub.nds.tlsattacker.core.workflow.action.ResetRecordCipherListsAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
@@ -244,7 +245,9 @@ public class StateMachine extends Tls12Test {
     public void secondChangeCipherSpecAfterHandshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace.addTlsAction(new SendAction(new ChangeCipherSpecMessage()));
+        ChangeCipherSpecMessage secondChangeCipherSpec = new ChangeCipherSpecMessage();
+        secondChangeCipherSpec.setAdjustContext(Modifiable.explicit(false));
+        workflowTrace.addTlsAction(new SendAction(secondChangeCipherSpec));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
@@ -259,8 +262,12 @@ public class StateMachine extends Tls12Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsAction(new DeactivateEncryptionAction());
-        workflowTrace.addTlsAction(new SendAction(new ChangeCipherSpecMessage()));
+        ChangeCipherSpecMessage secondChangeCipherSpec = new ChangeCipherSpecMessage();
+        secondChangeCipherSpec.setAdjustContext(Modifiable.explicit(false));
+        workflowTrace.addTlsAction(new SendAction(secondChangeCipherSpec));
         workflowTrace.addTlsAction(new ActivateEncryptionAction(false));
+        //for stream ciphers, the state must be restored as a decryption already took place in this test
+        workflowTrace.addTlsAction(new ResetRecordCipherListsAction(2, 2));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }

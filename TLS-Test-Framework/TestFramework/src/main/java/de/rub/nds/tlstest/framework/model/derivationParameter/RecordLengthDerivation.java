@@ -35,6 +35,7 @@ public class RecordLengthDerivation extends DerivationParameter<Integer>  {
             parameterValues.add(new RecordLengthDerivation(16384));
             parameterValues.add(new RecordLengthDerivation(50));
             parameterValues.add(new RecordLengthDerivation(111));
+            parameterValues.add(new RecordLengthDerivation(1));
         }
         
         return parameterValues;

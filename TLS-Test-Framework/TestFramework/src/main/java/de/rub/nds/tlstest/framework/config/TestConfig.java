@@ -306,6 +306,7 @@ public class TestConfig extends TLSDelegateConfig {
         config.setPrefferedCertRsaKeySize(4096);
         config.setPrefferedCertDssKeySize(3072);
         
+        config.setFiltersKeepUserSettings(Boolean.FALSE);
         config.setDefaultProposedAlpnProtocols("http/1.1", "spdy/1", "spdy/2", "spdy/3", "stun.turn",
                 "stun.nat-discovery", "h2", "h2c", "webrtc", "c-webrtc", "ftp", "imap", "pop3", "managesieve");
 

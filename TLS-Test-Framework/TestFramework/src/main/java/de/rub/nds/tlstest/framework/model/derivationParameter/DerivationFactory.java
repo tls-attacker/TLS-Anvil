@@ -9,10 +9,12 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.mirrored.MirroredCipherSuiteDerivation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe.ShareOutOfBoundsDerivation;
+import de.rub.nds.tlstest.framework.model.derivationParameter.mirrored.MirroredCipherSuiteDerivation;
 
 public class DerivationFactory {
     
@@ -100,7 +102,10 @@ public class DerivationFactory {
                 return new CompressionMethodDerivation();
             case PROTOCOL_MESSAGE_TYPE:
                 return new ProtocolMessageTypeDerivation();
+            case FFDHE_SHARE_OUT_OF_BOUNDS:
+                return new ShareOutOfBoundsDerivation();
             default:
+                LOGGER.error("Derivation Type {} not implemented", type);
                 throw new UnsupportedOperationException("Derivation Type not implemented");
         }
     }

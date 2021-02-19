@@ -53,7 +53,8 @@ public enum DerivationType {
     INCLUDE_GREASE_NAMED_GROUPS,
     ADDITIONAL_PADDING_LENGTH,
     COMPRESSION_METHOD,
-    PROTOCOL_MESSAGE_TYPE;
+    PROTOCOL_MESSAGE_TYPE,
+    FFDHE_SHARE_OUT_OF_BOUNDS;
    
     
     public boolean isBitmaskDerivation() {

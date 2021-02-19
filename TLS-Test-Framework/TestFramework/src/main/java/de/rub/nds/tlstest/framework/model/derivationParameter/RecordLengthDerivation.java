@@ -32,12 +32,11 @@ public class RecordLengthDerivation extends DerivationParameter<Integer>  {
         List<DerivationParameter> parameterValues = new LinkedList<>();
 
         if (context.getSiteReport().getSupportsRecordFragmentation()) {
-            parameterValues.add(new RecordLengthDerivation(16384));
             parameterValues.add(new RecordLengthDerivation(50));
             parameterValues.add(new RecordLengthDerivation(111));
             parameterValues.add(new RecordLengthDerivation(1));
         }
-        
+        parameterValues.add(new RecordLengthDerivation(16384));
         return parameterValues;
     }
 

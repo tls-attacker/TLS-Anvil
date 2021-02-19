@@ -128,7 +128,7 @@ public abstract class DerivationParameter<T> {
                 return (Boolean) method.invoke(valueInQuestion);
             }
         } catch (InstantiationException | SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            LOGGER.error("", ex);
+            LOGGER.error("Was unable to invoke constraint method for type " + type, ex);
             return true;
         }
     }

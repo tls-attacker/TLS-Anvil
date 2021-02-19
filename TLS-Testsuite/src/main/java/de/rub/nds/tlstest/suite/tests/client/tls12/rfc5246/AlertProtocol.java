@@ -22,11 +22,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.*;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -50,11 +46,17 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class AlertProtocol extends Tls12Test {
 
+    //alerts must not be fragmented
+    public boolean recordLengthAllowsModification(Integer lengthCandidate) {
+        return lengthCandidate >= 50;
+    }
+
     @TlsTest(description = "Unless some other fatal alert has been transmitted, each party is "
             + "required to send a close_notify alert before closing the write side "
             + "of the connection. The other party MUST respond with a close_notify "
             + "alert of its own and close down the connection immediately, "
             + "discarding any pending writes.")
+    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @InteroperabilityCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.LOW)
@@ -92,6 +94,7 @@ public class AlertProtocol extends Tls12Test {
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
     @ScopeExtensions(DerivationType.ALERT)
     @TestDescription("A Fatal Alert must terminate the connection")
+    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @SecurityCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -123,6 +126,7 @@ public class AlertProtocol extends Tls12Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.ALERT)
     @TestDescription("A Fatal Alert must terminate the connection")
+    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void abortAfterFatalAlertServerHelloDone(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

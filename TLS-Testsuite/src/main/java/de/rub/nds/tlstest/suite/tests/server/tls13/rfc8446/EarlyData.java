@@ -186,7 +186,7 @@ public class EarlyData extends Tls13Test {
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "supports0rtt")
     @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.CIPHERTEXT_BITMASK})
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModifications")
+    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @InteroperabilityCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

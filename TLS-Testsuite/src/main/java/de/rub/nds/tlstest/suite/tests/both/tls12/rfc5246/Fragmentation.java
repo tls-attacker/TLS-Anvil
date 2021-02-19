@@ -31,6 +31,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -52,6 +53,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import org.junit.jupiter.api.Test;
 
 @RFC(number = 5264, section = "6.2.1 Fragmentation")
 public class Fragmentation extends Tls12Test {
@@ -231,5 +233,15 @@ public class Fragmentation extends Tls12Test {
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW, alert);
         });
+    }
+    
+    @Test
+    @TestDescription("Evaluate if the preparation phase detected that the target is able to process fragmented Records")
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.HIGH)
+    public void recordFragmentationSupported() {
+        assertTrue("Record fragmentation support has not been detected", context.getSiteReport().getSupportsRecordFragmentation());
     }
 }

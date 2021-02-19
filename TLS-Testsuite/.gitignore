@@ -15,3 +15,8 @@ buildNumber.properties
 logs
 apps
 out
+
+.settings/
+.factorypath
+.classpath
+.project

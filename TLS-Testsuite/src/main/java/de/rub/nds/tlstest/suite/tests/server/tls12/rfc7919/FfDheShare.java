@@ -8,12 +8,15 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.modifiablevariable.biginteger.BigIntegerExplicitValueModification;
 import de.rub.nds.modifiablevariable.biginteger.BigIntegerMultiplyModification;
 import de.rub.nds.modifiablevariable.biginteger.BigIntegerShiftLeftModification;
+import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.DHClientKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.computations.DHClientComputations;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -54,22 +57,22 @@ public class FfDheShare extends Tls12Test {
     public void shareOutOfBounds(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        DHClientKeyExchangeMessage CKE = new DHClientKeyExchangeMessage();
-        CKE.prepareComputations();
-        var computations = CKE.getComputations();
+        DHClientKeyExchangeMessage cke = new DHClientKeyExchangeMessage();
+        cke.prepareComputations();
+        DHClientComputations computations = cke.getComputations();
 
         ShareOutOfBoundsDerivation share = derivationContainer.getDerivation(ShareOutOfBoundsDerivation.class);
         switch (share.getSelectedValue()) {
             case SHARE_IS_ONE:
-                computations.getPublicKey().setModification(new BigIntegerExplicitValueModification(BigInteger.ONE));
+                computations.setPublicKey(Modifiable.explicit(BigInteger.ONE));
                 break;
             case SHARE_MINUS_P:
-                computations.getPublicKey().setModification(new BigIntegerMultiplyModification(BigInteger.valueOf(-1)));
+                computations.setPublicKey(Modifiable.multiplyBigInteger(BigInteger.valueOf(-1)));
                 break;
             case SHARE_PLUS_P:
                 // multiply modulus by 2^6 = 64
                 // Chance that public share is below original p is 1/64
-                computations.getModulus().setModification(new BigIntegerShiftLeftModification(6));
+                computations.setModulus(Modifiable.shiftLeftBigInteger(6));
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown type " + share.getSelectedValue());
@@ -77,7 +80,7 @@ public class FfDheShare extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE,
                 HandshakeMessageType.CLIENT_KEY_EXCHANGE);
-        workflowTrace.addTlsActions(new SendAction(CKE), new SendAction(ActionOption.MAY_FAIL, new FinishedMessage()),
+        workflowTrace.addTlsActions(new SendAction(cke), new SendAction(new ChangeCipherSpecMessage()),new SendAction(ActionOption.MAY_FAIL, new FinishedMessage()),
                 new ReceiveAction(new AlertMessage()));
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();

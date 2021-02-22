@@ -80,7 +80,7 @@ public class FfDheShare extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE,
                 HandshakeMessageType.CLIENT_KEY_EXCHANGE);
-        workflowTrace.addTlsActions(new SendAction(cke), new SendAction(new ChangeCipherSpecMessage()),new SendAction(ActionOption.MAY_FAIL, new FinishedMessage()),
+        workflowTrace.addTlsActions(new SendAction(cke), new SendAction(ActionOption.MAY_FAIL, new ChangeCipherSpecMessage()),new SendAction(ActionOption.MAY_FAIL, new FinishedMessage()),
                 new ReceiveAction(new AlertMessage()));
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();

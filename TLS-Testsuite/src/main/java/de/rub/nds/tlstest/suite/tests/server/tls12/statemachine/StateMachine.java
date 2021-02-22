@@ -206,13 +206,15 @@ public class StateMachine extends Tls12Test {
     }
 
     //Figure 7: path 0,3
-    @TlsTest(description = "Begin the Handshake with Application Data")
+    @Test
+    @TestDescription("Begin the Handshake with empty Application Data")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.HIGH)
-    public void beginWithEmptyApplicationData(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void beginWithEmptyApplicationData(WorkflowRunner runner) {
+        Config config = getConfig();
+        runner.setPreparedConfig(config);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         Record record = new Record();
         record.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));

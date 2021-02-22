@@ -165,41 +165,4 @@ public class KeyShare extends Tls13Test {
         }
         assertFalse("Deprecated or invalid group used for key share", foundDeprecated);
     }
-
-    public boolean isInvalidCurveApplicableNamedGroup(NamedGroup group) {
-        if (group.isCurve() && !group.isGost() && !(CurveFactory.getCurve(group) instanceof RFC7748Curve)) {
-            return true;
-        }
-        return false;
-    }
-
-    @TlsTest(description = "A lack of point validation might enable Invalid Curve Attacks")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isInvalidCurveApplicableNamedGroup")
-    @CryptoCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    public void rejectsInvalidCurvePoints(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-
-        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
-        EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
-        InvalidCurvePoint invalidCurvePoint = InvalidCurvePoint.smallOrder(selectedGroup);
-        Point serializablePoint
-                = new Point(new FieldElementFp(invalidCurvePoint.getPublicPointBaseX(), curve.getModulus()), new FieldElementFp(
-                        invalidCurvePoint.getPublicPointBaseY(), curve.getModulus()));
-        byte[] serializedPoint = PointFormatter.formatToByteArray(selectedGroup, serializablePoint, ECPointFormat.UNCOMPRESSED);
-
-        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        ServerHelloMessage serverHello = (ServerHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
-        KeyShareExtensionMessage keyShareExtension = serverHello.getExtension(KeyShareExtensionMessage.class);
-
-        byte[] keyShareListBytes = ArrayConverter.concatenate(selectedGroup.getValue(), ArrayConverter.intToBytes(serializedPoint.length, ExtensionByteLength.KEY_SHARE_LENGTH), serializedPoint);
-        keyShareExtension.setKeyShareListBytes(Modifiable.explicit(keyShareListBytes));
-        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
-    }
-
 }

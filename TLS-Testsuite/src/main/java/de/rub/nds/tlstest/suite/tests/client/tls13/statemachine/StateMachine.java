@@ -9,15 +9,18 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.statemachine;
 
+import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.DHEServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EndOfEarlyDataMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
@@ -253,7 +256,9 @@ public class StateMachine extends Tls13Test {
     public void sendEndOfEarlyDataAsServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.FINISHED);
-        workflowTrace.addTlsAction(new SendAction(new EndOfEarlyDataMessage()));
+        EndOfEarlyDataMessage endOfEarlyData = new EndOfEarlyDataMessage();
+        endOfEarlyData.setAdjustContext(Modifiable.explicit(Boolean.FALSE));
+        workflowTrace.addTlsAction(new SendAction(endOfEarlyData));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, config).validateFinal(i -> {

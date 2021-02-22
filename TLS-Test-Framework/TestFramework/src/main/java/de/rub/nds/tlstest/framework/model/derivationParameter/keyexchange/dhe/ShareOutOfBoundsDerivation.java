@@ -15,8 +15,12 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParamete
 
 public class ShareOutOfBoundsDerivation extends DerivationParameter<ShareOutOfBoundsDerivation.OutOfBoundsType> {
 
+    // share minus p wasn't useful
+    // numbers in TLS are unsigned - negative numbers do not exist
+    // therefore this would not test bound validation but errors in
+    // (de)serialisation
     public enum OutOfBoundsType {
-        SHARE_PLUS_P, SHARE_MINUS_P, SHARE_IS_ONE,
+        SHARE_PLUS_P, SHARE_IS_ONE,
     }
 
     public ShareOutOfBoundsDerivation() {
@@ -52,11 +56,6 @@ public class ShareOutOfBoundsDerivation extends DerivationParameter<ShareOutOfBo
                 case SHARE_PLUS_P:
                     pubShare = config.getDefaultServerDhPublicKey();
                     pubShare = pubShare.add(config.getDefaultServerDhModulus());
-                    config.setDefaultServerDhPublicKey(pubShare);
-                    break;
-                case SHARE_MINUS_P:
-                    pubShare = config.getDefaultServerDhPublicKey();
-                    pubShare = pubShare.subtract(config.getDefaultServerDhModulus());
                     config.setDefaultServerDhPublicKey(pubShare);
                     break;
             }

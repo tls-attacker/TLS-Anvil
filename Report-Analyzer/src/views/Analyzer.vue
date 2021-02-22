@@ -184,6 +184,7 @@
 <script>
 import * as analyzer from '@/lib/analyzer'
 import VueJsonPretty from 'vue-json-pretty'
+import 'vue-json-pretty/lib/styles.css'
 import TableFilter from '@/components/TableFilter'
 import { FilterInputModels } from "@/lib/filter/filterInputModels";
 import { filter } from "@/lib/filter/filter"

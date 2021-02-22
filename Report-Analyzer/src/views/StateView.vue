@@ -129,6 +129,7 @@
 <script>
 import * as stateview from '@/lib/stateview'
 import VueJsonPretty from 'vue-json-pretty'
+import 'vue-json-pretty/lib/styles.css'
 import { FilterInputModels } from "@/lib/filter/filterInputModels";
 import TableFilter from '@/components/TableFilter'
 import { filter } from "@/lib/filter/filter"
@@ -394,12 +395,22 @@ export default {
       } 
     },
 
-    showPcap(selectedCell, ev) {
+    async showPcap(selectedCell, ev) {
       let target = null
       if (ev) {
         ev.target.innerHTML = 'Loading...'
         ev.target.disabled = true
         target = ev.target.previousSibling.previousSibling
+      } else {
+        while (!document.querySelector(".packetViewer")) {
+          await new Promise((res) => setTimeout(() => res(), 500));
+        }
+
+        const t = document.querySelector(".pcapInlineBtn.download")
+        if (t) {
+          t.innerHTML = "Loading..."
+          t.disabled = true
+        }
       }
 
       this.$http.get(`/testReport/${selectedCell.ContainerId}/testResult/${this.className}/${this.methodName}/${selectedCell.uuid}/pcap`).then(async (res) => {

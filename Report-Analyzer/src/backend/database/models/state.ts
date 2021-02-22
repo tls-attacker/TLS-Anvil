@@ -47,6 +47,6 @@ export const StateSchema = new Schema({
 
 StateSchema.index({TestResultId: 1})
 StateSchema.index({ContainerId: 1})
-StateSchema.index({Status: 1})
+StateSchema.index({Result: 1})
 StateSchema.index({AdditionalResultInformation: 1})
 StateSchema.index({Stacktrace: 1})

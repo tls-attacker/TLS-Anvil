@@ -12,14 +12,6 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/dist-backend/backend/index.js"
-        },
-        {
-            "type": "firefox",
-            "request": "launch",
-            "name": "vuejs: firefox",
-            "url": "http://localhost:8080",
-            "webRoot": "${workspaceFolder}/src",
-            "pathMappings": [{ "url": "webpack:///src/", "path": "${webRoot}/" }]
-          }
+        }
     ]
 }

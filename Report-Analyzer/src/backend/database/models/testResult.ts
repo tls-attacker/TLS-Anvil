@@ -54,4 +54,4 @@ export const TestResultSchema = new Schema({
 })
 
 TestResultSchema.index({ContainerId: 1})
-TestResultSchema.index({Status: 1})
+TestResultSchema.index({Result: 1})

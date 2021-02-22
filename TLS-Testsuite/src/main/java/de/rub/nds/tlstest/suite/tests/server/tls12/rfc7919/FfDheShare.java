@@ -64,15 +64,15 @@ public class FfDheShare extends Tls12Test {
         ShareOutOfBoundsDerivation share = derivationContainer.getDerivation(ShareOutOfBoundsDerivation.class);
         switch (share.getSelectedValue()) {
             case SHARE_IS_ONE:
-                computations.setPublicKey(Modifiable.explicit(BigInteger.ONE));
-                break;
-            case SHARE_MINUS_P:
-                computations.setPublicKey(Modifiable.multiplyBigInteger(BigInteger.valueOf(-1)));
+                c.setDefaultClientDhPrivateKey(BigInteger.ZERO);
+                c.setDefaultClientDhPublicKey(BigInteger.ONE);
                 break;
             case SHARE_PLUS_P:
-                // multiply modulus by 2^6 = 64
-                // Chance that public share is below original p is 1/64
-                computations.setModulus(Modifiable.shiftLeftBigInteger(6));
+                // multiply modulus by 2^64
+                // Chance that public share is below original p is 1/2^64
+                // TODO: would be nice if we could always be above this bound, but only barely
+                // i.e. share += p; but this would require us to already know p...
+                computations.setModulus(Modifiable.shiftLeftBigInteger(64));
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown type " + share.getSelectedValue());

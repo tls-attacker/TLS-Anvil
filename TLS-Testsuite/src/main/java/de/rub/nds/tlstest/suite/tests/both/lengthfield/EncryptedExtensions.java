@@ -30,7 +30,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class EncryptedExtensions extends TlsGenericTest {
     
-    @TlsTest(description = "Send an Encrypted Extensions Message with a modified length value")
+    @TlsTest(description = "Send an Encrypted Extensions Message with a modified length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -41,7 +41,7 @@ public class EncryptedExtensions extends TlsGenericTest {
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
-    @TlsTest(description = "Send an Encrypted Extensions Message with a modified Extensions list length value")
+    @TlsTest(description = "Send an Encrypted Extensions Message with a modified Extensions list length value (+1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)

@@ -45,7 +45,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
         }
     }
     
-    @TlsTest(description = "Send a Pre Shared Key Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
     @ScopeLimitations(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "supportsPsk")
@@ -58,7 +58,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
-    @TlsTest(description = "Send a Pre Shared Key Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
     @ScopeLimitations(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "supportsPsk")
@@ -71,7 +71,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
         
-    @TlsTest(description = "Send a Pre Shared Key Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
     @ScopeLimitations(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "supportsPsk")

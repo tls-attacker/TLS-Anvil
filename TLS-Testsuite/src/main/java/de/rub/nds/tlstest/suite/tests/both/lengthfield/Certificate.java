@@ -26,7 +26,7 @@ public class Certificate extends TlsGenericTest {
     
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @TlsTest(description = "Send a Certificate Message with a modified length value")
+    @TlsTest(description = "Send a Certificate Message with a modified length value (-1)")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -38,7 +38,7 @@ public class Certificate extends TlsGenericTest {
     
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @TlsTest(description = "Send a Certificate Message with a modified certificate list length value")
+    @TlsTest(description = "Send a Certificate Message with a modified certificate list length value (-1)")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -50,7 +50,7 @@ public class Certificate extends TlsGenericTest {
     
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @TlsTest(description = "Send a Certificate Message with a modified length value")
+    @TlsTest(description = "Send a Certificate Message with a modified length value (-1)")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -61,8 +61,8 @@ public class Certificate extends TlsGenericTest {
     }
     
     @Tag("tls13")
-    @TlsVersion(supported = ProtocolVersion.TLS13)
-    @TlsTest(description = "Send a Certificate Message with a modified certificate list length value")
+    @TlsVersion(supported = ProtocolVersion.TLS13) 
+    @TlsTest(description = "Send a Certificate Message with a modified certificate list length value (-1)")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -74,7 +74,7 @@ public class Certificate extends TlsGenericTest {
     
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @TlsTest(description = "Send a Certificate Message with a modified request context length value")
+    @TlsTest(description = "Send a Certificate Message with a modified request context length value (+1)")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)

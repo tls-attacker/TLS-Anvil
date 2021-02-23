@@ -29,7 +29,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL12)
 public class ClientKeyExchange extends TlsGenericTest {
     
-    @TlsTest(description = "Send a Client Key Exchange Message with a modified length value")
+    @TlsTest(description = "Send a Client Key Exchange Message with a modified length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -40,7 +40,7 @@ public class ClientKeyExchange extends TlsGenericTest {
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
-    @TlsTest(description = "Send a Client Key Exchange Message with a modified public key length value")
+    @TlsTest(description = "Send a Client Key Exchange Message with a modified public key length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)

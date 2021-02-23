@@ -32,7 +32,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
 public class ServerKeyExchange extends TlsGenericTest {
 
-    @TlsTest(description = "Send a Server Key Exchange Message with a modified length value")
+    @TlsTest(description = "Send a Server Key Exchange Message with a modified length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -43,7 +43,7 @@ public class ServerKeyExchange extends TlsGenericTest {
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
-    @TlsTest(description = "Send a Server Key Exchange Message with a modified signature length value")
+    @TlsTest(description = "Send a Server Key Exchange Message with a modified signature length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNotAnonymousCipherSuite")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -55,7 +55,7 @@ public class ServerKeyExchange extends TlsGenericTest {
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
-    @TlsTest(description = "Send a Server Key Exchange Message with a modified public key length value")
+    @TlsTest(description = "Send a Server Key Exchange Message with a modified public key length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -66,7 +66,7 @@ public class ServerKeyExchange extends TlsGenericTest {
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
-    @TlsTest(description = "Send a Diffie-Hellman Server Key Exchange Message with a modified modulus length value")
+    @TlsTest(description = "Send a Diffie-Hellman Server Key Exchange Message with a modified modulus length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -78,7 +78,7 @@ public class ServerKeyExchange extends TlsGenericTest {
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
-    @TlsTest(description = "Send a Diffie-Hellman Server Key Exchange Message with a modified generator length value")
+    @TlsTest(description = "Send a Diffie-Hellman Server Key Exchange Message with a modified generator length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     @MessageStructureCategory(SeverityLevel.MEDIUM)

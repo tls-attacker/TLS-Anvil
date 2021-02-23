@@ -25,7 +25,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class SupportedVersionsExtension extends TlsGenericTest {
     
-    @TlsTest(description = "Send a Supported Versions Extension in the Hello Message with a modified algorithm list length value")
+    @TlsTest(description = "Send a Supported Versions Extension in the Hello Message with a modified algorithm list length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -35,7 +35,7 @@ public class SupportedVersionsExtension extends TlsGenericTest {
     }
     
     @ServerTest
-    @TlsTest(description = "Send a Supported Versions Extension in the Hello Message with a modified algorithm list length value")
+    @TlsTest(description = "Send a Supported Versions Extension in the Hello Message with a modified algorithm list length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)

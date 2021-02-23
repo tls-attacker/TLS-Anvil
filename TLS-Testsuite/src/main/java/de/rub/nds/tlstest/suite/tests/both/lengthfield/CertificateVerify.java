@@ -32,7 +32,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class CertificateVerify extends TlsGenericTest {
     
-    @TlsTest(description = "Send a Certificate Verify Message with a modified length value")
+    @TlsTest(description = "Send a Certificate Verify Message with a modified length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -43,7 +43,7 @@ public class CertificateVerify extends TlsGenericTest {
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
-    @TlsTest(description = "Send a Certificate Verify Message with a modified signature length value")
+    @TlsTest(description = "Send a Certificate Verify Message with a modified signature length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)

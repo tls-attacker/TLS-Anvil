@@ -63,10 +63,6 @@ public class ParameterModelFactory {
             case EMPTY:
                 break;
             case LENGTHFIELD:
-                List<DerivationType> lengthfieldDerivations = getDerivationsOfModel(derivationScope, ModelType.CERTIFICATE);
-                lengthfieldDerivations.remove(DerivationType.RECORD_LENGTH);
-                lengthfieldDerivations.remove(DerivationType.TCP_FRAGMENTATION);
-                return lengthfieldDerivations;
             case CERTIFICATE:
                 if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
                     derivationsOfModel.add(DerivationType.CERTIFICATE);

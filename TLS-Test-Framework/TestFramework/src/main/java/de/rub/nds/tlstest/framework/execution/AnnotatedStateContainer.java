@@ -172,15 +172,18 @@ public class  AnnotatedStateContainer {
             }
             failedReason = String.format("%d/%d tests failed", errors.size(), states.size());
         }
-
-        if (failureInducingCombinations != null) {
-            if(anyStateSucceeded()) {
+  
+        if(anyStateSucceeded() && failed) {
+            LOGGER.info("Some generated inputs resulted in failures for test " + testMethodConfig.getMethodName()); 
+            if (failureInducingCombinations != null) {
                 String tmp = failureInducingCombinations.stream().map(DerivationContainer::toString).collect(Collectors.joining("\n\t"));
-                LOGGER.info("The following parameters resulted in test failures for test " + testMethodConfig.getMethodName() + ":\n\t{}", tmp);
-                printFailedContainers();
+                LOGGER.info("The following parameters resulted in test failures:\n\t{}", tmp);
             } else {
-                LOGGER.info("All generated inputs resulted in failures for test " + testMethodConfig.getMethodName());
+                LOGGER.info("No fault characterization result obtained");
             }
+            printFailedContainers();
+        } else if(failed) {
+            LOGGER.info("All generated inputs resulted in failures for test " + testMethodConfig.getMethodName());
         }
     }
 
@@ -189,7 +192,7 @@ public class  AnnotatedStateContainer {
     }
     
     private void printFailedContainers() {
-        LOGGER.info("Individual failed Containers:");
+        LOGGER.info("Individual failed Containers for test " + testMethodConfig.getMethodName() +":\n");
         states.stream().filter(state -> state.getResult() != TestResult.SUCCEEDED)
                 .forEach(state -> LOGGER.info(state.getDerivationContainer().toString()));
     }
@@ -241,7 +244,7 @@ public class  AnnotatedStateContainer {
     }
     
     private boolean anyStateSucceeded() {
-        return states.stream().anyMatch(state -> state.getResult() == TestResult.SUCCEEDED);
+        return states.stream().anyMatch(state -> state.getResult() == TestResult.SUCCEEDED || state.getResult() == TestResult.PARTIALLY_SUCCEEDED);
     }
 
     public List<DerivationContainer> getFailureInducingCombinations() {

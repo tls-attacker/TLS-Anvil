@@ -86,7 +86,14 @@ public class TlsGenericTest extends TlsBaseTest {
     protected void genericExtensionLengthTest(WorkflowRunner runner, ArgumentsAccessor argumentAccessor, Config config, Class<? extends ExtensionMessage> extensionMessageClass) {
         WorkflowTrace workflowTrace = setupLengthFieldTestForConfig(config, runner, argumentAccessor); 
         ExtensionMessage extensionMessage = getTargetedExtension(extensionMessageClass, workflowTrace);
-        extensionMessage.setExtensionLength(Modifiable.add(10));
+        extensionMessage.setExtensionLength(Modifiable.sub(1));
+        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(this::validateLengthTest);
+    }
+    
+    protected void emptyExtensionLengthTest(WorkflowRunner runner, ArgumentsAccessor argumentAccessor, Config config, Class<? extends ExtensionMessage> extensionMessageClass) {
+        WorkflowTrace workflowTrace = setupLengthFieldTestForConfig(config, runner, argumentAccessor); 
+        ExtensionMessage extensionMessage = getTargetedExtension(extensionMessageClass, workflowTrace);
+        extensionMessage.setExtensionLength(Modifiable.add(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(this::validateLengthTest);
     }
     

@@ -3,19 +3,21 @@ package uploader
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"log"
+	"os"
 	"strings"
 	"sync"
 	"time"
 	"uploader/src/database"
 	"uploader/src/database/models"
+	. "uploader/src/logging"
 )
 
 type UploadData struct {
-	JsonRaw []byte
-	Keylog []byte
-	Pcap []byte
+	JsonFile   *os.File
+	KeylogFile *os.File
+	PcapFile   *os.File
 
 	Container *models.Container
 	Results []models.Result
@@ -25,6 +27,7 @@ type UploadData struct {
 
 	Finished chan bool
 	uploader *uploader
+	Logger *logrus.Entry
 }
 
 var uploadQueue = make(chan *UploadData)
@@ -53,16 +56,17 @@ type uploader struct {
 
 func (u *uploader) Upload(data *UploadData) {
 	data.uploader = u
+	data.Logger = Logger.WithField("identifier", data.Identifier)
 
 	if u.database.ReportExists(data.Identifier) {
 		u.finished = u.finished + 1
-		log.Printf("%03d/%03d Skipped %s (exists already)\n", u.finished, u.size, data.Identifier)
+		data.Logger.Infof("%03d/%03d Skipped (exists already)", u.finished, u.size)
 		return
 	}
 
 	if err := u.preprocess(data); err != nil {
 		u.finished = u.finished + 1
-		log.Printf("%03d/%03d Error while preprocessing %s, %s\n", u.finished, u.size, data.Identifier, err)
+		data.Logger.Errorf("%03d/%03d Error while preprocessing, %s", u.finished, u.size, err)
 		return
 	}
 
@@ -72,19 +76,25 @@ func (u *uploader) Upload(data *UploadData) {
 
 	uploadQueue <- data
 	<- data.Finished
-
 }
 
 func (u *uploader) preprocess(data *UploadData) error {
+	//container := models.Container{}
 	var container models.Container
-	if err := json.Unmarshal(data.JsonRaw, &container); err != nil {
+
+	data.Logger.Debug("Start prerocessing")
+	decoder := json.NewDecoder(data.JsonFile)
+	if err := decoder.Decode(&container); err != nil {
 		return err
 	}
+	data.JsonFile.Close()
+	data.Logger.Traceln("Finished parsing")
 
-	data.JsonRaw = nil
 	container.Date = time.Unix(0, int64(container.DateInt) * int64(time.Millisecond))
 
 	container.Flatten()
+
+	data.Logger.Traceln("Flattened results")
 
 	data.States = make([]models.State, 0)
 	data.Results = container.TestResultsStructs
@@ -115,7 +125,7 @@ func (u *uploader) preprocess(data *UploadData) error {
 				continue
 			} else if _, ok := uuids[s.Uuid]; ok {
 				uuidsAreUnique = false
-				log.Printf("uuids are not unique %s %s", testResult.TestMethod.ClassName + "." + testResult.TestMethod.MethodName, data.Identifier)
+				data.Logger.Warningf("uuids are not unique %s", testResult.TestMethod.ClassName + "." + testResult.TestMethod.MethodName)
 				continue
 			}
 
@@ -138,8 +148,9 @@ func (u *uploader) preprocess(data *UploadData) error {
 	}
 
 	container.TestResults = testResultIds
-
 	data.Container = &container
+
+	data.Logger.Debug("Finished preprocessing")
 
 	return nil
 }
@@ -152,15 +163,19 @@ func upload(data *UploadData) {
 
 	var wg sync.WaitGroup
 	wg.Add(2)
+	data.Logger.Trace("Starting upload")
+
 	go func() {
-		data.uploader.database.UploadFile(database.Keylog, data.Identifier, data.Container.KeylogfileStorageId, data.Keylog)
-		data.Keylog = nil
+		data.uploader.database.UploadFile(database.Keylog, data.Identifier, data.Container.KeylogfileStorageId, data.KeylogFile)
+		data.KeylogFile.Close()
+		data.Logger.Trace("Finished uploading keylogfile")
 		wg.Done()
 	}()
 
 	go func() {
-		data.uploader.database.UploadFile(database.Pcap, data.Identifier, data.Container.PcapStorageId, data.Pcap)
-		data.Pcap = nil
+		data.uploader.database.UploadFile(database.Pcap, data.Identifier, data.Container.PcapStorageId, data.PcapFile)
+		data.PcapFile.Close()
+		data.Logger.Trace("Finished uploading pcap")
 		wg.Done()
 	}()
 
@@ -170,7 +185,7 @@ func upload(data *UploadData) {
 
 	wg.Wait()
 	data.uploader.finished = data.uploader.finished + 1
-	log.Printf("%03d/%03d Uploaded %s (%s)\n", data.uploader.finished, data.uploader.size, data.Container.Identifier, time.Since(t))
+	data.Logger.Infof("%03d/%03d Upload finished (%s)", data.uploader.finished, data.uploader.size, time.Since(t))
 	data.Finished <- true
 }
 
@@ -183,7 +198,7 @@ func scheduleUpload() {
 		}
 	}
 
-	log.Printf("Finished uploading!")
+	Logger.Infoln("Finished uploading!")
 }
 
 

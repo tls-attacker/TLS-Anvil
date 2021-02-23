@@ -8,10 +8,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
+	"os"
 	"time"
 	"uploader/src/config"
 	"uploader/src/database/models"
+	. "uploader/src/logging"
 )
 
 type BucketName int
@@ -27,7 +28,7 @@ type Database interface {
 	AddStates(documents []models.State)
 	Insert(col string, doc interface{})
 	InsertMany(col string, doc []interface{})
-	UploadFile(bucket BucketName, filename string, id primitive.ObjectID, data []byte)
+	UploadFile(bucket BucketName, filename string, id primitive.ObjectID, file *os.File)
 	ReportExists(identifier string) bool
 }
 
@@ -40,17 +41,17 @@ func NewDatabase() Database {
 	var err error
 	db.client, err = mongo.NewClient(connectionOpts)
 	if err != nil {
-		log.Fatal(err)
+		Logger.Fatal(err)
 	}
 	db.context, _ = context.WithCancel(context.Background())
 	err = db.client.Connect(db.context)
 	if err != nil {
-		log.Fatal(err)
+		Logger.Fatal(err)
 	}
 
 	q, _ := context.WithTimeout(db.context, 5 * time.Second)
 	if err := db.client.Ping(q, nil); err != nil {
-		log.Fatal("Could not connect to database: ", err)
+		Logger.Fatal("Could not connect to database: ", err)
 	}
 
 	db.database = db.client.Database("reportAnalyzer")
@@ -86,7 +87,7 @@ func (d *database) AddResults(results []models.Result) {
 		documents[i] = results[i]
 	}
 	if _, err := d.collections.results.InsertMany(d.context, documents); err != nil {
-		log.Println(err)
+		Logger.Error(err)
 	}
 }
 
@@ -98,7 +99,7 @@ func (d *database) AddStates(states []models.State) {
 		documents[i] = states[i]
 	}
 	if _, err := d.collections.states.InsertMany(d.context, documents); err != nil {
-		log.Println(err)
+		Logger.Error(err)
 	}
 }
 
@@ -106,23 +107,23 @@ func (d *database) AddContainer(document models.Container) {
 	document.CreatedAt = time.Now()
 	document.UpdatedAt = time.Now()
 	if _, err := d.collections.containers.InsertOne(d.context, document); err != nil {
-		log.Println(err)
+		Logger.Error(err)
 	}
 }
 
 func (d *database) Insert(col string, doc interface{}) {
 	if _, err := d.database.Collection(col).InsertOne(d.context, doc); err != nil {
-		log.Println(err)
+		Logger.Error(err)
 	}
 }
 
 func (d *database) InsertMany(col string, docs []interface{}) {
 	if _, err := d.database.Collection(col).InsertMany(d.context, docs); err != nil {
-		log.Println(err)
+		Logger.Error(err)
 	}
 }
 
-func (d *database) UploadFile(bucket BucketName, filename string, id primitive.ObjectID, data []byte) {
+func (d *database) UploadFile(bucket BucketName, filename string, id primitive.ObjectID, file *os.File) {
 	var b *gridfs.Bucket
 	if bucket == Keylog {
 		b = d.bucketKeylog
@@ -130,11 +131,9 @@ func (d *database) UploadFile(bucket BucketName, filename string, id primitive.O
 		b = d.bucketPcap
 	}
 
-	stream, _ := b.OpenUploadStreamWithID(id, filename)
-	defer stream.Close()
-
-	if _, err := stream.Write(data); err != nil {
-		log.Println(err)
+	err := b.UploadFromStreamWithID(id, filename, file)
+	if err != nil {
+		Logger.Error(err)
 	}
 }
 
@@ -143,7 +142,7 @@ func (d *database) ReportExists(identifier string) bool {
 	if r.Err() == mongo.ErrNoDocuments {
 		return false
 	} else if r.Err() != nil {
-		log.Println(r.Err())
+		Logger.Error(r.Err())
 		return false
 	}
 

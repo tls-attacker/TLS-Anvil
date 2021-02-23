@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	_ "net/http/pprof"
 	"os"
@@ -12,14 +11,15 @@ import (
 	"sync"
 	uploader "uploader/src"
 	"uploader/src/config"
+	. "uploader/src/logging"
 )
 
 var workers chan int
 
-func readFile(p string, target *[]byte) error {
-	c, err := ioutil.ReadFile(p)
+func openFile(p string, target **os.File) error {
+	c, err := os.Open(p)
 	if err != nil {
-		log.Println("Error while reading file ", p)
+		Logger.Error("Error while reading file ", p)
 		return err
 	}
 
@@ -46,13 +46,13 @@ func main() {
 	var err error
 	fpath, err = filepath.Abs(fpath)
 	if err != nil {
-		log.Fatalln(err)
+		Logger.Fatalln(err)
 	}
 
 	var stat os.FileInfo
 	stat, err = os.Stat(fpath)
 	if err != nil {
-		log.Fatalln(err)
+		Logger.Fatalln(err)
 	} else if !stat.IsDir() {
 		fpath = filepath.Dir(fpath)
 	}
@@ -60,7 +60,7 @@ func main() {
 	files := make([]string, 0)
 	filepath.Walk(fpath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			log.Fatalln(err)
+			Logger.Fatalln(err)
 		}
 
 		if strings.Contains(path, "/testResults.json") {
@@ -75,18 +75,20 @@ func main() {
 	for _, v := range files {
 		workerId := <- workers
 
+		Logger.Debugf("Use preprocessing worker %d", workerId)
+
 		dir := path.Dir(v)
 		uploadData := &uploader.UploadData{}
 
-		if err = readFile(v, &uploadData.JsonRaw); err != nil {
+		if err = openFile(v, &uploadData.JsonFile); err != nil {
 			continue
 		}
 
-		if err = readFile(filepath.Join(dir, "keyfile.log"), &uploadData.Keylog); err != nil {
+		if err = openFile(filepath.Join(dir, "keyfile.log"), &uploadData.KeylogFile); err != nil {
 			continue
 		}
 
-		if err = readFile(filepath.Join(dir, "dump.pcap"), &uploadData.Pcap); err != nil {
+		if err = openFile(filepath.Join(dir, "dump.pcap"), &uploadData.PcapFile); err != nil {
 			continue
 		}
 

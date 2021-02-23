@@ -40,6 +40,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -54,6 +55,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import sun.net.ext.ExtendedSocketOptions;
 
 @RFC(number = 8446, section = "4.2 Extensions")
 @ClientTest
@@ -155,6 +157,12 @@ public class Extensions extends Tls13Test {
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
+            if(msg != null && msg.getDescription().getValue() == AlertDescription.UNSUPPORTED_EXTENSION.getValue()
+                    && !context.getReceivedClientHelloMessage().containsExtension(ExtensionType.HEARTBEAT)
+                    && i.getResult() == TestResult.PARTIALLY_SUCCEEDED) {
+                i.setResult(TestResult.SUCCEEDED);
+                i.addAdditionalResultInfo("Description is acceptable as Heartbeat was not proposed by client");
+            }
         });
     }
 }

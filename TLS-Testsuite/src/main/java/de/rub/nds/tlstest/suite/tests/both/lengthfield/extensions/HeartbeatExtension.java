@@ -40,7 +40,7 @@ public class HeartbeatExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @TlsTest(description = "Send a Heartbeat Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send a Heartbeat Extension in the Hello Message with a modified length value (-1)")
     @ScopeLimitations(DerivationType.INCLUDE_HEARTBEAT_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "targetCanBeTested")
@@ -56,7 +56,7 @@ public class HeartbeatExtension extends TlsGenericTest {
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @TlsTest(description = "Send a Heartbeat Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send a Heartbeat Extension in the Hello Message with a modified length value (-1)")
     @ScopeLimitations(DerivationType.INCLUDE_HEARTBEAT_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)

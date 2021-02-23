@@ -24,7 +24,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ECDH)
 public class ECPointFormatExtension extends TlsGenericTest {
 
-    @TlsTest(description = "Send an EC Point Format Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send an EC Point Format Extension in the Hello Message with a modified length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -33,14 +33,14 @@ public class ECPointFormatExtension extends TlsGenericTest {
         genericExtensionLengthTest(runner, argumentAccessor, config, ECPointFormatExtensionMessage.class);
     }
 
-    @TlsTest(description = "Send an EC Point Format Extension in the Hello Message with a modified formats list length value")
+    @TlsTest(description = "Send an EC Point Format Extension in the Hello Message with a modified formats list length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void pointFormatExtensionFormatsLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         ECPointFormatExtensionMessage pointFormatExtension = getTargetedExtension(ECPointFormatExtensionMessage.class, workflowTrace);
-        pointFormatExtension.setPointFormatsLength(Modifiable.add(10));
+        pointFormatExtension.setPointFormatsLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
 }

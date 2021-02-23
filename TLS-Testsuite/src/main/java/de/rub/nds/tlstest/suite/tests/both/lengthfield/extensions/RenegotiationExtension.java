@@ -84,7 +84,7 @@ public class RenegotiationExtension extends TlsGenericTest {
         versionBasedConfig.setAddRenegotiationInfoExtension(true);
         WorkflowTrace workflowTrace = setupLengthFieldTestForConfig(versionBasedConfig, runner, argumentAccessor);
         RenegotiationInfoExtensionMessage renegotiationExtension = getTargetedExtension(RenegotiationInfoExtensionMessage.class, workflowTrace);
-        renegotiationExtension.setRenegotiationInfoLength(Modifiable.add(10));
+        renegotiationExtension.setRenegotiationInfoLength(Modifiable.add(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
 }

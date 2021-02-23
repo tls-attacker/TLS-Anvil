@@ -39,7 +39,7 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @TlsTest(description = "Send an Extended Master Secret Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send an Extended Master Secret Extension in the Hello Message with a modified length value (+1)")
     @ScopeLimitations(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "targetCanBeTested")
@@ -48,14 +48,14 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
     public void extendedMasterSecretExtensionLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         config.setAddExtendedMasterSecretExtension(true);
-        genericExtensionLengthTest(runner, argumentAccessor, config, ExtendedMasterSecretExtensionMessage.class);
+        emptyExtensionLengthTest(runner, argumentAccessor, config, ExtendedMasterSecretExtensionMessage.class);
     }
     
     @Tag("tls13")
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @TlsTest(description = "Send an Extended Master Secret Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send an Extended Master Secret Extension in the Hello Message with a modified length value (+1)")
     @ScopeLimitations(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -63,6 +63,6 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
     public void extendedMasterSecretExtensionLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddExtendedMasterSecretExtension(true);
-        genericExtensionLengthTest(runner, argumentAccessor, config, ExtendedMasterSecretExtensionMessage.class);
+        emptyExtensionLengthTest(runner, argumentAccessor, config, ExtendedMasterSecretExtensionMessage.class);
     }
 }

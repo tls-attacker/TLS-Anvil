@@ -75,7 +75,7 @@ public class ALPNExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @TlsTest(description = "Send an ALPN Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send an ALPN Extension in the Hello Message with a modified length value (-1)")
     @ScopeLimitations(DerivationType.INCLUDE_ALPN_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "targetCanBeTested")
@@ -90,7 +90,7 @@ public class ALPNExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @TlsTest(description = "Send an ALPN Extension in the Hello Message with a modified protocols list length value")
+    @TlsTest(description = "Send an ALPN Extension in the Hello Message with a modified protocols list length value (-1)")
     @ScopeLimitations(DerivationType.INCLUDE_ALPN_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "targetCanBeTested")
@@ -105,7 +105,7 @@ public class ALPNExtension extends TlsGenericTest {
         versionBasedConfig.setAddAlpnExtension(true);
         WorkflowTrace workflowTrace = setupLengthFieldTestForConfig(versionBasedConfig, runner, argumentAccessor);
         AlpnExtensionMessage alpnExtension = getTargetedExtension(AlpnExtensionMessage.class, workflowTrace);
-        alpnExtension.setProposedAlpnProtocolsLength(Modifiable.add(10));
+        alpnExtension.setProposedAlpnProtocolsLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
 }

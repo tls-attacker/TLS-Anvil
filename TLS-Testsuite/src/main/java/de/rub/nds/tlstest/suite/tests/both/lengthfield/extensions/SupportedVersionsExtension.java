@@ -42,7 +42,7 @@ public class SupportedVersionsExtension extends TlsGenericTest {
     public void supportedVersionsListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         SupportedVersionsExtensionMessage supportedVersions = getTargetedExtension(SupportedVersionsExtensionMessage.class, workflowTrace);
-        supportedVersions.setSupportedVersionsLength(Modifiable.add(10));
+        supportedVersions.setSupportedVersionsLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(this::validateLengthTest);
     }
 }

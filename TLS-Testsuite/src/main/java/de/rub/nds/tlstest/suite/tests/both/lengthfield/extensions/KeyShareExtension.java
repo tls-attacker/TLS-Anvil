@@ -25,7 +25,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class KeyShareExtension extends TlsGenericTest {
     
-    @TlsTest(description = "Send a Key Share Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send a Key Share Extension in the Hello Message with a modified length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -35,14 +35,14 @@ public class KeyShareExtension extends TlsGenericTest {
     }
     
     @ServerTest
-    @TlsTest(description = "Send a Key Share Extension in the Hello Message with a modified entry list length value")
+    @TlsTest(description = "Send a Key Share Extension in the Hello Message with a modified entry list length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void keyShareEntryListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         KeyShareExtensionMessage keyShareExtension = getTargetedExtension(KeyShareExtensionMessage.class, workflowTrace);
-        keyShareExtension.setKeyShareListLength(Modifiable.add(10));
+        keyShareExtension.setKeyShareListLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
 }

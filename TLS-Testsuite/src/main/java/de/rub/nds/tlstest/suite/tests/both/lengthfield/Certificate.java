@@ -82,20 +82,20 @@ public class Certificate extends TlsGenericTest {
     public void certificateRequestContextLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         CertificateMessage certificateMessage = (CertificateMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CERTIFICATE, workflowTrace);
-        certificateMessage.setRequestContextLength(Modifiable.add(10));
+        certificateMessage.setRequestContextLength(Modifiable.add(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
     
     private void certificateMessagLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
         CertificateMessage certificateMessage = (CertificateMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CERTIFICATE, workflowTrace);
-        certificateMessage.setLength(Modifiable.add(10));
+        certificateMessage.setLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest); 
     }
     
     private void certificateListLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
         CertificateMessage certificateMessage = (CertificateMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CERTIFICATE, workflowTrace);
-        certificateMessage.setCertificatesListLength(Modifiable.add(10));
+        certificateMessage.setCertificatesListLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
 }

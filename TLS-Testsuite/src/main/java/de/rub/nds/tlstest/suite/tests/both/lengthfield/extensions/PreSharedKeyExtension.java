@@ -54,7 +54,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     public void preSharedKeyExtensionLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
-        pskExtension.setExtensionLength(Modifiable.add(10));
+        pskExtension.setExtensionLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
@@ -67,7 +67,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     public void preSharedKeyExtensionIdentityListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
-        pskExtension.setIdentityListLength(Modifiable.add(10));
+        pskExtension.setIdentityListLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
         
@@ -80,7 +80,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     public void preSharedKeyExtensionBinderListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
-        pskExtension.setBinderListLength(Modifiable.add(10));
+        pskExtension.setBinderListLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
@@ -88,6 +88,10 @@ public class PreSharedKeyExtension extends TlsGenericTest {
         Config config = context.getConfig().createTls13Config();
         config.setAddPSKKeyExchangeModesExtension(true);
         config.setAddPreSharedKeyExtension(true);
+        //RFC 8446: Servers SHOULD NOT attempt to validate multiple binders;
+        //rather, they SHOULD select a single PSK and validate solely the
+        //binder that corresponds to that PSK.
+        config.setLimitPsksToOne(Boolean.TRUE);
         prepareConfig(config, argumentAccessor, runner);
         return runner.generateWorkflowTrace(WorkflowTraceType.FULL_TLS13_PSK);
     }

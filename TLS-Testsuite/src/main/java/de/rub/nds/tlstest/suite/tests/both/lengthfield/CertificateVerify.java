@@ -39,7 +39,7 @@ public class CertificateVerify extends TlsGenericTest {
     public void certificateVerifyLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         CertificateVerifyMessage certVerifyMsg = (CertificateVerifyMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CERTIFICATE_VERIFY, workflowTrace);
-        certVerifyMsg.setLength(Modifiable.add(10));
+        certVerifyMsg.setLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
@@ -50,7 +50,7 @@ public class CertificateVerify extends TlsGenericTest {
     public void certificateVerifySignatureLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         CertificateVerifyMessage certVerifyMsg = (CertificateVerifyMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CERTIFICATE_VERIFY, workflowTrace);
-        certVerifyMsg.setSignatureLength(Modifiable.add(10));
+        certVerifyMsg.setSignatureLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
 }

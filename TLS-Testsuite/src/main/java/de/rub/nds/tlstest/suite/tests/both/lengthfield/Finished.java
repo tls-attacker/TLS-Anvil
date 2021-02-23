@@ -55,7 +55,7 @@ public class Finished extends TlsGenericTest {
     
     private void finishedLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
        FinishedMessage finishedMessage = (FinishedMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.FINISHED, workflowTrace);
-       finishedMessage.setLength(Modifiable.add(10)); 
+       finishedMessage.setLength(Modifiable.sub(1)); 
        if((runner.getPreparedConfig().getHighestProtocolVersion() != ProtocolVersion.TLS13 && context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT)
                || (runner.getPreparedConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13 && context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER)) {
            workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));

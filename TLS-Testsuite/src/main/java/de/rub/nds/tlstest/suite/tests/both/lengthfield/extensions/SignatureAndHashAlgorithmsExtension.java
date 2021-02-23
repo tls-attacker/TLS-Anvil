@@ -79,7 +79,7 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
         versionBasedConfig.setAddSignatureAndHashAlgorithmsExtension(true);
         WorkflowTrace workflowTrace = setupLengthFieldTestForConfig(versionBasedConfig, runner, argumentAccessor);
         SignatureAndHashAlgorithmsExtensionMessage sigAndHashAlgorithmsExtension = getTargetedExtension(SignatureAndHashAlgorithmsExtensionMessage.class, workflowTrace);
-        sigAndHashAlgorithmsExtension.setSignatureAndHashAlgorithmsLength(Modifiable.add(10));
+        sigAndHashAlgorithmsExtension.setSignatureAndHashAlgorithmsLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
 }

@@ -167,31 +167,31 @@ public class Hello extends TlsGenericTest {
     
     private void clientHelloCompressionLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
         ClientHelloMessage helloMessage = (ClientHelloMessage) getHelloMessage(workflowTrace);
-        helloMessage.setCompressionLength(Modifiable.add(10));
+        helloMessage.setCompressionLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
     private void clientHelloCipherSuitesLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
         ClientHelloMessage helloMessage = (ClientHelloMessage) getHelloMessage(workflowTrace);
-        helloMessage.setCipherSuiteLength(Modifiable.add(10)); 
+        helloMessage.setCipherSuiteLength(Modifiable.sub(1)); 
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
     private void helloExtensionsLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
         HelloMessage helloMessage = getHelloMessage(workflowTrace);
-        helloMessage.setExtensionsLength(Modifiable.add(10)); 
+        helloMessage.setExtensionsLength(Modifiable.sub(1)); 
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
     private void helloLenghtTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
         HelloMessage helloMessage = getHelloMessage(workflowTrace);
-        helloMessage.setLength(Modifiable.add(10)); 
+        helloMessage.setLength(Modifiable.sub(1)); 
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
     private void sessionIdLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
        HelloMessage helloMessage = getHelloMessage(workflowTrace);
-       helloMessage.setSessionIdLength(Modifiable.add(10));   
+       helloMessage.setSessionIdLength(Modifiable.add(1));   
        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest); 
     }
     

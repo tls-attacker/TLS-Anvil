@@ -37,7 +37,7 @@ public class EncryptedExtensions extends TlsGenericTest {
     public void encryptedExtensionsLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         EncryptedExtensionsMessage encryptedExtensions = (EncryptedExtensionsMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);
-        encryptedExtensions.setLength(Modifiable.add(10));
+        encryptedExtensions.setLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
@@ -48,7 +48,7 @@ public class EncryptedExtensions extends TlsGenericTest {
     public void encryptedExtensionsExtensionsLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         EncryptedExtensionsMessage encryptedExtensions = (EncryptedExtensionsMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);
-        encryptedExtensions.setExtensionsLength(Modifiable.add(10));
+        encryptedExtensions.setExtensionsLength(Modifiable.add(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
 }

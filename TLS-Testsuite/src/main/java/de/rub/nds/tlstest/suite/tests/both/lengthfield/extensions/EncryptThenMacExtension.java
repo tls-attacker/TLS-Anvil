@@ -40,7 +40,7 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @TlsTest(description = "Send an Encrypt-Then-Mac Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send an Encrypt-Then-Mac Extension in the Hello Message with a modified length value (+1)")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "targetCanBeTested")
@@ -49,14 +49,14 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     public void encryptThenMacExtensionLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         config.setAddEncryptThenMacExtension(true);
-        genericExtensionLengthTest(runner, argumentAccessor, config, EncryptThenMacExtensionMessage.class);
+        emptyExtensionLengthTest(runner, argumentAccessor, config, EncryptThenMacExtensionMessage.class);
     }
     
     @ServerTest
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @TlsTest(description = "Send an Encrypt-Then-Mac Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send an Encrypt-Then-Mac Extension in the Hello Message with a modified length value (+1)")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -64,6 +64,6 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     public void encryptThenMacExtensionLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddEncryptThenMacExtension(true);
-        genericExtensionLengthTest(runner, argumentAccessor, config, EncryptThenMacExtensionMessage.class);
+        emptyExtensionLengthTest(runner, argumentAccessor, config, EncryptThenMacExtensionMessage.class);
     }
 }

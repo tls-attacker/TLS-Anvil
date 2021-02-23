@@ -29,10 +29,9 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class PSKKeyExchangeModesExtension extends TlsGenericTest {
     
-    @TlsTest(description = "Send a Pre Shared Key Exchange Modes Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send a Pre Shared Key Exchange Modes Extension in the Hello Message with a modified length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @ScopeLimitations(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
-    @MethodCondition(method = "targetCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void pskKeyExchangeModesExtensionLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -41,10 +40,9 @@ public class PSKKeyExchangeModesExtension extends TlsGenericTest {
         genericExtensionLengthTest(runner, argumentAccessor, config, PSKKeyExchangeModesExtensionMessage.class);
     }
     
-    @TlsTest(description = "Send a Pre Shared Key Exchange Modes Extension in the Hello Message with a modified length value")
+    @TlsTest(description = "Send a Pre Shared Key Exchange Modes Extension in the Hello Message with a modified length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @ScopeLimitations(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
-    @MethodCondition(method = "targetCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void pskKeyExchangeModesExtensionListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -52,7 +50,7 @@ public class PSKKeyExchangeModesExtension extends TlsGenericTest {
         config.setAddPSKKeyExchangeModesExtension(true);
         WorkflowTrace workflowTrace = setupLengthFieldTestForConfig(config, runner, argumentAccessor);
         PSKKeyExchangeModesExtensionMessage keyExchangeModes = getTargetedExtension(PSKKeyExchangeModesExtensionMessage.class, workflowTrace);
-        keyExchangeModes.setKeyExchangeModesListLength(Modifiable.add(10));
+        keyExchangeModes.setKeyExchangeModesListLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);        
     }
 }

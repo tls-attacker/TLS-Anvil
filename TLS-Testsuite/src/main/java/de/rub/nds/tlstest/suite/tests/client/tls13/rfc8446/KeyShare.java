@@ -106,10 +106,9 @@ public class KeyShare extends Tls13Test {
             + "that the server has selected for the negotiated key exchange.")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void selectInvalidKeyshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

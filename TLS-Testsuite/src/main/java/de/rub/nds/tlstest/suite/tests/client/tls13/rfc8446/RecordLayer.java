@@ -65,10 +65,9 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Implementations MUST NOT send "
             + "zero-length fragments of Handshake types, even "
             + "if those fragments contain padding.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void zeroLengthRecord_ServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -94,10 +93,9 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Implementations MUST NOT send "
             + "zero-length fragments of Handshake types, even "
             + "if those fragments contain padding.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void zeroLengthRecord_Finished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -131,9 +129,8 @@ public class RecordLayer extends Tls13Test {
             + "records, there MUST NOT be any other records between them.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @ScopeExtensions(DerivationType.ALERT)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "supportsRecordFragmentation")
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -176,11 +173,10 @@ public class RecordLayer extends Tls13Test {
     @ExplicitValues(affectedTypes = DerivationType.CHOSEN_HANDSHAKE_MSG, methods = "getModifiableHandshakeMessages")
     @ManualConfig(DerivationType.CHOSEN_HANDSHAKE_MSG)
     @Tag("emptyRecord")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendEmptyZeroLengthRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         HandshakeMessageType affectedMessage = derivationContainer.getDerivation(ChosenHandshakeMessageDerivation.class).getSelectedValue();

@@ -11,6 +11,7 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -34,6 +35,7 @@ public class EncryptedExtensions extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void encryptedExtensionsLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         EncryptedExtensionsMessage encryptedExtensions = (EncryptedExtensionsMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);
@@ -45,6 +47,7 @@ public class EncryptedExtensions extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void encryptedExtensionsExtensionsLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         EncryptedExtensionsMessage encryptedExtensions = (EncryptedExtensionsMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);

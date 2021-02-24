@@ -57,8 +57,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             + "The \"version\" value in a ServerHello or HelloRetryRequest")
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -78,8 +77,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @ScopeLimitations(DerivationType.CIPHERSUITE)
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite greaseCipher = derivationContainer.getDerivation(GreaseCipherSuiteDerivation.class).getSelectedValue();
@@ -99,8 +97,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             + "Any ServerHello extension")
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendServerHelloGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ExtensionType greaseExtension = derivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
@@ -123,9 +120,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @ScopeExtensions(DerivationType.GREASE_NAMED_GROUP)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void selectGreaseNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -145,9 +141,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
     @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void selectGreaseSignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

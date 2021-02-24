@@ -10,6 +10,7 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -31,6 +32,7 @@ public class Certificate extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void certificateMessageLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         certificateMessagLengthTest(workflowTrace, runner);
@@ -43,6 +45,7 @@ public class Certificate extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void certificateListLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         certificateListLengthTest(workflowTrace, runner);
@@ -55,6 +58,7 @@ public class Certificate extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void certificateMessageLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         certificateMessagLengthTest(workflowTrace, runner);
@@ -67,6 +71,7 @@ public class Certificate extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void certificateListLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         certificateListLengthTest(workflowTrace, runner);
@@ -79,6 +84,7 @@ public class Certificate extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void certificateRequestContextLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         CertificateMessage certificateMessage = (CertificateMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CERTIFICATE, workflowTrace);

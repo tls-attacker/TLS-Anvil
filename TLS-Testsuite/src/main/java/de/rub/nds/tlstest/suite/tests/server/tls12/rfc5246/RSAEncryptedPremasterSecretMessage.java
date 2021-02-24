@@ -52,7 +52,7 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void PMWithWrongClientVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -80,7 +80,7 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void PMWithWrongPKCS1Padding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

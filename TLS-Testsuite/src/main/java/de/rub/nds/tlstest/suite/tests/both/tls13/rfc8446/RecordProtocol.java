@@ -55,9 +55,8 @@ public class RecordProtocol extends Tls13Test {
             + "defined in this document unless negotiated by some extension. "
             + "If a TLS implementation receives an unexpected record type, "
             + "it MUST terminate the connection with an \"unexpected_message\" alert.")
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @RecordLayerCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.LOW)
     public void invalidRecordContentType(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -88,9 +87,8 @@ public class RecordProtocol extends Tls13Test {
             + "If a TLS implementation receives an unexpected record type, "
             + "it MUST terminate the connection with an \"unexpected_message\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @RecordLayerCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.LOW)
     public void invalidRecordContentTypeAfterEncryption(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -121,7 +119,7 @@ public class RecordProtocol extends Tls13Test {
     @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -139,7 +137,12 @@ public class RecordProtocol extends Tls13Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(trace, c).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+
+            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, alert);
+        });
     }
 
     @TlsTest(description = "The length (in bytes) of the following "
@@ -147,12 +150,11 @@ public class RecordProtocol extends Tls13Test {
             + "endpoint that receives a record that exceeds this length MUST "
             + "terminate the connection with a \"record_overflow\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RFC(number = 8446, section = "5.1. Record Layer")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -191,7 +193,7 @@ public class RecordProtocol extends Tls13Test {
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -209,7 +211,12 @@ public class RecordProtocol extends Tls13Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(trace, c).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+
+            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, alert);
+        });
     }
 
     @TlsTest(description = "All encrypted TLS records can be padded to inflate the size of the "
@@ -233,12 +240,11 @@ public class RecordProtocol extends Tls13Test {
             + "An endpoint that receives a record that exceeds this "
             + "length MUST terminate the connection with a \"record_overflow\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendRecordWithCiphertextOver2pow14plus256(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -266,9 +272,10 @@ public class RecordProtocol extends Tls13Test {
 
     @TlsTest(description = "Send a record without any content.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.PROTOCOL_MESSAGE_TYPE)
+    @AlertCategory(SeverityLevel.LOW)
     @Tag("emptyRecord")
     public void sendEmptyRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

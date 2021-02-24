@@ -34,10 +34,9 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class Cookie extends Tls13Test {
 
     @TlsTest(description = "Clients MUST NOT use cookies in their initial ClientHello in subsequent connections.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void clientHelloContainsCookieExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

@@ -49,10 +49,9 @@ public class PreSharedKeyExchangeModes extends Tls13Test {
 
     @TlsTest(description = "The server MUST NOT send a \"psk_key_exchange_modes\" extension.")
     @MethodCondition(method = "supportsPSKModeExtension")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendPSKModeExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

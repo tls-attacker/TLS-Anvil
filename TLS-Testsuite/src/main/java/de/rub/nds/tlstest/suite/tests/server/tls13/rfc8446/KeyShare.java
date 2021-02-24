@@ -68,7 +68,6 @@ public class KeyShare extends Tls13Test {
             + "to a group offered in the \"supported_groups\" extension "
             + "and MUST appear in the same order.")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void testOrderOfKeyshareEntries(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -156,7 +155,6 @@ public class KeyShare extends Tls13Test {
 
     @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
     @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getLegacyGroups")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)
@@ -171,7 +169,6 @@ public class KeyShare extends Tls13Test {
 
     @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)

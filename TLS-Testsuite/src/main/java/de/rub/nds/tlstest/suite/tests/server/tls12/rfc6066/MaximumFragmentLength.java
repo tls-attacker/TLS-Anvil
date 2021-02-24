@@ -37,9 +37,8 @@ public class MaximumFragmentLength extends Tls12Test {
 
     @TlsTest(description = "If a server receives a maximum fragment length negotiation request for "+
             "a value other than the allowed values, it MUST abort the handshake with an \"illegal_parameter\" alert.")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidMaximumFragmentLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

@@ -46,7 +46,7 @@ public class Finished extends Tls13Test {
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

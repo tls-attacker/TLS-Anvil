@@ -63,7 +63,6 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "clients MUST NOT treat GREASE values diﬀerently from any unknown value.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void advertiseGreaseExtensionsInSessionTicket(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -84,7 +83,6 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "The \"version\" value in a ServerHello or HelloRetryRequest")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -112,7 +110,6 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
     @ScopeLimitations(DerivationType.CIPHERSUITE)
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -137,7 +134,6 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "if a GREASE value appears in any of the following: "
             + "Any ServerHello extension")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
@@ -164,10 +160,9 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "Any EncryptedExtensions extension")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendEncryptedExtensionsGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -185,12 +180,11 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "if a GREASE value appears in any of the following: "
             + "The signature algorithm in a server CertiﬁcateVerify signature in TLS 1.3")
     @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @CertificateCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendCertificateVerifyGreaseSignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

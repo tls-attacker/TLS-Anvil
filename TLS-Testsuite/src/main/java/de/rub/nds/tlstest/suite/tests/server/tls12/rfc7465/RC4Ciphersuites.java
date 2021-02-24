@@ -115,7 +115,7 @@ public class RC4Ciphersuites extends Tls12Test {
     @CryptoCategory(SeverityLevel.MEDIUM)
     @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void onlyRC4Suites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

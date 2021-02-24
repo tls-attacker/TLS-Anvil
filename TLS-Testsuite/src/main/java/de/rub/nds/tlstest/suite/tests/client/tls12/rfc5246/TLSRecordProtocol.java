@@ -45,7 +45,7 @@ public class TLSRecordProtocol extends Tls12Test {
             + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
             + "record type, it MUST send an unexpected_message alert.")
     @RecordLayerCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.LOW)
     public void sendNotDefinedRecordTypesWithServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -74,7 +74,7 @@ public class TLSRecordProtocol extends Tls12Test {
             + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
             + "record type, it MUST send an unexpected_message alert.")
     @RecordLayerCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.LOW)
     public void sendNotDefinedRecordTypesWithCCSAndFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

@@ -150,6 +150,7 @@ public class PreSharedKey extends Tls13Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.LOW)
     public void invalidBinder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddPSKKeyExchangeModesExtension(true);
@@ -176,6 +177,7 @@ public class PreSharedKey extends Tls13Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.LOW)
     public void noBinder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddPSKKeyExchangeModesExtension(true);

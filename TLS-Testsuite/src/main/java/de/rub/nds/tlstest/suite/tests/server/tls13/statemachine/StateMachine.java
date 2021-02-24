@@ -48,9 +48,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 public class StateMachine extends Tls13Test {
 
     @TlsTest(description = "Send two Client Hello Messages at the beginning of the Handshake")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void secondClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -58,9 +57,8 @@ public class StateMachine extends Tls13Test {
     }
 
     @TlsTest(description = "Send a second Client Hello after receiving the server's Handshake messages")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void secondClientHelloAfterServerHelloMessages(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -71,9 +69,8 @@ public class StateMachine extends Tls13Test {
     @TestDescription("An implementation may receive an unencrypted record of type "
             + "change_cipher_spec consisting of the single byte value 0x01 at any "
             + "time after the first ClientHello message has been sent or received")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void beginWithChangeCipherSpec(WorkflowRunner runner) {
         Config config = getConfig();
@@ -82,7 +79,6 @@ public class StateMachine extends Tls13Test {
 
     @Test
     @TestDescription("Begin the Handshake with Application Data")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -94,9 +90,8 @@ public class StateMachine extends Tls13Test {
 
     @Test
     @TestDescription("Begin the Handshake with a Finished Message")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
@@ -109,9 +104,8 @@ public class StateMachine extends Tls13Test {
             + "treated as an unexpected record type (though stateless servers may "
             + "not be able to distinguish these cases from allowed cases).")
     @RFC(number = 8446, section = "5. Record Protocol")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void sendLegacyChangeCipherSpecAfterFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -127,9 +121,8 @@ public class StateMachine extends Tls13Test {
             + "which receives a protected change_cipher_spec record MUST abort the "
             + "handshake with an \"unexpected_message\" alert.")
     @RFC(number = 8446, section = "5. Record Protocol")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void sendEncryptedChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -147,9 +140,8 @@ public class StateMachine extends Tls13Test {
     }
 
     @TlsTest(description = "Send a legacy ECDH Client Key Exchange Message instead of just a Finished")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void sendLegacyFlowECDHClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -161,9 +153,8 @@ public class StateMachine extends Tls13Test {
     }
 
     @TlsTest(description = "Send a legacy DH Client Key Exchange Message instead of just a Finished")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void sendLegacyFlowDHClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -175,9 +166,8 @@ public class StateMachine extends Tls13Test {
     }
 
     @TlsTest(description = "Send a legacy RSA Client Key Exchange Message instead of just a Finished")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void sendLegacyFlowRSAClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

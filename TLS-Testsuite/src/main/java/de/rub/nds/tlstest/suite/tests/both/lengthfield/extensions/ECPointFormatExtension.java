@@ -8,6 +8,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -28,6 +29,7 @@ public class ECPointFormatExtension extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void pointFormatExtensionLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         genericExtensionLengthTest(runner, argumentAccessor, config, ECPointFormatExtensionMessage.class);
@@ -37,6 +39,7 @@ public class ECPointFormatExtension extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void pointFormatExtensionFormatsLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         ECPointFormatExtensionMessage pointFormatExtension = getTargetedExtension(ECPointFormatExtensionMessage.class, workflowTrace);

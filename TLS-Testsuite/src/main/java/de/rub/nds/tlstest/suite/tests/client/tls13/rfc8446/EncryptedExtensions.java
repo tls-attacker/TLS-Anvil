@@ -62,7 +62,6 @@ public class EncryptedExtensions extends Tls13Test {
             + "for the presence of any forbidden extensions and if "
             + "any are found MUST abort the handshake "
             + "with an \"illegal_parameter\" alert.")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -86,7 +85,6 @@ public class EncryptedExtensions extends Tls13Test {
             + "for the presence of any forbidden extensions and if "
             + "any are found MUST abort the handshake "
             + "with an \"illegal_parameter\" alert.")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -110,7 +108,6 @@ public class EncryptedExtensions extends Tls13Test {
     @TlsTest(description = "Similarly, if a client receives a maximum fragment length negotiation "
             + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -139,7 +136,6 @@ public class EncryptedExtensions extends Tls13Test {
     @TlsTest(description = "Similarly, if a client receives a maximum fragment length negotiation "
             + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)

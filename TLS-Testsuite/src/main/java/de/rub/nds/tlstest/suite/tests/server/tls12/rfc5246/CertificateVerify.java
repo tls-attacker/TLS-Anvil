@@ -25,6 +25,7 @@ import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -56,6 +57,7 @@ public class CertificateVerify extends Tls12Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @CertificateCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.LOW)
     public void invalidCertificateVerify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

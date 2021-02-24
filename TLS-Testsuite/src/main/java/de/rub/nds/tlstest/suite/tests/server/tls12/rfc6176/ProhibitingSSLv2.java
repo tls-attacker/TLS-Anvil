@@ -42,7 +42,7 @@ public class ProhibitingSSLv2 extends Tls12Test {
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendSSL2CompatibleClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -62,7 +62,7 @@ public class ProhibitingSSLv2 extends Tls12Test {
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendClientHelloVersionLower0300(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

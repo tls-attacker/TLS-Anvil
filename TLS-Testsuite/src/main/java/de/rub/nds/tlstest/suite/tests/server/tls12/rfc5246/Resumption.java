@@ -87,7 +87,6 @@ public class Resumption extends Tls12Test {
     @SecurityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.LOW)
-    @InteroperabilityCategory(SeverityLevel.LOW)
     public void rejectSniDisparityResumption(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
@@ -127,7 +126,6 @@ public class Resumption extends Tls12Test {
     @SecurityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.LOW)
-    @InteroperabilityCategory(SeverityLevel.LOW)
     public void serverHelloSniInResumption(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);

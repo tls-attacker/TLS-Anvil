@@ -63,7 +63,6 @@ public class SignatureAlgorithms extends Tls13Test {
             + "and the client has not sent a \"signature_algorithms\" extension, "
             + "then the server MUST abort the handshake with "
             + "a \"missing_extension\" alert (see Section 9.2).")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -135,7 +134,7 @@ public class SignatureAlgorithms extends Tls13Test {
     @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.MEDIUM)
     public void offerOnlyLegacySignatureAlgorithms(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -153,7 +152,6 @@ public class SignatureAlgorithms extends Tls13Test {
     @TlsTest(description = "Perform a Handshake where the Signature and Hash Algorithms Extension contains an additional, undefined algorithm")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void includeUnknownSignatureAndHashAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

@@ -11,6 +11,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -33,6 +34,7 @@ public class ClientKeyExchange extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void clientKeyExchangeLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         ClientKeyExchangeMessage clientKeyExchange = (ClientKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_KEY_EXCHANGE, workflowTrace);
@@ -44,6 +46,7 @@ public class ClientKeyExchange extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void clientKeyExchangePublicKeyLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         ClientKeyExchangeMessage clientKeyExchange = (ClientKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_KEY_EXCHANGE, workflowTrace);

@@ -40,9 +40,9 @@ public class D5_SecurityRestrictions extends Tls13Test {
             "records with a version less than 0x0300 (but may inadvertently " +
             "do so if the record version number is ignored completely).")
     @RFC(number = 8446, section = "D.5. Security Restrictions Related to Backward Compatibility")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void invalidRecordVersion_ssl30(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

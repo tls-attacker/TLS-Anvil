@@ -53,7 +53,7 @@ public class AEADCiphers extends Tls12Test {
     @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isAEAD")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -93,7 +93,7 @@ public class AEADCiphers extends Tls12Test {
     @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

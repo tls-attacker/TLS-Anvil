@@ -67,7 +67,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendClientHelloVersion0300(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -83,15 +83,8 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
             Validator.receivedFatalAlert(i);
-
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            byte description = msg.getDescription().getValue();
-            try {
-                assertEquals(AssertMsgs.NoFatalAlert, AlertDescription.PROTOCOL_VERSION.getValue(), description);
-            } catch (AssertionError err) {
-                i.addAdditionalResultInfo(String.format("Received invalid alert description. Execpted: %s, got: %s", AlertDescription.PROTOCOL_VERSION, AlertDescription.getAlertDescription(description)));
-            }
-
+            Validator.testAlertDescription(i, AlertDescription.PROTOCOL_VERSION, msg);
         });
 
     }

@@ -10,6 +10,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -33,6 +34,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void renegotiationExtensionLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         config.setAddRenegotiationInfoExtension(true);
@@ -47,6 +49,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void renegotiationExtensionLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddRenegotiationInfoExtension(true);
@@ -61,6 +64,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void renegotiationExtensionInfoLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         renegotiationExtensionInfoLengthTest(config, runner, argumentAccessor);
@@ -74,6 +78,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void renegotiationExtensionInfoLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         renegotiationExtensionInfoLengthTest(config, runner, argumentAccessor);

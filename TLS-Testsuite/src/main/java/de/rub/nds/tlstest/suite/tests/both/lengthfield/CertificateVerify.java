@@ -11,6 +11,7 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -36,6 +37,7 @@ public class CertificateVerify extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void certificateVerifyLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         CertificateVerifyMessage certVerifyMsg = (CertificateVerifyMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CERTIFICATE_VERIFY, workflowTrace);
@@ -47,6 +49,7 @@ public class CertificateVerify extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void certificateVerifySignatureLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         CertificateVerifyMessage certVerifyMsg = (CertificateVerifyMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CERTIFICATE_VERIFY, workflowTrace);

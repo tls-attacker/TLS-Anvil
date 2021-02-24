@@ -11,6 +11,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -46,6 +47,7 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     @MethodCondition(method = "targetCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void encryptThenMacExtensionLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         config.setAddEncryptThenMacExtension(true);
@@ -61,6 +63,7 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void encryptThenMacExtensionLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddEncryptThenMacExtension(true);

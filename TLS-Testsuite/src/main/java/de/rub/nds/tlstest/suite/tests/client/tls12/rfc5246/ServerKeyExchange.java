@@ -64,7 +64,7 @@ public class ServerKeyExchange extends Tls12Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void invalidServerKeyExchangeSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] bitmask = derivationContainer.buildBitmask();
@@ -103,7 +103,7 @@ public class ServerKeyExchange extends Tls12Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void acceptsUnproposedNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -139,7 +139,7 @@ public class ServerKeyExchange extends Tls12Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isStaticEcdhCipherSuite")
     public void acceptsUnproposedNamedGroupStatic(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -160,7 +160,7 @@ public class ServerKeyExchange extends Tls12Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void acceptsMissingSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -189,7 +189,7 @@ public class ServerKeyExchange extends Tls12Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void acceptsAnonSignatureForNonAnonymousCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -228,7 +228,7 @@ public class ServerKeyExchange extends Tls12Test {
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void acceptsUnproposedSignatureAndHash(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

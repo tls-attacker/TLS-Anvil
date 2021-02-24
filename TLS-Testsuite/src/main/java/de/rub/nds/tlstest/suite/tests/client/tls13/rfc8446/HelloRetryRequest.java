@@ -85,7 +85,6 @@ public class HelloRetryRequest extends Tls13Test {
             + "alert.")
     @RFC(number = 8446, section = "4.2.8 Key Share")
     @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getUnofferedGroups")
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -104,9 +103,8 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "A client which receives a cipher suite that was not offered MUST "
             + "abort the handshake.")
     @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getUnofferedTls13CipherSuites")
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void helloRetryRequestsUnofferedTls13CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -130,7 +128,6 @@ public class HelloRetryRequest extends Tls13Test {
             + "\"illegal_parameter\" alert if the HelloRetryRequest would not result "
             + "in any change in the ClientHello.")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isKeyShareInInitialHello")
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -180,7 +177,6 @@ public class HelloRetryRequest extends Tls13Test {
             + "handshake with an \"unexpected_message\" alert.")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
     @MethodCondition(method = "supportsMultipleNamedGroups")
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -224,7 +220,6 @@ public class HelloRetryRequest extends Tls13Test {
     @ScopeExtensions(DerivationType.MIRRORED_CIPHERSUITE)
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
     @MethodCondition(method = "supportsMultipleCipherSuites")
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -252,7 +247,6 @@ public class HelloRetryRequest extends Tls13Test {
             + "field that does not match what it sent in the ClientHello MUST "
             + "abort the handshake with an \"illegal_parameter\" alert.")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -268,6 +262,7 @@ public class HelloRetryRequest extends Tls13Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
+    @DeprecatedFeatureCategory(SeverityLevel.HIGH)
     public void helloRetryCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
         ServerHello.sharedCompressionValueTest(workflowTrace, runner);
@@ -412,7 +407,6 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "Enforce a TLS 1.3 HelloRetryRequest but select a TLS 1.2 Cipher Suite")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
     @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getTls12CipherSuites")
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)

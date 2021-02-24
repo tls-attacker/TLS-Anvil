@@ -87,7 +87,6 @@ public class Extensions extends Tls13Test {
     @ScopeExtensions(DerivationType.EXTENSION)
     @ManualConfig(DerivationType.EXTENSION)
     @ExplicitValues(affectedTypes = DerivationType.EXTENSION, methods = "getUnrequestedExtensions")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -135,7 +134,6 @@ public class Extensions extends Tls13Test {
     @TlsTest(description = "If an implementation receives an extension which it "
             + "recognizes and which is not specified for the message in "
             + "which it appears, it MUST abort the handshake with an \"illegal_parameter\" alert.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)

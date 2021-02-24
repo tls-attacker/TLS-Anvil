@@ -56,10 +56,9 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Implementations MUST NOT send "
             + "zero-length fragments of Handshake types, even "
             + "if those fragments contain padding.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void zeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -81,10 +80,9 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Implementations MUST NOT send "
             + "zero-length fragments of Handshake types, even "
             + "if those fragments contain padding.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void zeroLengthRecord_Finished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -115,10 +113,9 @@ public class RecordLayer extends Tls13Test {
             + "records, there MUST NOT be any other records between them.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @ScopeExtensions(DerivationType.ALERT)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @MethodCondition(method = "supportsRecordFragmentation")
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

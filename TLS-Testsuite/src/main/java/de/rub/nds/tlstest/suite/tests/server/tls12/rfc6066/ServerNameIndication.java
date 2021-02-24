@@ -51,7 +51,7 @@ public class ServerNameIndication extends Tls12Test {
     @MethodCondition(method = "sniActive")
     @HandshakeCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void moreThanOneNameOfTheSameType(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddServerNameIndicationExtension(true);

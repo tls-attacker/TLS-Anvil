@@ -86,7 +86,6 @@ public class SupportedVersions extends Tls13Test {
     @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
     @ManualConfig(DerivationType.PROTOCOL_VERSION)
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getInvalidLegacyVersions")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.MEDIUM)
@@ -106,7 +105,6 @@ public class SupportedVersions extends Tls13Test {
             + "handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -136,7 +134,6 @@ public class SupportedVersions extends Tls13Test {
             + "contains a version not offered by the client or contains a version "
             + "prior to TLS 1.3, the client MUST abort the "
             + "handshake with an \"illegal_parameter\" alert.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -210,9 +207,8 @@ public class SupportedVersions extends Tls13Test {
     @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getUnsupportedProtocolVersions")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
     public void negotiateUnproposedOldProtocolVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

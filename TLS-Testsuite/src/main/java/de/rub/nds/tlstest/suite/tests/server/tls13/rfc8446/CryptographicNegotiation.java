@@ -61,9 +61,8 @@ public class CryptographicNegotiation extends Tls13Test {
             "(i.e., there is no overlap between the client and server parameters), it MUST abort " +
             "the handshake with either a \"handshake_failure\" or \"insufficient_security\" fatal alert (see Section 6).")
     @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getUnsupportedGroups")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void noOverlappingParameters(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

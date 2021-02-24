@@ -9,6 +9,7 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -29,6 +30,7 @@ public class SupportedVersionsExtension extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void supportedVersionsExtensionLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         genericExtensionLengthTest(runner, argumentAccessor, config, SupportedVersionsExtensionMessage.class);
@@ -39,6 +41,7 @@ public class SupportedVersionsExtension extends TlsGenericTest {
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void supportedVersionsListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         SupportedVersionsExtensionMessage supportedVersions = getTargetedExtension(SupportedVersionsExtensionMessage.class, workflowTrace);

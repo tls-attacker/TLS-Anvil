@@ -60,7 +60,7 @@ public class StateMachine extends Tls12Test {
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void omitCertificate(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -78,7 +78,7 @@ public class StateMachine extends Tls12Test {
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void omitChangeCipherSpecUnencryptedFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -94,7 +94,7 @@ public class StateMachine extends Tls12Test {
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void omitChangeCipherSpecEncryptedFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         
@@ -109,6 +109,7 @@ public class StateMachine extends Tls12Test {
     @TlsTest(description = "Send two Server Hellos as the first server messages")
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendServerHelloTwice(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner);
@@ -118,7 +119,7 @@ public class StateMachine extends Tls12Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendSecondServerHelloAfterClientFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -135,7 +136,7 @@ public class StateMachine extends Tls12Test {
     @TlsTest(description = "Send ServerHello, Change CipherSpec")
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendResumptionMessageFlow(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -150,6 +151,7 @@ public class StateMachine extends Tls12Test {
     @TestDescription("Begin the Handshake with a Finished Message")
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.LOW)
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
@@ -160,6 +162,7 @@ public class StateMachine extends Tls12Test {
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.LOW)
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);

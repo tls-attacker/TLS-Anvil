@@ -94,7 +94,6 @@ public class ServerHello extends Tls13Test {
             + "an \"illegal_parameter\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeLimitations(DerivationType.CIPHERSUITE)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -121,12 +120,11 @@ public class ServerHello extends Tls13Test {
     @TlsTest(description = "legacy_compression_method: A single byte which "
             + "MUST have the value 0.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @DeprecatedFeatureCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void testCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -144,12 +142,6 @@ public class ServerHello extends Tls13Test {
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
             Validator.receivedFatalAlert(i);
-
-            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            if (msg == null) {
-                return;
-            }
-            assertNotNull(AssertMsgs.AlertNotReceived, msg);
         });
     }
 

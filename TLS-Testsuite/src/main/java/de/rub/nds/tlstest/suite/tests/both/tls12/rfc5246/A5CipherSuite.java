@@ -48,7 +48,6 @@ public class A5CipherSuite extends Tls12Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @TestDescription("Anonymous Cipher Suites must not be used unless requested by application layer")
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void anonCipherSuites() {
         List<CipherSuite> suites = new ArrayList<>(context.getSiteReport().getCipherSuites());

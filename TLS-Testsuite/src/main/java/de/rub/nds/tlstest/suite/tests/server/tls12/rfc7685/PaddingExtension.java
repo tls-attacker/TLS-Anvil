@@ -39,7 +39,6 @@ public class PaddingExtension extends Tls12Test {
     @TlsTest(description = "The client MUST fill the padding extension completely with zero " +
             "bytes, although the padding extension_data field may be empty.")
     @ComplianceCategory(SeverityLevel.LOW)
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.LOW) 
     @AlertCategory(SeverityLevel.LOW)
     public void paddingWithNonZero(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

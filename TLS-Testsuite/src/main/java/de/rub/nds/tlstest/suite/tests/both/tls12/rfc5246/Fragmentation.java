@@ -62,9 +62,9 @@ public class Fragmentation extends Tls12Test {
             + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
             + "Application data MAY be sent as they are potentially useful as a "
             + "traffic analysis countermeasure.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendZeroLengthRecord_CCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -89,7 +89,6 @@ public class Fragmentation extends Tls12Test {
             + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
             + "Application data MAY be sent as they are potentially useful as a "
             + "traffic analysis countermeasure.")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     public void sendZeroLengthApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -122,7 +121,9 @@ public class Fragmentation extends Tls12Test {
     @TlsTest(description = "Send a record without any content with Content Type Application Data.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Tag("emptyRecord")
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendEmptyApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -146,7 +147,9 @@ public class Fragmentation extends Tls12Test {
 
     @TlsTest(description = "Send a record without any content with Content Type Handshake.")
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.LOW)
     @Tag("emptyRecord")
     public void sendEmptyFinishedRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -171,10 +174,9 @@ public class Fragmentation extends Tls12Test {
             + "The length MUST NOT exceed 2^14.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -206,10 +208,9 @@ public class Fragmentation extends Tls12Test {
     @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. "
             + "The length MUST NOT exceed 2^14 + 2048.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendRecordWithCiphertextOver2pow14plus2048(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

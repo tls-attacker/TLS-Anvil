@@ -13,7 +13,10 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -28,7 +31,8 @@ public class ClientServerStateMachine extends Tls13Test {
     
     @TlsTest(description = "Send a record without any content")
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     @Tag("emptyRecord")
     public void sendEmptyRecordFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

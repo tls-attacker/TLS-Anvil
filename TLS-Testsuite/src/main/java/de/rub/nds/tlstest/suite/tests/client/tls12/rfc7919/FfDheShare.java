@@ -22,6 +22,7 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -44,6 +45,7 @@ public class FfDheShare extends Tls12Test {
         @ScopeExtensions(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
         @HandshakeCategory(SeverityLevel.INFORMATIONAL)
         @ComplianceCategory(SeverityLevel.HIGH)
+        @AlertCategory(SeverityLevel.MEDIUM)
         @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
         public void shareOutOfBounds(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
                 Config c = getPreparedConfig(argumentAccessor, runner);

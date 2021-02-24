@@ -35,6 +35,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
@@ -53,9 +54,9 @@ public class Fragmentation extends Tls12Test {
             + "Application data MAY be sent as they are potentially useful as a "
             + "traffic analysis countermeasure.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendZeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -82,9 +83,9 @@ public class Fragmentation extends Tls12Test {
             + "Application data MAY be sent as they are potentially useful as a "
             + "traffic analysis countermeasure.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.LOW)
     public void sendZeroLengthRecord_Alert(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);

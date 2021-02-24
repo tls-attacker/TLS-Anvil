@@ -17,6 +17,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -51,6 +52,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     @MethodCondition(method = "supportsPsk")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void preSharedKeyExtensionLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
@@ -64,6 +66,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     @MethodCondition(method = "supportsPsk")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void preSharedKeyExtensionIdentityListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
@@ -77,6 +80,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     @MethodCondition(method = "supportsPsk")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void preSharedKeyExtensionBinderListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);

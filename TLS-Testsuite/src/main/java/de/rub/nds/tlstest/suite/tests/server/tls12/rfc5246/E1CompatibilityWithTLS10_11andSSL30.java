@@ -101,7 +101,6 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             "versions greater than client_version, it MUST send a " +
             "\"protocol_version\" alert message and close the connection.")
     @MethodCondition(method = "doesSupportLegacyVersions")
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
     public void versionLowerThanSupportedByServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -173,9 +172,8 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getInvalidHighRecordVersion")
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void rejectHigherRecordVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] selectedRecordVersion = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();

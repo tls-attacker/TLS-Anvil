@@ -31,6 +31,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
@@ -78,9 +79,9 @@ public class TLSExtensionForECC extends Tls12Test {
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello "
             + "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void bothECExtensions_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -94,9 +95,9 @@ public class TLSExtensionForECC extends Tls12Test {
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello "
             + "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void ecExtension_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -110,9 +111,9 @@ public class TLSExtensionForECC extends Tls12Test {
     @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello "
             + "message if it does not propose any ECC cipher suites.")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void ecPointFormatExtension_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -151,9 +152,9 @@ public class TLSExtensionForECC extends Tls12Test {
             + "it MUST NOT negotiate the use of an ECC cipher suite.")
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void onlyInvalidEllipticCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

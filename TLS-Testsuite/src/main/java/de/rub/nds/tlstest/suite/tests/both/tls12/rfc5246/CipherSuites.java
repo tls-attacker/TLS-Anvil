@@ -52,7 +52,7 @@ public class CipherSuites extends Tls12Test {
             if (AlgorithmResolver.getCipher(i).toString().contains("IDEA")) {
                 badSuites.add(i.toString());
             }
-            else if (AlgorithmResolver.getCipher(i).toString().contains("DES")) {
+            else if (AlgorithmResolver.getCipher(i).toString().contains("_DES")) {
                 badSuites.add(i.toString());
             }
             else if (AlgorithmResolver.getCipher(i).toString().contains("RC4")) {

@@ -89,7 +89,7 @@ public class CertificateVerify extends Tls13Test {
     @CryptoCategory(SeverityLevel.MEDIUM)
     @CertificateCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
     @ExplicitValues(affectedTypes=DerivationType.SIG_HASH_ALGORIHTM,methods="getLegacyRSASAHAlgorithms")
     @ManualConfig(DerivationType.SIG_HASH_ALGORIHTM)
@@ -122,7 +122,7 @@ public class CertificateVerify extends Tls13Test {
     @CryptoCategory(SeverityLevel.MEDIUM)
     @CertificateCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @MethodCondition(method = "supportsLegacyECDSASAHAlgorithms")
     public void selectLegacyECDSASignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -185,7 +185,7 @@ public class CertificateVerify extends Tls13Test {
     @CryptoCategory(SeverityLevel.HIGH)
     @CertificateCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
     public void acceptsUnproposedSignatureAndHash(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -205,7 +205,7 @@ public class CertificateVerify extends Tls13Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @CertificateCategory(SeverityLevel.CRITICAL)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @AlertCategory(SeverityLevel.MEDIUM)
     public void emptySignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -227,13 +227,12 @@ public class CertificateVerify extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
+    @TlsTest(description = "Send a Certificate Verify message with an empty Signature Algorithm field")
     @SecurityCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @CertificateCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.CRITICAL)
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     public void emptySigAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -249,12 +248,11 @@ public class CertificateVerify extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Servers MUST send this message when authenticating via a certificate.")
+    @TlsTest(description = "Send a Certificate Verify message with an empty Signature Algorithm and empty Signature field")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     @CertificateCategory(SeverityLevel.CRITICAL)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     public void emptyBoth(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

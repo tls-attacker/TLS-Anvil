@@ -197,9 +197,9 @@ public class SupportedVersions extends Tls13Test {
             + "servers MUST NOT use the ClientHello.legacy_version value for "
             + "version negotiation and MUST use only the \"supported_versions\" "
             + "extension to determine client preferences.")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.LOW)
     public void setLegacyVersionTo0304(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -221,10 +221,9 @@ public class SupportedVersions extends Tls13Test {
             + "servers MUST NOT use the ClientHello.legacy_version value for "
             + "version negotiation and MUST use only the \"supported_versions\" "
             + "extension to determine client preferences.")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void setLegacyVersionTo0304WithoutSVExt(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddSupportedVersionsExtension(false);

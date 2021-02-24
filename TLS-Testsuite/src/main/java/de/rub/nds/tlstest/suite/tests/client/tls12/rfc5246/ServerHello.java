@@ -60,7 +60,6 @@ public class ServerHello extends Tls12Test {
             + "not request in the associated ClientHello, it MUST abort the handshake with an "
             + "unsupported_extension fatal alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -130,10 +129,9 @@ public class ServerHello extends Tls12Test {
             + "list in ClientHello.compression_methods.")
     @ScopeExtensions(DerivationType.COMPRESSION_METHOD)
     @DynamicValueConstraints(affectedTypes = DerivationType.COMPRESSION_METHOD, methods = "isUnproposedCompressionMethod")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
     public void selectUnproposedCompressionMethod(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CompressionMethod selectedCompressionMethod = derivationContainer.getDerivation(CompressionMethodDerivation.class).getSelectedValue();

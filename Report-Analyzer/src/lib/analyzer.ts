@@ -1,7 +1,7 @@
-import { IScoreMap } from '../backend/database/models/score';
 import { ITestMethod, ITestResult, ITestResultContainer } from '../backend/database/models';
-import { resolveSeverityLevel, IItemProviderContext, Optional, resolveStatus, ISeverityFilter, allSeverityLevels, SeverityLevelStrings, allResults, TestResult, TestResultStrings } from './const';
-import { allScoreCategories, ScoreCategories } from './const/ScoreCategories';
+import { IScoreMap } from '../backend/database/models/score';
+import { IItemProviderContext, Optional, resolveStatus } from './const';
+import { allScoreCategories } from './const/ScoreCategories';
 
 export interface ITestResultTable extends ITestResult {
   statusIcons: string
@@ -60,7 +60,12 @@ export function itemProvider(ctx: IItemProviderContext, reports: ITestResultCont
 
     for (let j = 0; j < allScoreCategories.length; j++) {
       const category = allScoreCategories[j]
-      items[j][report.Identifier] = {statusIcons: `${report.Score[category].Reached}/${report.Score[category].Total} (${report.Score[category].Percentage.toFixed(2)}%)`}
+      if (report.Score[category]) {
+        items[j][report.Identifier] = {statusIcons: `${report.Score[category].Reached}/${report.Score[category].Total} (${report.Score[category].Percentage.toFixed(2)}%)`}
+      } else {
+        items[j][report.Identifier] = {statusIcons: ""}
+      }
+      
     }
 
     const c = allScoreCategories.length;

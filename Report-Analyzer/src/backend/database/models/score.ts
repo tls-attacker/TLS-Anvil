@@ -22,6 +22,14 @@ export const ScoreSchemaObject = {
 
 
 export const ScoreMapSchmaObject = {
+  ALERT: ScoreSchemaObject,
+  CVE: ScoreSchemaObject,
+  CERTIFICATE: ScoreSchemaObject,
+  CRYPTO: ScoreSchemaObject,
+  DEPRECATED: ScoreSchemaObject,
+  HANDSHAKE: ScoreSchemaObject,
+  MESSAGESTRUCTURE: ScoreSchemaObject,
+  RECORDLAYER: ScoreSchemaObject,
   INTEROPERABILITY: ScoreSchemaObject,
   SECURITY: ScoreSchemaObject,
   COMPLIANCE: ScoreSchemaObject

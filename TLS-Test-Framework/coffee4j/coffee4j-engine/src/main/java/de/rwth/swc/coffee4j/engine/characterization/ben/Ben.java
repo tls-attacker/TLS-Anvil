@@ -66,7 +66,7 @@ import static de.rwth.swc.coffee4j.engine.util.PredicateUtil.not;
 public class Ben extends SuspiciousCombinationAlgorithm {
     
     private static final int DEFAULT_NUMBER_OF_COMBINATIONS_PER_STEP = 10;
-    private static final int DEFAULT_MAX_GENERATION_ATTEMPTS = 50;
+    private static final int DEFAULT_MAX_GENERATION_ATTEMPTS = 120;
     
     private final int numberOfCombinationsPerStep;
     private final int maxGenerationAttempts;

@@ -1,4 +1,3 @@
-import { ISeverityFilter } from "./ISeverityFilter";
 export interface IItemProviderContext {
   currentPage: number;
   perPage: number;

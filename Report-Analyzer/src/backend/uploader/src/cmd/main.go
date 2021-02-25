@@ -43,6 +43,7 @@ func main() {
 	}
 
 	fpath := conf.BasePath
+	identSuffix := conf.Suffix
 	var err error
 	fpath, err = filepath.Abs(fpath)
 	if err != nil {
@@ -92,7 +93,7 @@ func main() {
 			continue
 		}
 
-		uploadData.Identifier = path.Base(dir)
+		uploadData.Identifier = path.Base(dir) + identSuffix
 
 		wg.Add(1)
 		go func(data *uploader.UploadData, group *sync.WaitGroup, worker int) {

@@ -110,6 +110,9 @@ public class WorkflowRunner {
                 && context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             allowOptionalTls13NewSessionTickets(trace);
             disableQuickReceiveForTls13PostHandshakeServerTests(trace, config);
+        } else if(preparedConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13
+                && context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
+            allowOptionalClientCcs(trace);
         }
         
         allowOptionalClientApplicationMessage(trace);
@@ -350,6 +353,30 @@ public class WorkflowRunner {
             NewSessionTicketMessage optionalExplicitNewSessionTicket = new NewSessionTicketMessage();
             optionalExplicitNewSessionTicket.setRequired(false);
             lastReceive.getExpectedMessages().add(0, optionalExplicitNewSessionTicket);
+        }
+    }
+    
+    public void allowOptionalClientCcs(WorkflowTrace trace) {
+        boolean ccsAlreadyExpected = false;
+        for(ReceivingAction receiving : trace.getReceivingActions()) {
+            if(receiving instanceof ReceiveAction) {
+                ReceiveAction receiveAction = (ReceiveAction) receiving;
+                if(receiveAction.getGoingToReceiveProtocolMessageTypes().contains(ProtocolMessageType.CHANGE_CIPHER_SPEC)) {
+                    ccsAlreadyExpected = true;
+                }
+            }
+        }
+        
+        //this will only affect alerts expected during the handshake as we allways
+        //add an optional css beforehand otherwise
+        if(trace.getLastReceivingAction() != null 
+                && trace.getLastReceivingAction() instanceof ReceiveAction
+                && !ccsAlreadyExpected
+                && ((ReceiveAction)trace.getLastReceivingAction()).getGoingToReceiveProtocolMessageTypes().contains(ProtocolMessageType.ALERT)) {
+            ReceiveAction lastReceive = (ReceiveAction) trace.getLastReceivingAction();
+            ChangeCipherSpecMessage optionalCcs = new ChangeCipherSpecMessage();
+            optionalCcs.setRequired(false);
+            lastReceive.getExpectedMessages().add(0, optionalCcs);
         }
     }
     

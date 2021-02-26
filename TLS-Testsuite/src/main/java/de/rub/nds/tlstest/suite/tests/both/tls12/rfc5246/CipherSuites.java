@@ -40,7 +40,7 @@ public class CipherSuites extends Tls12Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
-    public void supportOfDeprectedCipherSuites() {
+    public void supportOfDeprecatedCipherSuites() {
         List<VersionSuiteListPair> versionSuiteListPairList = context.getSiteReport().getVersionSuitePairs();
         List<CipherSuite> suites = versionSuiteListPairList.stream()
                 .filter(i -> i.getVersion() == ProtocolVersion.TLS12)

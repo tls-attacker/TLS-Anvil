@@ -258,7 +258,6 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "legacy_compression_method: A single byte which "
             + "MUST have the value 0.")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
-    @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -276,7 +275,6 @@ public class HelloRetryRequest extends Tls13Test {
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
     @ScopeLimitations(DerivationType.CIPHERSUITE)
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void helloRetryGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -292,7 +290,6 @@ public class HelloRetryRequest extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void helloRetryGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -308,7 +305,6 @@ public class HelloRetryRequest extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void helloRetryGreaseVersionSelected(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

@@ -13,6 +13,7 @@ import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SetEncryptChangeCipherSpecConfigAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -127,11 +128,8 @@ public class StateMachine extends Tls13Test {
     public void sendEncryptedChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-
+        workflowTrace.addTlsAction(new SetEncryptChangeCipherSpecConfigAction(true));
         SendAction sendActionCCS = new SendAction(new ChangeCipherSpecMessage());
-        Record ccsRecord = new Record();
-        ccsRecord.setAllowEncryptedChangeCipherSpec(true);
-        sendActionCCS.setRecords(ccsRecord);
 
         workflowTrace.addTlsAction(sendActionCCS);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));

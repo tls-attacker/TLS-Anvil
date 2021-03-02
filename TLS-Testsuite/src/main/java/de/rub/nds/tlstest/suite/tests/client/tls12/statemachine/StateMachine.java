@@ -14,6 +14,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ActivateEncryptionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.action.ResetRecordCipherListsAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
@@ -100,6 +101,9 @@ public class StateMachine extends Tls12Test {
         
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         workflowTrace.addTlsAction(new ActivateEncryptionAction(false));
+        //RC4 requires a continuous state - ActivateEncryption will create
+        //a new Decryptor - this has to be reverted
+        workflowTrace.addTlsAction(new ResetRecordCipherListsAction(0, 1));
         workflowTrace.addTlsAction(new SendAction(new FinishedMessage(config)));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         

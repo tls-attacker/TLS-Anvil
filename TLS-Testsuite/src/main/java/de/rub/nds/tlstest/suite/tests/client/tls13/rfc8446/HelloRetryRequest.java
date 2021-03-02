@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -199,7 +200,9 @@ public class HelloRetryRequest extends Tls13Test {
         );
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
-            assertFalse("Client replied to second HelloRetryRequest with ClientHello", WorkflowTraceUtil.getLastReceivedMessage(i.getWorkflowTrace()) instanceof ClientHelloMessage);
+            assertFalse("Client replied to second HelloRetryRequest with ClientHello", WorkflowTraceUtil.getLastReceivedMessage(i.getWorkflowTrace()) instanceof ClientHelloMessage 
+                    && i.getWorkflowTrace().getLastReceivingAction().getReceivedMessages() != null
+                    && i.getWorkflowTrace().getLastReceivingAction().getReceivedMessages().contains(WorkflowTraceUtil.getLastReceivedMessage(i.getWorkflowTrace())));
             Validator.receivedFatalAlert(i);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, alert);

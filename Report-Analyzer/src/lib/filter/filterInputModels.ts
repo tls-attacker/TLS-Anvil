@@ -7,7 +7,7 @@ import { allScoreCategories, CategoriesStrings, ScoreCategories } from '../const
 export namespace FilterInputModels {
   export type Comparator = "==" | "!=" | "<" | "<=" | ">" | ">=" | "fullfills" | "!fullfills" | "contains" | "!contains"
   export type ComposedModel = Model[]
-  export type ModelName = "category" | "testResult" | "property" | "derivation" | "severity"
+  export type ModelName = "category" | "testResult" | "property" | "derivation" | "severity" | "additionalResultInformation" | "additionalTestInformation"
   export type ModeName = DerivationStrings | CategoriesStrings
   export enum PropertyKeys {
     diffResults = "diffResults",
@@ -109,8 +109,10 @@ export namespace FilterInputModels {
   export const states: ComposedModel = [
     testResult,
     propertyState
-    // missing: 
+    // missing, is added in StateView.vue: 
     //  * Derivation container values
+    //  * Additional test information values
+    //  * Additional result information values
   ]
 
 }

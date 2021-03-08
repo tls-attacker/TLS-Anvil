@@ -200,6 +200,36 @@ export function filter(inputModel: FilterInputModels.ComposedModel, dataModel: F
           conditionEvalString.push(result.toString())
         }  
         break;
+        
+        case "additionalResultInformation": {
+          let evalString = ``
+          if (condition.comparator == "==") {
+            evalString = `{value}.indexOf('${condition.value}') > -1`
+          } else if (condition.comparator == "!=") {
+            evalString = `{value}.indexOf('${condition.value}') == -1`
+          }
+
+          let result = filterRow<IStateTable>(evalString, i => {
+            return i.AdditionalResultInformation.split(";").map((j) => j.trim())
+          }, row).reduce((i, j) => i || j)
+          conditionEvalString.push(result.toString())
+        }
+        break;
+
+        case "additionalTestInformation": {
+          let evalString = ``
+          if (condition.comparator == "==") {
+            evalString = `{value}.indexOf('${condition.value}') > -1`
+          } else if (condition.comparator == "!=") {
+            evalString = `{value}.indexOf('${condition.value}') == -1`
+          }
+
+          let result = filterRow<IStateTable>(evalString, i => {
+            return i.AdditionalTestInformation.split(";").map((j) => j.trim())
+          }, row).reduce((i, j) => i || j)
+          conditionEvalString.push(result.toString())
+        }
+        break;
       }
 
       if (conditionEvalString.length > conditionLength) {

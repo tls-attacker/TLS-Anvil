@@ -147,6 +147,8 @@ export default {
       filterInputModel: FilterInputModels.states,
       filter: [],
       derivationFilters: null,
+      additionalResultInformationFilter: null,
+      additionalTestInformationFilter: null,
       hightlightOption: null, 
       selectedRow: {},
       selectedColumn: [],
@@ -169,11 +171,21 @@ export default {
   },
   computed: {
     filterOptions() {
-      const additional = this.derivationFilters ? this.derivationFilters : []
-      return [
+      const derivationFilters = this.derivationFilters ? this.derivationFilters : []
+      const result = [
         ...this.filterInputModel,
-        ...additional
       ]
+
+      if (this.additionalResultInformationFilter) {
+        result.push(this.additionalResultInformationFilter)
+      }
+      if (this.additionalTestInformationFilter) {
+        result.push(this.additionalTestInformationFilter)
+      }
+
+      result.push(...derivationFilters)
+
+      return result
     }
   },
   methods: {
@@ -220,6 +232,8 @@ export default {
 
       const promises = []
       const derivations = new Set()
+      const additionalResultInformation = new Set()
+      const additionalTestInformation = new Set()
       const derivationValues = {}
       for (const i of newIdentifiers) {
         const p = this.$http.get(`testReport/${i}/testResult/${this.className}/${this.methodName}`).then((res) => {
@@ -232,14 +246,27 @@ export default {
 
           if (res.data.States) {
             for (const s of res.data.States) {
-              if (!s.DerivationContainer) continue;
-              for (const d in s.DerivationContainer) {
-                derivations.add(d)
-                if (!derivationValues[d]) {
-                  derivationValues[d] = new Set()
+              if (s.DerivationContainer) {
+                for (const d in s.DerivationContainer) {
+                  derivations.add(d)
+                  if (!derivationValues[d]) {
+                    derivationValues[d] = new Set()
+                  }
+                  derivationValues[d].add(s.DerivationContainer[d])
                 }
-                derivationValues[d].add(s.DerivationContainer[d])
               }
+
+              if (s.AdditionalResultInformation) {
+                s.AdditionalResultInformation.split(";").forEach((info) => {
+                  additionalResultInformation.add(info.trim())
+                })
+              }
+
+              if (s.AdditionalTestInformation) {
+                s.AdditionalTestInformation.split(";").forEach((info) => {
+                  additionalTestInformation.add(info.trim())
+                })
+              } 
             }
           }
         }).catch((e) => {
@@ -277,6 +304,38 @@ export default {
             values: values,
             comparators: comparator
           })
+        }
+
+        if (additionalResultInformation.size > 0) {
+          const comparator = ["==", "!="]
+          const values = Array.from(additionalResultInformation)
+          values.sort()
+
+          this.additionalResultInformationFilter = {
+            key: {
+              type: 'additionalResultInformation',
+            },
+            displayName: "Additional Result Information",
+            type: 'selector',
+            values: values,
+            comparators: comparator
+          }
+        }
+        
+        if (additionalTestInformation.size > 0) {
+          const comparator = ["==", "!="]
+          const values = Array.from(additionalTestInformation)
+          values.sort()
+
+          this.additionalTestInformationFilter = {
+            key: {
+              type: 'additionalTestInformation',
+            },
+            displayName: "Additional Test Information",
+            type: 'selector',
+            values: values,
+            comparators: comparator
+          }
         }
 
         this.$refs.table.refresh()

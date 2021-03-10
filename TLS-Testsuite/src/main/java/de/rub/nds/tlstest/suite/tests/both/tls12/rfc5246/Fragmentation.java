@@ -57,7 +57,7 @@ import org.junit.jupiter.api.Test;
 
 @RFC(number = 5264, section = "6.2.1 Fragmentation")
 public class Fragmentation extends Tls12Test {
-
+    
     @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, "
             + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
             + "Application data MAY be sent as they are potentially useful as a "
@@ -214,8 +214,8 @@ public class Fragmentation extends Tls12Test {
     public void sendRecordWithCiphertextOver2pow14plus2048(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        c.getDefaultClientConnection().setTimeout(5000);
-        c.getDefaultServerConnection().setTimeout(5000);
+        c.getDefaultClientConnection().setTimeout(2500);
+        c.getDefaultServerConnection().setTimeout(2500);
 
         Record overflowRecord = new Record();
         overflowRecord.setProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 2049]));

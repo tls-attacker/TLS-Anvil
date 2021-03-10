@@ -386,7 +386,8 @@ public class WorkflowRunner {
             for(TlsAction action : trace.getTlsActions()) {
                 if(action instanceof ReceiveAction) {
                     ReceiveAction receiveAction = (ReceiveAction) action;
-                    if(receiveAction.getExpectedMessages().stream().anyMatch(message -> message instanceof FinishedMessage)) {
+                    if(receiveAction.getExpectedMessages().stream().anyMatch(message -> message instanceof FinishedMessage)
+                            && preparedConfig.getHighestProtocolVersion() == ProtocolVersion.TLS13) {
                         mayReceiveApplicationDataFromNow = true;
                     
                         //only allow *after* Finished
@@ -403,6 +404,11 @@ public class WorkflowRunner {
                 
                 } else if(action instanceof ResetConnectionAction) {
                     mayReceiveApplicationDataFromNow = false;
+                } else if(action instanceof SendAction && preparedConfig.getHighestProtocolVersion() != ProtocolVersion.TLS13) {
+                    SendAction sendAction = (SendAction) action;
+                    if(sendAction.getSendMessages().stream().anyMatch(message -> message instanceof FinishedMessage)) {
+                        mayReceiveApplicationDataFromNow = true;
+                    }
                 }
             }
         }

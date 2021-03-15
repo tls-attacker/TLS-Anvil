@@ -21,6 +21,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.record.AbstractRecord;
+import de.rub.nds.tlsattacker.core.record.BlobRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipher;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipherFactory;
@@ -285,51 +286,53 @@ public class Validator {
         ProtocolMessage lastReceivedMessage = lastReceiveAction.getReceivedMessages().get(lastReceiveAction.getReceivedMessages().size() - 1);
         List<ProtocolMessage> receivedMessages = lastReceiveAction.getReceivedMessages();
         List<AbstractRecord> receivedRecords = lastReceiveAction.getReceivedRecords();
-        Record lastReceivedRecord = (Record) lastReceiveAction.getReceivedRecords().get(receivedRecords.size() - 1);
-        int expectedFirstEncryptedRecordIndex = 0;
-        if(receivedMessages.get(0) instanceof ChangeCipherSpecMessage) {
-            expectedFirstEncryptedRecordIndex = 1;
-        }
-        if(state.getState().getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13
-                && TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT
-                && state.getState().getTlsContext().getActiveClientKeySetType() == Tls13KeySetType.NONE
-                && lastReceivedMessage instanceof ApplicationMessage) {
-            state.addAdditionalResultInfo("Received Application Message before decryption was set");
+        AbstractRecord lastAbstractRecord = lastReceiveAction.getReceivedRecords().get(receivedRecords.size() - 1);
+        if(lastAbstractRecord instanceof Record) {
+            Record lastReceivedRecord = (Record) lastAbstractRecord;
+            int expectedFirstEncryptedRecordIndex = 0;
+            if(receivedMessages.get(0) instanceof ChangeCipherSpecMessage) {
+                expectedFirstEncryptedRecordIndex = 1;
+            }
+            if(state.getState().getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13
+                    && TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT
+                    && state.getState().getTlsContext().getActiveClientKeySetType() == Tls13KeySetType.NONE
+                    && lastReceivedMessage instanceof ApplicationMessage) {
+                state.addAdditionalResultInfo("Received Application Message before decryption was set");
             
-            List<ProtocolMessage> decryptedAlerts = new LinkedList<>();
-            AlertMessage potentialAlert = null;
+                List<ProtocolMessage> decryptedAlerts = new LinkedList<>();
+                AlertMessage potentialAlert = null;
             
-            for(int i = expectedFirstEncryptedRecordIndex; i < receivedRecords.size(); i++) {
-                Record recordToDecrypt = ((Record)receivedRecords.get(i));
-                recordToDecrypt.setSequenceNumber(Modifiable.explicit(BigInteger.valueOf(i - expectedFirstEncryptedRecordIndex)));
-                potentialAlert = tryToDecryptRecordWithHandshakeSecrets(state.getState().getTlsContext(),lastReceivedRecord);
+                for(int i = expectedFirstEncryptedRecordIndex; i < receivedRecords.size(); i++) {
+                    Record recordToDecrypt = ((Record)receivedRecords.get(i));
+                    recordToDecrypt.setSequenceNumber(Modifiable.explicit(BigInteger.valueOf(i - expectedFirstEncryptedRecordIndex)));
+                    potentialAlert = tryToDecryptRecordWithHandshakeSecrets(state.getState().getTlsContext(),lastReceivedRecord);
                 
-                if(potentialAlert != null) {
-                    state.addAdditionalResultInfo("Client encrypted Alert too early");
-                    decryptedAlerts.add(potentialAlert);
-                } else if(decryptedAlerts.size() > 0) {
-                    //chain of Alerts was interrupted by other message type
-                    //or decryption failed
-                    state.addAdditionalResultInfo("Not all Application Messages were Alerts");
-                    return false;
-                }  
-            } 
+                    if(potentialAlert != null) {
+                        state.addAdditionalResultInfo("Client encrypted Alert too early");
+                        decryptedAlerts.add(potentialAlert);
+                    } else if(decryptedAlerts.size() > 0) {
+                        //chain of Alerts was interrupted by other message type
+                        //or decryption failed
+                        state.addAdditionalResultInfo("Not all Application Messages were Alerts");
+                        return false;
+                    }     
+                } 
             
-            //replace messages for further evaluation
-            for(int i = expectedFirstEncryptedRecordIndex; i < receivedMessages.size(); i++) {
-                receivedMessages.remove(i);
-                receivedMessages.add(i, decryptedAlerts.get(i - expectedFirstEncryptedRecordIndex));
-            }
+                //replace messages for further evaluation
+                for(int i = expectedFirstEncryptedRecordIndex; i < receivedMessages.size(); i++) {
+                    receivedMessages.remove(i);
+                    receivedMessages.add(i, decryptedAlerts.get(i - expectedFirstEncryptedRecordIndex));
+                }
             
-            if(potentialAlert != null && potentialAlert.getLevel().getValue() == AlertLevel.FATAL.getValue()) {
-                //last is Fatal Alert
-                return true;
-            } else if(!decryptedAlerts.isEmpty()) {
-                //also allow additional (Warning) Alerts if they follow a Fatal Alert
-                return onlyValidAlertsAfterFatalAlert(decryptedAlerts);
+                if(potentialAlert != null && potentialAlert.getLevel().getValue() == AlertLevel.FATAL.getValue()) {
+                    //last is Fatal Alert
+                    return true;
+                } else if(!decryptedAlerts.isEmpty()) {
+                    //also allow additional (Warning) Alerts if they follow a Fatal Alert
+                    return onlyValidAlertsAfterFatalAlert(decryptedAlerts);
+                }
             }
         }
-        
         return false;
     }
     

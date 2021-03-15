@@ -180,8 +180,8 @@ public class Fragmentation extends Tls12Test {
     public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        c.getDefaultClientConnection().setTimeout(5000);
-        c.getDefaultServerConnection().setTimeout(5000);
+        c.getDefaultClientConnection().setTimeout(2000);
+        c.getDefaultServerConnection().setTimeout(2000);
 
         ApplicationMessage msg = new ApplicationMessage(c);
         msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
@@ -214,8 +214,8 @@ public class Fragmentation extends Tls12Test {
     public void sendRecordWithCiphertextOver2pow14plus2048(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        c.getDefaultClientConnection().setTimeout(2500);
-        c.getDefaultServerConnection().setTimeout(2500);
+        c.getDefaultClientConnection().setTimeout(2000);
+        c.getDefaultServerConnection().setTimeout(2000);
 
         Record overflowRecord = new Record();
         overflowRecord.setProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 2049]));

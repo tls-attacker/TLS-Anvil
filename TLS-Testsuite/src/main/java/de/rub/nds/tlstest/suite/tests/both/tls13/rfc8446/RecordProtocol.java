@@ -158,8 +158,8 @@ public class RecordProtocol extends Tls13Test {
     public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        c.getDefaultClientConnection().setTimeout(5000);
-        c.getDefaultServerConnection().setTimeout(5000);
+        c.getDefaultClientConnection().setTimeout(2000);
+        c.getDefaultServerConnection().setTimeout(2000);
 
         ApplicationMessage msg = new ApplicationMessage(c);
         Record overflowRecord = new Record();
@@ -248,8 +248,8 @@ public class RecordProtocol extends Tls13Test {
     public void sendRecordWithCiphertextOver2pow14plus256(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        c.getDefaultClientConnection().setTimeout(5000);
-        c.getDefaultServerConnection().setTimeout(5000);
+        c.getDefaultClientConnection().setTimeout(2000);
+        c.getDefaultServerConnection().setTimeout(2000);
 
         Record overflowRecord = new Record();
         overflowRecord.setProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 257]));

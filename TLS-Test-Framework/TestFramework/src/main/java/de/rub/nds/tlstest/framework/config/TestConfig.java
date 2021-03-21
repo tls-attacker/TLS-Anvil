@@ -25,6 +25,7 @@ import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
+import de.rub.nds.tlstest.framework.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,6 +35,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -65,11 +67,8 @@ public class TestConfig extends TLSDelegateConfig {
             "thus they are cached. Using this flag, the cache is ignored.")
     private boolean ignoreCache = false;
 
-    @Parameter(names = "-outputFile", description = "Filepath where the test results should be store, defaults to `pwd/results.json`")
-    private String outputFile = "";
-
-    @Parameter(names = "-outputFormat", description = "Defines the format of the output. Supported: xml or json")
-    private String outputFormat = "";
+    @Parameter(names = "-outputFolder", description = "Folder where the test results should be stored inside, defaults to `pwd/TestSuiteResults_$(date)`")
+    private String outputFolder = "";
 
     @Parameter(names = "-parallelHandshakes", description = "How many TLS-Handshakes should be executed in parallel? (Default value: 5)")
     private int parallelHandshakes = 5;
@@ -164,15 +163,6 @@ public class TestConfig extends TLSDelegateConfig {
             argParser.usage();
         }
 
-        if (!this.outputFormat.equals("json") && !this.outputFormat.equals("xml") && !this.outputFormat.isEmpty()) {
-            throw new ParameterException("-outputFormat must be 'json' or 'xml'");
-        }
-
-        String ext = "json";
-        if (!this.outputFormat.isEmpty()) {
-            ext = this.outputFormat;
-        }
-
         if (this.identifier == null) {
             if (argParser.getParsedCommand().equals("server")) {
                 this.identifier = testServerDelegate.getHost();
@@ -182,34 +172,15 @@ public class TestConfig extends TLSDelegateConfig {
             }
         }
 
-        if (this.outputFile.isEmpty()) {
-            this.outputFile = Paths.get(System.getProperty("user.dir"), "testResults." + ext).toString();
+        if (this.outputFolder.isEmpty()) {
+            this.outputFolder = Paths.get(System.getProperty("user.dir"), "TestSuiteResults_" + Utils.DateToISO8601UTC(new Date())).toString();
         }
 
         try {
-            Path outputFile = Paths.get(this.outputFile);
-            if (this.outputFile.endsWith("/") || this.outputFile.endsWith("\\")) {
-                outputFile = Paths.get(this.outputFile, "testResults." + ext);
-            }
+            Path outputFolder = Paths.get(this.outputFolder);
+            outputFolder = outputFolder.toAbsolutePath();
 
-            outputFile = outputFile.toAbsolutePath();
-
-            this.outputFile = outputFile.toString();
-            if (!this.outputFile.endsWith(".xml") && !this.outputFile.endsWith(".json")) {
-                throw new ParameterException("Invalid outputFile, only 'json' and 'xml' files are supported");
-            }
-
-            if (this.outputFormat.isEmpty()) {
-                this.outputFormat = "json";
-                if (this.outputFile.endsWith("xml")) {
-                    this.outputFormat = "xml";
-                }
-            } else {
-                if ((this.outputFile.endsWith(".xml") && this.outputFormat.equals("json")) ||
-                        (this.outputFile.endsWith(".json") && this.outputFormat.equals("xml"))) {
-                    throw new ParameterException("-outputFile file extension does not match -outputFormat");
-                }
-            }
+            this.outputFolder = outputFolder.toString();
 
             if (timeoutActionCommand.size() > 0) {
                 timeoutActionScript = () -> {
@@ -402,20 +373,12 @@ public class TestConfig extends TLSDelegateConfig {
         this.ignoreCache = ignoreCache;
     }
 
-    public String getOutputFile() {
-        return outputFile;
+    public String getOutputFolder() {
+        return outputFolder;
     }
 
-    public void setOutputFile(String outputFile) {
-        this.outputFile = outputFile;
-    }
-
-    public String getOutputFormat() {
-        return outputFormat;
-    }
-
-    public void setOutputFormat(String outputFormat) {
-        this.outputFormat = outputFormat;
+    public void setOutputFolder(String outputFolder) {
+        this.outputFolder = outputFolder;
     }
 
     public boolean isParsedArgs() {

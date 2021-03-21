@@ -9,13 +9,16 @@
  */
 package de.rub.nds.tlstest.framework.execution;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceSerializer;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.reporting.ScoreContainer;
+import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
 import de.rub.nds.tlstest.framework.utils.Utils;
 import de.rwth.swc.coffee4j.model.Combination;
@@ -23,14 +26,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import javax.annotation.Nonnull;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 /**
@@ -120,7 +127,7 @@ public class  AnnotatedStateContainer {
     }
 
     public void finished() {
-        TestContext.getInstance().testFinished();
+        TestContext.getInstance().testFinished(this.uniqueId);
         finished = true;
         elapsedTime = System.currentTimeMillis() - startTime;
         statesCount = states.size();
@@ -129,6 +136,8 @@ public class  AnnotatedStateContainer {
         boolean failed = false;
         
         String lastAdditionalResultInformation = "";
+        TestContext.getInstance().increasePerformedHandshakes(this.getStates().size());
+
         for (AnnotatedState state : this.getStates()) {
             if (state.getResult() == TestResult.FAILED) {
                 errors.add(state.getFailedReason());
@@ -174,6 +183,8 @@ public class  AnnotatedStateContainer {
         } else if(failed) {
             LOGGER.info("All generated inputs resulted in failures for test " + testMethodConfig.getMethodName());
         }
+
+        this.serialize();
     }
 
     public void stateFinished(TestResult result) {
@@ -283,5 +294,65 @@ public class  AnnotatedStateContainer {
 
     public void setHasVaryingAdditionalResultInformation(Boolean hasVaryingAdditionalResultInformation) {
         this.hasVaryingAdditionalResultInformation = hasVaryingAdditionalResultInformation;
+    }
+
+    private void serialize() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+                .withFieldVisibility(JsonAutoDetect.Visibility.NONE)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+
+        String method = testMethodConfig.getClassName() + "." + testMethodConfig.getMethodName();
+        String targetFolder = Paths.get(TestContext.getInstance().getConfig().getOutputFolder(), method).toString();
+        String containerResultPath = Paths.get(targetFolder, "_containerResult.json").toString();
+        File f = new File(containerResultPath);
+        StringBuilder errorMsg = new StringBuilder();
+        f.getParentFile().mkdirs();
+        try {
+            f.createNewFile();
+        } catch (Exception ignored) { }
+
+
+        try {
+            mapper.writeValue(new File(containerResultPath), this);
+        } catch (Exception e) {
+            LOGGER.error("Failed to serialize AnnotatedStateContainer ({})", method, e);
+            errorMsg.append("Failed to serialize AnnotatedStateContainer");
+            errorMsg.append(ExecptionPrinter.stacktraceToString(e));
+        }
+
+        try {
+            FileOutputStream fos = new FileOutputStream(Paths.get(targetFolder, "traces.zip").toString());
+            ZipOutputStream zipOut = new ZipOutputStream(fos);
+            for (AnnotatedState s : states) {
+                ZipEntry zipEntry = new ZipEntry(s.getUuid() + ".xml");
+                zipOut.putNextEntry(zipEntry);
+                try {
+                    String serialized = WorkflowTraceSerializer.write(s.getWorkflowTrace());
+                    zipOut.write(serialized.getBytes(StandardCharsets.UTF_8));
+                } catch (Exception e) {
+                    LOGGER.error("Failed to serialize State ({}, {})", method, s.getUuid(), e);
+                    errorMsg.append("\nFailed to serialize WorkflowTraces");
+                    errorMsg.append(ExecptionPrinter.stacktraceToString(e));
+                }
+            }
+            zipOut.close();
+            fos.close();
+        } catch (Exception e){
+            LOGGER.error("", e);
+        }
+
+        try {
+            String err = errorMsg.toString();
+            if (!err.isEmpty()) {
+                FileWriter fileWriter = new FileWriter(Paths.get(targetFolder, "_error.txt").toString());
+                PrintWriter printWriter = new PrintWriter(fileWriter);
+                printWriter.print(err);
+                printWriter.close();
+            }
+        } catch (Exception ignored) {}
+
     }
 }

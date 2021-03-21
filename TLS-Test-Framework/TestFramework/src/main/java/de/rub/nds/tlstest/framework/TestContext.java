@@ -36,6 +36,7 @@ public class TestContext {
     private ParallelExecutor stateExecutor;
 
     private final Map<String, AnnotatedStateContainer> testResults = new HashMap<>();
+    private final Map<String, Boolean> finishedTests = new HashMap<>();
     private boolean initializationFailed = false;
 
     private TestSiteReport siteReport = null;
@@ -46,6 +47,7 @@ public class TestContext {
     private long testsDisabled = 0;
     private long testsFailed = 0;
     private long testsSucceeded = 0;
+    private long performedHandshakes = 0;
 
     private ProgressBar proggressBar = null;
     private final Date startTime = new Date();
@@ -141,7 +143,10 @@ public class TestContext {
         return testsDone;
     }
 
-    synchronized public void testFinished() {
+    synchronized public void testFinished(String uniqueId) {
+        finishedTests.put(uniqueId, true);
+        testResults.remove(uniqueId);
+
         testsDone += 1;
         if (proggressBar != null && !isDocker()) {
             proggressBar.stepBy(1);
@@ -212,5 +217,17 @@ public class TestContext {
     
     public synchronized void increaseServerHandshakesSinceRestart() {
         this.serverHandshakesSinceRestart += 1;
+    }
+
+    public long getPerformedHandshakes() {
+        return performedHandshakes;
+    }
+
+    public void increasePerformedHandshakes(long performedHandshakes) {
+        this.performedHandshakes += performedHandshakes;
+    }
+
+    public boolean testIsFinished(String uniqueId) {
+        return finishedTests.containsKey(uniqueId);
     }
 }

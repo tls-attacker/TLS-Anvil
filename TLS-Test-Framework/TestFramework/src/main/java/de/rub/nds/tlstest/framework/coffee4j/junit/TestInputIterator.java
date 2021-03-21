@@ -1,6 +1,7 @@
 package de.rub.nds.tlstest.framework.coffee4j.junit;
 
-import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
+import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.utils.Utils;
 import de.rwth.swc.coffee4j.model.Combination;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -35,7 +36,8 @@ class TestInputIterator implements Iterator<Combination> {
     
     @Override
     public boolean hasNext() {
-        while (!AnnotatedStateContainer.forExtensionContext(extensionContext).isFinished()) {
+        String uniqueId = Utils.getTemplateContainerExtensionContext(extensionContext).getUniqueId();
+        while (!TestContext.getInstance().testIsFinished(uniqueId)) {
             try {
                 Combination nextTestInput = testInputQueue.poll(3, TimeUnit.SECONDS);
                 if (nextTestInput != null) {

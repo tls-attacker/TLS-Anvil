@@ -12,7 +12,6 @@ package de.rub.nds.tlstest.framework.reporting;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.platform.engine.TestExecutionResult;
@@ -21,16 +20,10 @@ import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
 import java.io.File;
-import java.util.ArrayList;
+import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Contains methods that are called when the complete testplan is finished.
@@ -63,102 +56,33 @@ public class ExecutionListener implements TestExecutionListener {
     private void realTestPlanExecutionFinished(TestPlan testPlan) {
         LOGGER.trace(testPlan.toString() + " finished");
         long elapsedTime = System.currentTimeMillis() - start;
+        Summary s = new Summary();
 
-        Set<TestIdentifier> roots = testPlan.getRoots();
-        List<TestResultContainer> rootContainers = new ArrayList<>();
+        s.setElapsedTime(elapsedTime);
+        s.setTestEndpointType(TestContext.getInstance().getConfig().getTestEndpointMode());
+        s.setIdentifier(TestContext.getInstance().getConfig().getIdentifier());
+        s.setDate(TestContext.getInstance().getStartTime());
+        s.setHandshakes(TestContext.getInstance().getPerformedHandshakes());
+        s.setTestsDisabled(TestContext.getInstance().getTestsDisabled());
+        s.setTestsFailed(TestContext.getInstance().getTestsFailed());
+        s.setTestsSucceeded(TestContext.getInstance().getTestsSucceeded());
 
-        for (TestIdentifier rootIdentifier: roots) {
-            Set<TestIdentifier> identifiers = testPlan.getDescendants(rootIdentifier);
-            if (identifiers.size() == 0) continue;
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
+                    .withFieldVisibility(JsonAutoDetect.Visibility.NONE)
+                    .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                    .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                    .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
-            TestResultContainer root = new TestResultContainer(rootIdentifier);
-            root.setElapsedTime(elapsedTime);
-            root.setTestEndpointType(TestContext.getInstance().getConfig().getTestEndpointMode());
-            root.setIdentifier(TestContext.getInstance().getConfig().getIdentifier());
-            root.setDate(TestContext.getInstance().getStartTime());
-            rootContainers.add(root);
+            String summaryPath = Paths.get(TestContext.getInstance().getConfig().getOutputFolder(), "summary.json").toString();
+            File f = new File(summaryPath);
+            f.createNewFile();
 
-            Set<TestIdentifier> containers = new HashSet<>(identifiers).stream().filter(TestIdentifier::isContainer).collect(Collectors.toSet());
-            Set<TestIdentifier> tests = new HashSet<>();
-            Map<String, AnnotatedStateContainer> results = TestContext.getInstance().getTestResults();
-            LOGGER.debug("{}", containers.stream().map(TestIdentifier::getUniqueId).collect(Collectors.toList()));
-
-            boolean errorOccurred = false;
-            for (TestIdentifier container : containers) {
-                if (results.get(container.getUniqueId()) != null) {
-                    tests.add(container);
-                    continue;
-                }
-
-                try {
-                    TestResultContainer child = root.addChildContainer(container);
-                    child.setElapsedTime(containerElapsedTimes.get(container.getUniqueId()));
-                } catch (Exception E) {
-                    root.addAdditionalInformation("Problem occurred by adding " + container.getUniqueId());
-                    LOGGER.error("Problem occurred by adding {}", container.getUniqueId(), E);
-                    errorOccurred = true;
-                }
-            }
-
-            if (errorOccurred) {
-                LOGGER.error(containers);
-                LOGGER.error(results);
-            }
-
-            Set<TestIdentifier> notAddedTests = new HashSet<>(identifiers).stream()
-                    .filter(TestIdentifier::isTest)
-                    .filter(i -> {
-                        return tests.stream()
-                                .map(TestIdentifier::getUniqueId)
-                                .noneMatch(j -> j.equals(i.getParentId().get()));
-                    })
-                    .collect(Collectors.toSet());
-
-            tests.addAll(notAddedTests);
-
-            for (TestIdentifier i : tests) {
-                if (!i.getParentId().isPresent()) {
-                    LOGGER.error("Test has no parent");
-                    root.addAdditionalInformation(String.format("Test has no parent %s", i.getUniqueId()));
-                    throw new RuntimeException("Test has no parent...");
-                }
-                root.addResultWithParent(i.getParentId().get(), results.get(i.getUniqueId()));
-            }
-        }
-
-        if (TestContext.getInstance().getConfig().getOutputFormat().equals("json")) {
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
-                        .withFieldVisibility(JsonAutoDetect.Visibility.NONE)
-                        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                        .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-                        .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
-
-                File f = new File(TestContext.getInstance().getConfig().getOutputFile());
-                f.getParentFile().mkdirs();
-                f.createNewFile();
-
-                mapper.writeValue(new File(TestContext.getInstance().getConfig().getOutputFile()), rootContainers.get(0));
-            } catch (Exception e) {
-                LOGGER.error("", e);
-                throw new RuntimeException(e);
-            }
-
-        }
-        else {
-            try {
-                JAXBContext jaxbContext = JAXBContext.newInstance(TestResultContainer.class);
-                Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-                jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-
-                File f = new File(TestContext.getInstance().getConfig().getOutputFile());
-                f.getParentFile().mkdirs();
-                jaxbMarshaller.marshal(rootContainers.get(0), f);
-            } catch (Exception e) {
-                LOGGER.error("", e);
-                throw new RuntimeException(e);
-            }
+            mapper.writeValue(f, s);
+        } catch (Exception e) {
+            LOGGER.error("", e);
+            throw new RuntimeException(e);
         }
 
     }

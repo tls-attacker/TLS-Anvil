@@ -33,14 +33,14 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
 
         String uniqueId = Utils.getTemplateContainerExtensionContext(context).getUniqueId();
         AnnotatedStateContainer container = TestContext.getInstance().getTestResults().get(uniqueId);
-        if (container != null) {
+        if (container != null || TestContext.getInstance().testIsFinished(uniqueId)) {
             return container;
         }
 
-        TestContext.getInstance().testFinished();
         container = AnnotatedStateContainer.forExtensionContext(context);
         container.setResultRaw(result.getValue());
         TestContext.getInstance().addTestResult(container);
+        TestContext.getInstance().testFinished(uniqueId);
         return container;
     }
 
@@ -48,7 +48,14 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
     @Override
     synchronized public void testSuccessful(ExtensionContext context) {
         TestContext.getInstance().testSucceeded();
-        createResult(context, TestResult.SUCCEEDED);
+        AnnotatedStateContainer container = createResult(context, TestResult.SUCCEEDED);
+
+        if (!Utils.extensionContextIsTemplateContainer(context.getParent().get())) {
+            // test does not belong to a test case performing handshakes
+            // thus AnnotatedStateContainer.finished is never called,
+            // therefore serialze the container immediately
+            container.finished();
+        }
     }
 
     @Override
@@ -59,12 +66,17 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
                 .filter(i -> i.getExtensionContext().getUniqueId().equals(context.getUniqueId()))
                 .findFirst()
                 .orElse(null);
+
         if (state == null) {
             if (Utils.extensionContextIsTemplateContainer(context.getParent().get())) {
                 state = new AnnotatedState(context, null, null);
                 state.setFailedReason(cause);
             } else {
+                // test does not belong to a test case performing handshakes
+                // thus AnnotatedStateContainer.finished is never called,
+                // therefore serialze the container immediately
                 container.setFailedReason(ExecptionPrinter.stacktraceToString(cause));
+                container.finished();
             }
         }
 
@@ -78,5 +90,11 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
         TestContext.getInstance().testDisabled();
         AnnotatedStateContainer container = createResult(context, TestResult.DISABLED);
         container.setDisabledReason(reason.orElse("No reason"));
+        if (!Utils.extensionContextIsTemplateContainer(context.getParent().get())) {
+            // test does not belong to a test case performing handshakes
+            // thus AnnotatedStateContainer.finished is never called,
+            // therefore serialze the container immediately
+            container.finished();
+        }
     }
 }

@@ -24,10 +24,6 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import javax.annotation.Nonnull;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,7 +38,6 @@ import java.util.stream.Collectors;
  * This class contains a list of States / Handshakes that are the result
  * of the derivation process.
  */
-@XmlAccessorType(XmlAccessType.NONE)
 public class  AnnotatedStateContainer {
     private static final Logger LOGGER = LogManager.getLogger();
     private boolean finished = false;
@@ -50,7 +45,6 @@ public class  AnnotatedStateContainer {
     private int resultRaw = 0;
     private String uniqueId;
 
-    @XmlElement(name = "TestMethod")
     @JsonProperty("TestMethod")
     private TestMethodConfig testMethodConfig;
 
@@ -63,15 +57,12 @@ public class  AnnotatedStateContainer {
     @JsonProperty("HasVaryingAdditionalResultInformation")
     private Boolean hasVaryingAdditionalResultInformation = false;
 
-    @XmlElement(name = "DisabledReason")
     @JsonProperty("DisabledReason")
     private String disabledReason;
 
-    @XmlElement(name = "FailedReason")
     @JsonProperty("FailedReason")
     private String failedReason;
 
-    @XmlElement(name = "ElapsedTime")
     @JsonProperty("ElapsedTime")
     private long elapsedTime = 0;
 
@@ -81,8 +72,6 @@ public class  AnnotatedStateContainer {
     @JsonProperty("FailureInducingCombinations")
     List<DerivationContainer> failureInducingCombinations;
 
-    @XmlElementWrapper(name = "States")
-    @XmlElement(name = "State")
     @JsonProperty("States")
     private List<AnnotatedState> states = new ArrayList<>();
 

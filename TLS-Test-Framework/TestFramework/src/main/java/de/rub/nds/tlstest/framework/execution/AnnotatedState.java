@@ -10,26 +10,17 @@
 package de.rub.nds.tlstest.framework.execution;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceSerializer;
 import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
 import de.rub.nds.tlstest.framework.constants.TestResult;
-import de.rub.nds.tlstest.framework.exceptions.TransportHandlerExpection;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import javax.annotation.Nonnull;
 import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
@@ -39,8 +30,6 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.function.Consumer;
 
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
 public class AnnotatedState {
     private static final Logger LOGGER = LogManager.getLogger();
     private State state;
@@ -48,7 +37,6 @@ public class AnnotatedState {
     private Throwable failedReason;
     private AnnotatedStateContainer associatedContainer;
 
-    @XmlElement(name = "Result")
     @JsonProperty("Result")
     private TestResult result = TestResult.NOT_SPECIFIED;
 
@@ -124,7 +112,6 @@ public class AnnotatedState {
         associatedContainer.stateFinished(result);
     }
 
-    @XmlElement(name = "Stacktrace")
     @JsonProperty("Stacktrace")
     public String getStacktrace() {
         if (failedReason != null) {
@@ -133,7 +120,6 @@ public class AnnotatedState {
         return null;
     }
 
-    @XmlElement(name = "WorkflowTrace")
     public WorkflowTrace getWorkflowTrace() {
         if (state != null) {
             return state.getWorkflowTrace();
@@ -141,7 +127,6 @@ public class AnnotatedState {
         return null;
     }
 
-    @XmlElement(name = "AdditionalResultInformation")
     @JsonProperty("AdditionalResultInformation")
     public String getAdditionalResultInformation() {
         if (additionalResultInformation == null) return "";
@@ -156,7 +141,6 @@ public class AnnotatedState {
         additionalResultInformation.add(info);
     }
 
-    @XmlElement(name = "AdditionalTestInformation")
     @JsonProperty("AdditionalTestInformation")
     public String getAdditionalTestInformation() {
         if (additionalTestInformation == null) return "";
@@ -171,7 +155,6 @@ public class AnnotatedState {
         additionalTestInformation.add(info);
     }
 
-    @XmlElement(name = "uuid")
     @JsonProperty("uuid")
     public String getUuid() {
         StringBuilder toHash = new StringBuilder();

@@ -20,15 +20,9 @@ import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyX;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE)
 public class TestMethodConfig {
     private KeyX keyExchange = null;
     private Method testMethod = null;
@@ -37,23 +31,18 @@ public class TestMethodConfig {
     @JsonProperty("RFC")
     private RFC rfc = null;
 
-    @XmlElement(name = "TlsTest")
     @JsonUnwrapped
     private TlsTest tlsTest = null;
 
-    @XmlElement(name = "MethodName")
     @JsonProperty("MethodName")
     private String methodName = null;
 
-    @XmlElement(name = "DisplayName")
     @JsonProperty("DisplayName")
     private String displayName = null;
 
-    @XmlElement(name = "ClassName")
     @JsonProperty("ClassName")
     private String className = null;
 
-    @XmlElement(name = "TlsVersion")
     @JsonUnwrapped
     private TlsVersion tlsVersion = null;
 

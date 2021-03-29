@@ -91,6 +91,9 @@ public class TestConfig extends TLSDelegateConfig {
     @Parameter(names = "-strength", description = "Strength of the pairwise test. (Default value: 4)")
     private int strength = 4;
     
+    @Parameter(names = "-connectionTimeout", description = "The default timeout for TLS sessions in ms. (Default value: 1000)")
+    private int connectionTimeout = 1000;
+    
     public TestConfig() {
         super(new GeneralDelegate());
         this.testServerDelegate = new TestServerDelegate();
@@ -288,14 +291,14 @@ public class TestConfig extends TLSDelegateConfig {
         Config config = super.createConfig();
 
         // Server test -> TLS-Attacker acts as Client
-        config.getDefaultClientConnection().setFirstTimeout((parallelHandshakes + 1) * 1000);
-        config.getDefaultClientConnection().setTimeout(1000);
+        config.getDefaultClientConnection().setFirstTimeout((parallelHandshakes + 1) * connectionTimeout);
+        config.getDefaultClientConnection().setTimeout(connectionTimeout);
         config.getDefaultClientConnection().setConnectionTimeout(0);
 
 
         // Client test -> TLS-Attacker acts as Server
-        config.getDefaultServerConnection().setFirstTimeout(1000);
-        config.getDefaultServerConnection().setTimeout(1000);
+        config.getDefaultServerConnection().setFirstTimeout(connectionTimeout);
+        config.getDefaultServerConnection().setTimeout(connectionTimeout);
 
 
         config.setWorkflowExecutorShouldClose(true);
@@ -488,5 +491,13 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setRestartServerAfter(Integer restartServerAfter) {
         this.restartServerAfter = restartServerAfter;
+    }
+
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
     }
 }

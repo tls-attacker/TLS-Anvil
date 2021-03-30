@@ -57,10 +57,6 @@ public class TlsGenericTest extends TlsBaseTest {
     public Config prepareConfig(Config config, ArgumentsAccessor argAccessor, WorkflowRunner runner) {
         super.prepareConfig(config, argAccessor, runner);
         config.setStopTraceAfterUnexpected(true);
-        config.getDefaultServerConnection().setTimeout(1000);
-        config.getDefaultServerConnection().setFirstTimeout(5000);
-        config.getDefaultClientConnection().setTimeout(1000);
-        config.getDefaultClientConnection().setFirstTimeout(5000);
         return config;
     }
     

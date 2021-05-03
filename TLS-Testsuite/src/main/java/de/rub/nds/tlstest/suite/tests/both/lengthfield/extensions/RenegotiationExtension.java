@@ -70,21 +70,6 @@ public class RenegotiationExtension extends TlsGenericTest {
         renegotiationExtensionInfoLengthTest(config, runner, argumentAccessor);
     }
     
-    @Tag("tls13")
-    @TlsVersion(supported = ProtocolVersion.TLS13)
-    @KeyExchange(supported = KeyExchangeType.ALL13)
-    @TlsTest(description = "Send a Renegotiation Extension in the Hello Message with a modified  Extension Info length value (+1)")
-    @ScopeLimitations(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION)
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    public void renegotiationExtensionInfoLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = context.getConfig().createTls13Config();
-        renegotiationExtensionInfoLengthTest(config, runner, argumentAccessor);
-    }
-    
-    
     private void renegotiationExtensionInfoLengthTest(Config versionBasedConfig, WorkflowRunner runner, ArgumentsAccessor argumentAccessor) {
         versionBasedConfig.setAddRenegotiationInfoExtension(true);
         WorkflowTrace workflowTrace = setupLengthFieldTestForConfig(versionBasedConfig, runner, argumentAccessor);

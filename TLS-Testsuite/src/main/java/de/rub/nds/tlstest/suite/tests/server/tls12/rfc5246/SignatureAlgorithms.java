@@ -89,31 +89,6 @@ public class SignatureAlgorithms extends Tls12Test {
     }
 
     @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
-            "If the negotiated key exchange algorithm is one of (RSA, DHE_RSA, DH_RSA, RSA_PSK, ECDH_RSA, ECDHE_RSA), " +
-            "behave as if client had sent the value {sha1,rsa}.")
-    @MethodCondition(method = "rsaCiphersuitesSupported")
-    @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    public void rsaNoSignatureAlgorithmsExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-        c.setAddSignatureAndHashAlgorithmsExtension(false);
-
-        WorkflowTrace workflowTrace = getWorkflowFor(c);
-
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.executedAsPlanned(i);
-
-            assertEquals(SignatureAlgorithm.RSA, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getSignatureAlgorithm());
-            ServerKeyExchangeMessage skx = i.getWorkflowTrace().getFirstReceivedMessage(ServerKeyExchangeMessage.class);
-            SignatureAndHashAlgorithm sigHashAlg = SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(skx.getSignatureAndHashAlgorithm().getValue());
-            assertEquals(HashAlgorithm.SHA1, sigHashAlg.getHashAlgorithm());
-        });
-
-    }
-
-    @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
             "If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), " +
             "behave as if the client had sent the value {sha1,dsa}.")
     @MethodCondition(method = "dssCiphersuitesSupported")

@@ -33,6 +33,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -41,7 +42,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
 
-    @TlsTest(description = "Client implementations MUST always send the correct version number in PreMasterSecret. " +
+    /*@TlsTest(description = "Client implementations MUST always send the correct version number in PreMasterSecret. " +
             "If ClientHello.client_version is TLS 1.1 or higher, server implementations MUST check " +
             "the version number as described in the note below.\n" +
             "In any case, a TLS server MUST NOT generate an alert if processing an " +
@@ -70,7 +71,7 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
 
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
-    }
+    }*/
 
     @TlsTest(description = "In any case, a TLS server MUST NOT generate an alert if processing an " +
             "RSA-encrypted premaster secret message fails, or the version number " +

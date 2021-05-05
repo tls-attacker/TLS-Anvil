@@ -137,10 +137,8 @@ public class TLSExtensionForECC extends Tls12Test {
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
 
-        ClientHelloMessage chm = new ClientHelloMessage(c);
-
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        chm.getExtension(EllipticCurvesExtensionMessage.class).setSupportedGroups(Modifiable.insert(new byte[]{(byte) 123, 124}, 0));
+        workflowTrace.getFirstSendMessage(ClientHelloMessage.class).getExtension(EllipticCurvesExtensionMessage.class).setSupportedGroups(Modifiable.insert(new byte[]{(byte) 123, 124}, 0));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }

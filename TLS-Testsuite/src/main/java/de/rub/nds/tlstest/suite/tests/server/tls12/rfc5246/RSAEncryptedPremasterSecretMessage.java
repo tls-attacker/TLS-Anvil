@@ -42,7 +42,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
 
-    /*@TlsTest(description = "Client implementations MUST always send the correct version number in PreMasterSecret. " +
+    @TlsTest(description = "Client implementations MUST always send the correct version number in PreMasterSecret. " +
             "If ClientHello.client_version is TLS 1.1 or higher, server implementations MUST check " +
             "the version number as described in the note below.\n" +
             "In any case, a TLS server MUST NOT generate an alert if processing an " +
@@ -71,7 +71,7 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
 
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
-    }*/
+    }
 
     @TlsTest(description = "In any case, a TLS server MUST NOT generate an alert if processing an " +
             "RSA-encrypted premaster secret message fails, or the version number " +
@@ -94,8 +94,8 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
 
         RSAClientKeyExchangeMessage cke = workflowTrace.getFirstSendMessage(RSAClientKeyExchangeMessage.class);
         cke.prepareComputations();
-        //changes "0x00 0x02 random 0x00" to "0x00 0x01 random 0x00"
-        cke.getComputations().setPremasterSecret(Modifiable.xor(new byte[] {0x01}, 1));
+        //changes "0x00 0x02 random 0x00" to "0x00 0x03 random 0x00"
+        cke.getComputations().setPlainPaddedPremasterSecret(Modifiable.xor(new byte[] {0x01}, 1));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }

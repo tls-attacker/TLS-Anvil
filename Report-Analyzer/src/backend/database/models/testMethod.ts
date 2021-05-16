@@ -8,7 +8,7 @@ export interface ITestMethod {
   TlsVersion: string,
   RFC: {
     Section: string,
-    number: number
+    Number: number
   }
   MethodName: string,
   DisplayName: string,
@@ -21,7 +21,7 @@ export const TestMethodSchemaObject = {
   TlsVersion: String,
   RFC: {
     Section: String,
-    number: Number
+    Number: Number
   },
   MethodName: String,
   DisplayName: String,

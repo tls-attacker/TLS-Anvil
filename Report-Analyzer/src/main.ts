@@ -24,8 +24,14 @@ if (process.env.NODE_ENV == 'production') {
 
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
-new Vue({
+const v = new Vue({
   router,
   store,
   render: h => h(App)
 }).$mount('#app')
+export default v
+
+
+store.dispatch("getIdentifiers")
+
+

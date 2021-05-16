@@ -1,0 +1,79 @@
+//- 
+  variables that are needed by the template
+    - identifiers: string[] - array of identifiers
+    - tableData: rowData[]
+        - rowData: {
+            rowHead: {
+              value: string,
+              isHead: boolean
+            }, 
+            `identifier`: {
+              value: string,
+              data: any
+            }
+          }
+    - showTooltip: (data: rowData) => boolean - function that determines if a tooltip should be displayed
+    - tooltip: (data: rowData) => string - function that returns that text of the tooltip
+   
+
+//- style={"table-layout": "fixed"})
+//- style={"width": 'auto'})
+
+.table-responsive
+  table.table.table-hover.table-striped 
+    thead
+      tr
+        th.text-truncate.stickyColumn(scope="col")
+        each val in identifiers
+          th.text-center.stickyColumn
+            span.colHead(
+              scope="col"
+              data-identifier=val
+              onclick="document.dispatchEvent(new CustomEvent('colHeadClicked', {'detail': this}))"
+            )= val
+    tbody
+      each rowData, rowIndex in tableData
+        tr(data-rowindex=rowIndex 
+          class=Object.keys(rowData).length == 1 ? ["empty"] : ''
+          class=rowData["rowHead"]["isHead"] ? "rowIsHead" : "rowIsNoHead"
+        )      
+          if Object.keys(rowData).length > 1
+            //- First column (head)
+            th.stickyColumn
+              span.text-truncate.rowHead(
+                scope="row"
+                data-rowindex=rowIndex
+                onclick="document.dispatchEvent(new CustomEvent('rowHeadClicked', {'detail': this}))"
+              )= rowData["rowHead"]["value"]
+
+            //- Report columns
+            each i in identifiers
+              if showTooltip(rowData[i].data)
+                td.text-center
+                  if rowData[i].value != ''
+                    span.cell(
+                      data-rowindex=rowIndex
+                      data-identifier=i
+                      data-toggle="tooltip" 
+                      data-placement="top" 
+                      title=tooltip(rowData[i].data)
+                      onclick="document.dispatchEvent(new CustomEvent('cellClicked', {'detail': this}))"
+                      class=rowData[i].data ? 'pointer' : ''
+                    )= rowData[i].value
+              else
+                td.text-center
+                  if rowData[i].value != ''
+                    span.cell(
+                      data-rowindex=rowIndex
+                      data-identifier=i
+                      onclick="document.dispatchEvent(new CustomEvent('cellClicked', {'detail': this}))"
+                      class=rowData[i].data ? 'pointer' : ''
+                    )= rowData[i].value
+          else
+            //- render empty table row
+            th
+              span.text-truncate.rowHead(
+                scope="row"
+              )= rowData["rowHead"]["value"]
+            each i in identifiers
+              td

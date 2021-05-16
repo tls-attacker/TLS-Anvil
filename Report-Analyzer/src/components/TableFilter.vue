@@ -11,7 +11,7 @@
             <b-form-select
               v-model="condition.key"
               :options="keys"
-              @change="keyChanged(condition)"
+              @change="keyChanged(condition); filterChanged()"
             ></b-form-select>
           </b-col>
           <b-col cols="2">
@@ -19,6 +19,7 @@
               <b-form-select
                 v-model="condition.comparator"
                 :options="propertiesForKey(condition.key).comparators"
+                @change="filterChanged()"
               ></b-form-select>
             </template>
             <template v-else-if="condition.key">
@@ -28,13 +29,14 @@
             </template>
           </b-col>
           <b-col>
-            <template v-if="condition.key && (propertiesForKey(condition.key).type === 'text' || condition.comparator.indexOf('contains') > -1)">
+            <template v-if="condition.key && (propertiesForKey(condition.key).type === 'text' || (condition.comparator && condition.comparator.indexOf('contains') > -1))">
               <b-form-input
                 placeholder="Value"
                 autocomplete="false"
                 debounce="500"
                 v-model="condition.value"
                 :list="JSON.stringify(condition.key) + containerIdx.toString() + conditionIdx.toString()"
+                @change="filterChanged()"
               ></b-form-input>
               <b-form-datalist :id="JSON.stringify(condition.key) + containerIdx.toString() + conditionIdx.toString()" :options="propertiesForKey(condition.key).values"></b-form-datalist>
             </template>
@@ -47,12 +49,13 @@
               <b-form-select
                 v-model="condition.value"
                 :options="propertiesForKey(condition.key).values"
+                @change="filterChanged()"
               ></b-form-select>
             </template>
           </b-col>
           <b-col cols="2">
             <b-button
-              @click="addCondition($event, containerIdx, conditionIdx)"
+              @click="addCondition($event, containerIdx, conditionIdx); filterChanged()"
               v-bind="condition.addBtnStyle"
               class="addBtn"
               v-text="btnTextForOperator(condition.operator)"
@@ -61,7 +64,7 @@
             <b-icon
               style="cursor: pointer"
               v-if="condition.operator != 'ADD'"
-              @click="removeCondition(containerIdx, conditionIdx)"
+              @click="removeCondition(containerIdx, conditionIdx); filterChanged()"
               icon="trash"
               variant="danger"
             ></b-icon>
@@ -233,6 +236,12 @@ export default {
         condition.value = condition.value.value
       }
     },
+
+    filterChanged() {
+      this.$nextTick(()=> {
+        this.$emit("filterChanged")
+      })
+    }
   },
 };
 </script>

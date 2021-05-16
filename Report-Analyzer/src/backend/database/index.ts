@@ -1,8 +1,10 @@
 import mongodb from 'mongodb';
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 import { Readable } from 'stream';
-import { IState, ITestResult, ITestResultContainer, StateSchema, TestResultContainerSchema, TestResultSchema } from './models';
+import { IState, ITestResult, ITestResultContainer, ITestResultEditDocument, StateSchema, TestResultContainerSchema, TestResultEditSchema, TestResultSchema } from './models';
 import { BadRequest } from '../errors';
+import { CategoriesStrings, TestResult } from '../../lib/const';
+import { calculateScoreDelta, IScoreDeltaMap } from './models/score';
 
 export enum FileType {
   pcap,
@@ -10,11 +12,14 @@ export enum FileType {
 }
 class Database {
   testResultContainer = mongoose.model<ITestResultContainer>("TestContainer", TestResultContainerSchema)
-  private testResult = mongoose.model<ITestResult>("TestResult", TestResultSchema)
+  testResultEdit = mongoose.model<ITestResultEditDocument>("TestResultEdit", TestResultEditSchema)
+  testResult = mongoose.model<ITestResult>("TestResult", TestResultSchema)
   private testResultState = mongoose.model<IState>("TestResultState", StateSchema)
   private rawDb: mongodb.Db;
   private pcapBucket: mongodb.GridFSBucket
   private keylogfileBucket: mongodb.GridFSBucket
+
+  private rawDb_testResults: mongodb.Collection
 
   constructor() {
     console.log("DB object created")
@@ -28,6 +33,7 @@ class Database {
       }
       mongoose.connect(`mongodb://${conHost}:27017/reportAnalyzer`, { useNewUrlParser: true, useUnifiedTopology: true }).then((m) => {
         this.rawDb = m.connection.db
+        this.rawDb_testResults = this.rawDb.collection("testresults")
         this.pcapBucket = new mongodb.GridFSBucket(this.rawDb, {
           bucketName: "pcap"
         })
@@ -82,7 +88,7 @@ class Database {
         const stateDoc = new this.testResultState(state)
         stateIds.push(stateDoc._id)
         uuids.push(stateDoc.uuid)
-        testResultDoc.StateIndexMap.set(stateDoc.uuid, stateIds.length - 1)
+        testResultDoc.StateIndexMap[stateDoc.uuid] = stateIds.length - 1
         stateDocs.push(stateDoc)
       }
 
@@ -92,7 +98,7 @@ class Database {
 
       testResultDoc.States = stateIds
       testResultDocs.push(testResultDoc)
-      containerDoc.TestResultClassMethodIndexMap.set(`${testResultDoc.TestMethod.ClassName}.${testResultDoc.TestMethod.MethodName}`.replace(/\./g, "||"), i)
+      containerDoc.TestResultClassMethodIndexMap[`${testResultDoc.TestMethod.ClassName}.${testResultDoc.TestMethod.MethodName}`.replace(/\./g, "||")] = i
     }
     // console.timeEnd("prepareAdd")
 
@@ -133,16 +139,98 @@ class Database {
   }
 
   async getResultContainer(identifier: string): Promise<Pick<ITestResultContainer, any>> {
-    return this.testResultContainer.findOne({ Identifier: identifier }).populate({path: 'TestResults'}).lean().exec()
+    console.time("query container " + identifier)
+    const container = await this.testResultContainer.findOne({ Identifier: identifier }).lean().exec() // populate({path: 'TestResults'}).lean().exec()
+    console.timeEnd("query container " + identifier)
+
+    const p = this.testResult.find({ContainerId: container._id.toString()}).lean().exec()
+
+    const edits = this.testResultEdit.find({
+      "$or": [
+        {Containers: {"$in": [container._id.toString()]}},
+        {Containers: null},
+      ]
+    }).sort({"createdAt": "asc"}).lean().exec()
+
+    let resultScoreDelta: IScoreDeltaMap = {}
+
+    console.time("query results " + identifier)
+    container.TestResults = await p
+    console.timeEnd("query results " + identifier)
+    for (let edit of (await edits)) {
+      const methodName = `${edit.ClassName}.${edit.MethodName}`.replace(/\./g, "||")
+      const resultIndex = container.TestResultClassMethodIndexMap[methodName]
+      const result = container.TestResults[resultIndex]
+
+      const scoreDelta = calculateScoreDelta(result.Score, edit.newResult)
+      resultScoreDelta = {...resultScoreDelta, ...scoreDelta}
+
+      result.Result = edit.newResult
+      result.edited = true
+      result.appliedEdit = <any>edit
+      result.matchingEdits = <any>edits
+    }
+    
+
+    for (const key of Object.keys(resultScoreDelta)) {
+      const v = resultScoreDelta[<CategoriesStrings>key]
+      const score = container.Score[<CategoriesStrings>key]
+      score.Reached += v.ReachedDelta
+      score.Total   += v.TotalDelta
+      score.Percentage = (score.Reached / score.Total * 100)
+    }
+
+    return container
   }
 
   async getTestResult(identifier: string, className: string, methodName: string): Promise<Pick<ITestResult, any>> {
-    const container = await this.testResultContainer.findOne({ Identifier: identifier }).exec()
-    return this.testResult.findOne({
-      ContainerId: container._id, 
+    const container = await this.testResultContainer.findOne({ Identifier: identifier }).select({_id: 1}).lean().exec()
+    const result = await this.testResult.findOne({
+      ContainerId: container._id.toString(), 
       'TestMethod.ClassName': className, 
       'TestMethod.MethodName': methodName
     }).populate('States').lean().exec()
+
+    if (!result || result.Result === TestResult.DISABLED) {
+      return result
+    }
+
+    const edits = await this.testResultEdit.find({
+      "$or": [
+        {Containers: {"$in": [container._id.toString()]}},
+        {Containers: null},
+      ],
+      MethodName: methodName,
+      ClassName: className
+    }).sort({createdAt: 'desc'}).lean().exec()
+
+    if (edits.length > 1) {
+      console.warn(`Multiple edits were found targeting ${className.replace("de.rub.nds.tlstest.suite.tests.", "")}.${methodName}@${identifier}`)
+      console.warn("Only evaluating the newest one")
+    }
+
+    if (edits.length > 0) {
+      result.Result = edits[0].newResult
+      result.edited = true
+      result.appliedEdit = <any>edits[0]
+      result.matchingEdits = <any>edits
+
+      // updates result.Score inplace
+      calculateScoreDelta(result.Score, edits[0].newResult)
+    }
+
+    return result
+  }
+
+
+  async getTestResults(identifiers: string[], className: string, methodName: string): Promise<Pick<ITestResult, any>[]> {
+    const promises = []
+    for (const identifier of identifiers) {
+      const p = this.getTestResult(identifier, className, methodName)
+      promises.push(p)
+    }
+
+    return Promise.all(promises)
   }
 
   async uploadFile(filetype: FileType, data: string, filename: string): Promise<mongoose.Types.ObjectId> {

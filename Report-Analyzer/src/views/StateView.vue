@@ -1,6 +1,8 @@
 <template>
   <div class="analyzer">
     <b-alert v-if="error" variant="danger" show>{{error}}</b-alert>
+
+    <!-- Detail Modal View -->
     <b-modal id="modal-xl" 
       v-model="showDetails" 
       scrollable 
@@ -10,35 +12,23 @@
     >
       <template v-if="detailsMode == 0">
         <div v-for="k in selectedIdentifiers" :key="k">
-          <template v-if="selectedRow && selectedRow[k] && k != 'uuid'">
+          <template v-if="selectedRow && selectedRow[k] && selectedRow[k].data && k != 'rowHead'">
             <p style="font-weight: bold;">{{ k }}</p>
             <vue-json-pretty
               id="jsonPreview"
-              :data="selectedRow[k]"
+              :data="selectedRow[k].data"
             >
             </vue-json-pretty>
             <div class="packetViewer"></div>
-            <b-button variant="success" class="pcapInlineBtn" @click="downloadPcap(selectedRow[k], k, $event)">Download</b-button>
-            <b-button variant="primary" class="pcapInlineBtn" @click="showPcap(selectedRow[k], $event)">Show PCAP</b-button>
+            <b-button variant="success" class="pcapInlineBtn" @click="downloadPcap(selectedRow[k].data, k, $event)">Download</b-button>
+            <b-button variant="primary" class="pcapInlineBtn" @click="showPcap(selectedRow[k].data, $event)">Show PCAP</b-button>
           </template>
         </div>
       </template>
       <template v-else-if="detailsMode == 1">
-        <template v-if="failureInducingCombinations"></template>
-        <vue-json-pretty id="fds" :data="failureInducingCombinations">
+        <template v-if="selectedCell"></template>
+        <vue-json-pretty id="jsonPreview" :data="selectedCell">
         </vue-json-pretty>
-        <!-- <div style="height: 50px"></div>
-        <div v-for="k in selectedColumn" :key="k.uuid">
-          <p style="font-weight: bold;">{{ k.uuid }}</p>
-          <vue-json-pretty
-            id="jsonPreview"
-            :data="k"
-          >
-          </vue-json-pretty>
-          <div class="packetViewer"></div>
-          <b-button variant="success" class="pcapInlineBtn" @click="downloadPcap(k, k.Identifier, $event)">Download</b-button>
-          <b-button variant="primary" class="pcapInlineBtn" @click="showPcap(k, $event)">Show PCAP</b-button>
-        </div> -->
       </template>
       <template v-else-if="detailsMode == 2">
         <vue-json-pretty
@@ -52,87 +42,76 @@
       </template>
     </b-modal>
 
+    <!-- Edit Modal View -->
+    <b-modal id="edit-modal"
+      v-model="showEditPanel" 
+      scrollable
+      size="xl"
+      title="Edit panel to change the test result"
+      :ok-disabled="!editPanelData.validated"
+      ok-variant="success"
+      @ok="submitEdit()"
+    >
+      <EditPanel
+        v-model="editPanelData"
+      ></EditPanel>
+    </b-modal>
+
+    <!-- TOP of the page -->
+    <template v-if="testMethod">
+      <p style="max-width: 900px">
+        <template v-if="testMethod.RFC">
+          <strong>RFC:</strong> {{testMethod.RFC.Number}}, <strong>Section:</strong> {{testMethod.RFC.Section}}<br>
+        </template>
+        <strong>Description:</strong> {{testMethod.Description}}<br>
+        <strong>TLS-Version:</strong> {{testMethod.TlsVersion}}<br>
+        <strong>Method:</strong> <span class="monospace">{{testMethod.ClassName.replace("de.rub.nds.tlstest.suite.tests.", "")}}.{{testMethod.MethodName}}</span><br>
+        <strong>Severity Levels:</strong>
+        <vue-json-pretty
+          id="jsonPreview"
+          :data="testMethod.data"
+        >
+        </vue-json-pretty>
+      </p>
+    </template>
+    <template v-else>
+      <div style="height: 280px;"></div>
+    </template>
+
+    <!-- Filter -->
     <b-row>
       <b-col>
         <TableFilter 
           :filterPossibilities="filterOptions"
           v-model="filter"
+          @filterChanged="filterChanged()"
         ></TableFilter>
       </b-col>
     </b-row>
 
-    <template v-if="testMethod">
-      <p style="max-width: 900px">
-        <strong>RFC:</strong> {{testMethod.RFC ? testMethod.RFC.number : "" }}, <strong>Section:</strong> {{testMethod.RFC ? testMethod.RFC.Section : ""}}<br>
-        <strong>Description:</strong> {{testMethod.Description}}<br>
-        <strong>TLS-Version:</strong> {{testMethod.TlsVersion}}<br>
-        <strong>Security severity:</strong> {{testMethod.SecuritySeverity}}, <strong>Interoperability severity: </strong> {{testMethod.InteroperabilitySeverity}}<br>
-        <strong>Method:</strong> {{testMethod.ClassName}}.{{testMethod.MethodName}}
-      </p>
-    </template>
+    <!-- Edit Button -->
+    <b-row>
+      <b-col align-h="end">
+        <b-button variant="primary" style="float:right" @click="showEditPanel = !showEditPanel">Edit</b-button>
+      </b-col>
+    </b-row>
 
-    <template v-if="this.selectedIdentifiers.length == 0">
-      <h3 style="margin-top: 30px">No State selected</h3>
-    </template>
-    <template v-else>
-      <b-table
-        ref="table"
-        class="stateTable"
-        head-variant="dark"
-        :no-border-collapse="false"
-        :items="itemProviderProxy"
-        :fields="fields"
-        :filter="filter"
-        sticky-header
-        striped
-        responsive
-        hover
-        select-mode="single"
-        :tbody-tr-class="rowClass"
-        @head-clicked="headClicked"
-      >
-        <template v-slot:cell(uuid)="data">
-          <template v-if="data.value.value && data.value.value.length > 20">
-            <span  
-              class="uuidRow selectable"
-              v-b-popover="{
-                placement: 'right',
-                customClass: 'uuidPopover',
-                trigger: 'hover',
-                html: true,
-                content: data.value.state.DisplayName
-              }"
-              @click="uuidColumnClicked(data.item, $event)"
-            >{{data.value.value}}</span>
-          </template>
-          <template v-else>
-            <span v-html="data.value"></span>
-          </template>
-        </template>
-
-        <template v-slot:cell()="data">
-          <template v-if="data.value">
-            <span v-b-tooltip.hover 
-              :title="data.value.AdditionalResultInformation || 'n.a'"
-              @click="iconClicked(data.value, data.field.key, $event)"
-              class="selectable"
-            >
-              {{ data.value.statusIcons }}
-            </span>
-          </template>
-        </template>
-      </b-table>
-    </template>
+    <!-- Table -->
+    <b-overlay :show="showOverlay" no-fade rounded="sm">
+      <div id="table" class="stateTable">
+        <!-- rendered by the server as HTML -->
+      </div>
+    </b-overlay>
   </div>
 </template>
 
 <script>
-import * as stateview from '@/lib/stateview'
 import VueJsonPretty from 'vue-json-pretty'
 import 'vue-json-pretty/lib/styles.css'
 import { FilterInputModels } from "@/lib/filter/filterInputModels";
 import TableFilter from '@/components/TableFilter'
-import { filter } from "@/lib/filter/filter"
+import EditPanel from '@/components/EditPanel'
+import { filter } from "@/lib/filter/filter2"
 
 export default {
   name: "StateView",
@@ -151,22 +130,16 @@ export default {
       additionalTestInformationFilter: null,
       hightlightOption: null, 
       selectedRow: {},
-      selectedColumn: [],
       selectedCell: {},
       showDetails: false,
+      showEditPanel: false,
+      editPanelData: {},
       detailsMode: 0,
-      fields: [
-        {
-          key: "uuid",
-          label: "UUID",
-          stickyColumn: true,
-          thStyle: {width: "640px"},
-          tdClass: "stickyColumn"
-        }, {
-          key: "dummy",
-          label: "",
-        }
-      ]
+      showOverlay: false
+      /* non-reactive data
+      tableData: []
+      resultData: {}
+      */
     }
   },
   computed: {
@@ -189,109 +162,31 @@ export default {
     }
   },
   methods: {
-    getStates() {
-      const reportIdentifiers = this.testResults.map((i) => i.Identifier)
-      const newIdentifiers = this.selectedIdentifiers.filter((i) => reportIdentifiers.indexOf(i) == -1)
-      if (newIdentifiers.length == 0) {
-        this.$nextTick(() => {
-          if (reportIdentifiers.length != this.fields.length - 2) {
-            this.fields.splice(1, this.fields.length - 1)
-            for (const i of reportIdentifiers) {
-              this.fields.push({
-                key: i, 
-                label: i,
-                thStyle: {width: "200px", cursor: "pointer"},
-                class: "centered"
-              })
-            }
-            
-            this.fields.push({
-              key: "dummy",
-              label: ""
-            })
-          }
-          this.$refs.table.refresh()
-        }) 
-        return
-      }
+    async getStates() {
+      this.showOverlay = true
+      await this.$http.get(`testResult/${this.className}/${this.methodName}`, {
+        params: {
+          identifiers: this.selectedIdentifiers,
+        }
+      }).then((res) => {
+        this.tableData = res.data.tableData
+        this.resultData = res.data.resultData
 
-      this.fields.splice(this.fields.length - 1, 1)
-      for (const i of newIdentifiers) {
-        this.fields.push({
-          key: i, 
-          label: i,
-          thStyle: {width: "200px", cursor: "pointer"},
-          class: "centered"
-        })
-      }
-      
-      this.fields.push({
-        key: "dummy",
-        label: ""
-      })
+        const d = this.resultData[this.selectedIdentifiers[0]]
+        this.testMethod = d.TestMethod
+        this.testMethod.data = {}
+        const score = d.Score
+        for (const key of Object.keys(score)) {
+          this.testMethod.data[key] = score[key].SeverityLevel
+        }
 
-      const promises = []
-      const derivations = new Set()
-      const additionalResultInformation = new Set()
-      const additionalTestInformation = new Set()
-      const derivationValues = {}
-      for (const i of newIdentifiers) {
-        const p = this.$http.get(`testReport/${i}/testResult/${this.className}/${this.methodName}`).then((res) => {
-          console.log(`finished req ${i}`)
-          res.data.Identifier = i
-          this.testResults.push(res.data)
-          if (!this.testMethod && res.data.TestMethod) {
-            this.testMethod = res.data.TestMethod
-          }
-
-          if (res.data.States) {
-            for (const s of res.data.States) {
-              if (s.DerivationContainer) {
-                for (const d in s.DerivationContainer) {
-                  derivations.add(d)
-                  if (!derivationValues[d]) {
-                    derivationValues[d] = new Set()
-                  }
-                  derivationValues[d].add(s.DerivationContainer[d])
-                }
-              }
-
-              if (s.AdditionalResultInformation) {
-                s.AdditionalResultInformation.split(";").forEach((info) => {
-                  additionalResultInformation.add(info.trim())
-                })
-              }
-
-              if (s.AdditionalTestInformation) {
-                s.AdditionalTestInformation.split(";").forEach((info) => {
-                  additionalTestInformation.add(info.trim())
-                })
-              } 
-            }
-          }
-        }).catch((e) => {
-          console.error(e)
-        })
-
-        promises.push(p)
-      }
-
-      Promise.all(promises).then(() => {
         this.derivationFilters = []
-        for (const derivation of derivations) {
+        const filterData = res.data.filterData
+        for (const derivation of filterData.derivationsSet) {
           let comparator = ["==", "!=", "contains", "!contains"]
-          const values = Array.from(derivationValues[derivation])
-          values.sort()
+          const values = Array.from(filterData.derivationValues[derivation])
           if (!isNaN(values[0])) {
             comparator = FilterInputModels.Comparator.all
-            values.sort((i,j) =>{
-              const ni = parseInt(i)
-              const nj = parseInt(j)
-              if (ni == nj) return 0
-              if (ni < nj) return -1
-              if (ni > nj) return 1
-            })
-            
           }
 
           this.derivationFilters.push({
@@ -306,10 +201,9 @@ export default {
           })
         }
 
-        if (additionalResultInformation.size > 0) {
+        if (filterData.additionalResultInformationSet.size > 0) {
           const comparator = ["==", "!="]
-          const values = Array.from(additionalResultInformation)
-          values.sort()
+          const values = Array.from(filterData.additionalResultInformationSet)
 
           this.additionalResultInformationFilter = {
             key: {
@@ -322,10 +216,9 @@ export default {
           }
         }
         
-        if (additionalTestInformation.size > 0) {
+        if (filterData.additionalTestInformationSet.size > 0) {
           const comparator = ["==", "!="]
-          const values = Array.from(additionalTestInformation)
-          values.sort()
+          const values = Array.from(filterData.additionalTestInformationSet)
 
           this.additionalTestInformationFilter = {
             key: {
@@ -338,89 +231,64 @@ export default {
           }
         }
 
-        this.$refs.table.refresh()
+        document.getElementById("table").innerHTML = res.data.html
+        this.filterChanged()
+        this.showOverlay = false
+
+      }).catch((e) => {
+        console.error(e)
       })
     },
-    itemProviderProxy(ctx) {
-      console.log("start itemProvider")
-      const start = new Date().getTime()
-      try {
-        const res = stateview.itemProvider(ctx, this.testResults)
-        for (let i = 0; i < res.length; i++) {
-          const row = res[i]
-          if (!filter(this.filterOptions, this.filter, row)) {
-            res.splice(i, 1)
-            i--;
-          }
-        }
-        console.log(`Finished in ${new Date().getTime() - start}ms (${res.length})`)
-        this.currentlyVisibleRows = res
-        return res
-      } catch(e) {
-        console.error("d", e, e.stack)
-        return []
-      }
-    },
-    rowClass(item, type) {
-      if (type !== "row") return
-      return stateview.getRowClass(item, this.hightlightOption)
-    },
-    uuidColumnClicked(selected, ev) {
-      ev.preventDefault()
-      ev.stopPropagation()
-      ev.stopImmediatePropagation()
-      let con = false
-      for (const i in selected) {
-        if (i === "uuid") continue
-        if (selected[i] && Object.keys(selected[i]).length > 1) {
-          con = true
-          break
-        }
-      }
 
-      if (!con)
-        return
+    // triggered when clicked the first column (i.e. an UUID)
+    rowHeadClicked(ev) {
+      const target = ev.detail
+      const rowIndex = target.getAttribute("data-rowindex")
 
-      this.selectedRow = selected
+      const rowData = this.tableData[rowIndex]
+      if (rowData.isHead) return
+
+      this.selectedRow = rowData
       this.detailsMode = 0
       this.showDetails = true
     },
-    iconClicked(data, identifier, ev) {
-      ev.preventDefault()
-      ev.stopPropagation()
-      ev.stopImmediatePropagation()
-      this.detailsMode = 2
-      this.showPcap(data, null)
 
+    // triggered when clicked on an icon (a table cell)
+    cellClicked(ev) {
+      const target = ev.detail
+      const identifier = target.getAttribute("data-identifier")
+      const rowIndex = target.getAttribute("data-rowindex")
+
+      const data = JSON.parse(JSON.stringify(this.tableData[rowIndex][identifier].data))
+      if (!data) {
+        return
+      }
+
+      this.detailsMode = 1
+      if (data.DerivationContainer) {
+        this.detailsMode = 2
+        this.showPcap(this.tableData[rowIndex][identifier].data, null)
+      }
       data.Identifier = identifier
       this.selectedCell = data
       this.showDetails = true
     },
-    headClicked(key, field) {
-      if (key == "uuid") return
-      const identifier = field.key
-      const result = this.testResults.filter(i => i.Identifier == identifier)[0]
-      let states = result.States
-      console.log(this.currentlyVisibleRows)
-      if (this.currentlyVisibleRows) {
-        states = []
-        for (const row of this.currentlyVisibleRows) {
-          if (row[identifier] && row[identifier].Result)
-            states.push(row[identifier])
-        }
-      }
 
-      states.map((i) => i.Identifier = identifier)
-      console.log(result)
-      this.failureInducingCombinations = result.FailureInducingCombinations
-      this.selectedColumn = states
+    // triggered when clicked on column head
+    colHeadClicked(ev) {
+      const target = ev.detail
+      const identifier = target.getAttribute("data-identifier")
+
+      this.selectedCell = this.resultData[identifier]
       this.detailsMode = 1
       this.showDetails = true
     },
+
     updateParameters(route) {
       this.error = null
       if (route.query.selected) {
         this.selectedIdentifiers = route.query.selected.split(',')
+        this.$store.commit("setSelectedIdentifiers", this.selectedIdentifiers)
       }
       if (route.query.className) {
         this.className = route.query.className
@@ -432,26 +300,6 @@ export default {
       this.$nextTick(() => {
         this.getStates()
       })
-    },
-    checkCache(selected, className, methodName) {
-      let sameSelection = true
-      for (let i = 0; i < selected.length; i++) {
-        if (selected[i] !== this.selectedIdentifiers[i]) {
-          sameSelection = false
-        }
-      }
-
-      if (!sameSelection || className !== this.className || methodName !== this.methodName) {
-        this.testResults = []
-        this.testMethod = null
-        this.derivationFilters = null
-        if (this.fields.length > 2) {
-          this.fields.splice(1, this.fields.length - 2)
-        }
-        this.$nextTick(() => {
-          this.$refs.table.refresh()
-        })
-      } 
     },
 
     async showPcap(selectedCell, ev) {
@@ -512,11 +360,82 @@ export default {
         ev.target.disabled = false
         console.error(e)
       })
+    },
+
+    async filterChanged() {
+      console.log("Filter changed")
+      this.showOverlay = true
+
+      await this.processLargeArrayAsync(this.tableData, (val, i) => {
+        if (i == 0) console.log("start loop")
+        if (i == this.tableData.length - 1) console.log("end loop")
+        const show = filter(this.filter, this.tableData[i])
+        if (show) {
+          document.querySelector(`tr[data-rowIndex='${i}']`).classList.remove("hidden")
+        } else {
+          document.querySelector(`tr[data-rowIndex='${i}']`).classList.add("hidden")
+        }
+      })
+
+      console.log("finished")
+      this.showOverlay = false
+    },
+
+    async submitEdit() {
+      const data = {
+        ...this.editPanelData,
+        MethodName: this.testMethod.MethodName,
+        ClassName: this.testMethod.ClassName
+      }
+      this.$http.post(`/testResult/edit`, data).then(() => {
+        this.getStates()
+      }).catch((e) => {
+        console.error(e)
+      })
+    },
+
+    async processLargeArrayAsync(array, fn, maxTimePerChunk, context) {
+      context = context || this;
+      maxTimePerChunk = maxTimePerChunk || 200;
+      let index = 0;
+
+      function now() {
+        return new Date().getTime();
+      }
+
+      async function doChunk() {
+        await new Promise((res) => {
+          setTimeout(() => {
+            res()
+          }, 1)
+        })
+
+        return new Promise(function(res) {
+          const startTime = now();
+          while (index < array.length && (now() - startTime) <= maxTimePerChunk) {
+            // callback called with args (value, index, array)
+            fn.call(context, array[index], index, array);
+            ++index;
+          }
+          if (index >= array.length) {
+            res()
+          } else {
+            res(doChunk())
+          }
+        })
+      }
+
+      await doChunk();    
     }
+
   },
   created() {
     console.log("created")
     this.testResults = []
+
+    document.addEventListener("cellClicked", this.cellClicked)
+    document.addEventListener("rowHeadClicked", this.rowHeadClicked)
+    document.addEventListener("colHeadClicked", this.colHeadClicked)
   },
   beforeRouteUpdate(to, from, next) {
     if (this.guardNavigation > 0) {
@@ -526,25 +445,16 @@ export default {
     }
 
     console.log("beforeRouteUpdate")
-      
-    const selected = to.query.selected ? to.query.selected.split(',') : []
-    const className = to.query.className
-    const methodName = to.query.methodName
-    this.checkCache(selected, className, methodName)
     this.updateParameters(to)
-
     next()
   },
   activated() {
-    const selected = this.$route.query.selected ? this.$route.query.selected.split(',') : []
-    const className = this.$route.query.className
-    const methodName = this.$route.query.methodName
-    this.checkCache(selected, className, methodName)
     this.updateParameters(this.$route)
   },
   components: {
     VueJsonPretty,
-    TableFilter
+    TableFilter,
+    EditPanel
   }
 };
 </script>
@@ -560,14 +470,38 @@ export default {
   background-color: rgb(255, 187, 142) !important;
 }
 
+.empty {
+  background-color: #343a40 !important;
+  border: 1px solid #464646 !important;
+}
+
 .stickyColumn {
   color: #fff !important;
   background-color: #343a40 !important;
-  border: 0 !important;
+  border: 1px solid #464646 !important;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.table-responsive {
+  max-height: 99vh;
+  overflow-y: auto;
 }
 
 .notSelectable {
   cursor: default !important;
+}
+
+.hidden {
+  display: none
+}
+
+tr.rowIsNoHead span.cell,
+tr.rowIsNoHead span.rowHead,
+.pointer,
+thead span.colHead {
+  cursor: pointer
 }
 
 .centered {
@@ -578,8 +512,18 @@ thead th {
   vertical-align: middle !important;
 }
 
-.uuidRow {
+tbody tr.rowIsHead th {
+  font-family: inherit;
+}
+
+tbody tr th,
+.monospace {
   font-family: monospace;
+}
+
+
+.table thead th {
+  border-bottom: none !important;
 }
 
 #jsonPreview {

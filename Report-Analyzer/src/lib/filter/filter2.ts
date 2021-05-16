@@ -1,22 +1,18 @@
-import { IState } from '../../backend/database/models';
+import { IState, ITestResult } from '../../backend/database/models';
+import { TableRow } from '../../backend/services/processResults';
 import { ITestResultTable } from '../analyzer';
 import { allResults, allSeverityLevels, CategoriesStrings, Optional, TestResult } from '../const';
 import { Derivation, DerivationStrings } from '../const/Derivations';
 import { FilterDataModels } from './filterDataModels';
 import { FilterInputModels } from './filterInputModels';
 
-
-export interface IStateTable extends IState {
-  statusIcons: string
-}
-
-
-function isResultTableRow(a : Optional<any>): a is ResultTableRow {
-  return a && a.testcase
-}
-
-function isStateTableRow(a : Optional<any>): a is StateTableRow {
+function isStateTableRow(a : Optional<any>): a is IState {
   return a && a.uuid
+}
+
+function isResultTableRow(a: Optional<any>): a is ITestResult {
+  // TODO: filter v2 not yet implemented
+  return false
 }
 
 function resolveOperator(op: FilterDataModels.Operator) {
@@ -29,18 +25,13 @@ function resolveOperator(op: FilterDataModels.Operator) {
   return ""
 }
 
-type ResultTableRow = {[identifier: string]: Optional<ITestResultTable>};
-type StateTableRow = {[identifier: string]: Optional<IStateTable>};
-type TableRow = ResultTableRow | StateTableRow
-
-
 
 function filterRow<T>(evalTemplateString: string, valueExtractor: (i: T) => any, row: TableRow) : any[] {
   const results = []
   for (let column of Object.keys(row)) {
     const cell = row[column]
-    if (column == 'testcase' || column == 'uuid' || !cell || Object.keys(cell).length < 2) continue
-    let value = valueExtractor(<any>cell)
+    if (column == 'rowHead' || !cell || Object.keys(cell).length < 2 || cell.isHead) continue
+    let value = valueExtractor(<any>cell.data)
     if (value == null) {
       results.push(false)
       continue
@@ -56,23 +47,21 @@ function filterRow<T>(evalTemplateString: string, valueExtractor: (i: T) => any,
   return results
 }
 
-export function filter(inputModel: FilterInputModels.ComposedModel, dataModel: FilterDataModels.Container[], row: TableRow) {
+export function filter(dataModel: FilterDataModels.Container[], row: TableRow) {
 
   const cleanedModel = FilterDataModels.cleanup(dataModel)
   if (cleanedModel.length == 0) {
     return true
   }
 
-  if (Object.keys(row).length == 1 && (Object.keys(row)[0] == 'testcase' || Object.keys(row)[0] == 'uuid')) {
+  if (Object.keys(row).length == 1 && Object.keys(row)[0] == 'rowHead') {
     return true
   }
 
   let show = true
   for (let key of Object.keys(row)) {
     const tmp = row[key]
-    if (tmp && typeof tmp != "string") {
-      show = show && Object.keys(tmp).length == 1
-    }
+    show = show && tmp.isHead
   }
 
   if (show) {
@@ -105,7 +94,7 @@ export function filter(inputModel: FilterInputModels.ComposedModel, dataModel: F
         case "property": {
           let evalString = "(() => {return {value}})()"
           if (condition.value === FilterInputModels.PropertyKeys.diffResults) {
-            const results = filterRow<IStateTable | ITestResultTable>(evalString, i => {
+            const results = filterRow<IState | ITestResultTable>(evalString, i => {
               return i.Result
             }, row)
             const firstElem = results[0]
@@ -151,7 +140,7 @@ export function filter(inputModel: FilterInputModels.ComposedModel, dataModel: F
 
 
           } else if (condition.value === FilterInputModels.PropertyKeys.hasAdditionalInfo && isStateTableRow(row)) {
-            let result = filterRow<IStateTable>(`{value}.length > 0`, i => {
+            let result = filterRow<IState>(`{value}.length > 0`, i => {
               return i.AdditionalResultInformation
             }, row).reduce((i, j) => i || j)
             if (condition.comparator == "!fullfills") {
@@ -164,7 +153,7 @@ export function filter(inputModel: FilterInputModels.ComposedModel, dataModel: F
         break;
 
         case "testResult": {
-          let result = filterRow<IStateTable | ITestResultTable>(`{value} ${condition.comparator} ${condition.value}`, i => {
+          let result = filterRow<IState | ITestResultTable>(`{value} ${condition.comparator} ${condition.value}`, i => {
             let idx = allResults.indexOf(<TestResult>i.Result)
             if (idx == -1) {
               console.error(`${i.Result} is not a valid test result`)
@@ -198,7 +187,7 @@ export function filter(inputModel: FilterInputModels.ComposedModel, dataModel: F
             evalString = `{value}.indexOf('${condition.value}') == -1`
           }
 
-          let result = filterRow<IStateTable>(evalString, i => {
+          let result = filterRow<IState>(evalString, i => {
             return i.DerivationContainer[derivationType]
           }, row).reduce((i, j) => i || j)
           conditionEvalString.push(result.toString())
@@ -213,7 +202,7 @@ export function filter(inputModel: FilterInputModels.ComposedModel, dataModel: F
             evalString = `{value}.indexOf('${condition.value}') == -1`
           }
 
-          let result = filterRow<IStateTable>(evalString, i => {
+          let result = filterRow<IState>(evalString, i => {
             return i.AdditionalResultInformation.split(";").map((j) => j.trim())
           }, row).reduce((i, j) => i || j)
           conditionEvalString.push(result.toString())
@@ -228,7 +217,7 @@ export function filter(inputModel: FilterInputModels.ComposedModel, dataModel: F
             evalString = `{value}.indexOf('${condition.value}') == -1`
           }
 
-          let result = filterRow<IStateTable>(evalString, i => {
+          let result = filterRow<IState>(evalString, i => {
             return i.AdditionalTestInformation.split(";").map((j) => j.trim())
           }, row).reduce((i, j) => i || j)
           conditionEvalString.push(result.toString())

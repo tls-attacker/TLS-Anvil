@@ -10,6 +10,7 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "baseUrl": ".",
+    "checkJs": false,
     "types": [
       "webpack-env"
     ],
@@ -34,6 +35,7 @@
   ],
   "exclude": [
     "src/backend/**/*.ts",
-    "node_modules"
+    "node_modules",
+    "./*.js"
   ]
 }

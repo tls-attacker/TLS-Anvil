@@ -16,7 +16,7 @@ export interface ITestResultContainer extends Document, ITimestamp {
   DisabledTests: number,
   TestClasses?: ITestResultContainer[]
   TestResults: ITestResult[]
-  TestResultClassMethodIndexMap: Map<string, number>,
+  TestResultClassMethodIndexMap: {[method: string]: number},
   StatesCount: number
   Score: IScoreMap
 }

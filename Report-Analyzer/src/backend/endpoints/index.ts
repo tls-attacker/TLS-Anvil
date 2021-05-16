@@ -2,5 +2,5 @@
 
 
 
-export { UploadReportEndpoint } from "./uploadReport"
+export { UploadReportEndpoint } from "./UploadReportEndpoint"
 

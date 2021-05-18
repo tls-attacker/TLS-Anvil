@@ -112,6 +112,8 @@ import { FilterInputModels } from "@/lib/filter/filterInputModels";
 import TableFilter from '@/components/TableFilter'
 import EditPanel from '@/components/EditPanel'
 import { filter } from "@/lib/filter/filter2"
+import $ from 'jquery'
+import 'bootstrap/dist/js/bootstrap.min.js'
 
 export default {
   name: "StateView",
@@ -201,7 +203,7 @@ export default {
           })
         }
 
-        if (filterData.additionalResultInformationSet.size > 0) {
+        if (filterData.additionalResultInformationSet.length > 0) {
           const comparator = ["==", "!="]
           const values = Array.from(filterData.additionalResultInformationSet)
 
@@ -216,7 +218,7 @@ export default {
           }
         }
         
-        if (filterData.additionalTestInformationSet.size > 0) {
+        if (filterData.additionalTestInformationSet.length > 0) {
           const comparator = ["==", "!="]
           const values = Array.from(filterData.additionalTestInformationSet)
 
@@ -235,6 +237,7 @@ export default {
         this.filterChanged()
         this.showOverlay = false
 
+        $('[data-toggle="tooltip"]').tooltip()
       }).catch((e) => {
         console.error(e)
       })

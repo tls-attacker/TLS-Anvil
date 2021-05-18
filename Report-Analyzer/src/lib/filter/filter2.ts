@@ -7,7 +7,9 @@ import { FilterDataModels } from './filterDataModels';
 import { FilterInputModels } from './filterInputModels';
 
 function isStateTableRow(a : Optional<any>): a is IState {
-  return a && a.uuid
+  const key = Object.keys(a).filter(i => i != "rowHead")
+  if (key.length == 0) return false
+  return !!a[key[0]].data.uuid
 }
 
 function isResultTableRow(a: Optional<any>): a is ITestResult {

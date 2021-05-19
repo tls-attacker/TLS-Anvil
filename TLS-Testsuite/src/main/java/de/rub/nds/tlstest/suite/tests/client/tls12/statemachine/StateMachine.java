@@ -74,22 +74,6 @@ public class StateMachine extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
     
-    @TlsTest(description = "Omit the Change Cipher Spec Message and send Finished unencrypted")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @HandshakeCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
-    public void omitChangeCipherSpecUnencryptedFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
-        
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
-        workflowTrace.addTlsAction(new SendAction(new FinishedMessage(config)));
-        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
-    }
-    
     @TlsTest(description = "Omit the Change Cipher Spec Message and send Finished encrypted")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.CRITICAL)

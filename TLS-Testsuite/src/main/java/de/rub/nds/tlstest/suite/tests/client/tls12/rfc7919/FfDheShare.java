@@ -32,6 +32,7 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import static org.junit.Assert.assertTrue;
 
 @ClientTest
 @Tag("dheshare")
@@ -64,7 +65,10 @@ public class FfDheShare extends Tls12Test {
                         Validator.receivedFatalAlert(i);
 
                         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                        Validator.testAlertDescription(i, AlertDescription.HANDSHAKE_FAILURE, msg);
+                        //accept both Illegal Parameter and Handshake Failure as RFC 8446 and 7919 demand different alerts
+                        if(msg != null && !msg.getDescription().getValue().equals(AlertDescription.ILLEGAL_PARAMETER.getValue())) {
+                            Validator.testAlertDescription(i, AlertDescription.HANDSHAKE_FAILURE, msg);
+                        }
                 });
         }
 

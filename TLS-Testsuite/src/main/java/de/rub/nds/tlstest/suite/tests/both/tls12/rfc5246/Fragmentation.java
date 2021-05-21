@@ -55,7 +55,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.api.Test;
 
-@RFC(number = 5264, section = "6.2.1 Fragmentation")
+@RFC(number = 5246, section = "6.2.1 Fragmentation")
 public class Fragmentation extends Tls12Test {
     
     @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, "

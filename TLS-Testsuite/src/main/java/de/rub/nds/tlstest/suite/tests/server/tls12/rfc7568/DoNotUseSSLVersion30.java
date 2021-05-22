@@ -51,7 +51,7 @@ import static org.junit.Assert.*;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
-@RFC(number = 7568, section = "3")
+@RFC(number = 7568, section = "3. Do Not Use SSL Version 3.0")
 @ServerTest
 public class DoNotUseSSLVersion30 extends Tls12Test {
 

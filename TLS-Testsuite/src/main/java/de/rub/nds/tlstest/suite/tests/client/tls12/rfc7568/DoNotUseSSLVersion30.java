@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-@RFC(number = 7568, section = "3")
+@RFC(number = 7568, section = "3. Do Not Use SSL Version 3.0")
 @ClientTest
 public class DoNotUseSSLVersion30 extends Tls12Test {
 

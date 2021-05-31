@@ -147,6 +147,7 @@ public class Resumption extends Tls12Test {
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
     @ScopeExtensions(DerivationType.ALERT)
+    @ScopeLimitations(DerivationType.INCLUDE_SESSION_TICKET_EXTENSION)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.MEDIUM)

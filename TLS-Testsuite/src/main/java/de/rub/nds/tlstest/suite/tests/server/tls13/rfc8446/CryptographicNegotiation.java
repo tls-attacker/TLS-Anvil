@@ -32,6 +32,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -63,7 +64,7 @@ public class CryptographicNegotiation extends Tls13Test {
     @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getUnsupportedGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH) //todo restrict groups
     public void noOverlappingParameters(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -77,17 +78,18 @@ public class CryptographicNegotiation extends Tls13Test {
 
         runner.execute(trace, config).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
-
             AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
             if (alert == null) {
                 return;
             }
-
+            
+            //todo add testAlertDescription for multiple allowed alerts
+            //also required for FFDHE tests
             AlertDescription description = AlertDescription.getAlertDescription(alert.getDescription().getValue());
-            assertTrue(
-                    AssertMsgs.UnexpectedAlertDescription,
-                    description == AlertDescription.HANDSHAKE_FAILURE || description == AlertDescription.INSUFFICIENT_SECURITY
-            );
+            if(description != AlertDescription.HANDSHAKE_FAILURE && description != AlertDescription.INSUFFICIENT_SECURITY) {
+               i.setResult(TestResult.PARTIALLY_SUCCEEDED);
+               i.addAdditionalResultInfo("Alert was not Handshake Failure or Insufficient Security");
+            }
         });
     }
    

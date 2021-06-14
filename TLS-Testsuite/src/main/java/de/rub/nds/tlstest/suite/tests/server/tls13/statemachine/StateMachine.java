@@ -57,27 +57,6 @@ public class StateMachine extends Tls13Test {
         SharedStateMachineTest.sharedSecondClientHelloTest(config, runner);
     }
 
-    @TlsTest(description = "Send a second Client Hello after receiving the server's Handshake messages")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    public void secondClientHelloAfterServerHelloMessages(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
-        SharedStateMachineTest.sharedSecondClientHelloAfterServerHelloTest(config, runner);
-    }
-
-    @Test
-    @TestDescription("An implementation may receive an unencrypted record of type "
-            + "change_cipher_spec consisting of the single byte value 0x01 at any "
-            + "time after the first ClientHello message has been sent or received")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    public void beginWithChangeCipherSpec(WorkflowRunner runner) {
-        Config config = getConfig();
-        SharedStateMachineTest.sharedBeginWithChangeCipherSpecTest(config, runner);
-    }
-
     @Test
     @TestDescription("Begin the Handshake with Application Data")
     @HandshakeCategory(SeverityLevel.MEDIUM)

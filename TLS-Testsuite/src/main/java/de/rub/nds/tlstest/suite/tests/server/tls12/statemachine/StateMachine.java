@@ -200,11 +200,12 @@ public class StateMachine extends Tls12Test {
 
     //Figure 7: path 0,2
     @Test
-    @TestDescription("Begin the Handshake with Change Cipher Spec")
+    @TestDescription("Begin the Handshake with Change Cipher Spec. A stateless server may ignore this record from TLS 1.3 on.")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
+    //TODO: only run when TLS 1.3 is *not* supported!
     public void beginWithChangeCipherSpec(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithChangeCipherSpecTest(config, runner);
@@ -250,6 +251,7 @@ public class StateMachine extends Tls12Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
+    @Tag("libressl")
     public void secondChangeCipherSpecAfterHandshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);

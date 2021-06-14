@@ -75,54 +75,6 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @RFC(number = 8422, section = "4. TLS Extensions for ECC")
-    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello "
-            + "message if it does not propose any ECC cipher suites.")
-    @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    public void bothECExtensions_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-
-        c.setAddEllipticCurveExtension(true);
-        c.setAddECPointFormatExtension(true);
-
-        execute(runner, c);
-    }
-
-    @RFC(number = 8422, section = "4. TLS Extensions for ECC")
-    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello "
-            + "message if it does not propose any ECC cipher suites.")
-    @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    public void ecExtension_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-
-        c.setAddEllipticCurveExtension(true);
-        c.setAddECPointFormatExtension(false);
-
-        execute(runner, c);
-    }
-
-    @RFC(number = 8422, section = "4. TLS Extensions for ECC")
-    @TlsTest(description = "The client MUST NOT include these extensions in the ClientHello "
-            + "message if it does not propose any ECC cipher suites.")
-    @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    public void ecPointFormatExtension_WithoutECCCipher(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-
-        c.setAddEllipticCurveExtension(false);
-        c.setAddECPointFormatExtension(true);
-
-        execute(runner, c);
-    }
-
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
     @TlsTest(description = "A server that receives a ClientHello containing one or both of these "
             + "extensions MUST use the client's enumerated capabilities to guide its "
@@ -237,7 +189,6 @@ public class TLSExtensionForECC extends Tls12Test {
     @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void supportsDeprecated(WorkflowRunner runner) {
-        boolean deprecated = false;
         List<NamedGroup> deprecatedFound = new LinkedList<>();
         for (NamedGroup group : context.getSiteReport().getSupportedNamedGroups()) {
             if (group.getIntValue() < NamedGroup.SECP256R1.getIntValue() || group == NamedGroup.EXPLICIT_CHAR2 || group == NamedGroup.EXPLICIT_PRIME) {

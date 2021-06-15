@@ -233,7 +233,7 @@ public class TestRunner {
         scannerConfig.setBaseConfig(config);
 
         scannerConfig.setProbes(
-                ProbeType.CIPHERSUITE,
+                ProbeType.CIPHER_SUITE,
                 ProbeType.CERTIFICATE,
                 ProbeType.COMPRESSIONS,
                 ProbeType.NAMED_GROUPS,
@@ -242,7 +242,6 @@ public class TestRunner {
                 ProbeType.RESUMPTION,
                 ProbeType.EXTENSIONS,
                 ProbeType.RECORD_FRAGMENTATION,
-                ProbeType.GREASE,
                 ProbeType.HELLO_RETRY
         );
         scannerConfig.setOverallThreads(1);

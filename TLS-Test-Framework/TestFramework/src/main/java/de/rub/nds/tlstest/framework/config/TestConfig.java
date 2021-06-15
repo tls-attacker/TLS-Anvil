@@ -250,8 +250,8 @@ public class TestConfig extends TLSDelegateConfig {
                     }
                 } else {
                     Optional<VersionSuiteListPair> suitePair = report.getVersionSuitePairs().stream().filter(i -> i.getVersion() == ProtocolVersion.TLS12).findFirst();
-                    if (suitePair.isPresent() && !suitePair.get().getCiphersuiteList().contains(config.getDefaultSelectedCipherSuite())) {
-                        supported.addAll(suitePair.get().getCiphersuiteList());
+                    if (suitePair.isPresent() && !suitePair.get().getCipherSuiteList().contains(config.getDefaultSelectedCipherSuite())) {
+                        supported.addAll(suitePair.get().getCipherSuiteList());
                     }
                 }
                 if (supported.size() > 0) {

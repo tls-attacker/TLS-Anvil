@@ -7,7 +7,8 @@ import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.crypto.MessageDigestCollector;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ProtocolMessage;
+import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.TlsMessage;
 import de.rub.nds.tlsattacker.core.state.TlsContext;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
@@ -117,7 +118,7 @@ public class CertificateVerify extends Tls13Test {
                     if (message instanceof CertificateVerifyMessage) {
                         return transcript;
                     } else {
-                        if (message.isHandshakeMessage()) {
+                        if (((TlsMessage)message).isHandshakeMessage()) {
                             transcript = ArrayConverter.concatenate(transcript, message.getCompleteResultingMessage().getValue());
                         }
                     }

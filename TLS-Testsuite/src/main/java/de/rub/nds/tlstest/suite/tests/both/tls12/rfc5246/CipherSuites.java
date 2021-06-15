@@ -44,7 +44,7 @@ public class CipherSuites extends Tls12Test {
         List<VersionSuiteListPair> versionSuiteListPairList = context.getSiteReport().getVersionSuitePairs();
         List<CipherSuite> suites = versionSuiteListPairList.stream()
                 .filter(i -> i.getVersion() == ProtocolVersion.TLS12)
-                .flatMap(i -> i.getCiphersuiteList().stream())
+                .flatMap(i -> i.getCipherSuiteList().stream())
                 .collect(Collectors.toList());
 
         List<String> badSuites = new ArrayList<>();

@@ -81,9 +81,7 @@ public class ServerHello extends Tls12Test {
             extensionMessage = new EncryptThenMacExtensionMessage();
         } else if (!types.contains(ExtensionType.SERVER_NAME_INDICATION)) {
             ServerNameIndicationExtensionMessage sni = new ServerNameIndicationExtensionMessage();
-            ServerNamePair sniPair = new ServerNamePair();
-            sniPair.setServerName(Modifiable.explicit("localhost".getBytes()));
-            sniPair.setServerNameType(Modifiable.explicit(NameType.HOST_NAME.getValue()));
+            ServerNamePair sniPair = new ServerNamePair(NameType.HOST_NAME.getValue(), "localhost".getBytes());
             sni.setServerNameList(new ArrayList<ServerNamePair>() {
                 {
                     add(sniPair);

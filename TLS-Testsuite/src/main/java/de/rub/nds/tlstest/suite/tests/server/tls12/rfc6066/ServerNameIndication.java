@@ -56,10 +56,8 @@ public class ServerNameIndication extends Tls12Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddServerNameIndicationExtension(true);
 
-        ServerNamePair pair = new ServerNamePair();
-        pair.setServerNameConfig(c.getDefaultClientConnection().getHostname()
+        ServerNamePair pair = new ServerNamePair(c.getSniType().getValue(), c.getDefaultClientConnection().getHostname()
                 .getBytes(Charset.forName("ASCII")));
-        pair.setServerNameTypeConfig(c.getSniType().getValue());
 
         ClientHelloMessage clientHello = new ClientHelloMessage(c);
         clientHello.getExtension(ServerNameIndicationExtensionMessage.class).setServerNameList(new ArrayList<ServerNamePair>(){{

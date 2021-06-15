@@ -13,7 +13,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ProtocolMessage;
+import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PreSharedKeyExtensionMessage;
 import de.rub.nds.tlsattacker.core.record.AbstractRecord;
@@ -305,7 +305,7 @@ public class EarlyData extends Tls13Test {
             RecordDecryptor dec = new RecordDecryptor(recordCipher, context);
             dec.decrypt(record);
             AlertHandler handler = new AlertHandler(context);
-            AlertMessage alert = (AlertMessage) handler.parseMessage(record.getCleanProtocolMessageBytes().getValue(), 0, true).getMessage();
+            AlertMessage alert = handler.getParser(record.getCleanProtocolMessageBytes().getValue(), 0).parse();
             return alert;
         } catch (Exception ex) {
             return null;

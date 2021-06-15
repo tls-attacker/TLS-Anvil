@@ -29,7 +29,6 @@ import de.rub.nds.tlstest.framework.annotations.*;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -94,9 +93,7 @@ public class Resumption extends Tls12Test {
         ClientHelloMessage cHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
         ServerNameIndicationExtensionMessage sni2 = cHello.getExtension(ServerNameIndicationExtensionMessage.class);
 
-        ServerNamePair pair = new ServerNamePair();
-        pair.setServerNameConfig(("test" + c.getDefaultClientConnection().getHostname()).getBytes(Charset.forName("ASCII")));
-        pair.setServerNameTypeConfig(c.getSniType().getValue());
+        ServerNamePair pair = new ServerNamePair(c.getSniType().getValue(), ("test" + c.getDefaultClientConnection().getHostname()).getBytes(Charset.forName("ASCII")));
         sni2.setServerNameList(new ArrayList<ServerNamePair>() {
             {
                 add(pair);

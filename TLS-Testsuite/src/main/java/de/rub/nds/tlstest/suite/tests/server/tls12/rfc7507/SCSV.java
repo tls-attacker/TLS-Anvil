@@ -70,7 +70,7 @@ public class SCSV extends Tls12Test {
         List<VersionSuiteListPair> olderPairs = new ArrayList<>(context.getSiteReport().getVersionSuitePairs());
         olderPairs.removeIf(i -> i.getVersion() != ProtocolVersion.TLS10 && i.getVersion() != ProtocolVersion.TLS11);
         for(VersionSuiteListPair pair: olderPairs) {
-            olderCipherSuites.addAll(pair.getCiphersuiteList());
+            olderCipherSuites.addAll(pair.getCipherSuiteList());
         }
         
         for(CipherSuite cipherSuite: olderCipherSuites) {
@@ -84,7 +84,7 @@ public class SCSV extends Tls12Test {
         List<VersionSuiteListPair> olderPairs = new ArrayList<>(context.getSiteReport().getVersionSuitePairs());
         olderPairs.removeIf(i -> i.getVersion() != ProtocolVersion.TLS10 && i.getVersion() != ProtocolVersion.TLS11);
         for(VersionSuiteListPair versionSuite: olderPairs) {
-            if(versionSuite.getCiphersuiteList().contains(cipherSuite)) {
+            if(versionSuite.getCipherSuiteList().contains(cipherSuite)) {
                 return versionSuite.getVersion();
             }
         }

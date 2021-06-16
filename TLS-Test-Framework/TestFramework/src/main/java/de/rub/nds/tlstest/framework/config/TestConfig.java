@@ -94,6 +94,10 @@ public class TestConfig extends TLSDelegateConfig {
     @Parameter(names = "-connectionTimeout", description = "The default timeout for TLS sessions in ms. (Default value: 1000)")
     private int connectionTimeout = 1000;
     
+    //we might want to turn these into CLI parameters in the future
+    private boolean expectTls13Alerts = false;
+    private boolean enforceSenderRestrictions = false;
+    
     public TestConfig() {
         super(new GeneralDelegate());
         this.testServerDelegate = new TestServerDelegate();
@@ -499,5 +503,26 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setConnectionTimeout(int connectionTimeout) {
         this.connectionTimeout = connectionTimeout;
+    }
+
+    /**
+     * @return the expectTls13Alerts
+     */
+    public boolean isExpectTls13Alerts() {
+        return expectTls13Alerts;
+    }
+
+    /**
+     * @param expectTls13Alerts the expectTls13Alerts to set
+     */
+    public void setExpectTls13Alerts(boolean expectTls13Alerts) {
+        this.expectTls13Alerts = expectTls13Alerts;
+    }
+
+    /**
+     * @return the enforcePeerRestrictions
+     */
+    public boolean isEnforceSenderRestrictions() {
+        return enforceSenderRestrictions;
     }
 }

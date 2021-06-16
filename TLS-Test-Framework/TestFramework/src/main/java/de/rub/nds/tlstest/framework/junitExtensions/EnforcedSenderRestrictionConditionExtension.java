@@ -14,6 +14,10 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 public class EnforcedSenderRestrictionConditionExtension extends BaseCondition {
     @Override
     public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext extensionContext) {
+        if (!extensionContext.getTestMethod().isPresent()) {
+            return ConditionEvaluationResult.enabled("Class annotations are not relevant.");
+        }
+        
         Method testMethod = extensionContext.getRequiredTestMethod();
         Class<?> testClass = extensionContext.getRequiredTestClass();
         

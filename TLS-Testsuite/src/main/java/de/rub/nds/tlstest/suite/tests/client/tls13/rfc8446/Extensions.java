@@ -55,7 +55,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-import sun.net.ext.ExtendedSocketOptions;
 
 @RFC(number = 8446, section = "4.2 Extensions")
 @ClientTest

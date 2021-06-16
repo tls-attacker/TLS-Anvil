@@ -13,22 +13,18 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
-import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.*;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -37,23 +33,13 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
-import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import de.rwth.swc.coffee4j.engine.characterization.delta.ImprovedDeltaDebugging;
-import de.rwth.swc.coffee4j.junit.CombinatorialTest;
-import de.rwth.swc.coffee4j.junit.provider.configuration.characterization.EnableFaultCharacterization;
-import de.rwth.swc.coffee4j.junit.provider.configuration.reporter.Reporter;
-import de.rwth.swc.coffee4j.model.report.PrintStreamExecutionReporter;
-import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
 
 import static org.junit.Assert.assertTrue;
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -78,7 +64,7 @@ public class AlertProtocol extends Tls12Test {
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.LOW)
     @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
-    public void close_notify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void closeNotify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         AlertMessage alert = new AlertMessage();
@@ -103,6 +89,7 @@ public class AlertProtocol extends Tls12Test {
                 i.setResult(TestResult.PARTIALLY_SUCCEEDED);
                 return;
             }
+            assertTrue("Socket has not been closed", Validator.socketClosed(i));
             Validator.receivedWarningAlert(i);
             Validator.testAlertDescription(i, AlertDescription.CLOSE_NOTIFY, message);
 

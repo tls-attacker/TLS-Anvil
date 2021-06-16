@@ -76,6 +76,13 @@ public class ServerKeyExchange extends Tls12Test {
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
+            if(serverKeyExchangeMsg.getSignatureLength().getValue() < bitmask.length) {
+                //we can't determine the ECDSA signature length beforehand
+                //as trailing zeros may be stripped - the manipulation won't be
+                //applied in these cases which results in false positives
+                i.addAdditionalResultInfo("Bitmask exceeded signature length");
+                return;
+            }
             Validator.receivedFatalAlert(i);
         });
     }

@@ -2,6 +2,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.statemachine;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -20,7 +21,11 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
+import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
@@ -33,12 +38,14 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.tests.server.both.statemachine.SharedStateMachineTest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /**
@@ -198,6 +205,14 @@ public class StateMachine extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
+    public ConditionEvaluationResult onlySupportsTls12() {
+        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS_1_3) == TestResult.FALSE) {
+            return ConditionEvaluationResult.enabled("Server does not support TLS 1.3");
+        }
+        return ConditionEvaluationResult.disabled("Server supports TLS 1.3, where a CCS at the beginning of the handshake is permitted by RFC 8446 4.2.2");
+    }
+    
+    
     //Figure 7: path 0,2
     @Test
     @TestDescription("Begin the Handshake with Change Cipher Spec. A stateless server may ignore this record from TLS 1.3 on.")
@@ -205,7 +220,7 @@ public class StateMachine extends Tls12Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
-    //TODO: only run when TLS 1.3 is *not* supported!
+    @MethodCondition(method="onlySupportsTls12")
     public void beginWithChangeCipherSpec(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithChangeCipherSpecTest(config, runner);

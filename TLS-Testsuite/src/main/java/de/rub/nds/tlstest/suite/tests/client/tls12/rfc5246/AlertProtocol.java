@@ -39,6 +39,7 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -60,17 +61,17 @@ public class AlertProtocol extends Tls12Test {
     @InteroperabilityCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.LOW)
-    public void close_notify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void closeNotify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));
         alert.setDescription(Modifiable.explicit(AlertDescription.CLOSE_NOTIFY.getValue()));
 
-        WorkflowTrace workflowTrace = new WorkflowTrace();
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        workflowTrace.getLastSendingAction().getSendMessages().add(alert);
+        
         workflowTrace.addTlsActions(
-                new ReceiveAction(new ClientHelloMessage()),
-                new SendAction(alert),
                 new ReceiveAction(new AlertMessage())
         );
 
@@ -84,6 +85,7 @@ public class AlertProtocol extends Tls12Test {
                 i.setResult(TestResult.PARTIALLY_SUCCEEDED);
                 return;
             }
+            assertTrue("Socket has not been closed", Validator.socketClosed(i));
             Validator.receivedWarningAlert(i);
             Validator.testAlertDescription(i, AlertDescription.CLOSE_NOTIFY, message);
 

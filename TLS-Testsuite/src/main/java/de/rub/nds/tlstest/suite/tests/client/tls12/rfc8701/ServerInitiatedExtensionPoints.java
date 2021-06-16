@@ -48,7 +48,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
-@RFC(number = 8701, section = "4. Server-Initiated Extension Points")
+@RFC(number = 8701, section = "3.1 Client Behavior")
 public class ServerInitiatedExtensionPoints extends Tls12Test {
 
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "

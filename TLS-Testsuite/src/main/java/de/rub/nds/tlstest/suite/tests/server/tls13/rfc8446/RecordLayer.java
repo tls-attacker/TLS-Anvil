@@ -119,13 +119,12 @@ public class RecordLayer extends Tls13Test {
     @MethodCondition(method = "supportsRecordFragmentation")
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        WorkflowTrace trace = new WorkflowTrace();
-        trace.addTlsAction(new SendAction(new ClientHelloMessage(c)));
-        SendAction sendClientHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.CLIENT_HELLO, trace);
+        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        SendAction sendFinished = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.FINISHED, trace);
         AlertDescription selectedAlert = derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
         
-        Record clientHelloPart = new Record();
-        clientHelloPart.setMaxRecordLengthConfig(20);
+        Record finishedFragmentRecord = new Record();
+        finishedFragmentRecord.setMaxRecordLengthConfig(10);
         Record alertRecord = new Record();
         
         //we add a record that will remain untouched by record layer but has
@@ -135,7 +134,7 @@ public class RecordLayer extends Tls13Test {
         byte[] alertContent = new byte [] {AlertLevel.WARNING.getValue(), selectedAlert.getValue()};
         alertRecord.setProtocolMessageBytes(Modifiable.explicit(alertContent));
         
-        sendClientHelloAction.setRecords(clientHelloPart, alertRecord);
+        sendFinished.setRecords(finishedFragmentRecord, alertRecord);
 
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
 

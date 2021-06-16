@@ -40,7 +40,6 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolMessageTypeDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
-import static org.junit.Assert.assertFalse;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;

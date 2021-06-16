@@ -139,9 +139,10 @@ public class RecordLayer extends Tls13Test {
         SendAction sendServerHelloAction = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, trace);
         AlertDescription selectedAlert = derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
         
-        
-        Record serverHelloPart = new Record();
-        serverHelloPart.setMaxRecordLengthConfig(20);
+        Record unmodifiedServerHelloRecord = new Record();
+        Record unmodifiedEncryptedExtensionsRecord = new Record();
+        Record certificateRecordFragment = new Record();
+        certificateRecordFragment.setMaxRecordLengthConfig(20);
         Record alertRecord = new Record();
         
         //we add a record that will remain untouched by record layer but has
@@ -151,7 +152,7 @@ public class RecordLayer extends Tls13Test {
         byte[] alertContent = new byte [] {AlertLevel.WARNING.getValue(), selectedAlert.getValue()};
         alertRecord.setProtocolMessageBytes(Modifiable.explicit(alertContent));
         
-        sendServerHelloAction.setRecords(serverHelloPart, alertRecord);
+        sendServerHelloAction.setRecords(unmodifiedServerHelloRecord, unmodifiedEncryptedExtensionsRecord, certificateRecordFragment, alertRecord);
 
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
 

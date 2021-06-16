@@ -110,7 +110,7 @@ public class KeyShare extends Tls13Test {
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    public void serverOnlyOffersOneKeshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void serverOnlyOffersOneKeyshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> supportedTls13 = context.getSiteReport().getSupportedTls13Groups();
         c.setDefaultClientNamedGroups(supportedTls13);
@@ -124,7 +124,7 @@ public class KeyShare extends Tls13Test {
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    public void serverOnlyOffersOneKeshareAllGroupsAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void serverOnlyOffersOneKeyshareAllGroupsAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> supportedTls13 = context.getSiteReport().getSupportedTls13Groups();
         c.setDefaultClientKeyShareNamedGroups(supportedTls13);

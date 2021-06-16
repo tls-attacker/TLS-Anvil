@@ -47,7 +47,7 @@ public class Finished extends Tls13Test {
     @CryptoCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
-    public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void verifyFinishedMessageCorrect(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);

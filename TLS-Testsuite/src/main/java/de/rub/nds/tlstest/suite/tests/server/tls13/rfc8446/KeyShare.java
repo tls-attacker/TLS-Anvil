@@ -27,6 +27,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
@@ -70,6 +71,11 @@ public class KeyShare extends Tls13Test {
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
+    /*
+        Servers MAY check for violations of these rules and abort the
+        handshake with an "illegal_parameter" alert if one is violated.
+    */
+    @EnforcedSenderRestriction
     public void testOrderOfKeyshareEntries(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -113,6 +119,12 @@ public class KeyShare extends Tls13Test {
     public void serverOnlyOffersOneKeyshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         List<NamedGroup> supportedTls13 = context.getSiteReport().getSupportedTls13Groups();
+        
+        //place selected group at the top to avoid (optional) HRR
+        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+        supportedTls13.remove(selectedGroup);
+        supportedTls13.add(0, selectedGroup);
+        
         c.setDefaultClientNamedGroups(supportedTls13);
         performOneKeyshareTest(c, runner);
     }

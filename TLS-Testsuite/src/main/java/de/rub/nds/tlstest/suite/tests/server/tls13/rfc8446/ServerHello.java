@@ -118,7 +118,11 @@ public class ServerHello extends Tls13Test {
     public void testSessionIdEchoed(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        byte[] sessionId = new byte[]{0x01, 0x02, 0x03, 0x04, 0x05};
+        //WolfSSL expects 32 bytes - to be determined if this is correct behavior
+        byte[] sessionId = new byte[32];
+        sessionId[0] = (byte) 0xFF;
+        sessionId[16] = (byte) 0xFF;
+        
         c.setDefaultClientSessionId(sessionId);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();

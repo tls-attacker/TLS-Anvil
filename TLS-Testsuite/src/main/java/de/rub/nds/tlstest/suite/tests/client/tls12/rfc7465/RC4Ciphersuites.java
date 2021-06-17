@@ -18,6 +18,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
@@ -66,6 +67,7 @@ public class RC4Ciphersuites extends Tls12Test {
     @DeprecatedFeatureCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
     @CryptoCategory(SeverityLevel.MEDIUM)
+    @EnforcedSenderRestriction
     public void selectRC4CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

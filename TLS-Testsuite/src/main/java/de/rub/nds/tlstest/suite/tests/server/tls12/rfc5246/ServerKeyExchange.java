@@ -71,7 +71,6 @@ public class ServerKeyExchange extends Tls12Test {
         ServerHelloMessage serverHello = (ServerHelloMessage) WorkflowTraceUtil.getFirstReceivedMessage(HandshakeMessageType.SERVER_HELLO, executedTrace);
         ServerKeyExchangeMessage serverKeyExchange = (ServerKeyExchangeMessage) WorkflowTraceUtil.getFirstReceivedMessage(HandshakeMessageType.SERVER_KEY_EXCHANGE, executedTrace);
         
-        CipherSuite selectedCipherSuite = CipherSuite.getCipherSuite(serverHello.getSelectedCipherSuite().getValue());
         
         State sessionState = annotatedState.getState();
         
@@ -108,7 +107,6 @@ public class ServerKeyExchange extends Tls12Test {
             curveType[0] = ecdheServerKeyExchange.getGroupType().getValue();
             byte[] namedCurve = ecdheServerKeyExchange.getNamedGroup().getValue();
             byte[] publicKeyLength = ecdheServerKeyExchange.getPublicKeyLength().getByteArray(HandshakeByteLength.ECDHE_PARAM_LENGTH);
-            byte[] sigHashAlgorithm = serverKeyExchange.getSignatureAndHashAlgorithm().getValue();
             byte[] publicKey = serverKeyExchange.getPublicKey().getValue();
             return ArrayConverter.concatenate(
                     curveType,

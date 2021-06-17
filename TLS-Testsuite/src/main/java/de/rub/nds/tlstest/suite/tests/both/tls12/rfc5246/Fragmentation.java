@@ -29,6 +29,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
@@ -65,6 +66,7 @@ public class Fragmentation extends Tls12Test {
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
+    @EnforcedSenderRestriction
     public void sendZeroLengthRecord_CCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -118,7 +120,8 @@ public class Fragmentation extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "Send a record without any content with Content Type Application Data.")
+    @TlsTest(description = "Send a record without any content with Content Type Application Data. "
+            + " The former record increases the sequencenumber, which should not be allowed")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @Tag("emptyRecord")
     @RecordLayerCategory(SeverityLevel.CRITICAL)
@@ -145,7 +148,8 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Send a record without any content with Content Type Handshake.")
+    @TlsTest(description = "Send a record without any content with Content Type Handshake followed by an encrypted record. "
+            + " The former record increases the sequencenumber, which should not be allowed")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)

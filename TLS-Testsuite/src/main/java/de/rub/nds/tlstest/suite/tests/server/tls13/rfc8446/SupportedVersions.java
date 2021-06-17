@@ -12,12 +12,14 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -217,10 +219,12 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "If this extension is present in the ClientHello, "
-            + "servers MUST NOT use the ClientHello.legacy_version value for "
-            + "version negotiation and MUST use only the \"supported_versions\" "
-            + "extension to determine client preferences.")
+    @TlsTest(description = "If this extension is not present, servers which are compliant with " +
+            "this specification and which also support TLS 1.2 MUST negotiate " +
+            "TLS 1.2 or prior as specified in [RFC5246], even if " +
+            "ClientHello.legacy_version is 0x0304 or later. Servers MAY abort the " +
+            "handshake upon receiving a ClientHello with legacy_version 0x0304 or " +
+            "later.")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -237,6 +241,8 @@ public class SupportedVersions extends Tls13Test {
         ClientHelloMessage chm = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
         chm.setProtocolVersion(Modifiable.explicit(ProtocolVersion.TLS13.getValue()));
 
+        //note that we only offer TLS 1.3 cipher suites, the server is hence
+        //forced to abort the handshake
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 

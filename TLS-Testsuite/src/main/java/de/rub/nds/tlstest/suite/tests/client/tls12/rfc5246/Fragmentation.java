@@ -21,6 +21,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
@@ -48,6 +49,7 @@ public class Fragmentation extends Tls12Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
+    @EnforcedSenderRestriction
     public void sendZeroLengthRecord_SH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -69,7 +71,11 @@ public class Fragmentation extends Tls12Test {
 
     @TlsTest
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @TestDescription("Implementations should accept multiple Handshake messages sent within a single record.")
+    @TestDescription("Client" +
+        "   message boundaries are not preserved in the record layer (i.e.,\n" +
+        "   multiple client messages of the same ContentType MAY be coalesced\n" +
+        "   into a single TLSPlaintext record, or a single message MAY be\n" +
+        "   fragmented across several records).")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

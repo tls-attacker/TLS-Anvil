@@ -22,6 +22,7 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -227,7 +228,7 @@ public class ServerKeyExchange extends Tls12Test {
                 .forEach(algorithm -> unsupportedAlgorithms.add(new SigAndHashDerivation(algorithm)));
         return unsupportedAlgorithms;
     }
-
+    
     @TlsTest(description = "If the client has offered the \"signature_algorithms\" extension, the "
             + "signature algorithm and hash algorithm MUST be a pair listed in that "
             + "extension. ")

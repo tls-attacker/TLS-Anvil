@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 public class SupportedCiphersuites extends Tls13Test {
 
     @Test
-    @TestDescription("Client exploration detected more supported ciphersuites than "
+    @TestDescription("Client exploration detected more supported cipher suites than "
             + "advertised by the client in the ClientHello message.")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -44,7 +44,7 @@ public class SupportedCiphersuites extends Tls13Test {
 
         advertised.forEach(supported::remove);
 
-        assertEquals("Client supports more ciphersuites than advertised. "
+        assertEquals("Client supports more cipher suites than advertised. "
                 + supported.parallelStream().map(Enum::name).collect(Collectors.joining(",")),
                 0,
                 supported.size());

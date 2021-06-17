@@ -25,6 +25,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
@@ -59,6 +60,7 @@ public class RecordLayer extends Tls13Test {
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
+    @EnforcedSenderRestriction
     public void zeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
@@ -77,9 +79,11 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Implementations MUST NOT send "
-            + "zero-length fragments of Handshake types, even "
-            + "if those fragments contain padding.")
+    @TlsTest(description = "Implementations " +
+        "MUST NOT send Handshake and Alert records that have a zero-length " +
+        "TLSInnerPlaintext.content; if such a message is received, the " +
+        "receiving implementation MUST terminate the connection with an " +
+        "\"unexpected_message\" alert.")
     @RecordLayerCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -98,7 +102,13 @@ public class RecordLayer extends Tls13Test {
         SendAction finished = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.FINISHED, trace);
         finished.setRecords(record);
 
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(trace, c).validateFinal(i -> {
+            WorkflowTrace workflowtrace = i.getWorkflowTrace();
+            Validator.receivedFatalAlert(i);
+
+            AlertMessage msg = workflowtrace.getFirstReceivedMessage(AlertMessage.class);
+            Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, msg);
+        });
     }
 
     public ConditionEvaluationResult supportsRecordFragmentation() {
@@ -117,6 +127,7 @@ public class RecordLayer extends Tls13Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
     @MethodCondition(method = "supportsRecordFragmentation")
+    @EnforcedSenderRestriction
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);

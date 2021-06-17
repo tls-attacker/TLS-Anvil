@@ -32,6 +32,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
@@ -68,6 +69,7 @@ public class RecordLayer extends Tls13Test {
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
+    @EnforcedSenderRestriction
     public void zeroLengthRecord_ServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -90,9 +92,11 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Implementations MUST NOT send "
-            + "zero-length fragments of Handshake types, even "
-            + "if those fragments contain padding.")
+    @TlsTest(description = "Implementations " +
+        "MUST NOT send Handshake and Alert records that have a zero-length " +
+        "TLSInnerPlaintext.content; if such a message is received, the " +
+        "receiving implementation MUST terminate the connection with an " +
+        "\"unexpected_message\" alert.")
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -133,6 +137,7 @@ public class RecordLayer extends Tls13Test {
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "supportsRecordFragmentation")
+    @EnforcedSenderRestriction
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -168,7 +173,7 @@ public class RecordLayer extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(description = "Send a record without any content.")
+    @TlsTest(description = "Send a record without any content to increase the sequencenumber.")
     @ScopeExtensions(DerivationType.CHOSEN_HANDSHAKE_MSG)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @ExplicitValues(affectedTypes = DerivationType.CHOSEN_HANDSHAKE_MSG, methods = "getModifiableHandshakeMessages")

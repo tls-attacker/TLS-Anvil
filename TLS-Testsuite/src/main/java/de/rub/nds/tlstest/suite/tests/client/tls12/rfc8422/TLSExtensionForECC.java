@@ -70,28 +70,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 public class TLSExtensionForECC extends Tls12Test {
 
     @Test
-    @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.RSA})
-    @TestDescription("The client MUST NOT include these extensions in the ClientHello " +
-            "message if it does not propose any ECC cipher suites.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    public void bothECExtensions_WithoutECCCipher() {
-        ClientHelloMessage msg = context.getReceivedClientHelloMessage();
-        assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
-        Set<CipherSuite> suites = context.getSiteReport().getCipherSuites();
-        suites.removeIf(cs -> !KeyExchangeType.ECDH.compatibleWithCiphersuite(cs));
-
-        if (suites.isEmpty()) {
-            ECPointFormatExtensionMessage poinfmtExt = msg.getExtension(ECPointFormatExtensionMessage.class);
-            EllipticCurvesExtensionMessage ecExt = msg.getExtension(EllipticCurvesExtensionMessage.class);
-            assertNull("ECPointFormatExtension should be null", poinfmtExt);
-            assertNull("EllipticCurveExtension should be null", ecExt);
-        }
-    }
-
-
-    @Test
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @TestDescription("Implementations of this document MUST support the" +
             "uncompressed format for all of their supported curves and MUST NOT" +

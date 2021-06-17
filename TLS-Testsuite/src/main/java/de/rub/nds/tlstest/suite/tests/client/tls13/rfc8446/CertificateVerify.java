@@ -83,7 +83,10 @@ public class CertificateVerify extends Tls13Test {
     @TlsTest(description = "RSA signatures MUST use an RSASSA-PSS algorithm, " +
             "regardless of whether RSASSA-PKCS1-v1_5 algorithms " +
             "appear in \"signature_algorithms\". The SHA-1 algorithm " +
-            "MUST NOT be used in any signatures of CertificateVerify messages.")
+            "MUST NOT be used in any signatures of CertificateVerify messages. " + 
+            "All SHA-1 signature algorithms in this specification are defined " +
+            "solely for use in legacy certificates and are not valid for " +
+            "CertificateVerify signatures.")
     @SecurityCategory(SeverityLevel.MEDIUM)
     @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     @CryptoCategory(SeverityLevel.MEDIUM)
@@ -113,10 +116,11 @@ public class CertificateVerify extends Tls13Test {
         return ConditionEvaluationResult.disabled("Client does not support legacy rsa signature and hash algorithms");
     }
 
-    @TlsTest(description = "RSA signatures MUST use an RSASSA-PSS algorithm, " +
-            "regardless of whether RSASSA-PKCS1-v1_5 algorithms " +
-            "appear in \"signature_algorithms\". The SHA-1 algorithm " +
-            "MUST NOT be used in any signatures of CertificateVerify messages.")
+    @TlsTest(description = "The SHA-1 algorithm " +
+            "MUST NOT be used in any signatures of CertificateVerify messages." + 
+            "All SHA-1 signature algorithms in this specification are defined " +
+            "solely for use in legacy certificates and are not valid for " +
+            "CertificateVerify signatures.")
     @SecurityCategory(SeverityLevel.MEDIUM)
     @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     @CryptoCategory(SeverityLevel.MEDIUM)
@@ -126,15 +130,12 @@ public class CertificateVerify extends Tls13Test {
     @MethodCondition(method = "supportsLegacyECDSASAHAlgorithms")
     public void selectLegacyECDSASignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        SignatureAndHashAlgorithm selsectedLegacySigHash = SignatureAndHashAlgorithm.ECDSA_SHA1;
-
+        c.setAutoAdjustSignatureAndHashAlgorithm(false);
+        c.setDefaultSelectedSignatureAndHashAlgorithm(SignatureAndHashAlgorithm.ECDSA_SHA1);
         c.setPreferredCertificateSignatureType(CertificateKeyType.ECDSA);
+        
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-
-        workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class)
-                .setSignatureHashAlgorithm(Modifiable.explicit(SignatureAndHashAlgorithm.ECDSA_SHA1.getByteValue()));
-
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }

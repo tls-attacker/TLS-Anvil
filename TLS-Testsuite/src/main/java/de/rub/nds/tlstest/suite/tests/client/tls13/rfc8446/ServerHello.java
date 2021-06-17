@@ -74,7 +74,12 @@ public class ServerHello extends Tls13Test {
 
     public static void sharedSessionIdTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
-        sh.setSessionId(Modifiable.explicit(new byte[]{0x01, 0x02, 0x03, 0x04}));
+        
+        //WolfSSL expects 32 bytes - to be determined if this is correct behavior
+        byte[] dummySessionId = new byte[32];
+        dummySessionId[0] = (byte) 0xFF;
+        dummySessionId[16] = (byte) 0xFF;
+        sh.setSessionId(Modifiable.explicit(dummySessionId));
 
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();

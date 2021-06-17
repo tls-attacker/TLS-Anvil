@@ -202,8 +202,10 @@ public class SupportedVersions extends Tls13Test {
         return versions;
     }
 
-    @TlsTest(description = "Servers MUST only select a version of TLS present in "
-            + "that extension")
+    @TlsTest(description = "The \"supported_versions\" extension is used by the client to indicate " +
+        "which versions of TLS it supports and by the server to indicate which " +
+        "version it is using.  The extension contains a list of supported " +
+        "versions in preference order, with the most preferred version first.")
     @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getUnsupportedProtocolVersions")
     @KeyExchange(supported = KeyExchangeType.ALL12)

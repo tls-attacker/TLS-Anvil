@@ -269,7 +269,7 @@ public class RecordProtocol extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "Send a record without any content.")
+    @TlsTest(description = "Send a record without any content to increase the sequencenumber.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)

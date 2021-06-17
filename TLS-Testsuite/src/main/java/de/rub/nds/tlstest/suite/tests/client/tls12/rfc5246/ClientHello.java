@@ -51,7 +51,6 @@ public class ClientHello extends Tls12Test {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         byte[] compression = clientHelloMessage.getCompressions().getValue();
         boolean containsZero = false;
-        boolean containsOther = false;
         for (byte i : compression) {
             if (i == 0) {
                 containsZero = true;
@@ -71,7 +70,6 @@ public class ClientHello extends Tls12Test {
     public void offersNonNullCompressionMethod() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         byte[] compression = clientHelloMessage.getCompressions().getValue();
-        boolean containsZero = false;
         boolean containsOther = false;
         for (byte i : compression) {
             if (i != 0) {
@@ -126,15 +124,10 @@ public class ClientHello extends Tls12Test {
                     }
                     break;
                 case GOST01:
-                    if(providedSignatureAlgorithm(SignatureAlgorithm.GOSTR34102001)) {
-                       foundMatch = true; 
-                    }
-                    break;
                 case GOST12:
-                    if(providedSignatureAlgorithm(SignatureAlgorithm.GOSTR34102012_256) 
-                            || providedSignatureAlgorithm(SignatureAlgorithm.GOSTR34102012_512)) {
-                       foundMatch = true; 
-                    }
+                    //the peer does not have to add algorithms for these
+                    //explicitly
+                    foundMatch = true;
                     break;  
             }
             if(foundMatch) {

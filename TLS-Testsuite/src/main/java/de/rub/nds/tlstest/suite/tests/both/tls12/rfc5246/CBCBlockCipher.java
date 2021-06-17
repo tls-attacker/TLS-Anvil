@@ -95,9 +95,6 @@ public class CBCBlockCipher extends Tls12Test {
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
-            if (msg == null || msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
-                throw new AssertionError("Received non expected alert message with invalid CBC padding");
-            }
         });
 
     }
@@ -154,8 +151,6 @@ public class CBCBlockCipher extends Tls12Test {
                 //permitted certain attacks against the CBC mode [CBCATT]. It MUST
                 //NOT be sent by compliant implementations.
                 throw new AssertionError("Target sent deprecated decryption_failed_RESERVERD alert in response to invalid Ciphertext");
-            } else if (msg == null || msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
-                throw new AssertionError("Received non expected alert message with invalid Ciphertext");
             }
         });
     }
@@ -198,9 +193,6 @@ public class CBCBlockCipher extends Tls12Test {
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
-            if (msg == null || msg.getDescription().getValue() != AlertDescription.BAD_RECORD_MAC.getValue()) {
-                throw new AssertionError("Received non expected alert message with invalid CBC MAC");
-            }
         });
     }
     

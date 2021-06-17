@@ -17,6 +17,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
@@ -37,11 +38,11 @@ public class Cookie extends Tls13Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
-    public void clientHelloContainsCookieExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    @EnforcedSenderRestriction
+    public void clientHelloWithUnsolicitedCookieExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
-        Config c = this.getConfig();
-        ClientHelloMessage clientHello = new ClientHelloMessage(c);
+        ClientHelloMessage clientHello = new ClientHelloMessage(config);
         clientHello.setExtensionBytes(Modifiable.insert(new byte[]{0x00, 44, 0x00, 0x03, 0x00, 0x01, 0x02}, 0));
 
         WorkflowTrace trace = new WorkflowTrace();
@@ -50,7 +51,7 @@ public class Cookie extends Tls13Test {
                 new ReceiveAction(new AlertMessage())
         );
 
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
 
     }
 }

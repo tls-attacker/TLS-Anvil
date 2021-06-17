@@ -102,7 +102,7 @@ public class HelloRetryRequest extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setDefaultClientSupportedCipherSuites(new LinkedList<>(context.getSiteReport().getSupportedTls13CipherSuites()));
         WorkflowTrace workflowTrace = getHelloRetryWorkflowTrace(runner);
-
+        
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);
 
@@ -159,11 +159,18 @@ public class HelloRetryRequest extends Tls13Test {
         ClientHelloMessage initialHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
         KeyShareExtensionMessage ksExt = initialHello.getExtension(KeyShareExtensionMessage.class);
         ksExt.setKeyShareListBytes(Modifiable.explicit(new byte[0]));
-        
+
         if(context.getSiteReport().getResult(AnalyzedProperty.ISSUES_COOKIE_IN_HELLO_RETRY) == TestResult.TRUE) {
            runner.getPreparedConfig().setAddCookieExtension(Boolean.TRUE); 
         }
         WorkflowTrace secondHelloTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
+        
+        //we usually use random values for client randoms but the 2nd hello
+        //after an HRR must retain the random value from before
+        byte[] fixedRandom = runner.getPreparedConfig().getDefaultClientRandom();
+        initialHello.setRandom(Modifiable.explicit(fixedRandom));
+        secondHelloTrace.getFirstSendMessage(ClientHelloMessage.class).setRandom(Modifiable.explicit(fixedRandom));
+        
         workflowTrace.addTlsActions(secondHelloTrace.getTlsActions());
         return workflowTrace;
     }

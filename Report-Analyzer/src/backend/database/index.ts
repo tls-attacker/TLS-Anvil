@@ -88,7 +88,8 @@ class Database {
         const stateDoc = new this.testResultState(state)
         stateIds.push(stateDoc._id)
         uuids.push(stateDoc.uuid)
-        testResultDoc.StateIndexMap[stateDoc.uuid] = stateIds.length - 1
+        //@ts-ignore
+        testResultDoc.StateIndexMap.set(stateDoc.uuid, stateIds.length - 1)
         stateDocs.push(stateDoc)
       }
 
@@ -98,7 +99,8 @@ class Database {
 
       testResultDoc.States = stateIds
       testResultDocs.push(testResultDoc)
-      containerDoc.TestResultClassMethodIndexMap[`${testResultDoc.TestMethod.ClassName}.${testResultDoc.TestMethod.MethodName}`.replace(/\./g, "||")] = i
+      //@ts-ignore
+      containerDoc.TestResultClassMethodIndexMap.set(`${testResultDoc.TestMethod.ClassName}.${testResultDoc.TestMethod.MethodName}`.replace(/\./g, "||"), i)
     }
     // console.timeEnd("prepareAdd")
 

@@ -28,6 +28,12 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Yields bitmasks to modify the padding of a plaintext.
+ * Note that the derivation may generate valid paddings for mac-then-encrypt.
+ * These paddings are valid in terms of the padding scheme but are invalid
+ * in regard to the position of the MAC.
+ */
 public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
 
     private static final Logger LOGGER = LogManager.getLogger();
@@ -43,13 +49,14 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
 
     @Override
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
-        int maxCipherTextByteLen = 0;
-        Set<CipherSuite> cipherSuiteList = context.getSiteReport().getCipherSuites();
         if (scope.isTls13Test()) {
-            cipherSuiteList = context.getSiteReport().getSupportedTls13CipherSuites();
+            throw new RuntimeException("Padding bitmask is not configured for optional TLS 1.3 record padding");
         }
+        
+        Set<CipherSuite> cipherSuiteList = context.getSiteReport().getCipherSuites();
+        int maxCipherTextByteLen = 0;
         for (CipherSuite cipherSuite : cipherSuiteList) {
-            if (AlgorithmResolver.getCipher(cipherSuite).getBlocksize() > maxCipherTextByteLen && cipherSuite.isUsingPadding(scope.getTargetVersion()) && AlgorithmResolver.getCipherType(cipherSuite) != CipherType.AEAD) {
+            if (AlgorithmResolver.getCipherType(cipherSuite) == CipherType.BLOCK && AlgorithmResolver.getCipher(cipherSuite).getBlocksize() > maxCipherTextByteLen) {
                 maxCipherTextByteLen = AlgorithmResolver.getCipher(cipherSuite).getBlocksize();
             }
         }
@@ -69,24 +76,11 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
-        if (ConstraintHelper.multipleBlocksizesModeled(scope)) {
-            condConstraints.add(getMustBeWithinBlocksizeConstraint());
-        }
-
         condConstraints.add(getMustNotExceedPaddingLengthConstraint(scope, false));
-        condConstraints.add(getMustNotResultInZeroPaddingLength(scope, false));
+        if (ParameterModelFactory.getDerivationsForScope(scope).contains(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)) {
+            condConstraints.add(getMustNotResultInPlausiblePadding(scope, false));
+        }
         return condConstraints;
-    }
-
-    public ConditionalConstraint getMustBeWithinBlocksizeConstraint() {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
-
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePos, DerivationParameter cipherSuite) -> {
-            int chosenBytePos = (Integer) bytePos.getSelectedValue();
-            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-            return AlgorithmResolver.getCipher(cipherDev.getSelectedValue()).getBlocksize() - 1 > chosenBytePos;
-        }));
     }
 
     public ConditionalConstraint getMustNotExceedPaddingLengthConstraint(DerivationScope scope, boolean enforceEncryptThenMacMode) {
@@ -99,13 +93,13 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
             requiredDerivations.add(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
             return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name(), DerivationType.APP_MSG_LENGHT.name(), DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION.name()).by((DerivationParameter chosenPaddingModificationBytePositionParam, DerivationParameter cipherSuiteParam, DerivationParameter applicationMessageLengthParam, DerivationParameter encryptThenMacParam) -> {
                 boolean isEncryptThenMac = (Boolean) encryptThenMacParam.getSelectedValue() || enforceEncryptThenMacMode;
-                return paddingModificationExceedsPaddingLength(scope, chosenPaddingModificationBytePositionParam, cipherSuiteParam, applicationMessageLengthParam, isEncryptThenMac);
+                return chosenByteIsWithinPadding(scope, chosenPaddingModificationBytePositionParam, cipherSuiteParam, applicationMessageLengthParam, isEncryptThenMac);
             }));
 
         } else {
 
             return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name(), DerivationType.APP_MSG_LENGHT.name()).by((DerivationParameter chosenPaddingModificationBytePositionParam, DerivationParameter cipherSuiteParam, DerivationParameter applicationMessageLengthParam) -> {
-                return paddingModificationExceedsPaddingLength(scope, chosenPaddingModificationBytePositionParam, cipherSuiteParam, applicationMessageLengthParam, enforceEncryptThenMacMode);
+                return chosenByteIsWithinPadding(scope, chosenPaddingModificationBytePositionParam, cipherSuiteParam, applicationMessageLengthParam, enforceEncryptThenMacMode);
             }));
 
         }
@@ -117,44 +111,51 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
         if (isEncryptThenMac) {
             return blockSize - (applicationMessageContentLength % blockSize);
         } else {
-            return blockSize - (applicationMessageContentLength + macSize % blockSize);
-        }
-    }
-
-    public ConditionalConstraint getMustNotResultInZeroPaddingLength(DerivationScope scope, boolean enforceEncryptThenMacMode) {
-        //the ciphertext contains a padding length byte which must not be zero
-        //as implementations can't determine that this case is invalid
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
-        requiredDerivations.add(DerivationType.APP_MSG_LENGHT);
-
-        if (ParameterModelFactory.getDerivationsForScope(scope).contains(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)) {
-            requiredDerivations.add(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
-            return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name(), DerivationType.APP_MSG_LENGHT.name(), DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION.name(), DerivationType.BIT_POSITION.name()).by((DerivationParameter chosenPaddingModificationBytePositionParam, DerivationParameter cipherSuiteParam, DerivationParameter applicationMessageLengthParam, DerivationParameter encryptThenMacParam, DerivationParameter bitPosition) -> {
-                boolean isEncryptThenMac = (Boolean) encryptThenMacParam.getSelectedValue() || enforceEncryptThenMacMode;
-                return resultsInZeroPadding(scope, chosenPaddingModificationBytePositionParam, cipherSuiteParam, applicationMessageLengthParam, bitPosition, isEncryptThenMac);
-            }));
-
-        } else {
-
-            return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name(), DerivationType.APP_MSG_LENGHT.name(), DerivationType.BIT_POSITION.name()).by((DerivationParameter chosenPaddingModificationBytePositionParam, DerivationParameter cipherSuiteParam, DerivationParameter applicationMessageLengthParam, DerivationParameter bitPosition) -> {
-                return resultsInZeroPadding(scope, chosenPaddingModificationBytePositionParam, cipherSuiteParam, applicationMessageLengthParam, bitPosition, enforceEncryptThenMacMode);
-            }));
-
+            return blockSize - ((applicationMessageContentLength + macSize) % blockSize);
         }
     }
     
-    private boolean resultsInZeroPadding(DerivationScope scope, DerivationParameter chosenPaddingModificationBytePositionParam, DerivationParameter cipherSuiteParam, DerivationParameter applicationMessageLengthParam, DerivationParameter bitPosition, boolean isEncryptThenMac) {
+    public ConditionalConstraint getMustNotResultInPlausiblePadding(DerivationScope scope, boolean enforceEncryptThenMacMode) {
+        Set<DerivationType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        requiredDerivations.add(DerivationType.APP_MSG_LENGHT);
+        requiredDerivations.add(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
+        
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name(), DerivationType.APP_MSG_LENGHT.name(), DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION.name(), DerivationType.BIT_POSITION.name()).by((DerivationParameter chosenPaddingModificationBytePositionParam, DerivationParameter cipherSuiteParam, DerivationParameter applicationMessageLengthParam, DerivationParameter encryptThenMacParam, DerivationParameter bitPosition) -> {
+                boolean isEncryptThenMac = (Boolean) encryptThenMacParam.getSelectedValue() || enforceEncryptThenMacMode;
+                
+                if(isEncryptThenMac) {
+                    return resultsInPlausiblePadding(scope, chosenPaddingModificationBytePositionParam, cipherSuiteParam, applicationMessageLengthParam, bitPosition);
+                }
+                //without enc-then-mac, a padding error or misread MAC is
+                //guaranteed - we include coincidentally valid values here
+                //as this reduces the complexity of the IPM and should not
+                //result in false positives
+                return true;
+        }));
+    }
+    
+    private boolean resultsInPlausiblePadding(DerivationScope scope, DerivationParameter chosenPaddingModificationBytePositionParam, DerivationParameter cipherSuiteParam, DerivationParameter applicationMessageLengthParam, DerivationParameter bitPosition) {
         int chosenPaddingModificationBytePosition = (Integer) chosenPaddingModificationBytePositionParam.getSelectedValue();
-        int resultingPaddingSize = getResultingPaddingSize(isEncryptThenMac, (Integer) applicationMessageLengthParam.getSelectedValue(), (CipherSuite) cipherSuiteParam.getSelectedValue(), scope.getTargetVersion());
+        int applicationDataLength = (Integer) applicationMessageLengthParam.getSelectedValue();
+        int resultingPaddingSize = getResultingPaddingSize(true, applicationDataLength, (CipherSuite) cipherSuiteParam.getSelectedValue(), scope.getTargetVersion());
         int bitShifts = (Integer) bitPosition.getSelectedValue();
+        
         if ((chosenPaddingModificationBytePosition + 1) == resultingPaddingSize && (1 << bitShifts) == (resultingPaddingSize - 1)) {
+            //padding appears to be only the lengthfield byte
+            return false;
+        } else if(resultingPaddingSize == 1 
+                && chosenPaddingModificationBytePosition == 0 
+                && (resultingPaddingSize ^ (1 << bitShifts)) == AppMsgLengthDerivation.getAsciiLetter()
+                && applicationDataLength >= AppMsgLengthDerivation.getAsciiLetter()) {
+            //only one byte of padding (lengthfield) gets modified in a way
+            //that it matches the ASCII contents of the AppMsg data
             return false;
         }
         return true;
     }
     
-    private boolean paddingModificationExceedsPaddingLength(DerivationScope scope, DerivationParameter chosenPaddingModificationBytePositionParam, DerivationParameter cipherSuiteParam, DerivationParameter applicationMessageLengthParam, boolean isEncryptThenMac) {
+    private boolean chosenByteIsWithinPadding(DerivationScope scope, DerivationParameter chosenPaddingModificationBytePositionParam, DerivationParameter cipherSuiteParam, DerivationParameter applicationMessageLengthParam, boolean isEncryptThenMac) {
         int chosenPaddingModificationBytePosition = (Integer) chosenPaddingModificationBytePositionParam.getSelectedValue();
         int resultingPaddingSize = getResultingPaddingSize(isEncryptThenMac, (Integer) applicationMessageLengthParam.getSelectedValue(), (CipherSuite) cipherSuiteParam.getSelectedValue(), scope.getTargetVersion());
         return resultingPaddingSize > chosenPaddingModificationBytePosition;

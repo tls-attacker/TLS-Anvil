@@ -551,7 +551,7 @@ public class TestRunner {
         long serverTls13 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls13", "server"));
         long bothTls12 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls12", "both"));
         long bothTls13 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls13", "both"));
-
+        
         LOGGER.info("Server tests, TLS 1.2: {}, TLS 1.3: {}", serverTls12 + bothTls12, serverTls13 + bothTls13);
         LOGGER.info("Client tests, TLS 1.2: {}, TLS 1.3: {}", clientTls12 + bothTls12, clientTls13 + bothTls13);
         LOGGER.info("Testing using default strength " + TestContext.getInstance().getConfig().getStrength());

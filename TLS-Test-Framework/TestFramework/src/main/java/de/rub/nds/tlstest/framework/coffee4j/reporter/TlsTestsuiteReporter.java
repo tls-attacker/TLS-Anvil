@@ -23,7 +23,12 @@ public class TlsTestsuiteReporter implements ExecutionReporter {
     public TlsTestsuiteReporter(ExtensionContext context) {
         extensionContext = context;
     }
-
+    
+    @Override
+    public void testInputGroupGenerated(TestInputGroupContext context, List<Combination> testInputs) {
+        LOGGER.trace("Test Inputs generated for " + extensionContext.getRequiredTestMethod().getName());
+    }
+    
     @Override
     public void faultCharacterizationFinished(TestInputGroupContext context, List<Combination> failureInducingCombinations) {
         AnnotatedStateContainer.forExtensionContext(extensionContext).setFailureInducingCombinations(failureInducingCombinations);

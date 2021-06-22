@@ -14,8 +14,8 @@
         <junit.minor-version>7.0</junit.minor-version>
         <junit.jupiter.version>5.${junit.minor-version}</junit.jupiter.version>
         <junit.platform.version>1.${junit.minor-version}</junit.platform.version>
-        <tlsattacker.version>3.7.0</tlsattacker.version>
-        <tlsscanner.version>4.1.0</tlsscanner.version>
+        <tlsattacker.version>3.8.0-SNAPSHOT</tlsattacker.version>
+        <tlsscanner.version>4.2.0-SNAPSHOT</tlsscanner.version>
     </properties>
     <dependencies>
         <dependency>

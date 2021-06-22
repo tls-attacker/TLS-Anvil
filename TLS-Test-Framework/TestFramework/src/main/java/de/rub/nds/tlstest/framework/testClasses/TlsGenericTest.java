@@ -12,27 +12,19 @@ package de.rub.nds.tlstest.framework.testClasses;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.HandshakeMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -57,10 +49,6 @@ public class TlsGenericTest extends TlsBaseTest {
     public Config prepareConfig(Config config, ArgumentsAccessor argAccessor, WorkflowRunner runner) {
         super.prepareConfig(config, argAccessor, runner);
         config.setStopTraceAfterUnexpected(true);
-        config.getDefaultServerConnection().setTimeout(1000);
-        config.getDefaultServerConnection().setFirstTimeout(5000);
-        config.getDefaultClientConnection().setTimeout(1000);
-        config.getDefaultClientConnection().setFirstTimeout(5000);
         return config;
     }
     

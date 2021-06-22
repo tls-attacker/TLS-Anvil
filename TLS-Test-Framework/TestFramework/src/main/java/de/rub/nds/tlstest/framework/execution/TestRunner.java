@@ -225,6 +225,7 @@ public class TestRunner {
 
         LOGGER.info("Server available, starting TLS-Scanner");
         ScannerConfig scannerConfig = new ScannerConfig(testConfig.getGeneralDelegate(), testConfig.getTestServerDelegate());
+        scannerConfig.setTimeout(testConfig.getConnectionTimeout());
         Config config = scannerConfig.createConfig();
         config.setAddServerNameIndicationExtension(testConfig.createConfig().isAddServerNameIndicationExtension());
 
@@ -232,7 +233,7 @@ public class TestRunner {
         scannerConfig.setBaseConfig(config);
 
         scannerConfig.setProbes(
-                ProbeType.CIPHERSUITE,
+                ProbeType.CIPHER_SUITE,
                 ProbeType.CERTIFICATE,
                 ProbeType.COMPRESSIONS,
                 ProbeType.NAMED_GROUPS,
@@ -241,7 +242,6 @@ public class TestRunner {
                 ProbeType.RESUMPTION,
                 ProbeType.EXTENSIONS,
                 ProbeType.RECORD_FRAGMENTATION,
-                ProbeType.GREASE,
                 ProbeType.HELLO_RETRY
         );
         scannerConfig.setOverallThreads(1);
@@ -432,7 +432,7 @@ public class TestRunner {
 
         ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
         executor.setTimeoutAction(testConfig.getTimeoutActionScript());
-        executor.armTimeoutAction();
+        executor.armTimeoutAction(20000);
         testContext.setStateExecutor(executor);
 
         LOGGER.info("Starting preparation phase");
@@ -551,10 +551,11 @@ public class TestRunner {
         long serverTls13 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls13", "server"));
         long bothTls12 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls12", "both"));
         long bothTls13 = testplan.countTestIdentifiers(i -> this.countTests(i, "tls13", "both"));
-
+        
         LOGGER.info("Server tests, TLS 1.2: {}, TLS 1.3: {}", serverTls12 + bothTls12, serverTls13 + bothTls13);
         LOGGER.info("Client tests, TLS 1.2: {}, TLS 1.3: {}", clientTls12 + bothTls12, clientTls13 + bothTls13);
         LOGGER.info("Testing using default strength " + TestContext.getInstance().getConfig().getStrength());
+        LOGGER.info("Default timeout " + TestContext.getInstance().getConfig().getConnectionTimeout() + " ms");
         logCommonDerivationValues();
         testContext.setTotalTests(testcases);
         long start = System.currentTimeMillis();

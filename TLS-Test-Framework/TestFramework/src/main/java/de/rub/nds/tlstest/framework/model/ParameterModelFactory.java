@@ -163,15 +163,15 @@ public class ParameterModelFactory {
             }
         }
         
-        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.TOLERATES_GREASE_CIPHER_SUITE) == TestResult.TRUE) {
+        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_CIPHER_SUITE_INTOLERANCE) != TestResult.TRUE) {
             derivationTypes.add(DerivationType.INCLUDE_GREASE_CIPHER_SUITES);
         }
         
-        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.TOLERATES_GREASE_NAMED_GROUP) == TestResult.TRUE) {
+        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_NAMED_GROUP_INTOLERANCE) != TestResult.TRUE) {
             derivationTypes.add(DerivationType.INCLUDE_GREASE_NAMED_GROUPS);
         }
         
-        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.TOLERATES_GREASE_SIGNATURE_AND_HASH_ALGORITHM) == TestResult.TRUE) {
+        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_SIGNATURE_AND_HASH_ALGORITHM_INTOLERANCE) != TestResult.TRUE) {
             derivationTypes.add(DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS);
         }
         return derivationTypes;

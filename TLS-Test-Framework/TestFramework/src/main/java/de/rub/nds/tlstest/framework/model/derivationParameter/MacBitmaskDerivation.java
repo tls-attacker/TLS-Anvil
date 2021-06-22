@@ -42,7 +42,7 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
         int maxMacLenght = 0;
         for (CipherSuite cipherSuite : context.getSiteReport().getCipherSuites()) {
             MacAlgorithm macAlg = AlgorithmResolver.getMacAlgorithm(scope.getTargetVersion(), cipherSuite);
-            if (maxMacLenght < macAlg.getSize()) {
+            if (macAlg != MacAlgorithm.AEAD && macAlg != MacAlgorithm.NULL && maxMacLenght < macAlg.getSize()) {
                 maxMacLenght = macAlg.getSize();
             }
         }

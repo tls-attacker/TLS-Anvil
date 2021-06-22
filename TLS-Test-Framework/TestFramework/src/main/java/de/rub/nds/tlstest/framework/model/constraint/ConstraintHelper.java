@@ -95,7 +95,10 @@ public class ConstraintHelper {
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         Set<Integer> blockLengths = new HashSet<>();
         for (DerivationParameter param : values) {
-            blockLengths.add(AlgorithmResolver.getCipher((CipherSuite) param.getSelectedValue()).getBlocksize());
+            CipherSuite selectableCipherSuite = (CipherSuite) param.getSelectedValue();
+            if(AlgorithmResolver.getCipherType(selectableCipherSuite) == CipherType.BLOCK) {
+                blockLengths.add(AlgorithmResolver.getCipher(selectableCipherSuite).getBlocksize());
+            }
         }
 
         return blockLengths.size() > 1;

@@ -90,6 +90,13 @@ public class TestConfig extends TLSDelegateConfig {
     @Parameter(names = "-strength", description = "Strength of the pairwise test. (Default value: 4)")
     private int strength = 4;
     
+    @Parameter(names = "-connectionTimeout", description = "The default timeout for TLS sessions in ms. (Default value: 1000)")
+    private int connectionTimeout = 1000;
+    
+    //we might want to turn these into CLI parameters in the future
+    private boolean expectTls13Alerts = false;
+    private boolean enforceSenderRestrictions = false;
+    
     public TestConfig() {
         super(new GeneralDelegate());
         this.testServerDelegate = new TestServerDelegate();
@@ -218,8 +225,8 @@ public class TestConfig extends TLSDelegateConfig {
                     }
                 } else {
                     Optional<VersionSuiteListPair> suitePair = report.getVersionSuitePairs().stream().filter(i -> i.getVersion() == ProtocolVersion.TLS12).findFirst();
-                    if (suitePair.isPresent() && !suitePair.get().getCiphersuiteList().contains(config.getDefaultSelectedCipherSuite())) {
-                        supported.addAll(suitePair.get().getCiphersuiteList());
+                    if (suitePair.isPresent() && !suitePair.get().getCipherSuiteList().contains(config.getDefaultSelectedCipherSuite())) {
+                        supported.addAll(suitePair.get().getCipherSuiteList());
                     }
                 }
                 if (supported.size() > 0) {
@@ -259,14 +266,14 @@ public class TestConfig extends TLSDelegateConfig {
         Config config = super.createConfig();
 
         // Server test -> TLS-Attacker acts as Client
-        config.getDefaultClientConnection().setFirstTimeout((parallelHandshakes + 1) * 1000);
-        config.getDefaultClientConnection().setTimeout(1000);
+        config.getDefaultClientConnection().setFirstTimeout((parallelHandshakes + 1) * connectionTimeout);
+        config.getDefaultClientConnection().setTimeout(connectionTimeout);
         config.getDefaultClientConnection().setConnectionTimeout(0);
 
 
         // Client test -> TLS-Attacker acts as Server
-        config.getDefaultServerConnection().setFirstTimeout(1000);
-        config.getDefaultServerConnection().setTimeout(1000);
+        config.getDefaultServerConnection().setFirstTimeout(connectionTimeout);
+        config.getDefaultServerConnection().setTimeout(connectionTimeout);
 
 
         config.setWorkflowExecutorShouldClose(true);
@@ -451,5 +458,34 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setRestartServerAfter(Integer restartServerAfter) {
         this.restartServerAfter = restartServerAfter;
+    }
+
+    public int getConnectionTimeout() {
+        return connectionTimeout;
+    }
+
+    public void setConnectionTimeout(int connectionTimeout) {
+        this.connectionTimeout = connectionTimeout;
+    }
+
+    /**
+     * @return the expectTls13Alerts
+     */
+    public boolean isExpectTls13Alerts() {
+        return expectTls13Alerts;
+    }
+
+    /**
+     * @param expectTls13Alerts the expectTls13Alerts to set
+     */
+    public void setExpectTls13Alerts(boolean expectTls13Alerts) {
+        this.expectTls13Alerts = expectTls13Alerts;
+    }
+
+    /**
+     * @return the enforcePeerRestrictions
+     */
+    public boolean isEnforceSenderRestrictions() {
+        return enforceSenderRestrictions;
     }
 }

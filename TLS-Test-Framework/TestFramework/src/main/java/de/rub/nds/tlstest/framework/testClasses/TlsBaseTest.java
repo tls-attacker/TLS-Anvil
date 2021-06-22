@@ -11,9 +11,9 @@ package de.rub.nds.tlstest.framework.testClasses;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
+import de.rub.nds.tlstest.framework.junitExtensions.EnforcedSenderRestrictionConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.ExtensionContextResolver;
 import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.MethodConditionExtension;
@@ -23,8 +23,6 @@ import de.rub.nds.tlstest.framework.junitExtensions.ValueConstraintsConditionExt
 import de.rub.nds.tlstest.framework.junitExtensions.WorkflowRunnerResolver;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
-import de.rwth.swc.coffee4j.model.InputParameterModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +36,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
         TlsVersionCondition.class,
         KexCondition.class,
         MethodConditionExtension.class,
+        EnforcedSenderRestrictionConditionExtension.class,
         ValueConstraintsConditionExtension.class,
         ExtensionContextResolver.class,
         WorkflowRunnerResolver.class

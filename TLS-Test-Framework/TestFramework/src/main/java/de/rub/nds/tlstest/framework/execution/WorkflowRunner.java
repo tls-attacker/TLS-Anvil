@@ -23,6 +23,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.TlsMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
@@ -348,7 +349,7 @@ public class WorkflowRunner {
         //add an optional NewSessionTicketMessage for Alert receiving action
         //this facilitates the tolerance mechanisms of the Validator
         if(lastReceive != null && lastReceive.getExpectedMessages() != null 
-                && lastReceive.getExpectedMessages().stream().anyMatch(message -> message.getProtocolMessageType() == ProtocolMessageType.ALERT)
+                && lastReceive.getExpectedMessages().stream().anyMatch(message -> ((TlsMessage)message).getProtocolMessageType() == ProtocolMessageType.ALERT)
                 && mayReceiveNewSessionTicketFromNow) {
             NewSessionTicketMessage optionalExplicitNewSessionTicket = new NewSessionTicketMessage();
             optionalExplicitNewSessionTicket.setRequired(false);

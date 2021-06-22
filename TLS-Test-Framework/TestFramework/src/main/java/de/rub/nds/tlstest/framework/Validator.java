@@ -19,9 +19,9 @@ import de.rub.nds.tlsattacker.core.protocol.handler.AlertHandler;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ProtocolMessage;
+import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.TlsMessage;
 import de.rub.nds.tlsattacker.core.record.AbstractRecord;
-import de.rub.nds.tlsattacker.core.record.BlobRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipher;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipherFactory;
@@ -82,10 +82,14 @@ public class Validator {
         List<ProtocolMessage> receivedAlerts = WorkflowTraceUtil.getAllReceivedMessages(trace, ProtocolMessageType.ALERT);
         if(receivedAlerts.size() > 1) {
             i.addAdditionalResultInfo("Received multiple Alerts while waiting for Fatal Alert (" + 
-                    receivedAlerts.stream().map(ProtocolMessage::toCompactString).collect(Collectors.joining(","))+ ")");
+                    receivedAlerts.stream().map(alert -> ((TlsMessage)alert).toCompactString()).collect(Collectors.joining(","))+ ")");
         }
         boolean socketClosed = socketClosed(i);
         if (msg == null && socketClosed) {
+            if(i.getState().getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13 && !TestContext.getInstance().getConfig().isExpectTls13Alerts()) {
+                i.addAdditionalResultInfo("SUT chose not to send an alert in TLS 1.3");
+                return;
+            }
             i.addAdditionalResultInfo("Only socket closed (" + i.getState().getTlsContext().getFinalSocketState() + ")");
             i.setResult(TestResult.PARTIALLY_SUCCEEDED);
             LOGGER.debug("Timeout");
@@ -194,12 +198,11 @@ public class Validator {
             if (receivedMessages == null) {
                 receivedMessages = new ArrayList<>();
             }
-                
-            ProtocolMessage lastExpected = expectedMessages.get(expectedMessages.size() - 1);
+
+            TlsMessage lastExpected = (TlsMessage) expectedMessages.get(expectedMessages.size() - 1);
             if (lastExpected.getClass().equals(AlertMessage.class)) {
                 if (receivedMessages.size() > 0) {
                     ProtocolMessage lastReceivedMessage = receivedMessages.get(receivedMessages.size() - 1);
-                    AbstractRecord lastReceivedRecord = action.getReceivedRecords().get(action.getReceivedRecords().size() - 1);
                     if (lastReceivedMessage.getClass().equals(AlertMessage.class)) {
                         boolean lastMessageIsFatalAlert =
                                 AlertLevel.FATAL == AlertLevel.getAlertLevel(((AlertMessage)lastReceivedMessage).getLevel().getValue());
@@ -231,7 +234,7 @@ public class Validator {
             ProtocolMessage expectedMessage = action.getWaitTillMessage();
             List<ProtocolMessage> messages = action.getReceivedMessages();
 
-            if (action.getReceivedMessages().size() == 0 && expectedMessage.getClass().equals(AlertMessage.class)) {
+            if (action.getReceivedMessages().isEmpty() && expectedMessage.getClass().equals(AlertMessage.class)) {
                 return;
             } else if (messages.get(messages.size() - 1).getClass().equals(AlertMessage.class)) {
                 return;
@@ -344,7 +347,7 @@ public class Validator {
             dec.decrypt(record);
             if(record.getContentMessageType() == ProtocolMessageType.ALERT) {
                 AlertHandler handler = new AlertHandler(context);
-                AlertMessage alert = (AlertMessage) handler.parseMessage(record.getCleanProtocolMessageBytes().getValue(), 0, true).getMessage();
+                AlertMessage alert = handler.getParser(record.getCleanProtocolMessageBytes().getValue(), 0).parse();
                 return alert;
             }
             return null;

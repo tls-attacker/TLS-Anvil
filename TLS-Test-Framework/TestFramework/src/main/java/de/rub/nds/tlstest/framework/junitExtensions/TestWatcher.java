@@ -40,7 +40,6 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
         container = AnnotatedStateContainer.forExtensionContext(context);
         container.setResultRaw(result.getValue());
         TestContext.getInstance().addTestResult(container);
-        TestContext.getInstance().testFinished(uniqueId);
         return container;
     }
 
@@ -50,7 +49,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
         TestContext.getInstance().testSucceeded();
         AnnotatedStateContainer container = createResult(context, TestResult.SUCCEEDED);
 
-        if (!Utils.extensionContextIsTemplateContainer(context.getParent().get())) {
+        if (!Utils.extensionContextIsBasedOnCombinatorialTesting(context.getParent().get())) {
             // test does not belong to a test case performing handshakes
             // thus AnnotatedStateContainer.finished is never called,
             // therefore serialze the container immediately
@@ -68,7 +67,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
                 .orElse(null);
 
         if (state == null) {
-            if (Utils.extensionContextIsTemplateContainer(context.getParent().get())) {
+            if (Utils.extensionContextIsBasedOnCombinatorialTesting(context.getParent().get())) {
                 state = new AnnotatedState(context, null, null);
                 state.setFailedReason(cause);
             } else {
@@ -90,7 +89,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
         TestContext.getInstance().testDisabled();
         AnnotatedStateContainer container = createResult(context, TestResult.DISABLED);
         container.setDisabledReason(reason.orElse("No reason"));
-        if (!Utils.extensionContextIsTemplateContainer(context.getParent().get())) {
+        if (!Utils.extensionContextIsBasedOnCombinatorialTesting(context.getParent().get())) {
             // test does not belong to a test case performing handshakes
             // thus AnnotatedStateContainer.finished is never called,
             // therefore serialze the container immediately

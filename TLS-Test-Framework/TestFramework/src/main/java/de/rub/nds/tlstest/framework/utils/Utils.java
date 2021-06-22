@@ -1,5 +1,7 @@
 package de.rub.nds.tlstest.framework.utils;
 
+import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import java.lang.reflect.Method;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.text.DateFormat;
@@ -7,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 import java.util.TimeZone;
+import org.junit.platform.commons.util.PreconditionViolationException;
 
 public class Utils {
 
@@ -18,12 +21,12 @@ public class Utils {
      * or a {@link org.junit.jupiter.engine.descriptor.MethodExtensionContext} in case no handshakes are performed.
      */
     public static ExtensionContext getTemplateContainerExtensionContext(ExtensionContext extensionContext) {
-        if (extensionContextIsTemplateContainer(extensionContext)) {
+        if (extensionContextIsBasedOnCombinatorialTesting(extensionContext)) {
             return extensionContext;
         } else {
             Optional<ExtensionContext> tmp = extensionContext.getParent();
             while (tmp.isPresent()) {
-                if (extensionContextIsTemplateContainer(tmp.get())) {
+                if (extensionContextIsBasedOnCombinatorialTesting(tmp.get())) {
                     return tmp.get();
                 }
                 tmp = tmp.get().getParent();
@@ -33,17 +36,10 @@ public class Utils {
 
     }
 
-    public static boolean extensionContextIsTemplateContainer(ExtensionContext extensionContext) {
-        try {
-            // Pretty ugly, but the class is not public and there are no other ways
-            // to find out, if the extension context belongs to an invocation context (aka handshake)
-            // or to the test template method, which is the container.
-            // Be careful by updating JUnit :D
-            Class<?> clazz = Class.forName("org.junit.jupiter.engine.descriptor.TestTemplateExtensionContext");
-            return clazz.isAssignableFrom(extensionContext.getClass());
-        } catch (Exception E) {
-            throw new RuntimeException(E);
-        }
+    public static boolean extensionContextIsBasedOnCombinatorialTesting(ExtensionContext extensionContext) {
+        Optional<Method> testMethod = extensionContext.getTestMethod();
+        //this will also yield false for all disabled tests
+        return testMethod.isPresent() && testMethod.get().isAnnotationPresent(TlsTest.class);
     }
 
 

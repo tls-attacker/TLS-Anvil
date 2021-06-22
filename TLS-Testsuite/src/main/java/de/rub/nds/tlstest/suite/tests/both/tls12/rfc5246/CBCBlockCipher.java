@@ -195,18 +195,5 @@ public class CBCBlockCipher extends Tls12Test {
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
         });
     }
-    
-    public List<ConditionalConstraint> getPaddingBitmaskConstraints(DerivationScope scope) {
-        PaddingBitmaskDerivation paddingBitmaskDerivation = (PaddingBitmaskDerivation) DerivationFactory.getInstance(DerivationType.PADDING_BITMASK);
-        List<ConditionalConstraint> condConstraints = new LinkedList<>();
-
-        if (ConstraintHelper.multipleBlocksizesModeled(scope)) {
-            condConstraints.add(paddingBitmaskDerivation.getMustBeWithinBlocksizeConstraint());
-        }
-
-        condConstraints.add(paddingBitmaskDerivation.getMustNotExceedPaddingLengthConstraint(scope, true));
-        condConstraints.add(paddingBitmaskDerivation.getMustNotResultInZeroPaddingLength(scope, true));
-        return condConstraints;
-    }     
 
 }

@@ -26,6 +26,7 @@ import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -101,6 +102,9 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
             + "{03,XX} (including {03,00}) as the record layer version number for "
             + "ClientHello, but they MUST NOT negotiate SSLv3.")
     @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    //we can't retain the version across all records if we don't know how
+    //many are required
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "get03ProtocolVersions")
     @ManualConfig(DerivationType.PROTOCOL_VERSION)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -108,7 +112,44 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
     @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.HIGH)
-    public void sendClientHelloVersion0300WithDifferentVersionInTheRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendClientHelloVersion0300DifferentRecordVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        byte[] protocolVersionBytes = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();
+        
+        Record record = new Record();
+        record.setProtocolVersion(Modifiable.explicit(protocolVersionBytes));
+        ClientHelloMessage clientHelloMessage = new ClientHelloMessage(config);
+        clientHelloMessage.setProtocolVersion(Modifiable.explicit(new byte[]{0x03, 0x00}));
+
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        workflowTrace.addTlsActions(
+                new SendAction(clientHelloMessage),
+                new ReceiveAction(new AlertMessage())
+        );
+
+        runner.execute(workflowTrace, config).validateFinal(i -> {
+            WorkflowTrace trace = i.getWorkflowTrace();
+            Validator.receivedFatalAlert(i);
+            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+            Validator.testAlertDescription(i, AlertDescription.PROTOCOL_VERSION, msg);
+        });
+    }
+    
+    @TlsTest(description = "TLS servers MUST accept any value "
+            + "{03,XX} (including {03,00}) as the record layer version number for "
+            + "ClientHello, but they MUST NOT negotiate SSLv3.")
+    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    //we can't retain the version across all records if we don't know how
+    //many are required
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "get03ProtocolVersions")
+    @ManualConfig(DerivationType.PROTOCOL_VERSION)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
+    @SecurityCategory(SeverityLevel.CRITICAL)
+    @AlertCategory(SeverityLevel.HIGH)
+    public void sendClientHelloVersion0300RecordVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         byte[] protocolVersionBytes = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();
         

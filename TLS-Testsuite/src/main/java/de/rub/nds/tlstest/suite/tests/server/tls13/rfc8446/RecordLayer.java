@@ -84,6 +84,7 @@ public class RecordLayer extends Tls13Test {
         "TLSInnerPlaintext.content; if such a message is received, the " +
         "receiving implementation MUST terminate the connection with an " +
         "\"unexpected_message\" alert.")
+    @RFC(number = 8446, section = "5.4. Record Padding")
     @RecordLayerCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)

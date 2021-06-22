@@ -5,7 +5,10 @@ import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
@@ -36,7 +39,7 @@ public class ClientKeyExchange extends TlsGenericTest {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void clientKeyExchangeLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = getWorkflowTraceSeparatedClientKeyExchange(argumentAccessor, runner);
         ClientKeyExchangeMessage clientKeyExchange = (ClientKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_KEY_EXCHANGE, workflowTrace);
         clientKeyExchange.setLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
@@ -48,9 +51,20 @@ public class ClientKeyExchange extends TlsGenericTest {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void clientKeyExchangePublicKeyLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = getWorkflowTraceSeparatedClientKeyExchange(argumentAccessor, runner);
         ClientKeyExchangeMessage clientKeyExchange = (ClientKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_KEY_EXCHANGE, workflowTrace);
         clientKeyExchange.setPublicKeyLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
+    }
+    
+    
+    private WorkflowTrace getWorkflowTraceSeparatedClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
+        SendAction sendCkeCcsFin = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.CLIENT_KEY_EXCHANGE, workflowTrace);
+        ClientKeyExchangeMessage clientKeyExchange = (ClientKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_KEY_EXCHANGE, workflowTrace);
+        sendCkeCcsFin.getSendMessages().remove(clientKeyExchange);
+        sendCkeCcsFin.addActionOption(ActionOption.MAY_FAIL);
+        workflowTrace.getTlsActions().add(workflowTrace.getTlsActions().indexOf(sendCkeCcsFin), new SendAction(clientKeyExchange));
+        return workflowTrace;
     }
 }

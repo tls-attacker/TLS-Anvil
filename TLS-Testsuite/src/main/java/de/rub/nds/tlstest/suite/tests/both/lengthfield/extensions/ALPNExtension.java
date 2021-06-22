@@ -37,8 +37,15 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class ALPNExtension extends TlsGenericTest {
     
     public ConditionEvaluationResult targetCanBeTested() {
-        if((TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER && TestContext.getInstance().getSiteReport().getSupportedExtensions() != null) ||
-                TestContext.getInstance().getSiteReport().getReceivedClientHello().containsExtension(ExtensionType.ALPN)) {
+        if(TestContext.getInstance().getSiteReport().getSupportedExtensions() != null) {
+            return ConditionEvaluationResult.enabled("The Extension can be tested");
+        }
+        return ConditionEvaluationResult.disabled("Target is not a server and did not include the required Extension in Client Hello");
+    }
+
+    public ConditionEvaluationResult contentCanBeTested() {
+        if(TestContext.getInstance().getSiteReport().getSupportedExtensions() != null
+                && context.getSiteReport().getSupportedExtensions().contains(ExtensionType.ALPN)) {
             return ConditionEvaluationResult.enabled("The Extension can be tested");
         }
         return ConditionEvaluationResult.disabled("Target is not a server and did not include the required Extension in Client Hello");
@@ -66,7 +73,7 @@ public class ALPNExtension extends TlsGenericTest {
     @TlsTest(description = "Send an ALPN Extension in the Hello Message with a modified protocols list length value")
     @ScopeLimitations(DerivationType.INCLUDE_ALPN_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
-    @MethodCondition(method = "targetCanBeTested")
+    @MethodCondition(method = "contentCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -97,7 +104,7 @@ public class ALPNExtension extends TlsGenericTest {
     @TlsTest(description = "Send an ALPN Extension in the Hello Message with a modified protocols list length value (-1)")
     @ScopeLimitations(DerivationType.INCLUDE_ALPN_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
-    @MethodCondition(method = "targetCanBeTested")
+    @MethodCondition(method = "contentCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

@@ -66,12 +66,12 @@ public class SupportedCiphersuites extends Tls12Test {
         List<CipherSuite> advertised = CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue());
         advertised.remove(CipherSuite.TLS_FALLBACK_SCSV);
         advertised.remove(CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV);
-
+        
         List<CipherSuite> supported = new ArrayList<>(context.getSiteReport().getCipherSuites());
         supported.addAll(context.getSiteReport().getSupportedTls13CipherSuites());
 
         supported.forEach(advertised::remove);
-        advertised = advertised.stream().filter(cipherSuite -> CipherSuite.getImplemented().contains(cipherSuite)).collect(Collectors.toList());
+        advertised = advertised.stream().filter(cipherSuite -> CipherSuite.getImplemented().contains(cipherSuite) && !cipherSuite.isGOST()).collect(Collectors.toList());
 
         assertEquals("Client supports less ciphersuites than advertised. " +
                         advertised.parallelStream().map(Enum::name).collect(Collectors.joining(",")),

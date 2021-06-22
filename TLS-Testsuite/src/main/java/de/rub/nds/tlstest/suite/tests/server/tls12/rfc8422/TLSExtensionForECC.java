@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc8422;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
@@ -19,6 +20,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -44,6 +46,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
+import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
 import org.apache.logging.log4j.LogManager;
@@ -56,6 +59,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -196,6 +200,35 @@ public class TLSExtensionForECC extends Tls12Test {
             }
         }
         assertTrue("Deprecated group(s) supported: " + deprecatedFound.stream().map(NamedGroup::name).collect(Collectors.joining(",")), deprecatedFound.isEmpty());
+    }
+    
+    @TlsTest(description = "Send a ClientHello that offers many groups.")
+    @ScopeLimitations(DerivationType.INCLUDE_GREASE_NAMED_GROUPS)
+    @KeyExchange(supported = KeyExchangeType.ECDH)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    public void manyGroupsOffered(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+
+        c.setAddEllipticCurveExtension(true);
+        c.setAddECPointFormatExtension(true);
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+        //add 52 additional groups to reach 53, which is the sum of all
+        //named groups, explicit curves, and grease values
+        byte[] allExplicitGroups = new byte[53 * 2];
+        for(int i = 0; i < (52 * 2); i = i+2) {
+            allExplicitGroups[i] = (byte) 0x0A;
+            allExplicitGroups[i+1] = (byte) i;
+        }
+        allExplicitGroups[104] = selectedGroup.getValue()[0];
+        allExplicitGroups[105] = selectedGroup.getValue()[1];
+        ClientHelloMessage clientHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+        clientHello.getExtension(EllipticCurvesExtensionMessage.class).setSupportedGroups(Modifiable.explicit(allExplicitGroups));
+        
+        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
 }

@@ -11,6 +11,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
@@ -25,6 +26,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -33,9 +35,12 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Arrays;
 import static org.junit.Assert.assertFalse;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 5246, section = "7.4.1.2. Client Hello")
@@ -110,5 +115,43 @@ public class ClientHello extends Tls12Test {
                 }
             }
         });
+    }
+    
+    @TlsTest(description = "Send a ClientHello that offers many cipher suites")
+    @ScopeLimitations(DerivationType.INCLUDE_GREASE_CIPHER_SUITES)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    public void offerManyCipherSuites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        
+        //add pseudo cipher suites to reach 408, which is the sum of all
+        //defined values and GREASE values
+        CipherSuite selectedCipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+        byte[] explicitCipherSuites = new byte[408 * 2];
+        byte firstByte = 0x0A;
+        byte secondByte = 0;
+        for(int i = 0; i < 407 * 2; i = i + 2) {
+            explicitCipherSuites[i] = firstByte;
+            explicitCipherSuites[i + 1] = secondByte;
+            if(secondByte == (byte) 0xFF) {
+                firstByte++;
+            }
+            secondByte++;
+        }
+        explicitCipherSuites[814] = selectedCipherSuite.getByteValue()[0];
+        explicitCipherSuites[815] = selectedCipherSuite.getByteValue()[1];
+        
+        ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
+        clientHelloMessage.setCipherSuites(Modifiable.explicit(explicitCipherSuites));
+
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        workflowTrace.addTlsActions(
+                new SendAction(clientHelloMessage),
+                new ReceiveTillAction(new ServerHelloDoneMessage())
+        );
+
+        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        
     }
 }

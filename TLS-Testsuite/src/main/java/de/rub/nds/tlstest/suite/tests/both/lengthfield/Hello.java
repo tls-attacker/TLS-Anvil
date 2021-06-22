@@ -7,8 +7,11 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.HandshakeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.HelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
@@ -112,7 +115,7 @@ public class Hello extends TlsGenericTest {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void helloExtensionsLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         helloExtensionsLengthTest(workflowTrace, runner); 
     }
     
@@ -142,7 +145,7 @@ public class Hello extends TlsGenericTest {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void clientHelloCipherSuitesLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         clientHelloCipherSuitesLengthTest(workflowTrace, runner); 
     }
     
@@ -172,7 +175,7 @@ public class Hello extends TlsGenericTest {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void clientHelloCompressionLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         clientHelloCompressionLengthTest(workflowTrace, runner); 
     }
     
@@ -189,18 +192,27 @@ public class Hello extends TlsGenericTest {
     }
     
     private void helloExtensionsLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
+        if(isClientTest()) {
+            separateServerHelloMessage(workflowTrace);
+        }
         HelloMessage helloMessage = getHelloMessage(workflowTrace);
         helloMessage.setExtensionsLength(Modifiable.sub(1)); 
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
     private void helloLenghtTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
+        if(isClientTest()) {
+            separateServerHelloMessage(workflowTrace);
+        }
         HelloMessage helloMessage = getHelloMessage(workflowTrace);
         helloMessage.setLength(Modifiable.sub(1)); 
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
     }
     
     private void sessionIdLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
+       if(isClientTest()) {
+            separateServerHelloMessage(workflowTrace);
+       }
        HelloMessage helloMessage = getHelloMessage(workflowTrace);
        helloMessage.setSessionIdLength(Modifiable.add(1));   
        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest); 
@@ -214,5 +226,13 @@ public class Hello extends TlsGenericTest {
             helloMessage = WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
         }
         return (HelloMessage) helloMessage;
+    }
+    
+    private void separateServerHelloMessage(WorkflowTrace workflowTrace) {
+        ServerHelloMessage serverHello = (ServerHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
+        SendAction sendServerHelloMessages = (SendAction) WorkflowTraceUtil.getFirstSendingActionForMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
+        sendServerHelloMessages.getSendMessages().remove(serverHello);
+        sendServerHelloMessages.addActionOption(ActionOption.MAY_FAIL);
+        workflowTrace.addTlsAction(workflowTrace.getTlsActions().indexOf(sendServerHelloMessages), new SendAction(serverHello));
     }
 }

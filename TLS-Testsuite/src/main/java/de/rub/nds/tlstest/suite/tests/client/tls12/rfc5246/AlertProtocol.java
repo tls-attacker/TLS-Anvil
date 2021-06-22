@@ -68,7 +68,7 @@ public class AlertProtocol extends Tls12Test {
         alert.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));
         alert.setDescription(Modifiable.explicit(AlertDescription.CLOSE_NOTIFY.getValue()));
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO_DONE);
         workflowTrace.getLastSendingAction().getSendMessages().add(alert);
         
         workflowTrace.addTlsActions(

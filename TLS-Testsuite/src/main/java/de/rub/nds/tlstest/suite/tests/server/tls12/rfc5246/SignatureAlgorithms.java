@@ -29,6 +29,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -37,6 +38,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
@@ -143,6 +145,36 @@ public class SignatureAlgorithms extends Tls12Test {
         SignatureAndHashAlgorithmsExtensionMessage algorithmsExtension = clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
         algorithmsExtension.setSignatureAndHashAlgorithms(Modifiable.insert(new byte[]{(byte)0xfe, 0x44}, 0));
         
+        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+    }
+    
+    @TlsTest(description = "Send a ClientHello that offers many SignatureAndHash algorithms")
+    @ScopeLimitations(DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    public void offerManyAlgorithms(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        
+        //add pseudo algorithms to reach 58 which is the number of all defined values
+        //and grease values
+        int realAlgorithms = c.getDefaultClientSupportedSignatureAndHashAlgorithms().size();
+        byte[] explicitAlgorithms = new byte[58 * 2];
+        int y = 0;
+        for(int i = 0; i < 58 * 2; i = i + 2) {
+            if(i < (58 - realAlgorithms) * 2) {
+                explicitAlgorithms[i] = (byte) 0x0A;
+                explicitAlgorithms[i+1] = (byte) i;
+            } else {
+                explicitAlgorithms[i] = c.getDefaultClientSupportedSignatureAndHashAlgorithms().get(y).getByteValue()[0];
+                explicitAlgorithms[i + 1] = c.getDefaultClientSupportedSignatureAndHashAlgorithms().get(y).getByteValue()[1];
+                y++;
+            }
+            
+        }
+        ClientHelloMessage clientHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+        clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class).setSignatureAndHashAlgorithms(Modifiable.explicit(explicitAlgorithms));
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 }

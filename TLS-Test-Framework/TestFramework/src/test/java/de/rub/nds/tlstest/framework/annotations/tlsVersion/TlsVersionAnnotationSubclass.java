@@ -31,7 +31,7 @@ public class TlsVersionAnnotationSubclass extends Tls12SuperClass  {
 
     @BeforeAll
     static void setup() {
-        TestContext testContext = new TestContext();
+        TestContext testContext = TestContext.getInstance();
         TestSiteReport report = new TestSiteReport("");
 
         report.setVersions(new ArrayList<ProtocolVersion>() {

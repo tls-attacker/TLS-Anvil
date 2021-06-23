@@ -26,7 +26,7 @@ public class ClientAnnotationClassServerTest {
 
     @BeforeAll
     static void setup() {
-        TestContext testContext = new TestContext();
+        TestContext testContext = TestContext.getInstance();
         testContext.getConfig().parse(new String[]{ "server", "-connect", "alphanudel.de" });
     }
 

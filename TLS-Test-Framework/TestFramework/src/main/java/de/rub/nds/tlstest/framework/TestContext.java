@@ -36,8 +36,6 @@ public class TestContext {
     private ParallelExecutor stateExecutor;
 
     private final Map<String, AnnotatedStateContainer> testResults = new HashMap<>();
-    private boolean initializationFailed = false;
-
     private TestSiteReport siteReport = null;
     private ClientHelloMessage receivedClientHelloMessage;
 
@@ -55,35 +53,15 @@ public class TestContext {
     synchronized public static TestContext getInstance() {
         if (TestContext.instance == null) {
             TestContext.instance = new TestContext();
-            try {
-                TestContext.instance.config.parse(null);
-                TestContext.instance.getTestRunner().prepareTestExecution();
-            } catch(Exception e) {
-                TestContext.instance.initializationFailed = true;
-                throw new RuntimeException(e);
-            }
-        }
-        if (TestContext.instance.initializationFailed) {
-            throw new RuntimeException();
         }
         return TestContext.instance;
     }
 
-    public TestContext() {
+    private TestContext() {
         super();
         this.config = new TestConfig();
         this.testRunner = new TestRunner(this.config, this);
-        TestContext.instance = this;
     }
-
-    public TestContext(TestConfig config) {
-        super();
-        this.config = config;
-    }
-
-
-
-
 
     synchronized public TestConfig getConfig() {
         return config;

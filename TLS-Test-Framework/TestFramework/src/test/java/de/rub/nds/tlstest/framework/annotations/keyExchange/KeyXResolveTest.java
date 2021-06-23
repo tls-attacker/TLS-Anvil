@@ -31,7 +31,7 @@ public class KeyXResolveTest {
 
     @BeforeAll
     public static void setup() {
-        TestContext context = new TestContext();
+        TestContext context = TestContext.getInstance();
         TestSiteReport siteReport = new TestSiteReport("");
 
         siteReport.addCipherSuites(new HashSet<CipherSuite>(){

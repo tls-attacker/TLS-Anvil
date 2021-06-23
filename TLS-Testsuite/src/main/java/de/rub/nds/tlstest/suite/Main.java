@@ -24,7 +24,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        TestContext testContext = new TestContext();
+        TestContext testContext = TestContext.getInstance();
         testContext.getConfig().setSupportedVersions(Arrays.asList(ProtocolVersion.TLS12, ProtocolVersion.TLS13));
 
         new Thread(() -> {

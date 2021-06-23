@@ -9,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 import java.util.TimeZone;
-import org.junit.platform.commons.util.PreconditionViolationException;
 
 public class Utils {
 
@@ -21,7 +20,7 @@ public class Utils {
      * or a {@link org.junit.jupiter.engine.descriptor.MethodExtensionContext} in case no handshakes are performed.
      */
     public static ExtensionContext getTemplateContainerExtensionContext(ExtensionContext extensionContext) {
-        if (extensionContextIsBasedOnCombinatorialTesting(extensionContext)) {
+        if (!extensionContextIsBasedOnCombinatorialTesting(extensionContext)) {
             return extensionContext;
         } else {
             Optional<ExtensionContext> tmp = extensionContext.getParent();

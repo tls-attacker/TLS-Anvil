@@ -183,8 +183,8 @@ public class  AnnotatedStateContainer {
         } else if(failed) {
             LOGGER.info("All generated inputs resulted in failures for test " + testMethodConfig.getMethodName());
         }
-
-        this.serialize();
+        
+        serialize();
     }
 
     public void stateFinished(TestResult result) {
@@ -322,28 +322,29 @@ public class  AnnotatedStateContainer {
             errorMsg.append("Failed to serialize AnnotatedStateContainer");
             errorMsg.append(ExecptionPrinter.stacktraceToString(e));
         }
-
-        try {
-            FileOutputStream fos = new FileOutputStream(Paths.get(targetFolder, "traces.zip").toString());
-            ZipOutputStream zipOut = new ZipOutputStream(fos);
-            for (AnnotatedState s : states) {
-                ZipEntry zipEntry = new ZipEntry(s.getUuid() + ".xml");
-                zipOut.putNextEntry(zipEntry);
-                try {
-                    String serialized = WorkflowTraceSerializer.write(s.getWorkflowTrace());
-                    zipOut.write(serialized.getBytes(StandardCharsets.UTF_8));
-                } catch (Exception e) {
-                    LOGGER.error("Failed to serialize State ({}, {})", method, s.getUuid(), e);
-                    errorMsg.append("\nFailed to serialize WorkflowTraces");
-                    errorMsg.append(ExecptionPrinter.stacktraceToString(e));
-                }
+        
+        if(TestContext.getInstance().getConfig().isExportTraces()) {
+            try {
+                FileOutputStream fos = new FileOutputStream(Paths.get(targetFolder, "traces.zip").toString());
+                ZipOutputStream zipOut = new ZipOutputStream(fos);
+                for (AnnotatedState s : states) {
+                    ZipEntry zipEntry = new ZipEntry(s.getUuid() + ".xml");
+                    zipOut.putNextEntry(zipEntry);
+                    try {
+                        String serialized = WorkflowTraceSerializer.write(s.getWorkflowTrace());
+                        zipOut.write(serialized.getBytes(StandardCharsets.UTF_8));
+                    } catch (Exception e) {
+                        LOGGER.error("Failed to serialize State ({}, {})", method, s.getUuid(), e);
+                        errorMsg.append("\nFailed to serialize WorkflowTraces");
+                        errorMsg.append(ExecptionPrinter.stacktraceToString(e));
+                    }
+                }   
+                zipOut.close();
+                fos.close();
+            } catch (Exception e){
+                LOGGER.error("", e);
             }
-            zipOut.close();
-            fos.close();
-        } catch (Exception e){
-            LOGGER.error("", e);
         }
-
         try {
             String err = errorMsg.toString();
             if (!err.isEmpty()) {

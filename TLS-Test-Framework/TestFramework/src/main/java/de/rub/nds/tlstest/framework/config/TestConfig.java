@@ -66,6 +66,10 @@ public class TestConfig extends TLSDelegateConfig {
     @Parameter(names = "-ignoreCache", description = "Discovering supported TLS-Features takes time, " +
             "thus they are cached. Using this flag, the cache is ignored.")
     private boolean ignoreCache = false;
+    
+    @Parameter(names = "-exportTraces", description = "Export executed WorkflowTraces with all values "
+            + "used in the messages")
+    private boolean exportTraces = false;
 
     @Parameter(names = "-outputFolder", description = "Folder where the test results should be stored inside, defaults to `pwd/TestSuiteResults_$(date)`")
     private String outputFolder = "";
@@ -468,24 +472,23 @@ public class TestConfig extends TLSDelegateConfig {
         this.connectionTimeout = connectionTimeout;
     }
 
-    /**
-     * @return the expectTls13Alerts
-     */
     public boolean isExpectTls13Alerts() {
         return expectTls13Alerts;
     }
 
-    /**
-     * @param expectTls13Alerts the expectTls13Alerts to set
-     */
     public void setExpectTls13Alerts(boolean expectTls13Alerts) {
         this.expectTls13Alerts = expectTls13Alerts;
     }
 
-    /**
-     * @return the enforcePeerRestrictions
-     */
     public boolean isEnforceSenderRestrictions() {
         return enforceSenderRestrictions;
+    }
+    
+    public boolean isExportTraces() {
+        return exportTraces;
+    }
+
+    public void setExportTraces(boolean exportTraces) {
+        this.exportTraces = exportTraces;
     }
 }

@@ -71,10 +71,11 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePosParam, DerivationParameter cipherSuite) -> {
-            int chosenPos = (Integer) bytePosParam.getSelectedValue();
-            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-            return AlgorithmResolver.getMacAlgorithm(scope.getTargetVersion(), cipherDev.getSelectedValue()).getSize() > chosenPos;
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((MacBitmaskDerivation macBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+            int selectedBitmaskBytePosition = macBitmaskDerivation.getSelectedValue();
+            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
+            
+            return AlgorithmResolver.getMacAlgorithm(scope.getTargetVersion(), selectedCipherSuite).getSize() > selectedBitmaskBytePosition;
         }));
     }
 

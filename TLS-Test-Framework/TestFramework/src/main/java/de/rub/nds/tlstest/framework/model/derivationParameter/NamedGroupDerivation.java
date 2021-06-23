@@ -11,6 +11,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
+import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsscanner.serverscanner.probe.namedcurve.NamedCurveWitness;
@@ -114,10 +115,11 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     private ConditionalConstraint getMustNotBeNullForECDHConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter group, DerivationParameter cipherSuite) -> {
-            NamedGroupDerivation groupDev = (NamedGroupDerivation) group;
-            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-            if (groupDev.getSelectedValue() == null && AlgorithmResolver.getKeyExchangeAlgorithm(cipherDev.getSelectedValue()).isKeyExchangeEcdh()) {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((NamedGroupDerivation namedGroupDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+            NamedGroup selectedNamedGroup = namedGroupDerivation.getSelectedValue();
+            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
+            
+            if (selectedNamedGroup == null && AlgorithmResolver.getKeyExchangeAlgorithm(selectedCipherSuite).isKeyExchangeEcdh()) {
                 return false;
             }
             return true;
@@ -127,10 +129,11 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     private ConditionalConstraint getMustBeNullForNonECDHConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter group, DerivationParameter cipherSuite) -> {
-            NamedGroupDerivation groupDev = (NamedGroupDerivation) group;
-            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-            if (groupDev.getSelectedValue() != null && !AlgorithmResolver.getKeyExchangeAlgorithm(cipherDev.getSelectedValue()).isKeyExchangeEcdh()) {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((NamedGroupDerivation namedGroupDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+            NamedGroup selectedNamedGroup = namedGroupDerivation.getSelectedValue();
+            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
+            
+            if (selectedNamedGroup != null && !AlgorithmResolver.getKeyExchangeAlgorithm(selectedCipherSuite).isKeyExchangeEcdh()) {
                 return false;
             }
             return true;
@@ -140,10 +143,11 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     private ConditionalConstraint getMustBeNullForStaticECDH() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter group, DerivationParameter cipherSuite) -> {
-            NamedGroupDerivation groupDev = (NamedGroupDerivation) group;
-            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-            if (groupDev.getSelectedValue() != null && AlgorithmResolver.getKeyExchangeAlgorithm(cipherDev.getSelectedValue()).isKeyExchangeEcdh() && !cipherDev.getSelectedValue().isEphemeral()) {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((NamedGroupDerivation namedGroupDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+            NamedGroup selectedNamedGroup = namedGroupDerivation.getSelectedValue();
+            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
+            
+            if (selectedNamedGroup != null && AlgorithmResolver.getKeyExchangeAlgorithm(selectedCipherSuite).isKeyExchangeEcdh() && !selectedCipherSuite.isEphemeral()) {
                 return false;
             }
             return true;

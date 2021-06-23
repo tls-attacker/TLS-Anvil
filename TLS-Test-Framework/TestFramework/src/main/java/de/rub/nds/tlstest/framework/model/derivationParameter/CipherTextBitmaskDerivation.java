@@ -92,12 +92,13 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
         requiredDerivationsCiphertext.add(DerivationType.APP_MSG_LENGHT);
 
         //ensure that the selected byte is within ciphertext size (for non-padded)
-        return new ConditionalConstraint(requiredDerivationsCiphertext, ConstraintBuilder.constrain(DerivationType.CIPHERTEXT_BITMASK.name(), DerivationType.CIPHERSUITE.name(), DerivationType.APP_MSG_LENGHT.name()).by((DerivationParameter bytePos, DerivationParameter cipherSuite, DerivationParameter appMsgLenParam) -> {
-            int chosenBytePos = (Integer) bytePos.getSelectedValue();
-            int appMsgLen = (Integer) appMsgLenParam.getSelectedValue();
-            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-            if (!cipherDev.getSelectedValue().isUsingPadding(scope.getTargetVersion()) || AlgorithmResolver.getCipherType(cipherDev.getSelectedValue()) == CipherType.AEAD) {
-                return appMsgLen > chosenBytePos;
+        return new ConditionalConstraint(requiredDerivationsCiphertext, ConstraintBuilder.constrain(DerivationType.CIPHERTEXT_BITMASK.name(), DerivationType.CIPHERSUITE.name(), DerivationType.APP_MSG_LENGHT.name()).by((CipherTextBitmaskDerivation cipherTextBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation, AppMsgLengthDerivation appMsgLenParam) -> {
+            int selectedBitmaskBytePosition = cipherTextBitmaskDerivation.getSelectedValue();
+            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
+            int selectedAppMsgLength = appMsgLenParam.getSelectedValue();
+            
+            if (!selectedCipherSuite.isUsingPadding(scope.getTargetVersion()) || AlgorithmResolver.getCipherType(selectedCipherSuite) == CipherType.AEAD) {
+                return selectedAppMsgLength > selectedBitmaskBytePosition;
             }
             return true;
         }));

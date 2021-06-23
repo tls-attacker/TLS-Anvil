@@ -89,11 +89,12 @@ public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(DerivationType.APP_MSG_LENGHT.name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter msgLenParam, DerivationParameter cipherSuite) -> {
-            int msgLen = (Integer) msgLenParam.getSelectedValue();
-            CipherSuite selectedCipherSuite = ((CipherSuiteDerivation) cipherSuite).getSelectedValue();
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(DerivationType.APP_MSG_LENGHT.name(), DerivationType.CIPHERSUITE.name()).by((AppMsgLengthDerivation appMsgLengthDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+            int selectedAppMsgLength = appMsgLengthDerivation.getSelectedValue();
+            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
+            
             if(AlgorithmResolver.getCipherType(selectedCipherSuite) == CipherType.BLOCK) {
-                return AlgorithmResolver.getCipher(selectedCipherSuite).getBlocksize() >= msgLen;
+                return AlgorithmResolver.getCipher(selectedCipherSuite).getBlocksize() >= selectedAppMsgLength;
             }
             return true;
         }));

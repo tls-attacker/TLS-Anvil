@@ -189,25 +189,24 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
         requiredDerivations.add(DerivationType.CERTIFICATE);
         requiredDerivations.add(DerivationType.SIG_HASH_ALGORIHTM);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CERTIFICATE.name(), DerivationType.SIG_HASH_ALGORIHTM.name()).by((DerivationParameter bitmaskParam, DerivationParameter certParam, DerivationParameter sigHashAlgorithmParam) -> {
-            SignatureBitmaskDerivation bitmaskDerivation = (SignatureBitmaskDerivation) bitmaskParam;
-            SigAndHashDerivation sigHashAlg = (SigAndHashDerivation) sigHashAlgorithmParam;
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CERTIFICATE.name(), DerivationType.SIG_HASH_ALGORIHTM.name()).by((SignatureBitmaskDerivation signatureBitmaskDerivation, CertificateDerivation certificateDerivation, SigAndHashDerivation sigAndHashDerivation) -> {
+            int selectedBitmaskBytePosition = signatureBitmaskDerivation.getSelectedValue();
+            CertificateKeyPair selectedCertKeyPair = certificateDerivation.getSelectedValue();
+            SignatureAndHashAlgorithm selectedSigHashAlgorithm = sigAndHashDerivation.getSelectedValue();
             
-            if(sigHashAlg.getSelectedValue() == null) {
+            if(selectedSigHashAlgorithm == null) {
                 return false;
             }
-            
-            CertificateDerivation cert = (CertificateDerivation) certParam;
 
             int certificateKeySize; 
-            if(cert.getSelectedValue().getCertPublicKeyType() == CertificateKeyType.DSS) {
-                certificateKeySize = ((CustomDSAPrivateKey)cert.getSelectedValue().getPrivateKey()).getParams().getQ().bitLength();
+            if(selectedCertKeyPair.getCertPublicKeyType() == CertificateKeyType.DSS) {
+                certificateKeySize = ((CustomDSAPrivateKey)selectedCertKeyPair.getPrivateKey()).getParams().getQ().bitLength();
             } else {
-                certificateKeySize = cert.getSelectedValue().getPublicKey().keySize(); 
+                certificateKeySize = selectedCertKeyPair.getPublicKey().keySize(); 
             }
-            SignatureAlgorithm sigAlg = sigHashAlg.getSelectedValue().getSignatureAlgorithm();
+            SignatureAlgorithm sigAlg = selectedSigHashAlgorithm.getSignatureAlgorithm();
 
-            return computeEstimatedSignatureSize(sigAlg, certificateKeySize) > bitmaskDerivation.getSelectedValue();
+            return computeEstimatedSignatureSize(sigAlg, certificateKeySize) > selectedBitmaskBytePosition;
         }));
     }
 

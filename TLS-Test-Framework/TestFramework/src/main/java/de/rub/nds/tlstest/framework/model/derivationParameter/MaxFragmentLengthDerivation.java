@@ -9,22 +9,35 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.MaxFragmentLength;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+
+import java.util.AbstractMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
-public class MaxFragmentLengthDerivation extends DerivationParameter<MaxFragmentLength> {
+/**
+ * Derivation for the max_fragment_length extension
+ *
+ * The parameter type is a pair of [Boolean, MaxFragmentLength].
+ * If the first value is true the extension is included with the fragment length of the second value.
+ * If the first value is false the extension is not included. The second value is ignored in this case.
+ */
+public class MaxFragmentLengthDerivation extends DerivationParameter<Map.Entry<Boolean, MaxFragmentLength>> {
 
     public MaxFragmentLengthDerivation() {
-        super(DerivationType.MAX_FRAGMENT_LENGTH, MaxFragmentLength.class);
+        super(DerivationType.MAX_FRAGMENT_LENGTH, (Class<Map.Entry<Boolean, MaxFragmentLength>>)
+                ((Map.Entry<Boolean, MaxFragmentLength>)
+                (new AbstractMap.SimpleImmutableEntry<>(false, MaxFragmentLength.TWO_9)))
+                .getClass());
     }
 
-    public MaxFragmentLengthDerivation(MaxFragmentLength selectedValue) {
+    public MaxFragmentLengthDerivation(Map.Entry<Boolean, MaxFragmentLength> selectedValue) {
         this();
         setSelectedValue(selectedValue);
     }
@@ -32,19 +45,45 @@ public class MaxFragmentLengthDerivation extends DerivationParameter<MaxFragment
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
 
-        if(context.getSiteReport().getSupportedExtensions().contains(ExtensionType.MAX_FRAGMENT_LENGTH)){
-            for(MaxFragmentLength maxFragmentLength : MaxFragmentLength.values()){
-                parameterValues.add(new MaxFragmentLengthDerivation(maxFragmentLength));
-            }
+        for(MaxFragmentLength maxFragmentLength : MaxFragmentLength.values()){
+            Map.Entry<Boolean, MaxFragmentLength> pair = new AbstractMap.SimpleImmutableEntry<Boolean, MaxFragmentLength>(true, maxFragmentLength);
+            parameterValues.add(new MaxFragmentLengthDerivation(pair));
         }
+
+        // A parameter where no max fragment length extension is included
+        Map.Entry<Boolean, MaxFragmentLength> pair = new AbstractMap.SimpleImmutableEntry<Boolean, MaxFragmentLength>(false, MaxFragmentLength.TWO_9);
+        parameterValues.add(new MaxFragmentLengthDerivation(pair));
+
         return parameterValues;
     }
 
     @Override
     public void applyToConfig(Config config, TestContext context) {
-        if (getSelectedValue() != null) {
-            config.setMaxFragmentLength(getSelectedValue());
+        Map.Entry<Boolean, MaxFragmentLength> selectedValue = getSelectedValue();
+        boolean includeAddMaxFragmentExtension = selectedValue.getKey();
+        MaxFragmentLength maxFragmentLength = selectedValue.getValue();
+
+        if (includeAddMaxFragmentExtension) {
+            config.setMaxFragmentLength(maxFragmentLength);
             config.setAddMaxFragmentLengthExtension(true);
+        }
+        else {
+            config.setAddMaxFragmentLengthExtension(false);
+        }
+    }
+
+    @Override
+    @JsonValue
+    public String jsonValue() {
+        Map.Entry<Boolean, MaxFragmentLength> selectedValue = getSelectedValue();
+        boolean includeAddMaxFragmentExtension = selectedValue.getKey();
+        MaxFragmentLength maxFragmentLength = selectedValue.getValue();
+
+        if(includeAddMaxFragmentExtension){
+            return "" + maxFragmentLength;
+        }
+        else{
+            return "EXTENSION_NOT_INCLUDED";
         }
     }
 

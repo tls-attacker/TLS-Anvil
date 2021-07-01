@@ -233,6 +233,7 @@ public class TestRunner {
         scannerConfig.setBaseConfig(config);
 
         scannerConfig.setProbes(
+                ProbeType.COMMON_BUGS,
                 ProbeType.CIPHER_SUITE,
                 ProbeType.CERTIFICATE,
                 ProbeType.COMPRESSIONS,

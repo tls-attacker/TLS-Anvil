@@ -11,8 +11,11 @@ import de.rub.nds.tlsattacker.core.constants.ExtensionByteLength;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
+import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
+import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PreSharedKeyExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -40,6 +43,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import java.util.Arrays;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -153,8 +157,7 @@ public class PreSharedKey extends Tls13Test {
     @AlertCategory(SeverityLevel.LOW)
     public void invalidBinder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        c.setAddPSKKeyExchangeModesExtension(true);
-        c.setAddPreSharedKeyExtension(true);
+        setupPskConfig(c);
         c.setLimitPsksToOne(true);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction());
@@ -180,8 +183,7 @@ public class PreSharedKey extends Tls13Test {
     @AlertCategory(SeverityLevel.LOW)
     public void noBinder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        c.setAddPSKKeyExchangeModesExtension(true);
-        c.setAddPreSharedKeyExtension(true);
+        setupPskConfig(c);
         c.setLimitPsksToOne(true);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
@@ -191,7 +193,7 @@ public class PreSharedKey extends Tls13Test {
         PreSharedKeyExtensionMessage pskExt = cHello.getExtension(PreSharedKeyExtensionMessage.class);
         pskExt.setBinderListBytes(Modifiable.explicit(new byte[0]));
         pskExt.setBinderListLength(Modifiable.explicit(0));
-
+        
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
             Validator.receivedFatalAlert(i, false);
@@ -207,8 +209,7 @@ public class PreSharedKey extends Tls13Test {
     @SecurityCategory(SeverityLevel.HIGH)
     public void selectedPSKIndexIsWithinOfferedListSize(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
-        config.setAddPSKKeyExchangeModesExtension(true);
-        config.setAddPreSharedKeyExtension(true);
+        setupPskConfig(config);
 
         WorkflowTrace workflowTrace;
         if (config.getTls13BackwardsCompatibilityMode()) {
@@ -230,5 +231,11 @@ public class PreSharedKey extends Tls13Test {
             int selectedIdentityIndex = pskServerHello.getExtension(PreSharedKeyExtensionMessage.class).getSelectedIdentity().getValue();
             assertTrue("Server set an invalid selected PSK index (" + selectedIdentityIndex + " of " + offeredPSKs + " )", selectedIdentityIndex >= 0 && selectedIdentityIndex < offeredPSKs);
         });
+    }
+    
+    private void setupPskConfig(Config config) {
+        config.setAddPSKKeyExchangeModesExtension(true);
+        config.setAddPreSharedKeyExtension(true);
+        adjustPreSharedKeyModes(config);
     }
 }

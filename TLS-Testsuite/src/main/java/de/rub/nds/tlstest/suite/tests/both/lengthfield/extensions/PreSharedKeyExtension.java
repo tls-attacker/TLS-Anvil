@@ -4,10 +4,14 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
+import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
+import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PreSharedKeyExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
@@ -96,6 +100,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
         //rather, they SHOULD select a single PSK and validate solely the
         //binder that corresponds to that PSK.
         config.setLimitPsksToOne(Boolean.TRUE);
+        adjustPreSharedKeyModes(config);
         prepareConfig(config, argumentAccessor, runner);
         return runner.generateWorkflowTrace(WorkflowTraceType.FULL_TLS13_PSK);
     }

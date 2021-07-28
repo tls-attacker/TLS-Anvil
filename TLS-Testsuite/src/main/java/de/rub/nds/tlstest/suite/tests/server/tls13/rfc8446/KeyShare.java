@@ -33,13 +33,11 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -148,12 +146,17 @@ public class KeyShare extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.executedAsPlanned(i);
-            KeyShareExtensionMessage keyshare = i.getWorkflowTrace()
-                    .getFirstReceivedMessage(ServerHelloMessage.class)
-                    .getExtension(KeyShareExtensionMessage.class);
-            assertEquals("Server offered more than one keyshare entry", 1, keyshare.getKeyShareList().size());
-            assertTrue(c.getDefaultClientNamedGroups().contains(keyshare.getKeyShareList().stream().map(KeyShareEntry::getGroupConfig).collect(Collectors.toList()).get(0)));
+            ServerHelloMessage serverHello = i.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
+            assertTrue("No ServerHello has been received", serverHello != null);
+            KeyShareExtensionMessage keyshare = serverHello.getExtension(KeyShareExtensionMessage.class);
+            if(serverHello.isTls13HelloRetryRequest()) {
+                i.addAdditionalResultInfo("Server enforced own preferred group");
+                assertTrue("Server requested an unproposed group in HelloRetryRequest",c.getDefaultClientNamedGroups().contains(keyshare.getKeyShareList().stream().map(KeyShareEntry::getGroupConfig).collect(Collectors.toList()).get(0)));
+            } else {
+                Validator.executedAsPlanned(i);
+                assertTrue("Server selected group for which no Key Share was sent outside of HelloRetryRequest", c.getDefaultClientKeyShareNamedGroups().contains(keyshare.getKeyShareList().stream().map(KeyShareEntry::getGroupConfig).collect(Collectors.toList()).get(0)));
+            }
+            assertEquals("Server offered more than one keyshare entry", 1, keyshare.getKeyShareList().size());    
         });
     }
     

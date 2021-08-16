@@ -52,7 +52,7 @@ public class MaxFragmentLengthDerivation extends DerivationParameter<MaxFragment
         MaxFragmentLength selectedValue = getSelectedValue();
 
         if (selectedValue != null) {
-            config.setMaxFragmentLength(selectedValue);
+            config.setDefaultMaxFragmentLength(selectedValue);
             config.setAddMaxFragmentLengthExtension(true);
         }
     }

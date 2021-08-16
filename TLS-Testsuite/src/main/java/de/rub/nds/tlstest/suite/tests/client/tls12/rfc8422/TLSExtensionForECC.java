@@ -80,6 +80,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
+    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     public void invalidPointFormat() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);

@@ -24,6 +24,8 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMes
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
+import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -45,6 +47,7 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseNamedGroupDe
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseSigHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
@@ -67,7 +70,15 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.setProtocolVersion(Modifiable.explicit(greaseVersion.getValue()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            if(context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS_1_3) == TestResult.TRUE) {
+                //In TLS 1.3, alerts are not mandatory - at this point no version
+                //has been negotiated
+                assertTrue("Socket has not been closed",Validator.socketClosed(i));
+            } else {
+               Validator.receivedFatalAlert(i);
+            }
+        });
     }
 
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "

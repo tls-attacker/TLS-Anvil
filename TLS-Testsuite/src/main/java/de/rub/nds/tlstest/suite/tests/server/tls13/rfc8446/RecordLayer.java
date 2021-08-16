@@ -24,6 +24,8 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
+import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
@@ -113,7 +115,7 @@ public class RecordLayer extends Tls13Test {
     }
 
     public ConditionEvaluationResult supportsRecordFragmentation() {
-        if (context.getSiteReport().getSupportsRecordFragmentation()) {
+        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION) == TestResult.TRUE) {
             return ConditionEvaluationResult.enabled("");
         }
         return ConditionEvaluationResult.disabled("Target does not support Record fragmentation");

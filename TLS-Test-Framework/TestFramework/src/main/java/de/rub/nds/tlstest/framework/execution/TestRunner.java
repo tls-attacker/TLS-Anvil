@@ -337,7 +337,7 @@ public class TestRunner {
         }
              
         List<State> keyShareStates = new LinkedList<>();
-        List<TlsTask> keyShareTasks = new LinkedList<>();
+        List<TlsTask> keyShareTasks = new LinkedList<>();       
         if(clientHello.containsExtension(ExtensionType.ELLIPTIC_CURVES) && clientHello.containsExtension(ExtensionType.KEY_SHARE)) {
             keyShareStates = buildClientKeyShareProbeStates(clientHello);
             if(!keyShareStates.isEmpty()) {
@@ -379,7 +379,7 @@ public class TestRunner {
         report.addCipherSuites(tls12CipherSuites);
         report.addCipherSuites(tls13CipherSuites);
         report.setReceivedClientHello(clientHello);
-        report.setSupportsRecordFragmentation(supportsRecordFragmentation);
+        report.putResult(AnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION, supportsRecordFragmentation);
         report.setMinimumRsaCertKeySize(rsaMinCertKeySize);
         report.setMinimumDssCertKeySize(dssMinCertKeySize);
         additionalTls13Groups.addAll(report.getClientHelloKeyShareGroups());

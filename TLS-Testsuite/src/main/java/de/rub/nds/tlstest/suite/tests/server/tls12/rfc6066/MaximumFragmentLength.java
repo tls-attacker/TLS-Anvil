@@ -51,7 +51,7 @@ public class MaximumFragmentLength extends Tls12Test {
     @HandshakeCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
-    @MethodCondition(method="supportsExtension")
+    @MethodCondition(method="targetCanBeTested")
     public void invalidMaximumFragmentLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

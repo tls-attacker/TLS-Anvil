@@ -99,36 +99,12 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
     private ConditionalConstraint getCertPkTypeMustMatchCipherSuiteConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(this.getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter cert, DerivationParameter cipherSuite) -> {
-                CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-                CertificateDerivation certDev = (CertificateDerivation) cert;
-                CertificateKeyType requiredCertKeyType = AlgorithmResolver.getCertificateKeyType(cipherDev.getSelectedValue());
-                CertificateKeyPair possiblePair = certDev.getSelectedValue();
-                return possiblePair.isUsable(requiredCertKeyType, possiblePair.getCertSignatureType());
-        }));
-    }
-    
-    /**
-     * This turned out to be inefficient - we are currently testing a different
-     * aproach based on the NamedGroupDerivation
-     */
-    private ConditionalConstraint getCertPkMustMatchSelectedGroupIfStaticEcCipherSuite() {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
-        requiredDerivations.add(DerivationType.NAMED_GROUP);
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(this.getType().name(), DerivationType.CIPHERSUITE.name(), DerivationType.NAMED_GROUP.name()).by((DerivationParameter certParameter, DerivationParameter cipherSuiteParameter, DerivationParameter namedGroupParameter) -> {
-                CipherSuiteDerivation cipherSuiteDerivation = (CipherSuiteDerivation) cipherSuiteParameter;
-                CertificateDerivation certDerivation = (CertificateDerivation) certParameter;
-                NamedGroupDerivation namedGroupDerivation = (NamedGroupDerivation) namedGroupParameter;
-                CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
-                CertificateKeyPair selectedCert = certDerivation.getSelectedValue();
-                if(!selectedCipherSuite.isTLS13() 
-                        && AlgorithmResolver.getKeyExchangeAlgorithm(selectedCipherSuite).isKeyExchangeEcdh() 
-                        && !selectedCipherSuite.isEphemeral() 
-                        && (selectedCert.getCertPublicKeyType() == CertificateKeyType.ECDSA || selectedCert.getCertPublicKeyType() == CertificateKeyType.ECDH)) {
-                    return namedGroupDerivation.getSelectedValue() == selectedCert.getPublicKeyGroup();
-                }   
-                return true;
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(this.getType().name(), DerivationType.CIPHERSUITE.name()).by((CertificateDerivation certificateDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+            CertificateKeyPair selectedCertKeyPair = certificateDerivation.getSelectedValue();
+            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
+
+            CertificateKeyType requiredCertKeyType = AlgorithmResolver.getCertificateKeyType(selectedCipherSuite);
+            return selectedCertKeyPair.isUsable(requiredCertKeyType, selectedCertKeyPair.getCertSignatureType());
         }));
     }
 

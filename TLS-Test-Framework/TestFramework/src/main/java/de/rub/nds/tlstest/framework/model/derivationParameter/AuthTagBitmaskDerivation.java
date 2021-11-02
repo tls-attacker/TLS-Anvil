@@ -75,10 +75,11 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePosParam, DerivationParameter cipherSuite) -> {
-            int selectedPos = (Integer) bytePosParam.getSelectedValue();
-            CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
-            return getAuthTagLen(cipherDev.getSelectedValue()) > selectedPos;
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((AuthTagBitmaskDerivation authTagBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+            int selectedBitmaskBytePosition = authTagBitmaskDerivation.getSelectedValue();
+            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
+            
+            return getAuthTagLen(selectedCipherSuite) > selectedBitmaskBytePosition;
         }));
     }
 

@@ -29,7 +29,7 @@ public class TlsVersionAnnotationMethod {
 
     @BeforeAll
     static void setup() {
-        TestContext testContext = new TestContext();
+        TestContext testContext = TestContext.getInstance();
         testContext.getConfig().parse(new String[]{ "client", "-port", "443" });
         TestSiteReport report = new TestSiteReport("");
 

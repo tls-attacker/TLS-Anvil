@@ -36,7 +36,7 @@ public class TestRunnerTest {
 
     @Test
     public void test_clientPreparation() {
-        TestContext context = new TestContext();
+        TestContext context = TestContext.getInstance();
 
         URL scriptPath = TestRunnerTest.class.getClassLoader().getResource("trigger.sh");
         String path = scriptPath.toString().replaceAll("^file:", "");

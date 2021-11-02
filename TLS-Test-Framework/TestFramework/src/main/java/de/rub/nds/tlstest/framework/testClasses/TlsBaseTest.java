@@ -10,6 +10,9 @@
 package de.rub.nds.tlstest.framework.testClasses;
 
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
+import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
+import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
@@ -23,6 +26,7 @@ import de.rub.nds.tlstest.framework.junitExtensions.ValueConstraintsConditionExt
 import de.rub.nds.tlstest.framework.junitExtensions.WorkflowRunnerResolver;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
+import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,6 +70,13 @@ public abstract class TlsBaseTest {
         runner.setPreparedConfig(config);
         runner.setDerivationContainer(derivationContainer);
         return config;
+    }
+    
+    public void adjustPreSharedKeyModes(Config config) {
+        if(context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS13_PSK_DHE) == TestResult.TRUE &&
+                context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS13_PSK) == TestResult.FALSE) {
+            config.setPSKKeyExchangeModes(Arrays.asList(PskKeyExchangeMode.PSK_DHE_KE));
+        }
     }
     
     public TlsBaseTest() {

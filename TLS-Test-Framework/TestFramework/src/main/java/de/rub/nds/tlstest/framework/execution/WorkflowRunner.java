@@ -338,6 +338,11 @@ public class WorkflowRunner {
                 if(receiveAction.getExpectedMessages().stream().anyMatch(message -> message instanceof FinishedMessage)) {
                     mayReceiveNewSessionTicketFromNow = true;
                 }
+                
+                //set explicitly expected new session tickets as optional to
+                //allow early NewSessionTickets sent with Fin
+                receiveAction.getExpectedMessages().stream().filter(message -> message instanceof NewSessionTicketMessage)
+                        .forEach(newSessionTicket -> newSessionTicket.setRequired(false));
                 if(mayReceiveNewSessionTicketFromNow) {
                     receiveAction.getActionOptions().add(ActionOption.IGNORE_UNEXPECTED_NEW_SESSION_TICKETS);
                 }

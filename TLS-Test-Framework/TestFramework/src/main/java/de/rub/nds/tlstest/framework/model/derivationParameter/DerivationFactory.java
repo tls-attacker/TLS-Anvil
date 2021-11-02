@@ -104,6 +104,8 @@ public class DerivationFactory {
                 return new ProtocolMessageTypeDerivation();
             case FFDHE_SHARE_OUT_OF_BOUNDS:
                 return new ShareOutOfBoundsDerivation();
+            case MAX_FRAGMENT_LENGTH:
+                return new MaxFragmentLengthDerivation();
             default:
                 LOGGER.error("Derivation Type {} not implemented", type);
                 throw new UnsupportedOperationException("Derivation Type not implemented");

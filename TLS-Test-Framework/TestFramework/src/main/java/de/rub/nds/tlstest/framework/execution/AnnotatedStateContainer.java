@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceSerializer;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestResult;
@@ -296,6 +297,19 @@ public class  AnnotatedStateContainer {
         this.hasVaryingAdditionalResultInformation = hasVaryingAdditionalResultInformation;
     }
 
+    private String getSerializationPath() {
+        String method = testMethodConfig.getCompleteMethodName();
+        // truncate the class name to shorten the path length
+        // basically throw away the common package, i.e. everything before "server" or "client"
+        int startIndex = Math.max(method.indexOf("server"), method.indexOf("client"));
+        startIndex = Math.max(startIndex, 0);
+        method = method.substring(startIndex);
+
+        String[] folderComponents = method.split("\\.");
+
+        return Paths.get(TestContext.getInstance().getConfig().getOutputFolder(), folderComponents).toString();
+    }
+
     private void serialize() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
@@ -304,26 +318,22 @@ public class  AnnotatedStateContainer {
                 .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
-        String method = testMethodConfig.getClassName() + "." + testMethodConfig.getMethodName();
-        String targetFolder = Paths.get(TestContext.getInstance().getConfig().getOutputFolder(), method).toString();
         if (TestContext.getInstance().getConfig().isPrettyPrintJSON()) {
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
         }
 
+        String targetFolder = getSerializationPath();
+
         String containerResultPath = Paths.get(targetFolder, "_containerResult.json").toString();
         File f = new File(containerResultPath);
         StringBuilder errorMsg = new StringBuilder();
-        f.getParentFile().mkdirs();
-        try {
-            f.createNewFile();
-        } catch (Exception ignored) { }
-
+        Utils.createEmptyFile(containerResultPath);
 
         try {
-            mapper.writeValue(new File(containerResultPath), this);
+            mapper.writeValue(f, this);
         } catch (Exception e) {
-            LOGGER.error("Failed to serialize AnnotatedStateContainer ({})", method, e);
-            errorMsg.append("Failed to serialize AnnotatedStateContainer");
+            LOGGER.error("Failed to serialize AnnotatedStateContainer ({})", testMethodConfig.getCompleteMethodName(), e);
+            errorMsg.append("Failed to serialize AnnotatedStateContainer\n");
             errorMsg.append(ExecptionPrinter.stacktraceToString(e));
         }
         
@@ -338,7 +348,7 @@ public class  AnnotatedStateContainer {
                         String serialized = WorkflowTraceSerializer.write(s.getWorkflowTrace());
                         zipOut.write(serialized.getBytes(StandardCharsets.UTF_8));
                     } catch (Exception e) {
-                        LOGGER.error("Failed to serialize State ({}, {})", method, s.getUuid(), e);
+                        LOGGER.error("Failed to serialize State ({}, {})", testMethodConfig.getCompleteMethodName(), s.getUuid(), e);
                         errorMsg.append("\nFailed to serialize WorkflowTraces");
                         errorMsg.append(ExecptionPrinter.stacktraceToString(e));
                     }

@@ -1,6 +1,8 @@
 package de.rub.nds.tlstest.framework.utils;
 
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
+
+import java.io.File;
 import java.lang.reflect.Method;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -47,6 +49,14 @@ public class Utils {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss'Z'");
         df.setTimeZone(tz);
         return df.format(date);
+    }
+
+    public static void createEmptyFile(String path) {
+        File f = new File(path);
+        f.getParentFile().mkdirs();
+        try {
+            f.createNewFile();
+        } catch (Exception ignored) {}
     }
 
 }

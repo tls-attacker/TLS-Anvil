@@ -146,4 +146,8 @@ public class TestMethodConfig {
     public void setTlsVersion(TlsVersion tlsVersion) {
         this.tlsVersion = tlsVersion;
     }
+
+    public String getCompleteMethodName() {
+        return this.className + "." + this.methodName;
+    }
 }

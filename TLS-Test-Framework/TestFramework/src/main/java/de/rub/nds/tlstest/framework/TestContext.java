@@ -14,6 +14,7 @@ import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.TestRunner;
+import de.rub.nds.tlstest.framework.reporting.ScoreContainer;
 import me.tongfei.progressbar.ProgressBar;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,6 +49,8 @@ public class TestContext {
     private long testsFailed = 0;
     private long testsSucceeded = 0;
     private long performedHandshakes = 0;
+
+    private ScoreContainer scoreContainer = ScoreContainer.forEveryCategory();
 
     private ProgressBar proggressBar = null;
     private final Date startTime = new Date();
@@ -125,6 +128,8 @@ public class TestContext {
 
     synchronized public void testFinished(String uniqueId) {
         finishedTests.put(uniqueId, true);
+        this.scoreContainer.mergeWithContainer(testResults.get(uniqueId).getScoreContainer());
+
         testResults.remove(uniqueId);
 
         testsDone += 1;
@@ -209,5 +214,9 @@ public class TestContext {
 
     public boolean testIsFinished(String uniqueId) {
         return finishedTests.containsKey(uniqueId);
+    }
+
+    public ScoreContainer getScoreContainer() {
+        return scoreContainer;
     }
 }

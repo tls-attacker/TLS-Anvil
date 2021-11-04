@@ -67,6 +67,7 @@ public class ExecutionListener implements TestExecutionListener {
         s.setTestsDisabled(TestContext.getInstance().getTestsDisabled());
         s.setTestsFailed(TestContext.getInstance().getTestsFailed());
         s.setTestsSucceeded(TestContext.getInstance().getTestsSucceeded());
+        s.setScoreContainer(TestContext.getInstance().getScoreContainer());
 
         try {
             ObjectMapper mapper = new ObjectMapper();

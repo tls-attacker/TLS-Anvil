@@ -88,6 +88,13 @@ public class ScoreContainer {
         }
     }
 
+    public void mergeWithContainer(ScoreContainer container) {
+        for (TestCategory i : container.getScoreMap().keySet()) {
+            this.getScoreMap().get(i).setReached(this.getScoreMap().get(i).getReached() + container.getScoreMap().get(i).getReached());
+            this.getScoreMap().get(i).setTotal(this.getScoreMap().get(i).getTotal() + container.getScoreMap().get(i).getTotal());
+        }
+    }
+
     public void updateStatusForCategory(TestCategory category, TestResult status) {
         if (scoreMap.containsKey(category)) {
             scoreMap.get(category).updateForTestResult(status);

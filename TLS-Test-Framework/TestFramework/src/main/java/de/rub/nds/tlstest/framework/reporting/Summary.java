@@ -25,6 +25,8 @@ public class Summary {
     private long testsDisabled;
     @JsonProperty
     private long testsFailed;
+    @JsonProperty
+    private ScoreContainer scoreContainer;
 
     public long getElapsedTime() {
         return elapsedTime;
@@ -88,5 +90,13 @@ public class Summary {
 
     public void setTestEndpointType(TestEndpointType testEndpointType) {
         this.testEndpointType = testEndpointType;
+    }
+
+    public ScoreContainer getScoreContainer() {
+        return scoreContainer;
+    }
+
+    public void setScoreContainer(ScoreContainer scoreContainer) {
+        this.scoreContainer = scoreContainer;
     }
 }

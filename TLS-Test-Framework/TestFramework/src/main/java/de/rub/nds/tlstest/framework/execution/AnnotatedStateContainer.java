@@ -306,6 +306,10 @@ public class  AnnotatedStateContainer {
 
         String method = testMethodConfig.getClassName() + "." + testMethodConfig.getMethodName();
         String targetFolder = Paths.get(TestContext.getInstance().getConfig().getOutputFolder(), method).toString();
+        if (TestContext.getInstance().getConfig().isPrettyPrintJSON()) {
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        }
+
         String containerResultPath = Paths.get(targetFolder, "_containerResult.json").toString();
         File f = new File(containerResultPath);
         StringBuilder errorMsg = new StringBuilder();

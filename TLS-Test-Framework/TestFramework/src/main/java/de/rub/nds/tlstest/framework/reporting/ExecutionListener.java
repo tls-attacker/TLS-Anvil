@@ -11,6 +11,7 @@ package de.rub.nds.tlstest.framework.reporting;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import de.rub.nds.tlstest.framework.TestContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -74,6 +75,10 @@ public class ExecutionListener implements TestExecutionListener {
                     .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
                     .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                     .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+
+            if (TestContext.getInstance().getConfig().isPrettyPrintJSON()) {
+                mapper.enable(SerializationFeature.INDENT_OUTPUT);
+            }
 
             String summaryPath = Paths.get(TestContext.getInstance().getConfig().getOutputFolder(), "summary.json").toString();
             File f = new File(summaryPath);

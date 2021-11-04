@@ -96,6 +96,9 @@ public class TestConfig extends TLSDelegateConfig {
     
     @Parameter(names = "-connectionTimeout", description = "The default timeout for TLS sessions in ms. (Default value: 1000)")
     private int connectionTimeout = 1000;
+
+    @Parameter(names = "-prettyPrintJSON", description = "Pretty print json output")
+    private boolean prettyPrintJSON = false;
     
     //we might want to turn these into CLI parameters in the future
     private boolean expectTls13Alerts = false;
@@ -490,5 +493,13 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setExportTraces(boolean exportTraces) {
         this.exportTraces = exportTraces;
+    }
+
+    public boolean isPrettyPrintJSON() {
+        return prettyPrintJSON;
+    }
+
+    public void setPrettyPrintJSON(boolean prettyPrintJSON) {
+        this.prettyPrintJSON = prettyPrintJSON;
     }
 }

@@ -52,6 +52,10 @@
             <AppenderRef ref="FileTestsuite"/>
         </Logger>
 
+        <Logger name="org.junit.jupiter" level="warn">
+            <AppenderRef ref="FileTestsuite_warn"/>
+        </Logger>
+
 
         <Logger name="Direct" level="trace" additivity="false">
             <AppenderRef ref="Console"/>

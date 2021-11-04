@@ -22,6 +22,10 @@ public class Main {
     private static final Logger LOGGER = LogManager.getLogger();
     private static boolean finished = false;
 
+    static {
+        System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+    }
+
     public static void main(String[] args) {
 
         TestContext testContext = TestContext.getInstance();

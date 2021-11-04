@@ -49,6 +49,11 @@
             <version>2.14.0</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jul</artifactId>
+            <version>2.14.0</version>
+        </dependency>
+        <dependency>
             <artifactId>TLS-Server-Scanner</artifactId>
             <groupId>de.rub.nds.tlsscanner</groupId>
             <version>${tlsscanner.version}</version>

@@ -17,7 +17,6 @@
     "jquery": "^3.6.0",
     "moment": "^2.29.1",
     "mongodb": "^3.6.4",
-    "mongodb-client-encryption": "^1.2.1",
     "mongoose": "^5.11.16",
     "mongoose-gridfs": "^1.2.48",
     "pug": "^3.0.2",

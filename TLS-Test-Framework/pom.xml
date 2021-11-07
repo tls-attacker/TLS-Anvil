@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>de.rub.nds.tlstest</groupId>
+    <artifactId>TLS-Test-Framework-Aggregator</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>TLS-Test-Framework-Aggregator</name>
+
+    <modules>
+        <module>coffee4j</module>
+        <module>TestFramework</module>
+    </modules>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>de.rub.nds.tlstest</groupId>
+            <artifactId>TLS-Test-Framework</artifactId>
+            <version>2.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+
+        </plugins>
+
+    </build>
+
+</project>

@@ -301,9 +301,8 @@ public class  AnnotatedStateContainer {
         String method = testMethodConfig.getCompleteMethodName();
         // truncate the class name to shorten the path length
         // basically throw away the common package, i.e. everything before "server" or "client"
-        int startIndex = Math.max(method.indexOf("server"), method.indexOf("client"));
-        startIndex = Math.max(startIndex, 0);
-        method = method.substring(startIndex);
+        String pName = "de.rub.nds.tlstest.suite.tests.";
+        method = method.replace(pName, "");
 
         String[] folderComponents = method.split("\\.");
 

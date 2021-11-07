@@ -14,6 +14,8 @@ type Config struct {
 	PreprocessingThreads int
 	BasePath string
 	Suffix string
+	KeyFileName string
+	PcapFileName string
 	LogLevel logrus.Level
 }
 
@@ -33,6 +35,8 @@ func (c *Config) parse() {
 	flag.StringVar(&conf.DatabaseUrl, "db", "localhost:27017", "URL where the database is available at")
 	flag.StringVar(&conf.BasePath, "path", "", "Scans path recurively for test results")
 	flag.StringVar(&conf.Suffix, "suffix", "", "Append specified string to identifier")
+	flag.StringVar(&conf.KeyFileName, "keyfilename", "keyfile.log", "Name of the keyfile")
+	flag.StringVar(&conf.PcapFileName, "pcapfilename", "dump.pcap", "Name of the pcap dump file")
 	flag.IntVar(&conf.PreprocessingThreads, "n", 5, "Preprocessing threads")
 	debug := flag.Bool("v", false, "Set log level to debug")
 	trace := flag.Bool("vv", false, "Set log level to trace")

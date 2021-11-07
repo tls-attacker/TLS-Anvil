@@ -23,8 +23,9 @@ const (
 )
 
 type Database interface {
-	AddContainer(document models.Container)
+	AddContainer(document models.Summary)
 	AddResults(documents []models.Result)
+	AddResult(result models.Result)
 	AddStates(documents []models.State)
 	Insert(col string, doc interface{})
 	InsertMany(col string, doc []interface{})
@@ -91,6 +92,14 @@ func (d *database) AddResults(results []models.Result) {
 	}
 }
 
+func (d *database) AddResult(result models.Result) {
+	result.UpdatedAt = time.Now()
+	result.CreatedAt = time.Now()
+	if _, err := d.collections.results.InsertOne(d.context, result); err != nil {
+		Logger.Error(err)
+	}
+}
+
 func (d *database) AddStates(states []models.State) {
 	documents := make([]interface{}, len(states))
 	for i, _ := range states {
@@ -103,7 +112,7 @@ func (d *database) AddStates(states []models.State) {
 	}
 }
 
-func (d *database) AddContainer(document models.Container) {
+func (d *database) AddContainer(document models.Summary) {
 	document.CreatedAt = time.Now()
 	document.UpdatedAt = time.Now()
 	if _, err := d.collections.containers.InsertOne(d.context, document); err != nil {

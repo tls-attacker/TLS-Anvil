@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/pkg/errors"
 	"log"
 	_ "net/http/pprof"
 	"os"
@@ -14,7 +16,7 @@ import (
 	. "uploader/src/logging"
 )
 
-var workers chan int
+var workersChannel chan int
 
 func openFile(p string, target **os.File) error {
 	c, err := os.Open(p)
@@ -36,10 +38,10 @@ func main() {
 	//}()
 
 	conf := config.GetConfig()
-	workers = make(chan int, conf.PreprocessingThreads)
+	workersChannel = make(chan int, conf.PreprocessingThreads)
 
 	for i := 1; i <= conf.PreprocessingThreads; i++ {
-		workers <- i
+		workersChannel <- i
 	}
 
 	fpath := conf.BasePath
@@ -58,57 +60,88 @@ func main() {
 		fpath = filepath.Dir(fpath)
 	}
 
-	files := make([]string, 0)
+	summaryFiles := make([]string, 0)
+	containerResultFiles := make(map[string][]string)
+
 	filepath.Walk(fpath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			Logger.Fatalln(err)
 		}
 
-		if strings.Contains(path, "/testResults.json") {
-			files = append(files, path)
+		if strings.Contains(path, "/summary.json") {
+			summaryFiles = append(summaryFiles, path)
+			containerResultFiles[path] = make([]string, 0)
+			filepath.Walk(filepath.Dir(path), func(path2 string, info2 os.FileInfo, err2 error) error {
+				if err2 != nil {
+					Logger.Fatalln(err2)
+				}
+
+				if strings.Contains(path2, "/_containerResult.json") {
+					containerResultFiles[path] = append(containerResultFiles[path], path2)
+				}
+
+				if strings.Contains(path2, "/_error.txt") {
+					Logger.Warn(fmt.Sprintf("There were some errors %s", path2))
+				}
+
+				return nil
+			})
 		}
 
 		return nil
 	})
 
 	wg := sync.WaitGroup{}
-	u := uploader.NewUploader(len(files))
-	for _, v := range files {
-		workerId := <- workers
+	u := uploader.NewUploader(len(summaryFiles))
+	for _, summaryFile := range summaryFiles {
+		workerId := <-workersChannel
 
 		Logger.Debugf("Use preprocessing worker %d", workerId)
 
-		dir := path.Dir(v)
+		dir := path.Dir(summaryFile)
 		uploadData := &uploader.UploadData{}
+		uploadData.ContainerResultFiles = make([]string, len(containerResultFiles[summaryFile]))
 
-		if err = openFile(v, &uploadData.JsonFile); err != nil {
+		for i, containerFile := range containerResultFiles[summaryFile] {
+			uploadData.ContainerResultFiles[i] = containerFile
+		}
+
+		uploadData.JsonFile = summaryFile
+		uploadData.KeylogFile = filepath.Join(dir, conf.KeyFileName)
+		uploadData.PcapFile = filepath.Join(dir, conf.PcapFileName)
+
+		if err := uploader.ParseJson(summaryFile, &uploadData.Summary); err != nil {
+			Logger.Errorf(fmt.Sprintf("Error while parsing %s", summaryFile))
 			continue
 		}
 
-		if err = openFile(filepath.Join(dir, "keyfile.log"), &uploadData.KeylogFile); err != nil {
-			continue
+		uploadData.Summary.Identifier += identSuffix
+
+		fileMissing := false
+		if _, err := os.Stat(uploadData.KeylogFile); errors.Is(err, os.ErrNotExist) {
+			Logger.Errorf(fmt.Sprintf("Keylogfile does not exist %s", uploadData.KeylogFile))
+			fileMissing = true
 		}
 
-		if err = openFile(filepath.Join(dir, "dump.pcap"), &uploadData.PcapFile); err != nil {
-			continue
+		if _, err := os.Stat(uploadData.PcapFile); errors.Is(err, os.ErrNotExist) {
+			Logger.Errorf(fmt.Sprintf("Pcap file does not exist %s", uploadData.PcapFile))
+			fileMissing = true
 		}
 
-		uploadData.Identifier = path.Base(dir) + identSuffix
+		if fileMissing {
+			continue
+		}
 
 		wg.Add(1)
 		go func(data *uploader.UploadData, group *sync.WaitGroup, worker int) {
 			u.Upload(data)
 			debug.FreeOSMemory()
 			group.Done()
-			workers <- worker
+			workersChannel <- worker
 		}(uploadData, &wg, workerId)
 
 	}
 
 	wg.Wait()
-
-	//select {
-	//
-	//}
 
 }

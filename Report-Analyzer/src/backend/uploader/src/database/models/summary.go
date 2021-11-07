@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Container struct {
+type Summary struct {
 	ID                            primitive.ObjectID   `bson:"_id"`
 	PcapStorageId                 primitive.ObjectID   `bson:"PcapStorageId"`
 	KeylogfileStorageId           primitive.ObjectID   `bson:"KeylogfileStorageId"`
@@ -22,31 +22,6 @@ type Container struct {
 	StatesCount                   int                  `bson:"StatesCount"`
 	Score                         map[string]Score     `bson:"Score"`
 	TestResults                   []primitive.ObjectID `bson:"TestResults"  json:"-"`
-	TestResultsStructs            []Result             `bson:"-"            json:"TestResults"`
-	TestClasses                   []Container          `bson:"-"            json:"TestClasses"`
-	CreatedAt                     time.Time            `bson:"createdAt"`
-	UpdatedAt                     time.Time            `bson:"updatedAt"`
-}
-
-func (c *Container) getResults() []Result {
-	results := make([]Result, 0)
-
-	if c.TestResultsStructs != nil {
-		results = append(results, c.TestResultsStructs...)
-	}
-
-	containers := c.TestClasses
-	if containers != nil {
-		for _, v := range containers {
-			results = append(results, v.getResults()...)
-		}
-	}
-
-	return results
-}
-
-func (c *Container) Flatten() {
-	results := c.getResults()
-	c.TestResultsStructs = results
-	c.TestClasses = nil
+	CreatedAt                     time.Time            `bson:"createdAt"  json:"-"`
+	UpdatedAt                     time.Time            `bson:"updatedAt" json:"-"`
 }

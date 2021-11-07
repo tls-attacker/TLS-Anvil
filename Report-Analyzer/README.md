@@ -8,9 +8,12 @@ docker-compose build
 docker-compose up -d
 ```
 
-The web application is deployed available at [http://localhost:5000/](http://localhost:5000/). To get direct access to the MongoDB database where the test reports are stored, either use [http://localhost:8181/](http://localhost:8181/) or a MongoDB client of your choice connecting to `localhost:2701`.
+The web application is available at [http://localhost:5000/](http://localhost:5000/). To get direct access to the MongoDB database where the test reports are stored, either use [http://localhost:8181/](http://localhost:8181/) or a MongoDB client of your choice connecting to `localhost:2701`.
 
 For changing the URL where the application is deployed, the `docker-compose.yml` file has to be edited. The `app` container specifies a `REST_API_BASE_URL` variable, which must be changed.
+
+## Uploading Reports
+See `/src/backend/uploader/README.md`
 
 
 ## Development Setup

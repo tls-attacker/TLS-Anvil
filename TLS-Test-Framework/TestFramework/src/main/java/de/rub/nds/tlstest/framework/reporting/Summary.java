@@ -1,6 +1,7 @@
 package de.rub.nds.tlstest.framework.reporting;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 
 import java.util.Date;
@@ -8,24 +9,24 @@ import java.util.Date;
 
 
 public class Summary {
-    @JsonProperty
+    @JsonProperty("ElapsedTime")
     private long elapsedTime;
-    @JsonProperty
+    @JsonProperty("Identifier")
     private String identifier;
-    @JsonProperty
+    @JsonProperty("StatesCount")
     private long handshakes;
-    @JsonProperty
+    @JsonProperty("Date")
     private Date date;
-    @JsonProperty
+    @JsonProperty("TestEndpointType")
     private TestEndpointType testEndpointType;
 
-    @JsonProperty
+    @JsonProperty("SucceededTests")
     private long testsSucceeded;
-    @JsonProperty
+    @JsonProperty("DisabledTests")
     private long testsDisabled;
-    @JsonProperty
+    @JsonProperty("FailedTests")
     private long testsFailed;
-    @JsonProperty
+    @JsonUnwrapped
     private ScoreContainer scoreContainer;
 
     public long getElapsedTime() {

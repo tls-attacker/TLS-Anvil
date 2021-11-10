@@ -13,6 +13,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.ServerDelegate;
+import de.rub.nds.tlsattacker.core.state.State;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,6 +22,8 @@ import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
+import java.util.logging.Level;
 
 
 @Parameters(commandDescription = "Test a client implementation, thus start TLS-Attacker in server mode")
@@ -31,7 +34,7 @@ public class TestClientDelegate extends ServerDelegate {
             "This command takes a variable number of arguments.", variableArity = true)
     protected List<String> triggerScriptCommand = new ArrayList<>();
 
-    private Callable<Integer> triggerScript;
+    private Function<State, Integer>  triggerScript;
     private ServerSocket serverSocket;
 
     @Override
@@ -39,11 +42,15 @@ public class TestClientDelegate extends ServerDelegate {
         super.applyDelegate(config);
 
         if (this.triggerScriptCommand.size() > 0) {
-            triggerScript = () -> {
-                ProcessBuilder processBuilder = new ProcessBuilder(triggerScriptCommand);
-                Process p = processBuilder.start();
-                p.waitFor();
-                return p.exitValue();
+            triggerScript = (State state) -> {
+                try {
+                    ProcessBuilder processBuilder = new ProcessBuilder(triggerScriptCommand);
+                    Process p = processBuilder.start();
+                    return 0;
+                } catch (IOException ex) {
+                    LOGGER.error(ex);
+                    return 1;
+                }
             };
         }
 
@@ -56,15 +63,15 @@ public class TestClientDelegate extends ServerDelegate {
     }
 
 
-    public int executeTriggerScript() throws Exception {
-        return this.triggerScript.call();
+    public int executeTriggerScript(State state) throws Exception {
+        return this.triggerScript.apply(state);
     }
 
-    public Callable<Integer> getTriggerScript() {
+    public Function<State, Integer> getTriggerScript() {
         return triggerScript;
     }
 
-    public void setTriggerScript(Callable<Integer> triggerScript) {
+    public void setTriggerScript(Function<State, Integer> triggerScript) {
         this.triggerScript = triggerScript;
     }
 

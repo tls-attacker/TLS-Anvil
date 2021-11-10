@@ -24,6 +24,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.TlsMessage;
+import de.rub.nds.tlsattacker.core.record.layer.RecordLayerFactory;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
@@ -36,16 +37,17 @@ import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsattacker.transport.TransportHandlerType;
+import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.KeyX;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
+import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -55,6 +57,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -126,14 +129,28 @@ public class WorkflowRunner {
             if(TestContext.getInstance().getServerHandshakesSinceRestart() == TestContext.getInstance().getConfig().getRestartServerAfter()
                     && TestContext.getInstance().getConfig().getTimeoutActionScript() != null) {
                 LOGGER.info("Scheduling server restart with task");
-                task.setBeforeConnectCallback(TestContext.getInstance().getConfig().getTimeoutActionScript());
+                task.setBeforeTransportPreInitCallback((State state) -> {
+                    try {
+                        return TestContext.getInstance().getConfig().getTimeoutActionScript().call();
+                    } catch (Exception ex) {
+                        LOGGER.error(ex);
+                        return 1;
+                    }
+                });
                 TestContext.getInstance().resetServerHandshakesSinceRestart();
             }
             context.getStateExecutor().bulkExecuteTasks(task);
         } else {
-            StateExecutionServerTask task = new StateExecutionServerTask(annotatedState.getState(), context.getConfig().getTestClientDelegate().getServerSocket(), 2);
-            task.setBeforeAcceptCallback(context.getConfig().getTestClientDelegate().getTriggerScript());
-            context.getStateExecutor().bulkExecuteTasks(task);
+            try {
+                annotatedState.getState().getTlsContext().setTransportHandler(new ServerTcpTransportHandler(context.getConfig().getConnectionTimeout(), context.getConfig().getConnectionTimeout(), context.getConfig().getTestClientDelegate().getServerSocket()));
+                annotatedState.getState().getTlsContext().setRecordLayer(RecordLayerFactory.getRecordLayer(annotatedState.getState().getTlsContext().getRecordLayerType(), annotatedState.getState().getTlsContext()));
+                StateExecutionTask task = new StateExecutionTask(annotatedState.getState(), 2);
+                
+                task.setBeforeTransportInitCallback(context.getConfig().getTestClientDelegate().getTriggerScript());
+                context.getStateExecutor().bulkExecuteTasks(task);
+            } catch (IOException ex) {
+                throw new RuntimeException("Failed to set TransportHandler");
+            }
         }
 
         return annotatedState;

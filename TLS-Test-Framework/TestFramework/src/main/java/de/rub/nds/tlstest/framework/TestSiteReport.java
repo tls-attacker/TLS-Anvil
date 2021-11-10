@@ -35,7 +35,7 @@ public class TestSiteReport extends SiteReport {
     private ClientHelloMessage receivedClientHello;
 
     public TestSiteReport(String host) {
-        super(host);
+        super(host, 4433);
     }
 
     private TestSiteReport() {

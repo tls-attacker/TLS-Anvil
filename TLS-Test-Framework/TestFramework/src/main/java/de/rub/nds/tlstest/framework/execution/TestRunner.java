@@ -36,6 +36,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionM
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.record.layer.RecordLayerFactory;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -45,8 +46,10 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionServerTask;
+import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
+import de.rub.nds.tlsattacker.transport.Connection;
+import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlsscanner.serverscanner.TlsScanner;
 import de.rub.nds.tlsscanner.serverscanner.config.ScannerConfig;
 import de.rub.nds.tlsscanner.serverscanner.constants.ProbeType;
@@ -79,6 +82,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
@@ -170,7 +174,8 @@ public class TestRunner {
                 while (!targetIsReady) {
                     LOGGER.warn("Waiting for the client to get ready...");
                     try {
-                        testConfig.getTestClientDelegate().executeTriggerScript();
+                        State state = new State();
+                        testConfig.getTestClientDelegate().executeTriggerScript(state);
                     } catch (Exception ignored) {}
 
                     try {
@@ -286,11 +291,12 @@ public class TestRunner {
             try {
                 WorkflowConfigurationFactory configurationFactory = new WorkflowConfigurationFactory(config);
                 WorkflowTrace trace = configurationFactory.createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER);
-                State s = new State(config, trace);
-                StateExecutionServerTask task = new StateExecutionServerTask(s, testConfig.getTestClientDelegate().getServerSocket(), 2);
-                task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getTriggerScript());
+                State state = new State(config, trace);
+                prepareStateForConnection(state);
+                StateExecutionTask task = new StateExecutionTask(state, 2);
+                task.setBeforeTransportInitCallback(testConfig.getTestClientDelegate().getTriggerScript());
                 tasks.add(task);
-                states.add(s);
+                states.add(state);
             }
             catch(Exception ignored) {
 
@@ -342,8 +348,16 @@ public class TestRunner {
             keyShareStates = buildClientKeyShareProbeStates(clientHello);
             if(!keyShareStates.isEmpty()) {
                 for(State state: keyShareStates) {
-                    StateExecutionServerTask task = new StateExecutionServerTask(state, testConfig.getTestClientDelegate().getServerSocket(), 2);
-                    task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getTriggerScript());
+                    StateExecutionTask task = new StateExecutionTask(state, 2);
+                    Connection connection = state.getConfig().getDefaultServerConnection();
+                    try {
+                        state.getTlsContext().setTransportHandler(new ServerTcpTransportHandler(testConfig.getConnectionTimeout(), testConfig.getConnectionTimeout(), testConfig.getTestClientDelegate().getServerSocket()));
+                    } catch (IOException ex) {
+                        throw new RuntimeException("Failed to set TransportHandler");
+                    }
+                    state.getTlsContext().setRecordLayer(
+                    RecordLayerFactory.getRecordLayer(state.getTlsContext().getRecordLayerType(), state.getTlsContext()));
+                    task.setBeforeTransportInitCallback(testConfig.getTestClientDelegate().getTriggerScript());
                     keyShareTasks.add(task);
                 }
                 executor.bulkExecuteTasks(keyShareTasks);
@@ -624,8 +638,9 @@ public class TestRunner {
         config.setDefaultMaxRecordData(50);
 
         State state = new State(config, new WorkflowConfigurationFactory(config).createWorkflowTrace(WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER));
-        StateExecutionServerTask task = new StateExecutionServerTask(state, testConfig.getTestClientDelegate().getServerSocket(), 2);
-        task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getTriggerScript());
+        prepareStateForConnection(state);
+        StateExecutionTask task = new StateExecutionTask(state, 2);
+        task.setBeforeTransportInitCallback(testConfig.getTestClientDelegate().getTriggerScript());
         executor.bulkExecuteTasks(task);
         return state.getWorkflowTrace().executedAsPlanned();
     }
@@ -688,8 +703,9 @@ public class TestRunner {
     private List<TlsTask> buildStateExecutionServerTasksFromStates(List<State> states) {
         List<TlsTask> testTasks = new LinkedList<>();
         states.forEach(state -> {
-            StateExecutionServerTask task = new StateExecutionServerTask(state, testConfig.getTestClientDelegate().getServerSocket(), 2);
-            task.setBeforeAcceptCallback(testConfig.getTestClientDelegate().getTriggerScript());
+            prepareStateForConnection(state);
+            StateExecutionTask task = new StateExecutionTask(state, 2);
+            task.setBeforeTransportInitCallback(testConfig.getTestClientDelegate().getTriggerScript());
             testTasks.add(task);
         });
         return testTasks;
@@ -703,6 +719,16 @@ public class TestRunner {
         }
         if(TestContext.getInstance().getSiteReport().getSupportedTls13CipherSuites() != null) {
             LOGGER.info("Supported TLS 1.3 CipherSuites: " + TestContext.getInstance().getSiteReport().getSupportedTls13CipherSuites().stream().map(CipherSuite::toString).collect(Collectors.joining(",")));
+        }
+    }
+    
+    private void prepareStateForConnection(State state) {
+        try {
+            state.getTlsContext().setTransportHandler(new ServerTcpTransportHandler(testConfig.getConnectionTimeout(), testConfig.getConnectionTimeout(), testConfig.getTestClientDelegate().getServerSocket()));
+            state.getTlsContext().setRecordLayer(
+                    RecordLayerFactory.getRecordLayer(state.getTlsContext().getRecordLayerType(), state.getTlsContext()));
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to set TransportHandlers");
         }
     }
 }

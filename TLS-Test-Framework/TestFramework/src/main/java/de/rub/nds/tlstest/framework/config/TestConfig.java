@@ -19,6 +19,7 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsscanner.serverscanner.report.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
@@ -26,6 +27,7 @@ import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.utils.Utils;
+import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,6 +41,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 
@@ -198,12 +202,12 @@ public class TestConfig extends TLSDelegateConfig {
 
             if (timeoutActionCommand.size() > 0) {
                 timeoutActionScript = () -> {
-                    LOGGER.debug("Timeout action executed");
-                    ProcessBuilder processBuilder = new ProcessBuilder(timeoutActionCommand);
-                    Process p = processBuilder.start();
-                    p.waitFor();
-                    Thread.sleep(1500);
-                    return p.exitValue();
+                        LOGGER.debug("Timeout action executed");
+                        ProcessBuilder processBuilder = new ProcessBuilder(timeoutActionCommand);
+                        Process p = processBuilder.start();
+                        p.waitFor();
+                        Thread.sleep(1500);
+                        return p.exitValue();
                 };
             }
         } catch (Exception e) {

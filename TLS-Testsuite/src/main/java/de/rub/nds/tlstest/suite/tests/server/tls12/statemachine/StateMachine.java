@@ -200,7 +200,6 @@ public class StateMachine extends Tls12Test {
         SendAction sendActionSecondKeyExchange = new SendAction();
         workflowFactory.addClientKeyExchangeMessage(sendActionSecondKeyExchange.getMessages());
         workflowTrace.addTlsAction(sendActionSecondKeyExchange);
-        workflowTrace.addTlsAction(new ActivateEncryptionAction(false));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
@@ -290,7 +289,6 @@ public class StateMachine extends Tls12Test {
         ChangeCipherSpecMessage secondChangeCipherSpec = new ChangeCipherSpecMessage();
         secondChangeCipherSpec.setAdjustContext(Modifiable.explicit(false));
         workflowTrace.addTlsAction(new SendAction(secondChangeCipherSpec));
-        workflowTrace.addTlsAction(new ActivateEncryptionAction(false));
         //for stream ciphers, the state must be restored as a decryption already took place in this test
         workflowTrace.addTlsAction(new ResetRecordCipherListsAction(2, 2));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));

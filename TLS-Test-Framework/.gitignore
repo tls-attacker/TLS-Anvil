@@ -13,3 +13,8 @@ buildNumber.properties
 .idea/
 apps/
 .DS_Store
+*.classpath
+*.project
+*.settings
+*.factorypath
+*.code-workspace

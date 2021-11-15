@@ -9,7 +9,7 @@
  */
 package de.rub.nds.tlstest.framework.model;
 
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
@@ -44,7 +44,7 @@ public class ParameterModelFactory {
     public static List<DerivationType> getDerivationsForScope(DerivationScope derivationScope) {
         List<DerivationType> resultingDerivations = new LinkedList<>();
         List<DerivationType> derivationsOfModel = getDerivationsOfModel(derivationScope);
-        for (DerivationType derivationType : DerivationType.values()) {
+        for (DerivationType derivationType : BasicDerivationType.values()) {
             if (!isBeyondScope(derivationType, derivationsOfModel, derivationScope.getScopeLimits(), derivationScope.getScopeExtensions())) {
                 resultingDerivations.add(derivationType);
             }
@@ -58,31 +58,32 @@ public class ParameterModelFactory {
     }
 
     private static List<DerivationType> getDerivationsOfModel(DerivationScope derivationScope, ModelType baseModel) {
-        LinkedList<DerivationType> derivationsOfModel = new LinkedList<>();
+        /*LinkedList<DerivationType> derivationsOfModel = new LinkedList<>();
         switch (baseModel) {
             case EMPTY:
                 break;
             case LENGTHFIELD:
             case CERTIFICATE:
                 if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
-                    derivationsOfModel.add(DerivationType.CERTIFICATE);
-                    derivationsOfModel.add(DerivationType.SIG_HASH_ALGORIHTM);
+                    derivationsOfModel.add(BasicDerivationType.CERTIFICATE);
+                    derivationsOfModel.add(BasicDerivationType.SIG_HASH_ALGORIHTM);
                 }
             case GENERIC:
             default:
                 derivationsOfModel.addAll(getBasicModelDerivations(derivationScope));
         }
-        return derivationsOfModel;
+        return derivationsOfModel;*/
+        return DerivationManager.getInstance().getDerivationsOfModel(derivationScope, baseModel);
     }
 
     private static Parameter.Builder[] getModelParameters(List<DerivationType> derivationTypes, TestContext testContext, DerivationScope derivationScope) {
         List<Parameter.Builder> parameterBuilders = new LinkedList<>();
         for (DerivationType derivationType : derivationTypes) {
-            DerivationParameter paramDerivation = DerivationFactory.getInstance(derivationType);
+            DerivationParameter paramDerivation = DerivationManager.getInstance().getDerivationParameterInstance(derivationType);
             if (paramDerivation.canBeModeled(testContext, derivationScope)) {
                 parameterBuilders.add(paramDerivation.getParameterBuilder(testContext, derivationScope));
                 if (derivationType.isBitmaskDerivation()) {
-                    DerivationParameter bitPositionParam = DerivationFactory.getInstance(DerivationType.BIT_POSITION);
+                    DerivationParameter bitPositionParam = DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.BIT_POSITION);
                     bitPositionParam.setParent(derivationType);
                     parameterBuilders.add(bitPositionParam.getParameterBuilder(testContext, derivationScope));
                 }
@@ -95,8 +96,8 @@ public class ParameterModelFactory {
     private static Constraint[] getModelConstraints(List<DerivationType> derivationTypes, DerivationScope scope) {
         List<Constraint> applicableConstraints = new LinkedList<>();
         for (DerivationType derivationType : derivationTypes) {
-            if (DerivationFactory.getInstance(derivationType).canBeModeled(TestContext.getInstance(), scope)) {
-                List<ConditionalConstraint> condConstraints = DerivationFactory.getInstance(derivationType).getConditionalConstraints(scope);
+            if (DerivationManager.getInstance().getDerivationParameterInstance(derivationType).canBeModeled(TestContext.getInstance(), scope)) {
+                List<ConditionalConstraint> condConstraints = DerivationManager.getInstance().getDerivationParameterInstance(derivationType).getConditionalConstraints(scope);
                 for (ConditionalConstraint condConstraint : condConstraints) {
                     if (condConstraint.isApplicableTo(derivationTypes, scope)) {
                         applicableConstraints.add(condConstraint.getConstraint());
@@ -115,7 +116,7 @@ public class ParameterModelFactory {
         return false;
     }
 
-    private static List<DerivationType> getBasicModelDerivations(DerivationScope derivationScope) {
+    /*private static List<DerivationType> getBasicModelDerivations(DerivationScope derivationScope) {
         List<DerivationType> derivationTypes = getBasicDerivationsForBoth(derivationScope);
         
         if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
@@ -124,17 +125,17 @@ public class ParameterModelFactory {
             derivationTypes.addAll(getBasicDerivationsForClient(derivationScope));
         }
         return derivationTypes;
-    }
+    }*/
     
-    private static List<DerivationType> getBasicDerivationsForBoth(DerivationScope derivationScope) {
+    /*private static List<DerivationType> getBasicDerivationsForBoth(DerivationScope derivationScope) {
         List<DerivationType> derivationTypes = new LinkedList<>();
-        derivationTypes.add(DerivationType.CIPHERSUITE);
-        derivationTypes.add(DerivationType.NAMED_GROUP);
-        derivationTypes.add(DerivationType.RECORD_LENGTH);
-        derivationTypes.add(DerivationType.TCP_FRAGMENTATION);
+        derivationTypes.add(BasicDerivationType.CIPHERSUITE);
+        derivationTypes.add(BasicDerivationType.NAMED_GROUP);
+        derivationTypes.add(BasicDerivationType.RECORD_LENGTH);
+        derivationTypes.add(BasicDerivationType.TCP_FRAGMENTATION);
 
         if (derivationScope.isTls13Test()) {
-            derivationTypes.add(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC);
+            derivationTypes.add(BasicDerivationType.INCLUDE_CHANGE_CIPHER_SPEC);
         }
         
         return derivationTypes;
@@ -145,35 +146,35 @@ public class ParameterModelFactory {
         List<ExtensionType> supportedExtensions = TestContext.getInstance().getSiteReport().getSupportedExtensions();
         if (supportedExtensions != null) {
             //we add all extension regardless if the server negotiates them
-            derivationTypes.add(DerivationType.INCLUDE_ALPN_EXTENSION);
-            derivationTypes.add(DerivationType.INCLUDE_HEARTBEAT_EXTENSION);
-            derivationTypes.add(DerivationType.INCLUDE_PADDING_EXTENSION);
-            derivationTypes.add(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION);
-            derivationTypes.add(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
-            derivationTypes.add(DerivationType.INCLUDE_SESSION_TICKET_EXTENSION);
-            derivationTypes.add(DerivationType.MAX_FRAGMENT_LENGTH);
+            derivationTypes.add(BasicDerivationType.INCLUDE_ALPN_EXTENSION);
+            derivationTypes.add(BasicDerivationType.INCLUDE_HEARTBEAT_EXTENSION);
+            derivationTypes.add(BasicDerivationType.INCLUDE_PADDING_EXTENSION);
+            derivationTypes.add(BasicDerivationType.INCLUDE_RENEGOTIATION_EXTENSION);
+            derivationTypes.add(BasicDerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
+            derivationTypes.add(BasicDerivationType.INCLUDE_SESSION_TICKET_EXTENSION);
+            derivationTypes.add(BasicDerivationType.MAX_FRAGMENT_LENGTH);
             
             //we must know if the server negotiates Encrypt-Then-Mac to be able
             //to define correct constraints for padding tests
             if (supportedExtensions.contains(ExtensionType.ENCRYPT_THEN_MAC)) {
-                derivationTypes.add(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
+                derivationTypes.add(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
             }
             
             if (derivationScope.isTls13Test()) {
-                derivationTypes.add(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION);
+                derivationTypes.add(BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION);
             }
         }
         
         if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_CIPHER_SUITE_INTOLERANCE) != TestResult.TRUE) {
-            derivationTypes.add(DerivationType.INCLUDE_GREASE_CIPHER_SUITES);
+            derivationTypes.add(BasicDerivationType.INCLUDE_GREASE_CIPHER_SUITES);
         }
         
         if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_NAMED_GROUP_INTOLERANCE) != TestResult.TRUE) {
-            derivationTypes.add(DerivationType.INCLUDE_GREASE_NAMED_GROUPS);
+            derivationTypes.add(BasicDerivationType.INCLUDE_GREASE_NAMED_GROUPS);
         }
         
         if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_SIGNATURE_AND_HASH_ALGORITHM_INTOLERANCE) != TestResult.TRUE) {
-            derivationTypes.add(DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS);
+            derivationTypes.add(BasicDerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS);
         }
         return derivationTypes;
     }
@@ -182,15 +183,15 @@ public class ParameterModelFactory {
         List<DerivationType> derivationTypes = new LinkedList<>();
         if(!derivationScope.isTls13Test()) {
             if(TestContext.getInstance().getSiteReport().getReceivedClientHello().containsExtension(ExtensionType.ENCRYPT_THEN_MAC)) {
-                derivationTypes.add(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
+                derivationTypes.add(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
             }
             
             if(TestContext.getInstance().getSiteReport().getReceivedClientHello().containsExtension(ExtensionType.EXTENDED_MASTER_SECRET)) {
-                derivationTypes.add(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
+                derivationTypes.add(BasicDerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
             }
         }
         return derivationTypes;
-    }
+    }*/
 
     /**
      * DerivationParameters that only have one possible value can not be modeled
@@ -201,7 +202,7 @@ public class ParameterModelFactory {
         List<DerivationParameter> staticParameters = new LinkedList<>();
         List<DerivationType> plannedDerivations = getDerivationsForScope(scope);
         for (DerivationType type : plannedDerivations) {
-            List<DerivationParameter> parameterValues = DerivationFactory.getInstance(type).getConstrainedParameterValues(context, scope);
+            List<DerivationParameter> parameterValues = DerivationManager.getInstance().getDerivationParameterInstance(type).getConstrainedParameterValues(context, scope);
             if (parameterValues.size() == 1) {
                 staticParameters.add(parameterValues.get(0));
             }
@@ -218,7 +219,7 @@ public class ParameterModelFactory {
     public static List<DerivationParameter> getSimpleModelVariations(TestContext context, DerivationScope scope) {
         List<DerivationType> modelDerivations = getDerivationsForScope(scope);
         for (DerivationType type : modelDerivations) {
-            DerivationParameter parameter = DerivationFactory.getInstance(type);
+            DerivationParameter parameter = DerivationManager.getInstance().getDerivationParameterInstance(type);
             if (parameter.canBeModeled(context, scope)) {
                 return parameter.getConstrainedParameterValues(context, scope);
             }

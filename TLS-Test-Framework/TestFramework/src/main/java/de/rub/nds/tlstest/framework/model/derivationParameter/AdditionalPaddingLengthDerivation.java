@@ -13,7 +13,7 @@ import java.util.List;
 public class AdditionalPaddingLengthDerivation extends DerivationParameter<Integer> {
     
     public AdditionalPaddingLengthDerivation() {
-        super(DerivationType.ADDITIONAL_PADDING_LENGTH, Integer.class);
+        super(BasicDerivationType.ADDITIONAL_PADDING_LENGTH, Integer.class);
     }
     
     public AdditionalPaddingLengthDerivation(Integer selectedValue) {

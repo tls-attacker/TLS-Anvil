@@ -20,7 +20,7 @@ import java.util.List;
 public class GreaseSigHashDerivation extends DerivationParameter<SignatureAndHashAlgorithm> {
     
     public GreaseSigHashDerivation() {
-        super(DerivationType.GREASE_SIG_HASH, SignatureAndHashAlgorithm.class);
+        super(BasicDerivationType.GREASE_SIG_HASH, SignatureAndHashAlgorithm.class);
     }
     
     public GreaseSigHashDerivation(SignatureAndHashAlgorithm selectedValue) {

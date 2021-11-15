@@ -20,7 +20,7 @@ import java.util.List;
 public class GreaseCipherSuiteDerivation extends DerivationParameter<CipherSuite> {
 
     public GreaseCipherSuiteDerivation() {
-        super(DerivationType.GREASE_CIPHERSUITE, CipherSuite.class);
+        super(BasicDerivationType.GREASE_CIPHERSUITE, CipherSuite.class);
     }
     
     public GreaseCipherSuiteDerivation(CipherSuite selectedValue) {

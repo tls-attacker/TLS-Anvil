@@ -34,7 +34,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -74,8 +74,8 @@ public class EncThenMacExtension extends Tls12Test {
             + "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, "
             + "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
     @MethodCondition(method = "supportsExtension")
-    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNotBlockCipher")
-    @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.CIPHERSUITE, methods = "isNotBlockCipher")
+    @ScopeLimitations(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -95,8 +95,8 @@ public class EncThenMacExtension extends Tls12Test {
     @TlsTest(description = "Test if the client can complete the handshake if encrypt-then-MAC is negotiated")
     @MethodCondition(method = "supportsExtension")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isBlockCipher")
-    @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.CIPHERSUITE, methods = "isBlockCipher")
+    @ScopeLimitations(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

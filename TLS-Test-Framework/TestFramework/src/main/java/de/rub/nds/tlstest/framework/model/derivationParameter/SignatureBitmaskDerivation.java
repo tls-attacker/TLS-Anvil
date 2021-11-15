@@ -10,6 +10,7 @@ import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.crypto.keys.CustomDSAPrivateKey;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.model.DerivationManager;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
 
     public SignatureBitmaskDerivation() {
-        super(DerivationType.SIGNATURE_BITMASK, Integer.class);
+        super(BasicDerivationType.SIGNATURE_BITMASK, Integer.class);
     }
 
     public SignatureBitmaskDerivation(Integer selectedValue) {
@@ -55,7 +56,7 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
         Set<Integer> listedValues = new HashSet<>();
         listedValues.add(0);
 
-        List<DerivationParameter> applicableCertificates = DerivationFactory.getInstance(DerivationType.CERTIFICATE).getConstrainedParameterValues(context, scope);
+        List<DerivationParameter> applicableCertificates = DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CERTIFICATE).getConstrainedParameterValues(context, scope);
         applicableCertificates.forEach(selectableCert -> listedValues.add(computeSignatureSizeForCertKeyPair((CertificateKeyPair) selectableCert.getSelectedValue()) - 1));
         
         List<DerivationParameter> parameterValues = new LinkedList<>();
@@ -186,10 +187,10 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
 
     private ConditionalConstraint getMustBeWithinSignatureSizeConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CERTIFICATE);
-        requiredDerivations.add(DerivationType.SIG_HASH_ALGORIHTM);
+        requiredDerivations.add(BasicDerivationType.CERTIFICATE);
+        requiredDerivations.add(BasicDerivationType.SIG_HASH_ALGORIHTM);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CERTIFICATE.name(), DerivationType.SIG_HASH_ALGORIHTM.name()).by((SignatureBitmaskDerivation signatureBitmaskDerivation, CertificateDerivation certificateDerivation, SigAndHashDerivation sigAndHashDerivation) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CERTIFICATE.name(), BasicDerivationType.SIG_HASH_ALGORIHTM.name()).by((SignatureBitmaskDerivation signatureBitmaskDerivation, CertificateDerivation certificateDerivation, SigAndHashDerivation sigAndHashDerivation) -> {
             int selectedBitmaskBytePosition = signatureBitmaskDerivation.getSelectedValue();
             CertificateKeyPair selectedCertKeyPair = certificateDerivation.getSelectedValue();
             SignatureAndHashAlgorithm selectedSigHashAlgorithm = sigAndHashDerivation.getSelectedValue();

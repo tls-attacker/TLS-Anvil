@@ -20,7 +20,7 @@ import java.util.List;
 public class GreaseNamedGroupDerivation extends DerivationParameter<NamedGroup> {
 
     public GreaseNamedGroupDerivation() {
-        super(DerivationType.GREASE_NAMED_GROUP, NamedGroup.class);
+        super(BasicDerivationType.GREASE_NAMED_GROUP, NamedGroup.class);
     }
     
     public GreaseNamedGroupDerivation(NamedGroup selectedValue) {

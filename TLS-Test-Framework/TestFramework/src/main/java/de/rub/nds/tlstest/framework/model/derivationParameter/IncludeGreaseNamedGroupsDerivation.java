@@ -15,7 +15,7 @@ import java.util.List;
 public class IncludeGreaseNamedGroupsDerivation extends DerivationParameter<Boolean> {
 
     public IncludeGreaseNamedGroupsDerivation() {
-        super(DerivationType.INCLUDE_GREASE_NAMED_GROUPS, Boolean.class);
+        super(BasicDerivationType.INCLUDE_GREASE_NAMED_GROUPS, Boolean.class);
     }
     public IncludeGreaseNamedGroupsDerivation(Boolean selectedValue) {
         this();

@@ -51,7 +51,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -104,7 +104,7 @@ public class KeyShare extends Tls13Test {
     @TlsTest(description = "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
             + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
             + "that the server has selected for the negotiated key exchange.")
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ScopeLimitations(BasicDerivationType.NAMED_GROUP)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

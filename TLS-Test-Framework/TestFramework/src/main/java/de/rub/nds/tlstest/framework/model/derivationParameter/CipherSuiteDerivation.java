@@ -23,7 +23,7 @@ import java.util.Set;
 public class CipherSuiteDerivation extends DerivationParameter<CipherSuite> {
     
     public CipherSuiteDerivation() {
-        super(DerivationType.CIPHERSUITE, CipherSuite.class);
+        super(BasicDerivationType.CIPHERSUITE, CipherSuite.class);
     }
     
     public CipherSuiteDerivation(CipherSuite selectedValue) {

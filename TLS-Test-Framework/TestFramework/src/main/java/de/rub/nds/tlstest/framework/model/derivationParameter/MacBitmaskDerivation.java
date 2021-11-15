@@ -28,7 +28,7 @@ import java.util.Set;
 public class MacBitmaskDerivation extends DerivationParameter<Integer> {
 
     public MacBitmaskDerivation() {
-        super(DerivationType.MAC_BITMASK, Integer.class);
+        super(BasicDerivationType.MAC_BITMASK, Integer.class);
     }
 
     public MacBitmaskDerivation(Integer selectedValue) {
@@ -69,9 +69,9 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
 
     private ConditionalConstraint getMustBeWithinMacSizeConstraint(DerivationScope scope) {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((MacBitmaskDerivation macBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CIPHERSUITE.name()).by((MacBitmaskDerivation macBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
             int selectedBitmaskBytePosition = macBitmaskDerivation.getSelectedValue();
             CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
             

@@ -36,7 +36,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolMessageTypeDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -115,7 +115,7 @@ public class RecordProtocol extends Tls13Test {
             + "terminate the connection with a \"bad_record_mac\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
+    @ScopeExtensions(BasicDerivationType.AUTH_TAG_BITMASK)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -150,7 +150,7 @@ public class RecordProtocol extends Tls13Test {
             + "terminate the connection with a \"record_overflow\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @RFC(number = 8446, section = "5.1. Record Layer")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -187,8 +187,8 @@ public class RecordProtocol extends Tls13Test {
             + "terminate the connection with a \"bad_record_mac\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions({DerivationType.CIPHERTEXT_BITMASK, DerivationType.APP_MSG_LENGHT})
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions({BasicDerivationType.CIPHERTEXT_BITMASK, BasicDerivationType.APP_MSG_LENGHT})
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
@@ -221,7 +221,7 @@ public class RecordProtocol extends Tls13Test {
     @TlsTest(description = "All encrypted TLS records can be padded to inflate the size of the "
             + "TLSCiphertext.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions(DerivationType.ADDITIONAL_PADDING_LENGTH)
+    @ScopeExtensions(BasicDerivationType.ADDITIONAL_PADDING_LENGTH)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -239,7 +239,7 @@ public class RecordProtocol extends Tls13Test {
             + "An endpoint that receives a record that exceeds this "
             + "length MUST terminate the connection with a \"record_overflow\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -273,7 +273,7 @@ public class RecordProtocol extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.PROTOCOL_MESSAGE_TYPE)
+    @ScopeExtensions(BasicDerivationType.PROTOCOL_MESSAGE_TYPE)
     @AlertCategory(SeverityLevel.LOW)
     @Tag("emptyRecord")
     public void sendEmptyRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

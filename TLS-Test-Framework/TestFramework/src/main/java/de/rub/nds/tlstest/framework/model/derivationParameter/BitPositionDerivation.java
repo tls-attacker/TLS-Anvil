@@ -19,7 +19,7 @@ import java.util.List;
 public class BitPositionDerivation extends DerivationParameter<Integer> {
 
     public BitPositionDerivation() {
-        super(DerivationType.BIT_POSITION, Integer.class);
+        super(BasicDerivationType.BIT_POSITION, Integer.class);
     }
 
     public BitPositionDerivation(Integer selectedValue, DerivationType parent) {

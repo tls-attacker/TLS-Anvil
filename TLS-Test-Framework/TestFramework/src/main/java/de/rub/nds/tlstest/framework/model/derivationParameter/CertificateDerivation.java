@@ -28,7 +28,7 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
     private final boolean ALLOW_DSS = true;
 
     public CertificateDerivation() {
-        super(DerivationType.CERTIFICATE, CertificateKeyPair.class);
+        super(BasicDerivationType.CERTIFICATE, CertificateKeyPair.class);
     }
     
     public CertificateDerivation(CertificateKeyPair certKeyPair) {
@@ -98,8 +98,8 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
       
     private ConditionalConstraint getCertPkTypeMustMatchCipherSuiteConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(this.getType().name(), DerivationType.CIPHERSUITE.name()).by((CertificateDerivation certificateDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(this.getType().toString(), BasicDerivationType.CIPHERSUITE.name()).by((CertificateDerivation certificateDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
             CertificateKeyPair selectedCertKeyPair = certificateDerivation.getSelectedValue();
             CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
 

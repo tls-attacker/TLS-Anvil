@@ -2,9 +2,9 @@ package de.rub.nds.tlstest.framework.model.derivationParameter.mirrored;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.model.DerivationManager;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 
 
@@ -29,12 +29,12 @@ public abstract class MirroredDerivationParameter<T> extends DerivationParameter
 
     @Override
     public boolean hasNoApplicableValues(TestContext context, DerivationScope scope) {
-        return DerivationFactory.getInstance(getMirroredType()).hasNoApplicableValues(context, scope);
+        return DerivationManager.getInstance().getDerivationParameterInstance(getMirroredType()).hasNoApplicableValues(context, scope);
     }
 
     @Override
     public boolean canBeModeled(TestContext context, DerivationScope scope) {
-        return DerivationFactory.getInstance(getMirroredType()).canBeModeled(context, scope);
+        return DerivationManager.getInstance().getDerivationParameterInstance(getMirroredType()).canBeModeled(context, scope);
     }     
 
     public DerivationType getMirroredType() {

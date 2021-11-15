@@ -38,7 +38,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -139,7 +139,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
     @TlsTest(description = "Thus, TLS server compliant with this specification MUST accept any value {03,XX} as the " +
             "record layer version number for ClientHello.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     public void acceptAnyRecordVersionNumber(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

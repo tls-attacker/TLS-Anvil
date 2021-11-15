@@ -32,7 +32,7 @@ import java.util.Set;
 public class PRFBitmaskDerivation extends DerivationParameter<Integer> {
 
     public PRFBitmaskDerivation() {
-        super(DerivationType.PRF_BITMASK, Integer.class);
+        super(BasicDerivationType.PRF_BITMASK, Integer.class);
     }
 
     public PRFBitmaskDerivation(Integer selectedValue) {
@@ -77,9 +77,9 @@ public class PRFBitmaskDerivation extends DerivationParameter<Integer> {
 
     private ConditionalConstraint getMustBeWithinPRFSizeConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((PRFBitmaskDerivation prfBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CIPHERSUITE.name()).by((PRFBitmaskDerivation prfBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
             int selectedBitmaskBytePosition = prfBitmaskDerivation.getSelectedValue();
             CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
             

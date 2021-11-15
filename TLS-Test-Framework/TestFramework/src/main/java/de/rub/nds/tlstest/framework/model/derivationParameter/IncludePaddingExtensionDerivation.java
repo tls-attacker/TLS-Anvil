@@ -10,7 +10,7 @@ import java.util.List;
 public class IncludePaddingExtensionDerivation extends DerivationParameter<Boolean> {
 
     public IncludePaddingExtensionDerivation() {
-        super(DerivationType.INCLUDE_PADDING_EXTENSION, Boolean.class);
+        super(BasicDerivationType.INCLUDE_PADDING_EXTENSION, Boolean.class);
     }
     public IncludePaddingExtensionDerivation(Boolean selectedValue) {
         this();

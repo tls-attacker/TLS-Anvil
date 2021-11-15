@@ -21,7 +21,7 @@ import java.util.List;
 public class RecordLengthDerivation extends DerivationParameter<Integer>  {
 
     public RecordLengthDerivation() {
-        super(DerivationType.RECORD_LENGTH, Integer.class);
+        super(BasicDerivationType.RECORD_LENGTH, Integer.class);
     }
     
     public RecordLengthDerivation(Integer selectedValue) {

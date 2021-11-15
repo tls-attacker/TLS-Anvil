@@ -34,7 +34,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.tests.client.both.statemachine.SharedStateMachineTest;
@@ -57,9 +57,9 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Omit the Certificate Message for non-anonymous Cipher Suite")
-    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNotAnonCipherSuite")
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.CIPHERSUITE, methods = "isNotAnonCipherSuite")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations({DerivationType.CERTIFICATE})
+    @ScopeLimitations({BasicDerivationType.CERTIFICATE})
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.HIGH)

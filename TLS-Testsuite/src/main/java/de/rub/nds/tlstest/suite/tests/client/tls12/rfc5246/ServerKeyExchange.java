@@ -39,7 +39,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
@@ -61,7 +61,7 @@ public class ServerKeyExchange extends Tls12Test {
     @TlsTest(description = "The client must verify the signature of the ServerKeyExchange message")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
-    @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)
+    @ScopeExtensions(BasicDerivationType.SIGNATURE_BITMASK)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -98,7 +98,7 @@ public class ServerKeyExchange extends Tls12Test {
     }
     
     public List<DerivationParameter> getCertsIncludingUnsupportedPkGroups(DerivationScope scope) {
-        CertificateDerivation certDerivation = (CertificateDerivation) DerivationFactory.getInstance(DerivationType.CERTIFICATE);
+        CertificateDerivation certDerivation = (CertificateDerivation) DerivationFactory.getInstance(BasicDerivationType.CERTIFICATE);
         return certDerivation.getApplicableCertificates(context, scope, true);
     }
 
@@ -107,7 +107,7 @@ public class ServerKeyExchange extends Tls12Test {
             + "handling elliptic curves and point formats are exceeded")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
-    @ExplicitValues(affectedTypes = {DerivationType.NAMED_GROUP, DerivationType.CERTIFICATE}, methods = {"getUnproposedNamedGroups", "getCertsIncludingUnsupportedPkGroups"})
+    @ExplicitValues(affectedTypes = {BasicDerivationType.NAMED_GROUP, BasicDerivationType.CERTIFICATE}, methods = {"getUnproposedNamedGroups", "getCertsIncludingUnsupportedPkGroups"})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -141,14 +141,14 @@ public class ServerKeyExchange extends Tls12Test {
             + "fatal handshake failure is that the client's capabilities for "
             + "handling elliptic curves and point formats are exceeded")
     @ModelFromScope(baseModel = ModelType.GENERIC)
-    @ScopeExtensions(DerivationType.CERTIFICATE)
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
-    @ExplicitValues(affectedTypes = DerivationType.CERTIFICATE, methods = "getEcdhCertsForUnproposedGroups")
+    @ScopeExtensions(BasicDerivationType.CERTIFICATE)
+    @ScopeLimitations(BasicDerivationType.NAMED_GROUP)
+    @ExplicitValues(affectedTypes = BasicDerivationType.CERTIFICATE, methods = "getEcdhCertsForUnproposedGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
-    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isStaticEcdhCipherSuite")
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.CIPHERSUITE, methods = "isStaticEcdhCipherSuite")
     public void acceptsUnproposedNamedGroupStatic(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -191,9 +191,9 @@ public class ServerKeyExchange extends Tls12Test {
             + "server's elliptic curve domain parameters and ephemeral ECDH public "
             + "key from the ServerKeyExchange message.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations(DerivationType.SIG_HASH_ALGORIHTM)
+    @ScopeLimitations(BasicDerivationType.SIG_HASH_ALGORIHTM)
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNotAnonCipherSuite")
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.CIPHERSUITE, methods = "isNotAnonCipherSuite")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -234,7 +234,7 @@ public class ServerKeyExchange extends Tls12Test {
             + "extension. ")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
-    @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
+    @ExplicitValues(affectedTypes = BasicDerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void acceptsUnproposedSignatureAndHash(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

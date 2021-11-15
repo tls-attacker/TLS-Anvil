@@ -26,7 +26,7 @@ import java.util.Set;
 public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
 
     public AuthTagBitmaskDerivation() {
-        super(DerivationType.AUTH_TAG_BITMASK, Integer.class);
+        super(BasicDerivationType.AUTH_TAG_BITMASK, Integer.class);
     }
 
     public AuthTagBitmaskDerivation(Integer selectedValue) {
@@ -73,9 +73,9 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
 
     private ConditionalConstraint getMustBeWithinTagSizeConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((AuthTagBitmaskDerivation authTagBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CIPHERSUITE.name()).by((AuthTagBitmaskDerivation authTagBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
             int selectedBitmaskBytePosition = authTagBitmaskDerivation.getSelectedValue();
             CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
             

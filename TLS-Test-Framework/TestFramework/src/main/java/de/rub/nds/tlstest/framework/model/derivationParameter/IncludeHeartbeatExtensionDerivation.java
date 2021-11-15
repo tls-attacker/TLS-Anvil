@@ -11,7 +11,7 @@ import java.util.List;
 public class IncludeHeartbeatExtensionDerivation extends DerivationParameter<Boolean> {
 
     public IncludeHeartbeatExtensionDerivation() {
-        super(DerivationType.INCLUDE_HEARTBEAT_EXTENSION, Boolean.class);
+        super(BasicDerivationType.INCLUDE_HEARTBEAT_EXTENSION, Boolean.class);
     }
     public IncludeHeartbeatExtensionDerivation(Boolean selectedValue) {
         this();

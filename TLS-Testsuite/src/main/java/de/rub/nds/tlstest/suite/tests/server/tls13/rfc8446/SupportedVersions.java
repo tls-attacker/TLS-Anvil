@@ -41,7 +41,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -108,7 +108,7 @@ public class SupportedVersions extends Tls13Test {
             + "for version negotiation and MUST use only the \"supported_versions\" "
             + "extension to determine client preferences.")
     @MethodCondition(method = "supportsTls12")
-    @ManualConfig(DerivationType.CIPHERSUITE)
+    @ManualConfig(BasicDerivationType.CIPHERSUITE)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

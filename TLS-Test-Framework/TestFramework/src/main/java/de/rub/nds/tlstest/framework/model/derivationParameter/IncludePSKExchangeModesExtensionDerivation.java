@@ -11,7 +11,7 @@ import java.util.List;
 public class IncludePSKExchangeModesExtensionDerivation extends DerivationParameter<Boolean> {
 
     public IncludePSKExchangeModesExtensionDerivation() {
-        super(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION, Boolean.class);
+        super(BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION, Boolean.class);
     }
     public IncludePSKExchangeModesExtensionDerivation(Boolean selectedValue) {
         this();

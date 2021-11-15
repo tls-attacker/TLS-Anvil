@@ -50,7 +50,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ChosenHandshakeMessageDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
@@ -134,8 +134,8 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Handshake messages MUST NOT be interleaved "
             + "with other record types. That is, if a handshake message is split over two or more\n"
             + "records, there MUST NOT be any other records between them.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @ScopeExtensions(DerivationType.ALERT)
+    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
+    @ScopeExtensions(BasicDerivationType.ALERT)
     @RecordLayerCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -177,10 +177,10 @@ public class RecordLayer extends Tls13Test {
     }
 
     @TlsTest(description = "Send a record without any content to increase the sequencenumber.")
-    @ScopeExtensions(DerivationType.CHOSEN_HANDSHAKE_MSG)
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @ExplicitValues(affectedTypes = DerivationType.CHOSEN_HANDSHAKE_MSG, methods = "getModifiableHandshakeMessages")
-    @ManualConfig(DerivationType.CHOSEN_HANDSHAKE_MSG)
+    @ScopeExtensions(BasicDerivationType.CHOSEN_HANDSHAKE_MSG)
+    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
+    @ExplicitValues(affectedTypes = BasicDerivationType.CHOSEN_HANDSHAKE_MSG, methods = "getModifiableHandshakeMessages")
+    @ManualConfig(BasicDerivationType.CHOSEN_HANDSHAKE_MSG)
     @Tag("emptyRecord")
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)

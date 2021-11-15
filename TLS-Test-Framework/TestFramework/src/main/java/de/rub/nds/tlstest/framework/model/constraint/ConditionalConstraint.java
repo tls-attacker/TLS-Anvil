@@ -6,9 +6,9 @@
 package de.rub.nds.tlstest.framework.model.constraint;
 
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.model.DerivationManager;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rwth.swc.coffee4j.model.constraints.Constraint;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +27,7 @@ public class ConditionalConstraint {
     
     public boolean isApplicableTo(List<DerivationType> modeledDerivations, DerivationScope scope) {
         for(DerivationType required: requiredDerivations) {
-            if(!modeledDerivations.contains(required) || !DerivationFactory.getInstance(required).canBeModeled(TestContext.getInstance(), scope)) {
+            if(!modeledDerivations.contains(required) || !DerivationManager.getInstance().getDerivationParameterInstance(required).canBeModeled(TestContext.getInstance(), scope)) {
                 return false;
             }
         }

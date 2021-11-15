@@ -21,7 +21,7 @@ import java.util.List;
 public class GreaseProtocolVersionDerivation extends DerivationParameter<ProtocolVersion> {
 
     public GreaseProtocolVersionDerivation() {
-        super(DerivationType.GREASE_PROTOCOL_VERSION, ProtocolVersion.class);
+        super(BasicDerivationType.GREASE_PROTOCOL_VERSION, ProtocolVersion.class);
     }
     
     public GreaseProtocolVersionDerivation(ProtocolVersion selectedValue) {

@@ -31,7 +31,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
@@ -62,9 +62,9 @@ public class CBCBlockCipher extends Tls12Test {
             "indicate padding errors.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
-    @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.PADDING_BITMASK})
-    @ValueConstraints(affectedTypes = {DerivationType.CIPHERSUITE}, methods = "isCBC")
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions({BasicDerivationType.APP_MSG_LENGHT, BasicDerivationType.PADDING_BITMASK})
+    @ValueConstraints(affectedTypes = {BasicDerivationType.CIPHERSUITE}, methods = "isCBC")
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.HIGH)
@@ -106,9 +106,9 @@ public class CBCBlockCipher extends Tls12Test {
     @RFC(number = 5446, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(DerivationType.CIPHERTEXT_BITMASK)
-    @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions(BasicDerivationType.CIPHERTEXT_BITMASK)
+    @ValueConstraints(affectedTypes = BasicDerivationType.CIPHERSUITE, methods = "isCBC")
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.HIGH)
@@ -161,9 +161,9 @@ public class CBCBlockCipher extends Tls12Test {
     @RFC(number = 5446, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(DerivationType.MAC_BITMASK)
-    @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions(BasicDerivationType.MAC_BITMASK)
+    @ValueConstraints(affectedTypes = BasicDerivationType.CIPHERSUITE, methods = "isCBC")
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @CryptoCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.HIGH)

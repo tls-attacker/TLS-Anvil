@@ -17,6 +17,7 @@ import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -118,7 +119,7 @@ public class DerivationScope {
         Method testMethod = context.getRequiredTestMethod();
         if(testMethod.isAnnotationPresent(ValueConstraints.class)) {
             ValueConstraints valConstraints = testMethod.getAnnotation(ValueConstraints.class);
-            DerivationType[] affectedTypes = valConstraints.affectedTypes();
+            BasicDerivationType[] affectedTypes = valConstraints.affectedTypes();
             String[] methods = valConstraints.methods();
             if(methods.length != affectedTypes.length) {
                 throw new RuntimeException("Unable to resolve ValueConstraints - argument count mismatch");

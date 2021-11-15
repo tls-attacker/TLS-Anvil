@@ -12,10 +12,10 @@ package de.rub.nds.tlstest.framework.junitExtensions;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.tlstest.framework.model.DerivationManager;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.constraint.ValueConstraint;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
@@ -32,14 +32,14 @@ public class ValueConstraintsConditionExtension extends BaseCondition {
         
         DerivationScope derivationScope = new DerivationScope(extensionContext);
         for(ValueConstraint valContraint : derivationScope.getValueConstraints()) {
-            DerivationParameter derivationParam = DerivationFactory.getInstance(valContraint.getAffectedType());
+            DerivationParameter derivationParam = DerivationManager.getInstance().getDerivationParameterInstance(valContraint.getAffectedType());
             if(derivationParam.hasNoApplicableValues(TestContext.getInstance(), derivationScope)) {
                 return ConditionEvaluationResult.disabled("Host does not support required value for parameter " + derivationParam.getType());
             }
         }
         
         for(DerivationType explicitType : derivationScope.getExplicitTypeValues().keySet()) {
-            DerivationParameter derivationParam = DerivationFactory.getInstance(explicitType);
+            DerivationParameter derivationParam = DerivationManager.getInstance().getDerivationParameterInstance(explicitType);
             if(derivationParam.hasNoApplicableValues(TestContext.getInstance(), derivationScope)) {
                 return ConditionEvaluationResult.disabled("Host does not support required value for parameter " + explicitType);
             }

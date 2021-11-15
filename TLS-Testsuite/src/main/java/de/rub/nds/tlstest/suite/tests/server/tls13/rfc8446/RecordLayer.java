@@ -45,7 +45,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
@@ -124,8 +124,8 @@ public class RecordLayer extends Tls13Test {
     @TlsTest(description = "Handshake messages MUST NOT be interleaved "
             + "with other record types. That is, if a handshake message is split over two or more\n"
             + "records, there MUST NOT be any other records between them.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @ScopeExtensions(DerivationType.ALERT)
+    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
+    @ScopeExtensions(BasicDerivationType.ALERT)
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)

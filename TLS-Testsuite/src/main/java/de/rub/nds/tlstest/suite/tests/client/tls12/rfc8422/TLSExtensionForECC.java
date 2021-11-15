@@ -49,7 +49,7 @@ import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -157,7 +157,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @TlsTest(description = "A lack of point validation might enable Invalid Curve Attacks")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isInvalidCurveApplicableNamedGroup")
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.NAMED_GROUP, methods = "isInvalidCurveApplicableNamedGroup")
     @CryptoCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

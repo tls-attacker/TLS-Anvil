@@ -26,7 +26,7 @@ import java.util.List;
 public class MaxFragmentLengthDerivation extends DerivationParameter<MaxFragmentLength> {
 
     public MaxFragmentLengthDerivation() {
-        super(DerivationType.MAX_FRAGMENT_LENGTH, MaxFragmentLength.class);
+        super(BasicDerivationType.MAX_FRAGMENT_LENGTH, MaxFragmentLength.class);
     }
 
     public MaxFragmentLengthDerivation(MaxFragmentLength selectedValue) {

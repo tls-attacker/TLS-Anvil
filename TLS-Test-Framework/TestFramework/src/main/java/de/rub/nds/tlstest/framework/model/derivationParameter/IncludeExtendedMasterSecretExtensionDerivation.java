@@ -13,7 +13,7 @@ import java.util.List;
 public class IncludeExtendedMasterSecretExtensionDerivation extends DerivationParameter<Boolean> {
 
     public IncludeExtendedMasterSecretExtensionDerivation() {
-        super(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION, Boolean.class);
+        super(BasicDerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION, Boolean.class);
     }
     public IncludeExtendedMasterSecretExtensionDerivation(Boolean selectedValue) {
         this();

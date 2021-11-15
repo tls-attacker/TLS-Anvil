@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
 
     public NamedGroupDerivation() {
-        super(DerivationType.NAMED_GROUP, NamedGroup.class);
+        super(BasicDerivationType.NAMED_GROUP, NamedGroup.class);
     }
 
     public NamedGroupDerivation(NamedGroup group) {
@@ -114,8 +114,8 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
 
     private ConditionalConstraint getMustNotBeNullForECDHConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((NamedGroupDerivation namedGroupDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CIPHERSUITE.name()).by((NamedGroupDerivation namedGroupDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
             NamedGroup selectedNamedGroup = namedGroupDerivation.getSelectedValue();
             CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
             
@@ -128,8 +128,8 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
 
     private ConditionalConstraint getMustBeNullForNonECDHConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((NamedGroupDerivation namedGroupDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CIPHERSUITE.name()).by((NamedGroupDerivation namedGroupDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
             NamedGroup selectedNamedGroup = namedGroupDerivation.getSelectedValue();
             CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
             
@@ -142,8 +142,8 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     
     private ConditionalConstraint getMustBeNullForStaticECDH() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((NamedGroupDerivation namedGroupDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CIPHERSUITE.name()).by((NamedGroupDerivation namedGroupDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
             NamedGroup selectedNamedGroup = namedGroupDerivation.getSelectedValue();
             CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
             

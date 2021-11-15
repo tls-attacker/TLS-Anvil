@@ -16,7 +16,7 @@ import java.util.List;
 public class IncludeGreaseSigHashDerivation extends DerivationParameter<Boolean> {
 
     public IncludeGreaseSigHashDerivation() {
-        super(DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS, Boolean.class);
+        super(BasicDerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS, Boolean.class);
     }
     public IncludeGreaseSigHashDerivation(Boolean selectedValue) {
         this();

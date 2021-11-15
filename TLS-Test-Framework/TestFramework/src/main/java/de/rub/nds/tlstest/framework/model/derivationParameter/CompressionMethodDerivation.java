@@ -12,7 +12,7 @@ import java.util.List;
 public class CompressionMethodDerivation extends DerivationParameter<CompressionMethod> {
 
     public CompressionMethodDerivation() {
-        super(DerivationType.COMPRESSION_METHOD, CompressionMethod.class);
+        super(BasicDerivationType.COMPRESSION_METHOD, CompressionMethod.class);
     }
     
     public CompressionMethodDerivation(CompressionMethod selectedValue) {

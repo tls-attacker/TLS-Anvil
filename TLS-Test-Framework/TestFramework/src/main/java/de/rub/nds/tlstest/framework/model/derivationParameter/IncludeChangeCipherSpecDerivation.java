@@ -14,7 +14,7 @@ import java.util.List;
 public class IncludeChangeCipherSpecDerivation extends DerivationParameter<Boolean> {
 
     public IncludeChangeCipherSpecDerivation() {
-        super(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC, Boolean.class);
+        super(BasicDerivationType.INCLUDE_CHANGE_CIPHER_SPEC, Boolean.class);
     }
     public IncludeChangeCipherSpecDerivation(Boolean selectedValue) {
         this();

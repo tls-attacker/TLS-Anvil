@@ -12,7 +12,7 @@ import java.util.List;
 public class ProtocolVersionDerivation extends DerivationParameter<byte[]> {
 
     public ProtocolVersionDerivation() {
-        super(DerivationType.PROTOCOL_VERSION, byte[].class);
+        super(BasicDerivationType.PROTOCOL_VERSION, byte[].class);
     }
 
     public ProtocolVersionDerivation(byte[] selectedValue) {

@@ -33,7 +33,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe.ShareOutOfBoundsDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -47,8 +47,8 @@ public class FfDheShare extends Tls12Test {
             + "If dh_Yc is out of range, the server MUST terminate the connection"
             + "with a fatal handshake_failure(40) alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
-    @ManualConfig(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
+    @ScopeExtensions(BasicDerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
+    @ManualConfig(BasicDerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
     @HandshakeCategory(SeverityLevel.INFORMATIONAL)
     @ComplianceCategory(SeverityLevel.HIGH)
     @KeyExchange(supported = KeyExchangeType.DH)

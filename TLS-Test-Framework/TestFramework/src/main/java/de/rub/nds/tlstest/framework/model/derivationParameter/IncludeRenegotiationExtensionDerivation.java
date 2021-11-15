@@ -10,7 +10,7 @@ import java.util.List;
 public class IncludeRenegotiationExtensionDerivation extends DerivationParameter<Boolean> {
 
     public IncludeRenegotiationExtensionDerivation() {
-        super(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION, Boolean.class);
+        super(BasicDerivationType.INCLUDE_RENEGOTIATION_EXTENSION, Boolean.class);
     }
     public IncludeRenegotiationExtensionDerivation(Boolean selectedValue) {
         this();

@@ -84,7 +84,7 @@ public abstract class DerivationParameter<T> {
     
     public Parameter.Builder getParameterBuilder(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = getConstrainedParameterValues(context, scope);
-        return Parameter.parameter(type.name()).values(parameterValues.toArray());
+        return Parameter.parameter(type.toString()).values(parameterValues.toArray());
     }
 
     public abstract void applyToConfig(Config config, TestContext context);

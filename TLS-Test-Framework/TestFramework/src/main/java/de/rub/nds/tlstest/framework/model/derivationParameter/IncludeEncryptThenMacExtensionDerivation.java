@@ -10,7 +10,7 @@ import java.util.List;
 public class IncludeEncryptThenMacExtensionDerivation extends DerivationParameter<Boolean> {
 
     public IncludeEncryptThenMacExtensionDerivation() {
-        super(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION, Boolean.class);
+        super(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION, Boolean.class);
     }
     
     public IncludeEncryptThenMacExtensionDerivation(Boolean selectedValue) {

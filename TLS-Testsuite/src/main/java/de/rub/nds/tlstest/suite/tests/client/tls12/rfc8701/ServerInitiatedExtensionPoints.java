@@ -40,7 +40,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseCipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseExtensionDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseNamedGroupDerivation;
@@ -58,7 +58,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
             + "The \"version\" value in a ServerHello or HelloRetryRequest")
-    @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
+    @ScopeExtensions(BasicDerivationType.GREASE_PROTOCOL_VERSION)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -85,8 +85,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
             + "The \"cipher_suite\" value in a ServerHello")
-    @ScopeLimitations(DerivationType.CIPHERSUITE)
-    @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
+    @ScopeLimitations(BasicDerivationType.CIPHERSUITE)
+    @ScopeExtensions(BasicDerivationType.GREASE_CIPHERSUITE)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -106,7 +106,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
             + "Any ServerHello extension")
-    @ScopeExtensions(DerivationType.GREASE_EXTENSION)
+    @ScopeExtensions(BasicDerivationType.GREASE_EXTENSION)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void sendServerHelloGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -128,8 +128,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             + "The \"namedcurve\" value in a ServerKeyExchange for an Ephemeral Elliptic Curve DiﬃeHellman (ECDHE) "
             + "cipher in TLS 1.2 [RFC5246] or earlier")
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
-    @ScopeExtensions(DerivationType.GREASE_NAMED_GROUP)
+    @ScopeLimitations(BasicDerivationType.NAMED_GROUP)
+    @ScopeExtensions(BasicDerivationType.GREASE_NAMED_GROUP)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -150,7 +150,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             + "if a GREASE value appears in any of the following: "
             + "The signature algorithm in a ServerKeyExchange signature in TLS 1.2 or earlier")
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
-    @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
+    @ScopeExtensions(BasicDerivationType.GREASE_SIG_HASH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)

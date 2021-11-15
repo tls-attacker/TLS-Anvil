@@ -15,7 +15,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -28,7 +28,7 @@ public class PaddingExtension extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @TlsTest(description = "Send a Padding Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations(DerivationType.INCLUDE_PADDING_EXTENSION)
+    @ScopeLimitations(BasicDerivationType.INCLUDE_PADDING_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -43,7 +43,7 @@ public class PaddingExtension extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @TlsTest(description = "Send a Padding Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations(DerivationType.INCLUDE_PADDING_EXTENSION)
+    @ScopeLimitations(BasicDerivationType.INCLUDE_PADDING_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)

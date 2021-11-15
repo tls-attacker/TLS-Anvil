@@ -20,7 +20,7 @@ import java.util.List;
 public class TcpFragmentationDerivation extends DerivationParameter<Boolean> {
 
     public TcpFragmentationDerivation() {
-        super(DerivationType.TCP_FRAGMENTATION, Boolean.class);
+        super(BasicDerivationType.TCP_FRAGMENTATION, Boolean.class);
     }
     
     public TcpFragmentationDerivation(Boolean selectedValue) {

@@ -21,14 +21,11 @@ import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.crypto.keys.CustomDSAPrivateKey;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.model.DerivationManager;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
-import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.SignatureBitmaskDerivation;
+import de.rub.nds.tlstest.framework.model.derivationParameter.*;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -49,7 +46,7 @@ public class ConstraintHelper {
     private static final Logger LOGGER = LogManager.getLogger();
     
     public static boolean staticEcdhCipherSuiteModeled(DerivationScope scope) {
-        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         for (DerivationParameter param : values) {
             CipherSuite cipherSuite = (CipherSuite) param.getSelectedValue();
@@ -61,7 +58,7 @@ public class ConstraintHelper {
     }
     
     public static boolean staticCipherSuiteModeled(DerivationScope scope) {
-        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         for (DerivationParameter param : values) {
             CipherSuite cipherSuite = (CipherSuite) param.getSelectedValue();
@@ -73,7 +70,7 @@ public class ConstraintHelper {
     }
     
     public static boolean ephemeralCipherSuiteModeled(DerivationScope scope) {
-        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         for (DerivationParameter param : values) {
             CipherSuite cipherSuite = (CipherSuite) param.getSelectedValue();
@@ -85,13 +82,13 @@ public class ConstraintHelper {
     }
     
     public static boolean nullSigHashModeled(DerivationScope scope) {
-        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
+        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter> values = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         return values.stream().anyMatch(parameter -> parameter.getSelectedValue() == null);
     }
 
     public static boolean multipleBlocksizesModeled(DerivationScope scope) {
-        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         Set<Integer> blockLengths = new HashSet<>();
         for (DerivationParameter param : values) {
@@ -105,7 +102,7 @@ public class ConstraintHelper {
     }
 
     public static boolean unpaddedCipherSuitesModeled(DerivationScope scope) {
-        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         for (DerivationParameter param : values) {
             CipherSuite cipherSuite = (CipherSuite) param.getSelectedValue(); 
@@ -118,7 +115,7 @@ public class ConstraintHelper {
     }
 
     public static boolean multipleMacSizesModeled(DerivationScope scope) {
-        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         Set<Integer> macLengths = new HashSet<>();
         for (DerivationParameter param : values) {
@@ -132,7 +129,7 @@ public class ConstraintHelper {
     }
 
     public static boolean ecdhCipherSuiteModeled(DerivationScope scope) {
-        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         for (DerivationParameter param : values) {
             if (scope.isTls13Test()) {
@@ -147,7 +144,7 @@ public class ConstraintHelper {
     }
 
     public static boolean nonEcdhCipherSuiteModeled(DerivationScope scope) {
-        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation) DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         for (DerivationParameter param : values) {
             if (!AlgorithmResolver.getKeyExchangeAlgorithm((CipherSuite) param.getSelectedValue()).isKeyExchangeEcdh()) {
@@ -159,7 +156,7 @@ public class ConstraintHelper {
     }
 
 public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
-        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation)DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation)DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         Set<HKDFAlgorithm> hkdfAlgos = new HashSet<>();
         for(DerivationParameter param : values) {
@@ -171,7 +168,7 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
     }
     
     public static boolean multipleTagSizesModeled(DerivationScope scope) {
-        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation)DerivationFactory.getInstance(DerivationType.CIPHERSUITE);
+        CipherSuiteDerivation cipherSuiteDeriv = (CipherSuiteDerivation)DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CIPHERSUITE);
         List<DerivationParameter> values = cipherSuiteDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         Set<Integer> tagLengths = new HashSet<>();
         for(DerivationParameter param : values) {
@@ -183,13 +180,13 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
     }
     
     public static boolean nullModeled(DerivationScope scope, DerivationType type) {
-        return DerivationFactory.getInstance(type).getConstrainedParameterValues(TestContext.getInstance(), scope)
+        return DerivationManager.getInstance().getDerivationParameterInstance(type).getConstrainedParameterValues(TestContext.getInstance(), scope)
                 .stream().anyMatch(parameterValue -> ((DerivationParameter)parameterValue).getSelectedValue() == null);
     }
     
         
     public static boolean multipleSigAlgorithmRequiredKeyTypesModeled(DerivationScope scope) {
-        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
+        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter> values = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         values = removeNull(values);
         Set<CertificateKeyType> keyTypes = new HashSet<>();
@@ -215,7 +212,7 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
     }
     
     public static boolean multipleCertPublicKeyTypesModeled(DerivationScope scope) {
-        CertificateDerivation certDeriv = (CertificateDerivation)DerivationFactory.getInstance(DerivationType.CERTIFICATE);
+        CertificateDerivation certDeriv = (CertificateDerivation)DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CERTIFICATE);
         List<DerivationParameter> values = certDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         Set<CertificateKeyType> certKeyTypes = new HashSet<>();
         for(DerivationParameter param : values) {
@@ -225,17 +222,17 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
     }
     
     public static boolean pssSigAlgoModeled(DerivationScope scope) {
-        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
+        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter> algorithms = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         algorithms = removeNull(algorithms);
         return algorithms.stream().anyMatch(param -> ((SigAndHashDerivation)param).getSelectedValue().name().contains("PSS"));
     }
     
     public static boolean rsaPkMightNotSufficeForPss(DerivationScope scope) {
-        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
+        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter> algorithms = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         algorithms = removeNull(algorithms);
-        CertificateDerivation certDerivation = (CertificateDerivation)DerivationFactory.getInstance(DerivationType.CERTIFICATE);
+        CertificateDerivation certDerivation = (CertificateDerivation)DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CERTIFICATE);
         List<DerivationParameter> certificates = certDerivation.getConstrainedParameterValues(TestContext.getInstance(), scope);
         boolean pssWithSha512modeled = algorithms.stream().anyMatch(algorithm -> 
             (((SigAndHashDerivation)algorithm).getSelectedValue().getSignatureAlgorithm() == SignatureAlgorithm.RSA_PSS_PSS || ((SigAndHashDerivation)algorithm).getSelectedValue().getSignatureAlgorithm() == SignatureAlgorithm.RSA_PSS_RSAE)
@@ -252,7 +249,7 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
     }
     
     public static boolean rsaPkBelow1024BitsModeled(DerivationScope scope) {
-        CertificateDerivation certDerivation = (CertificateDerivation)DerivationFactory.getInstance(DerivationType.CERTIFICATE);
+        CertificateDerivation certDerivation = (CertificateDerivation)DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CERTIFICATE);
         List<DerivationParameter> certificates = certDerivation.getConstrainedParameterValues(TestContext.getInstance(), scope);
         return certificates.stream().anyMatch(selectedCert -> {
             return ((CertificateDerivation)selectedCert).getSelectedValue().getCertPublicKeyType() == CertificateKeyType.RSA 
@@ -261,7 +258,7 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
     }
     
     public static boolean rsaShaAlgLongerThan256BitsModeled(DerivationScope scope) {
-        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationFactory.getInstance(DerivationType.SIG_HASH_ALGORIHTM);
+        SigAndHashDerivation sigHashDeriv = (SigAndHashDerivation)DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter> algorithms = sigHashDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         return algorithms.stream().anyMatch(selectedAlgo -> {
             if(((SigAndHashDerivation)selectedAlgo).getSelectedValue().name().contains("RSA")) {
@@ -279,8 +276,8 @@ public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
     }
     
     public static boolean signatureLengthConstraintApplicable(DerivationScope scope) {
-        CertificateDerivation certDeriv = (CertificateDerivation) DerivationFactory.getInstance(DerivationType.CERTIFICATE);
-        SignatureBitmaskDerivation sigBitmaskDeriv = (SignatureBitmaskDerivation) DerivationFactory.getInstance(DerivationType.SIGNATURE_BITMASK);
+        CertificateDerivation certDeriv = (CertificateDerivation) DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.CERTIFICATE);
+        SignatureBitmaskDerivation sigBitmaskDeriv = (SignatureBitmaskDerivation) DerivationManager.getInstance().getDerivationParameterInstance(BasicDerivationType.SIGNATURE_BITMASK);
         List<DerivationParameter> bytePositions = sigBitmaskDeriv.getConstrainedParameterValues(TestContext.getInstance(), scope);
         int maxBytePosition = 0;
         for(DerivationParameter selectablePosition: bytePositions) {

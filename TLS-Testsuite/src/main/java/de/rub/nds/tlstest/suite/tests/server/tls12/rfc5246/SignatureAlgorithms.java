@@ -38,7 +38,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
@@ -149,7 +149,7 @@ public class SignatureAlgorithms extends Tls12Test {
     }
     
     @TlsTest(description = "Send a ClientHello that offers many SignatureAndHash algorithms")
-    @ScopeLimitations(DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS)
+    @ScopeLimitations(BasicDerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

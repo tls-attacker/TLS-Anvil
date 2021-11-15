@@ -134,7 +134,7 @@ public class DerivationContainer {
     private Map<String, DerivationParameter> jsonObject() {
         Map<String, DerivationParameter> res = new HashMap<>();
         for (DerivationParameter i : derivations) {
-            res.put(i.getType().name(), i);
+            res.put(i.getType().toString(), i);
         }
         return res;
     }

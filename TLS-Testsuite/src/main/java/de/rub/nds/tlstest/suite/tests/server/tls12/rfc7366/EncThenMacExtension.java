@@ -35,7 +35,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import static org.junit.Assert.assertFalse;
@@ -71,8 +71,8 @@ public class EncThenMacExtension extends Tls12Test {
     }
 
     @TlsTest(description = "Test if the server supports the encrypt-then-mac extension")
-    @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isBlockCipher")
-    @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @DynamicValueConstraints(affectedTypes=BasicDerivationType.CIPHERSUITE, methods="isBlockCipher")
+    @ScopeLimitations(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @HandshakeCategory(SeverityLevel.INFORMATIONAL)
     @ComplianceCategory(SeverityLevel.INFORMATIONAL)
     @CryptoCategory(SeverityLevel.INFORMATIONAL)
@@ -95,8 +95,8 @@ public class EncThenMacExtension extends Tls12Test {
     @TlsTest(description = "If a server receives an encrypt-then-MAC request extension from a client and then " +
             "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, " +
             "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
-    @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isNotBlockCipher")
-    @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @DynamicValueConstraints(affectedTypes=BasicDerivationType.CIPHERSUITE, methods="isNotBlockCipher")
+    @ScopeLimitations(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

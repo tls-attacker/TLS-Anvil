@@ -11,6 +11,7 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 
 public class ShareOutOfBoundsDerivation extends DerivationParameter<ShareOutOfBoundsDerivation.OutOfBoundsType> {
@@ -24,7 +25,7 @@ public class ShareOutOfBoundsDerivation extends DerivationParameter<ShareOutOfBo
     }
 
     public ShareOutOfBoundsDerivation() {
-        super(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS, OutOfBoundsType.class);
+        super(BasicDerivationType.FFDHE_SHARE_OUT_OF_BOUNDS, OutOfBoundsType.class);
     }
 
     public ShareOutOfBoundsDerivation(OutOfBoundsType selectedValue) {

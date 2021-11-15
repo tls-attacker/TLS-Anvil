@@ -13,7 +13,7 @@ import java.util.List;
 public class IncludeGreaseCipherSuitesDerivation extends DerivationParameter<Boolean> {
 
     public IncludeGreaseCipherSuitesDerivation() {
-        super(DerivationType.INCLUDE_GREASE_CIPHER_SUITES, Boolean.class);
+        super(BasicDerivationType.INCLUDE_GREASE_CIPHER_SUITES, Boolean.class);
     }
     public IncludeGreaseCipherSuitesDerivation(Boolean selectedValue) {
         this();

@@ -27,7 +27,7 @@ import java.util.Set;
 public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAlgorithm> {
 
     public SigAndHashDerivation() {
-        super(DerivationType.SIG_HASH_ALGORIHTM, SignatureAndHashAlgorithm.class);
+        super(BasicDerivationType.SIG_HASH_ALGORIHTM, SignatureAndHashAlgorithm.class);
     }
 
     public SigAndHashDerivation(SignatureAndHashAlgorithm selectedValue) {
@@ -152,11 +152,11 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
 
     private ConditionalConstraint getHashSizeMustMatchEcdsaPkSizeConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CERTIFICATE);
+        requiredDerivations.add(BasicDerivationType.CERTIFICATE);
 
         //TLS 1.3 specifies explicit curves for hash functions in ECDSA
         //e.g ecdsa_secp256r1_sha256
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CERTIFICATE.name()).by((SigAndHashDerivation sigAndHashDerivation, CertificateDerivation certificateDerivation) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CERTIFICATE.name()).by((SigAndHashDerivation sigAndHashDerivation, CertificateDerivation certificateDerivation) -> {
             if (sigAndHashDerivation.getSelectedValue() != null) {
                 CertificateKeyPair certKeyPair = certificateDerivation.getSelectedValue();
                 SignatureAlgorithm sigAlg = sigAndHashDerivation.getSelectedValue().getSignatureAlgorithm();
@@ -174,10 +174,10 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
 
     private ConditionalConstraint getDefaultAlgorithmMustMatchCipherSuite() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
 
         //see RFC 5246 - Section 7.4.1.4.1
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((SigAndHashDerivation sigAndHashDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CIPHERSUITE.name()).by((SigAndHashDerivation sigAndHashDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
             if (sigAndHashDerivation.getSelectedValue() != null) {
                 CertificateKeyType requiredCertKeyType = AlgorithmResolver.getCertificateKeyType(cipherSuiteDerivation.getSelectedValue());
                 
@@ -205,10 +205,10 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
 
     private ConditionalConstraint getMustBeNullForStaticCipherSuite() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
 
         //see RFC 5246 - Section 7.4.1.4.1
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((SigAndHashDerivation sigAndHashDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CIPHERSUITE.name()).by((SigAndHashDerivation sigAndHashDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
             if (sigAndHashDerivation.getSelectedValue() != null && !cipherSuiteDerivation.getSelectedValue().isEphemeral()) {
                 return false;
             }
@@ -218,10 +218,10 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
 
     private ConditionalConstraint getMustNotBeNullForEphemeralCipherSuite() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
 
         //see RFC 5246 - Section 7.4.1.4.1
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((SigAndHashDerivation sigAndHashDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CIPHERSUITE.name()).by((SigAndHashDerivation sigAndHashDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
             if (sigAndHashDerivation.getSelectedValue() == null && cipherSuiteDerivation.getSelectedValue().isEphemeral()) {
                 return false;
             }
@@ -231,9 +231,9 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
 
     private ConditionalConstraint getMustMatchPkOfCertificateConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CERTIFICATE);
+        requiredDerivations.add(BasicDerivationType.CERTIFICATE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CERTIFICATE.name()).by((SigAndHashDerivation sigAndHashDerivation, CertificateDerivation certificateDerivation) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CERTIFICATE.name()).by((SigAndHashDerivation sigAndHashDerivation, CertificateDerivation certificateDerivation) -> {
             if (sigAndHashDerivation.getSelectedValue() != null) {
                 SignatureAlgorithm sigAlg = sigAndHashDerivation.getSelectedValue().getSignatureAlgorithm();
                 switch (certificateDerivation.getSelectedValue().getCertPublicKeyType()) {
@@ -271,10 +271,10 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
 
     private ConditionalConstraint getMustNotBePSSWithShortRSAKeyConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CERTIFICATE);
+        requiredDerivations.add(BasicDerivationType.CERTIFICATE);
 
         //RSA 512 bit key does not suffice for PSS signature
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CERTIFICATE.name()).by((SigAndHashDerivation sigAndHashDerivation, CertificateDerivation certificateDerivation) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CERTIFICATE.name()).by((SigAndHashDerivation sigAndHashDerivation, CertificateDerivation certificateDerivation) -> {
             if (sigAndHashDerivation.getSelectedValue() != null) {
                 SignatureAlgorithm sigAlg = sigAndHashDerivation.getSelectedValue().getSignatureAlgorithm();
                 HashAlgorithm hashAlgo = sigAndHashDerivation.getSelectedValue().getHashAlgorithm();
@@ -294,10 +294,10 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
     
     private ConditionalConstraint getMustNotBeRSA512withHashAbove256BitsConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CERTIFICATE);
+        requiredDerivations.add(BasicDerivationType.CERTIFICATE);
         
         //RSA 512 bit key does not work with RSA_SHA[> 256] 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CERTIFICATE.name()).by((SigAndHashDerivation sigAndHashDerivation, CertificateDerivation certificateDerivation) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), BasicDerivationType.CERTIFICATE.name()).by((SigAndHashDerivation sigAndHashDerivation, CertificateDerivation certificateDerivation) -> {
             if (sigAndHashDerivation.getSelectedValue() != null) {
                 SignatureAlgorithm sigAlg = sigAndHashDerivation.getSelectedValue().getSignatureAlgorithm();
                 HashAlgorithm hashAlgo = sigAndHashDerivation.getSelectedValue().getHashAlgorithm();

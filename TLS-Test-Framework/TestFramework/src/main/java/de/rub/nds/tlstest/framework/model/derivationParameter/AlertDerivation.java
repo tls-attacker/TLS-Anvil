@@ -21,7 +21,7 @@ import java.util.List;
 public class AlertDerivation extends DerivationParameter<AlertDescription>  {
 
     public AlertDerivation() {
-        super(DerivationType.ALERT, AlertDescription.class);
+        super(BasicDerivationType.ALERT, AlertDescription.class);
     }
     
     public AlertDerivation(AlertDescription selectedValue) {

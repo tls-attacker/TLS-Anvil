@@ -46,7 +46,11 @@ public class BasicDerivationManager implements DerivationCategoryManager{
 
     public DerivationParameter getDerivationParameterInstance(DerivationType type)
     {
-        switch(type) {
+        if(!(type instanceof BasicDerivationType)){
+            throw new IllegalArgumentException("This manager can only handle BasicDerivationTypes but type '"+type+"' was passed.");
+        }
+        BasicDerivationType basicType = (BasicDerivationType) type;
+        switch(basicType) {
             case CIPHERSUITE:
                 return new CipherSuiteDerivation();
             case MAC_BITMASK:
@@ -146,8 +150,8 @@ public class BasicDerivationManager implements DerivationCategoryManager{
             case LENGTHFIELD:
             case CERTIFICATE:
                 if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
-                    derivationsOfModel.add(DerivationType.CERTIFICATE);
-                    derivationsOfModel.add(DerivationType.SIG_HASH_ALGORIHTM);
+                    derivationsOfModel.add(BasicDerivationType.CERTIFICATE);
+                    derivationsOfModel.add(BasicDerivationType.SIG_HASH_ALGORIHTM);
                 }
             case GENERIC:
             default:
@@ -169,13 +173,13 @@ public class BasicDerivationManager implements DerivationCategoryManager{
     
     private static List<DerivationType> getBasicDerivationsForBoth(DerivationScope derivationScope) {
         List<DerivationType> derivationTypes = new LinkedList<>();
-        derivationTypes.add(DerivationType.CIPHERSUITE);
-        derivationTypes.add(DerivationType.NAMED_GROUP);
-        derivationTypes.add(DerivationType.RECORD_LENGTH);
-        derivationTypes.add(DerivationType.TCP_FRAGMENTATION);
+        derivationTypes.add(BasicDerivationType.CIPHERSUITE);
+        derivationTypes.add(BasicDerivationType.NAMED_GROUP);
+        derivationTypes.add(BasicDerivationType.RECORD_LENGTH);
+        derivationTypes.add(BasicDerivationType.TCP_FRAGMENTATION);
 
         if (derivationScope.isTls13Test()) {
-            derivationTypes.add(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC);
+            derivationTypes.add(BasicDerivationType.INCLUDE_CHANGE_CIPHER_SPEC);
         }
         
         return derivationTypes;
@@ -186,35 +190,35 @@ public class BasicDerivationManager implements DerivationCategoryManager{
         List<ExtensionType> supportedExtensions = TestContext.getInstance().getSiteReport().getSupportedExtensions();
         if (supportedExtensions != null) {
             //we add all extension regardless if the server negotiates them
-            derivationTypes.add(DerivationType.INCLUDE_ALPN_EXTENSION);
-            derivationTypes.add(DerivationType.INCLUDE_HEARTBEAT_EXTENSION);
-            derivationTypes.add(DerivationType.INCLUDE_PADDING_EXTENSION);
-            derivationTypes.add(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION);
-            derivationTypes.add(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
-            derivationTypes.add(DerivationType.INCLUDE_SESSION_TICKET_EXTENSION);
-            derivationTypes.add(DerivationType.MAX_FRAGMENT_LENGTH);
+            derivationTypes.add(BasicDerivationType.INCLUDE_ALPN_EXTENSION);
+            derivationTypes.add(BasicDerivationType.INCLUDE_HEARTBEAT_EXTENSION);
+            derivationTypes.add(BasicDerivationType.INCLUDE_PADDING_EXTENSION);
+            derivationTypes.add(BasicDerivationType.INCLUDE_RENEGOTIATION_EXTENSION);
+            derivationTypes.add(BasicDerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
+            derivationTypes.add(BasicDerivationType.INCLUDE_SESSION_TICKET_EXTENSION);
+            derivationTypes.add(BasicDerivationType.MAX_FRAGMENT_LENGTH);
             
             //we must know if the server negotiates Encrypt-Then-Mac to be able
             //to define correct constraints for padding tests
             if (supportedExtensions.contains(ExtensionType.ENCRYPT_THEN_MAC)) {
-                derivationTypes.add(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
+                derivationTypes.add(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
             }
             
             if (derivationScope.isTls13Test()) {
-                derivationTypes.add(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION);
+                derivationTypes.add(BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION);
             }
         }
         
         if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_CIPHER_SUITE_INTOLERANCE) != TestResult.TRUE) {
-            derivationTypes.add(DerivationType.INCLUDE_GREASE_CIPHER_SUITES);
+            derivationTypes.add(BasicDerivationType.INCLUDE_GREASE_CIPHER_SUITES);
         }
         
         if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_NAMED_GROUP_INTOLERANCE) != TestResult.TRUE) {
-            derivationTypes.add(DerivationType.INCLUDE_GREASE_NAMED_GROUPS);
+            derivationTypes.add(BasicDerivationType.INCLUDE_GREASE_NAMED_GROUPS);
         }
         
         if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_SIGNATURE_AND_HASH_ALGORITHM_INTOLERANCE) != TestResult.TRUE) {
-            derivationTypes.add(DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS);
+            derivationTypes.add(BasicDerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS);
         }
         return derivationTypes;
     }
@@ -223,11 +227,11 @@ public class BasicDerivationManager implements DerivationCategoryManager{
         List<DerivationType> derivationTypes = new LinkedList<>();
         if(!derivationScope.isTls13Test()) {
             if(TestContext.getInstance().getSiteReport().getReceivedClientHello().containsExtension(ExtensionType.ENCRYPT_THEN_MAC)) {
-                derivationTypes.add(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
+                derivationTypes.add(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
             }
             
             if(TestContext.getInstance().getSiteReport().getReceivedClientHello().containsExtension(ExtensionType.EXTENDED_MASTER_SECRET)) {
-                derivationTypes.add(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
+                derivationTypes.add(BasicDerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
             }
         }
         return derivationTypes;

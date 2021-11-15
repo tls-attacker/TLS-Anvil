@@ -20,7 +20,7 @@ import java.util.List;
 public class GreaseExtensionDerivation extends DerivationParameter<ExtensionType> {
     
     public GreaseExtensionDerivation() {
-        super(DerivationType.GREASE_EXTENSION, ExtensionType.class);
+        super(BasicDerivationType.GREASE_EXTENSION, ExtensionType.class);
     }
     
     public GreaseExtensionDerivation(ExtensionType selectedValue) {

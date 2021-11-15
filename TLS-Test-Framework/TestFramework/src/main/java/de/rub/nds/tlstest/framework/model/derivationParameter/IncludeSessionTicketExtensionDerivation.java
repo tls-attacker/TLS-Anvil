@@ -13,7 +13,7 @@ import java.util.List;
 public class IncludeSessionTicketExtensionDerivation extends DerivationParameter<Boolean> {
 
     public IncludeSessionTicketExtensionDerivation() {
-        super(DerivationType.INCLUDE_SESSION_TICKET_EXTENSION, Boolean.class);
+        super(BasicDerivationType.INCLUDE_SESSION_TICKET_EXTENSION, Boolean.class);
     }
     public IncludeSessionTicketExtensionDerivation(Boolean selectedValue) {
         this();

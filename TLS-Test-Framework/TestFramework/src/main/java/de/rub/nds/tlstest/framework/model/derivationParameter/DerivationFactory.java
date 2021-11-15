@@ -21,7 +21,11 @@ public class DerivationFactory {
     private static final Logger LOGGER = LogManager.getLogger();
     
     public static DerivationParameter getInstance(DerivationType type) {
-        switch(type) {
+        if(!(type instanceof BasicDerivationType)){
+            throw new IllegalArgumentException("This manager can only handle BasicDerivationTypes but type '"+type+"' was passed.");
+        }
+        BasicDerivationType basicType = (BasicDerivationType) type;
+        switch(basicType) {
             case CIPHERSUITE:
                 return new CipherSuiteDerivation();
             case MAC_BITMASK:

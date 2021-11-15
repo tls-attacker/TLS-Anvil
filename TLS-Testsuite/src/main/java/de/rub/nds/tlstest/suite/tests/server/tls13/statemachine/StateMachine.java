@@ -31,7 +31,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.tests.server.both.statemachine.SharedStateMachineTest;
 import org.junit.jupiter.api.Tag;

@@ -30,7 +30,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Arrays;
@@ -92,7 +92,7 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "Servers MUST ensure that they negotiate the "
             + "same cipher suite when receiving a conformant updated ClientHello")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
-    @ScopeLimitations(DerivationType.CIPHERSUITE)
+    @ScopeLimitations(BasicDerivationType.CIPHERSUITE)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

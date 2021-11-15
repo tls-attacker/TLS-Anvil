@@ -50,7 +50,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.tests.client.both.statemachine.SharedStateMachineTest;
@@ -90,7 +90,7 @@ public class StateMachine extends Tls13Test {
             + "which receives a protected change_cipher_spec record MUST abort the "
             + "handshake with an \"unexpected_message\" alert.")
     @RFC(number = 8446, section = "5. Record Protocol")
-    @ScopeLimitations(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
+    @ScopeLimitations(BasicDerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

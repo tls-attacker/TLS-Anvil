@@ -43,7 +43,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ExtensionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -83,9 +83,9 @@ public class Extensions extends Tls13Test {
             + "with the exception of the \"cookie\" extension in the HelloRetryRequest. "
             + "Upon receiving such an extension, an endpoint MUST abort "
             + "the handshake with an \"unsupported_extension\" alert.")
-    @ScopeExtensions(DerivationType.EXTENSION)
-    @ManualConfig(DerivationType.EXTENSION)
-    @ExplicitValues(affectedTypes = DerivationType.EXTENSION, methods = "getUnrequestedExtensions")
+    @ScopeExtensions(BasicDerivationType.EXTENSION)
+    @ManualConfig(BasicDerivationType.EXTENSION)
+    @ExplicitValues(affectedTypes = BasicDerivationType.EXTENSION, methods = "getUnrequestedExtensions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)

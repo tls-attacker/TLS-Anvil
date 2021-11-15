@@ -10,7 +10,7 @@ import java.util.List;
 public class IncludeALPNExtensionDerivation extends DerivationParameter<Boolean> {
     
     public IncludeALPNExtensionDerivation() {
-        super(DerivationType.INCLUDE_ALPN_EXTENSION, Boolean.class);
+        super(BasicDerivationType.INCLUDE_ALPN_EXTENSION, Boolean.class);
     }
     public IncludeALPNExtensionDerivation(Boolean selectedValue) {
         this();

@@ -14,7 +14,7 @@ import java.util.List;
 public class ProtocolMessageTypeDerivation extends DerivationParameter<ProtocolMessageType> {
 
     public ProtocolMessageTypeDerivation() {
-        super(DerivationType.PROTOCOL_MESSAGE_TYPE, ProtocolMessageType.class);
+        super(BasicDerivationType.PROTOCOL_MESSAGE_TYPE, ProtocolMessageType.class);
     }
     
     public ProtocolMessageTypeDerivation(ProtocolMessageType selectedValue) {

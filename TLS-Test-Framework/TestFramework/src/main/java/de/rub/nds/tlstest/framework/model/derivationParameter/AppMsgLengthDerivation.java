@@ -30,7 +30,7 @@ public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
     private final static int UNPADDED_MIN_LENGTH = 16;
 
     public AppMsgLengthDerivation() {
-        super(DerivationType.APP_MSG_LENGHT, Integer.class);
+        super(BasicDerivationType.APP_MSG_LENGHT, Integer.class);
     }
 
     public AppMsgLengthDerivation(Integer selectedValue) {
@@ -87,9 +87,9 @@ public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
 
     private ConditionalConstraint getMustBeWithinBlocksizeConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(DerivationType.APP_MSG_LENGHT.name(), DerivationType.CIPHERSUITE.name()).by((AppMsgLengthDerivation appMsgLengthDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(BasicDerivationType.APP_MSG_LENGHT.name(), BasicDerivationType.CIPHERSUITE.name()).by((AppMsgLengthDerivation appMsgLengthDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
             int selectedAppMsgLength = appMsgLengthDerivation.getSelectedValue();
             CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
             

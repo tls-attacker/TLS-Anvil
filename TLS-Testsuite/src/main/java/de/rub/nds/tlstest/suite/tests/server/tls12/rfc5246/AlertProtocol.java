@@ -34,7 +34,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
@@ -63,7 +63,7 @@ public class AlertProtocol extends Tls12Test {
     @InteroperabilityCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.LOW)
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     public void closeNotify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -102,8 +102,8 @@ public class AlertProtocol extends Tls12Test {
     @SecurityCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(DerivationType.ALERT)
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions(BasicDerivationType.ALERT)
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     public void abortAfterFatalAlert_sendBeforeCCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -132,8 +132,8 @@ public class AlertProtocol extends Tls12Test {
     @SecurityCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(DerivationType.ALERT)
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions(BasicDerivationType.ALERT)
+    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     public void abortAfterFatalAlert_sendAfterServerHelloDone(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

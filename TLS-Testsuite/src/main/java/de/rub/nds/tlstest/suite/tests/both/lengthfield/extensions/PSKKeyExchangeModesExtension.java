@@ -23,7 +23,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -45,7 +45,7 @@ public class PSKKeyExchangeModesExtension extends TlsGenericTest {
     
     @TlsTest(description = "Send a Pre Shared Key Exchange Modes Extension in the Hello Message with a modified length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
-    @ScopeLimitations(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
+    @ScopeLimitations(BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -57,7 +57,7 @@ public class PSKKeyExchangeModesExtension extends TlsGenericTest {
     
     @TlsTest(description = "Send a Pre Shared Key Exchange Modes Extension in the Hello Message with a modified length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
-    @ScopeLimitations(DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
+    @ScopeLimitations(BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

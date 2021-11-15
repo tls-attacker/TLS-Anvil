@@ -19,7 +19,7 @@ import java.util.List;
 public class InvalidCCSContentDerivation extends DerivationParameter<byte[]> {
 
     public InvalidCCSContentDerivation() {
-        super(DerivationType.INVALID_CCS_CONTENT, byte[].class);
+        super(BasicDerivationType.INVALID_CCS_CONTENT, byte[].class);
     }
 
     public InvalidCCSContentDerivation(byte[] selectedValue) {

@@ -13,7 +13,7 @@ import java.util.List;
 public class ExtensionDerivation extends DerivationParameter<ExtensionType> {
     
     public ExtensionDerivation() {
-        super(DerivationType.EXTENSION, ExtensionType.class);
+        super(BasicDerivationType.EXTENSION, ExtensionType.class);
     }
     
     public ExtensionDerivation(ExtensionType selectedValue) {

@@ -46,7 +46,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -179,7 +179,7 @@ public class Fragmentation extends Tls12Test {
     @TlsTest(description = "The length (in bytes) of the following TLSPlaintext.fragment. "
             + "The length MUST NOT exceed 2^14.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -213,7 +213,7 @@ public class Fragmentation extends Tls12Test {
 
     @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. "
             + "The length MUST NOT exceed 2^14 + 2048.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)

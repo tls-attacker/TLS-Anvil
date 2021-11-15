@@ -13,7 +13,7 @@ import java.util.List;
 public class ChosenHandshakeMessageDerivation extends DerivationParameter<HandshakeMessageType> {
     
     public ChosenHandshakeMessageDerivation() {
-        super(DerivationType.CHOSEN_HANDSHAKE_MSG, HandshakeMessageType.class);
+        super(BasicDerivationType.CHOSEN_HANDSHAKE_MSG, HandshakeMessageType.class);
     }
     
     public ChosenHandshakeMessageDerivation(HandshakeMessageType selectedValue) {

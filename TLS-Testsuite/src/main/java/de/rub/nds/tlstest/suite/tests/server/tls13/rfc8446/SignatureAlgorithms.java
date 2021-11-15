@@ -41,7 +41,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -96,9 +96,9 @@ public class SignatureAlgorithms extends Tls13Test {
     @TlsTest(description = "Clients offering these values MUST list "
             + "them (legacy algorithms) as the lowest priority (listed after all other "
             + "algorithms in SignatureSchemeList).")
-    @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
-    @ManualConfig(DerivationType.SIG_HASH_ALGORIHTM)
-    @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
+    @ScopeExtensions(BasicDerivationType.SIG_HASH_ALGORIHTM)
+    @ManualConfig(BasicDerivationType.SIG_HASH_ALGORIHTM)
+    @ExplicitValues(affectedTypes = BasicDerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -131,8 +131,8 @@ public class SignatureAlgorithms extends Tls13Test {
             + "signed TLS handshake messages, although they MAY appear in \"signature_algorithms\" "
             + "and \"signature_algorithms_cert\" for backward "
             + "compatibility with TLS 1.2.")
-    @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
-    @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
+    @ScopeExtensions(BasicDerivationType.SIG_HASH_ALGORIHTM)
+    @ExplicitValues(affectedTypes = BasicDerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)

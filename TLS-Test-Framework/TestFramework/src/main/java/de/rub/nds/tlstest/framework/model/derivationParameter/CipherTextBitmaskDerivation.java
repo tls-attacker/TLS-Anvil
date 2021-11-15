@@ -29,7 +29,7 @@ import java.util.Set;
 public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
 
     public CipherTextBitmaskDerivation() {
-        super(DerivationType.CIPHERTEXT_BITMASK, Integer.class);
+        super(BasicDerivationType.CIPHERTEXT_BITMASK, Integer.class);
     }
 
     public CipherTextBitmaskDerivation(Integer selectedValue) {
@@ -77,9 +77,9 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
 
     private ConditionalConstraint getMustBeWithinBlocksizeConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(DerivationType.CIPHERTEXT_BITMASK.name(), DerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePos, DerivationParameter cipherSuite) -> {
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(BasicDerivationType.CIPHERTEXT_BITMASK.name(), BasicDerivationType.CIPHERSUITE.name()).by((DerivationParameter bytePos, DerivationParameter cipherSuite) -> {
             int chosenBytePos = (Integer) bytePos.getSelectedValue();
             CipherSuiteDerivation cipherDev = (CipherSuiteDerivation) cipherSuite;
             return AlgorithmResolver.getCipher(cipherDev.getSelectedValue()).getBlocksize() > chosenBytePos;
@@ -88,11 +88,11 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
 
     private ConditionalConstraint getMustBeWithinCiphertextSizeConstraint(DerivationScope scope) {
         Set<DerivationType> requiredDerivationsCiphertext = new HashSet<>();
-        requiredDerivationsCiphertext.add(DerivationType.CIPHERSUITE);
-        requiredDerivationsCiphertext.add(DerivationType.APP_MSG_LENGHT);
+        requiredDerivationsCiphertext.add(BasicDerivationType.CIPHERSUITE);
+        requiredDerivationsCiphertext.add(BasicDerivationType.APP_MSG_LENGHT);
 
         //ensure that the selected byte is within ciphertext size (for non-padded)
-        return new ConditionalConstraint(requiredDerivationsCiphertext, ConstraintBuilder.constrain(DerivationType.CIPHERTEXT_BITMASK.name(), DerivationType.CIPHERSUITE.name(), DerivationType.APP_MSG_LENGHT.name()).by((CipherTextBitmaskDerivation cipherTextBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation, AppMsgLengthDerivation appMsgLenParam) -> {
+        return new ConditionalConstraint(requiredDerivationsCiphertext, ConstraintBuilder.constrain(BasicDerivationType.CIPHERTEXT_BITMASK.name(), BasicDerivationType.CIPHERSUITE.name(), BasicDerivationType.APP_MSG_LENGHT.name()).by((CipherTextBitmaskDerivation cipherTextBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation, AppMsgLengthDerivation appMsgLenParam) -> {
             int selectedBitmaskBytePosition = cipherTextBitmaskDerivation.getSelectedValue();
             CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
             int selectedAppMsgLength = appMsgLenParam.getSelectedValue();

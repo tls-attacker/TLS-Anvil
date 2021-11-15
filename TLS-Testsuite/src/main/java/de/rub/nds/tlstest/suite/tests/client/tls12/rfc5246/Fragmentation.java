@@ -32,7 +32,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
@@ -70,7 +70,7 @@ public class Fragmentation extends Tls12Test {
     }
 
     @TlsTest
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
     @TestDescription("Client" +
         "   message boundaries are not preserved in the record layer (i.e.,\n" +
         "   multiple client messages of the same ContentType MAY be coalesced\n" +

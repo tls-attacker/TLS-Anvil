@@ -35,7 +35,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Arrays;
@@ -118,7 +118,7 @@ public class ClientHello extends Tls12Test {
     }
     
     @TlsTest(description = "Send a ClientHello that offers many cipher suites")
-    @ScopeLimitations(DerivationType.INCLUDE_GREASE_CIPHER_SUITES)
+    @ScopeLimitations(BasicDerivationType.INCLUDE_GREASE_CIPHER_SUITES)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

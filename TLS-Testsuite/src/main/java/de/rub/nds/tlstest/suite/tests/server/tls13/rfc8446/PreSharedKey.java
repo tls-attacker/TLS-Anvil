@@ -41,7 +41,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Arrays;
 import static org.junit.Assert.assertTrue;
@@ -148,7 +148,7 @@ public class PreSharedKey extends Tls13Test {
     }*/
     @TlsTest(description = "Prior to accepting PSK key establishment, the server MUST validate"
             + "the corresponding binder value")
-    @ScopeExtensions(DerivationType.PRF_BITMASK)
+    @ScopeExtensions(BasicDerivationType.PRF_BITMASK)
     @MethodCondition(method = "supportsPsk")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

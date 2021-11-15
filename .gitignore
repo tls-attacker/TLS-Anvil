@@ -1,1 +1,6 @@
 *.code-workspace
+.vscode/
+logs/
+
+TestSuiteResults_*
+localhost:*

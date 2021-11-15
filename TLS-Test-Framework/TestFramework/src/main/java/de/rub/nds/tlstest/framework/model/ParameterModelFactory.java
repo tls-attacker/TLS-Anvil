@@ -31,8 +31,6 @@ import org.apache.logging.log4j.Logger;
  */
 public class ParameterModelFactory {
 
-    private static final Logger LOGGER = LogManager.getLogger();
-
     public static InputParameterModel generateModel(DerivationScope derivationScope, TestContext testContext) {
         List<DerivationType> derivationTypes = getDerivationsForScope(derivationScope);
         Parameter.Builder[] builders = getModelParameters(derivationTypes, testContext, derivationScope);
@@ -58,21 +56,6 @@ public class ParameterModelFactory {
     }
 
     private static List<DerivationType> getDerivationsOfModel(DerivationScope derivationScope, ModelType baseModel) {
-        /*LinkedList<DerivationType> derivationsOfModel = new LinkedList<>();
-        switch (baseModel) {
-            case EMPTY:
-                break;
-            case LENGTHFIELD:
-            case CERTIFICATE:
-                if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
-                    derivationsOfModel.add(BasicDerivationType.CERTIFICATE);
-                    derivationsOfModel.add(BasicDerivationType.SIG_HASH_ALGORIHTM);
-                }
-            case GENERIC:
-            default:
-                derivationsOfModel.addAll(getBasicModelDerivations(derivationScope));
-        }
-        return derivationsOfModel;*/
         return DerivationManager.getInstance().getDerivationsOfModel(derivationScope, baseModel);
     }
 
@@ -115,83 +98,6 @@ public class ParameterModelFactory {
         }
         return false;
     }
-
-    /*private static List<DerivationType> getBasicModelDerivations(DerivationScope derivationScope) {
-        List<DerivationType> derivationTypes = getBasicDerivationsForBoth(derivationScope);
-        
-        if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-            derivationTypes.addAll(getBasicDerivationsForServer(derivationScope));
-        } else {
-            derivationTypes.addAll(getBasicDerivationsForClient(derivationScope));
-        }
-        return derivationTypes;
-    }*/
-    
-    /*private static List<DerivationType> getBasicDerivationsForBoth(DerivationScope derivationScope) {
-        List<DerivationType> derivationTypes = new LinkedList<>();
-        derivationTypes.add(BasicDerivationType.CIPHERSUITE);
-        derivationTypes.add(BasicDerivationType.NAMED_GROUP);
-        derivationTypes.add(BasicDerivationType.RECORD_LENGTH);
-        derivationTypes.add(BasicDerivationType.TCP_FRAGMENTATION);
-
-        if (derivationScope.isTls13Test()) {
-            derivationTypes.add(BasicDerivationType.INCLUDE_CHANGE_CIPHER_SPEC);
-        }
-        
-        return derivationTypes;
-    }
-    
-    private static List<DerivationType> getBasicDerivationsForServer(DerivationScope derivationScope) {
-        List<DerivationType> derivationTypes = new LinkedList<>();
-        List<ExtensionType> supportedExtensions = TestContext.getInstance().getSiteReport().getSupportedExtensions();
-        if (supportedExtensions != null) {
-            //we add all extension regardless if the server negotiates them
-            derivationTypes.add(BasicDerivationType.INCLUDE_ALPN_EXTENSION);
-            derivationTypes.add(BasicDerivationType.INCLUDE_HEARTBEAT_EXTENSION);
-            derivationTypes.add(BasicDerivationType.INCLUDE_PADDING_EXTENSION);
-            derivationTypes.add(BasicDerivationType.INCLUDE_RENEGOTIATION_EXTENSION);
-            derivationTypes.add(BasicDerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
-            derivationTypes.add(BasicDerivationType.INCLUDE_SESSION_TICKET_EXTENSION);
-            derivationTypes.add(BasicDerivationType.MAX_FRAGMENT_LENGTH);
-            
-            //we must know if the server negotiates Encrypt-Then-Mac to be able
-            //to define correct constraints for padding tests
-            if (supportedExtensions.contains(ExtensionType.ENCRYPT_THEN_MAC)) {
-                derivationTypes.add(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
-            }
-            
-            if (derivationScope.isTls13Test()) {
-                derivationTypes.add(BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION);
-            }
-        }
-        
-        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_CIPHER_SUITE_INTOLERANCE) != TestResult.TRUE) {
-            derivationTypes.add(BasicDerivationType.INCLUDE_GREASE_CIPHER_SUITES);
-        }
-        
-        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_NAMED_GROUP_INTOLERANCE) != TestResult.TRUE) {
-            derivationTypes.add(BasicDerivationType.INCLUDE_GREASE_NAMED_GROUPS);
-        }
-        
-        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_SIGNATURE_AND_HASH_ALGORITHM_INTOLERANCE) != TestResult.TRUE) {
-            derivationTypes.add(BasicDerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS);
-        }
-        return derivationTypes;
-    }
-    
-    private static List<DerivationType> getBasicDerivationsForClient(DerivationScope derivationScope) {
-        List<DerivationType> derivationTypes = new LinkedList<>();
-        if(!derivationScope.isTls13Test()) {
-            if(TestContext.getInstance().getSiteReport().getReceivedClientHello().containsExtension(ExtensionType.ENCRYPT_THEN_MAC)) {
-                derivationTypes.add(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
-            }
-            
-            if(TestContext.getInstance().getSiteReport().getReceivedClientHello().containsExtension(ExtensionType.EXTENDED_MASTER_SECRET)) {
-                derivationTypes.add(BasicDerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
-            }
-        }
-        return derivationTypes;
-    }*/
 
     /**
      * DerivationParameters that only have one possible value can not be modeled

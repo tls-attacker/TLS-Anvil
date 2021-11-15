@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 /**
  * The manager that knows and manages all DerivationCategoryManager%s. It is used to collect the set of DerivationParameter%s
@@ -34,7 +35,7 @@ public class DerivationManager {
 
     private Map<Class, DerivationCategoryManager> categoryManagers;
 
-    public static DerivationManager getInstance() {
+    public static synchronized DerivationManager getInstance() {
         if (DerivationManager.instance == null) {
             DerivationManager.instance = new DerivationManager();
         }
@@ -42,10 +43,12 @@ public class DerivationManager {
     }
 
     private DerivationManager() {
+        categoryManagers = new HashMap<>();
         registerCategoryManager(BasicDerivationType.class, BasicDerivationManager.getInstance());
     }
 
-    public DerivationParameter getDerivationParameterInstance(DerivationType type) {
+
+    public synchronized DerivationParameter getDerivationParameterInstance(DerivationType type) {
         for (Map.Entry<Class, DerivationCategoryManager> entry : categoryManagers.entrySet()) {
             if(entry.getKey() == type.getClass()){
                 return entry.getValue().getDerivationParameterInstance(type);
@@ -55,7 +58,7 @@ public class DerivationManager {
         throw new UnsupportedOperationException("Derivation Type Category not registered");
     }
 
-    public List<DerivationType> getDerivationsOfModel(DerivationScope derivationScope, ModelType baseModel) {
+    public synchronized List<DerivationType> getDerivationsOfModel(DerivationScope derivationScope, ModelType baseModel) {
         List<DerivationType> derivationsOfModel = new LinkedList<>();
         for (Map.Entry<Class, DerivationCategoryManager> entry : categoryManagers.entrySet()) {
             derivationsOfModel.addAll(entry.getValue().getDerivationsOfModel(derivationScope, baseModel));
@@ -63,18 +66,18 @@ public class DerivationManager {
         return derivationsOfModel;
     }
 
-    public void registerCategoryManager(Class derivationTypeCategory, DerivationCategoryManager categoryManager){
+    public synchronized void registerCategoryManager(Class derivationTypeCategory, DerivationCategoryManager categoryManager){
         if(!DerivationType.class.isAssignableFrom(derivationTypeCategory)){
             throw new IllegalArgumentException(String.format("Passed derivationTypeCategory '%s' does not implement the DerivationType interface.", derivationTypeCategory.toString()));
         }
         categoryManagers.put(derivationTypeCategory, categoryManager);
     }
 
-    public void unregisterCategoryManager(Class derivationTypeCategory){
+    public synchronized void unregisterCategoryManager(Class derivationTypeCategory){
         categoryManagers.remove(derivationTypeCategory);
     }
 
-    public List<DerivationCategoryManager> getRegisteredCategoryManagers(){
+    public synchronized List<DerivationCategoryManager> getRegisteredCategoryManagers(){
         return new ArrayList<DerivationCategoryManager>(categoryManagers.values());
     }
 }

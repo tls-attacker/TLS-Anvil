@@ -33,7 +33,7 @@ public class BasicDerivationManager implements DerivationCategoryManager{
     private static BasicDerivationManager instance = null;
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static BasicDerivationManager getInstance() {
+    public static synchronized BasicDerivationManager getInstance() {
         if (BasicDerivationManager.instance == null) {
             BasicDerivationManager.instance = new BasicDerivationManager();
         }

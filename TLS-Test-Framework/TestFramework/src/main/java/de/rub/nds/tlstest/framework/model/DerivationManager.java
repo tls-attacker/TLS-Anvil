@@ -48,7 +48,7 @@ public class DerivationManager {
     }
 
 
-    public synchronized DerivationParameter getDerivationParameterInstance(DerivationType type) {
+    public DerivationParameter getDerivationParameterInstance(DerivationType type) {
         for (Map.Entry<Class, DerivationCategoryManager> entry : categoryManagers.entrySet()) {
             if(entry.getKey() == type.getClass()){
                 return entry.getValue().getDerivationParameterInstance(type);
@@ -58,7 +58,7 @@ public class DerivationManager {
         throw new UnsupportedOperationException("Derivation Type Category not registered");
     }
 
-    public synchronized List<DerivationType> getDerivationsOfModel(DerivationScope derivationScope, ModelType baseModel) {
+    public List<DerivationType> getDerivationsOfModel(DerivationScope derivationScope, ModelType baseModel) {
         List<DerivationType> derivationsOfModel = new LinkedList<>();
         for (Map.Entry<Class, DerivationCategoryManager> entry : categoryManagers.entrySet()) {
             derivationsOfModel.addAll(entry.getValue().getDerivationsOfModel(derivationScope, baseModel));

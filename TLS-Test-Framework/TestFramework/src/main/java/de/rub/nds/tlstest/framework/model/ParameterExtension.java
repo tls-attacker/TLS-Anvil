@@ -14,7 +14,7 @@ package de.rub.nds.tlstest.framework.model;
  * Note that any new parameter extension has to be known by the ParameterExtensionManager, to be used.
  */
 public interface ParameterExtension {
-    boolean load();
-    boolean unload();
+    void load(Object initData);
+    void unload();
     String getIdentifier();
 }

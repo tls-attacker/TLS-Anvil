@@ -9,6 +9,8 @@
  */
 package de.rub.nds.tlstest.framework.model;
 
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsExtension;
+
 import java.util.*;
 
 public class ParameterExtensionManager {
@@ -27,7 +29,7 @@ public class ParameterExtensionManager {
         availableExtensions = new HashMap<>();
         loadedExtensions = new HashSet<>();
         // Register new parameterExtensions here:
-        //registerParameterExtension(TODO: Add ConfigOptionsExtension here);
+        registerParameterExtension(ConfigurationOptionsExtension.getInstance());
     }
 
     public synchronized void registerParameterExtension(ParameterExtension parameterExtension) {
@@ -46,12 +48,18 @@ public class ParameterExtensionManager {
         return new HashSet<>(loadedExtensions);
     }
 
-    public synchronized void loadExtension(String identifier){
+    /**
+     * Loads the extension identified by the specified identifier.
+     *
+     * @param identifier - The identifier of the extension to load
+     * @param initData - Some data to initialize the extension. The expected data and type depends on the extension.
+     */
+    public synchronized void loadExtension(String identifier, Object initData){
         if(!availableExtensions.containsKey(identifier)){
             throw new IllegalArgumentException(String.format("Parameter Extension identifier '%s' is not known by the ParameterExtensionManager. Have you registered it?",identifier));
         }
         if(!loadedExtensions.contains(identifier)){
-            availableExtensions.get(identifier).load();
+            availableExtensions.get(identifier).load(initData);
             loadedExtensions.add(identifier);
         }
     }

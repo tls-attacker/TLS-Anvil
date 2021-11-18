@@ -12,6 +12,9 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
+
+import java.util.Set;
 
 /**
  * A ConfigurationOptionsBuildManager knows how to build a specific TLS library in a specific version range. It is
@@ -29,5 +32,5 @@ public interface ConfigurationOptionsBuildManager {
      * @param optionSet - the set of configurationOptionDerivationParameters that contain selected values.
      * @returns the TestSiteReport of the provided library build.
      */
-    TestSiteReport configureOptionSetAndGetSiteReport(Config config, TestContext context/*, Set<ConfigurationOptionDerivationParameter> optionSet*/);
+    TestSiteReport configureOptionSetAndGetSiteReport(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet);
 }

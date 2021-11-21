@@ -58,7 +58,9 @@ import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
+import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
+import de.rub.nds.tlstest.framework.extractor.TestCaseExtractor;
 import de.rub.nds.tlstest.framework.reporting.ExecutionListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -515,12 +517,18 @@ public class TestRunner {
     }
 
     public void runTests(Class<?> mainClass) {
-        prepareTestExecution();
-
         String packageName = mainClass.getPackage().getName();
         if (testConfig.getTestPackage() != null) {
             packageName = testConfig.getTestPackage();
         }
+
+        if (testConfig.getParsedCommand() == ConfigDelegates.EXTRACT_TESTS) {
+            TestCaseExtractor extractor = new TestCaseExtractor(packageName);
+            extractor.start();
+            return;
+        }
+
+        prepareTestExecution();
 
         LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()
                 .selectors(

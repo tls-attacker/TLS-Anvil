@@ -19,15 +19,15 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
-import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsscanner.serverscanner.report.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
+import de.rub.nds.tlstest.framework.config.delegates.TestExtractorDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.utils.Utils;
-import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,8 +41,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 
@@ -50,6 +48,7 @@ public class TestConfig extends TLSDelegateConfig {
     private static final Logger LOGGER = LogManager.getLogger();
     private TestClientDelegate testClientDelegate = null;
     private TestServerDelegate testServerDelegate = null;
+    private TestExtractorDelegate testExtractorDelegate = null;
 
     private JCommander argParser = null;
 
@@ -59,6 +58,8 @@ public class TestConfig extends TLSDelegateConfig {
     private Config cachedConfig = null;
     private List<ProtocolVersion> supportedVersions = null;
     private Callable<Integer> timeoutActionScript;
+
+    private ConfigDelegates parsedCommand = null;
 
 
     @Parameter(names = "-tags", description = "Run only tests containing on of the specified tags")
@@ -112,6 +113,7 @@ public class TestConfig extends TLSDelegateConfig {
         super(new GeneralDelegate());
         this.testServerDelegate = new TestServerDelegate();
         this.testClientDelegate = new TestClientDelegate();
+        this.testExtractorDelegate = new TestExtractorDelegate();
     }
 
 
@@ -157,8 +159,9 @@ public class TestConfig extends TLSDelegateConfig {
 
         if (argParser == null) {
             argParser = JCommander.newBuilder()
-                    .addCommand("client", testClientDelegate)
-                    .addCommand("server", testServerDelegate)
+                    .addCommand(ConfigDelegates.CLIENT.getCommand(), testClientDelegate)
+                    .addCommand(ConfigDelegates.SERVER.getCommand(), testServerDelegate)
+                    .addCommand(ConfigDelegates.EXTRACT_TESTS.getCommand(), testExtractorDelegate)
                     .addObject(this)
                     .build();
         }
@@ -170,9 +173,12 @@ public class TestConfig extends TLSDelegateConfig {
         }
 
         this.argParser.parse(args);
+        this.parsedCommand = ConfigDelegates.delegateForCommand(this.argParser.getParsedCommand());
         if (argParser.getParsedCommand() == null) {
             argParser.usage();
             throw new ParameterException("You have to use the client or server command");
+        } else if (argParser.getParsedCommand().equals(ConfigDelegates.EXTRACT_TESTS.getCommand())) {
+            return;
         }
 
         this.setTestEndpointMode(argParser.getParsedCommand());
@@ -182,7 +188,7 @@ public class TestConfig extends TLSDelegateConfig {
         }
 
         if (this.identifier == null) {
-            if (argParser.getParsedCommand().equals("server")) {
+            if (argParser.getParsedCommand().equals(ConfigDelegates.SERVER.getCommand())) {
                 this.identifier = testServerDelegate.getHost();
             }
             else {
@@ -505,5 +511,13 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setPrettyPrintJSON(boolean prettyPrintJSON) {
         this.prettyPrintJSON = prettyPrintJSON;
+    }
+
+    public ConfigDelegates getParsedCommand() {
+        return parsedCommand;
+    }
+
+    public TestExtractorDelegate getTestExtractorDelegate() {
+        return testExtractorDelegate;
     }
 }

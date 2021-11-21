@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
-@RFC(number = 5446, section = "7.4.6. Client Certificate")
+@RFC(number = 5246, section = "7.4.6. Client Certificate")
 public class ClientCertificateMessage extends Tls12Test {
 
     @TlsTest(description = "If no suitable certificate is available, the client MUST send a certificate message containing no certificates.")

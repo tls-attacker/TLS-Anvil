@@ -43,7 +43,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 
-@RFC(number = 5264, section = "6.2.3.3 AEAD Ciphers")
+@RFC(number = 5246, section = "6.2.3.3 AEAD Ciphers")
 public class AEADCiphers extends Tls12Test {
 
     @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")

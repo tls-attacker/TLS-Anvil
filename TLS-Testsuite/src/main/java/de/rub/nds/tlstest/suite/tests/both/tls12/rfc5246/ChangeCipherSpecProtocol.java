@@ -44,7 +44,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 
-@RFC(number = 5264, section = "7.1 Change Cipher Spec Protocol")
+@RFC(number = 5246, section = "7.1 Change Cipher Spec Protocol")
 public class ChangeCipherSpecProtocol extends Tls12Test {
 
     //don't split ccs into multiple records

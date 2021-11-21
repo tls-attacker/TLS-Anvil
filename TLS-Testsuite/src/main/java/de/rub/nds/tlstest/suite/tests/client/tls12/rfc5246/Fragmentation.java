@@ -37,7 +37,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
-@RFC(number = 5264, section = "6.2.1 Fragmentation")
+@RFC(number = 5246, section = "6.2.1 Fragmentation")
 @ClientTest
 public class Fragmentation extends Tls12Test {
 

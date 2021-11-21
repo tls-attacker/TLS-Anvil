@@ -45,7 +45,7 @@ public class PreSharedKey extends Tls13Test {
             "the handshake with an \"illegal_parameter\" alert.")*/
     @Test
     @MethodCondition(method = "sendsPSKExtension")
-    @TestDescription("The Pre-Shared Key extension must be the last extension of the Client Hello")
+    @TestDescription("The \"pre_shared_key\" extension MUST be the last extension in the ClientHello")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

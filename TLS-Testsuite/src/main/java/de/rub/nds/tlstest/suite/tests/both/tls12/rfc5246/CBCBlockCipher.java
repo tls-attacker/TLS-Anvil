@@ -47,7 +47,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 
-@RFC(number = 5264, section = "6.2.3.2 CBC Block Cipher")
+@RFC(number = 5246, section = "6.2.3.2 CBC Block Cipher")
 public class CBCBlockCipher extends Tls12Test {
 
     //tests are supposed to test validity with different padding sizes etc
@@ -103,7 +103,7 @@ public class CBCBlockCipher extends Tls12Test {
             "a TLSCiphertext decrypted in an invalid way: either it wasn’t an " +
             "even multiple of the block length, or its padding values, when " +
             "checked, weren’t correct.")
-    @RFC(number = 5446, section = "7.2.2. Error Alerts")
+    @RFC(number = 5246, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.CIPHERTEXT_BITMASK)
@@ -158,7 +158,7 @@ public class CBCBlockCipher extends Tls12Test {
 
     @TlsTest(description = "bad_record_mac - This alert is returned if a record is received with an incorrect " +
             "MAC.")
-    @RFC(number = 5446, section = "7.2.2. Error Alerts")
+    @RFC(number = 5246, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.MAC_BITMASK)

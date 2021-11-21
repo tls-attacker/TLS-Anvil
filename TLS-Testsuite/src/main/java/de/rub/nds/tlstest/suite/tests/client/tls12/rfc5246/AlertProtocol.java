@@ -43,7 +43,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5264, section = "7.2.1 Closure Alerts")
+@RFC(number = 5246, section = "7.2.1 Closure Alerts")
 @ClientTest
 public class AlertProtocol extends Tls12Test {
 
@@ -93,7 +93,7 @@ public class AlertProtocol extends Tls12Test {
     }
 
     @TlsTest
-    @RFC(number = 5264, section = "7.2.2 Error Alerts")
+    @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @ScopeExtensions(DerivationType.ALERT)
     @TestDescription("A Fatal Alert must terminate the connection")
     @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
@@ -122,7 +122,7 @@ public class AlertProtocol extends Tls12Test {
 
     @TlsTest
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @RFC(number = 5264, section = "7.2.2 Error Alerts")
+    @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

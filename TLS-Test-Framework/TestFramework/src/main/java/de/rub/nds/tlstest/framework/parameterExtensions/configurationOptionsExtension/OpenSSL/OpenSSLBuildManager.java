@@ -10,18 +10,33 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.command.ListVolumesResponse;
+import com.github.dockerjava.api.model.Bind;
+import com.github.dockerjava.api.model.HostConfig;
+import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.api.model.Volume;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.DockerClientConfig;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.*;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import javax.xml.bind.DatatypeConverter;
+import java.awt.*;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.List;
 
 /**
  * The OpenSSLBuildManager is a ConfigurationOptionsBuildManager to build modern OpenSSL versions.
@@ -31,6 +46,14 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
     private Path buildScriptPath;
     private Map<String, TestSiteReport> dockerTagToSiteReport;
 
+    private Set<String> existingDockerTags;
+    private DockerClient dockerClient;
+    private final String TEMP_IMAGE_NAME = "temp-openssl-image:latest";
+    private final String TEMP_CONTAINER_NAME = "temp-openssl-container";
+
+    private final String CCACHE_VOLUME_NAME = "ccache-cache";
+    private Volume targetVolume = new Volume("/src/ccache");
+
     public static synchronized OpenSSLBuildManager getInstance() {
         if (OpenSSLBuildManager.instance == null) {
             OpenSSLBuildManager.instance = new OpenSSLBuildManager();
@@ -39,7 +62,28 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
     }
 
     private OpenSSLBuildManager(){
+
         dockerTagToSiteReport = new HashMap<>();
+        // The log4j logger must be disabled to prevent warnings of unconfigured log4j
+        Logger.getRootLogger().setLevel(Level.OFF);
+        dockerClient = DockerClientBuilder.getInstance().build();
+
+        // Get all existing docker tags
+        // Note that it is assumed, that no (relevant) docker images are created or deleted manually during the test executions
+        List<Image> imageList = dockerClient.listImagesCmd().withDanglingFilter(false).exec();
+        Set<String> existingDockerTags = new HashSet<>();
+        for(Image img : imageList){
+            Object tagsObj = img.getRawValues().get("RepoTags");
+            List<String> tags = (List<String>) tagsObj;
+            existingDockerTags.addAll(tags);
+        }
+
+        // Create a ccache volume if it does not exist so far
+        if(!dockerClient.listVolumesCmd().exec().getVolumes().stream().anyMatch(response -> response.getName().equals(CCACHE_VOLUME_NAME))){
+            // If a volume with the specified name exists:
+            dockerClient.createVolumeCmd().withName(CCACHE_VOLUME_NAME).exec();
+        }
+
     }
 
     @Override
@@ -65,7 +109,7 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
         String dockerTag = computeDockerTag(cliString, configOptionsConfig.getTlsLibraryName(), configOptionsConfig.getTlsLibraryVersion());
 
         if(!dockerTagExists(dockerTag)){
-            buildDockerImageWithBuildScript(cliString, dockerTag);
+            buildDockerImage(cliString, dockerTag);
         }
 
         // TODO: start container and assign port
@@ -161,12 +205,37 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
     // Docker access functions
 
     private boolean dockerTagExists(String dockerTag){
-        // TODO
-        return false;
+        return existingDockerTags.contains(dockerTag);
     }
 
-    private void buildDockerImageWithBuildScript(String cliOptionString, String dockerTag){
-        // TODO
+    private void buildDockerImage(String cliOptionString, String dockerTag)  {
+        //dockerClient.removeImageCmd(TEMP_IMAGE_NAME);
+        CreateContainerResponse tempContainer = dockerClient.createContainerCmd(TEMP_IMAGE_NAME)
+                .withName(TEMP_CONTAINER_NAME)
+                .withHostConfig(HostConfig.newHostConfig().withBinds(new Bind(CCACHE_VOLUME_NAME, targetVolume)))
+                .withCmd(cliOptionString)
+                .exec();
+
+        dockerClient.startContainerCmd(tempContainer.getId()).exec();
+        InspectContainerResponse containerResp
+                = dockerClient.inspectContainerCmd(tempContainer.getId()).exec();
+
+        // Wait for the build process to finish
+        while(containerResp.getState().getRunning()){
+            try {
+                Thread.sleep(200);
+            }
+            catch(InterruptedException e){
+                e.printStackTrace();
+            }
+        }
+
+        // Commit the build to create a final image
+        dockerClient.commitCmd(tempContainer.getId()).withTag("finished-build-raw:latest").exec();
+
+        // TODO Build final image using the docker tag
+        // TODO: Test me!!!
+
         return;
     }
 

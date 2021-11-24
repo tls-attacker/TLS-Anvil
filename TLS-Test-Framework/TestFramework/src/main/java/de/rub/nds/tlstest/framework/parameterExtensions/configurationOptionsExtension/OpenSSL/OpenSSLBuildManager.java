@@ -11,16 +11,12 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.BuildImageCmd;
+import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
-import com.github.dockerjava.api.command.ListVolumesResponse;
-import com.github.dockerjava.api.model.Bind;
-import com.github.dockerjava.api.model.HostConfig;
-import com.github.dockerjava.api.model.Image;
-import com.github.dockerjava.api.model.Volume;
-import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DockerClientBuilder;
-import com.github.dockerjava.core.DockerClientConfig;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
@@ -31,12 +27,14 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import javax.xml.bind.DatatypeConverter;
-import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * The OpenSSLBuildManager is a ConfigurationOptionsBuildManager to build modern OpenSSL versions.
@@ -48,7 +46,7 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
 
     private Set<String> existingDockerTags;
     private DockerClient dockerClient;
-    private final String TEMP_IMAGE_NAME = "temp-openssl-image:latest";
+    private final String FACTORY_IMAGE_NAME = "build-openssl-cached:latest";
     private final String TEMP_CONTAINER_NAME = "temp-openssl-container";
 
     private final String CCACHE_VOLUME_NAME = "ccache-cache";
@@ -208,39 +206,92 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
         return existingDockerTags.contains(dockerTag);
     }
 
-    private void buildDockerImage(String cliOptionString, String dockerTag)  {
-        //dockerClient.removeImageCmd(TEMP_IMAGE_NAME);
-        CreateContainerResponse tempContainer = dockerClient.createContainerCmd(TEMP_IMAGE_NAME)
+    public void buildDockerImage(String cliOptionString, String dockerTag)  {
+        Optional<Container> oldTempContainer = containerByName(TEMP_CONTAINER_NAME);
+        if(oldTempContainer.isPresent()){
+            dockerClient.removeContainerCmd(oldTempContainer.get().getId()).exec();
+            System.out.println("Old Container Removed");
+        }
+
+        CreateContainerResponse tempContainer = dockerClient.createContainerCmd(FACTORY_IMAGE_NAME)
                 .withName(TEMP_CONTAINER_NAME)
                 .withHostConfig(HostConfig.newHostConfig().withBinds(new Bind(CCACHE_VOLUME_NAME, targetVolume)))
                 .withCmd(cliOptionString)
                 .exec();
 
+        System.out.println("Factory Container created.");
+
         dockerClient.startContainerCmd(tempContainer.getId()).exec();
         InspectContainerResponse containerResp
                 = dockerClient.inspectContainerCmd(tempContainer.getId()).exec();
 
+        System.out.println("Factory Container started.");
+
         // Wait for the build process to finish
         while(containerResp.getState().getRunning()){
             try {
-                Thread.sleep(200);
+                Thread.sleep(1000);
+                containerResp = dockerClient.inspectContainerCmd(tempContainer.getId()).exec();
+                //System.out.println(containerResp.getState());
+                System.out.println(".");
             }
             catch(InterruptedException e){
                 e.printStackTrace();
             }
         }
 
+        System.out.println("\nFactory Container finished.");
+
         // Commit the build to create a final image
-        dockerClient.commitCmd(tempContainer.getId()).withTag("finished-build-raw:latest").exec();
+        String repro = "temp_openssl_img";
+        String finishedRawId = dockerClient.commitCmd(tempContainer.getId())
+                .withRepository(repro)
+                .withTag(dockerTag)
+                .exec();
 
-        // TODO Build final image using the docker tag
-        // TODO: Test me!!!
+        System.out.println(String.format("Factory Container committed (ID='%s')", finishedRawId));
+        String buildArg = String.format("%s:%s", repro, dockerTag);
+        System.out.println("Arg: " + buildArg);
 
-        return;
+        // TODO: Non constant path (use (and rename) "buildScriptPath" )
+        System.out.println();
+
+        String imageId = dockerClient.buildImageCmd()
+                .withDockerfile(new File("/home/fabian/Experimental/dockerBuild/Dockerfile_OpenSSL"))
+                .withTags(new HashSet<>(Arrays.asList("openssl_img:"+dockerTag)))
+                .withBuildArg("TEMP_REPRO", buildArg).exec(new BuildImageResultCallback()).awaitImageId();
+
+        System.out.println("Final Image built");
+        //TODO: Remove prints
+    }
+
+    public Optional<Container> containerByName(String name){
+        final String cName;
+        if(!name.startsWith("/")){
+            cName = "/"+name;
+        }
+        else{
+            cName = name;
+        }
+
+        for(Container c : dockerClient.listContainersCmd().exec()){
+            System.out.println(Arrays.asList(c.getNames()));
+        }
+        //System.out.println(Arrays.asList(container.getNames()));
+
+
+        Predicate<Container> pred = container -> Arrays.asList(container.getNames()).stream().anyMatch(n -> n.equals(cName));
+        return dockerClient.listContainersCmd().withShowAll(true).exec().stream().filter(pred).findFirst();
     }
 
     private void createDockerContainer(String dockerTag, Integer port){
-        // TODO
-        return;
+        String cmd = String.format("-accept %d -key /cert/ec256key.pem -cert /cert/ec256cert.pem", port);
+
+        /*CreateContainerResponse tempContainer = dockerClient.createContainerCmd(FACTORY_IMAGE_NAME)
+                .withPort
+                .withName(TEMP_CONTAINER_NAME)
+                .withHostConfig(HostConfig.newHostConfig().withBinds(new Bind(CCACHE_VOLUME_NAME, targetVolume)))
+                .withCmd(cliOptionString)
+                .exec();*/
     }
 }

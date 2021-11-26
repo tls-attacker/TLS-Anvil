@@ -89,9 +89,14 @@ public class RFCHtml {
                 last.text(last.getWholeText().replaceAll("[\\n]+$", "\n\n"));
             }
 
-
             preElem.appendChildren(i.childNodes());
         });
+
+        if (origDocCopy.getElementsByClass("newpage").size() == 0) {
+            preElem.appendChildren(
+                origDocCopy.getElementsByClass("draftcontent").get(0).getElementsByTag("pre").get(0).childNodes()
+            );
+        }
     }
 
 

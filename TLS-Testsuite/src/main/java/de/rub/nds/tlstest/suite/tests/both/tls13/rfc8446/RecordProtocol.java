@@ -297,7 +297,7 @@ public class RecordProtocol extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Zero-length"
+    @TlsTest(description = "Zero-length "
             + "fragments of Application Data MAY be sent, as they are potentially "
             + "useful as a traffic analysis countermeasure.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)

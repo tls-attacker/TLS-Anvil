@@ -148,7 +148,9 @@ public class KeyShare extends Tls13Test {
     }
     
     @Test
-    @TestDescription("RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
+    @TlsTest(description = "secp256r1(0x0017), secp384r1(0x0018), secp521r1(0x0019)," +
+        " x25519(0x001D), x448(0x001E),")
+    @RFC(number = 8446, section = "4.2.7. Supported Groups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @DeprecatedFeatureCategory(SeverityLevel.HIGH)

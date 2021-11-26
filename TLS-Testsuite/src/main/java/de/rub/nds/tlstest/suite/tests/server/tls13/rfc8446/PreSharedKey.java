@@ -146,7 +146,7 @@ public class PreSharedKey extends Tls13Test {
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }*/
-    @TlsTest(description = "Prior to accepting PSK key establishment, the server MUST validate"
+    @TlsTest(description = "Prior to accepting PSK key establishment, the server MUST validate "
             + "the corresponding binder value")
     @ScopeExtensions(DerivationType.PRF_BITMASK)
     @MethodCondition(method = "supportsPsk")
@@ -173,7 +173,7 @@ public class PreSharedKey extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "Prior to accepting PSK key establishment, the server MUST validate"
+    @TlsTest(description = "Prior to accepting PSK key establishment, the server MUST validate "
             + "the corresponding binder value")
     @MethodCondition(method = "supportsPsk")
     @HandshakeCategory(SeverityLevel.MEDIUM)

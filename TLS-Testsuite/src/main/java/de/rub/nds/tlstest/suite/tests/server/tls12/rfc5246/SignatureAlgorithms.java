@@ -90,8 +90,8 @@ public class SignatureAlgorithms extends Tls12Test {
         return ConditionEvaluationResult.disabled("No ECDSA signature ciphersuites supported");
     }
 
-    @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
-            "If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), " +
+    @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:" +
+            "[...]If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), " +
             "behave as if the client had sent the value {sha1,dsa}.")
     @MethodCondition(method = "dssCiphersuitesSupported")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
@@ -111,9 +111,9 @@ public class SignatureAlgorithms extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
-            "If the negotiated key exchange algorithm is one of (ECDH_ECDSA, ECDHE_ECDSA), " +
-            "behave as if the client had sent value {sha1,ecdsa}.")
+    @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:" +
+            "[...]If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), " +
+            "behave as if the client had sent the value {sha1,dsa}.")
     @MethodCondition(method = "ecdsaCiphersuitesSupported")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)

@@ -71,11 +71,11 @@ public class TLSExtensionForECC extends Tls12Test {
 
     @Test
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @TestDescription("Implementations of this document MUST support the" +
-            "uncompressed format for all of their supported curves and MUST NOT" +
-            "support other formats for curves defined in this specification.  For" +
-            "backwards compatibility purposes, the point format list extension MAY" +
-            "still be included and contain exactly one value: the uncompressed" +
+    @TestDescription("Implementations of this document MUST support the " +
+            "uncompressed format for all of their supported curves and MUST NOT " +
+            "support other formats for curves defined in this specification.  For " +
+            "backwards compatibility purposes, the point format list extension MAY " +
+            "still be included and contain exactly one value: the uncompressed " +
             "point format (0).")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -111,16 +111,13 @@ public class TLSExtensionForECC extends Tls12Test {
         }
     }
     
-    /*@TlsTest(description = " RFC 4492 defined 25 different curves in the NamedCurve registry (now\n" +
-            "renamed the \"TLS Supported Groups\" registry, although the enumeration\n" +
-            "below is still named NamedCurve) for use in TLS.  Only three have\n" +
-            "seen much use.  This specification is deprecating the rest (with\n" +
-            "numbers 1-22).  This specification also deprecates the explicit " +
-            "curves with identifiers 0xFF01 and 0xFF02.  It also adds the new\n" +
-            "curves defined in [RFC7748]", securitySeverity = SeverityLevel.LOW)*/
     @Test
     @KeyExchange(supported = {KeyExchangeType.ECDH})
-    @TestDescription("Deprecated groups should not be offered by a client")
+    @TestDescription("RFC 4492 defined 25 different curves in the NamedCurve registry (now"  +
+        "renamed the \"TLS Supported Groups\" registry, although the enumeration " +
+        "below is still named NamedCurve) for use in TLS. Only three have " +
+        "seen much use. This specification is deprecating the rest (with " +
+        "numbers 1-22).")
     @CryptoCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.MEDIUM)
     @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)

@@ -43,8 +43,8 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 public class FfDheShare extends Tls12Test {
 
     @RFC(number = 7919, section = "4. Server Behavior")
-    @TlsTest(description = "[...]the server MUST verify that 1 < dh_Yc < dh_p - 1."
-            + "If dh_Yc is out of range, the server MUST terminate the connection"
+    @TlsTest(description = "[...] the server MUST verify that 1 < dh_Yc < dh_p - 1. "
+            + "If dh_Yc is out of range, the server MUST terminate the connection "
             + "with a fatal handshake_failure(40) alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)

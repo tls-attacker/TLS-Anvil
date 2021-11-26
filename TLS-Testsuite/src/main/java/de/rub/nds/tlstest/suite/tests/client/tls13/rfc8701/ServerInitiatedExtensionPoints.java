@@ -80,7 +80,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "The \"version\" value in a ServerHello or HelloRetryRequest")
+            + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
     @ComplianceCategory(SeverityLevel.CRITICAL)
@@ -106,7 +106,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "The \"cipher_suite\" value in a ServerHello")
+            + "[...] The \"cipher_suite\" value in a ServerHello")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
     @ScopeLimitations(DerivationType.CIPHERSUITE)
@@ -132,7 +132,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "Any ServerHello extension")
+            + "[...] Any ServerHello extension")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -157,7 +157,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "Any EncryptedExtensions extension")
+            + "[...] Any EncryptedExtensions extension")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     @ComplianceCategory(SeverityLevel.CRITICAL)
@@ -178,7 +178,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "The signature algorithm in a server CertiﬁcateVerify signature in TLS 1.3")
+            + "[...] The signature algorithm in a server CertiﬁcateVerify signature in TLS 1.3")
     @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)

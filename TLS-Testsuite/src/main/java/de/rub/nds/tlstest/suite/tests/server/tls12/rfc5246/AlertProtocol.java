@@ -97,7 +97,7 @@ public class AlertProtocol extends Tls12Test {
     }
 
     @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both"
-            + "parties immediately close the connection.")
+            + " parties immediately close the connection.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @SecurityCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -127,7 +127,7 @@ public class AlertProtocol extends Tls12Test {
     }
 
     @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both"
-            + "parties immediately close the connection.")
+            + " parties immediately close the connection.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @SecurityCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

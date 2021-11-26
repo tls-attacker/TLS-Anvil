@@ -63,8 +63,8 @@ public class ProhibitingSSLv2 extends Tls12Test {
     }
 
     @TlsTest(description = "TLS servers MUST NOT reply with an SSL 2.0 SERVER-HELLO with a"
-            + "protocol version that is less than { 0x03, 0x00 } and instead MUST"
-            + "abort the connection")
+            + " protocol version that is less than { 0x03, 0x00 } and instead MUST"
+            + " abort the connection")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)

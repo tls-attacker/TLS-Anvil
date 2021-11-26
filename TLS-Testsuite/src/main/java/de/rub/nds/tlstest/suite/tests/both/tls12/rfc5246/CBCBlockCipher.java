@@ -99,7 +99,7 @@ public class CBCBlockCipher extends Tls12Test {
 
     }
 
-    @TlsTest(description = "bad_record_mac - [...] This alert also MUST be returned if an alert is sent because " +
+    @TlsTest(description = "bad_record_mac[...]This alert also MUST be returned if an alert is sent because " +
             "a TLSCiphertext decrypted in an invalid way: either it wasn’t an " +
             "even multiple of the block length, or its padding values, when " +
             "checked, weren’t correct.")
@@ -156,7 +156,7 @@ public class CBCBlockCipher extends Tls12Test {
     }
 
 
-    @TlsTest(description = "bad_record_mac - This alert is returned if a record is received with an incorrect " +
+    @TlsTest(description = "bad_record_mac[...]This alert is returned if a record is received with an incorrect " +
             "MAC.")
     @RFC(number = 5246, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)

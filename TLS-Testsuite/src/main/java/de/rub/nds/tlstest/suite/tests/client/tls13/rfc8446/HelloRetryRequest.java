@@ -273,7 +273,7 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "The \"cipher_suite\" value in a ServerHello")
+            + "[...] The \"cipher_suite\" value in a ServerHello")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
     @ScopeLimitations(DerivationType.CIPHERSUITE)
@@ -288,7 +288,7 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "Any ServerHello extension")
+            + "[...] Any ServerHello extension")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
@@ -303,7 +303,7 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "The \"version\" value in a ServerHello or HelloRetryRequest")
+            + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)

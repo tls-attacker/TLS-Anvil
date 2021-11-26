@@ -58,7 +58,9 @@ import org.junit.jupiter.api.Tag;
 @ClientTest
 public class ServerKeyExchange extends Tls12Test {
 
-    @TlsTest(description = "The client must verify the signature of the ServerKeyExchange message")
+    @TlsTest(description = "The client verifies the signature (when present) and retrieves the "
+            + "server's elliptic curve domain parameters and ephemeral ECDH public "
+            + "key from the ServerKeyExchange message.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
     @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)

@@ -57,7 +57,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "The \"version\" value in a ServerHello or HelloRetryRequest")
+            + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -84,7 +84,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "The \"cipher_suite\" value in a ServerHello")
+            + "[...] The \"cipher_suite\" value in a ServerHello")
     @ScopeLimitations(DerivationType.CIPHERSUITE)
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -105,7 +105,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "Any ServerHello extension")
+            + "[...] Any ServerHello extension")
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -125,7 +125,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "The \"namedcurve\" value in a ServerKeyExchange for an Ephemeral Elliptic Curve DiﬃeHellman (ECDHE) "
+            + "[...] The \"namedcurve\" value in a ServerKeyExchange for an Ephemeral Elliptic Curve DiﬃeHellman (ECDHE) "
             + "cipher in TLS 1.2 [RFC5246] or earlier")
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
     @ScopeLimitations(DerivationType.NAMED_GROUP)
@@ -148,7 +148,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "The signature algorithm in a ServerKeyExchange signature in TLS 1.2 or earlier")
+            + "[...] The signature algorithm in a ServerKeyExchange signature in TLS 1.2 or earlier")
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
     @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

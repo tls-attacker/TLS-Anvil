@@ -132,8 +132,13 @@ public class RFCHtml {
         if (color == null) {
             color = "red";
         }
-
+      
         String pattern = searchText;
+        pattern = pattern.replace("’", "'");
+        pattern = pattern.replace("[The server]", "");
+        pattern = pattern.replace("[Servers]", "");
+        String[] parts = pattern.split(Pattern.quote("[...]"));
+        pattern = parts[parts.length -1];
         for (String r : "[,],(,),^,$,|,{,}".split(",")) {
             pattern = pattern.replace(r, String.format("\\%s", r));
         }
@@ -157,6 +162,13 @@ public class RFCHtml {
 
         if (!found) {
             LOGGER.warn("RFC {}: Did not find '{}'", rfcNumber, searchText);
+        } else {
+            //mark surrounding passages
+            for(int i = 0; i < parts.length -1; i++) {
+                if(parts[i].length() > 5) {
+                    markText(parts[i], color);
+                }
+            }
         }
     }
 
@@ -240,5 +252,5 @@ public class RFCHtml {
                 .map(OffsetTextNode::getTextNode)
                 .collect(Collectors.toList());
     }
-
+    
 }

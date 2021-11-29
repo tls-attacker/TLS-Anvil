@@ -138,8 +138,7 @@ public class RFCHtml {
             color = "red";
         }
       
-        String pattern = searchText;
-        pattern = pattern.replace("’", "'");
+        String pattern = encodeString(searchText);
         pattern = pattern.replace("[The server]", "");
         pattern = pattern.replace("[Servers]", "");
         String[] parts = pattern.split(Pattern.quote("[...]"));
@@ -258,4 +257,7 @@ public class RFCHtml {
                 .collect(Collectors.toList());
     }
     
+    private String encodeString(String input) {
+        return input.replace("+", "\\+").replace("’", "'");
+    }
 }

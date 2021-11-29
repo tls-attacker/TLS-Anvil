@@ -58,15 +58,26 @@ public class TestCaseExtractor {
         rfcMap.keySet().forEach(rfcNumber -> {
             List<ExtractionMethod> testCases = rfcMap.get(rfcNumber);
             RFCHtml rfcHtml = new RFCHtml(rfcNumber);
+            applyHtmlRFCAnnotations(rfcHtml, rfcNumber);
             LOGGER.info("RFC {}: Found {} test cases", rfcNumber, testCases.size());
-
+            
             for (ExtractionMethod testCase : testCases) {
-                rfcHtml.markText(testCase.getDescription(), null);
+                rfcHtml.markText(testCase.getDescription(), HtmlRFCAnnotation.COLOR_COVERED, false, false);
             }
 
             rfcHtml.saveToFolder(TestContext.getInstance().getConfig().getTestExtractorDelegate().getOutputFolder());
         });
 
+    }
+    
+    private void applyHtmlRFCAnnotations(RFCHtml rfcHtml, int rfcNumber) {
+        rfcHtml.markText("MUST", HtmlRFCAnnotation.COLOR_MUST, true, true);
+        Map<String, List<String>> annotationMap = HtmlRFCAnnotation.getAnnotations(rfcNumber, "annotations/");
+        for(String annotationDirectory : annotationMap.keySet()) {
+            for(String annotatedPassage: annotationMap.get(annotationDirectory)) {
+                rfcHtml.markText(annotatedPassage, HtmlRFCAnnotation.getColorForDirectory(annotationDirectory), true, false);
+            }
+        }
     }
 
 

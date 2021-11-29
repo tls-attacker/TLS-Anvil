@@ -129,15 +129,11 @@ public class RFCHtml {
         Collections.sort(nodeOffsetIndex);
     }
 
-    public void markText(String searchText, String color) {
+    public void markText(String searchText, String color, boolean expectMultiple, boolean caseSensitive) {
         if (nodeOffsetIndex == null) {
             createTextNodeOffsetIndex();
         }
-
-        if (color == null) {
-            color = "red";
-        }
-      
+        
         String pattern = encodeString(searchText);
         pattern = pattern.replace("[The server]", "");
         pattern = pattern.replace("[Servers]", "");
@@ -149,10 +145,16 @@ public class RFCHtml {
         pattern = pattern.replaceAll("[\\s\\n]+", "[\\\\s\\\\n]+");
 
         String text = this.cleanupDoc.getElementsByTag("pre").first().wholeText();
-        Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(text);
+        Matcher matcher;
+        if(caseSensitive) {
+            matcher = Pattern.compile(pattern).matcher(text);
+        } else {
+            matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(text);
+        }
+        
         boolean found = false;
         while (matcher.find()) {
-            if (found) {
+            if (found && !expectMultiple) {
                 LOGGER.warn("RFC {}: Multiple matches of '{}'", rfcNumber, searchText);
             }
             found = true;
@@ -170,7 +172,7 @@ public class RFCHtml {
             //mark surrounding passages
             for(int i = 0; i < parts.length -1; i++) {
                 if(parts[i].length() > 5) {
-                    markText(parts[i], color);
+                    markText(parts[i], color, false, caseSensitive);
                 }
             }
         }

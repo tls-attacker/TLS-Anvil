@@ -1,0 +1,27 @@
+In the absence of an application profile standard specifying otherwise, a TLS-compliant application MUST implement the cipher suite TLS_RSA_WITH_AES_128_CBC_SHA (see Appendix A.5 for the definition).
+
+TLS 1.2 clients that wish to support SSL 2.0 servers MUST send version 2.0 CLIENT-HELLO messages defined in [SSL2].  The message MUST contain the same version number as would be used for ordinary ClientHello, and MUST encode the supported TLS cipher suites in the CIPHER-SPECS-DATA field as described below.
+
+For negotiation purposes, 2.0 CLIENT-HELLO is interpreted the same way as a ClientHello with a "null" compression method and no extensions.  Note that this message MUST be sent directly on the wire, not wrapped as a TLS record.
+
+The highest bit MUST be 1; the remaining bits contain the length of the following data in bytes.
+
+This field, in conjunction with the version field, identifies a version 2 ClientHello message.  The value MUST be 1.
+
+This field is the total length of the field cipher_specs.  It cannot be zero and MUST be a multiple of the V2CipherSpec length (3).
+
+This field MUST have a value of zero for a client that claims to support TLS 1.2.
+
+session_id This field MUST be empty.
+
+Note: Requests to resume a TLS session MUST use a TLS client hello.
+
+When TLS clients fall back to Version 2.0 compatibility mode, they MUST use special PKCS#1 block formatting.  This is done so that TLS servers will reject Version 2.0 sessions with TLS-capable clients.
+
+When a client negotiates SSL 2.0 but also supports TLS, it MUST set the right-hand (least-significant) 8 random bytes of the PKCS padding (not including the terminal null of the padding) for the RSA encryption of the ENCRYPTED-KEY-DATA field of the CLIENT-MASTER-KEY to 0x03 (the other padding bytes are random).
+
+Note: this extension is not meaningful for TLS versions prior to 1.2. Clients MUST NOT offer it if they are offering prior versions.
+
+Servers MUST NOT send this extension.  TLS servers MUST support receiving this extension.
+
+Implementors upgrading from SSLv3 MUST modify their implementations to generate and accept the correct encoding.

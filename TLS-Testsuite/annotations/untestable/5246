@@ -1,0 +1,27 @@
+These current states MUST be updated for each record processed.
+
+The sequence number MUST be set to zero whenever a connection state is made the active state.
+
+However, records MUST be delivered to the network in the same order as they are protected by the record layer.
+
+Recipients MUST receive and process interleaved application layer traffic during handshakes subsequent to the first one on a connection.
+
+The Initialization Vector (IV) SHOULD be chosen at random, and MUST be unpredictable.
+
+In order to defend against this attack, implementations MUST ensure that record processing time is essentially the same whether or not the padding is correct.
+
+Immediately after sending this message, the sender MUST instruct the record layer to make the write pending state the write active state.
+
+If the implementation chooses to send an alert but intends to close the connection immediately afterwards, it MUST send that alert at the fatal alert level.
+
+This alert was used in some earlier versions of TLS, and may have permitted certain attacks against the CBC mode [CBCATT].  It MUST NOT be sent by compliant implementations.
+
+This alert was used in SSLv3 but not any version of TLS.  It MUST NOT be sent by compliant implementations.
+
+This alert was used in some earlier versions of TLS.  It MUST NOT be sent by compliant implementations.
+
+Because the SessionID is transmitted without encryption or immediate MAC protection, servers MUST NOT place confidential information in session identifiers or let the contents of fake session identifiers cause any breach of security.
+
+If the client does not support the default algorithms, or supports other hash and signature algorithms (and it is willing to use them for verifying messages sent by the server, i.e., server certificates and server key exchange), it MUST send the signature_algorithms extension, listing the algorithms it is willing to accept.
+
+Accordingly, implementations that use static RSA keys MUST use RSA blinding or some other anti-timing technique, as described in [TIMING].

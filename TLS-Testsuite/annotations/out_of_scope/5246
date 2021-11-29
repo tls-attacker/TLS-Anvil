@@ -1,0 +1,63 @@
+In RSA signing, the opaque vector contains the signature generated using the RSASSA-PKCS1-v1_5 signature scheme defined in [PKCS1].  As discussed in [PKCS1], the DigestInfo MUST be DER-encoded [X680] [X690].  For hash algorithms without parameters (which includes SHA-1), the DigestInfo.AlgorithmIdentifier.parameters field MUST be NULL, but implementations MUST accept both without parameters and with NULL parameters.
+
+This message MUST NOT be included in the message hashes that are maintained throughout the handshake and used in the Finished messages and the certificate verify message.
+
+If the session_id field is not empty (implying a session resumption request), this vector MUST include at least the cipher_suite from that session.
+
+If the session_id field is not empty (implying a session resumption request), it MUST include the compression_method from that session.
+
+Clients MUST be prepared to do a full negotiation -- including negotiating new cipher suites -- during any handshake.
+
+The certificate MUST be appropriate for the negotiated cipher suite's key exchange algorithm and any negotiated extensions.
+
+The sender's certificate MUST come first in the list.  Each following certificate MUST directly certify the one preceding it.
+
+The certificate type MUST be X.509v3, unless explicitly negotiated otherwise (e.g., [TLSPGP]).
+
+The end entity certificate's public key (and associated restrictions) MUST be compatible with the selected key exchange algorithm.
+
+RSA RSA public key; the certificate MUST allow the RSA_PSK key to be used for encryption (the keyEncipherment bit MUST be set if the key usage extension is present).
+
+DHE_RSA RSA public key; the certificate MUST allow the ECDHE_RSA key to be used for signing (the digitalSignature bit MUST be set if the key usage extension is present) with the signature scheme and hash algorithm that will be employed in the server key exchange message.
+
+DHE_DSS DSA public key; the certificate MUST allow the key to be used for signing with the hash algorithm that will be employed in the server key exchange message.
+
+DH_DSS Diffie-Hellman public key; the keyAgreement bit DH_RSA MUST be set if the key usage extension is present.
+
+ECDH_ECDSA ECDH-capable public key; the public key MUST ECDH_RSA use a curve and point format supported by the client, as described in [TLSECC].
+
+ECDHE_ECDSA ECDSA-capable public key; the certificate MUST allow the key to be used for signing with the hash algorithm that will be employed in the server key exchange message.  The public key MUST use a curve and point format supported by the client, as described in  [TLSECC].
+
+If the client provided a "signature_algorithms" extension, then all certificates provided by the server MUST be signed by a hash/signature algorithm pair that appears in that extension.
+
+In addition, the hash and signature algorithms MUST be compatible with the key in the server's end-entity certificate.
+
+Any certificates provided by the client MUST be signed using a hash/signature algorithm pair found in supported_signature_algorithms.
+
+The end-entity certificate provided by the client MUST contain a key that is compatible with certificate_types.  If the key is a signature key, it MUST be usable with some hash/signature algorithm pair in supported_signature_algorithms.
+
+The certificate MUST be appropriate for the negotiated cipher suite's key exchange algorithm, and any negotiated extensions.
+
+The certificate type MUST be X.509v3, unless explicitly negotiated otherwise (e.g., [TLSPGP]).
+
+rsa_sign RSA public key; the certificate MUST allow the key to be used for signing with the signature scheme and hash algorithm that will be employed in the certificate verify message.
+
+dss_sign DSA public key; the certificate MUST allow the key to be used for signing with the hash algorithm that will be employed in the certificate verify message.
+
+ecdsa_sign ECDSA-capable public key; the certificate MUST allow the key to be used for signing with the hash algorithm that will be employed in the certificate verify message; the public key MUST use a curve and point format supported by the server.
+
+rsa_fixed_dh Diffie-Hellman public key; MUST use the same dss_fixed_dh parameters as server's key.
+
+rsa_fixed_ecdh ECDH-capable public key; MUST use the ecdsa_fixed_ecdh same curve as the server's key, and MUST use a point format supported by the server.
+
+The certificates MUST be signed using an acceptable hash/ signature algorithm pair, as described in Section 7.4.4. Note that this relaxes the constraints on certificate-signing algorithms found in prior versions of TLS.
+
+It MUST immediately follow the client certificate message, if it is sent.
+
+If the client is sending a certificate containing a static DH exponent (i.e., it is doing fixed_dh client authentication), then this message MUST be sent but MUST be empty.
+
+If the client has sent a certificate which contains a suitable Diffie-Hellman key (for fixed_dh client authentication), then Yc is implicit and does not need to be sent again.  In this case, the client key exchange message will be sent, but it MUST be empty.
+
+When sent, it MUST immediately follow the client key exchange message.
+
+The hash and signature algorithms used in the signature MUST be one of those present in the supported_signature_algorithms field of the CertificateRequest message.  In addition, the hash and signature algorithms MUST be compatible with the key in the client's end-entity certificate.

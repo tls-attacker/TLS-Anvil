@@ -1,0 +1,9 @@
+Whenever an implementation encounters a condition which is defined as a fatal alert, it MUST send the appropriate alert prior to closing the connection.
+
+The handshake protocol messages are presented below in the order they MUST be sent; sending handshake messages in an unexpected order results in a fatal error.
+
+The server MUST send a Certificate message whenever the agreed- upon key exchange method uses certificates for authentication (this includes all key exchange methods defined in this document except DH_anon).  This message will always immediately follow the ServerHello message.
+
+Otherwise, it MUST be the first message sent by the client after it receives the ServerHelloDone message.
+
+Application data MUST NOT be sent prior to the completion of the first handshake (before a cipher suite other than TLS_NULL_WITH_NULL_NULL is established).

@@ -37,7 +37,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class ProhibitingSSLv2 extends Tls12Test {
 
-    @TlsTest(description = "TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT-"
+    @TlsTest(description = "TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT- "
             + "HELLO message format.")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.CRITICAL)

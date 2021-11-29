@@ -58,9 +58,9 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
 
     @TlsTest(description = "When sending a NewSessionTicket message in TLS 1.3, a server "
             + "MAY select one or more GREASE extension values and advertise them as extensions "
-            + "with varying length and contents. "
-            + "When processing a CertiﬁcateRequest or NewSessionTicket, "
-            + "clients MUST NOT treat GREASE values diﬀerently from any unknown value.")
+            + "with varying length and contents. [...]"
+            + "When processing a CertificateRequest or NewSessionTicket, "
+            + "clients MUST NOT treat GREASE values differently from any unknown value.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -157,7 +157,8 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "[...] Any EncryptedExtensions extension")
+            + "[...] Any HelloRetryRequest, EncryptedExtensions, or Certificate " 
+            + "extension in TLS 1.3")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     @ComplianceCategory(SeverityLevel.CRITICAL)
@@ -178,7 +179,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "[...] The signature algorithm in a server CertiﬁcateVerify signature in TLS 1.3")
+            + "[...] The signature algorithm in a server CertificateVerify signature in TLS 1.3")
     @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)

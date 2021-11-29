@@ -125,8 +125,9 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
-            + "[...] The \"namedcurve\" value in a ServerKeyExchange for an Ephemeral Elliptic Curve DiﬃeHellman (ECDHE) "
-            + "cipher in TLS 1.2 [RFC5246] or earlier")
+            + "[...] The \"namedcurve\" value in a ServerKeyExchange for an Ephemeral " 
+            + "Elliptic Curve Diffie-Hellman (ECDHE) cipher in TLS 1.2 [RFC5246] " 
+            + "or earlier")
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
     @ScopeLimitations(DerivationType.NAMED_GROUP)
     @ScopeExtensions(DerivationType.GREASE_NAMED_GROUP)

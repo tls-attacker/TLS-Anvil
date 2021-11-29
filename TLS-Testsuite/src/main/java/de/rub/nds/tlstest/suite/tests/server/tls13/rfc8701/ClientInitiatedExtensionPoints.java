@@ -63,7 +63,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 @RFC(number = 8701, section = "3. Client-Initiated Extension Points")
 public class ClientInitiatedExtensionPoints extends Tls13Test {
 
-    @TlsTest(description = "A client MAY select one or more GREASE cipher suite values and advertise them in the \"cipher_suites\" field."
+    @TlsTest(description = "A client MAY select one or more GREASE cipher suite values and advertise them in the \"cipher_suites\" field. [...]"
             + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
     @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
@@ -84,7 +84,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "A client MAY select one or more GREASE extension values and advertise them as extensions with varying length and contents."
+    @TlsTest(description = "A client MAY select one or more GREASE extension values and advertise them as extensions with varying length and contents. [...]"
             + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
     @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
@@ -110,10 +110,12 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "A client MAY select one or more GREASE named group values and advertise them in the \"supported_groups\" extension, "
-            + "if sent. It MAY also send KeyShareEntry values for a subset of those selected in the \"key_share\" extension. "
-            + "For each of these, the \"key_exchange\" ﬁeld MAY be any value. "
-            + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
+    @TlsTest(description = "A client MAY select one or more GREASE named group values and " +
+        "advertise them in the \"supported_groups\" extension, if sent.  It " +
+        "MAY also send KeyShareEntry values for a subset of those selected " +
+        "in the \"key_share\" extension.  For each of these, the " +
+        "\"key_exchange\" field MAY be any value. [...]"+
+        "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @ScopeExtensions(DerivationType.GREASE_NAMED_GROUP)
     @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -147,7 +149,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
 
     @TlsTest(description = "A client MAY select one or more GREASE signature algorithm values "
             + "and advertise them in the \"signature_algorithms\" or "
-            + "\"signature_algorithms_cert\" extensions, if sent. "
+            + "\"signature_algorithms_cert\" extensions, if sent. [...]"
             + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
     @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
@@ -170,9 +172,10 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "A client MAY select one or more GREASE ALPN identiﬁers "
-            + "and advertise them in the \"application_layer_protocol_negotiation\" extension, if sent. "
-            + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
+    @TlsTest(description = "A client MAY select one or more GREASE ALPN identifiers and " +
+        "advertise them in the \"application_layer_protocol_negotiation\" " +
+        "extension, if sent. [...]" + 
+        "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello.")
     @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @InteroperabilityCategory(SeverityLevel.HIGH)

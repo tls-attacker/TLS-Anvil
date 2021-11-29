@@ -117,7 +117,7 @@ public class CertificateVerify extends Tls13Test {
     }
 
     @TlsTest(description = "The SHA-1 algorithm " +
-            "MUST NOT be used in any signatures of CertificateVerify messages." + 
+            "MUST NOT be used in any signatures of CertificateVerify messages. " + 
             "All SHA-1 signature algorithms in this specification are defined " +
             "solely for use in legacy certificates and are not valid for " +
             "CertificateVerify signatures.")
@@ -141,7 +141,7 @@ public class CertificateVerify extends Tls13Test {
     }
 
     @TlsTest(description = "The receiver of a CertificateVerify message MUST verify " +
-            "the signature field. If the verification fails, " +
+            "the signature field. [...] If the verification fails, " +
             "the receiver MUST terminate the handshake with a \"decrypt_error\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
@@ -235,7 +235,8 @@ public class CertificateVerify extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "Send a Certificate Verify message with an empty Signature Algorithm field")
+    @TlsTest(description = "The receiver of a CertificateVerify message MUST verify the signature " +
+        "field.")
     @SecurityCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -256,7 +257,8 @@ public class CertificateVerify extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Send a Certificate Verify message with an empty Signature Algorithm and empty Signature field")
+    @TlsTest(description = "The receiver of a CertificateVerify message MUST verify the signature " +
+        "field.")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.LOW)

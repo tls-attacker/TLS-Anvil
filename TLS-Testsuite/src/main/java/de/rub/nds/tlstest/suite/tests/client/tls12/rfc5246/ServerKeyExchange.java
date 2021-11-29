@@ -234,6 +234,7 @@ public class ServerKeyExchange extends Tls12Test {
     @TlsTest(description = "If the client has offered the \"signature_algorithms\" extension, the "
             + "signature algorithm and hash algorithm MUST be a pair listed in that "
             + "extension. ")
+    @RFC(number = 5246, section = "7.4.3.  Server Key Exchange Message")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")

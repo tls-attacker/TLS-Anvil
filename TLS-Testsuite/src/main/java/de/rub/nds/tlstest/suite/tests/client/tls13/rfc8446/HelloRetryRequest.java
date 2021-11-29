@@ -101,8 +101,9 @@ public class HelloRetryRequest extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(description = "A client which receives a cipher suite that was not offered MUST "
-            + "abort the handshake.")
+    @TlsTest(description = "A client which receives a " +
+        "cipher suite that was not offered MUST abort the handshake with an " +
+        "\"illegal_parameter\" alert.")
     @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getUnofferedTls13CipherSuites")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -118,6 +119,8 @@ public class HelloRetryRequest extends Tls13Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
+            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }
 
@@ -403,7 +406,9 @@ public class HelloRetryRequest extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(description = "Enforce a TLS 1.3 HelloRetryRequest but select a TLS 1.2 Cipher Suite")
+    @TlsTest(description = "Similarly, cipher suites for TLS 1.2 and lower cannot be used with " +
+        "TLS 1.3.")
+    @RFC(number = 8446, section="B.4.  Cipher Suites")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
     @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getTls12CipherSuites")
     @HandshakeCategory(SeverityLevel.MEDIUM)

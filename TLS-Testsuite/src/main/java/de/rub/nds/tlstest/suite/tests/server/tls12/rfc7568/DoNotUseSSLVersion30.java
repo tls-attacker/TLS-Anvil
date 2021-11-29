@@ -57,7 +57,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 public class DoNotUseSSLVersion30 extends Tls12Test {
 
     @TlsTest(description = "SSLv3 MUST NOT be used. Negotiation of SSLv3 from any version of TLS "
-            + "MUST NOT be permitted. "
+            + "MUST NOT be permitted. [...]"
             + "Pragmatically, clients MUST NOT send a ClientHello with "
             + "ClientHello.client_version set to {03,00}. Similarly, servers MUST "
             + "NOT send a ServerHello with ServerHello.server_version set to "

@@ -218,7 +218,10 @@ public class KeyShare extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "Send a Client Hello with an undefined Named Group")
+    @TlsTest(description = "A server receiving a ClientHello MUST correctly ignore all " +
+        "unrecognized cipher suites, extensions, and other parameters. " +
+        "Otherwise, it may fail to interoperate with newer clients.")
+    @RFC(number = 8446, section = "9.3.  Protocol Invariants")
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.CRITICAL)

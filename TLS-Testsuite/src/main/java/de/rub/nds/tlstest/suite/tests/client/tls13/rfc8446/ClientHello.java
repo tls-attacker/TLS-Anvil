@@ -28,11 +28,14 @@ import org.junit.jupiter.api.Test;
 @RFC(number = 8446, section = "4.1.2 Client Hello")
 public class ClientHello extends Tls13Test {
 
-    /*@TlsTest(description = "In TLS 1.3, the client indicates its version preferences " +
-            "in the \"supported_versions\" extension (Section 4.2.1) and the legacy_version " +
-            "field MUST be set to 0x0303, which is the version number for TLS 1.2.")*/
     @Test
-    @TestDescription("The client must set the legacy version field to TLS 1.2 and send a SupportedVersions Extension")
+    @TestDescription("In " +
+        "TLS 1.3, the client indicates its version preferences in the " +
+        "\"supported_versions\" extension (Section 4.2.1) and the " +
+        "legacy_version field MUST be set to 0x0303, which is the version " +
+        "number for TLS 1.2.  TLS 1.3 ClientHellos are identified as having " +
+        "a legacy_version of 0x0303 and a supported_versions extension " +
+        "present with 0x0304 as the highest version indicated therein.")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.LOW)

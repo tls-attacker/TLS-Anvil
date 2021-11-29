@@ -44,7 +44,7 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
 
     @TlsTest(description = "Client implementations MUST always send the correct version number in PreMasterSecret. " +
             "If ClientHello.client_version is TLS 1.1 or higher, server implementations MUST check " +
-            "the version number as described in the note below.\n" +
+            "the version number as described in the note below. [...]" +
             "In any case, a TLS server MUST NOT generate an alert if processing an " +
             "RSA-encrypted premaster secret message fails, or the version number " +
             "is not as expected.  Instead, it MUST continue the handshake with a " +

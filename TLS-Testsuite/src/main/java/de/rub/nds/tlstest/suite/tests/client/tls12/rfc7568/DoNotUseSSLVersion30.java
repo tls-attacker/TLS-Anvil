@@ -33,7 +33,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
 
     @Test
     @TestDescription("SSLv3 MUST NOT be used. Negotiation of SSLv3 from "
-            + "any version of TLS MUST NOT be permitted. "
+            + "any version of TLS MUST NOT be permitted. [...]"
             + "Pragmatically, clients MUST NOT send a ClientHello with "
             + "ClientHello.client_version set to {03,00}.")
     @SecurityCategory(SeverityLevel.CRITICAL)

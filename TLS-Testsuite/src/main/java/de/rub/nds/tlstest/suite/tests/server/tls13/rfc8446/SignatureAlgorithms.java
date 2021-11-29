@@ -93,9 +93,15 @@ public class SignatureAlgorithms extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(description = "Clients offering these values MUST list "
-            + "them (legacy algorithms) as the lowest priority (listed after all other "
-            + "algorithms in SignatureSchemeList).")
+    @TlsTest(description = "These values refer solely to signatures " +
+        "which appear in certificates (see Section 4.4.2.2) and are not " +
+        "defined for use in signed TLS handshake messages, although they " +
+        "MAY appear in \"signature_algorithms\" and " +
+        "\"signature_algorithms_cert\" for backward compatibility with " +
+        "TLS 1.2. [...]" + 
+        "Clients " +
+        "offering these values MUST list them as the lowest priority " +
+        "(listed after all other algorithms in SignatureSchemeList).")
     @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
     @ManualConfig(DerivationType.SIG_HASH_ALGORIHTM)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
@@ -126,11 +132,12 @@ public class SignatureAlgorithms extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "These values refer solely to signatures which appear in "
-            + "certificates (see Section 4.4.2.2) and are not defined for use in "
-            + "signed TLS handshake messages, although they MAY appear in \"signature_algorithms\" "
-            + "and \"signature_algorithms_cert\" for backward "
-            + "compatibility with TLS 1.2.")
+    @TlsTest(description = "These values refer solely to signatures " +
+        "which appear in certificates (see Section 4.4.2.2) and are not " +
+        "defined for use in signed TLS handshake messages, although they " +
+        "MAY appear in \"signature_algorithms\" and " +
+        "\"signature_algorithms_cert\" for backward compatibility with " +
+        "TLS 1.2.")
     @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
     @HandshakeCategory(SeverityLevel.MEDIUM)

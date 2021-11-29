@@ -147,7 +147,9 @@ public class HelloRetryRequest extends Tls13Test {
     trip
     */
     @RFC(number = 8446, section = "4.2.8.  Key Share")
-    @TestDescription("Evaluate if the server replied with a Hello Retry Request upon receiving a Client Hello without any Key Shares")
+    @TestDescription("Clients MAY send an empty client_shares vector in order to request " +
+        "group selection from the server, at the cost of an additional round " +
+        "trip")
     @ComplianceCategory(SeverityLevel.HIGH)
     @InteroperabilityCategory(SeverityLevel.LOW)
     public void sentHelloRetryRequest() {

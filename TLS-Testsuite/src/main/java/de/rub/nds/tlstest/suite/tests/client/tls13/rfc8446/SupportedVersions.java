@@ -163,7 +163,11 @@ public class SupportedVersions extends Tls13Test {
             "0x0304, but if previous versions of TLS are allowed to be " +
             "negotiated, they MUST be present as well).")*/
     @Test
-    @TestDescription("The SupportedVersions extension must contain TLS 1.3")
+    @TestDescription("Implementations of this specification MUST send this extension in the " +
+        "ClientHello containing all versions of TLS which they are prepared to " +
+        "negotiate (for this specification, that means minimally 0x0304, but " +
+        "if previous versions of TLS are allowed to be negotiated, they MUST " +
+        "be present as well).")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

@@ -113,7 +113,7 @@ public class TLSExtensionForECC extends Tls12Test {
     
     @Test
     @KeyExchange(supported = {KeyExchangeType.ECDH})
-    @TestDescription("RFC 4492 defined 25 different curves in the NamedCurve registry (now"  +
+    @TestDescription("RFC 4492 defined 25 different curves in the NamedCurve registry (now "  +
         "renamed the \"TLS Supported Groups\" registry, although the enumeration " +
         "below is still named NamedCurve) for use in TLS. Only three have " +
         "seen much use. This specification is deprecating the rest (with " +

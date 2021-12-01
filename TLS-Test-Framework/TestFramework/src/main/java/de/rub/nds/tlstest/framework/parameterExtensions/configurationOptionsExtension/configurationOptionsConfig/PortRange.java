@@ -1,0 +1,87 @@
+/*
+ *  TLS-Test-Framework - A framework for modeling TLS tests
+ *
+ *  Copyright 2020 Ruhr University Bochum and
+ *  TÜV Informationstechnik GmbH
+ *
+ *  Licensed under Apache License 2.0
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ */
+
+package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig;
+
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import net.bytebuddy.pool.TypePool;
+
+import java.util.IllegalFormatException;
+
+public class PortRange{
+    private Integer minPort;
+    private Integer maxPort;
+
+    public PortRange(Integer minPort, Integer maxPort){
+        if(maxPort < minPort){
+            throw new IllegalArgumentException("Invalid PortRange. maxPort must not be smaller than minPort.");
+        }
+
+        this.minPort = minPort;
+        this.maxPort = maxPort;
+    }
+
+    public Integer getMinPort() {
+        return minPort;
+    }
+
+    public Integer getMaxPort() {
+        return maxPort;
+    }
+
+    public boolean inRange(Integer port){
+        return (port >= minPort && port <= maxPort);
+    }
+
+    /**
+     * Parses a port range of format: '[Min Port]-[Max Port]', e.g. '4433-4444'.
+     * the column ':' is also an allowed separator.
+     *
+     * @param str - the string to parse
+     * @returns the port range
+     */
+    public static PortRange fromString(String str){
+        str = str.replace(":","-");
+        String[] splittedStr = str.split("-");
+
+        if(splittedStr.length != 2){
+            throw new IllegalArgumentException("Illegal port range format. Syntax is \"[Min Port]-[Max Port]\"");
+        }
+        Integer minPort;
+        Integer maxPort;
+        try{
+            minPort = Integer.parseInt(splittedStr[0]);
+            maxPort = Integer.parseInt(splittedStr[1]);
+        }
+        catch(IllegalFormatException e){
+            throw new IllegalArgumentException("Illegal port range format. Syntax is \"[Min Port]-[Max Port]\". " +
+                    "Min and max port must be numbers.");
+        }
+
+        if(maxPort < minPort){
+            throw new IllegalArgumentException("Illegal port range format. Syntax is \"[Min Port]-[Max Port]\". " +
+                    "Max port must not be smaller than min port.");
+        }
+
+        PortRange portRange = new PortRange(minPort, maxPort);
+
+        return portRange;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if(o.getClass() != this.getClass()){
+            return false;
+        }
+        PortRange other = (PortRange) o;
+        return (this.minPort.equals(other.minPort) && this.maxPort.equals(other.maxPort));
+    }
+
+}

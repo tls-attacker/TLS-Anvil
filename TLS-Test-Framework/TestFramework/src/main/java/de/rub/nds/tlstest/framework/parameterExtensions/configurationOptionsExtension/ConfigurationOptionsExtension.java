@@ -11,10 +11,9 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 
 import de.rub.nds.tlstest.framework.model.DerivationManager;
 import de.rub.nds.tlstest.framework.model.ParameterExtension;
-import org.xml.sax.SAXException;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -51,7 +50,7 @@ public class ConfigurationOptionsExtension implements ParameterExtension {
         try {
             config = new ConfigurationOptionsConfig(configPath);
         }
-        catch (ParserConfigurationException | IOException | SAXException e) {
+        catch (FileNotFoundException e) {
             e.printStackTrace();
             throw new IllegalArgumentException("The passed configuration options config file could not be parsed.");
         }

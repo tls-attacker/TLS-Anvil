@@ -21,4 +21,5 @@ import java.util.List;
 public interface DerivationCategoryManager {
     DerivationParameter getDerivationParameterInstance(DerivationType type);
     List<DerivationType> getDerivationsOfModel(DerivationScope derivationScope, ModelType baseModel);
+    List<DerivationType> getAllDerivations();
 }

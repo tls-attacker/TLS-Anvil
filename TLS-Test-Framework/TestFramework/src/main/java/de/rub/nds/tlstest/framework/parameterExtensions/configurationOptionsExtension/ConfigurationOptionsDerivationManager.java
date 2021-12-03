@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.tlstest.framework.model.*;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePskDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,7 +47,7 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         ConfigOptionDerivationType basicType = (ConfigOptionDerivationType) type;
         switch(basicType) {
             case DisablePSK:
-                return new CipherSuiteDerivation();
+                return new DisablePskDerivation();
             default:
                 LOGGER.error("Derivation Type {} not implemented", type);
                 throw new UnsupportedOperationException("Derivation Type not implemented");
@@ -58,12 +59,16 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         if(config == null){
             throw new IllegalStateException("No ConfigurationOptionsConfig was set so far. Register it before calling this method.");
         }
-        if(baseModel == ModelType.GENERIC){
-            return new LinkedList<>(config.getEnabledConfigOptionDerivations());
-        }
-        else{
-            return new LinkedList<>();
-        }
+        return new LinkedList<>(config.getEnabledConfigOptionDerivations());
+    }
+
+    @Override
+    public List<DerivationType> getAllDerivations() {
+        return new LinkedList<>(config.getEnabledConfigOptionDerivations());
+    }
+
+    public List<DerivationType> getDerivationsOfModel(ModelType baseModel) {
+        return getDerivationsOfModel(null, baseModel);
     }
 
     public void setConfigOptionsConfig(ConfigurationOptionsConfig optionsConfig){

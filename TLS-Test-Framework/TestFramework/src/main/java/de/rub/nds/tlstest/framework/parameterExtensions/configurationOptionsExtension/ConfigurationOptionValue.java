@@ -94,5 +94,19 @@ public class ConfigurationOptionValue {
         }
     }
 
+    public String toString(){
+        if(isFlag()){
+            if(isOptionSet()){
+                return "FLAG_SET";
+            }
+            else{
+                return "FLAG_NOT_SET";
+            }
+        }
+        else{
+            return String.join(",", getOptionValues());
+        }
+    }
+
 
 }

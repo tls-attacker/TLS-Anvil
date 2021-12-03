@@ -59,6 +59,8 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
+import de.rub.nds.tlstest.framework.model.ParameterExtensionManager;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsExtension;
 import de.rub.nds.tlstest.framework.reporting.ExecutionListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -444,25 +446,28 @@ public class TestRunner {
         if (!testConfig.isParsedArgs()) {
             return;
         }
+        initParameterExtensions();
 
         ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
         executor.setTimeoutAction(testConfig.getTimeoutActionScript());
         executor.armTimeoutAction(20000);
         testContext.setStateExecutor(executor);
 
-        LOGGER.info("Starting preparation phase");
-        this.testConfig.createConfig();
+        // If some parameter extension (e.g. the ConfigurationOptionsExtension) already created a SiteReport we
+        // need to skip this step here.
+        if(testContext.getSiteReport() == null) {
+            LOGGER.info("Starting preparation phase");
+            this.testConfig.createConfig();
 
-        if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
-            clientTestPreparation();
-        }
-        else if (this.testConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
-            serverTestPreparation();
-        }
-        else throw new RuntimeException("Invalid TestEndpointMode");
+            if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
+                clientTestPreparation();
+            } else if (this.testConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
+                serverTestPreparation();
+            } else throw new RuntimeException("Invalid TestEndpointMode");
 
-        if (testContext.getSiteReport() == null) {
-            throw new RuntimeException("SiteReport is null after preparation phase");
+            if (testContext.getSiteReport() == null) {
+                throw new RuntimeException("SiteReport is null after preparation phase");
+            }
         }
 
         boolean targetSupportVersions = true;
@@ -729,6 +734,13 @@ public class TestRunner {
                     RecordLayerFactory.getRecordLayer(state.getTlsContext().getRecordLayerType(), state.getTlsContext()));
         } catch (IOException ex) {
             throw new RuntimeException("Failed to set TransportHandlers");
+        }
+    }
+
+    private void initParameterExtensions(){
+        String configurationOptionsConfigFile = testConfig.getConfigOptionsConfigFile();
+        if(!configurationOptionsConfigFile.isEmpty()){
+            ParameterExtensionManager.getInstance().loadExtension("ConfigurationOptionsExtension", configurationOptionsConfigFile);
         }
     }
 }

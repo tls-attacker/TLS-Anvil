@@ -103,6 +103,11 @@ public class TestConfig extends TLSDelegateConfig {
 
     @Parameter(names = "-prettyPrintJSON", description = "Pretty print json output")
     private boolean prettyPrintJSON = false;
+
+    // -- Extensions --
+    @Parameter(names = "-configOptionsConfigFile", description = "Defines the path of the configuration option config file to enable configuration option tests.")
+    private String configOptionsConfigFile = "";
+
     
     //we might want to turn these into CLI parameters in the future
     private boolean expectTls13Alerts = false;
@@ -506,4 +511,13 @@ public class TestConfig extends TLSDelegateConfig {
     public void setPrettyPrintJSON(boolean prettyPrintJSON) {
         this.prettyPrintJSON = prettyPrintJSON;
     }
+
+    public String getConfigOptionsConfigFile(){
+        return this.configOptionsConfigFile;
+    }
+
+    public void setConfigOptionsConfigFile(String configOptionsConfigFile){
+        this.configOptionsConfigFile = configOptionsConfigFile;
+    }
+
 }

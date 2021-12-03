@@ -26,6 +26,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Predicate;
 
+/**
+ * This class provides various static helper functions that are used to build OpenSSL docker images
+ * and manage containers.
+ */
 public class OpenSSLDockerHelper {
 
     private static final Logger LOGGER = LogManager.getLogger();
@@ -55,7 +59,6 @@ public class OpenSSLDockerHelper {
      */
     public static String computeDockerTag(List<String> cliOptions, String libraryName, String libraryVersion){
         String cliString = String.join("", cliOptions);
-        //String libraryNamePart = libraryName.substring(0, Math.min(20, libraryName.length()));
         String libraryVersionPart = libraryVersion.substring(0,Math.min(20, libraryVersion.length()));
         String cliStringHashString;
         try {
@@ -75,8 +78,12 @@ public class OpenSSLDockerHelper {
         return res;
     }
 
-    public static String getFactoryImageTag(String openSSLBranchName){
+    public static String getFactoryImageNameAndTag(String openSSLBranchName){
         return String.format("%s:%s",FACTORY_REPRO_NAME, openSSLBranchName);
+    }
+
+    public static String getOpenSSLBuildImageNameAndTag(String dockerTag){
+        return String.format("%s:%s",BUILD_REPRO_NAME, dockerTag);
     }
 
     public static synchronized void buildOpenSSLImageWithFactory(DockerClient dockerClient, List<String> cliOptions, String dockerTag, Path dockerfileMinPath, String openSSLBranchName, String ccacheVolumeName)  {
@@ -142,43 +149,6 @@ public class OpenSSLDockerHelper {
         // Remove the temporary image and container
         dockerClient.removeImageCmd(tempImageId).exec();
         dockerClient.removeContainerCmd(tempContainer.getId()).exec();
-    }
-
-    private static Optional<Container> containerByName(DockerClient dockerClient, String name){
-        final String cName;
-        if(!name.startsWith("/")){
-            cName = "/"+name;
-        }
-        else{
-            cName = name;
-        }
-        Predicate<Container> pred = container -> Arrays.asList(container.getNames()).stream().anyMatch(n -> n.equals(cName));
-        return dockerClient.listContainersCmd().withShowAll(true).exec().stream().filter(pred).findFirst();
-    }
-
-    // For Debugging
-    public static void printContainerLogDebug(DockerClient dockerClient, String containerId){
-        List<String> logs = new ArrayList<>();
-        System.out.println(String.format("===== Output of Docker Container (id = %s) =====", containerId));
-        try {
-            dockerClient.logContainerCmd(containerId).withStdOut(true).
-                    withStdErr(true).withFollowStream(true).exec(new LogContainerResultCallback() {
-                @Override
-                public void onNext(Frame item) {
-                    System.out.print(new String(item.getPayload()));
-                }
-            }).awaitCompletion();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("===== End: Output of Docker Container =====");
-    }
-
-    private static String computerContainerName(String dockerTag, String ipAddress, Integer port){
-        String ipAddressPart = ipAddress.replaceAll("[^a-zA-Z0-9_\\.\\-]", "");
-        String res = String.format("%s%s_%s_%d", CONTAINER_NAME_PREFIX, dockerTag, ipAddressPart, port);
-
-        return res;
     }
 
     public static DockerContainerInfo createDockerContainerServer(DockerClient dockerClient, String dockerTag, String ipAddress, Integer port){
@@ -279,4 +249,41 @@ public class OpenSSLDockerHelper {
         containerInfo.updateContainerState(DockerContainerState.INVALID);
     }
 
+    // For Debugging
+    public static void printContainerLogDebug(DockerClient dockerClient, String containerId){
+        List<String> logs = new ArrayList<>();
+        System.out.println(String.format("===== Output of Docker Container (id = %s) =====", containerId));
+        try {
+            dockerClient.logContainerCmd(containerId).withStdOut(true).
+                    withStdErr(true).withFollowStream(true).exec(new LogContainerResultCallback() {
+                @Override
+                public void onNext(Frame item) {
+                    System.out.print(new String(item.getPayload()));
+                }
+            }).awaitCompletion();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("===== End: Output of Docker Container =====");
+    }
+
+
+    private static Optional<Container> containerByName(DockerClient dockerClient, String name){
+        final String cName;
+        if(!name.startsWith("/")){
+            cName = "/"+name;
+        }
+        else{
+            cName = name;
+        }
+        Predicate<Container> pred = container -> Arrays.asList(container.getNames()).stream().anyMatch(n -> n.equals(cName));
+        return dockerClient.listContainersCmd().withShowAll(true).exec().stream().filter(pred).findFirst();
+    }
+
+    private static String computerContainerName(String dockerTag, String ipAddress, Integer port){
+        String ipAddressPart = ipAddress.replaceAll("[^a-zA-Z0-9_\\.\\-]", "");
+        String res = String.format("%s%s_%s_%d", CONTAINER_NAME_PREFIX, dockerTag, ipAddressPart, port);
+
+        return res;
+    }
 }

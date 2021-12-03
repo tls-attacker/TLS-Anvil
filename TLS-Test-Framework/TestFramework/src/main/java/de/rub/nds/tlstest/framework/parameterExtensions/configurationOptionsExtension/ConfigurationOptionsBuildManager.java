@@ -33,4 +33,6 @@ public interface ConfigurationOptionsBuildManager {
      * @returns the TestSiteReport of the provided library build.
      */
     TestSiteReport configureOptionSetAndGetSiteReport(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet);
+
+    TestSiteReport createSiteReportFromOptionSet(Set<ConfigurationOptionDerivationParameter> optionSet);
 }

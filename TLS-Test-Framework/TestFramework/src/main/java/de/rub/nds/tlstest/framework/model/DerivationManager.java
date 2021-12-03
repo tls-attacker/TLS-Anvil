@@ -66,6 +66,14 @@ public class DerivationManager {
         return derivationsOfModel;
     }
 
+    public List<DerivationType> getAllDerivations(){
+        List<DerivationType> allDerivations = new LinkedList<>();
+        for (Map.Entry<Class, DerivationCategoryManager> entry : categoryManagers.entrySet()) {
+            allDerivations.addAll(entry.getValue().getAllDerivations());
+        }
+        return allDerivations;
+    }
+
     public synchronized void registerCategoryManager(Class derivationTypeCategory, DerivationCategoryManager categoryManager){
         if(!DerivationType.class.isAssignableFrom(derivationTypeCategory)){
             throw new IllegalArgumentException(String.format("Passed derivationTypeCategory '%s' does not implement the DerivationType interface.", derivationTypeCategory.toString()));

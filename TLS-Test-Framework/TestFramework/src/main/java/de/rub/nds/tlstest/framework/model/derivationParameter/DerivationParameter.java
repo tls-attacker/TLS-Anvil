@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
@@ -90,6 +91,9 @@ public abstract class DerivationParameter<T> {
     public abstract void applyToConfig(Config config, TestContext context);
 
     public void postProcessConfig(Config config, TestContext context) {
+    }
+
+    public void configureParameterDependencies(Config config, TestContext context, DerivationContainer container){
     }
 
     public final T getSelectedValue() {

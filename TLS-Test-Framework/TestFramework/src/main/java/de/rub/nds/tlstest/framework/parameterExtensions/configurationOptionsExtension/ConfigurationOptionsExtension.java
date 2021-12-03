@@ -9,14 +9,19 @@
  */
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
-import de.rub.nds.tlstest.framework.model.DerivationManager;
-import de.rub.nds.tlstest.framework.model.ParameterExtension;
+import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlstest.framework.model.*;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This parameter extension is used to add ConfigOptionsDerivationType DerivationParameter%s to the IPM. The DerivationParameters
@@ -25,6 +30,7 @@ import java.nio.file.Paths;
 public class ConfigurationOptionsExtension implements ParameterExtension {
 
     private static ConfigurationOptionsExtension instance = null;
+    private ConfigurationOptionsConfig config;
 
     public static synchronized ConfigurationOptionsExtension getInstance() {
         if (ConfigurationOptionsExtension.instance == null) {
@@ -46,26 +52,40 @@ public class ConfigurationOptionsExtension implements ParameterExtension {
         if(Files.notExists(configPath)){
             throw new IllegalArgumentException(String.format("Illegal path was passed. No file at '%s' can be found.", configPath.toAbsolutePath().toString()));
         }
-        ConfigurationOptionsConfig config;
         try {
             config = new ConfigurationOptionsConfig(configPath);
         }
         catch (FileNotFoundException e) {
             e.printStackTrace();
-            throw new IllegalArgumentException("The passed configuration options config file could not be parsed.");
+            throw new IllegalArgumentException(String.format("The passed configuration options config file '%s' could not be found.",configPath));
         }
 
         ConfigurationOptionsDerivationManager.getInstance().setConfigOptionsConfig(config);
         DerivationManager.getInstance().registerCategoryManager(ConfigOptionDerivationType.class, ConfigurationOptionsDerivationManager.getInstance());
 
-        //TODO: Create maximal Site Report using the appropriate BuildManager
+        TestSiteReport maxSiteReport = createMaximalSiteReport();
+        TestContext.getInstance().setSiteReport(maxSiteReport);
+    }
 
+    private TestSiteReport createMaximalSiteReport(){
+        List<DerivationType> derivationTypes = ConfigurationOptionsDerivationManager.getInstance().getDerivationsOfModel(ModelType.GENERIC);
+        Set<ConfigurationOptionDerivationParameter> optionSet = new HashSet<>();
+        for(DerivationType type : derivationTypes){
+            ConfigurationOptionDerivationParameter configOptionDerivation
+                    = (ConfigurationOptionDerivationParameter) ConfigurationOptionsDerivationManager.getInstance().getDerivationParameterInstance(type);
+            configOptionDerivation.setSelectedValue(configOptionDerivation.getMaxFeatureValue());
+            optionSet.add(configOptionDerivation);
+        }
+
+        TestSiteReport report = config.getBuildManager().createSiteReportFromOptionSet(optionSet);
+        return report;
     }
 
     @Override
     public void unload() {
-        // TODO
-        return;
+        DerivationManager.getInstance().unregisterCategoryManager(ConfigOptionDerivationType.class);
+        ConfigurationOptionsDerivationManager.getInstance().setConfigOptionsConfig(null);
+        config = null;
     }
 
     @Override

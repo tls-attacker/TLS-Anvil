@@ -42,7 +42,7 @@ public class ParameterModelFactory {
     public static List<DerivationType> getDerivationsForScope(DerivationScope derivationScope) {
         List<DerivationType> resultingDerivations = new LinkedList<>();
         List<DerivationType> derivationsOfModel = getDerivationsOfModel(derivationScope);
-        for (DerivationType derivationType : BasicDerivationType.values()) {
+        for (DerivationType derivationType : DerivationManager.getInstance().getAllDerivations()) {
             if (!isBeyondScope(derivationType, derivationsOfModel, derivationScope.getScopeLimits(), derivationScope.getScopeExtensions())) {
                 resultingDerivations.add(derivationType);
             }

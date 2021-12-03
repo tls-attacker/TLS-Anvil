@@ -45,12 +45,10 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
     private Map<String, DockerContainerInfo> dockerTagToContainerInfo;
     private Set<Integer> usedPorts;
 
-    private Set<String> existingDockerImageTags;
+    private Set<String> existingDockerImageNameWithTags;
     private DockerClient dockerClient;
 
     private Path dockerfileMinPath;
-
-    private boolean dockerInitialized;
 
     private ConfigurationOptionsConfig configOptionsConfig;
 
@@ -72,20 +70,17 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
     }
 
     public void initDocker(){
-        if(dockerInitialized){
-            return;
-        }
 
         dockerClient = DockerClientBuilder.getInstance().build();
 
         // Get all existing docker tags
         // Note that it is assumed, that no (relevant) docker images are created or deleted manually during the test executions
         List<Image> imageList = dockerClient.listImagesCmd().withDanglingFilter(false).exec();
-        existingDockerImageTags = new HashSet<>();
+        existingDockerImageNameWithTags = new HashSet<>();
         for(Image img : imageList){
             Object tagsObj = img.getRawValues().get("RepoTags");
             List<String> tags = (List<String>) tagsObj;
-            existingDockerImageTags.addAll(tags);
+            existingDockerImageNameWithTags.addAll(tags);
         }
 
         // Create a ccache volume if it does not exist so far
@@ -120,13 +115,12 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
 
         // Note that the library name must be a branch in OpenSSL's github.
         String openSSLBranchName = configOptionsConfig.getTlsVersionName();
-        String factoryImageTag = OpenSSLDockerHelper.getFactoryImageTag(openSSLBranchName);
-        if(!dockerTagExists(factoryImageTag)){
+        String factoryImageNameWithTag = OpenSSLDockerHelper.getFactoryImageNameAndTag(openSSLBranchName);
+        if(!dockerNameWithTagExists(factoryImageNameWithTag)){
             OpenSSLDockerHelper.createFactoryImage(dockerClient, pathToFactoryDockerfile, openSSLBranchName);
         }
 
         dockerfileMinPath = pathToMinDockerfile;
-        dockerInitialized = true;
 
         // On shutdown: Clean all created docker containers
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -147,15 +141,29 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
         OutboundConnection connection = new OutboundConnection(containerInfo.getPort(), configOptionsConfig.getDockerHostName());
         config.setDefaultClientConnection(connection);//.setPort(containerInfo.getPort());
 
-        OpenSSLDockerHelper.printContainerLogDebug(dockerClient, containerInfo.getContainerId());
+        //OpenSSLDockerHelper.printContainerLogDebug(dockerClient, containerInfo.getContainerId());
 
         return report;
     }
 
-    /*private Integer provideOpenSSLServerImplementation(ConfigurationOptionsConfig configOptionsConfig, Set<ConfigurationOptionDerivationParameter> optionSet){
-        // TODO
-        return -1;
-    }*/
+    @Override
+    public TestSiteReport createSiteReportFromOptionSet(Set<ConfigurationOptionDerivationParameter> optionSet) {
+        List<String> cliOptions = createConfigOptionCliList(optionSet);
+        String dockerTag = OpenSSLDockerHelper.computeDockerTag(cliOptions, configOptionsConfig.getTlsLibraryName(), configOptionsConfig.getTlsVersionName());
+        String dockerNameWithTag = OpenSSLDockerHelper.getOpenSSLBuildImageNameAndTag(dockerTag);
+        if(!dockerNameWithTagExists(dockerNameWithTag)){
+            OpenSSLDockerHelper.buildOpenSSLImageWithFactory(dockerClient, cliOptions, dockerTag, dockerfileMinPath, configOptionsConfig.getTlsVersionName(), CCACHE_VOLUME_NAME);
+        }
+        TestSiteReport report;
+        if(!dockerTagToSiteReport.containsKey(dockerTag)){
+            report = createSiteReport(dockerTag);
+            dockerTagToSiteReport.put(dockerTag, report);
+        }
+        else{
+            report = dockerTagToSiteReport.get(dockerTag);
+        }
+        return report;
+    }
 
     /**
      * Starts a docker container with the given options
@@ -166,6 +174,7 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
     private String provideOpenSSLImplementation(Set<ConfigurationOptionDerivationParameter> optionSet){
         List<String> cliOptions = createConfigOptionCliList(optionSet);
         String dockerTag = OpenSSLDockerHelper.computeDockerTag(cliOptions, configOptionsConfig.getTlsLibraryName(), configOptionsConfig.getTlsVersionName());
+        String dockerNameWithTag = OpenSSLDockerHelper.getOpenSSLBuildImageNameAndTag(dockerTag);
         DockerContainerInfo providedContainer;
 
         // Case: A docker container already exists
@@ -181,8 +190,9 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
         // Case: A new container has to be created
         else{
             // SubCase: The image for the container does not already exists
-            if(!dockerTagExists(dockerTag)){
+            if(!dockerNameWithTagExists(dockerNameWithTag)){
                 OpenSSLDockerHelper.buildOpenSSLImageWithFactory(dockerClient, cliOptions, dockerTag, dockerfileMinPath, configOptionsConfig.getTlsVersionName(), CCACHE_VOLUME_NAME);
+                existingDockerImageNameWithTags.add(dockerNameWithTag);
             }
             // Sub Case: There is no SiteReport created yet.
             if(!dockerTagToSiteReport.containsKey(dockerTag)){
@@ -293,8 +303,8 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
     }
 
     // Docker access functions
-    private boolean dockerTagExists(String dockerTag){
-        return existingDockerImageTags.contains(dockerTag);
+    private boolean dockerNameWithTagExists(String dockerTag){
+        return existingDockerImageNameWithTags.contains(dockerTag);
     }
 
     private Integer occupyNextPort(){
@@ -321,6 +331,5 @@ public class OpenSSLBuildManager implements ConfigurationOptionsBuildManager {
     private void freeOccupiedPort(Integer port){
         usedPorts.remove(port);
     }
-
 
 }

@@ -12,19 +12,56 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class ConfigurationOptionDerivationParameter extends DerivationParameter<ConfigurationOptionValue> {
     public ConfigurationOptionDerivationParameter(ConfigOptionDerivationType type) {
         super(type, ConfigurationOptionValue.class);
     }
 
-    //@Override
-    void configureParameterDependencies(Config config, TestContext context, DerivationContainer container){
+    @Override
+    public void configureParameterDependencies(Config config, TestContext context, DerivationContainer container){
         // TODO
+        // Use a shared flag to check if the ConfigurationOptions were already configured. They only need to be
+        // configured once per container, however this method is called multiple times.
+        final String SETUP_DONE = "CONFIGURATION_OPTION_SETUP_DONE";
+        Map<String, Object> sharedData = container.getSharedData();
+        if(sharedData.containsKey(SETUP_DONE)){
+            if(!(sharedData.get(SETUP_DONE) instanceof Boolean)){
+                throw new IllegalStateException(
+                        String.format("The shared data of the DerivationContainer must not contain the key '%s' of" +
+                                "non Boolean data type. Stop messing with it :P", SETUP_DONE));
+            }
+            Boolean setupAlreadyDone = (Boolean) sharedData.get(SETUP_DONE);
+            if(setupAlreadyDone){
+                return;
+            }
+        }
+
+        Set<ConfigurationOptionDerivationParameter> configOptionDerivations = new HashSet<>();
+        for(DerivationParameter derivation : container.getDerivationList()){
+            if(derivation instanceof ConfigurationOptionDerivationParameter){
+                ConfigurationOptionDerivationParameter configOptionDerivation = (ConfigurationOptionDerivationParameter) derivation;
+                configOptionDerivations.add(configOptionDerivation);
+            }
+        }
+
+        TestSiteReport report = ConfigurationOptionsDerivationManager.getInstance()
+                .getConfigurationOptionsBuildManager()
+                .configureOptionSetAndGetSiteReport(config, context, configOptionDerivations);
+
+        container.setAssociatedSiteReport(report);
+
+        sharedData.put(SETUP_DONE, Boolean.TRUE);
     }
 
     /**

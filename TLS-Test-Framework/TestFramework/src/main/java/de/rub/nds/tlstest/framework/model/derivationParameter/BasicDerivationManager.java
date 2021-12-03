@@ -160,6 +160,16 @@ public class BasicDerivationManager implements DerivationCategoryManager{
         return derivationsOfModel;
     }
 
+    @Override
+    public List<DerivationType> getAllDerivations() {
+        List<DerivationType> derivationTypes = new LinkedList<>();
+        for(BasicDerivationType type : BasicDerivationType.values()){
+            derivationTypes.add((DerivationType) type);
+        }
+
+        return derivationTypes;
+    }
+
     private static List<DerivationType> getBasicModelDerivations(DerivationScope derivationScope) {
         List<DerivationType> derivationTypes = getBasicDerivationsForBoth(derivationScope);
         

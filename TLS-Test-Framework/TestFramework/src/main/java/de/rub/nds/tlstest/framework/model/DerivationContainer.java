@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.framework.model;
 import com.fasterxml.jackson.annotation.JsonValue;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rwth.swc.coffee4j.model.Combination;
 import org.apache.logging.log4j.LogManager;
@@ -33,9 +34,17 @@ public class DerivationContainer {
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<DerivationParameter> derivations;
     private DerivationScope underlyingScope;
+
+    // Data that can be accessed and manipulated during the configureDependencies function
+    private Map<String, Object> sharedData;
+
+    // The site report that must be used for the respective derivations. By default the global site report is taken.
+    private TestSiteReport associatedSiteReport;
     
     public DerivationContainer(List<Object> objects) {
         derivations = new LinkedList<>();
+        sharedData = new HashMap<>();
+        associatedSiteReport = TestContext.getInstance().getSiteReport();
         for (Object derivation : objects) {
             if (derivation instanceof DerivationParameter) {
                 derivations.add((DerivationParameter) derivation);
@@ -79,6 +88,10 @@ public class DerivationContainer {
         return null;
     }
 
+    public List<DerivationParameter> getDerivationList() {
+        return derivations;
+    }
+
     public DerivationParameter getChildParameter(DerivationType type) {
         for (DerivationParameter listed : derivations) {
             if (listed.getParent() == type) {
@@ -98,10 +111,36 @@ public class DerivationContainer {
         for (DerivationParameter listed : derivations) {
             if(underlyingScope.isAutoApplyToConfig(listed.getType())) {
                 listed.postProcessConfig(baseConfig, context);
-            } 
-            
+            }
         }
         LOGGER.debug("Applied " + toString());
+    }
+
+    /**
+     * This method is called after the applyToConfig method is called to configure options that depend on multiple
+     * DerivationParameter%s.
+     *
+     * @param baseConfig The config to create/manipulate
+     * @param context The text context
+     */
+    public void configureDependencies(Config baseConfig, TestContext context){
+        for (DerivationParameter listed : derivations) {
+            if(underlyingScope.isAutoApplyToConfig(listed.getType())) {
+                listed.configureParameterDependencies(baseConfig, context, this);
+            }
+        }
+    }
+
+    public Map<String, Object> getSharedData(){
+        return sharedData;
+    }
+
+    public void setAssociatedSiteReport(TestSiteReport associatedSiteReport) {
+        this.associatedSiteReport = associatedSiteReport;
+    }
+
+    public TestSiteReport getAssociatedSiteReport(){
+        return this.associatedSiteReport;
     }
 
     public String toString() {

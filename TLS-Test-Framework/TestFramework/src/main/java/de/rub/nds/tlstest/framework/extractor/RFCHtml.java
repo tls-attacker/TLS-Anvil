@@ -129,12 +129,12 @@ public class RFCHtml {
         Collections.sort(nodeOffsetIndex);
     }
 
-    public void markText(String searchText, String color, boolean expectMultiple, boolean caseSensitive) {
+    public void markText(String searchText, String color, boolean expectMultiple, boolean caseSensitive, boolean encodeRegex) {
         if (nodeOffsetIndex == null) {
             createTextNodeOffsetIndex();
         }
         
-        String pattern = encodeString(searchText);
+        String pattern = (encodeRegex)?encodeString(searchText):searchText;
         pattern = pattern.replace("[The server]", "");
         pattern = pattern.replace("[Servers]", "");
         String[] parts = pattern.split(Pattern.quote("[...]"));
@@ -172,7 +172,7 @@ public class RFCHtml {
             //mark surrounding passages
             for(int i = 0; i < parts.length -1; i++) {
                 if(parts[i].length() > 5) {
-                    markText(parts[i], color, false, caseSensitive);
+                    markText(parts[i], color, false, caseSensitive, false);
                 }
             }
         }
@@ -260,6 +260,6 @@ public class RFCHtml {
     }
     
     private String encodeString(String input) {
-        return input.replace("+", "\\+").replace("’", "'");
+        return input.replace("+", "\\+").replace("-", "\\-").replace("’", "'");
     }
 }

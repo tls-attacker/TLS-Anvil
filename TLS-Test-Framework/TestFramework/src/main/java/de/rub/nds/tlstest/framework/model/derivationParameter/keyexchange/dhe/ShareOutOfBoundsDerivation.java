@@ -20,7 +20,7 @@ public class ShareOutOfBoundsDerivation extends DerivationParameter<ShareOutOfBo
     // therefore this would not test bound validation but errors in
     // (de)serialisation
     public enum OutOfBoundsType {
-        SHARE_PLUS_P, SHARE_IS_ONE,
+        SHARE_PLUS_P, SHARE_IS_ONE, SHARE_IS_ZERO
     }
 
     public ShareOutOfBoundsDerivation() {
@@ -35,8 +35,8 @@ public class ShareOutOfBoundsDerivation extends DerivationParameter<ShareOutOfBo
     @Override
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        for (OutOfBoundsType typ : OutOfBoundsType.values()) {
-            parameterValues.add(new ShareOutOfBoundsDerivation(typ));
+        for (OutOfBoundsType type : OutOfBoundsType.values()) {
+            parameterValues.add(new ShareOutOfBoundsDerivation(type));
         }
         return parameterValues;
     }
@@ -49,6 +49,10 @@ public class ShareOutOfBoundsDerivation extends DerivationParameter<ShareOutOfBo
         } else {
             BigInteger pubShare;
             switch (getSelectedValue()) {
+                case SHARE_IS_ZERO:
+                    config.setDefaultServerDhPrivateKey(BigInteger.ZERO);
+                    config.setDefaultServerDhPublicKey(BigInteger.ZERO);
+                    break;
                 case SHARE_IS_ONE:
                     config.setDefaultServerDhPrivateKey(BigInteger.ZERO);
                     config.setDefaultServerDhPublicKey(BigInteger.ONE);

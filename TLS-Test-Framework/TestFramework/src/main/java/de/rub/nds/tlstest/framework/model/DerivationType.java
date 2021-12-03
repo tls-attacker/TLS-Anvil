@@ -55,7 +55,8 @@ public enum DerivationType {
     COMPRESSION_METHOD,
     PROTOCOL_MESSAGE_TYPE,
     FFDHE_SHARE_OUT_OF_BOUNDS,
-    MAX_FRAGMENT_LENGTH;
+    MAX_FRAGMENT_LENGTH,
+    HELLO_RETRY_COOKIE;
    
     
     public boolean isBitmaskDerivation() {

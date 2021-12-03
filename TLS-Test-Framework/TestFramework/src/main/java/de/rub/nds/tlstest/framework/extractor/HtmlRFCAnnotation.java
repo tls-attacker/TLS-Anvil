@@ -39,7 +39,7 @@ public class HtmlRFCAnnotation {
 
     private static List<String> getAnnotations(String annotationPath, int rfcNumber) {
         List<String> annotatedPassages = new LinkedList<>();
-        try(BufferedReader reader = new BufferedReader(new FileReader(annotationPath + "/" + rfcNumber)))  {                       
+        try(BufferedReader reader = new BufferedReader(new FileReader(annotationPath + "/" + rfcNumber + ".txt")))  {                       
             String line;
             while ((line = reader.readLine()) != null) {
                 if(line.length() > 1) {

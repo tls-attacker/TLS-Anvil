@@ -106,6 +106,8 @@ public class DerivationFactory {
                 return new ShareOutOfBoundsDerivation();
             case MAX_FRAGMENT_LENGTH:
                 return new MaxFragmentLengthDerivation();
+            case HELLO_RETRY_COOKIE:
+                return new HelloRetryCookieDerivation();
             default:
                 LOGGER.error("Derivation Type {} not implemented", type);
                 throw new UnsupportedOperationException("Derivation Type not implemented");

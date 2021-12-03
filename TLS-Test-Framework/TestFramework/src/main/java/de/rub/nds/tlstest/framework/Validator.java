@@ -143,6 +143,11 @@ public class Validator {
             LOGGER.debug(i.getAdditionalResultInformation());
         }
     }
+    
+    public static void testAlertDescription(AnnotatedState i, AlertDescription expected) {
+        AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        testAlertDescription(i, expected, alert);
+    }
 
 
     public static void smartExecutedAsPlanned(AnnotatedState state) {

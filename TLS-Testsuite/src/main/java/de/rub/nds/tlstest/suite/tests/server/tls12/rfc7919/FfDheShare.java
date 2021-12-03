@@ -62,6 +62,10 @@ public class FfDheShare extends Tls12Test {
 
         ShareOutOfBoundsDerivation share = derivationContainer.getDerivation(ShareOutOfBoundsDerivation.class);
         switch (share.getSelectedValue()) {
+            case SHARE_IS_ZERO:
+                c.setDefaultClientDhPrivateKey(BigInteger.ZERO);
+                c.setDefaultClientDhPublicKey(BigInteger.ZERO);
+                break;
             case SHARE_IS_ONE:
                 c.setDefaultClientDhPrivateKey(BigInteger.ZERO);
                 c.setDefaultClientDhPublicKey(BigInteger.ONE);

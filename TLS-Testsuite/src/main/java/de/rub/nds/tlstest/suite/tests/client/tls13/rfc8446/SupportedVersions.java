@@ -58,6 +58,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -209,7 +210,11 @@ public class SupportedVersions extends Tls13Test {
     @TlsTest(description = "The \"supported_versions\" extension is used by the client to indicate " +
         "which versions of TLS it supports and by the server to indicate which " +
         "version it is using.  The extension contains a list of supported " +
-        "versions in preference order, with the most preferred version first.")
+        "versions in preference order, with the most preferred version first. [...]" + 
+        "If the version chosen by the server is not supported by the client " +
+        "(or is not acceptable), the client MUST abort the handshake with a " +
+        "\"protocol_version\" alert.")
+    @RFC(number = 8446, section = "4.2.1 Supported Versions and D.1. Negotiating with an Older Server")
     @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getUnsupportedProtocolVersions")
     @KeyExchange(supported = KeyExchangeType.ALL12)
@@ -217,6 +222,7 @@ public class SupportedVersions extends Tls13Test {
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
+    @Tag("adjusted")
     public void negotiateUnproposedOldProtocolVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
         byte[] oldProtocolVersion = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();
@@ -227,6 +233,48 @@ public class SupportedVersions extends Tls13Test {
         workflowTrace.addTlsAction(new SendAction(serverHello));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
+        runner.execute(workflowTrace, config).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+            Validator.testAlertDescription(i, AlertDescription.PROTOCOL_VERSION);
+        });
+    }
+    
+    @TlsTest(description = "The \"supported_versions\" extension is used by the client to indicate " +
+        "which versions of TLS it supports and by the server to indicate which " +
+        "version it is using.  The extension contains a list of supported " +
+        "versions in preference order, with the most preferred version first. [...]" + 
+        "If the version chosen by the server is not supported by the client " +
+        "(or is not acceptable), the client MUST abort the handshake with a " +
+        "\"protocol_version\" alert.")
+    @RFC(number = 8446, section = "4.2.1 Supported Versions and D.1. Negotiating with an Older Server")
+    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getUndefinedProtocolVersions")
+    @KeyExchange(supported = KeyExchangeType.ALL12)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.LOW)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.HIGH)
+    @Tag("new")
+    public void legacyNegotiateUndefinedProtocolVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+        byte[] oldProtocolVersion = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
+        ServerHelloMessage serverHello = new ServerHelloMessage(config);
+        serverHello.setProtocolVersion(Modifiable.explicit(oldProtocolVersion));
+        workflowTrace.addTlsAction(new SendAction(serverHello));
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+    }
+    
+    public List<DerivationParameter> getUndefinedProtocolVersions(DerivationScope scope) {
+        List<DerivationParameter> parameterValues = new LinkedList<>();
+        //03 04 is a separate test
+        parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x05}));
+        parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x04}));
+        parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x05, 0x03}));
+        parameterValues.add(new ProtocolVersionDerivation(new byte[] {(byte)0x99, 0x04}));
+        return parameterValues;
     }
 }

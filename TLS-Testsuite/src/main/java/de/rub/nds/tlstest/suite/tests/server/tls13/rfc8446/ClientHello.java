@@ -27,6 +27,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -39,9 +40,11 @@ import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Arrays;
 import static org.junit.Assert.assertFalse;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
@@ -52,7 +55,10 @@ public class ClientHello extends Tls13Test {
     @TlsTest(description = "If the list contains cipher suites that the server "
             + "does not recognize, support, or wish to use, the server MUST "
             + "ignore those cipher suites and process the remaining ones as "
-            + "usual.")
+            + "usual. [...]"
+            + "A server receiving a ClientHello MUST correctly ignore all " 
+            + "unrecognized cipher suites, extensions, and other parameters. "
+            + "Otherwise, it may fail to interoperate with newer clients.")
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.CRITICAL)
@@ -140,6 +146,7 @@ public class ClientHello extends Tls13Test {
             + "exactly one byte, set to zero, which corresponds to the \"null\" compression method in prior "
             + "versions of TLS. If a TLS 1.3 ClientHello is received with any other value in this field, "
             + "the server MUST abort the handshake with an \"illegal_parameter\" alert.")
+    @RFC(number = 8446, section = "4.1.2 Client Hello and 9.3. Protocol Invariants")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
@@ -164,7 +171,10 @@ public class ClientHello extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "Servers MUST ignore unrecognized extensions.")
+    @TlsTest(description = "Servers MUST ignore unrecognized extensions. [...]"
+            + "A server receiving a ClientHello MUST correctly ignore all " 
+            + "unrecognized cipher suites, extensions, and other parameters. "
+            + "Otherwise, it may fail to interoperate with newer clients.")
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.CRITICAL)
@@ -189,5 +199,92 @@ public class ClientHello extends Tls13Test {
             }
         });
     }
+    
+    //there is an omitSignatureAlgorithms test in SignatureAlgorithms
+    
+    @TlsTest(description = "A client is considered to be attempting to negotiate using this " +
+        "specification if the ClientHello contains a \"supported_versions\" " +
+        "extension with 0x0304 contained in its body.  Such a ClientHello " +
+        "message MUST meet the following requirements: [...]" +
+        "If not containing a \"pre_shared_key\" extension, it MUST contain " +
+        "both a \"signature_algorithms\" extension and a \"supported_groups\" " +
+        "extension. [...]" + 
+        "If containing a \"supported_groups\" extension, it MUST also contain " +
+        "a \"key_share\" extension, and vice versa.[...]" + 
+        "Servers receiving a ClientHello which does not conform to these " +
+        "requirements MUST abort the handshake with a \"missing_extension\" " +
+        "alert.")
+    @RFC(number = 8446, section = "9.2.  Mandatory-to-Implement Extensions")
+    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @Tag("new")
+    public void omitKeyShareAndSupportedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        config.setAddKeyShareExtension(false);
+        config.setAddEllipticCurveExtension(false);
+        
+        performMissingExtensionTest(config, runner);
+    }
 
+    private void performMissingExtensionTest(Config config, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        workflowTrace.addTlsAction(new SendAction(new ClientHelloMessage(config)));
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        
+        runner.execute(workflowTrace, config).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+            Validator.testAlertDescription(i, AlertDescription.MISSING_EXTENSION);
+        });
+    }
+    
+    @TlsTest(description = "A client is considered to be attempting to negotiate using this " +
+        "specification if the ClientHello contains a \"supported_versions\" " +
+        "extension with 0x0304 contained in its body.  Such a ClientHello " +
+        "message MUST meet the following requirements: [...]" +
+        "If not containing a \"pre_shared_key\" extension, it MUST contain " +
+        "both a \"signature_algorithms\" extension and a \"supported_groups\" " +
+        "extension. [...]" + 
+        "If containing a \"supported_groups\" extension, it MUST also contain " +
+        "a \"key_share\" extension, and vice versa.[...]" + 
+        "Servers receiving a ClientHello which does not conform to these " +
+        "requirements MUST abort the handshake with a \"missing_extension\" " +
+        "alert.")
+    @RFC(number = 8446, section = "9.2.  Mandatory-to-Implement Extensions")
+    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @Tag("new")
+    public void omitKeyShare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        config.setAddKeyShareExtension(false);
+        
+        performMissingExtensionTest(config, runner);
+    }
+    
+    @TlsTest(description = "A client is considered to be attempting to negotiate using this " +
+        "specification if the ClientHello contains a \"supported_versions\" " +
+        "extension with 0x0304 contained in its body.  Such a ClientHello " +
+        "message MUST meet the following requirements: [...]" +
+        "If not containing a \"pre_shared_key\" extension, it MUST contain " +
+        "both a \"signature_algorithms\" extension and a \"supported_groups\" " +
+        "extension. [...]" + 
+        "If containing a \"supported_groups\" extension, it MUST also contain " +
+        "a \"key_share\" extension, and vice versa.[...]" + 
+        "Servers receiving a ClientHello which does not conform to these " +
+        "requirements MUST abort the handshake with a \"missing_extension\" " +
+        "alert.")
+    @RFC(number = 8446, section = "9.2.  Mandatory-to-Implement Extensions")
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @Tag("new")
+    public void omitSupportedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        config.setAddEllipticCurveExtension(false);
+        
+        performMissingExtensionTest(config, runner);
+    }
 }

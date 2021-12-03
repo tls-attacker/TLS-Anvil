@@ -18,12 +18,14 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
+import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
@@ -43,6 +45,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -147,9 +150,12 @@ public class RecordProtocol extends Tls13Test {
     @TlsTest(description = "The length (in bytes) of the following "
             + "TLSPlaintext.fragment.  The length MUST NOT exceed 2^14 bytes.  An "
             + "endpoint that receives a record that exceeds this length MUST "
-            + "terminate the connection with a \"record_overflow\" alert.")
+            + "terminate the connection with a \"record_overflow\" alert. [...]"
+            + "the full encoded TLSInnerPlaintext MUST NOT exceed 2^14 " 
+            + "+ 1 octets.")
+    //Note that the additional byte is the encoded content type, which we also add
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @RFC(number = 8446, section = "5.1. Record Layer")
+    @RFC(number = 8446, section = "5.1. Record Layer and 5.4 Reccord Padding")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -237,7 +243,10 @@ public class RecordProtocol extends Tls13Test {
 
     @TlsTest(description = "The length MUST NOT exceed 2^14 + 256 bytes. "
             + "An endpoint that receives a record that exceeds this "
-            + "length MUST terminate the connection with a \"record_overflow\" alert.")
+            + "length MUST terminate the connection with a \"record_overflow\" alert. [...]"
+            + "An endpoint that receives a record from its " 
+            + "peer with TLSCiphertext.length larger than 2^14 + 256 octets MUST " 
+            + "terminate the connection with a \"record_overflow\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
@@ -302,6 +311,7 @@ public class RecordProtocol extends Tls13Test {
             + "useful as a traffic analysis countermeasure.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     public void sendZeroLengthApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -326,5 +336,92 @@ public class RecordProtocol extends Tls13Test {
             assertFalse("Socket was closed", Validator.socketClosed(state));
         });
     }
+    
+    @TlsTest(description = "Implementations MUST limit their scanning to the cleartext returned " +
+        "from the AEAD decryption.  If a receiving implementation does not " +
+        "find a non-zero octet in the cleartext, it MUST terminate the " +
+        "connection with an \"unexpected_message\" alert.")
+    @RFC(number = 8446, section = "5.4.  Record Padding")
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @RecordLayerCategory(SeverityLevel.MEDIUM)
+    @Tag("new")
+    public void sendEncryptedHandshakeRecordWithNoNonZeroOctet(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        Record record = getRecordWithOnlyZeroOctets();
+        
+        WorkflowTrace trace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
+        trace.addTlsAction(new SendAction(new FinishedMessage(config)));
+        trace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        //define modified record for finished
+        ((SendAction)trace.getLastSendingAction()).setRecords(record);
 
+        runner.execute(trace, config).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+            Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE);
+        });
+        
+    }
+    
+    @TlsTest(description = "Implementations MUST limit their scanning to the cleartext returned " +
+        "from the AEAD decryption.  If a receiving implementation does not " +
+        "find a non-zero octet in the cleartext, it MUST terminate the " +
+        "connection with an \"unexpected_message\" alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @RFC(number = 8446, section = "5.4.  Record Padding")
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @RecordLayerCategory(SeverityLevel.MEDIUM)
+    @Tag("new")
+    public void sendEncryptedAppRecordWithNoNonZeroOctet(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        Record record = getRecordWithOnlyZeroOctets();
+        
+        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        trace.addTlsAction(new SendAction(new ApplicationMessage(config)));
+        trace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        //define modified record for finished
+        ((SendAction)trace.getLastSendingAction()).setRecords(record);
+
+        runner.execute(trace, config).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+            Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE);
+        });
+        
+    }
+    
+    @TlsTest(description = "Implementations MUST NOT send any records with a version less than 0x0300.")
+    @RFC(number = 8446, section = "D.5. Security Restrictions Related to Backward Compatibility")
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.MEDIUM)
+    @RecordLayerCategory(SeverityLevel.MEDIUM)
+    @Tag("new")
+    public void checkMinimumRecordProtocolVersions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        runner.execute(workflowTrace, config).validateFinal(i -> {
+            Validator.executedAsPlanned(i);
+            testReceivedRecordVersions(i.getWorkflowTrace());
+        });
+    }
+
+    private Record getRecordWithOnlyZeroOctets() {
+        Record record = new Record();
+        record.setComputations(new RecordCryptoComputations());
+        record.getComputations().setPlainRecordBytes(Modifiable.explicit(new byte[] {0x00, 0x00, 0x00, 0x00}));
+        return record;
+    }
+
+    private void testReceivedRecordVersions(WorkflowTrace executedTrace) {
+        for(ReceivingAction receiving: executedTrace.getReceivingActions()) {
+            for(AbstractRecord abstractRecord : receiving.getReceivedRecords()) {
+                if(abstractRecord instanceof Record) {
+                    Record record = (Record) abstractRecord;
+                    assertFalse("Peer sent a record with Protocol Version below 0x03 00", record.getProtocolVersion().getValue()[0] < 0x03);
+                }
+                
+            }
+        }
+    }
 }

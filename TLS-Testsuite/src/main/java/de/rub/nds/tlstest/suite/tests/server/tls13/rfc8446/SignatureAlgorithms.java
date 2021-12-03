@@ -137,7 +137,14 @@ public class SignatureAlgorithms extends Tls13Test {
         "defined for use in signed TLS handshake messages, although they " +
         "MAY appear in \"signature_algorithms\" and " +
         "\"signature_algorithms_cert\" for backward compatibility with " +
-        "TLS 1.2.")
+        "TLS 1.2. [...]" + 
+        "In TLS 1.2, the extension contained hash/signature pairs.  The " +
+        "pairs are encoded in two octets, so SignatureScheme values have " +
+        "been allocated to align with TLS 1.2's encoding.  Some legacy " +
+        "pairs are left unallocated.  These algorithms are deprecated as of " +
+        "TLS 1.3.  They MUST NOT be offered or negotiated by any " +
+        "implementation.  In particular, MD5 [SLOTH], SHA-224, and DSA " +
+        "MUST NOT be used.")
     @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
     @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
     @HandshakeCategory(SeverityLevel.MEDIUM)

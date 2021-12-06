@@ -1,0 +1,32 @@
+In ECDHE_ECDSA, the server's certificate MUST contain an ECDSA- or EdDSA-capable public key.
+
+These parameters MUST be signed with ECDSA or EdDSA using the private key corresponding to the public key in the server's Certificate.
+
+This key exchange algorithm is the same as ECDHE_ECDSA except that the server's certificate MUST contain an RSA public key authorized for signing and the signature in the ServerKeyExchange message must be computed with the corresponding RSA private key.
+
+If these conditions are not met, the client SHOULD send a client Certificate message containing no certificates.  In this case, the ClientKeyExchange MUST be sent as described in Section 2, and the CertificateVerify MUST NOT be sent.
+
+To use this authentication mechanism, the client MUST possess a certificate containing an ECDSA- or EdDSA-capable public key.
+
+A server participating in an ECDHE_ECDSA key exchange may use different curves for the ECDSA or EdDSA key in its certificate and for the ephemeral ECDH key in the ServerKeyExchange message.  The server MUST consider the extensions in both cases.
+
+ECC public keys MUST be encoded in certificates as described in Section 5.9.
+
+Certificate MUST contain an ECDSA- or EdDSA-capable
+
+Certificate MUST contain an RSA public key. 
+
+the public key in the server's certificate MUST respect the client's choice of elliptic curves.  A server that cannot satisfy this requirement MUST NOT choose an ECC cipher suite in its ServerHello message.) 
+
+For the X25519 and X448 curves, the only valid representation is the one specified in [RFC7748], a 32- or 56-octet representation of the u value of the point.  This structure MUST NOT be used with Ed25519 and Ed448 public keys.
+
+The certificate MUST contain an ECDSA- or EdDSA-capable public key.
+
+X.509 certificates containing ECC public keys or signed using ECDSA MUST comply with [RFC3279] or another RFC that replaces or extends it.
+
+X.509 certificates containing ECC public keys or signed using EdDSA MUST comply with [RFC8410].
+
+EdDSA keys using the Ed25519 algorithm MUST use the ed25519 signature algorithm, and Ed448 keys MUST use the ed448 signature algorithm. This document does not define use of Ed25519ph and Ed448ph keys with TLS.  Ed25519, Ed25519ph, Ed448, and Ed448ph keys MUST NOT be used with ECDSA.
+
+The context parameter for Ed448 MUST be set to the empty string.
+

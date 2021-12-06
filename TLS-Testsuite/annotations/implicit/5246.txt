@@ -11,3 +11,4 @@ Application data MUST NOT be sent prior to the completion of the first handshake
 At this point, both client and server MUST send ChangeCipherSpec messages and proceed directly to Finished messages.
 
 and (as for all other messages) it MUST check that the amount of data in the message precisely matches one of these formats; if not, then it MUST send a fatal "decode_error" alert.
+

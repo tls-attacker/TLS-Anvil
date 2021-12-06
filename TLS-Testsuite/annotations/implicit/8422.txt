@@ -1,0 +1,3 @@
+Element to Octet String Conversion Primitive), has constant length for any given field; leading zeros found in this octet string MUST NOT be truncated.
+
+A secure hash function such as SHA-256, SHA-384, or SHA-512 from [FIPS.180-4] MUST be used.

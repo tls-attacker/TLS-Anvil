@@ -60,7 +60,10 @@ public class PointFormatExtension extends Tls12Test {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @RFC(number = 8422, section = "5.2. Server Hello Extensions")
-    @TlsTest(description = "Implementations of this document MUST support the "
+    @TlsTest(description = "The Supported "
+            + "Point Formats Extension, when used, MUST contain the value 0 " 
+            + "(uncompressed) as one of the items in the list of point formats. [...]"
+            + "Implementations of this document MUST support the "
             + "uncompressed format for all of their supported curves and MUST NOT "
             + "support other formats for curves defined in this specification.  For "
             + "backwards compatibility purposes, the point format list extension MAY "

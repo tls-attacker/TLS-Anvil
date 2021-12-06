@@ -58,7 +58,7 @@ public class MaximumFragmentLength extends Tls12Test {
     @TlsTest(description = "Similarly, if a client receives a maximum fragment length negotiation " +
             "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
+    @ScopeLimitations("BasicDerivationType.RECORD_LENGTH")
     @HandshakeCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -88,7 +88,7 @@ public class MaximumFragmentLength extends Tls12Test {
     @TlsTest(description = "Similarly, if a client receives a maximum fragment length negotiation " +
             "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
+    @ScopeLimitations("BasicDerivationType.RECORD_LENGTH")
     @HandshakeCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)

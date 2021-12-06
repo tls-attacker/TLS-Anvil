@@ -98,7 +98,7 @@ public class ServerHello extends Tls13Test {
             + "not offered MUST abort the handshake with "
             + "an \"illegal_parameter\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations(BasicDerivationType.CIPHERSUITE)
+    @ScopeLimitations("BasicDerivationType.CIPHERSUITE")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

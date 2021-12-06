@@ -10,6 +10,9 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
+import de.rub.nds.tlstest.framework.model.DerivationManager;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigOptionValueTranslation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.FlagTranslation;
@@ -72,5 +75,6 @@ public class ConfigurationOptionsConfigTest {
         assertEquals("no_psk",flagTranslation.getDataIfSet());
         assertEquals("",flagTranslation.getDataIfNotSet());
     }
+
 
 }

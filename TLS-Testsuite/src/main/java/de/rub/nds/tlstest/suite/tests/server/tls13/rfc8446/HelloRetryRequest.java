@@ -92,7 +92,7 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "Servers MUST ensure that they negotiate the "
             + "same cipher suite when receiving a conformant updated ClientHello")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
-    @ScopeLimitations(BasicDerivationType.CIPHERSUITE)
+    @ScopeLimitations("BasicDerivationType.CIPHERSUITE")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

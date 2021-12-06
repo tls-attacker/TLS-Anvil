@@ -179,7 +179,7 @@ public class Fragmentation extends Tls12Test {
     @TlsTest(description = "The length (in bytes) of the following TLSPlaintext.fragment. "
             + "The length MUST NOT exceed 2^14.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
+    @ScopeLimitations("BasicDerivationType.RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -213,7 +213,7 @@ public class Fragmentation extends Tls12Test {
 
     @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. "
             + "The length MUST NOT exceed 2^14 + 2048.")
-    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
+    @ScopeLimitations("BasicDerivationType.RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)

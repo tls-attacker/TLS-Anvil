@@ -108,7 +108,7 @@ public class SupportedVersions extends Tls13Test {
             + "for version negotiation and MUST use only the \"supported_versions\" "
             + "extension to determine client preferences.")
     @MethodCondition(method = "supportsTls12")
-    @ManualConfig(BasicDerivationType.CIPHERSUITE)
+    @ManualConfig("BasicDerivationType.CIPHERSUITE")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

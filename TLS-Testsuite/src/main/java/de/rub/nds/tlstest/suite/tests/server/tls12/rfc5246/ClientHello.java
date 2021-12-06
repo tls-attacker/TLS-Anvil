@@ -118,7 +118,7 @@ public class ClientHello extends Tls12Test {
     }
     
     @TlsTest(description = "Send a ClientHello that offers many cipher suites")
-    @ScopeLimitations(BasicDerivationType.INCLUDE_GREASE_CIPHER_SUITES)
+    @ScopeLimitations("BasicDerivationType.INCLUDE_GREASE_CIPHER_SUITES")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

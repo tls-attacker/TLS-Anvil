@@ -45,7 +45,7 @@ public class PSKKeyExchangeModesExtension extends TlsGenericTest {
     
     @TlsTest(description = "Send a Pre Shared Key Exchange Modes Extension in the Hello Message with a modified length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
-    @ScopeLimitations(BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
+    @ScopeLimitations("BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -57,7 +57,7 @@ public class PSKKeyExchangeModesExtension extends TlsGenericTest {
     
     @TlsTest(description = "Send a Pre Shared Key Exchange Modes Extension in the Hello Message with a modified length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
-    @ScopeLimitations(BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
+    @ScopeLimitations("BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

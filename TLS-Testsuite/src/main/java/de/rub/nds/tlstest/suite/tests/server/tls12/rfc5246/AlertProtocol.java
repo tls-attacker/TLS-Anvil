@@ -63,7 +63,7 @@ public class AlertProtocol extends Tls12Test {
     @InteroperabilityCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.LOW)
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.RECORD_LENGTH", methods = "recordLengthAllowsModification")
     public void closeNotify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -102,8 +102,8 @@ public class AlertProtocol extends Tls12Test {
     @SecurityCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(BasicDerivationType.ALERT)
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions("BasicDerivationType.ALERT")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.RECORD_LENGTH", methods = "recordLengthAllowsModification")
     public void abortAfterFatalAlert_sendBeforeCCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -132,8 +132,8 @@ public class AlertProtocol extends Tls12Test {
     @SecurityCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(BasicDerivationType.ALERT)
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions("BasicDerivationType.ALERT")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.RECORD_LENGTH", methods = "recordLengthAllowsModification")
     public void abortAfterFatalAlert_sendAfterServerHelloDone(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

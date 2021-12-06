@@ -98,7 +98,7 @@ public class SCSV extends Tls12Test {
             "The record layer version number for this alert MUST be set to either ClientHello.client_version " +
             "(as it would for the Server Hello message if the server was continuing the handshake) " +
             "or to the record layer version number used by the client.")
-    @ExplicitValues(affectedTypes=BasicDerivationType.CIPHERSUITE, methods="getOldCiphersuites")
+    @ExplicitValues(affectedTypes="BasicDerivationType.CIPHERSUITE", methods="getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -136,7 +136,7 @@ public class SCSV extends Tls12Test {
             "The record layer version number for this alert MUST be set to either ClientHello.client_version " +
             "(as it would for the Server Hello message if the server was continuing the handshake) " +
             "or to the record layer version number used by the client.")
-    @ExplicitValues(affectedTypes=BasicDerivationType.CIPHERSUITE, methods="getOldCiphersuites")
+    @ExplicitValues(affectedTypes="BasicDerivationType.CIPHERSUITE", methods="getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

@@ -93,9 +93,9 @@ public class CertificateVerify extends Tls13Test {
     @CertificateCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
-    @ScopeExtensions(BasicDerivationType.SIG_HASH_ALGORIHTM)
-    @ExplicitValues(affectedTypes=BasicDerivationType.SIG_HASH_ALGORIHTM,methods="getLegacyRSASAHAlgorithms")
-    @ManualConfig(BasicDerivationType.SIG_HASH_ALGORIHTM)
+    @ScopeExtensions("BasicDerivationType.SIG_HASH_ALGORIHTM")
+    @ExplicitValues(affectedTypes="BasicDerivationType.SIG_HASH_ALGORIHTM",methods="getLegacyRSASAHAlgorithms")
+    @ManualConfig("BasicDerivationType.SIG_HASH_ALGORIHTM")
     @MethodCondition(method = "supportsLegacyRSASAHAlgorithms")
     public void selectLegacyRSASignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -148,7 +148,7 @@ public class CertificateVerify extends Tls13Test {
     @CryptoCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
     @CertificateCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(BasicDerivationType.SIGNATURE_BITMASK)
+    @ScopeExtensions("BasicDerivationType.SIGNATURE_BITMASK")
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] bitmask = derivationContainer.buildBitmask();
@@ -194,7 +194,7 @@ public class CertificateVerify extends Tls13Test {
     @CertificateCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
-    @ExplicitValues(affectedTypes = BasicDerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
+    @ExplicitValues(affectedTypes = "BasicDerivationType.SIG_HASH_ALGORIHTM", methods = "getUnproposedSignatureAndHashAlgorithms")
     public void acceptsUnproposedSignatureAndHash(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

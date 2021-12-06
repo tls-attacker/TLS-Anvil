@@ -47,7 +47,7 @@ public class ServerKeyExchange extends TlsGenericTest {
     
     @TlsTest(description = "Send a Server Key Exchange Message with a modified signature length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.CIPHERSUITE, methods = "isNotAnonymousCipherSuite")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.CIPHERSUITE", methods = "isNotAnonymousCipherSuite")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

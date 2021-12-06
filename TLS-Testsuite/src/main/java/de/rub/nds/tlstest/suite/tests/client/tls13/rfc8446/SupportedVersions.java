@@ -83,9 +83,9 @@ public class SupportedVersions extends Tls13Test {
             + "ServerHello.legacy_version value and MUST use "
             + "only the \"supported_versions\" extension to determine the selected version.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions(BasicDerivationType.PROTOCOL_VERSION)
-    @ManualConfig(BasicDerivationType.PROTOCOL_VERSION)
-    @ExplicitValues(affectedTypes = BasicDerivationType.PROTOCOL_VERSION, methods = "getInvalidLegacyVersions")
+    @ScopeExtensions("BasicDerivationType.PROTOCOL_VERSION")
+    @ManualConfig("BasicDerivationType.PROTOCOL_VERSION")
+    @ExplicitValues(affectedTypes = "BasicDerivationType.PROTOCOL_VERSION", methods = "getInvalidLegacyVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.MEDIUM)
@@ -206,8 +206,8 @@ public class SupportedVersions extends Tls13Test {
         "which versions of TLS it supports and by the server to indicate which " +
         "version it is using.  The extension contains a list of supported " +
         "versions in preference order, with the most preferred version first.")
-    @ScopeExtensions(BasicDerivationType.PROTOCOL_VERSION)
-    @ExplicitValues(affectedTypes = BasicDerivationType.PROTOCOL_VERSION, methods = "getUnsupportedProtocolVersions")
+    @ScopeExtensions("BasicDerivationType.PROTOCOL_VERSION")
+    @ExplicitValues(affectedTypes = "BasicDerivationType.PROTOCOL_VERSION", methods = "getUnsupportedProtocolVersions")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

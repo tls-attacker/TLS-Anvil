@@ -139,7 +139,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
     @TlsTest(description = "Thus, TLS server compliant with this specification MUST accept any value {03,XX} as the " +
             "record layer version number for ClientHello.")
-    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
+    @ScopeLimitations("BasicDerivationType.RECORD_LENGTH")
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     public void acceptAnyRecordVersionNumber(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

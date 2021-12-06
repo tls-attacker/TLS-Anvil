@@ -48,7 +48,7 @@ public class Finished extends Tls12Test {
     @TlsTest( description = "Recipients of Finished messages MUST verify that the contents are correct.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(BasicDerivationType.PRF_BITMASK)
+    @ScopeExtensions("BasicDerivationType.PRF_BITMASK")
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)

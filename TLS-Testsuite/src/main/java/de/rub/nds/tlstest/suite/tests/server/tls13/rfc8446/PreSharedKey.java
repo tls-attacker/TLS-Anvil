@@ -148,7 +148,7 @@ public class PreSharedKey extends Tls13Test {
     }*/
     @TlsTest(description = "Prior to accepting PSK key establishment, the server MUST validate"
             + "the corresponding binder value")
-    @ScopeExtensions(BasicDerivationType.PRF_BITMASK)
+    @ScopeExtensions("BasicDerivationType.PRF_BITMASK")
     @MethodCondition(method = "supportsPsk")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

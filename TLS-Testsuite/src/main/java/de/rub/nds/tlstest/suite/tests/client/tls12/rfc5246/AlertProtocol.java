@@ -57,7 +57,7 @@ public class AlertProtocol extends Tls12Test {
             + "of the connection. The other party MUST respond with a close_notify "
             + "alert of its own and close down the connection immediately, "
             + "discarding any pending writes.")
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.RECORD_LENGTH", methods = "recordLengthAllowsModification")
     @InteroperabilityCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.LOW)
@@ -94,9 +94,9 @@ public class AlertProtocol extends Tls12Test {
 
     @TlsTest
     @RFC(number = 5264, section = "7.2.2 Error Alerts")
-    @ScopeExtensions(BasicDerivationType.ALERT)
+    @ScopeExtensions("BasicDerivationType.ALERT")
     @TestDescription("A Fatal Alert must terminate the connection")
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.RECORD_LENGTH", methods = "recordLengthAllowsModification")
     @SecurityCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -126,9 +126,9 @@ public class AlertProtocol extends Tls12Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(BasicDerivationType.ALERT)
+    @ScopeExtensions("BasicDerivationType.ALERT")
     @TestDescription("A Fatal Alert must terminate the connection")
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.RECORD_LENGTH", methods = "recordLengthAllowsModification")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void abortAfterFatalAlertServerHelloDone(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

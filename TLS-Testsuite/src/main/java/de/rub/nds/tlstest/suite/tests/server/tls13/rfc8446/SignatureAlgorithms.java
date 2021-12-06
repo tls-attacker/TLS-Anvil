@@ -96,9 +96,9 @@ public class SignatureAlgorithms extends Tls13Test {
     @TlsTest(description = "Clients offering these values MUST list "
             + "them (legacy algorithms) as the lowest priority (listed after all other "
             + "algorithms in SignatureSchemeList).")
-    @ScopeExtensions(BasicDerivationType.SIG_HASH_ALGORIHTM)
-    @ManualConfig(BasicDerivationType.SIG_HASH_ALGORIHTM)
-    @ExplicitValues(affectedTypes = BasicDerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
+    @ScopeExtensions("BasicDerivationType.SIG_HASH_ALGORIHTM")
+    @ManualConfig("BasicDerivationType.SIG_HASH_ALGORIHTM")
+    @ExplicitValues(affectedTypes = "BasicDerivationType.SIG_HASH_ALGORIHTM", methods = "getLegacySigHashAlgoritms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -131,8 +131,8 @@ public class SignatureAlgorithms extends Tls13Test {
             + "signed TLS handshake messages, although they MAY appear in \"signature_algorithms\" "
             + "and \"signature_algorithms_cert\" for backward "
             + "compatibility with TLS 1.2.")
-    @ScopeExtensions(BasicDerivationType.SIG_HASH_ALGORIHTM)
-    @ExplicitValues(affectedTypes = BasicDerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
+    @ScopeExtensions("BasicDerivationType.SIG_HASH_ALGORIHTM")
+    @ExplicitValues(affectedTypes = "BasicDerivationType.SIG_HASH_ALGORIHTM", methods = "getLegacySigHashAlgoritms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)

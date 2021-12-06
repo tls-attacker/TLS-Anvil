@@ -101,12 +101,12 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
     @TlsTest(description = "TLS servers MUST accept any value "
             + "{03,XX} (including {03,00}) as the record layer version number for "
             + "ClientHello, but they MUST NOT negotiate SSLv3.")
-    @ScopeExtensions(BasicDerivationType.PROTOCOL_VERSION)
+    @ScopeExtensions("BasicDerivationType.PROTOCOL_VERSION")
     //we can't retain the version across all records if we don't know how
     //many are required
-    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
-    @ExplicitValues(affectedTypes = BasicDerivationType.PROTOCOL_VERSION, methods = "get03ProtocolVersions")
-    @ManualConfig(BasicDerivationType.PROTOCOL_VERSION)
+    @ScopeLimitations("BasicDerivationType.RECORD_LENGTH")
+    @ExplicitValues(affectedTypes = "BasicDerivationType.PROTOCOL_VERSION", methods = "get03ProtocolVersions")
+    @ManualConfig("BasicDerivationType.PROTOCOL_VERSION")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
@@ -138,12 +138,12 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
     @TlsTest(description = "TLS servers MUST accept any value "
             + "{03,XX} (including {03,00}) as the record layer version number for "
             + "ClientHello, but they MUST NOT negotiate SSLv3.")
-    @ScopeExtensions(BasicDerivationType.PROTOCOL_VERSION)
+    @ScopeExtensions("BasicDerivationType.PROTOCOL_VERSION")
     //we can't retain the version across all records if we don't know how
     //many are required
-    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
-    @ExplicitValues(affectedTypes = BasicDerivationType.PROTOCOL_VERSION, methods = "get03ProtocolVersions")
-    @ManualConfig(BasicDerivationType.PROTOCOL_VERSION)
+    @ScopeLimitations("BasicDerivationType.RECORD_LENGTH")
+    @ExplicitValues(affectedTypes = "BasicDerivationType.PROTOCOL_VERSION", methods = "get03ProtocolVersions")
+    @ManualConfig("BasicDerivationType.PROTOCOL_VERSION")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)

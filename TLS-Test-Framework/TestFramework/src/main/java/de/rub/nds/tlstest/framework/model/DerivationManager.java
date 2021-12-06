@@ -15,6 +15,8 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParamete
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,9 +76,66 @@ public class DerivationManager {
         return allDerivations;
     }
 
+    public DerivationType getDerivationFromString(String derivationString){
+        String[] splittedString = derivationString.split("\\.");
+        if(splittedString.length != 2){
+            throw new IllegalArgumentException(String.format("Illegal String format. Derivation format is '<TypeEnum>.<TypeName>' but '%s' was given.", derivationString));
+        }
+        String derivationTypeEnum = splittedString[0];
+        String derivationTypeName = splittedString[1];
+        Class associatedClass = null;
+        for (Map.Entry<Class, DerivationCategoryManager> entry : categoryManagers.entrySet()) {
+            Class registeredTypeEnum = entry.getKey();
+            String className = registeredTypeEnum.getSimpleName();
+            if(derivationTypeEnum.equals(className)){
+                associatedClass = registeredTypeEnum;
+                break;
+            }
+        }
+        if(associatedClass == null){
+            List<String> registeredTypes = new LinkedList<>();
+            for(Map.Entry<Class, DerivationCategoryManager> entry : categoryManagers.entrySet()){
+                registeredTypes.add(entry.getKey().getSimpleName());
+            }
+            throw new UnsupportedOperationException(String.format("Derivations of type '%s' are not registered. Registered types are: %s", derivationTypeEnum, String.join(", ", registeredTypes)));
+        }
+
+        Method valueOfMethod;
+        Object result;
+
+        try{
+            valueOfMethod = associatedClass.getMethod("valueOf", String.class);
+            result = valueOfMethod.invoke(null, derivationTypeName);
+        }
+        catch (NoSuchMethodException e) {
+            // Should never happen, because associatedClass is always an enum.
+            e.printStackTrace();
+            throw new RuntimeException(String.format("%s is no enum. This should not happen.", derivationTypeEnum));
+        }
+        catch (InvocationTargetException e) {
+            if (e.getCause() instanceof IllegalArgumentException){
+                throw new IllegalArgumentException(String.format("There is no value '%s' in enum %s.", derivationTypeName, derivationTypeEnum));
+            }
+            else{
+                throw new RuntimeException(String.format("Unknown Exception was thrown.", derivationTypeEnum));
+            }
+        }
+        catch (IllegalAccessException e) {
+            e.printStackTrace();
+            throw new RuntimeException(String.format("Cannot access %s.", derivationString));
+        }
+
+        DerivationType resultDerivationType = (DerivationType) result;
+
+        return resultDerivationType;
+    }
+
     public synchronized void registerCategoryManager(Class derivationTypeCategory, DerivationCategoryManager categoryManager){
         if(!DerivationType.class.isAssignableFrom(derivationTypeCategory)){
             throw new IllegalArgumentException(String.format("Passed derivationTypeCategory '%s' does not implement the DerivationType interface.", derivationTypeCategory.toString()));
+        }
+        if(!derivationTypeCategory.isEnum()){
+            throw new IllegalArgumentException(String.format("Passed derivationTypeCategory '%s' is not an enum.", derivationTypeCategory.toString()));
         }
         categoryManagers.put(derivationTypeCategory, categoryManager);
     }

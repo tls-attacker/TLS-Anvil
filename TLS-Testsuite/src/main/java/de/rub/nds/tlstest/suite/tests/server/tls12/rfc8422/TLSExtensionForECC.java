@@ -104,7 +104,7 @@ public class TLSExtensionForECC extends Tls12Test {
             + "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake "
             + "while restricting itself to the enumerated curves and point formats, "
             + "it MUST NOT negotiate the use of an ECC cipher suite.")
-    @ScopeLimitations(BasicDerivationType.NAMED_GROUP)
+    @ScopeLimitations("BasicDerivationType.NAMED_GROUP")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -135,8 +135,8 @@ public class TLSExtensionForECC extends Tls12Test {
             + "it MUST NOT negotiate the use of an ECC cipher suite.")
     @TestDescription("Send single non ECC cipher suite and all ECC cipher suites with an invalid curve. "
             + "Check if the server selects the non ECC cipher suite.")
-    @ScopeLimitations(BasicDerivationType.NAMED_GROUP)
-    @ManualConfig(BasicDerivationType.CIPHERSUITE)
+    @ScopeLimitations("BasicDerivationType.NAMED_GROUP")
+    @ManualConfig("BasicDerivationType.CIPHERSUITE")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -203,7 +203,7 @@ public class TLSExtensionForECC extends Tls12Test {
     }
     
     @TlsTest(description = "Send a ClientHello that offers many groups.")
-    @ScopeLimitations(BasicDerivationType.INCLUDE_GREASE_NAMED_GROUPS)
+    @ScopeLimitations("BasicDerivationType.INCLUDE_GREASE_NAMED_GROUPS")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

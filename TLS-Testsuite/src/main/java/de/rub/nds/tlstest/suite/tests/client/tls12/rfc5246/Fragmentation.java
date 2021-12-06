@@ -70,7 +70,7 @@ public class Fragmentation extends Tls12Test {
     }
 
     @TlsTest
-    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
+    @ScopeLimitations("BasicDerivationType.RECORD_LENGTH")
     @TestDescription("Client" +
         "   message boundaries are not preserved in the record layer (i.e.,\n" +
         "   multiple client messages of the same ContentType MAY be coalesced\n" +

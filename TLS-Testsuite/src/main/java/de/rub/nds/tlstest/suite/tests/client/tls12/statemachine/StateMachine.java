@@ -57,9 +57,9 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Omit the Certificate Message for non-anonymous Cipher Suite")
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.CIPHERSUITE, methods = "isNotAnonCipherSuite")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.CIPHERSUITE", methods = "isNotAnonCipherSuite")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations({BasicDerivationType.CERTIFICATE})
+    @ScopeLimitations({"BasicDerivationType.CERTIFICATE"})
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.HIGH)

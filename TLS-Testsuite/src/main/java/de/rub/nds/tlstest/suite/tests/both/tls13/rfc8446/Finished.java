@@ -42,7 +42,7 @@ public class Finished extends Tls13Test {
             + "that the contents are correct and if incorrect MUST terminate "
             + "the connection with a \"decrypt_error\" alert.")
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(BasicDerivationType.PRF_BITMASK)
+    @ScopeExtensions("BasicDerivationType.PRF_BITMASK")
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)

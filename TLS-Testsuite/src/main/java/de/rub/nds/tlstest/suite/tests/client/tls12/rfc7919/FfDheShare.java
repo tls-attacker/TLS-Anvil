@@ -43,7 +43,7 @@ public class FfDheShare extends Tls12Test {
                         + "dh_Ys < dh_p - 1.  If dh_Ys is not in this range, the client MUST "
                         + "terminate the connection with a fatal handshake_failure(40) alert.")
         @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-        @ScopeExtensions(BasicDerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
+        @ScopeExtensions("BasicDerivationType.FFDHE_SHARE_OUT_OF_BOUNDS")
         @HandshakeCategory(SeverityLevel.INFORMATIONAL)
         @ComplianceCategory(SeverityLevel.HIGH)
         @AlertCategory(SeverityLevel.MEDIUM)

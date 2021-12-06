@@ -149,7 +149,7 @@ public class SignatureAlgorithms extends Tls12Test {
     }
     
     @TlsTest(description = "Send a ClientHello that offers many SignatureAndHash algorithms")
-    @ScopeLimitations(BasicDerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS)
+    @ScopeLimitations("BasicDerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

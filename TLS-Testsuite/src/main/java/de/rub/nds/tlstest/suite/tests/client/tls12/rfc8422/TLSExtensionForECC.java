@@ -157,7 +157,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @TlsTest(description = "A lack of point validation might enable Invalid Curve Attacks")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.NAMED_GROUP, methods = "isInvalidCurveApplicableNamedGroup")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.NAMED_GROUP", methods = "isInvalidCurveApplicableNamedGroup")
     @CryptoCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

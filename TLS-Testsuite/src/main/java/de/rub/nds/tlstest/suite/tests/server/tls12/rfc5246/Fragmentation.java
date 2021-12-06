@@ -54,7 +54,7 @@ public class Fragmentation extends Tls12Test {
             + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
             + "Application data MAY be sent as they are potentially useful as a "
             + "traffic analysis countermeasure.")
-    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
+    @ScopeLimitations("BasicDerivationType.RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -84,7 +84,7 @@ public class Fragmentation extends Tls12Test {
             + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
             + "Application data MAY be sent as they are potentially useful as a "
             + "traffic analysis countermeasure.")
-    @ScopeLimitations(BasicDerivationType.RECORD_LENGTH)
+    @ScopeLimitations("BasicDerivationType.RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -113,7 +113,7 @@ public class Fragmentation extends Tls12Test {
     }
 
     @TlsTest
-    @ScopeLimitations({BasicDerivationType.RECORD_LENGTH, BasicDerivationType.TCP_FRAGMENTATION})
+    @ScopeLimitations({"BasicDerivationType.RECORD_LENGTH", "BasicDerivationType.TCP_FRAGMENTATION"})
     @TestDescription("Handshake messages spread across different records should be accepted")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
@@ -139,7 +139,7 @@ public class Fragmentation extends Tls12Test {
     }
 
     @TlsTest(description = "")
-    @ScopeLimitations({BasicDerivationType.RECORD_LENGTH, BasicDerivationType.TCP_FRAGMENTATION})
+    @ScopeLimitations({"BasicDerivationType.RECORD_LENGTH", "BasicDerivationType.TCP_FRAGMENTATION"})
     @TestDescription("Handshake messages spread across different records should be accepted")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)

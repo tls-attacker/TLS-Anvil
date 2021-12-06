@@ -56,7 +56,7 @@ public class CryptographicNegotiation extends Tls13Test {
     @TlsTest(description = "If the server is unable to negotiate a supported set of parameters " +
             "(i.e., there is no overlap between the client and server parameters), it MUST abort " +
             "the handshake with either a \"handshake_failure\" or \"insufficient_security\" fatal alert (see Section 6).")
-    @ScopeLimitations({BasicDerivationType.INCLUDE_GREASE_NAMED_GROUPS, BasicDerivationType.NAMED_GROUP})
+    @ScopeLimitations({"BasicDerivationType.INCLUDE_GREASE_NAMED_GROUPS", "BasicDerivationType.NAMED_GROUP"})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

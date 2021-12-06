@@ -22,6 +22,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.TYPE})
 public @interface ValueConstraints {
     Class<?> clazz() default Object.class;
-    BasicDerivationType[] affectedTypes();
+    String[] affectedTypes();
     String[] methods();
 }

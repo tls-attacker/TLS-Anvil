@@ -71,8 +71,8 @@ public class EncThenMacExtension extends Tls12Test {
     }
 
     @TlsTest(description = "Test if the server supports the encrypt-then-mac extension")
-    @DynamicValueConstraints(affectedTypes=BasicDerivationType.CIPHERSUITE, methods="isBlockCipher")
-    @ScopeLimitations(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @DynamicValueConstraints(affectedTypes="BasicDerivationType.CIPHERSUITE", methods="isBlockCipher")
+    @ScopeLimitations("BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @HandshakeCategory(SeverityLevel.INFORMATIONAL)
     @ComplianceCategory(SeverityLevel.INFORMATIONAL)
     @CryptoCategory(SeverityLevel.INFORMATIONAL)
@@ -95,8 +95,8 @@ public class EncThenMacExtension extends Tls12Test {
     @TlsTest(description = "If a server receives an encrypt-then-MAC request extension from a client and then " +
             "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, " +
             "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
-    @DynamicValueConstraints(affectedTypes=BasicDerivationType.CIPHERSUITE, methods="isNotBlockCipher")
-    @ScopeLimitations(BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @DynamicValueConstraints(affectedTypes="BasicDerivationType.CIPHERSUITE", methods="isNotBlockCipher")
+    @ScopeLimitations("BasicDerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

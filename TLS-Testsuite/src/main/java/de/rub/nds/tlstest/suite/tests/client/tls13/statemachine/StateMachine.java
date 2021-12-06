@@ -90,7 +90,7 @@ public class StateMachine extends Tls13Test {
             + "which receives a protected change_cipher_spec record MUST abort the "
             + "handshake with an \"unexpected_message\" alert.")
     @RFC(number = 8446, section = "5. Record Protocol")
-    @ScopeLimitations(BasicDerivationType.INCLUDE_CHANGE_CIPHER_SPEC)
+    @ScopeLimitations("BasicDerivationType.INCLUDE_CHANGE_CIPHER_SPEC")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

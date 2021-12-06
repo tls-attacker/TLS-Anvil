@@ -104,7 +104,7 @@ public class KeyShare extends Tls13Test {
     @TlsTest(description = "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
             + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
             + "that the server has selected for the negotiated key exchange.")
-    @ScopeLimitations(BasicDerivationType.NAMED_GROUP)
+    @ScopeLimitations("BasicDerivationType.NAMED_GROUP")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

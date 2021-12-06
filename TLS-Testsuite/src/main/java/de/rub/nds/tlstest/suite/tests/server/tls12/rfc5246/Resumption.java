@@ -143,13 +143,13 @@ public class Resumption extends Tls12Test {
     @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
-    @ScopeExtensions(BasicDerivationType.ALERT)
-    @ScopeLimitations(BasicDerivationType.INCLUDE_SESSION_TICKET_EXTENSION)
+    @ScopeExtensions("BasicDerivationType.ALERT")
+    @ScopeLimitations("BasicDerivationType.INCLUDE_SESSION_TICKET_EXTENSION")
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.RECORD_LENGTH", methods = "recordLengthAllowsModification")
     public void rejectResumptionAfterFatalPostHandshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
@@ -185,12 +185,12 @@ public class Resumption extends Tls12Test {
     @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
-    @ScopeLimitations(BasicDerivationType.INCLUDE_SESSION_TICKET_EXTENSION)
+    @ScopeLimitations("BasicDerivationType.INCLUDE_SESSION_TICKET_EXTENSION")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.MEDIUM)
-    @ScopeExtensions(BasicDerivationType.ALERT)
+    @ScopeExtensions("BasicDerivationType.ALERT")
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.RECORD_LENGTH", methods = "recordLengthAllowsModification")
     public void rejectResumptionAfterInvalidFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastMessage(WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);

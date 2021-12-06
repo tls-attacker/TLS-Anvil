@@ -61,7 +61,7 @@ public class ServerKeyExchange extends Tls12Test {
     @TlsTest(description = "The client must verify the signature of the ServerKeyExchange message")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
-    @ScopeExtensions(BasicDerivationType.SIGNATURE_BITMASK)
+    @ScopeExtensions("BasicDerivationType.SIGNATURE_BITMASK")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -107,7 +107,7 @@ public class ServerKeyExchange extends Tls12Test {
             + "handling elliptic curves and point formats are exceeded")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
-    @ExplicitValues(affectedTypes = {BasicDerivationType.NAMED_GROUP, BasicDerivationType.CERTIFICATE}, methods = {"getUnproposedNamedGroups", "getCertsIncludingUnsupportedPkGroups"})
+    @ExplicitValues(affectedTypes = {"BasicDerivationType.NAMED_GROUP", "BasicDerivationType.CERTIFICATE"}, methods = {"getUnproposedNamedGroups", "getCertsIncludingUnsupportedPkGroups"})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -141,14 +141,14 @@ public class ServerKeyExchange extends Tls12Test {
             + "fatal handshake failure is that the client's capabilities for "
             + "handling elliptic curves and point formats are exceeded")
     @ModelFromScope(baseModel = ModelType.GENERIC)
-    @ScopeExtensions(BasicDerivationType.CERTIFICATE)
-    @ScopeLimitations(BasicDerivationType.NAMED_GROUP)
-    @ExplicitValues(affectedTypes = BasicDerivationType.CERTIFICATE, methods = "getEcdhCertsForUnproposedGroups")
+    @ScopeExtensions("BasicDerivationType.CERTIFICATE")
+    @ScopeLimitations("BasicDerivationType.NAMED_GROUP")
+    @ExplicitValues(affectedTypes = "BasicDerivationType.CERTIFICATE", methods = "getEcdhCertsForUnproposedGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.CIPHERSUITE, methods = "isStaticEcdhCipherSuite")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.CIPHERSUITE", methods = "isStaticEcdhCipherSuite")
     public void acceptsUnproposedNamedGroupStatic(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -191,9 +191,9 @@ public class ServerKeyExchange extends Tls12Test {
             + "server's elliptic curve domain parameters and ephemeral ECDH public "
             + "key from the ServerKeyExchange message.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations(BasicDerivationType.SIG_HASH_ALGORIHTM)
+    @ScopeLimitations("BasicDerivationType.SIG_HASH_ALGORIHTM")
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.CIPHERSUITE, methods = "isNotAnonCipherSuite")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.CIPHERSUITE", methods = "isNotAnonCipherSuite")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -234,7 +234,7 @@ public class ServerKeyExchange extends Tls12Test {
             + "extension. ")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ALL12}, requiresServerKeyExchMsg = true)
-    @ExplicitValues(affectedTypes = BasicDerivationType.SIG_HASH_ALGORIHTM, methods = "getUnproposedSignatureAndHashAlgorithms")
+    @ExplicitValues(affectedTypes = "BasicDerivationType.SIG_HASH_ALGORIHTM", methods = "getUnproposedSignatureAndHashAlgorithms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void acceptsUnproposedSignatureAndHash(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

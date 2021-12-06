@@ -66,7 +66,7 @@ public class KeyShare extends Tls13Test {
     @TlsTest(description = "Each KeyShareEntry value MUST correspond "
             + "to a group offered in the \"supported_groups\" extension "
             + "and MUST appear in the same order.")
-    @ScopeLimitations(BasicDerivationType.NAMED_GROUP)
+    @ScopeLimitations("BasicDerivationType.NAMED_GROUP")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     /*
@@ -130,7 +130,7 @@ public class KeyShare extends Tls13Test {
     @TlsTest(description = "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
             + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
             + "that the server has selected for the negotiated key exchange.")
-    @ScopeLimitations(BasicDerivationType.NAMED_GROUP)
+    @ScopeLimitations("BasicDerivationType.NAMED_GROUP")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -169,7 +169,7 @@ public class KeyShare extends Tls13Test {
     }
 
     @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
-    @ExplicitValues(affectedTypes = BasicDerivationType.NAMED_GROUP, methods = "getLegacyGroups")
+    @ExplicitValues(affectedTypes = "BasicDerivationType.NAMED_GROUP", methods = "getLegacyGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)
@@ -183,7 +183,7 @@ public class KeyShare extends Tls13Test {
     }
 
     @TlsTest(description = "RFC 8446 (TLS 1.3) and RFC 8422 deprecated curves may not be used")
-    @ScopeLimitations(BasicDerivationType.NAMED_GROUP)
+    @ScopeLimitations("BasicDerivationType.NAMED_GROUP")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)

@@ -125,8 +125,8 @@ public class ServerHello extends Tls12Test {
 
     @TlsTest(description = "The single compression algorithm selected by the server from the"
             + "list in ClientHello.compression_methods.")
-    @ScopeExtensions(BasicDerivationType.COMPRESSION_METHOD)
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.COMPRESSION_METHOD, methods = "isUnproposedCompressionMethod")
+    @ScopeExtensions("BasicDerivationType.COMPRESSION_METHOD")
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.COMPRESSION_METHOD", methods = "isUnproposedCompressionMethod")
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)

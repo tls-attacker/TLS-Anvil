@@ -83,9 +83,9 @@ public class Extensions extends Tls13Test {
             + "with the exception of the \"cookie\" extension in the HelloRetryRequest. "
             + "Upon receiving such an extension, an endpoint MUST abort "
             + "the handshake with an \"unsupported_extension\" alert.")
-    @ScopeExtensions(BasicDerivationType.EXTENSION)
-    @ManualConfig(BasicDerivationType.EXTENSION)
-    @ExplicitValues(affectedTypes = BasicDerivationType.EXTENSION, methods = "getUnrequestedExtensions")
+    @ScopeExtensions("BasicDerivationType.EXTENSION")
+    @ManualConfig("BasicDerivationType.EXTENSION")
+    @ExplicitValues(affectedTypes = "BasicDerivationType.EXTENSION", methods = "getUnrequestedExtensions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)

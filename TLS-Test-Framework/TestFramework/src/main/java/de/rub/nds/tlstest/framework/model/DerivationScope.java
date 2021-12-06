@@ -99,7 +99,17 @@ public class DerivationScope {
         Method testMethod = context.getRequiredTestMethod();
         if(testMethod.isAnnotationPresent(ScopeLimitations.class)) {
             ScopeLimitations scopeLimitations = testMethod.getAnnotation(ScopeLimitations.class);
-            Arrays.stream(scopeLimitations.value()).forEach(derivation -> limitations.add(derivation));
+            for(String typeStr : scopeLimitations.value()){
+                DerivationType derivationType;
+                try{
+                    derivationType = DerivationManager.getInstance().getDerivationFromString(typeStr);
+                }
+                catch(UnsupportedOperationException e){
+                    // If the respective DerivationType enum is not registered this type is simply skipped.
+                    continue;
+                }
+                limitations.add(derivationType);
+            }
         }
         return limitations;
     }
@@ -109,7 +119,17 @@ public class DerivationScope {
         Method testMethod = context.getRequiredTestMethod();
         if(testMethod.isAnnotationPresent(ScopeExtensions.class)) {
             ScopeExtensions scopeExtensions = testMethod.getAnnotation(ScopeExtensions.class);
-            Arrays.stream(scopeExtensions.value()).forEach(derivation -> extensions.add(derivation));
+            for(String typeStr : scopeExtensions.value()){
+                DerivationType derivationType;
+                try{
+                    derivationType = DerivationManager.getInstance().getDerivationFromString(typeStr);
+                }
+                catch(UnsupportedOperationException e){
+                    // If the respective DerivationType enum is not registered this type is simply skipped.
+                    continue;
+                }
+                extensions.add(derivationType);
+            }
         }
         return extensions;
     }
@@ -119,24 +139,40 @@ public class DerivationScope {
         Method testMethod = context.getRequiredTestMethod();
         if(testMethod.isAnnotationPresent(ValueConstraints.class)) {
             ValueConstraints valConstraints = testMethod.getAnnotation(ValueConstraints.class);
-            BasicDerivationType[] affectedTypes = valConstraints.affectedTypes();
+            String[] affectedTypes = valConstraints.affectedTypes();
             String[] methods = valConstraints.methods();
             if(methods.length != affectedTypes.length) {
                 throw new RuntimeException("Unable to resolve ValueConstraints - argument count mismatch");
             }
             for(int i = 0; i < affectedTypes.length; i++) {
-                constraints.add(new ValueConstraint(affectedTypes[i], methods[i], context.getRequiredTestClass(), false));
+                DerivationType affectedType;
+                try{
+                    affectedType = DerivationManager.getInstance().getDerivationFromString(affectedTypes[i]);
+                }
+                catch(UnsupportedOperationException e){
+                    // If the respective DerivationType enum is not registered this type is simply skipped.
+                    continue;
+                }
+                constraints.add(new ValueConstraint(affectedType, methods[i], context.getRequiredTestClass(), false));
             }
         }
         if(testMethod.isAnnotationPresent(DynamicValueConstraints.class)) {
             DynamicValueConstraints valConstraints = testMethod.getAnnotation(DynamicValueConstraints.class);
-            DerivationType[] affectedTypes = valConstraints.affectedTypes();
+            String[] affectedTypes = valConstraints.affectedTypes();
             String[] methods = valConstraints.methods();
             if(methods.length != affectedTypes.length) {
                 throw new RuntimeException("Unable to resolve ValueConstraints - argument count mismatch");
             }
             for(int i = 0; i < affectedTypes.length; i++) {
-                constraints.add(new ValueConstraint(affectedTypes[i], methods[i], context.getRequiredTestClass(), true));
+                DerivationType affectedType;
+                try{
+                    affectedType = DerivationManager.getInstance().getDerivationFromString(affectedTypes[i]);
+                }
+                catch(UnsupportedOperationException e){
+                    // If the respective DerivationType enum is not registered this type is simply skipped.
+                    continue;
+                }
+                constraints.add(new ValueConstraint(affectedType, methods[i], context.getRequiredTestClass(), true));
             }
         }
         
@@ -148,16 +184,24 @@ public class DerivationScope {
         Method testMethod = context.getRequiredTestMethod();
         if(testMethod.isAnnotationPresent(ExplicitValues.class)) {
             ExplicitValues explicitValues = testMethod.getAnnotation(ExplicitValues.class);
-            DerivationType[] affectedTypes = explicitValues.affectedTypes();
+            String[] affectedTypes = explicitValues.affectedTypes();
             String[] methods = explicitValues.methods();
             if(methods.length != affectedTypes.length) {
                 throw new RuntimeException("Unable to resolve ExplicitValues - argument count mismatch");
             }
             for(int i = 0; i < affectedTypes.length; i++) {
-                if(valueMap.containsKey(affectedTypes[i])) {
+                DerivationType affectedType;
+                try{
+                    affectedType = DerivationManager.getInstance().getDerivationFromString(affectedTypes[i]);
+                }
+                catch(UnsupportedOperationException e){
+                    // If the respective DerivationType enum is not registered this type is simply skipped.
+                    continue;
+                }
+                if(valueMap.containsKey(affectedType)) {
                     throw new RuntimeException("Unable to resolve ExplicitValues - multiple explicit values derfined for " + affectedTypes[i]);
                 }
-                valueMap.put(affectedTypes[i], methods[i]);
+                valueMap.put(affectedType, methods[i]);
             }
         }
         return valueMap;
@@ -168,16 +212,24 @@ public class DerivationScope {
         Method testMethod = context.getRequiredTestMethod();
         if(testMethod.isAnnotationPresent(ExplicitModelingConstraints.class)) {
             ExplicitModelingConstraints explicitConstraints = testMethod.getAnnotation(ExplicitModelingConstraints.class);
-            DerivationType[] affectedTypes = explicitConstraints.affectedTypes();
+            String[] affectedTypes = explicitConstraints.affectedTypes();
             String[] methods = explicitConstraints.methods();
             if(methods.length != affectedTypes.length) {
                 throw new RuntimeException("Unable to resolve ExplicitModelParameterConstraints - argument count mismatch");
             }
             for(int i = 0; i < affectedTypes.length; i++) {
-                if(valueMap.containsKey(affectedTypes[i])) {
-                    throw new RuntimeException("Unable to resolve ExplicitModelParameterConstraints - multiple explicit values derfined for " + affectedTypes[i]);
+                DerivationType affectedType;
+                try{
+                    affectedType = DerivationManager.getInstance().getDerivationFromString(affectedTypes[i]);
                 }
-                valueMap.put(affectedTypes[i], methods[i]);
+                catch(UnsupportedOperationException e){
+                    // If the respective DerivationType enum is not registered this type is simply skipped.
+                    continue;
+                }
+                if(valueMap.containsKey(affectedType)) {
+                    throw new RuntimeException("Unable to resolve ExplicitModelParameterConstraints - multiple explicit values defined for " + affectedTypes[i]);
+                }
+                valueMap.put(affectedType, methods[i]);
             }
         }
         return valueMap;
@@ -188,8 +240,18 @@ public class DerivationScope {
         Method testMethod = context.getRequiredTestMethod();
         if(testMethod.isAnnotationPresent(ManualConfig.class)) {
             ManualConfig manualConfig = testMethod.getAnnotation(ManualConfig.class);
-            DerivationType[] types = manualConfig.value();
-            manualConfigTypes.addAll(Arrays.asList(types));
+            String[] types = manualConfig.value();
+            for(String typeStr : types){
+                DerivationType derivationType;
+                try{
+                    derivationType = DerivationManager.getInstance().getDerivationFromString(typeStr);
+                }
+                catch(UnsupportedOperationException e){
+                    // If the respective DerivationType enum is not registered this type is simply skipped.
+                    continue;
+                }
+                manualConfigTypes.add(derivationType);
+            }
         }
         return manualConfigTypes;
     }

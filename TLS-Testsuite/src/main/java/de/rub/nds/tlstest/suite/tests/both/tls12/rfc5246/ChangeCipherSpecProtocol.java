@@ -54,8 +54,8 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
     
     @TlsTest(description = "The message consists of a single byte of value 1.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @DynamicValueConstraints(affectedTypes = BasicDerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
-    @ScopeExtensions(BasicDerivationType.INVALID_CCS_CONTENT)
+    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.RECORD_LENGTH", methods = "recordLengthAllowsModification")
+    @ScopeExtensions("BasicDerivationType.INVALID_CCS_CONTENT")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.MEDIUM)

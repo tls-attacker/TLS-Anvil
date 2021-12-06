@@ -58,10 +58,14 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "4.1.1 Cryptographic Negotiation")
 public class CryptographicNegotiation extends Tls13Test {
 
-    @TlsTest(description = "If there is no overlap between the received " +
+    @TlsTest(description = "If no " +
+        "common cryptographic parameters can be negotiated, the server MUST " +
+        "abort the handshake with an appropriate alert.[...] " +
+        "If there is no overlap between the received " +
         "\"supported_groups\" and the groups supported by the server, then the " +
         "server MUST abort the handshake with a \"handshake_failure\" or an " +
         "\"insufficient_security\" alert.")
+    @RFC(number = 8446, section = "2.1.  Incorrect DHE Share and 4.1.1 Cryptographic Negotiation")
     @ScopeLimitations({DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.NAMED_GROUP})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

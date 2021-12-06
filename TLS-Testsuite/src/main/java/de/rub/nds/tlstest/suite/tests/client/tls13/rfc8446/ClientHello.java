@@ -101,4 +101,24 @@ public class ClientHello extends Tls13Test {
         assertFalse("Client sent a Truncated HMAC Extension", clientHello.containsExtension(ExtensionType.TRUNCATED_HMAC));
     }
     
+    @Test
+    @TestDescription("In compatibility mode (see Appendix D.4), " +
+        "this field MUST be non-empty, so a client not offering a " +
+        "pre-TLS 1.3 session MUST generate a new 32-byte value.  This value " +
+        "need not be random but SHOULD be unpredictable to avoid " +
+        "implementations fixating on a specific value (also known as " +
+        "ossification).  Otherwise, it MUST be set as a zero-length vector " +
+        "(i.e., a zero-valued single byte length field).")
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @Tag("new")
+    public void checkLegacySessionId() {
+        ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
+        int sessionIdLength = clientHello.getSessionIdLength().getValue();
+        if(sessionIdLength > 0) {
+            assertEquals("Session ID was set by client but is not a 32-byte value", 32, sessionIdLength);
+        }
+    }
+    
 }

@@ -27,6 +27,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import static de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests.checkForDuplicateExtensions;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -137,6 +138,26 @@ public class ClientHello extends Tls12Test {
         proposedCipherSuites.removeAll(coveredCipherSuites);
         assertTrue("Client did not provide a SignatureAlgorithm for all cipher suites " +
                         proposedCipherSuites.parallelStream().map(Enum::name).collect(Collectors.joining(",")),proposedCipherSuites.isEmpty());
+    }
+    
+    @Test
+    @TestDescription("There MUST NOT be more than one extension of the same type. [...]" +
+            "The \"anonymous\" value is meaningless in this context but used in " +
+            "Section 7.4.3.  It MUST NOT appear in this extension.")
+    @RFC(number = 5246, section = "7.4.1.4. Hello Extensions and 7.4.1.4.1. Signature Algorithms")
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @Tag("new")
+    public void checkExtensions() {
+        ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
+        checkForDuplicateExtensions(clientHelloMessage);
+        SignatureAndHashAlgorithmsExtensionMessage sigHashExtension = context.getReceivedClientHelloMessage().getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
+        if(sigHashExtension != null) {
+            List<SignatureAndHashAlgorithm> algorithmPairs = SignatureAndHashAlgorithm.getSignatureAndHashAlgorithms(sigHashExtension.getSignatureAndHashAlgorithms().getValue());
+            List<SignatureAndHashAlgorithm> anonAlgorithms = algorithmPairs.stream().filter(algo -> {return algo.getSignatureAlgorithm() == SignatureAlgorithm.ANONYMOUS;}).collect(Collectors.toList());
+            assertTrue("Client offered anonymous signature algorithms:" + anonAlgorithms.parallelStream().map(Enum::name).collect(Collectors.joining(",")), anonAlgorithms.isEmpty());
+        }
     }
         
     private boolean providedSignatureAlgorithm(SignatureAlgorithm requiredAlgorithm) {

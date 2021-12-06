@@ -154,4 +154,19 @@ public class ClientHello extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
         
     }
+    
+    @TlsTest(description = "A server MUST accept ClientHello " +
+        "messages both with and without the extensions field")
+    @ScopeLimitations({DerivationType.INCLUDE_ALPN_EXTENSION, DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION, DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION, DerivationType.INCLUDE_HEARTBEAT_EXTENSION, DerivationType.INCLUDE_PADDING_EXTENSION, DerivationType.INCLUDE_RENEGOTIATION_EXTENSION, DerivationType.INCLUDE_SESSION_TICKET_EXTENSION})
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @Tag("new")
+    public void leaveOutExtensions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        ClientHelloMessage clientHello = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+        clientHello.setExtensionBytes(Modifiable.explicit(new byte [0]));
+        runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
+    }
 }

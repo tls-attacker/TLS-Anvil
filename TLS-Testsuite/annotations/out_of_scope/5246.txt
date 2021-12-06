@@ -61,3 +61,5 @@ If the client has sent a certificate which contains a suitable Diffie-Hellman ke
 When sent, it MUST immediately follow the client key exchange message.
 
 The hash and signature algorithms used in the signature MUST be one of those present in the supported_signature_algorithms field of the CertificateRequest message.  In addition, the hash and signature algorithms MUST be compatible with the key in the client's end-entity certificate.
+
+In order to negotiate correctly, the server MUST check any candidate cipher suites against the "signature_algorithms" extension before selecting them.

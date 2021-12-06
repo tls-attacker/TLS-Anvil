@@ -127,9 +127,14 @@ public class KeyShare extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
+    @TlsTest(description = "If (EC)DHE key establishment " 
+            + "is in use, then the ServerHello contains a \"key_share\" extension with " 
+            + "the server's ephemeral Diffie-Hellman share; the server's share MUST " 
+            + "be in the same group as one of the client's shares. [...]"
+            + "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
             + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
             + "that the server has selected for the negotiated key exchange.")
+    @RFC(number = 8446, section = "2. Protocol Overview and 4.2.8. Key Share")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

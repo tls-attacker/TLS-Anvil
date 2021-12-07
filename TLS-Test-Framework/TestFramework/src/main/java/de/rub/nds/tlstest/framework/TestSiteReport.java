@@ -37,14 +37,14 @@ public class TestSiteReport extends SiteReport {
     public TestSiteReport(String host) {
         super(host, 4433);
     }
-
-    private TestSiteReport() {
-        super();
+    
+    public TestSiteReport(String host, int port) {
+        super(host, port);
     }
 
     public static TestSiteReport fromSiteReport(SiteReport siteReport) {
         try {
-            TestSiteReport report = new TestSiteReport();
+            TestSiteReport report = new TestSiteReport(siteReport.getHost(), siteReport.getPort());
 
             report.setCipherSuites(siteReport.getCipherSuites());
             report.setSupportedSignatureAndHashAlgorithms(siteReport.getSupportedSignatureAndHashAlgorithms());

@@ -14,7 +14,7 @@ import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsscanner.serverscanner.probe.namedcurve.NamedCurveWitness;
+import de.rub.nds.tlsscanner.serverscanner.probe.namedgroup.NamedGroupWitness;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
@@ -77,7 +77,7 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
         if (getSelectedValue() != null && context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             Set<NamedGroup> groups = new HashSet<NamedGroup>();
             NamedGroup selectedGroup = getSelectedValue();
-            NamedCurveWitness witness = context.getSiteReport().getSupportedNamedGroupsWitnesses().get(selectedGroup);
+            NamedGroupWitness witness = context.getSiteReport().getSupportedNamedGroupsWitnesses().get(selectedGroup);
             groups.add(selectedGroup);
             if (witness != null) {
                 if (config.getDefaultSelectedCipherSuite().isEphemeral()) {

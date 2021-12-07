@@ -54,7 +54,7 @@ public class Resumption extends Tls12Test {
     }
 
     public ConditionEvaluationResult supportsResumption() {
-        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_SESSION_IDS) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_SESSION_ID_RESUMPTION) == TestResult.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
             return ConditionEvaluationResult.disabled("Does not support session resumption");

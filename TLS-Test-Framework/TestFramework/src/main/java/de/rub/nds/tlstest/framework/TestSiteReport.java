@@ -82,6 +82,17 @@ public class TestSiteReport extends SiteReport {
         return keyShareGroups;
     }
     
+    @Override
+    public List<NamedGroup> getSupportedNamedGroups() {
+        //We limit the tests to EC Named Groups for now in TLS 1.2 tests
+        return super.getSupportedNamedGroups().stream().filter(NamedGroup::isCurve).collect(Collectors.toList());
+    }
+    
+    public List<NamedGroup> getSupportedFfdheNamedGroups() {
+        //We only use these for FFDHE RFC tests for now
+        return super.getSupportedNamedGroups().stream().filter(NamedGroup::isDhGroup).collect(Collectors.toList());
+    }
+    
     public List<NamedGroup> getClientHelloNamedGroups() {
         if(receivedClientHello != null && receivedClientHello.containsExtension(ExtensionType.ELLIPTIC_CURVES)) {
             return NamedGroup.namedGroupsFromByteArray(receivedClientHello.getExtension(EllipticCurvesExtensionMessage.class).getSupportedGroups().getValue());

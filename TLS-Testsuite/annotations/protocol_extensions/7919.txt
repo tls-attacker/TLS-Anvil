@@ -1,0 +1,1 @@
+New additions of FFDHE groups MUST use a safe prime as the modulus to enable the inexpensive peer verification described in Section 5.1.

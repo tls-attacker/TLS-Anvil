@@ -1,0 +1,1 @@
+Compatible clients performing a full handshake MUST NOT use the False Start protocol modification if the server selects an FFDHE cipher suite but sends a group that is not cryptographically strong from the client's perspective.

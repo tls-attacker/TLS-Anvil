@@ -47,7 +47,7 @@ public class TestSiteReport extends SiteReport {
             TestSiteReport report = new TestSiteReport(siteReport.getHost(), siteReport.getPort());
 
             report.setCipherSuites(siteReport.getCipherSuites());
-            report.setSupportedSignatureAndHashAlgorithms(siteReport.getSupportedSignatureAndHashAlgorithms());
+            report.setSupportedSignatureAndHashAlgorithmsSke(siteReport.getSupportedSignatureAndHashAlgorithms());
             report.setVersions(siteReport.getVersions());
             report.setSupportedNamedGroups(siteReport.getSupportedNamedGroups());
             report.setVersionSuitePairs(siteReport.getVersionSuitePairs());

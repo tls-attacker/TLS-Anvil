@@ -1,2 +1,2 @@
-Implementations MUST honor protocol specifications when sending GREASE values. For instance, Section 4.2 of [RFC8446] forbids duplicate extension types within a single extension block.
+Implementations MUST honor protocol specifications when sending GREASE values.
 

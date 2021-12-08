@@ -358,12 +358,11 @@ public class KeyShare extends Tls13Test {
         return group.isTls13() && group.name().contains("FFDHE");
     }
     
-    @TlsTest(description = "For X25519 and X448 [...]" +
+    @TlsTest(description = "For X25519 and X448, [...]" +
             "For these curves, implementations SHOULD use the approach specified " +
             "in [RFC7748] to calculate the Diffie-Hellman shared secret. " +
             "Implementations MUST check whether the computed Diffie-Hellman shared " +
-            "secret is the all-zero value and abort if so, as described in " +
-            "Section 6 of [RFC7748].")
+            "secret is the all-zero value and abort if so")
     @RFC(number = 8446, section = "7.4.2.  Elliptic Curve Diffie-Hellman")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isXCurve")
     @HandshakeCategory(SeverityLevel.MEDIUM)

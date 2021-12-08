@@ -59,6 +59,7 @@ public class ClientHello extends Tls13Test {
             + "A server receiving a ClientHello MUST correctly ignore all " 
             + "unrecognized cipher suites, extensions, and other parameters. "
             + "Otherwise, it may fail to interoperate with newer clients.")
+    @RFC(number = 8446, section = "4.1.2 Client Hello and 9.3. Protocol Invariants")
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.CRITICAL)
@@ -175,6 +176,7 @@ public class ClientHello extends Tls13Test {
             + "A server receiving a ClientHello MUST correctly ignore all " 
             + "unrecognized cipher suites, extensions, and other parameters. "
             + "Otherwise, it may fail to interoperate with newer clients.")
+    @RFC(number = 8446, section = "4.1.2 Client Hello and 9.3. Protocol Invariants")
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.CRITICAL)

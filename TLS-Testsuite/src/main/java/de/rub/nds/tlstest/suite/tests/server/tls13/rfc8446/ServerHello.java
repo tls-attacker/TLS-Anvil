@@ -136,8 +136,8 @@ public class ServerHello extends Tls13Test {
             "response to a ClientHello MUST set the last 8 bytes of their Random " +
             "value specially in their ServerHello. [...]" +
             "If negotiating TLS 1.1 or below, TLS 1.3 servers MUST, and TLS 1.2 " +
-            "servers SHOULD, set the last 8 bytes of " +
-            "their Random value to the bytes: 44 4F 57 4E 47 52 44 00")
+            "servers SHOULD, set the last 8 bytes of their ServerHello.Random " +
+            "value to the bytes: 44 4F 57 4E 47 52 44 00")
     @MethodCondition(method = "supportsTls12")
     @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
     @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getTlsVersionsBelow12")

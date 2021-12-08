@@ -89,7 +89,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @Test
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @TestDescription("A client compliant with this specification that supports no other " +
-            "curves MUST send the following octets; note that the first two octets" +
+            "curves MUST send the following octets; note that the first two octets " +
             "indicate the extension type (Supported Point Formats Extension)[...]" +
             "If the Supported Point Formats " +
             "Extension is indeed sent, it MUST contain the value 0 (uncompressed) " +
@@ -215,8 +215,8 @@ public class TLSExtensionForECC extends Tls12Test {
         "abort the handshake (as required by definition of X25519 and X448). [...]" +
         "With X25519 and X448, a receiving party MUST check whether the " +
         "computed premaster secret is the all-zero value and abort the " +
-        "handshake if so, as described in Section 6 of [RFC7748]")
-    @RFC(number = 8446, section = "5.10. ECDH, ECDSA, and RSA Computations and 5.11. Public Key Validation")
+        "handshake if so")
+    @RFC(number = 8422, section = "5.10. ECDH, ECDSA, and RSA Computations and 5.11. Public Key Validation")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isXCurve")

@@ -8,7 +8,9 @@ Servers that support this extension MUST support the 'http' URI scheme for certi
 
 The TLS server MUST NOT follow HTTP redirects when retrieving the certificates or certificate chain.  The URLs used in this extension MUST NOT be chosen to depend on such redirects.
 
-The server MUST check that the SHA-1 hash of the contents of the object retrieved from that URL (after decoding any MIME Content-Transfer-Encoding) matches the given hash.  If any retrieved object does not have the correct SHA-1 hash, the server MUST abort the handshake with a bad_certificate_hash_value(114) alert.
+The server MUST check that the SHA-1 hash of the contents of the object retrieved from that URL (after decoding any MIME Content- Transfer-Encoding) matches the given hash. 
+
+If any retrieved object does not have the correct SHA-1 hash, the server MUST abort the handshake with a bad_certificate_hash_value(114) alert.
 
 If a server is unable to obtain certificates in a given CertificateURL, it MUST send a fatal certificate_unobtainable(111) alert if it requires the certificates to complete the handshake.
 

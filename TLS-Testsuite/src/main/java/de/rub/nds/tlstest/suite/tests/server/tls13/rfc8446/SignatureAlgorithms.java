@@ -163,7 +163,8 @@ public class SignatureAlgorithms extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Perform a Handshake where the Signature and Hash Algorithms Extension contains an additional, undefined algorithm")
+    @TlsTest(description = "A server receiving a ClientHello MUST correctly ignore all " +
+        "unrecognized cipher suites, extensions, and other parameters.")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

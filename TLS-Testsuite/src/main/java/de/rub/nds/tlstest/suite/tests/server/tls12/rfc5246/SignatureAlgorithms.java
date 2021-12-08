@@ -132,7 +132,10 @@ public class SignatureAlgorithms extends Tls12Test {
         });
     }
     
-    @TlsTest(description = "Perform a Handshake where the Signature and Hash Algorithms Extension contains an additional, undefined algorithm")
+    @TlsTest(description = "A server receiving a ClientHello MUST correctly ignore all " +
+        "unrecognized cipher suites, extensions, and other parameters.")
+    //This requirement also applies to older versions
+    @RFC(number = 8446, section = "9.3. Protocol Invariants")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

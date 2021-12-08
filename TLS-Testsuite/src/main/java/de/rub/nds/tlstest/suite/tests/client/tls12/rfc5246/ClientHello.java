@@ -62,7 +62,7 @@ public class ClientHello extends Tls12Test {
     
     @Test
     @RFC(number = 7457, section = "2.6.  Compression Attacks: CRIME, TIME, and BREACH")
-    @TestDescription("The CRIME attack (CVE-2012-4929) allows an active attacker to " +
+    @TestDescription("The CRIME attack [...] (CVE-2012-4929) allows an active attacker to " +
             "decrypt ciphertext (specifically, cookies) when TLS is used with TLS- " +
             "level compression.")
     @SecurityCategory(SeverityLevel.CRITICAL)

@@ -1,0 +1,25 @@
+If, on the other hand, the older session is resumed, then the server MUST ignore the extensions and send a server hello containing none of the extension types.  In this case, the functionality of these extensions negotiated during the original session initiation is applied to the resumed session.
+
+Here, "url_and_hash_list" contains a sequence of URLs and hashes. Each "url" MUST be an absolute URI reference according to [RFC3986] that can be immediately used to fetch the certificate(s).
+
+The "padding" byte MUST be 0x01.  It is present to make the structure backwards compatible.
+
+Servers that support this extension MUST support the 'http' URI scheme for certificate URLs and MAY support other schemes.
+
+The TLS server MUST NOT follow HTTP redirects when retrieving the certificates or certificate chain.  The URLs used in this extension MUST NOT be chosen to depend on such redirects.
+
+The server MUST check that the SHA-1 hash of the contents of the object retrieved from that URL (after decoding any MIME Content-Transfer-Encoding) matches the given hash.  If any retrieved object does not have the correct SHA-1 hash, the server MUST abort the handshake with a bad_certificate_hash_value(114) alert.
+
+If a server is unable to obtain certificates in a given CertificateURL, it MUST send a fatal certificate_unobtainable(111) alert if it requires the certificates to complete the handshake.
+
+In the case of the "id-pkix-ocsp-nonce" OCSP extension, [RFC2560] is unclear about its encoding; for clarification, the nonce MUST be a DER-encoded OCTET STRING, which is encapsulated as another OCTET STRING (note that implementations based on an existing OCSP client will need to be checked for conformance to this requirement).
+
+If a server returns a "CertificateStatus" message, then the server MUST have included an extension of type "status_request" with empty "extension_data" in the extended server hello.
+
+Clients requesting an OCSP response and receiving an OCSP response in a "CertificateStatus" message MUST check the OCSP response and abort the handshake if the response is not satisfactory with bad_certificate_status_response(113) alert.
+
+All Certificates MUST conform to [RFC5280].
+
+DER (as opposed to BER) encoding MUST be used.  If this type is sent over a 7-bit transport, base64 encoding SHOULD be used.
+
+To avoid "breaking" existing clients and servers, these alerts MUST NOT be sent unless the sending party has received an extended hello message from the party they are communicating with.

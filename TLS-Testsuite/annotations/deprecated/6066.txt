@@ -1,0 +1,1 @@
+Subsequently during the session, clients and servers MUST use truncated HMACs, calculated as specified in [RFC2104].

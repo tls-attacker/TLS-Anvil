@@ -1,0 +1,4 @@
+Since it is possible for a client to present a different server_name in the application protocol, application server implementations that rely upon these names being the same MUST check to make sure the client did not present a different name in the application protocol.
+
+Implementations MUST ensure that a buffer overflow does not occur, whatever the values of the length fields in server_name.
+

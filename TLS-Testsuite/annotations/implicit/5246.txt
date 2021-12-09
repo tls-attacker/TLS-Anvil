@@ -2,6 +2,8 @@ Whenever an implementation encounters a condition which is defined as a fatal al
 
 The handshake protocol messages are presented below in the order they MUST be sent; sending handshake messages in an unexpected order results in a fatal error.
 
+However, once the ChangeCipherSpec has been sent, the new CipherSpec MUST be used.
+
 The server MUST send a Certificate message whenever the agreed- upon key exchange method uses certificates for authentication (this includes all key exchange methods defined in this document except DH_anon).  This message will always immediately follow the ServerHello message.
 
 Otherwise, it MUST be the first message sent by the client after it receives the ServerHelloDone message.

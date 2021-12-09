@@ -58,6 +58,7 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 @ClientTest
 @Tag("dheshare")
+@RFC(number = 7919, section = "3. Client Behavior")
 public class FfDheShare extends Tls12Test {
     
          public ConditionEvaluationResult supportsFfdheAndEcNamedGroups() {

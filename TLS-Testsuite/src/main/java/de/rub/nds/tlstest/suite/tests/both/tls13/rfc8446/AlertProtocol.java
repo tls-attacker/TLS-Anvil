@@ -11,6 +11,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -26,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
+@RFC(number = 8446, section = "6. Alert Protocol")
 public class AlertProtocol extends Tls13Test {
     
     @TlsTest(description = "All the alerts listed in Section 6.2 MUST be sent with AlertLevel=fatal and MUST be treated as error alerts when received regardless of the AlertLevel in the message.")

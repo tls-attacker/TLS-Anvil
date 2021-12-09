@@ -14,6 +14,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
+import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
+@RFC(number = 6066, section = "4.  Maximum Fragment Length Negotiation")
 public class MaxFragmentLengthExtension extends Tls12Test {
     
     public ConditionEvaluationResult supportsMaxFragmentLength() {

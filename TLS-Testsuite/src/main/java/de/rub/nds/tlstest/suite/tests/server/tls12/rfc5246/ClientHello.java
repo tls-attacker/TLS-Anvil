@@ -25,6 +25,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
@@ -33,6 +34,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
+import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -158,6 +160,7 @@ public class ClientHello extends Tls12Test {
     @TlsTest(description = "A server MUST accept ClientHello " +
         "messages both with and without the extensions field")
     @ScopeLimitations({DerivationType.INCLUDE_ALPN_EXTENSION, DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION, DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION, DerivationType.INCLUDE_HEARTBEAT_EXTENSION, DerivationType.INCLUDE_PADDING_EXTENSION, DerivationType.INCLUDE_RENEGOTIATION_EXTENSION, DerivationType.INCLUDE_SESSION_TICKET_EXTENSION})
+    @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.RSA})
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

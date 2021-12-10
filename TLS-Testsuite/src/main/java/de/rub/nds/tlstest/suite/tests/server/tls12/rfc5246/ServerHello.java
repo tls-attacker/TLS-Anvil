@@ -81,9 +81,9 @@ public class ServerHello extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         runner.execute(workflowTrace, config).validateFinal(i -> {
             Validator.executedAsPlanned(i);
-            checkForUnproposedExtensions(workflowTrace.getFirstSendMessage(ServerHelloMessage.class), workflowTrace.getFirstReceivedMessage(ClientHelloMessage.class));
-            checkForDuplicateExtensions(workflowTrace.getFirstSendMessage(ServerHelloMessage.class));
-            assertFalse("Server sent a Signature Algorithms Extension", workflowTrace.getFirstSendMessage(ServerHelloMessage.class).containsExtension(ExtensionType.SIGNATURE_AND_HASH_ALGORITHMS));
+            checkForUnproposedExtensions(workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class), workflowTrace.getFirstSendMessage(ClientHelloMessage.class));
+            checkForDuplicateExtensions(workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class));
+            assertFalse("Server sent a Signature Algorithms Extension", workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class).containsExtension(ExtensionType.SIGNATURE_AND_HASH_ALGORITHMS));
         });
     }
 }

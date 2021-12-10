@@ -79,8 +79,10 @@ public class PaddingExtension extends Tls12Test {
 
         runner.execute(workflowTrace, config).validateFinal(i -> {
             Validator.executedAsPlanned(i);
-            ServerHelloMessage serverHello = i.getWorkflowTrace().getLastReceivedMessage(ServerHelloMessage.class);
-            assertFalse("Server responded with Padding Extension", serverHello.containsExtension(ExtensionType.PADDING));
+            ServerHelloMessage serverHello = i.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
+            if(serverHello.getExtensions() != null) {
+                assertFalse("Server responded with Padding Extension", serverHello.containsExtension(ExtensionType.PADDING));
+            }
         });
     }
 }

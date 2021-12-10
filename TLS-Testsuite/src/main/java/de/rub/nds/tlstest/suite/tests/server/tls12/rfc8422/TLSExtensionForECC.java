@@ -282,6 +282,7 @@ public class TLSExtensionForECC extends Tls12Test {
         "handshake if so")
     @RFC(number = 8422, section = "5.10. ECDH, ECDSA, and RSA Computations and 5.11. Public Key Validation")
     @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isXCurve")
+    @KeyExchange(supported = {KeyExchangeType.ECDH})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")

@@ -3,6 +3,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7507;
 
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Tag;
 
 import org.junit.jupiter.api.Test;
 
+@ClientTest
 @RFC(number = 7507, section = "4. Client Behavior")
 public class SCSV extends Tls12Test {
     @Test

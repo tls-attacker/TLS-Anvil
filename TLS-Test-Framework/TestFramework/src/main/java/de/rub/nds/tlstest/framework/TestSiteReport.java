@@ -84,13 +84,24 @@ public class TestSiteReport extends SiteReport {
     
     @Override
     public List<NamedGroup> getSupportedNamedGroups() {
-        //We limit the tests to EC Named Groups for now in TLS 1.2 tests
+        //We limit the tests to EC Named Groups for now
         return super.getSupportedNamedGroups().stream().filter(NamedGroup::isCurve).collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<NamedGroup> getSupportedTls13Groups() {
+        //We limit the tests to EC Named Groups for now
+        return super.getSupportedTls13Groups().stream().filter(NamedGroup::isCurve).collect(Collectors.toList());
     }
     
     public List<NamedGroup> getSupportedFfdheNamedGroups() {
         //We only use these for FFDHE RFC tests for now
         return super.getSupportedNamedGroups().stream().filter(NamedGroup::isDhGroup).collect(Collectors.toList());
+    }
+    
+    public List<NamedGroup> getSupportedTls13FfdheNamedGroups() {
+        //We limit the tests to EC Named Groups for now
+        return super.getSupportedTls13Groups().stream().filter(NamedGroup::isDhGroup).collect(Collectors.toList());
     }
     
     public List<NamedGroup> getClientHelloNamedGroups() {

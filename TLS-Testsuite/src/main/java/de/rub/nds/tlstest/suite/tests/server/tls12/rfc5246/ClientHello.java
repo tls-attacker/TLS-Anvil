@@ -159,7 +159,7 @@ public class ClientHello extends Tls12Test {
     
     @TlsTest(description = "A server MUST accept ClientHello " +
         "messages both with and without the extensions field")
-    @ScopeLimitations({DerivationType.INCLUDE_ALPN_EXTENSION, DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION, DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION, DerivationType.INCLUDE_HEARTBEAT_EXTENSION, DerivationType.INCLUDE_PADDING_EXTENSION, DerivationType.INCLUDE_RENEGOTIATION_EXTENSION, DerivationType.INCLUDE_SESSION_TICKET_EXTENSION})
+    @ScopeLimitations({DerivationType.INCLUDE_ALPN_EXTENSION, DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION, DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION, DerivationType.INCLUDE_HEARTBEAT_EXTENSION, DerivationType.INCLUDE_PADDING_EXTENSION, DerivationType.INCLUDE_RENEGOTIATION_EXTENSION, DerivationType.INCLUDE_SESSION_TICKET_EXTENSION, DerivationType.MAX_FRAGMENT_LENGTH, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION})
     @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.RSA})
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

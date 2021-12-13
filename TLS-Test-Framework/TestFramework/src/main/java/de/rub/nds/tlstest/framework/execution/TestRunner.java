@@ -446,7 +446,6 @@ public class TestRunner {
         if (!testConfig.isParsedArgs()) {
             return;
         }
-        initParameterExtensions();
 
         ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
         executor.setTimeoutAction(testConfig.getTimeoutActionScript());
@@ -455,10 +454,13 @@ public class TestRunner {
 
         // If some parameter extension (e.g. the ConfigurationOptionsExtension) already created a SiteReport we
         // need to skip this step here.
-        if(testContext.getSiteReport() == null) {
-            LOGGER.info("Starting preparation phase");
-            this.testConfig.createConfig();
 
+        LOGGER.info("Starting preparation phase");
+        this.testConfig.createConfig();
+
+        initParameterExtensions();
+
+        if(testContext.getSiteReport() == null) {
             if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
                 clientTestPreparation();
             } else if (this.testConfig.getTestEndpointMode() == TestEndpointType.SERVER) {

@@ -11,9 +11,9 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.core.DockerClientBuilder;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
@@ -26,7 +26,6 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -89,18 +88,46 @@ public class DockerTest {
 
         String tag = "taggTagg";
 
-        OpenSSLDockerHelper.buildOpenSSLImageWithFactory(manager.getDockerClient(),
+        /*OpenSSLDockerHelper.buildOpenSSLImageWithFactory(manager.getDockerClient(),
                 Arrays.asList("no-tls1_3"),
                 tag,
                 config.getDockerLibraryPath().resolve(Paths.get("images", "openssl", "configurationOptionsFactory", "Dockerfile_Min_OpenSSL")),
                 "OpenSSL_1_1_1",
-                "ccache-cache");
-        DockerContainerInfo info = OpenSSLDockerHelper.createDockerContainerServer(manager.getDockerClient(), tag, "127.0.0.42", 4433);
+                "ccache-cache");*/
+        DockerContainerInfo info = OpenSSLDockerHelper.createDockerServer(manager.getDockerClient(), tag, "127.0.0.42", 4433);
         OpenSSLDockerHelper.startContainer(manager.getDockerClient(), info);
 
         OpenSSLDockerHelper.printContainerLogDebug(manager.getDockerClient(), info.getContainerId());
 
 
+    }
+
+    @Test
+    public void dockerClientTest(){
+        Logger.getRootLogger().setLevel(Level.OFF);
+        //DockerClient dockerClient = DockerClientBuilder.getInstance().build();
+        ConfigurationOptionsConfig config = createTestConfig();
+        OpenSSLBuildManager manager = new OpenSSLBuildManager(config);
+
+        String tag = "taggTagg";
+
+        /*OpenSSLDockerHelper.buildOpenSSLImageWithFactory(manager.getDockerClient(),
+                Arrays.asList("no-tls1_3"),
+                tag,
+                config.getDockerLibraryPath().resolve(Paths.get("images", "openssl", "configurationOptionsFactory", "Dockerfile_Min_OpenSSL")),
+                "OpenSSL_1_1_1",
+                "ccache-cache");*/
+
+        DockerContainerInfo info = OpenSSLDockerHelper.createDockerClient(manager.getDockerClient(), tag, /*"127.0.0.42", 4455,*/
+                "127.0.0.41", 4466, "192.168.160.1", 4433);
+
+        DockerContainerInfo info2 = OpenSSLDockerHelper.createDockerClient(manager.getDockerClient(), tag, /*"127.0.0.42", 4455,*/
+                "127.0.0.41", 4467, "192.168.160.1", 4433);
+
+        OpenSSLDockerHelper.startContainer(manager.getDockerClient(), info);
+        OpenSSLDockerHelper.startContainer(manager.getDockerClient(), info2);
+
+        OpenSSLDockerHelper.printContainerLogDebug(manager.getDockerClient(), info.getContainerId());
     }
 
     // temp
@@ -111,7 +138,7 @@ public class DockerTest {
         //DockerContainerInfo info = OpenSSLDockerHelper.createDockerContainerServer(OpenSSLBuildManager.getInstance().getDockerClient(), tag, "127.0.0.42", 4433);
         //OpenSSLDockerHelper.startContainer(OpenSSLBuildManager.getInstance().getDockerClient(), info);
 
-        TestSiteReport report = manager.createSiteReport(tag);
+        TestSiteReport report = manager.createServerSiteReport(tag);
         System.out.println(report);
 
     }
@@ -129,6 +156,19 @@ public class DockerTest {
         TestSiteReport report = manager.configureOptionSetAndGetSiteReport(config, context, optionSet);
         System.out.println(report);
         System.out.println(config.getDefaultClientConnection().getPort());
+    }
+
+    @Test
+    public void tmpCheck(){
+
+        DockerClient dockerClient = DockerClientBuilder.getInstance().build();
+        assertNotNull(dockerClient);
+        System.out.println(dockerClient.listContainersCmd().withShowAll(true).exec());
+
+        for(Container container : dockerClient.listContainersCmd().withShowAll(true).exec()){
+            System.out.println(container.getNames()[0]);
+        }
+        // /container_server__OpenSSL_1_1_1_e3b0c44298fc1c14
     }
 
 

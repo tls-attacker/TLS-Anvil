@@ -18,13 +18,11 @@ public class DockerContainerInfo {
     private String dockerTag;
     private String containerId;
     private DockerContainerState containerState;
-    private Integer port;
 
-    public DockerContainerInfo(String dockerTag, String containerId, DockerContainerState containerState, Integer port){
+    public DockerContainerInfo(String dockerTag, String containerId, DockerContainerState containerState){
         this.dockerTag = dockerTag;
         this.containerId = containerId;
         this.containerState = containerState;
-        this.port = port;
     }
 
     public String getDockerTag() {
@@ -39,15 +37,8 @@ public class DockerContainerInfo {
         return containerState;
     }
 
-    public Integer getPort() {
-        return port;
-    }
-
     public void updateContainerState(DockerContainerState containerState) {
         this.containerState = containerState;
     }
 
-    public void updatePort(Integer port) {
-        this.port = port;
-    }
 }

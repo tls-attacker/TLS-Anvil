@@ -9,6 +9,8 @@
  */
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig;
 
+import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.OpenSSLBuildManager;
@@ -47,9 +49,10 @@ public class ConfigurationOptionsConfig {
     private boolean dockerConfigPresent;
 
     private Path dockerLibraryPath;
-
     private String dockerHostName;
     private PortRange dockerPortRange;
+    private String dockerClientDestinationHostName;
+
 
     public ConfigurationOptionsConfig(Path configFilePath) throws FileNotFoundException {
         optionsToTranslation = new HashMap<>();
@@ -89,6 +92,10 @@ public class ConfigurationOptionsConfig {
         return dockerPortRange;
     }
 
+    public String getDockerClientDestinationHostName() {
+        return dockerClientDestinationHostName;
+    }
+
     public Map<ConfigOptionDerivationType, ConfigOptionValueTranslation> getOptionsToTranslationMap() {
         return new HashMap<>(optionsToTranslation);
     }
@@ -109,8 +116,8 @@ public class ConfigurationOptionsConfig {
             Element rootElement = doc.getDocumentElement();
 
             // Parse basic configurations
-            tlsLibraryName = findRequiredElement(rootElement, "tlsLibraryName").getTextContent();
-            tlsVersionName = findRequiredElement(rootElement, "tlsVersionName").getTextContent();
+            tlsLibraryName = findElement(rootElement, "tlsLibraryName", true).getTextContent();
+            tlsVersionName = findElement(rootElement, "tlsVersionName", true).getTextContent();
 
 
             //dockerLibraryPath = Paths.get(rootElement.getElementsByTagName("dockerLibraryPath").item(0).getTextContent());
@@ -121,16 +128,21 @@ public class ConfigurationOptionsConfig {
             NodeList dockerConfigList = rootElement.getElementsByTagName("dockerConfig");
             if(dockerConfigList.getLength() > 0){
                 Element dockerConfigElement = (Element) dockerConfigList.item(0);
-                dockerLibraryPath = Paths.get(findRequiredElement(dockerConfigElement, "dockerLibraryPath").getTextContent());
-                dockerHostName = findRequiredElement(dockerConfigElement, "dockerHostName").getTextContent();
-                dockerPortRange = PortRange.fromString(findRequiredElement(dockerConfigElement, "portRange").getTextContent());
+                dockerLibraryPath = Paths.get(findElement(dockerConfigElement, "dockerLibraryPath", true).getTextContent());
+                dockerHostName = findElement(dockerConfigElement, "dockerHostName", true).getTextContent();
+                dockerPortRange = PortRange.fromString(findElement(dockerConfigElement, "portRange", true).getTextContent());
+                // Docker client dest is required for client tests
+                Element dockerClientDestElement =  findElement(dockerConfigElement, "dockerClientDestinationHost", (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT));
+                if(dockerClientDestElement != null){
+                    dockerClientDestinationHostName = dockerClientDestElement.getTextContent();
+                }
                 dockerConfigPresent = true;
             }
             else{
                 dockerConfigPresent = false;
             }
 
-            buildManager = getBuildManagerFromString(findRequiredElement(rootElement, "buildManager").getTextContent());
+            buildManager = getBuildManagerFromString(findElement(rootElement, "buildManager", true).getTextContent());
 
             // Parse options-translation list
             NodeList list = optionsToTest.getElementsByTagName("optionEntry");
@@ -144,10 +156,10 @@ public class ConfigurationOptionsConfig {
                     Element optionEntry = (Element) optionEntryNode;
 
                     // Parse derivation type
-                    ConfigOptionDerivationType derivationType = derivationTypeFromString(findRequiredElement(optionEntry, "derivationType").getTextContent());
+                    ConfigOptionDerivationType derivationType = derivationTypeFromString(findElement(optionEntry, "derivationType", true).getTextContent());
 
                     // Parse value translation
-                    ConfigOptionValueTranslation translation = getTranslationFromElement(findRequiredElement(optionEntry, "valueTranslation"));
+                    ConfigOptionValueTranslation translation = getTranslationFromElement(findElement(optionEntry, "valueTranslation", true));
 
                     optionsToTranslation.put(derivationType, translation);
                 }
@@ -163,10 +175,15 @@ public class ConfigurationOptionsConfig {
         }
     }
 
-    private Element findRequiredElement(Element root, String tagName){
+    private Element findElement(Element root, String tagName, boolean required){
         NodeList elementList = root.getElementsByTagName(tagName);
         if(elementList.getLength() < 1){
-            throw new RuntimeException(String.format("Missing child '%s' of '%s'.", tagName, root.getTagName()));
+            if(required){
+                throw new RuntimeException(String.format("Missing required child '%s' of '%s'.", tagName, root.getTagName()));
+            }
+            else{
+                return null;
+            }
         }
         else if(elementList.getLength() > 1){
             throw new RuntimeException(String.format("Multiple children '%s' in '%s' found.", tagName));

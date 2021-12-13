@@ -18,3 +18,4 @@ apps/
 *.settings
 *.factorypath
 *.code-workspace
+misc/

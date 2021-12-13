@@ -137,6 +137,7 @@ public class PreSharedKey extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastSendingMessage(WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.CLIENT_HELLO);
         ClientHelloMessage resumingHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
         resumingHello.getExtensions().add(resumingHello.getExtensions().size() - 2, new PreSharedKeyExtensionMessage(config));
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         return workflowTrace;
     }
     

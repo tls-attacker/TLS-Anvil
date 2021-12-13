@@ -260,29 +260,33 @@ public class ServerHello extends Tls13Test {
         //offered by the client in its ClientHello, with the 
         //exception of optionally the "cookie"
         List<ExtensionType> illegalExtensions = new LinkedList<>();
+        if(serverHello.getExtensions() != null) {
         for(ExtensionType extension: serverHello.getExtensions().stream().map(ExtensionMessage::getExtensionTypeConstant).toArray(ExtensionType[]::new)) {
             if(!clientHello.containsExtension(extension) && (extension != ExtensionType.COOKIE || !serverHello.isTls13HelloRetryRequest())) {
                 illegalExtensions.add(extension);
             }
         }
         assertTrue("Server negotiated the following unproposed extensions: " + illegalExtensions.parallelStream().map(Enum::name).collect(Collectors.joining(",")), illegalExtensions.isEmpty());
+        }
     }
     
     public static void checkForForbiddenExtensions(ServerHelloMessage serverHello) {
         assertNotNull("ServerHello was not received", serverHello);
-        //The server MUST NOT send a "psk_key_exchange_modes" extension.
-        assertFalse("Server sent a PSK Key Exchange Modes Extension", serverHello.containsExtension(ExtensionType.PSK_KEY_EXCHANGE_MODES));
-        //Servers MUST NOT send a post-handshake CertificateRequest to clients
-        //which do not offer this extension.  Servers MUST NOT send this
-        //extension.
-        assertFalse("Server sent a Post Handshake Auth Extension", serverHello.containsExtension(ExtensionType.POST_HANDSHAKE_AUTH));
-        //The "oid_filters" extension allows servers to provide a set of
-        //OID/value pairs which it would like the client's certificate to
-        //match.  This extension, if provided by the server, MUST only be sent
-        //in the CertificateRequest message.
-        assertFalse("Server sent an OID Filter Extension in Server Hello", serverHello.containsExtension(ExtensionType.OID_FILTERS));
-        //Implementations MUST NOT use the Truncated HMAC extension
-        assertFalse("Server sent a Truncated HMAC Extension", serverHello.containsExtension(ExtensionType.TRUNCATED_HMAC));
+        if(serverHello.getExtensions() != null) {
+            //The server MUST NOT send a "psk_key_exchange_modes" extension.
+            assertFalse("Server sent a PSK Key Exchange Modes Extension", serverHello.containsExtension(ExtensionType.PSK_KEY_EXCHANGE_MODES));
+            //Servers MUST NOT send a post-handshake CertificateRequest to clients
+            //which do not offer this extension.  Servers MUST NOT send this
+            //extension.
+            assertFalse("Server sent a Post Handshake Auth Extension", serverHello.containsExtension(ExtensionType.POST_HANDSHAKE_AUTH));
+            //The "oid_filters" extension allows servers to provide a set of
+            //OID/value pairs which it would like the client's certificate to
+            //match.  This extension, if provided by the server, MUST only be sent
+            //in the CertificateRequest message.
+            assertFalse("Server sent an OID Filter Extension in Server Hello", serverHello.containsExtension(ExtensionType.OID_FILTERS));
+            //Implementations MUST NOT use the Truncated HMAC extension
+            assertFalse("Server sent a Truncated HMAC Extension", serverHello.containsExtension(ExtensionType.TRUNCATED_HMAC));
+        }
     }
     
     public List<DerivationParameter> getTlsVersionsBelow12(DerivationScope scope) {

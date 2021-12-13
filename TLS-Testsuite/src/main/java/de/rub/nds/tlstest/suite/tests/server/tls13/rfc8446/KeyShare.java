@@ -44,6 +44,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
+import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
@@ -315,7 +316,8 @@ public class KeyShare extends Tls13Test {
         "< p-1.")
     @RFC(number = 8446, section = "4.2.8.1.  Diffie-Hellman Parameters")
     @ScopeExtensions(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isFfdheGroup")
+    @ManualConfig(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
+    @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getFfdheGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
@@ -354,8 +356,10 @@ public class KeyShare extends Tls13Test {
         runner.execute(worklfowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
     
-    public boolean isFfdheGroup(NamedGroup group) {
-        return group.isTls13() && group.name().contains("FFDHE");
+    public List<DerivationParameter> getFfdheGroups() {
+        List<DerivationParameter> derivationParameters = new LinkedList<>();
+        context.getSiteReport().getSupportedTls13FfdheNamedGroups().forEach(group -> derivationParameters.add(new NamedGroupDerivation(group)));
+        return derivationParameters;
     }
     
     @TlsTest(description = "For X25519 and X448, [...]" +

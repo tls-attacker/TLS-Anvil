@@ -40,6 +40,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
@@ -59,6 +60,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe.ShareOutOfBoundsDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -259,7 +261,7 @@ public class KeyShare extends Tls13Test {
         "< p-1.")
     @RFC(number = 8446, section = "4.2.8.1.  Diffie-Hellman Parameters")
     @ScopeExtensions(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isFfdheGroup")
+    @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getFfdheGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
@@ -297,7 +299,9 @@ public class KeyShare extends Tls13Test {
         runner.execute(worklfowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
     
-    public boolean isFfdheGroup(NamedGroup group) {
-        return group.isTls13() && group.name().contains("FFDHE");
+    public List<DerivationParameter> getFfdheGroups() {
+        List<DerivationParameter> derivationParameters = new LinkedList<>();
+        context.getSiteReport().getSupportedTls13FfdheNamedGroups().forEach(group -> derivationParameters.add(new NamedGroupDerivation(group)));
+        return derivationParameters;
     }
 }

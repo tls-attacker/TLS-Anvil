@@ -11,6 +11,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
@@ -24,6 +25,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
@@ -69,7 +71,19 @@ public class ServerHello extends Tls13Test {
     public ConditionEvaluationResult supportsTls12() {
         if (context.getSiteReport().getVersions().contains(ProtocolVersion.TLS12))
             return ConditionEvaluationResult.enabled("");
-        return ConditionEvaluationResult.disabled("No TLS 1.2 supported");
+        return ConditionEvaluationResult.disabled("No TLS 1.2 support");
+    }
+    
+    public ConditionEvaluationResult supportsTls11() {
+        if (context.getSiteReport().getVersions().contains(ProtocolVersion.TLS11))
+            return ConditionEvaluationResult.enabled("");
+        return ConditionEvaluationResult.disabled("No TLS 1.1 support");
+    }
+    
+    public ConditionEvaluationResult supportsTls10() {
+        if (context.getSiteReport().getVersions().contains(ProtocolVersion.TLS10))
+            return ConditionEvaluationResult.enabled("");
+        return ConditionEvaluationResult.disabled("No TLS 1.0 support");
     }
     
     @TlsTest(description = "In TLS 1.3, the TLS server indicates its version using the \"supported_versions\" " +
@@ -138,20 +152,18 @@ public class ServerHello extends Tls13Test {
             "If negotiating TLS 1.1 or below, TLS 1.3 servers MUST, and TLS 1.2 " +
             "servers SHOULD, set the last 8 bytes of their ServerHello.Random " +
             "value to the bytes: 44 4F 57 4E 47 52 44 00")
-    @MethodCondition(method = "supportsTls12")
-    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
-    @ExplicitValues(affectedTypes = DerivationType.PROTOCOL_VERSION, methods = "getTlsVersionsBelow12")
+    @MethodCondition(method = "supportsTls11")
+    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isTls11CipherSuite")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
-    public void testServerRandomFor11And10(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void testServerRandomFor11(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
-        byte[] selectedLegacyVersion = derivationContainer.getDerivation(ProtocolVersionDerivation.class).getSelectedValue();
+        config.setHighestProtocolVersion(ProtocolVersion.TLS11);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         ClientHelloMessage clientHello = new ClientHelloMessage(config);
-        clientHello.setProtocolVersion(Modifiable.explicit(selectedLegacyVersion));
         workflowTrace.addTlsActions(
                 new SendAction(clientHello),
                 new ReceiveTillAction(new ServerHelloDoneMessage())
@@ -167,6 +179,51 @@ public class ServerHello extends Tls13Test {
             assertArrayEquals("Invalid random", new byte[]{0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x00},
                     Arrays.copyOfRange(random, random.length - 8, random.length));
         });
+    }
+    
+    @TlsTest(description = "The last 8 bytes MUST be overwritten as described " +
+            "below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random. [...]" +
+            "TLS 1.3 servers which negotiate TLS 1.2 or below in " +
+            "response to a ClientHello MUST set the last 8 bytes of their Random " +
+            "value specially in their ServerHello. [...]" +
+            "If negotiating TLS 1.1 or below, TLS 1.3 servers MUST, and TLS 1.2 " +
+            "servers SHOULD, set the last 8 bytes of their ServerHello.Random " +
+            "value to the bytes: 44 4F 57 4E 47 52 44 00")
+    @MethodCondition(method = "supportsTls10")
+    @KeyExchange(supported = KeyExchangeType.ALL12)
+    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isTls10CipherSuite")
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @Tag("new")
+    public void testServerRandomFor10(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+        config.setHighestProtocolVersion(ProtocolVersion.TLS10);
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        ClientHelloMessage clientHello = new ClientHelloMessage(config);
+        workflowTrace.addTlsActions(
+                new SendAction(clientHello),
+                new ReceiveTillAction(new ServerHelloDoneMessage())
+        );
+
+        runner.execute(workflowTrace, config).validateFinal(i -> {
+            WorkflowTrace trace = i.getWorkflowTrace();
+            Validator.executedAsPlanned(i);
+
+            ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+            byte[] random = msg.getRandom().getValue();
+            assertArrayEquals("Invalid random", new byte[]{0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x00},
+                    Arrays.copyOfRange(random, random.length - 8, random.length));
+        });
+    }
+    
+    public boolean isTls10CipherSuite(CipherSuite cipherSuite) {
+        return cipherSuite.isSupportedInProtocol(ProtocolVersion.TLS10);
+    }
+    
+    public boolean isTls11CipherSuite(CipherSuite cipherSuite) {
+        return cipherSuite.isSupportedInProtocol(ProtocolVersion.TLS11);
     }
 
     @TlsTest(description = "A client which receives a legacy_session_id_echo " +

@@ -51,6 +51,7 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivat
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;

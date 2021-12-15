@@ -109,7 +109,7 @@ public class KeyUpdate extends Tls13Test {
             Validator.executedAsPlanned(i);
             KeyUpdateMessage receivedKeyUpdate = i.getWorkflowTrace().getLastReceivedMessage(KeyUpdateMessage.class);
             assertNotNull("Did not receive a KeyUpdate response", receivedKeyUpdate);
-            assertEquals("Peer did not set the correct KeyUpdate mode",receivedKeyUpdate.getRequestMode().getValue(), KeyUpdateRequest.UPDATE_NOT_REQUESTED);
+            assertEquals("Peer did not set the correct KeyUpdate mode", (byte) KeyUpdateRequest.UPDATE_NOT_REQUESTED.getValue(), (byte) receivedKeyUpdate.getRequestMode().getValue()) ;
             for(AbstractRecord abstractRecord: workflowTrace.getLastReceivingAction().getReceivedRecords()) {
                 if(abstractRecord.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
                     assertTrue("Invalid authentication tag for received KeyUpdateMessage", ((Record)abstractRecord).getComputations().getAuthenticationTagValid());

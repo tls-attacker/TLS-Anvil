@@ -83,7 +83,10 @@ public class ServerHello extends Tls12Test {
             Validator.executedAsPlanned(i);
             checkForUnproposedExtensions(workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class), workflowTrace.getFirstSendMessage(ClientHelloMessage.class));
             checkForDuplicateExtensions(workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class));
-            assertFalse("Server sent a Signature Algorithms Extension", workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class).containsExtension(ExtensionType.SIGNATURE_AND_HASH_ALGORITHMS));
+            if(workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class).getExtensions() != null) {
+                assertFalse("Server sent a Signature Algorithms Extension", workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class).containsExtension(ExtensionType.SIGNATURE_AND_HASH_ALGORITHMS));
+            }
         });
+        
     }
 }

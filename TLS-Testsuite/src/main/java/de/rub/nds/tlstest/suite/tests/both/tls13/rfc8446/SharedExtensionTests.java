@@ -18,12 +18,14 @@ public class SharedExtensionTests {
         //same type in a given extension block.   
         Set<ExtensionType> uniqueList = new HashSet<>();
         List<ExtensionType> duplicated = new LinkedList<>();
-        helloMessage.getExtensions().forEach(extension -> {
-            if(uniqueList.contains(extension.getExtensionTypeConstant())) {
-                duplicated.add(extension.getExtensionTypeConstant());
-            }
-            uniqueList.add(extension.getExtensionTypeConstant());
-        });
+        if(helloMessage.getExtensions() != null) {
+            helloMessage.getExtensions().forEach(extension -> {
+                if(uniqueList.contains(extension.getExtensionTypeConstant())) {
+                    duplicated.add(extension.getExtensionTypeConstant());
+                }
+                uniqueList.add(extension.getExtensionTypeConstant());
+            });
+        }
         assertTrue("Server included multiple Extensions of the following types: " + duplicated.parallelStream().map(Enum::name).collect(Collectors.joining(",")), duplicated.isEmpty());
     }
 }

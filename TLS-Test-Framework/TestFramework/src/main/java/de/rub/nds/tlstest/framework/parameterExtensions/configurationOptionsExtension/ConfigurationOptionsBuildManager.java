@@ -21,7 +21,7 @@ import java.util.Set;
  * used to provide library builds that use the specified configuration options set. Also it is responsible to offer
  * a TestSiteReport of the
  */
-public interface ConfigurationOptionsBuildManager {
+public abstract class ConfigurationOptionsBuildManager {
     /**
      * This function provides access to a TLS library that was built using the specified configuration options set.
      * The Config is manipulated so that the connection is delegated to the required library. The implementation
@@ -32,7 +32,17 @@ public interface ConfigurationOptionsBuildManager {
      * @param optionSet - the set of configurationOptionDerivationParameters that contain selected values.
      * @returns the TestSiteReport of the provided library build.
      */
-    TestSiteReport configureOptionSetAndGetSiteReport(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet);
+    public abstract TestSiteReport configureOptionSetAndGetSiteReport(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet);
 
-    TestSiteReport createSiteReportFromOptionSet(Set<ConfigurationOptionDerivationParameter> optionSet);
+    public abstract TestSiteReport createSiteReportFromOptionSet(Set<ConfigurationOptionDerivationParameter> optionSet);
+
+    /**
+     * Method is called before the ConfigurationOptionsExtension is unloaded.
+     */
+    public void onShutdown(){ }
+
+    /**
+     * Method to initialize the respective build manager (e.g. initialize docker)
+     */
+    public void init() { }
 }

@@ -16,6 +16,8 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.ResultsCollector.LogFile;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.ResultsCollector.OpenSSLConfigOptionsResultsCollector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,7 +43,6 @@ public class OpenSSLDockerHelper {
     private static final String CONTAINER_NAME_PREFIX = "container";
 
     private static Volume targetVolume = new Volume("/src/ccache");
-
 
     /**
      * Creates a docker tag. This tag is different, if the library name, the library version, or the cli option
@@ -86,7 +87,7 @@ public class OpenSSLDockerHelper {
         return String.format("%s:%s",BUILD_REPRO_NAME, dockerTag);
     }
 
-    public static synchronized void buildOpenSSLImageWithFactory(DockerClient dockerClient, List<String> cliOptions, String dockerTag, Path dockerfileMinPath, String openSSLBranchName, String ccacheVolumeName)  {
+    public static synchronized void buildOpenSSLImageWithFactory(DockerClient dockerClient, List<String> cliOptions, String dockerTag, Path dockerfileMinPath, String openSSLBranchName, String ccacheVolumeName, OpenSSLConfigOptionsResultsCollector resultsCollector)  {
         LOGGER.debug(String.format("Build with option string: '%s'", cliOptions));
 
         // Create the docker factory image for the respective OpenSSL version, if it does not exist so far
@@ -113,8 +114,13 @@ public class OpenSSLDockerHelper {
         InspectContainerResponse containerResp
                 = dockerClient.inspectContainerCmd(tempContainer.getId()).exec();
 
+        if(resultsCollector != null){
+            resultsCollector.logBuildContainer(new DockerContainerInfo(dockerTag, containerResp.getId(), DockerContainerState.RUNNING));
+        }
         // TODO tmp
-        printContainerLogDebug(dockerClient, containerResp.getId());
+        else {
+            printContainerLogDebug(dockerClient, containerResp.getId());
+        }
 
         LOGGER.debug("Factory Container started.");
 
@@ -229,42 +235,6 @@ public class OpenSSLDockerHelper {
             LOGGER.debug("Old Container Removed");
         }
 
-
-       // List<String> entrypoint = new LinkedList<>();
-        //List<PortBinding> portBindings = new LinkedList<>();
-        //List<Bind> volumeBinds = new LinkedList<>();
-
-        // Server container setup
-        /*if(!isClient){
-            entrypoint = Arrays.asList("server-entrypoint", "openssl", "s_server","-accept", CONTAINER_PORT_TLS_SERVER.toString(), "-key", "/cert/ec256key.pem", "-cert", "/cert/ec256cert.pem");
-
-            // Add the port binds
-            ExposedPort exposedServerPort = ExposedPort.tcp(CONTAINER_PORT_TLS_SERVER);
-            PortBinding portBinding = new PortBinding(Ports.Binding.bindIpAndPort(ipAddressTlsServer, tlsDockerPort), exposedServerPort);
-            portBindings.add(portBinding);
-
-            // Add the cert volume
-            Volume destVolume = new Volume("/cert/");
-            volumeBinds.add(new Bind("cert-data", destVolume, AccessMode.ro, SELContext.DEFAULT, true));
-        }
-        // Client container setup
-        else{
-            entrypoint = Arrays.asList("client-entrypoint", "openssl", "s_client", "-connect", ipAddressTlsServer, "-bind", CONTAINER_PORT_TLS_CLIENT.toString());
-
-            // Add the port binds
-            ExposedPort exposedClientPort = ExposedPort.tcp(CONTAINER_PORT_TLS_CLIENT);
-            PortBinding portBinding = new PortBinding(Ports.Binding.bindIpAndPort(ipAddressTlsServer, tlsDockerPort), exposedClientPort);
-            portBindings.add(portBinding);
-        }*/
-
-
-
-        //ExposedPort exposedPort = ExposedPort.tcp(CONTAINER_PORT_TLS_SERVER);
-
-        //PortBinding portBinding = new PortBinding(Ports.Binding.bindIpAndPort(ipAddressTlsServer, tlsDockerPort), exposedPort);
-
-
-
         HostConfig hostConfig = HostConfig.newHostConfig()
                 .withPortBindings(portBindings)
                 .withDns(new ArrayList<String>())
@@ -294,61 +264,9 @@ public class OpenSSLDockerHelper {
                 .withEntrypoint(entrypoint)
                 .exec();
 
-        // TODO
-        //DockerContainerInfo containerInfo = new DockerContainerInfo(dockerTag, createContainerCmd.getId(), DockerContainerState.NOT_RUNNING, 815/*tlsDockerPort*/);
-        //LOGGER.debug("Container created.");
 
         return createContainerCmd.getId();
     }
-
-    /*public static DockerContainerInfo createDockerContainerServer(DockerClient dockerClient, String dockerTag, String ipAddress, Integer port){
-
-        String imageTag = String.format("%s:%s", BUILD_REPRO_NAME, dockerTag);
-        String containerName = String.format("%s_server_%s", CONTAINER_NAME_PREFIX, dockerTag);
-
-        Optional<Container> oldContainer = containerByName(dockerClient, containerName);
-        if(oldContainer.isPresent()){
-            dockerClient.removeContainerCmd(oldContainer.get().getId()).withForce(true).exec();
-            LOGGER.debug("Old Container Removed");
-        }
-
-        final Integer CONTAINER_PORT = 443;
-        ExposedPort exposedPort = ExposedPort.tcp(CONTAINER_PORT);
-
-        PortBinding portBinding = new PortBinding(Ports.Binding.bindIpAndPort(ipAddress, port), exposedPort);
-
-        Volume destVolume = new Volume("/cert/");
-
-        HostConfig hostConfig = HostConfig.newHostConfig()
-                .withPortBindings(portBinding)
-                .withDns(new ArrayList<String>())
-                .withDnsOptions(new ArrayList<String>())
-                .withDnsSearch(new ArrayList<String>())
-                .withBlkioWeightDevice(new ArrayList<>())
-                .withDevices(new ArrayList<Device>())
-                .withBinds(new Bind("cert-data", destVolume, AccessMode.ro, SELContext.DEFAULT, true));
-
-
-        CreateContainerResponse createContainerCmd = dockerClient.createContainerCmd(imageTag)
-                .withName(containerName)
-                // Some of these options lead to (very undetectable and annoying) errors if they aren't set.
-                .withAttachStdout(true)
-                .withAttachStdin(true)
-                .withAttachStderr(true)
-                .withTty(true)
-                .withStdinOpen(true)
-                .withStdInOnce(true)
-                .withHostConfig(hostConfig)
-                .withExposedPorts(exposedPort)
-                .withEntrypoint("server-entrypoint", "openssl", "s_server")
-                .withCmd(Arrays.asList("-accept", CONTAINER_PORT.toString(), "-key", "/cert/ec256key.pem", "-cert", "/cert/ec256cert.pem"))
-                .exec();
-
-        DockerContainerInfo containerInfo = new DockerContainerInfo(dockerTag, createContainerCmd.getId(), DockerContainerState.NOT_RUNNING, port);
-        LOGGER.debug("Container created.");
-
-        return containerInfo;
-    }*/
 
     public static String createFactoryImage(DockerClient dockerClient, Path dockerfileFactoryPath, String openSSLBranchName){
         // Create the docker factory image for the respective OpenSSL version, if it does not exist so far
@@ -435,23 +353,6 @@ public class OpenSSLDockerHelper {
         String res = String.format("%s%s_%s_%d", CONTAINER_NAME_PREFIX, dockerTag, ipAddressPart, port);
 
         return res;
-    }
-
-    public static void printContainerLogDebugToFile(DockerClient dockerClient, String containerId){
-        List<String> logs = new ArrayList<>();
-        System.out.println(String.format("===== Output of Docker Container (id = %s) =====", containerId));
-        try {
-            dockerClient.logContainerCmd(containerId).withStdOut(true).
-                    withStdErr(true).withFollowStream(true).exec(new LogContainerResultCallback() {
-                @Override
-                public void onNext(Frame item) {
-                    System.out.print(new String(item.getPayload()));
-                }
-            }).awaitCompletion();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("===== End: Output of Docker Container =====");
     }
 
 

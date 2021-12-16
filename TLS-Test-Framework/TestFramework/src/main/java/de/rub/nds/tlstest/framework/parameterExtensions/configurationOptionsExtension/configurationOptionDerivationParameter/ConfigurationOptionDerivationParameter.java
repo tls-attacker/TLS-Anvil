@@ -30,7 +30,6 @@ public abstract class ConfigurationOptionDerivationParameter extends DerivationP
 
     @Override
     public void configureParameterDependencies(Config config, TestContext context, DerivationContainer container){
-        // TODO
         // Use a shared flag to check if the ConfigurationOptions were already configured. They only need to be
         // configured once per container, however this method is called multiple times.
         final String SETUP_DONE = "CONFIGURATION_OPTION_SETUP_DONE";

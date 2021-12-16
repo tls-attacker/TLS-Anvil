@@ -15,7 +15,9 @@
 		<Logger name="DirectLOgger" level="ALL">
 			<AppenderRef ref="Direct"/>
 		</Logger>
-        
+        <Logger name="com.github.dockerjava.core.DockerClientBuilder" level="ALL">
+            <AppenderRef ref="Direct"/>
+        </Logger>
 
         
         <Root level="INFO">

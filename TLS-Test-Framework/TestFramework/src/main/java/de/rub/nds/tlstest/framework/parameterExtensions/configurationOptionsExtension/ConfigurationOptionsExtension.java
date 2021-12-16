@@ -61,6 +61,7 @@ public class ConfigurationOptionsExtension implements ParameterExtension {
         }
 
         ConfigurationOptionsDerivationManager.getInstance().setConfigOptionsConfig(config);
+        config.getBuildManager().init();
         DerivationManager.getInstance().registerCategoryManager(ConfigOptionDerivationType.class, ConfigurationOptionsDerivationManager.getInstance());
 
         TestSiteReport maxSiteReport = createMaximalSiteReport();
@@ -83,6 +84,7 @@ public class ConfigurationOptionsExtension implements ParameterExtension {
 
     @Override
     public void unload() {
+        config.getBuildManager().onShutdown();
         DerivationManager.getInstance().unregisterCategoryManager(ConfigOptionDerivationType.class);
         ConfigurationOptionsDerivationManager.getInstance().setConfigOptionsConfig(null);
         config = null;

@@ -37,6 +37,8 @@ import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsattacker.transport.Connection;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
+import de.rub.nds.tlsscanner.serverscanner.ConsoleLogger;
+import de.rub.nds.tlsscanner.serverscanner.ThreadedScanJobExecutor;
 import de.rub.nds.tlsscanner.serverscanner.TlsScanner;
 import de.rub.nds.tlsscanner.serverscanner.config.ScannerConfig;
 import de.rub.nds.tlsscanner.serverscanner.constants.ProbeType;
@@ -45,8 +47,13 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.filter.ThresholdFilter;
 
 import java.io.IOException;
 import java.util.*;
@@ -60,9 +67,15 @@ import java.util.stream.Collectors;
  *
  */
 public class TestSiteReportFactory {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(TestSiteReportFactory.class);
 
-    public static TestSiteReport createServerSiteReport(String hostName, Integer port) {
+    public static TestSiteReport createServerSiteReport(String hostName, Integer port, boolean disableConsoleLog) {
+
+        Filter noErrorAndWarningsFilter = ThresholdFilter.createFilter( Level.ERROR, Filter.Result.ACCEPT, Filter.Result.DENY );
+        if(disableConsoleLog){
+            applyFilterOnLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+        }
+
         TestConfig testConfig = new TestConfig();
         testConfig.setTestEndpointMode(TestEndpointType.SERVER);
 
@@ -95,10 +108,19 @@ public class TestSiteReportFactory {
         TlsScanner scanner = new TlsScanner(scannerConfig);
 
         TestSiteReport report = TestSiteReport.fromSiteReport(scanner.scan());
+
+        if(disableConsoleLog){
+            removeFilterFromLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+        }
         return report;
     }
 
-    public static TestSiteReport createClientSiteReport(TestConfig testConfig, InboundConnection inboundConnection) {
+    public static TestSiteReport createClientSiteReport(TestConfig testConfig, InboundConnection inboundConnection,  boolean disableConsoleLog) {
+
+        Filter noErrorAndWarningsFilter = ThresholdFilter.createFilter( Level.ERROR, Filter.Result.ACCEPT, Filter.Result.DENY );
+        if(disableConsoleLog){
+            applyFilterOnLogger(LOGGER, noErrorAndWarningsFilter);
+        }
 
         List<TlsTask> tasks = new ArrayList<>();
         List<State> states = new ArrayList<>();
@@ -171,6 +193,9 @@ public class TestSiteReportFactory {
                 }
             } catch (Exception e) {
                 LOGGER.error(e);
+                if(disableConsoleLog){
+                    removeFilterFromLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+                }
                 throw new RuntimeException(e);
             }
         }
@@ -186,6 +211,9 @@ public class TestSiteReportFactory {
                     try {
                         state.getTlsContext().setTransportHandler(new ServerTcpTransportHandler(testConfig.getConnectionTimeout(), testConfig.getConnectionTimeout(), testConfig.getTestClientDelegate().getServerSocket()));
                     } catch (IOException ex) {
+                        if(disableConsoleLog){
+                            removeFilterFromLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+                        }
                         throw new RuntimeException("Failed to set TransportHandler");
                     }
                     state.getTlsContext().setRecordLayer(
@@ -209,12 +237,18 @@ public class TestSiteReportFactory {
                 }
             } catch (Exception e) {
                 LOGGER.error(e);
+                if(disableConsoleLog){
+                    removeFilterFromLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+                }
                 throw new RuntimeException(e);
             }
         }
 
         LOGGER.info(String.format("%d/%d client preparation workflows failed.", failed, states.size()));
         if (failed == states.size()) {
+            if(disableConsoleLog){
+                removeFilterFromLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+            }
             throw new RuntimeException("Client preparation could not be completed.");
         }
 
@@ -268,6 +302,10 @@ public class TestSiteReportFactory {
         TestContext.getInstance().setReceivedClientHelloMessage(clientHello);
         //testContext.setSiteReport(report);
         executor.shutdown();
+
+        if(disableConsoleLog){
+            removeFilterFromLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+        }
 
         return report;
 
@@ -401,6 +439,21 @@ public class TestSiteReportFactory {
         config.setDefaultServerSupportedCipherSuites(suite);
         config.setDefaultSelectedCipherSuite(suite);
         return config;
+    }
+
+    private static void applyFilterOnLogger(Logger logger, Filter filter){
+        org.apache.logging.log4j.core.Logger coreLogger = (org.apache.logging.log4j.core.Logger) logger;
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final Configuration config = ctx.getConfiguration();
+
+        config.addLoggerFilter(coreLogger, filter);
+    }
+    private static void removeFilterFromLogger(Logger logger, Filter filter){
+        org.apache.logging.log4j.core.Logger coreLogger = (org.apache.logging.log4j.core.Logger) logger;
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final Configuration config = ctx.getConfiguration();
+
+        config.getLoggerConfig(logger.getName()).removeFilter(filter);
     }
 
 }

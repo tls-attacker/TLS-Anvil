@@ -30,6 +30,10 @@ public class ParameterExtensionManager {
         loadedExtensions = new HashSet<>();
         // Register new parameterExtensions here:
         registerParameterExtension(ConfigurationOptionsExtension.getInstance());
+
+        // Ensure that all extensions are unloaded properly, even if stopped using CTRL+C
+        Thread unloadAllHook = new Thread(() -> this.unloadAllExtensions());
+        Runtime.getRuntime().addShutdownHook(unloadAllHook);
     }
 
     public synchronized void registerParameterExtension(ParameterExtension parameterExtension) {
@@ -71,6 +75,12 @@ public class ParameterExtensionManager {
         if(loadedExtensions.contains(identifier)){
             availableExtensions.get(identifier).unload();
             loadedExtensions.remove(identifier);
+        }
+    }
+
+    public synchronized  void unloadAllExtensions(){
+        for(String identifier : loadedExtensions){
+            unloadExtension(identifier);
         }
     }
 

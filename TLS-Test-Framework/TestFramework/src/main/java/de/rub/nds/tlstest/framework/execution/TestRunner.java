@@ -596,6 +596,7 @@ public class TestRunner {
         String content = new String(baos.toByteArray(), StandardCharsets.UTF_8);
         LOGGER.info("\n" + content);
 
+        ParameterExtensionManager.getInstance().unloadAllExtensions();
         testContext.getStateExecutor().shutdown();
 
         try {

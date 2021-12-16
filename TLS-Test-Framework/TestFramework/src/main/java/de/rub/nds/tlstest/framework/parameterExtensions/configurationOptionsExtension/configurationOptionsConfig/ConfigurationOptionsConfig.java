@@ -45,6 +45,8 @@ public class ConfigurationOptionsConfig {
     private ConfigurationOptionsBuildManager buildManager;
     private Map<ConfigOptionDerivationType, ConfigOptionValueTranslation> optionsToTranslation;
 
+    private boolean siteReportConsoleLogDisabled;
+
     // Docker Config (not required, but necessary for build managers that work with docker)
     private boolean dockerConfigPresent;
 
@@ -74,6 +76,10 @@ public class ConfigurationOptionsConfig {
 
     public ConfigurationOptionsBuildManager getBuildManager() { // temporary a String
         return buildManager;
+    }
+
+    public boolean isSiteReportConsoleLogDisabled(){
+        return siteReportConsoleLogDisabled;
     }
 
     public boolean isDockerConfigPresent() {
@@ -143,6 +149,14 @@ public class ConfigurationOptionsConfig {
             }
 
             buildManager = getBuildManagerFromString(findElement(rootElement, "buildManager", true).getTextContent());
+
+            Element disableSiteReportConsoleLogElement =  findElement(rootElement, "disableSiteReportConsoleLog", false);
+            if(disableSiteReportConsoleLogElement != null){
+                siteReportConsoleLogDisabled = Boolean.parseBoolean(disableSiteReportConsoleLogElement.getTextContent());
+            }
+            else{
+                siteReportConsoleLogDisabled = false;
+            }
 
             // Parse options-translation list
             NodeList list = optionsToTest.getElementsByTagName("optionEntry");

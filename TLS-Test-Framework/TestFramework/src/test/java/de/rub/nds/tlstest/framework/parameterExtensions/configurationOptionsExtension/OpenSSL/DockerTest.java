@@ -17,6 +17,9 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsConfigTest;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.ResultsCollector.DockerContainerLogFile;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.ResultsCollector.LogFile;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePskDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
@@ -26,6 +29,8 @@ import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -33,29 +38,30 @@ import static org.junit.Assert.*;
 
 public class DockerTest {
 
-    private ConfigurationOptionsConfig createTestConfig(){
+    /*private ConfigurationOptionsConfig createTestConfig(){
         String testFileContent =
                 "<config>\n" +
-                "    <tlsLibraryName>OpenSSL</tlsLibraryName>\n" +
-                "    <tlsVersionName>OpenSSL_1_1_1</tlsVersionName>\n" +
-                "    <buildManager>OpenSSLBuildManager</buildManager>\n" +
-                "    <dockerConfig>\n" +
-                "        <dockerLibraryPath>/home/fabian/TLS-Docker-Library/</dockerLibraryPath>\n" +
-                "        <dockerHostName>127.0.0.42</dockerHostName>\n" +
-                "        <portRange>4433-5433</portRange>\n" +
-                "    </dockerConfig>\n" +
-                "    \n" +
-                "\n" +
-                "    <optionsToTest>\n" +
-                "        <optionEntry>\n" +
-                "            <derivationType>ConfigOptionDerivationType.DisablePSK</derivationType>\n" +
-                "            <valueTranslation type=\"Flag\">\n" +
-                "                <true>no-psk</true>\n" +
-                "                <false></false>\n" +
-                "            </valueTranslation>\n" +
-                "        </optionEntry>\n" +
-                "    </optionsToTest>\n" +
-                "</config>";
+                        "    <tlsLibraryName>OpenSSL</tlsLibraryName>\n" +
+                        "    <tlsVersionName>OpenSSL_1_1_1</tlsVersionName>\n" +
+                        "    <buildManager>OpenSSLBuildManager</buildManager>\n" +
+                        "    <dockerConfig>\n" +
+                        "        <dockerLibraryPath>/home/fabian/TLS-Docker-Library</dockerLibraryPath>\n" +
+                        "        <dockerHostName>127.0.0.42</dockerHostName>\n" +
+                        "        <portRange>8090-10000</portRange>\n" +
+                        "        <dockerClientDestinationHost>192.168.162.242</dockerClientDestinationHost>\n" +
+                        "    </dockerConfig>\n" +
+                        "\n" +
+                        "\n" +
+                        "    <optionsToTest>\n" +
+                        "        <optionEntry>\n" +
+                        "            <derivationType>ConfigOptionDerivationType.DisablePSK</derivationType>\n" +
+                        "            <valueTranslation type=\"Flag\">\n" +
+                        "                <true>no-psk</true>\n" +
+                        "                <false></false>\n" +
+                        "            </valueTranslation>\n" +
+                        "        </optionEntry>\n" +
+                        "    </optionsToTest>\n" +
+                        "</config>";
 
 
 
@@ -65,7 +71,7 @@ public class DockerTest {
         ConfigurationOptionsConfig config = new ConfigurationOptionsConfig(is);
 
         return config;
-    }
+    }*/
 
     /**
      * Checks if docker can be accessed. If this test fails make sure that docker is correctly installed.
@@ -79,74 +85,78 @@ public class DockerTest {
     }
 
     // TODO: The following test are only temporary for development. Delete me later.
-    @Test
+    /*@Test
     public void dockerBuildLogicTemp(){
         Logger.getRootLogger().setLevel(Level.OFF);
         //DockerClient dockerClient = DockerClientBuilder.getInstance().build();
         ConfigurationOptionsConfig config = createTestConfig();
         OpenSSLBuildManager manager = new OpenSSLBuildManager(config);
+        manager.init();
 
         String tag = "taggTagg";
 
-        /*OpenSSLDockerHelper.buildOpenSSLImageWithFactory(manager.getDockerClient(),
-                Arrays.asList("no-tls1_3"),
-                tag,
-                config.getDockerLibraryPath().resolve(Paths.get("images", "openssl", "configurationOptionsFactory", "Dockerfile_Min_OpenSSL")),
-                "OpenSSL_1_1_1",
-                "ccache-cache");*/
+        //OpenSSLDockerHelper.buildOpenSSLImageWithFactory(manager.getDockerClient(),
+        //        Arrays.asList("no-tls1_3"),
+        //        tag,
+        //        config.getDockerLibraryPath().resolve(Paths.get("images", "openssl", "configurationOptionsFactory", "Dockerfile_Min_OpenSSL")),
+        //        "OpenSSL_1_1_1",
+        //        "ccache-cache");
         DockerContainerInfo info = OpenSSLDockerHelper.createDockerServer(manager.getDockerClient(), tag, "127.0.0.42", 4433);
         OpenSSLDockerHelper.startContainer(manager.getDockerClient(), info);
 
         OpenSSLDockerHelper.printContainerLogDebug(manager.getDockerClient(), info.getContainerId());
 
 
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void dockerClientTest(){
         Logger.getRootLogger().setLevel(Level.OFF);
         //DockerClient dockerClient = DockerClientBuilder.getInstance().build();
-        ConfigurationOptionsConfig config = createTestConfig();
+        ConfigurationOptionsConfig config = ConfigurationOptionsConfigTest.createTestConfig();
         OpenSSLBuildManager manager = new OpenSSLBuildManager(config);
+        manager.init();
 
-        String tag = "taggTagg";
+        String tag = "testTag";
 
-        /*OpenSSLDockerHelper.buildOpenSSLImageWithFactory(manager.getDockerClient(),
-                Arrays.asList("no-tls1_3"),
-                tag,
-                config.getDockerLibraryPath().resolve(Paths.get("images", "openssl", "configurationOptionsFactory", "Dockerfile_Min_OpenSSL")),
-                "OpenSSL_1_1_1",
-                "ccache-cache");*/
+        //OpenSSLDockerHelper.buildOpenSSLImageWithFactory(manager.getDockerClient(),
+        //        Arrays.asList("no-tls1_3"),
+        //        tag,
+        //        config.getDockerLibraryPath().resolve(Paths.get("images", "openssl", "configurationOptionsFactory", "Dockerfile_Min_OpenSSL")),
+        //        "OpenSSL_1_1_1",
+        //        "ccache-cache");
 
-        DockerContainerInfo info = OpenSSLDockerHelper.createDockerClient(manager.getDockerClient(), tag, /*"127.0.0.42", 4455,*/
+        DockerContainerInfo info = OpenSSLDockerHelper.createDockerClient(manager.getDockerClient(), tag,
                 "127.0.0.41", 4466, "192.168.160.1", 4433);
 
-        DockerContainerInfo info2 = OpenSSLDockerHelper.createDockerClient(manager.getDockerClient(), tag, /*"127.0.0.42", 4455,*/
+        DockerContainerInfo info2 = OpenSSLDockerHelper.createDockerClient(manager.getDockerClient(), tag,
                 "127.0.0.41", 4467, "192.168.160.1", 4433);
 
         OpenSSLDockerHelper.startContainer(manager.getDockerClient(), info);
         OpenSSLDockerHelper.startContainer(manager.getDockerClient(), info2);
 
         OpenSSLDockerHelper.printContainerLogDebug(manager.getDockerClient(), info.getContainerId());
-    }
+    }*/
 
     // temp
-    @Test
+    /*@Test
     public void siteReportScanTest(){
         String tag = "taggTagg";
-        OpenSSLBuildManager manager = new OpenSSLBuildManager(createTestConfig());
+        OpenSSLBuildManager manager = new OpenSSLBuildManager(ConfigurationOptionsConfigTest.createTestConfig());
+        manager.init();
         //DockerContainerInfo info = OpenSSLDockerHelper.createDockerContainerServer(OpenSSLBuildManager.getInstance().getDockerClient(), tag, "127.0.0.42", 4433);
         //OpenSSLDockerHelper.startContainer(OpenSSLBuildManager.getInstance().getDockerClient(), info);
 
         TestSiteReport report = manager.createServerSiteReport(tag);
         System.out.println(report);
 
-    }
+    }*/
 
     // temp
-    @Test
+    /*@Test
     public void fullTest(){
-        OpenSSLBuildManager manager = new OpenSSLBuildManager(createTestConfig());
+        OpenSSLBuildManager manager = new OpenSSLBuildManager(ConfigurationOptionsConfigTest.createTestConfig());
+        manager.init();
         Config config = Config.createEmptyConfig();
         TestContext context = TestContext.getInstance();
         Set<ConfigurationOptionDerivationParameter> optionSet = new HashSet<>();
@@ -156,20 +166,6 @@ public class DockerTest {
         TestSiteReport report = manager.configureOptionSetAndGetSiteReport(config, context, optionSet);
         System.out.println(report);
         System.out.println(config.getDefaultClientConnection().getPort());
-    }
-
-    @Test
-    public void tmpCheck(){
-
-        DockerClient dockerClient = DockerClientBuilder.getInstance().build();
-        assertNotNull(dockerClient);
-        System.out.println(dockerClient.listContainersCmd().withShowAll(true).exec());
-
-        for(Container container : dockerClient.listContainersCmd().withShowAll(true).exec()){
-            System.out.println(container.getNames()[0]);
-        }
-        // /container_server__OpenSSL_1_1_1_e3b0c44298fc1c14
-    }
-
+    }*/
 
 }

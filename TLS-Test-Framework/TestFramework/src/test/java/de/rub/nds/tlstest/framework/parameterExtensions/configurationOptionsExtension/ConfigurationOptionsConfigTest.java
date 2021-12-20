@@ -24,26 +24,25 @@ import java.io.InputStream;
 import static org.junit.Assert.*;
 
 public class ConfigurationOptionsConfigTest {
-
-    @Test
-    public void testOpenSSLOptionsConfig(){
+    public static ConfigurationOptionsConfig createTestConfig(){
         String testFileContent =
                 "<config>\n" +
                 "    <tlsLibraryName>OpenSSL</tlsLibraryName>\n" +
                 "    <tlsVersionName>OpenSSL_1_1_1</tlsVersionName>\n" +
                 "    <buildManager>OpenSSLBuildManager</buildManager>\n" +
                 "    <dockerConfig>\n" +
-                "        <dockerLibraryPath>/home/fabian/TLS-Docker-Library/</dockerLibraryPath>\n" +
+                "        <dockerLibraryPath>/home/fabian/TLS-Docker-Library</dockerLibraryPath>\n" +
                 "        <dockerHostName>127.0.0.42</dockerHostName>\n" +
-                "        <portRange>4433-5433</portRange>\n" +
+                "        <portRange>8090-10000</portRange>\n" +
+                "        <dockerClientDestinationHost>192.168.162.242</dockerClientDestinationHost>\n" +
                 "    </dockerConfig>\n" +
-                "    \n" +
+                "\n" +
                 "\n" +
                 "    <optionsToTest>\n" +
                 "        <optionEntry>\n" +
                 "            <derivationType>ConfigOptionDerivationType.DisablePSK</derivationType>\n" +
                 "            <valueTranslation type=\"Flag\">\n" +
-                "                <true>no_psk</true>\n" +
+                "                <true>no-psk</true>\n" +
                 "                <false></false>\n" +
                 "            </valueTranslation>\n" +
                 "        </optionEntry>\n" +
@@ -52,9 +51,18 @@ public class ConfigurationOptionsConfigTest {
 
 
 
+
         InputStream is = new ByteArrayInputStream(testFileContent.getBytes());
 
         ConfigurationOptionsConfig config = new ConfigurationOptionsConfig(is);
+
+        return config;
+    }
+
+
+    @Test
+    public void testOpenSSLOptionsConfig(){
+        ConfigurationOptionsConfig config = createTestConfig();
 
         assertEquals("OpenSSL", config.getTlsLibraryName());
         assertEquals("OpenSSL_1_1_1", config.getTlsVersionName());

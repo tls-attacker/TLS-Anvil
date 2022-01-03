@@ -12,24 +12,24 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 
 public class DockerClientContainerInfo extends DockerContainerInfo{
 
-    private String managerHost;
+    private String dockerHost;
     private Integer managerPort;
 
     public DockerClientContainerInfo(String dockerTag, String containerId, DockerContainerState containerState,
-                                     String managerHost, Integer managerPort)
+                                     String dockerHost, Integer managerPort)
     {
         super(dockerTag, containerId, containerState);
 
-        this.managerHost = managerHost;
+        this.dockerHost = dockerHost;
         this.managerPort = managerPort;
     }
 
-    public String getManagerHost() {
-        return managerHost;
+    public String getDockerHost() {
+        return dockerHost;
     }
 
-    public void setManagerHost(String managerHost) {
-        this.managerHost = managerHost;
+    public void setDockerHost(String dockerHost) {
+        this.dockerHost = dockerHost;
     }
 
     public Integer getManagerPort() {

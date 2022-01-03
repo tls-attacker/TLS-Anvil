@@ -11,21 +11,23 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL;
 
 public class DockerServerContainerInfo extends DockerContainerInfo{
-    private String tlsServerHost;
+    private String dockerHost;
     private Integer tlsServerPort;
+    private Integer managerPort;
 
-    public DockerServerContainerInfo(String dockerTag, String containerId, DockerContainerState containerState, String tlsServerHost, Integer tlsServerPort) {
+    public DockerServerContainerInfo(String dockerTag, String containerId, DockerContainerState containerState, String dockerHost, Integer tlsServerPort, Integer managerPort) {
         super(dockerTag, containerId, containerState);
-        this.tlsServerHost = tlsServerHost;
+        this.dockerHost = dockerHost;
         this.tlsServerPort = tlsServerPort;
+        this.managerPort = managerPort;
     }
 
-    public String getTlsServerHost() {
-        return tlsServerHost;
+    public String getDockerHost() {
+        return dockerHost;
     }
 
-    public void setTlsServerHost(String tlsServerHost) {
-        this.tlsServerHost = tlsServerHost;
+    public void setDockerHost(String dockerHost) {
+        this.dockerHost = dockerHost;
     }
 
     public Integer getTlsServerPort() {
@@ -34,6 +36,14 @@ public class DockerServerContainerInfo extends DockerContainerInfo{
 
     public void setTlsServerPort(Integer tlsServerPort) {
         this.tlsServerPort = tlsServerPort;
+    }
+
+    public Integer getManagerPort() {
+        return managerPort;
+    }
+
+    public void setManagerPort(Integer managerPort) {
+        this.managerPort = managerPort;
     }
 
 

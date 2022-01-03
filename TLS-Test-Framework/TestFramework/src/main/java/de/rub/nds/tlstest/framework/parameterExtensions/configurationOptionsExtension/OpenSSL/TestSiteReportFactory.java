@@ -71,9 +71,9 @@ public class TestSiteReportFactory {
 
     public static TestSiteReport createServerSiteReport(String hostName, Integer port, boolean disableConsoleLog) {
 
-        Filter noErrorAndWarningsFilter = ThresholdFilter.createFilter( Level.ERROR, Filter.Result.ACCEPT, Filter.Result.DENY );
+        Filter noInfoAndWarningsFilter = ThresholdFilter.createFilter( Level.ERROR, Filter.Result.ACCEPT, Filter.Result.DENY );
         if(disableConsoleLog){
-            applyFilterOnLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+            applyFilterOnLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
         }
 
         TestConfig testConfig = new TestConfig();
@@ -110,16 +110,16 @@ public class TestSiteReportFactory {
         TestSiteReport report = TestSiteReport.fromSiteReport(scanner.scan());
 
         if(disableConsoleLog){
-            removeFilterFromLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+            removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
         }
         return report;
     }
 
     public static TestSiteReport createClientSiteReport(TestConfig testConfig, InboundConnection inboundConnection,  boolean disableConsoleLog) {
 
-        Filter noErrorAndWarningsFilter = ThresholdFilter.createFilter( Level.ERROR, Filter.Result.ACCEPT, Filter.Result.DENY );
+        Filter noInfoAndWarningsFilter = ThresholdFilter.createFilter( Level.ERROR, Filter.Result.ACCEPT, Filter.Result.DENY );
         if(disableConsoleLog){
-            applyFilterOnLogger(LOGGER, noErrorAndWarningsFilter);
+            applyFilterOnLogger(LOGGER, noInfoAndWarningsFilter);
         }
 
         List<TlsTask> tasks = new ArrayList<>();
@@ -194,7 +194,7 @@ public class TestSiteReportFactory {
             } catch (Exception e) {
                 LOGGER.error(e);
                 if(disableConsoleLog){
-                    removeFilterFromLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+                    removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
                 }
                 throw new RuntimeException(e);
             }
@@ -212,7 +212,7 @@ public class TestSiteReportFactory {
                         state.getTlsContext().setTransportHandler(new ServerTcpTransportHandler(testConfig.getConnectionTimeout(), testConfig.getConnectionTimeout(), testConfig.getTestClientDelegate().getServerSocket()));
                     } catch (IOException ex) {
                         if(disableConsoleLog){
-                            removeFilterFromLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+                            removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
                         }
                         throw new RuntimeException("Failed to set TransportHandler");
                     }
@@ -238,7 +238,7 @@ public class TestSiteReportFactory {
             } catch (Exception e) {
                 LOGGER.error(e);
                 if(disableConsoleLog){
-                    removeFilterFromLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+                    removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
                 }
                 throw new RuntimeException(e);
             }
@@ -247,7 +247,7 @@ public class TestSiteReportFactory {
         LOGGER.info(String.format("%d/%d client preparation workflows failed.", failed, states.size()));
         if (failed == states.size()) {
             if(disableConsoleLog){
-                removeFilterFromLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+                removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
             }
             throw new RuntimeException("Client preparation could not be completed.");
         }
@@ -304,7 +304,7 @@ public class TestSiteReportFactory {
         executor.shutdown();
 
         if(disableConsoleLog){
-            removeFilterFromLogger(ConsoleLogger.CONSOLE, noErrorAndWarningsFilter);
+            removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
         }
 
         return report;

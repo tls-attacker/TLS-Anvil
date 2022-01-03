@@ -46,6 +46,7 @@ public class ConfigurationOptionsConfig {
     private Map<ConfigOptionDerivationType, ConfigOptionValueTranslation> optionsToTranslation;
 
     private boolean siteReportConsoleLogDisabled;
+    private boolean withCoverage;
 
     // Docker Config (not required, but necessary for build managers that work with docker)
     private boolean dockerConfigPresent;
@@ -80,6 +81,10 @@ public class ConfigurationOptionsConfig {
 
     public boolean isSiteReportConsoleLogDisabled(){
         return siteReportConsoleLogDisabled;
+    }
+
+    public boolean isWithCoverage() {
+        return withCoverage;
     }
 
     public boolean isDockerConfigPresent() {
@@ -156,6 +161,14 @@ public class ConfigurationOptionsConfig {
             }
             else{
                 siteReportConsoleLogDisabled = false;
+            }
+
+            Element withCoverageElement =  findElement(rootElement, "withCoverage", false);
+            if(withCoverageElement != null){
+                withCoverage = Boolean.parseBoolean(withCoverageElement.getTextContent());
+            }
+            else{
+                withCoverage = false;
             }
 
             // Parse options-translation list

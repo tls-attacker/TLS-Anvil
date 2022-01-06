@@ -30,12 +30,14 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ECDHClientKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
@@ -237,6 +239,7 @@ public class TLSExtensionForECC extends Tls12Test {
         byte[] serializedPublicKey = curve.encodeCoordinate(invalidPoint.getFieldX().getData());
         serverKeyExchange.setPublicKey(Modifiable.explicit(serializedPublicKey));
         workflowTrace.addTlsAction(new SendAction(serverKeyExchange));
+        workflowTrace.addTlsAction(new SendAction(ActionOption.MAY_FAIL, new ServerHelloDoneMessage(config)));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);

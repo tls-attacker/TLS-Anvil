@@ -17,6 +17,7 @@ import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.ResultsCollector.OpenSSLConfigOptionsResultsCollector;
+import de.rub.nds.tlstest.framework.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,7 +52,9 @@ public class OpenSSLDockerHelper {
     private final String volumeNameCert = "cert-data";
 
     private DockerClient dockerClient;
+
     private boolean withCoverage;
+    private final String COVERAGE_DIRECTORY_NAME;
 
     public OpenSSLDockerHelper(DockerClient dockerClient, boolean withCoverage){
         this.dockerClient = dockerClient;
@@ -68,6 +71,7 @@ public class OpenSSLDockerHelper {
         BUILD_REPRO_NAME = "openssl_img"+coverageSuffix;
         CONTAINER_NAME_PREFIX = "container"+coverageSuffix;
 
+        COVERAGE_DIRECTORY_NAME = "CoverageReport_" + Utils.DateToISO8601UTC(new Date());
     }
 
     /**
@@ -126,7 +130,7 @@ public class OpenSSLDockerHelper {
             LOGGER.debug("Old Container Removed");
         }
 
-        // Create a temporary container to build OpenSSL using ccache (TODO: with volumes?)
+        // Create a temporary container to build OpenSSL using ccache
         CreateContainerResponse tempContainer = dockerClient.createContainerCmd(factoryImageTag)
                 .withName(TEMP_CONTAINER_NAME)
                 .withHostConfig(HostConfig.newHostConfig().withBinds(new Bind(volumeNameCcache, targetVolumeCcache)))
@@ -142,10 +146,6 @@ public class OpenSSLDockerHelper {
 
         if(resultsCollector != null){
             resultsCollector.logBuildContainer(new DockerContainerInfo(dockerTag, containerResp.getId(), DockerContainerState.RUNNING));
-        }
-        // TODO tmp
-        else {
-            printContainerLogDebug(containerResp.getId());
         }
 
         LOGGER.debug("Factory Container started.");
@@ -183,8 +183,6 @@ public class OpenSSLDockerHelper {
         dockerClient.removeContainerCmd(tempContainer.getId()).exec();
     }
 
-
-
     public DockerServerContainerInfo createDockerServer(String dockerTag,
                                                         String dockerHost,
                                                         Integer dockerTlsPort,
@@ -194,7 +192,8 @@ public class OpenSSLDockerHelper {
         final Integer CONTAINER_MANAGER_PORT = 8090;
         List<String> entrypoint;
         if(withCoverage){
-            entrypoint = Arrays.asList("/usr/opensslEntrypoint.sh", "server");
+            final String coverageOutDir = String.format("%s/%s", COVERAGE_DIRECTORY_NAME, dockerTag);
+            entrypoint = Arrays.asList("/usr/opensslEntrypoint.sh", "-d", coverageOutDir, "server");
         }
         else{
             entrypoint = Arrays.asList("server-entrypoint", "openssl", "s_server","-accept", CONTAINER_PORT_TLS_SERVER.toString(), "-key", "/cert/ec256key.pem", "-cert", "/cert/ec256cert.pem");
@@ -231,7 +230,8 @@ public class OpenSSLDockerHelper {
         String connectionDest = String.format("%s:%d", tlsServerHost, tlsServerPort);
         List<String> entrypoint;
         if(withCoverage){
-            entrypoint = Arrays.asList("/usr/opensslEntrypoint.sh", "client", connectionDest);
+            final String coverageOutDir = String.format("%s/%s", COVERAGE_DIRECTORY_NAME, dockerTag);
+            entrypoint = Arrays.asList("/usr/opensslEntrypoint.sh", "-d", coverageOutDir, "client", connectionDest);
         }
         else{
             entrypoint = Arrays.asList("client-entrypoint", "openssl", "s_client", "-connect", connectionDest/*, "-bind", CONTAINER_PORT_TLS_CLIENT.toString()*/);

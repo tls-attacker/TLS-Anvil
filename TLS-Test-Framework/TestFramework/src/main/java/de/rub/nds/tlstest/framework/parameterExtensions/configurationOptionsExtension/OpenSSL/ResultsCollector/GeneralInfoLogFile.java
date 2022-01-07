@@ -36,7 +36,7 @@ public class GeneralInfoLogFile extends LogFile{
 
         data += String.format("Timestamp,%s\n", dtf.format(now));
 
-        appendln(data);
+        log(data+"\n");
     }
 
 }

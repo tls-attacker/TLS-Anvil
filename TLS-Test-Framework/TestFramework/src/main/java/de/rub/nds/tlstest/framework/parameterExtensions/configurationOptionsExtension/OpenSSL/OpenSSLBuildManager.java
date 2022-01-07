@@ -24,6 +24,7 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.*;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.ResultsCollector.OpenSSLConfigOptionsResultsCollector;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
@@ -31,10 +32,14 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.FlagTranslation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.PortRange;
+import de.rub.nds.tlstest.framework.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -61,6 +66,8 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
 
     private Path dockerfileMinPath;
 
+
+
     private ConfigurationOptionsConfig configOptionsConfig;
 
     private final String CCACHE_VOLUME_NAME = "ccache-cache";
@@ -71,9 +78,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
 
     private OpenSSLDockerHelper dockerHelper;
 
-
-    // Temp
-    //private final boolean withCoverage = true;
+    private String /*DockerTag*/ maximalFeatureContainerDockerTag;
 
     public OpenSSLBuildManager(ConfigurationOptionsConfig configurationOptionsConfig){
         configOptionsConfig = configurationOptionsConfig;
@@ -87,15 +92,39 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         return dockerClient;
     }
 
-    public void setOpenSSLTriggerScript(){
-        TestContext.getInstance().getConfig().getTestClientDelegate().setTriggerScript(getOpenSSLClientTriggerScript());
+    /**
+     * The input parameter model for some test cases may exclude every configuration options. In this case we cannot
+     * provide a build, since the respective method is never called. If this happens, the connection is delegated to
+     * a build with the maximal feature amount. This function overrides the default delegates, so that the default
+     * connection is delegated to these maximal feature builds.
+     */
+    public void configOpenSSLDefaultConnection(){
+        if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT){
+            TestContext.getInstance().getConfig().getTestClientDelegate().setTriggerScript(getOpenSSLClientTriggerScript());
+        }
+        else if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER){
+            if(maximalFeatureContainerDockerTag == null) {
+                Set<ConfigurationOptionDerivationParameter> optionSet = getMaxFeatureOptionSet();
+                maximalFeatureContainerDockerTag = provideOpenSSLImplementation(optionSet);
+            }
+
+            DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(maximalFeatureContainerDockerTag);
+            if(!(containerInfo instanceof DockerServerContainerInfo)){
+                throw new IllegalStateException("Maximal-Feature docker container is not a server container in server mode. This should never happen.");
+            }
+            DockerServerContainerInfo serverContainerInfo = (DockerServerContainerInfo) containerInfo;
+            String hostWithPort = String.format("%s:%d", configOptionsConfig.getDockerHostName(), serverContainerInfo.getTlsServerPort());
+            TestContext.getInstance().getConfig().getTestServerDelegate().setHost(hostWithPort);
+        }
+        else{
+            throw new IllegalStateException("TestEndpointMode is invalid.");
+        }
+        // Used to override host and port in the next execution of get createConfig
+        TestContext.getInstance().getConfig().clearConfigCache();
     }
 
     @Override
     public void init(){
-
-        setOpenSSLTriggerScript();
-
         DefaultDockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
 
         DockerHttpClient httpClient = (new com.github.dockerjava.jaxrs.JerseyDockerHttpClient.Builder()).dockerHost(config.getDockerHost()).sslConfig(config.getSSLConfig()).build();
@@ -156,7 +185,6 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         }
 
         // Build the factory if it does not exist
-
         // Note that the library name must be a branch in OpenSSL's github.
         String openSSLBranchName = configOptionsConfig.getTlsVersionName();
         String factoryImageNameWithTag = dockerHelper.getFactoryImageNameAndTag(openSSLBranchName);
@@ -166,18 +194,19 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
 
         dockerfileMinPath = pathToMinDockerfile;
 
+        configOpenSSLDefaultConnection();
     }
 
     @Override
     public synchronized TestSiteReport configureOptionSetAndGetSiteReport(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet) {
         String buildTag =  provideOpenSSLImplementation(optionSet);
         DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(buildTag);
-        TestSiteReport report = dockerTagToSiteReport.get(buildTag);
+        TestSiteReport report = getSiteReport(buildTag);
 
         // Configure the port in the config
         if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER){
-            DockerServerContainerInfo servercontainerInfo = (DockerServerContainerInfo) containerInfo;
-            OutboundConnection connection = new OutboundConnection(servercontainerInfo.getTlsServerPort(), configOptionsConfig.getDockerHostName());
+            DockerServerContainerInfo serverContainerInfo = (DockerServerContainerInfo) containerInfo;
+            OutboundConnection connection = new OutboundConnection(serverContainerInfo.getTlsServerPort(), configOptionsConfig.getDockerHostName());
             config.setDefaultClientConnection(connection);
         }
         else if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT){
@@ -193,7 +222,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         return report;
     }
 
-    @Override
+    /*@Override
     public synchronized TestSiteReport createSiteReportFromOptionSet(Set<ConfigurationOptionDerivationParameter> optionSet) {
         List<String> cliOptions = createConfigOptionCliList(optionSet);
         String dockerTag = dockerHelper.computeDockerTag(cliOptions, configOptionsConfig.getTlsLibraryName(), configOptionsConfig.getTlsVersionName());
@@ -211,7 +240,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
             report = dockerTagToSiteReport.get(dockerTag);
         }
         return report;
-    }
+    }*/
 
     @Override
     public synchronized void onShutdown(){
@@ -274,6 +303,38 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         }
     }
 
+    private Set<ConfigurationOptionDerivationParameter> getMaxFeatureOptionSet(){
+        List<DerivationType> derivationTypes = ConfigurationOptionsDerivationManager.getInstance().getDerivationsOfModel(ModelType.GENERIC);
+        Set<ConfigurationOptionDerivationParameter> optionSet = new HashSet<>();
+        for (DerivationType type : derivationTypes) {
+            ConfigurationOptionDerivationParameter configOptionDerivation
+                    = (ConfigurationOptionDerivationParameter) ConfigurationOptionsDerivationManager.getInstance().getDerivationParameterInstance(type);
+            configOptionDerivation.setSelectedValue(configOptionDerivation.getMaxFeatureValue());
+            optionSet.add(configOptionDerivation);
+        }
+        return optionSet;
+    }
+
+    private TestSiteReport getSiteReport(String dockerTag){
+        if(dockerTagToSiteReport.containsKey(dockerTag)){
+            return dockerTagToSiteReport.get(dockerTag);
+        }
+        else{
+            TestSiteReport report = createSiteReport(dockerTag);
+            dockerTagToSiteReport.put(dockerTag, report);
+            return report;
+        }
+    }
+
+    public synchronized TestSiteReport getMaximalFeatureSiteReport(){
+        if(maximalFeatureContainerDockerTag == null) {
+            Set<ConfigurationOptionDerivationParameter> optionSet = getMaxFeatureOptionSet();
+            maximalFeatureContainerDockerTag = provideOpenSSLImplementation(optionSet);
+        }
+        TestSiteReport report = getSiteReport(maximalFeatureContainerDockerTag);
+        return report;
+    }
+
     /**
      * Starts a docker container with the given options
      *
@@ -304,11 +365,6 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
                 dockerHelper.buildOpenSSLImageWithFactory(cliOptions, dockerTag, dockerfileMinPath, configOptionsConfig.getTlsVersionName(), resultsCollector);
                 resultsCollector.logNewOpenSSLBuildCreated(optionSet, dockerTag, System.currentTimeMillis() - timer);
                 existingDockerImageNameWithTags.add(dockerNameWithTag);
-            }
-            // Sub Case: There is no SiteReport created yet.
-            if(!dockerTagToSiteReport.containsKey(dockerTag)){
-                TestSiteReport report = createSiteReport(dockerTag);
-                dockerTagToSiteReport.put(dockerTag, report);
             }
 
             if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT){
@@ -344,31 +400,33 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
     }
 
     public synchronized TestSiteReport createServerSiteReport(String dockerTag){
-        DockerServerContainerInfo container = dockerHelper.createDockerServer(dockerTag, configOptionsConfig.getDockerHostName(), occupyNextPort(), occupyNextPort());
-        dockerHelper.startContainer(container);
+        DockerServerContainerInfo serverContainerInfo = (DockerServerContainerInfo) dockerTagToContainerInfo.get(dockerTag);
+        //DockerServerContainerInfo container = dockerHelper.createDockerServer(dockerTag, configOptionsConfig.getDockerHostName(), occupyNextPort(), occupyNextPort());
+        //dockerHelper.startContainer(container);
 
-        TestSiteReport report = TestSiteReportFactory.createServerSiteReport(configOptionsConfig.getDockerHostName(), container.getTlsServerPort(), configOptionsConfig.isSiteReportConsoleLogDisabled());
+        TestSiteReport report = TestSiteReportFactory.createServerSiteReport(configOptionsConfig.getDockerHostName(), serverContainerInfo.getTlsServerPort(), configOptionsConfig.isSiteReportConsoleLogDisabled());
 
         // Remove container
-        dockerHelper.removeContainer(container);
-        freeOccupiedPort(container.getTlsServerPort());
-        freeOccupiedPort(container.getManagerPort());
+        //dockerHelper.removeContainer(container);
+        //freeOccupiedPort(container.getTlsServerPort());
+        //freeOccupiedPort(container.getManagerPort());
 
         return report;
     }
 
     public synchronized TestSiteReport createClientSiteReport(String dockerTag){
-        Integer port = occupyNextPort();
-        DockerClientContainerInfo container = dockerHelper.createDockerClient(dockerTag,configOptionsConfig.getDockerHostName(), port, TLS_SERVER_HOST, TestContext.getInstance().getConfig().getTestClientDelegate().getPort());
-        dockerHelper.startContainer(container);
+        //Integer port = occupyNextPort();
+        //DockerClientContainerInfo container = dockerHelper.createDockerClient(dockerTag,configOptionsConfig.getDockerHostName(), port, TLS_SERVER_HOST, TestContext.getInstance().getConfig().getTestClientDelegate().getPort());
+        //dockerHelper.startContainer(container);
+        DockerClientContainerInfo clientContainerInfo = (DockerClientContainerInfo) dockerTagToContainerInfo.get(dockerTag);
 
         Config config = TestContext.getInstance().getConfig().createConfig();
-        InboundConnectionWithCustomTriggerArgs ibConnectionWCTA = createTriggerConnectionForContainer(container, config);
+        InboundConnectionWithCustomTriggerArgs ibConnectionWCTA = createTriggerConnectionForContainer(clientContainerInfo, config);
         TestSiteReport report =  TestSiteReportFactory.createClientSiteReport(TestContext.getInstance().getConfig(), ibConnectionWCTA, configOptionsConfig.isSiteReportConsoleLogDisabled());
 
         // Remove container
-        dockerHelper.removeContainer(container);
-        freeOccupiedPort(container.getManagerPort());
+        //dockerHelper.removeContainer(container);
+        //freeOccupiedPort(port);
 
         return report;
     }
@@ -424,7 +482,6 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
 
     }
 
-    // Docker access functions
     private boolean dockerNameWithTagExists(String dockerTag){
         return existingDockerImageNameWithTags.contains(dockerTag);
     }
@@ -438,8 +495,10 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
                 continue;
             }
             else{
-                portFound = true;
-                break;
+                if(isPortAvailable(port)){
+                    portFound = true;
+                    break;
+                }
             }
         }
         if(!portFound){
@@ -454,6 +513,35 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         usedPorts.remove(port);
     }
 
+    // Checks if a port is still available
+    private static boolean isPortAvailable(int port) {
+
+        ServerSocket ss = null;
+        DatagramSocket ds = null;
+        try {
+            ss = new ServerSocket(port);
+            ss.setReuseAddress(true);
+            ds = new DatagramSocket(port);
+            ds.setReuseAddress(true);
+            return true;
+        } catch (IOException e) {
+        } finally {
+            if (ds != null) {
+                ds.close();
+            }
+
+            if (ss != null) {
+                try {
+                    ss.close();
+                } catch (IOException e) {
+                    /* should not be thrown */
+                }
+            }
+        }
+
+        return false;
+    }
+
     private InboundConnectionWithCustomTriggerArgs createTriggerConnectionForContainer(DockerClientContainerInfo clientContainerInfo, Config config){
         InboundConnectionWithCustomTriggerArgs inboundConnectionWCTA = new InboundConnectionWithCustomTriggerArgs(config.getDefaultServerConnection());
         inboundConnectionWCTA.setTriggerArgs(Arrays.asList(String.format("http://%s:%d/trigger",clientContainerInfo.getDockerHost(), clientContainerInfo.getManagerPort())));
@@ -461,16 +549,41 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
     }
 
     private Function<State, Integer> getOpenSSLClientTriggerScript(){
+        if(TestContext.getInstance().getConfig().getTestEndpointMode() != TestEndpointType.CLIENT){
+            throw new IllegalStateException("Function must not be called in Server Mode!");
+        }
+
+
+        if(maximalFeatureContainerDockerTag == null) {
+            Set<ConfigurationOptionDerivationParameter> optionSet = getMaxFeatureOptionSet();
+            maximalFeatureContainerDockerTag = provideOpenSSLImplementation(optionSet);
+        }
+        DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(maximalFeatureContainerDockerTag);
+        if(!(containerInfo instanceof DockerClientContainerInfo)){
+            throw new IllegalStateException("Maximal-Feature docker container is not a client container in client mode. This should never happen.");
+        }
+        DockerClientContainerInfo clientContainerInfo = (DockerClientContainerInfo) containerInfo;
+
+
+        final String MAX_FEATURE_CONTAINER_TRIGGER_ADDRESS
+                = String.format("http://%s:%d/trigger", clientContainerInfo.getDockerHost(), clientContainerInfo.getManagerPort());
 
         Function<State, Integer> triggerScript = (State state) -> {
             InboundConnection inboundConnection = state.getConfig().getDefaultServerConnection();
+            // Build the process
+            List<String> triggerCommand;
             if(!(inboundConnection instanceof InboundConnectionWithCustomTriggerArgs)){
-                LOGGER.error("InboundConnection has no args.");
+                LOGGER.warn("InboundConnection has no args. Maximal-Feature container is used.");
+                triggerCommand = Stream.concat(TRIGGER_COMMAND_PREFIX.stream(), Stream.of(MAX_FEATURE_CONTAINER_TRIGGER_ADDRESS))
+                        .collect(Collectors.toList());
             }
-            InboundConnectionWithCustomTriggerArgs inboundConnectionWCTA =
-                    (InboundConnectionWithCustomTriggerArgs) inboundConnection;
-            List<String> triggerCommand = Stream.concat(TRIGGER_COMMAND_PREFIX.stream(), inboundConnectionWCTA.getTriggerArgs().stream())
-                    .collect(Collectors.toList());
+            else {
+                InboundConnectionWithCustomTriggerArgs inboundConnectionWCTA =
+                        (InboundConnectionWithCustomTriggerArgs) inboundConnection;
+                triggerCommand = Stream.concat(TRIGGER_COMMAND_PREFIX.stream(), inboundConnectionWCTA.getTriggerArgs().stream())
+                        .collect(Collectors.toList());
+            }
+            // Run the process
             try {
                 ProcessBuilder processBuilder = new ProcessBuilder(triggerCommand);
                 Process p = processBuilder.start();

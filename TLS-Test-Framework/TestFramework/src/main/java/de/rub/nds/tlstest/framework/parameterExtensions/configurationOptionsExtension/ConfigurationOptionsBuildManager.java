@@ -34,7 +34,9 @@ public abstract class ConfigurationOptionsBuildManager {
      */
     public abstract TestSiteReport configureOptionSetAndGetSiteReport(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet);
 
-    public abstract TestSiteReport createSiteReportFromOptionSet(Set<ConfigurationOptionDerivationParameter> optionSet);
+    //public abstract TestSiteReport createSiteReportFromOptionSet(Set<ConfigurationOptionDerivationParameter> optionSet);
+
+    public abstract TestSiteReport getMaximalFeatureSiteReport();
 
     /**
      * Method is called before the ConfigurationOptionsExtension is unloaded.

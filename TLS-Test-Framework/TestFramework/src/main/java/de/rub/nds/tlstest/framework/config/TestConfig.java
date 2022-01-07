@@ -227,6 +227,9 @@ public class TestConfig extends TLSDelegateConfig {
         parsedArgs = true;
     }
 
+    synchronized  public void clearConfigCache(){
+        cachedConfig = null;
+    }
 
     @Override
     synchronized public Config createConfig() {

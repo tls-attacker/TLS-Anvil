@@ -64,22 +64,8 @@ public class ConfigurationOptionsExtension implements ParameterExtension {
         config.getBuildManager().init();
         DerivationManager.getInstance().registerCategoryManager(ConfigOptionDerivationType.class, ConfigurationOptionsDerivationManager.getInstance());
 
-        TestSiteReport maxSiteReport = createMaximalSiteReport();
+        TestSiteReport maxSiteReport = config.getBuildManager().getMaximalFeatureSiteReport();
         TestContext.getInstance().setSiteReport(maxSiteReport);
-    }
-
-    private TestSiteReport createMaximalSiteReport(){
-        List<DerivationType> derivationTypes = ConfigurationOptionsDerivationManager.getInstance().getDerivationsOfModel(ModelType.GENERIC);
-        Set<ConfigurationOptionDerivationParameter> optionSet = new HashSet<>();
-        for(DerivationType type : derivationTypes){
-            ConfigurationOptionDerivationParameter configOptionDerivation
-                    = (ConfigurationOptionDerivationParameter) ConfigurationOptionsDerivationManager.getInstance().getDerivationParameterInstance(type);
-            configOptionDerivation.setSelectedValue(configOptionDerivation.getMaxFeatureValue());
-            optionSet.add(configOptionDerivation);
-        }
-
-        TestSiteReport report = config.getBuildManager().createSiteReportFromOptionSet(optionSet);
-        return report;
     }
 
     @Override

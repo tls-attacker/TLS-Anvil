@@ -14,19 +14,16 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.DockerContainerInfo;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 
 public class DockerContainerLogFile extends LogFile{
     private DockerClient dockerClient;
 
     public DockerContainerLogFile(Path folderDirectoryPath, String fileName, DockerClient dockerClient){
-        super(folderDirectoryPath, fileName);
+        super(folderDirectoryPath, fileName, "[%d]:%n%m%n");
         this.dockerClient = dockerClient;
     }
 
@@ -36,23 +33,23 @@ public class DockerContainerLogFile extends LogFile{
         String timeStamp = dtf.format(now);
 
         String header = String.format(
-                "==================================\n" +
+                "\n==================================\n" +
                 "Output Log of Docker Container\n" +
                 "Docker Tag: %s\n" +
                 "Container Id: %s\n" +
                 "Log Started at: %s\n" +
-                "==================================",
+                "==================================\n",
                 containerInfo.getDockerTag(),
                 containerInfo.getContainerId(),
                 timeStamp);
-        appendln(header);
+        log(header);
 
         try {
             dockerClient.logContainerCmd(containerInfo.getContainerId()).withStdOut(true).
                     withStdErr(true).withFollowStream(true).exec(new LogContainerResultCallback() {
                 @Override
                 public void onNext(Frame item) {
-                    append(new String(item.getPayload()), "");
+                    log(new String(item.getPayload()));
                 }
             });
         } catch (Exception e) {

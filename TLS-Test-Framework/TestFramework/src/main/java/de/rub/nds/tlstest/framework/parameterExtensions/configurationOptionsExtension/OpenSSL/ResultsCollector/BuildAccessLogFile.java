@@ -46,7 +46,7 @@ public class BuildAccessLogFile extends LogFile{
         }
         resultsString += String.format("%s,%d\n", "Total", totalSum);
 
-        append(resultsString, "");
+        log(resultsString);
     }
 
 }

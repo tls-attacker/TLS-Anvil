@@ -43,7 +43,7 @@ public class BuildOverviewLogFile extends LogFile {
         for(ConfigOptionDerivationType optionHeaderEntry : optionHeaders){
             header.add(optionHeaderEntry.name());
         }
-        appendln(String.join(",", header));
+        log(String.join(",", header)+"\n");
     }
 
     private String getTimeStringFromMs(long timeInMs){
@@ -85,8 +85,7 @@ public class BuildOverviewLogFile extends LogFile {
             }
         }
 
-        appendln(String.join(",", line));
-
+        log(String.join(",", line)+"\n");
     }
 
 }

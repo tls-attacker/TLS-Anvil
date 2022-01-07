@@ -55,6 +55,9 @@ public class TestClientDelegate extends ServerDelegate {
         }
 
         try {
+            if(serverSocket != null){
+                serverSocket.close();
+            }
             serverSocket = new ServerSocket(this.port);
         } catch (IOException e) {
             throw new RuntimeException(e);

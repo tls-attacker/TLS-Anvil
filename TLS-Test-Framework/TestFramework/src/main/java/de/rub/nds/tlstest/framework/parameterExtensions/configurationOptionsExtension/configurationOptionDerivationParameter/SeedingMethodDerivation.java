@@ -19,12 +19,23 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 import java.util.LinkedList;
 import java.util.List;
 
-public class DisablePskDerivation extends ConfigurationOptionDerivationParameter {
-    public DisablePskDerivation(){
-        super(ConfigOptionDerivationType.DisablePSK);
+public class SeedingMethodDerivation extends ConfigurationOptionDerivationParameter{
+
+    // All these seeding method types are tested (individually)
+    public enum SeedingMethodType {
+        OsEntropySource,
+        GetRandom,
+        DevRandom,
+        //EntropyGeneratingDaemon, <- build failure
+        CpuCommand;
+        //None; <- execution fails
     }
 
-    public DisablePskDerivation(ConfigurationOptionValue selectedValue) {
+    public SeedingMethodDerivation(){
+        super(ConfigOptionDerivationType.SeedingMethod);
+    }
+
+    public SeedingMethodDerivation(ConfigurationOptionValue selectedValue) {
         this();
         setSelectedValue(selectedValue);
     }
@@ -32,14 +43,16 @@ public class DisablePskDerivation extends ConfigurationOptionDerivationParameter
     @Override
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new DisablePskDerivation(new ConfigurationOptionValue(false)));
-        parameterValues.add(new DisablePskDerivation(new ConfigurationOptionValue(true)));
+
+        for(SeedingMethodType seedingMethodType : SeedingMethodType.values()){
+            parameterValues.add(new SeedingMethodDerivation(new ConfigurationOptionValue(seedingMethodType.name())));
+        }
 
         return parameterValues;
     }
 
     @Override
     public ConfigurationOptionValue getMaxFeatureValue() {
-        return new ConfigurationOptionValue(false);
+        return new ConfigurationOptionValue(SeedingMethodType.OsEntropySource.name());
     }
 }

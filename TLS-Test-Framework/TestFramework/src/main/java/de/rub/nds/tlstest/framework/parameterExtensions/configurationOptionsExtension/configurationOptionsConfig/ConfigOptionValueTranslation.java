@@ -19,6 +19,9 @@ import org.w3c.dom.Element;
  * to handle the translations and which translation objects are expected.
  */
 public abstract class ConfigOptionValueTranslation {
+    public ConfigOptionValueTranslation(){
+    }
+
     public ConfigOptionValueTranslation(Element xmlElement){
         setFromXmlElement(xmlElement);
     }

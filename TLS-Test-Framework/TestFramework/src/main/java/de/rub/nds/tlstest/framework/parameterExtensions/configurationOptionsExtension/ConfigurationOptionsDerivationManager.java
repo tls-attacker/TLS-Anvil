@@ -13,6 +13,7 @@ import de.rub.nds.tlstest.framework.model.*;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePskDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.SeedingMethodDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,6 +49,8 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         switch(basicType) {
             case DisablePSK:
                 return new DisablePskDerivation();
+            case SeedingMethod:
+                return new SeedingMethodDerivation();
             default:
                 LOGGER.error("Derivation Type {} not implemented", type);
                 throw new UnsupportedOperationException("Derivation Type not implemented");

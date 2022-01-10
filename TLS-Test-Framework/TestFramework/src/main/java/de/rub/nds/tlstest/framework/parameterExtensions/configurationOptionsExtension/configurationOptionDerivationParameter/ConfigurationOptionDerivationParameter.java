@@ -63,6 +63,11 @@ public abstract class ConfigurationOptionDerivationParameter extends DerivationP
         sharedData.put(SETUP_DONE, Boolean.TRUE);
     }
 
+    @Override
+    public void applyToConfig(Config config, TestContext context) {
+
+    }
+
     /**
      * Returns the value that results int the most feature-rich library build. It is required to create an upper boundary for
      * prefiltering test cases using the MethodCondition annotation.

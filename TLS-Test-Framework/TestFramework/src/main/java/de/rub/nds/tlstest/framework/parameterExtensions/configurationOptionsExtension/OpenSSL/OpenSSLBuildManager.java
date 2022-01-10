@@ -28,10 +28,7 @@ import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.*;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.ResultsCollector.OpenSSLConfigOptionsResultsCollector;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigOptionValueTranslation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.FlagTranslation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.PortRange;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.*;
 import de.rub.nds.tlstest.framework.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -476,10 +473,25 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
                 return flagTranslation.getDataIfNotSet();
             }
         }
+        else if(translation instanceof SingleValueOptionTranslation){
+            SingleValueOptionTranslation singleValueTranslation = (SingleValueOptionTranslation) translation;
+            if(value.isFlag()){
+                throw new IllegalStateException("The ConfigurationOptionsConfig's translation has a value, but the ConfigurationOptionValue is a flag. Value can't be translated.");
+            }
+            List<String> optionValues = value.getOptionValues();
+            if(optionValues.size() != 1){
+                throw new IllegalStateException("The ConfigurationOptionsConfig's translation has a single value, but the ConfigurationOptionValue is not a single value. Value can't be translated.");
+            }
+            String optionValue = optionValues.get(0);
+
+            String translatedName = singleValueTranslation.getIdentifier();
+            String translatedValue = singleValueTranslation.getValueTranslation(optionValue);
+
+            return String.format("%s=%s", translatedName, translatedValue);
+        }
         else{
             throw new UnsupportedOperationException(String.format("The OpenSSLBuildManager does not support translations '%s'.", translation.getClass()));
         }
-
     }
 
     private boolean dockerNameWithTagExists(String dockerTag){

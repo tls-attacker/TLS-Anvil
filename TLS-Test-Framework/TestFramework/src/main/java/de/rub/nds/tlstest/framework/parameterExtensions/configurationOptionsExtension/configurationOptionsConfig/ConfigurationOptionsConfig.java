@@ -127,8 +127,8 @@ public class ConfigurationOptionsConfig {
             Element rootElement = doc.getDocumentElement();
 
             // Parse basic configurations
-            tlsLibraryName = findElement(rootElement, "tlsLibraryName", true).getTextContent();
-            tlsVersionName = findElement(rootElement, "tlsVersionName", true).getTextContent();
+            tlsLibraryName = XmlParseUtils.findElement(rootElement, "tlsLibraryName", true).getTextContent();
+            tlsVersionName = XmlParseUtils.findElement(rootElement, "tlsVersionName", true).getTextContent();
 
 
             //dockerLibraryPath = Paths.get(rootElement.getElementsByTagName("dockerLibraryPath").item(0).getTextContent());
@@ -139,11 +139,11 @@ public class ConfigurationOptionsConfig {
             NodeList dockerConfigList = rootElement.getElementsByTagName("dockerConfig");
             if(dockerConfigList.getLength() > 0){
                 Element dockerConfigElement = (Element) dockerConfigList.item(0);
-                dockerLibraryPath = Paths.get(findElement(dockerConfigElement, "dockerLibraryPath", true).getTextContent());
-                dockerHostName = findElement(dockerConfigElement, "dockerHostName", true).getTextContent();
-                dockerPortRange = PortRange.fromString(findElement(dockerConfigElement, "portRange", true).getTextContent());
+                dockerLibraryPath = Paths.get(XmlParseUtils.findElement(dockerConfigElement, "dockerLibraryPath", true).getTextContent());
+                dockerHostName = XmlParseUtils.findElement(dockerConfigElement, "dockerHostName", true).getTextContent();
+                dockerPortRange = PortRange.fromString(XmlParseUtils.findElement(dockerConfigElement, "portRange", true).getTextContent());
                 // Docker client dest is required for client tests
-                Element dockerClientDestElement =  findElement(dockerConfigElement, "dockerClientDestinationHost", (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT));
+                Element dockerClientDestElement =  XmlParseUtils.findElement(dockerConfigElement, "dockerClientDestinationHost", (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT));
                 if(dockerClientDestElement != null){
                     dockerClientDestinationHostName = dockerClientDestElement.getTextContent();
                 }
@@ -153,9 +153,9 @@ public class ConfigurationOptionsConfig {
                 dockerConfigPresent = false;
             }
 
-            buildManager = getBuildManagerFromString(findElement(rootElement, "buildManager", true).getTextContent());
+            buildManager = getBuildManagerFromString(XmlParseUtils.findElement(rootElement, "buildManager", true).getTextContent());
 
-            Element disableSiteReportConsoleLogElement =  findElement(rootElement, "disableSiteReportConsoleLog", false);
+            Element disableSiteReportConsoleLogElement =  XmlParseUtils.findElement(rootElement, "disableSiteReportConsoleLog", false);
             if(disableSiteReportConsoleLogElement != null){
                 siteReportConsoleLogDisabled = Boolean.parseBoolean(disableSiteReportConsoleLogElement.getTextContent());
             }
@@ -163,7 +163,7 @@ public class ConfigurationOptionsConfig {
                 siteReportConsoleLogDisabled = false;
             }
 
-            Element withCoverageElement =  findElement(rootElement, "withCoverage", false);
+            Element withCoverageElement =  XmlParseUtils.findElement(rootElement, "withCoverage", false);
             if(withCoverageElement != null){
                 withCoverage = Boolean.parseBoolean(withCoverageElement.getTextContent());
             }
@@ -183,10 +183,10 @@ public class ConfigurationOptionsConfig {
                     Element optionEntry = (Element) optionEntryNode;
 
                     // Parse derivation type
-                    ConfigOptionDerivationType derivationType = derivationTypeFromString(findElement(optionEntry, "derivationType", true).getTextContent());
+                    ConfigOptionDerivationType derivationType = derivationTypeFromString(XmlParseUtils.findElement(optionEntry, "derivationType", true).getTextContent());
 
                     // Parse value translation
-                    ConfigOptionValueTranslation translation = getTranslationFromElement(findElement(optionEntry, "valueTranslation", true));
+                    ConfigOptionValueTranslation translation = getTranslationFromElement(XmlParseUtils.findElement(optionEntry, "valueTranslation", true));
 
                     optionsToTranslation.put(derivationType, translation);
                 }
@@ -202,7 +202,7 @@ public class ConfigurationOptionsConfig {
         }
     }
 
-    private Element findElement(Element root, String tagName, boolean required){
+    /*private Element findElement(Element root, String tagName, boolean required){
         NodeList elementList = root.getElementsByTagName(tagName);
         if(elementList.getLength() < 1){
             if(required){
@@ -221,7 +221,7 @@ public class ConfigurationOptionsConfig {
         Element element = (Element) elementList.item(0);
 
         return element;
-    }
+    }*/
 
     private ConfigurationOptionsBuildManager getBuildManagerFromString(String str)
     {
@@ -262,6 +262,8 @@ public class ConfigurationOptionsConfig {
         switch(type){
             case "Flag":
                 return new FlagTranslation(translationElement);
+            case "SingleValueOption":
+                return new SingleValueOptionTranslation(translationElement);
             default:
                 throw new IllegalArgumentException("Unsupported translation type \'"+type+"\'");
         }

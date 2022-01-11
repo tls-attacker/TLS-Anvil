@@ -34,8 +34,11 @@ import org.junit.jupiter.api.Test;
 public class SupportedCiphersuites extends Tls13Test {
 
     @Test
-    @TestDescription("Client exploration detected more supported cipher suites than "
-            + "advertised by the client in the ClientHello message.")
+    @RFC(number = 8446, section = "4.1.2.  Client Hello")
+    @TestDescription("cipher_suites:  A list of the symmetric cipher options supported by " +
+        "the client, specifically the record protection algorithm " +
+        "(including secret key length) and a hash to be used with HKDF, in " +
+        "descending order of client preference.")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)

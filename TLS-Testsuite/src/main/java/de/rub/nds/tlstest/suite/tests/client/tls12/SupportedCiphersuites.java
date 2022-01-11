@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls12;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
+import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -29,10 +30,14 @@ import static org.junit.Assert.assertEquals;
 import org.junit.jupiter.api.Test;
 
 @ClientTest
+@RFC(number = 5246, section = "7.4.1.2.  Client Hello")
 public class SupportedCiphersuites extends Tls12Test {
 
     @Test
-    @TestDescription("Evaluate if the client accepts more cipher suites than advertised")
+    @TestDescription("The cipher suite list, passed from the client to the server in the " +
+        "ClientHello message, contains the combinations of cryptographic " +
+        "algorithms supported by the client in order of the client's " +
+        "preference (favorite choice first).")
     @Tag("ciphersuites")
     @SecurityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -54,8 +59,10 @@ public class SupportedCiphersuites extends Tls12Test {
 
 
     @Test
-    @TestDescription("Client exploration detected less supported ciphersuites than " +
-            "advertised by the client in the ClientHello message.")
+    @TestDescription("The cipher suite list, passed from the client to the server in the " +
+        "ClientHello message, contains the combinations of cryptographic " +
+        "algorithms supported by the client in order of the client's " +
+        "preference (favorite choice first).")
     @Tag("ciphersuites")
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)

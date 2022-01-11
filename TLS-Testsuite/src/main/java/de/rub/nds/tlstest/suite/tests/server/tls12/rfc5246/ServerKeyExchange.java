@@ -18,6 +18,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
@@ -47,6 +48,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
  */
 @Tag("signature")
 @ServerTest
+@RFC(number = 5246 , section = "7.4.3. Server Key Exchange Message")
 public class ServerKeyExchange extends Tls12Test {
     
     @TlsTest(description = "Test if the Server sends Key Exchange Messages with valid signatures")

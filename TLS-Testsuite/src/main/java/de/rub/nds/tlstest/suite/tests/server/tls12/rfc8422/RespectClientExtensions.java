@@ -92,6 +92,7 @@ public class RespectClientExtensions extends Tls12Test {
     }
 
     @Test
+    @RFC(number = 8422, section = "5.3.  Server Certificate")
     @TestDescription("If the client has used a "
             + "Supported Elliptic Curves Extension, the public key in the server’s "
             + "certificate MUST respect the client’s choice of elliptic curves")

@@ -69,8 +69,14 @@ public class EncThenMacExtension extends Tls12Test {
         }
         return ConditionEvaluationResult.disabled("Encrypt-Then-Mac Extension not supported");
     }
-
-    @TlsTest(description = "Test if the server supports the encrypt-then-mac extension")
+    
+    @RFC(number = 7366, section = "2.  Negotiating Encrypt-then-MAC")
+    @TlsTest(description = "The use of encrypt-then-MAC is negotiated via TLS/DTLS extensions as " +
+        "defined in TLS [2].  On connecting, the client includes the " +
+        "encrypt_then_mac extension in its client_hello if it wishes to use " +
+        "encrypt-then-MAC rather than the default MAC-then-encrypt.  If the " +
+        "server is capable of meeting this requirement, it responds with an " +
+        "encrypt_then_mac in its server_hello.")
     @DynamicValueConstraints(affectedTypes=DerivationType.CIPHERSUITE, methods="isBlockCipher")
     @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @HandshakeCategory(SeverityLevel.INFORMATIONAL)

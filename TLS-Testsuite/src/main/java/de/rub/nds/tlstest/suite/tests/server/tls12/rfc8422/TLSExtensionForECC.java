@@ -212,7 +212,8 @@ public class TLSExtensionForECC extends Tls12Test {
         assertTrue("Deprecated group(s) supported: " + deprecatedFound.stream().map(NamedGroup::name).collect(Collectors.joining(",")), deprecatedFound.isEmpty());
     }
     
-    @TlsTest(description = "Send a ClientHello that offers many groups.")
+    @TlsTest(description = "NamedCurve named_curve_list<2..2^16-1>")
+    @RFC(number = 8422, section = "5.1.1.  Supported Elliptic Curves Extension")
     @ScopeLimitations(DerivationType.INCLUDE_GREASE_NAMED_GROUPS)
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @InteroperabilityCategory(SeverityLevel.HIGH)

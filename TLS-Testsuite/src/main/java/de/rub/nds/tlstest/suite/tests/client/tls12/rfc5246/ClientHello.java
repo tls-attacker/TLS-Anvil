@@ -87,6 +87,7 @@ public class ClientHello extends Tls12Test {
     }
     
     @Test
+    @RFC(number = 5246, section = "7.4.1.4.1.  Signature Algorithms")
     @TestDescription("The client uses the \"signature_algorithms\" extension to indicate to " +
             "the server which signature/hash algorithm pairs may be used in " +
             "digital signatures.")

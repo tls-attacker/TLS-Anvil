@@ -92,7 +92,12 @@ public class EncThenMacExtension extends Tls12Test {
         });
     }
     
-    @TlsTest(description = "Test if the client can complete the handshake if encrypt-then-MAC is negotiated")
+    @TlsTest(description = "Once the use of encrypt-then-MAC has been negotiated, processing of " +
+    "TLS/DTLS packets switches from the standard: " +
+    "[...]encrypt( data || MAC || pad ) " +
+    "[...]to the new:" +
+    "[...]encrypt( data || pad ) || MAC")
+    @RFC(number = 7366, section = "3.  Applying Encrypt-then-MAC")
     @MethodCondition(method = "supportsExtension")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isBlockCipher")

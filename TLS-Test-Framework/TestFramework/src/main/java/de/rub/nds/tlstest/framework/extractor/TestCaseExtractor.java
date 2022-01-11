@@ -64,7 +64,7 @@ public class TestCaseExtractor {
             for (ExtractionMethod testCase : testCases) {
                 rfcHtml.markText(testCase.getDescription(), HtmlRFCAnnotation.COLOR_COVERED, false, false, true);
             }
-
+            LOGGER.info("MUST (NOT) coverage RFC {}: \n{}", rfcNumber, rfcHtml.getPrintableCounters());
             rfcHtml.saveToFolder(TestContext.getInstance().getConfig().getTestExtractorDelegate().getOutputFolder());
         });
 

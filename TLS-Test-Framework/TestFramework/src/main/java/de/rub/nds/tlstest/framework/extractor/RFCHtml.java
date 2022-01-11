@@ -17,6 +17,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -30,7 +32,11 @@ public class RFCHtml {
     private Document origDoc;
     private Document cleanupDoc;
     private List<OffsetTextNode> nodeOffsetIndex = null;
-
+    private final Map<String, Integer> colorMustCounter = new HashMap<>();
+    private final Map<String, Integer> colorMustNotCounter = new HashMap<>();
+    private String coveringColor;
+    private List<String> colorCoveredStrings;
+            
     public RFCHtml(int rfcNumber) {
         this.rfcNumber = rfcNumber;
         this.urlString = String.format("https://datatracker.ietf.org/doc/html/rfc%d", rfcNumber);
@@ -130,6 +136,10 @@ public class RFCHtml {
     }
 
     public void markText(String searchText, String color, boolean expectMultiple, boolean caseSensitive, boolean encodeRegex) {
+        if(!color.equals(coveringColor)) {
+            coveringColor = color;
+            colorCoveredStrings = new LinkedList<>();
+        }
         if (nodeOffsetIndex == null) {
             createTextNodeOffsetIndex();
         }
@@ -138,7 +148,7 @@ public class RFCHtml {
         pattern = pattern.replace("[The server]", "");
         pattern = pattern.replace("[Servers]", "");
         String[] parts = pattern.split(Pattern.quote("[...]"));
-        pattern = parts[parts.length -1];
+        pattern = parts[parts.length -1]; 
         for (String r : "[,],(,),^,$,|,{,}".split(",")) {
             pattern = pattern.replace(r, String.format("\\%s", r));
         }
@@ -154,6 +164,10 @@ public class RFCHtml {
         
         boolean found = false;
         while (matcher.find()) {
+            if(!colorCoveredStrings.contains(parts[parts.length -1])) {
+                // only add quote-unique strings
+                addToCounter(parts[parts.length -1], color);
+            }
             if (found && !expectMultiple) {
                 LOGGER.warn("RFC {}: Multiple matches of '{}'", rfcNumber, searchText);
             }
@@ -165,10 +179,11 @@ public class RFCHtml {
                 node.wrap(String.format("<span style=\"color: %s;\"></span>", color));
             }
         }
-
+        
         if (!found) {
             LOGGER.warn("RFC {}: Did not find '{}'", rfcNumber, searchText);
         } else {
+            colorCoveredStrings.add(parts[parts.length -1]);
             //mark surrounding passages
             for(int i = 0; i < parts.length -1; i++) {
                 if(parts[i].length() > 5) {
@@ -261,5 +276,40 @@ public class RFCHtml {
     
     private String encodeString(String input) {
         return input.replace("+", "\\+").replace("-", "\\-").replace("’", "'");
+    }
+    
+    private void addToCounter(String statement, String color) {
+        int offset = 0;
+        int mustNots = 0;
+        int musts = 0;
+        
+        while(statement.indexOf("MUST", offset) > -1) {
+            int mustIndex = statement.indexOf("MUST", offset);
+            if(statement.indexOf("NOT", offset) == (mustIndex + 5)) {
+                mustNots++;
+                offset = mustIndex + 8;
+            } else {
+                musts++;
+                offset = mustIndex + 4;
+            }
+        }
+        
+        int presentMustNots = (colorMustNotCounter.containsKey(color))? colorMustNotCounter.get(color) : 0;
+        int presentMusts = (colorMustCounter.containsKey(color))? colorMustCounter.get(color) : 0;
+        colorMustNotCounter.put(color, presentMustNots + mustNots);
+        colorMustCounter.put(color, presentMusts + musts);
+    }
+    
+    public String getPrintableCounters() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("MUSTs:\n");
+        for(String color : colorMustCounter.keySet()) {
+            builder.append(color).append(": ").append(colorMustCounter.get(color)).append("\n");
+        }
+        builder.append("MUST NOTs:\n");
+        for(String color : colorMustNotCounter.keySet()) {
+            builder.append(color).append(": ").append(colorMustNotCounter.get(color)).append("\n");
+        }
+        return builder.toString();
     }
 }

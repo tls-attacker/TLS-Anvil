@@ -19,6 +19,7 @@ public class HtmlRFCAnnotation {
     public static final String COLOR_IMPLICIT = "pink";
     public static final String COLOR_PROTOCOL_EXTENSION = "gray";
     public static final String COLOR_BLACKBOX_UNTESTABLE = "cyan";
+    public static final String COLOR_CONTRADICTORY = "white";
     public static final String COLOR_MUST = "red";
 
     public static final String DIRECTORY_DEPRECATED = "deprecated";
@@ -26,6 +27,7 @@ public class HtmlRFCAnnotation {
     public static final String DIRECTORY_IMPLICIT = "implicit";
     public static final String DIRECTORY_PROTOCOL_EXTENSION = "protocol_extensions";
     public static final String DIRECTORY_BLACKBOX_UNTESTABLE = "untestable";
+    public static final String DIRECTORY_CONTRADICTORY = "contradictory";
 
     public static LinkedHashMap<String, List<String>> getAnnotations(int rfcNumber, String path) {
         LinkedHashMap<String, List<String>> annotationMap = new LinkedHashMap<>();
@@ -34,6 +36,7 @@ public class HtmlRFCAnnotation {
         annotationMap.put(DIRECTORY_IMPLICIT, getAnnotations(path + DIRECTORY_IMPLICIT, rfcNumber));
         annotationMap.put(DIRECTORY_PROTOCOL_EXTENSION, getAnnotations(path + DIRECTORY_PROTOCOL_EXTENSION, rfcNumber));
         annotationMap.put(DIRECTORY_BLACKBOX_UNTESTABLE, getAnnotations(path + DIRECTORY_BLACKBOX_UNTESTABLE, rfcNumber));
+        annotationMap.put(DIRECTORY_CONTRADICTORY, getAnnotations(path + DIRECTORY_CONTRADICTORY, rfcNumber));
         return annotationMap;
     }
 
@@ -63,6 +66,8 @@ public class HtmlRFCAnnotation {
                 return COLOR_OUT_OF_SCOPE;
             case DIRECTORY_PROTOCOL_EXTENSION:
                 return COLOR_PROTOCOL_EXTENSION;
+            case DIRECTORY_CONTRADICTORY:
+                return COLOR_CONTRADICTORY;
             default:
                 throw new IllegalArgumentException(directory + " is not a known annotation identifier");
         }

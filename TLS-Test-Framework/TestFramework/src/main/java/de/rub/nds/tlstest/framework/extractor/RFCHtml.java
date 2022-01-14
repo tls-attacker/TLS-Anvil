@@ -32,10 +32,11 @@ public class RFCHtml {
     private Document origDoc;
     private Document cleanupDoc;
     private List<OffsetTextNode> nodeOffsetIndex = null;
-    private final Map<String, Integer> colorMustCounter = new HashMap<>();
-    private final Map<String, Integer> colorMustNotCounter = new HashMap<>();
-    private String coveringColor;
-    private List<String> colorCoveredStrings;
+    private final Map<HtmlRFCAnnotation, Integer> annotationMustCounter = new HashMap<>();
+    private final Map<HtmlRFCAnnotation, Integer> annotationMustNotCounter = new HashMap<>();
+    private final List<MarkedPassage> mustNotPositions = new LinkedList<>();
+    private final List<MarkedPassage> mustPositions = new LinkedList<>();
+    private final List<MarkedPassage> remainingMustAndNot = new LinkedList<>();;
             
     public RFCHtml(int rfcNumber) {
         this.rfcNumber = rfcNumber;
@@ -134,16 +135,44 @@ public class RFCHtml {
 
         Collections.sort(nodeOffsetIndex);
     }
-
-    public void markText(String searchText, String color, boolean expectMultiple, boolean caseSensitive, boolean encodeRegex) {
-        if(!color.equals(coveringColor)) {
-            coveringColor = color;
-            colorCoveredStrings = new LinkedList<>();
-        }
+    
+    public void findMustAndNotPositions() {
         if (nodeOffsetIndex == null) {
             createTextNodeOffsetIndex();
         }
+        String pattern = "MUST NOT";
+
+        String text = this.cleanupDoc.getElementsByTag("pre").first().wholeText();
+        Matcher matcher = Pattern.compile(pattern).matcher(text);
+        while (matcher.find()) {
+            int startIndex = matcher.start();
+            int endIndex = matcher.end();
+            mustNotPositions.add(new MarkedPassage(startIndex, endIndex));
+            for (TextNode node : getTextNodesBetween(startIndex, endIndex)) {
+                node.wrap(String.format("<span style=\"color: %s;\"></span>", HtmlRFCAnnotation.MUST_NOT.getColor()));
+            }
+        }
         
+        pattern = "MUST";
+        matcher = Pattern.compile(pattern).matcher(text);
+        while (matcher.find()) {
+            int startIndex = matcher.start();
+            int endIndex = matcher.end();
+            MarkedPassage newPassage = new MarkedPassage(startIndex, endIndex);
+            boolean isPartOfMustNot = mustNotPositions.stream().anyMatch(listed -> newPassage.intersects(listed));
+            if(!isPartOfMustNot) {
+                mustPositions.add(new MarkedPassage(startIndex, endIndex));
+                for (TextNode node : getTextNodesBetween(startIndex, endIndex)) {
+                    node.wrap(String.format("<span style=\"color: %s;\"></span>", HtmlRFCAnnotation.MUST.getColor()));
+                }
+            }
+        }
+        remainingMustAndNot.addAll(mustNotPositions);
+        remainingMustAndNot.addAll(mustPositions);
+        LOGGER.info("RFC {} contains {} 'MUST's and {} 'MUST NOT's", rfcNumber, mustPositions.size(), mustNotPositions.size());
+    }
+
+    public boolean markText(String searchText, HtmlRFCAnnotation annotationType, boolean encodeRegex) {
         String pattern = (encodeRegex)?encodeString(searchText):searchText;
         pattern = pattern.replace("[The server]", "");
         pattern = pattern.replace("[Servers]", "");
@@ -155,42 +184,35 @@ public class RFCHtml {
         pattern = pattern.replaceAll("[\\s\\n]+", "[\\\\s\\\\n]+");
 
         String text = this.cleanupDoc.getElementsByTag("pre").first().wholeText();
-        Matcher matcher;
-        if(caseSensitive) {
-            matcher = Pattern.compile(pattern).matcher(text);
-        } else {
-            matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(text);
-        }
+        Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(text);
         
         boolean found = false;
         while (matcher.find()) {
-            if(!colorCoveredStrings.contains(parts[parts.length -1])) {
-                // only add quote-unique strings
-                addToCounter(parts[parts.length -1], color);
-            }
-            if (found && !expectMultiple) {
+            if (found) {
                 LOGGER.warn("RFC {}: Multiple matches of '{}'", rfcNumber, searchText);
             }
             found = true;
+            
             int startIndex = matcher.start();
             int endIndex = matcher.end();
-
+            MarkedPassage newPassage = new MarkedPassage(startIndex, endIndex);
+            consumeContainedMustAndNot(newPassage, annotationType);
             for (TextNode node : getTextNodesBetween(startIndex, endIndex)) {
-                node.wrap(String.format("<span style=\"color: %s;\"></span>", color));
+                node.wrap(String.format("<span style=\"color: %s;\"></span>", annotationType.getColor()));
             }
         }
         
         if (!found) {
             LOGGER.warn("RFC {}: Did not find '{}'", rfcNumber, searchText);
         } else {
-            colorCoveredStrings.add(parts[parts.length -1]);
             //mark surrounding passages
             for(int i = 0; i < parts.length -1; i++) {
                 if(parts[i].length() > 5) {
-                    markText(parts[i], color, false, caseSensitive, false);
+                    markText(parts[i], annotationType, false);
                 }
             }
         }
+        return found;
     }
 
     public String getHtml() {
@@ -278,38 +300,81 @@ public class RFCHtml {
         return input.replace("+", "\\+").replace("-", "\\-").replace("’", "'");
     }
     
-    private void addToCounter(String statement, String color) {
-        int offset = 0;
-        int mustNots = 0;
-        int musts = 0;
-        
-        while(statement.indexOf("MUST", offset) > -1) {
-            int mustIndex = statement.indexOf("MUST", offset);
-            if(statement.indexOf("NOT", offset) == (mustIndex + 5)) {
-                mustNots++;
-                offset = mustIndex + 8;
-            } else {
-                musts++;
-                offset = mustIndex + 4;
+    private void consumeContainedMustAndNot(MarkedPassage consumingPassage, HtmlRFCAnnotation annotationType) {
+        int coveringMustNots = remainingMustAndNot.size();
+        mustNotPositions.stream().filter(listed -> (consumingPassage.contains(listed) && remainingMustAndNot.contains(listed))).forEach(remainingMustAndNot::remove);
+        coveringMustNots = coveringMustNots - remainingMustAndNot.size(); 
+        int coveringMusts = remainingMustAndNot.size();
+        mustPositions.stream().filter(listed -> (consumingPassage.contains(listed) && remainingMustAndNot.contains(listed))).forEach(remainingMustAndNot::remove);
+        coveringMusts = coveringMusts - remainingMustAndNot.size(); 
+        int previouslyCoveredCountMustNot = (annotationMustNotCounter.containsKey(annotationType))? annotationMustNotCounter.get(annotationType) : 0;
+        int previouslyCoveredCountMust = (annotationMustCounter.containsKey(annotationType))? annotationMustCounter.get(annotationType) : 0;
+        annotationMustNotCounter.put(annotationType, previouslyCoveredCountMustNot + coveringMustNots);
+        annotationMustCounter.put(annotationType, previouslyCoveredCountMust + coveringMusts);
+    }
+ 
+    public String getPrintableCounters() {
+        for(HtmlRFCAnnotation annotationType : HtmlRFCAnnotation.values()) {
+            if(!annotationMustCounter.containsKey(annotationType)) {
+                annotationMustCounter.put(annotationType, 0);
+            }
+            if(!annotationMustNotCounter.containsKey(annotationType)) {
+                annotationMustNotCounter.put(annotationType, 0);
             }
         }
+        StringBuilder builder = new StringBuilder();
+        builder.append("\nCoverable MUSTs\n").append(rfcNumber).append("\n");
+        appendCountersForList(builder, mustPositions, annotationMustCounter);
         
-        int presentMustNots = (colorMustNotCounter.containsKey(color))? colorMustNotCounter.get(color) : 0;
-        int presentMusts = (colorMustCounter.containsKey(color))? colorMustCounter.get(color) : 0;
-        colorMustNotCounter.put(color, presentMustNots + mustNots);
-        colorMustCounter.put(color, presentMusts + musts);
+        builder.append("\nCoverable MUST NOTs\n").append(rfcNumber).append("\n");
+        appendCountersForList(builder, mustNotPositions, annotationMustNotCounter);
+        return builder.toString();
     }
     
-    public String getPrintableCounters() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("MUSTs:\n");
-        for(String color : colorMustCounter.keySet()) {
-            builder.append(color).append(": ").append(colorMustCounter.get(color)).append("\n");
+    private void appendCountersForList(StringBuilder builder, List<MarkedPassage> mandatoryPositions, Map<HtmlRFCAnnotation, Integer> annotationCounterMap) {
+        int keywordsOverall = 0;
+        if(!mandatoryPositions.isEmpty()) {
+            //subtract first MUST/MUST NOT from terminology explanation
+            keywordsOverall = mandatoryPositions.size() - 1;
         }
-        builder.append("MUST NOTs:\n");
-        for(String color : colorMustNotCounter.keySet()) {
-            builder.append(color).append(": ").append(colorMustNotCounter.get(color)).append("\n");
+        builder.append("Overall: ").append(keywordsOverall).append("\n");
+
+        int keywordsCovered = 0;
+        for(HtmlRFCAnnotation annotationType : HtmlRFCAnnotation.values()) {
+            if(annotationType != HtmlRFCAnnotation.MUST_NOT && annotationType != HtmlRFCAnnotation.MUST) { 
+                builder.append(annotationType.name()).append(": ").append(annotationCounterMap.get(annotationType)).append("\n");
+                keywordsCovered += annotationCounterMap.get(annotationType);
+            }
         }
-        return builder.toString();
+        if(keywordsCovered != keywordsOverall) {
+            LOGGER.error("RFC contains {} keywords but {} are covered", keywordsOverall, keywordsCovered);
+        }
+        //append  effective coverage percentage
+        builder.append("Coverage: ");
+        if(keywordsOverall == 0) {
+            builder.append("-");
+        } else {
+            float relevantKeywords = keywordsOverall - annotationCounterMap.get(HtmlRFCAnnotation.PROTOCOL_EXTENSION) - annotationCounterMap.get(HtmlRFCAnnotation.DEPRECATED) - annotationCounterMap.get(HtmlRFCAnnotation.CONTRADICTORY);
+            float effectivelyCovered = annotationCounterMap.get(HtmlRFCAnnotation.COVERED) + annotationCounterMap.get(HtmlRFCAnnotation.IMPLICIT);
+            builder.append(String.format("%.1f", (effectivelyCovered / relevantKeywords) * 100)).append("%");
+        }
+    }
+    
+    public class MarkedPassage {
+        private final int startIndex;
+        private final int endIndex;
+        public MarkedPassage(int startIndex, int endIndex) {
+            this.startIndex = startIndex;
+            this.endIndex = endIndex;
+        }
+        
+        public boolean intersects(MarkedPassage other) {
+            return (startIndex >= other.startIndex && startIndex <= other.endIndex) ||
+                    (other.startIndex >= startIndex && other.startIndex <= endIndex);
+        }
+        
+        public boolean contains(MarkedPassage other) {
+            return (other.startIndex >= startIndex && other.startIndex <= endIndex);
+        }
     }
 }

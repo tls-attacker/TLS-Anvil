@@ -132,7 +132,7 @@ public class RecordLayer extends Tls13Test {
     }
     
     @TlsTest(description = "Handshake messages MUST NOT be interleaved "
-            + "with other record types. That is, if a handshake message is split over two or more\n"
+            + "with other record types. That is, if a handshake message is split over two or more "
             + "records, there MUST NOT be any other records between them.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @ScopeExtensions(DerivationType.ALERT)

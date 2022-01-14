@@ -85,3 +85,13 @@ In addition, to avoid accidental misuse, TLS implementations MUST NOT enable 0-R
 In order to allow applications to implement this kind of processing, TLS implementations MUST provide a way for the application to determine if the handshake has completed.
 
 The ServerHello MUST only include extensions which are required to establish the cryptographic context and negotiate the protocol version.
+
+Implementations MUST NOT send zero-length fragments of Handshake types, even if those fragments contain padding.
+
+Handshake messages MUST NOT be interleaved with other record types. That is, if a handshake message is split over two or more records, there MUST NOT be any other records between them.
+
+Clients MUST NOT use cookies in their initial ClientHello in subsequent connections.
+
+Therefore, in normal operation, clients will not know which, if any, of these mechanisms servers actually implement and hence MUST only send early data which they deem safe to be replayed.
+
+The server MUST ensure that any instance of it (be it a machine, a thread, or any other entity within the relevant serving infrastructure) would accept 0-RTT for the same 0-RTT handshake at most once; this limits the number of replays to the number of server instances in the deployment.

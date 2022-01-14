@@ -113,9 +113,8 @@ public class HelloRetryRequest extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(description = "A client which receives a " +
-        "cipher suite that was not offered MUST abort the handshake with an " +
-        "\"illegal_parameter\" alert.")
+    @TlsTest(description = "A client which receives a cipher suite that was not offered MUST " +
+        "abort the handshake.")
     @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getUnofferedTls13CipherSuites")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -132,6 +131,8 @@ public class HelloRetryRequest extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
             AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            //illegal parameter is not mentioned in the quote above but is mandatory
+            //for the ServerHello case
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
         });
     }

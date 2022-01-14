@@ -171,7 +171,7 @@ public class FfDheShare extends Tls12Test {
         "a client that includes any FFDHE group (i.e., any codepoint between " +
         "256 and 511, inclusive, even if unknown to the server), and if none " +
         "of the client-proposed FFDHE groups are known and acceptable to the " +
-        "server, then the server MUST NOT select an FFDHE cipher suite. [...]" +
+        "server, then the server MUST NOT select an FFDHE cipher suite.[...]" +
         "If the extension is present " +
         "with FFDHE groups, none of the client's offered groups are acceptable " +
         "by the server, and none of the client's proposed non-FFDHE cipher " +

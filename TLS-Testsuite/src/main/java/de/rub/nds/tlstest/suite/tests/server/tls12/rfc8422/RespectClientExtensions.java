@@ -46,7 +46,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 @ServerTest
 public class RespectClientExtensions extends Tls12Test {
@@ -95,7 +94,9 @@ public class RespectClientExtensions extends Tls12Test {
     @RFC(number = 8422, section = "5.3.  Server Certificate")
     @TestDescription("If the client has used a "
             + "Supported Elliptic Curves Extension, the public key in the server’s "
-            + "certificate MUST respect the client’s choice of elliptic curves")
+            + "certificate MUST respect the client’s choice of elliptic curves. A " 
+            + "server that cannot satisfy this requirement MUST NOT choose an ECC " 
+            + "cipher suite in its ServerHello message.)")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)

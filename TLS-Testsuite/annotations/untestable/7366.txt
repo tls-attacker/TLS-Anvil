@@ -1,0 +1,1 @@
+If a server receives an encrypt-then-MAC request extension from a client and then selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, it MUST NOT send an encrypt-then-MAC response extension back to the client.

@@ -24,6 +24,8 @@ In this mode, the client and server MUST supply "key_share" values as described 
 
 When a PSK is used and early data is allowed for that PSK, the client can send Application Data in its first flight of messages.  If the client opts to do so, it MUST supply both the "pre_shared_key" and "early_data" extensions.
 
+If the client opts to send an OCSP response, the body of its "status_request" extension MUST be a CertificateStatus structure as defined in [RFC6066].
+
 The PSK used to encrypt the early data MUST be the first PSK listed in the client's "pre_shared_key" extension.
 
 For PSKs provisioned via NewSessionTicket, a server MUST validate that the ticket age for the selected PSK identity (computed by subtracting ticket_age_add from PskIdentity.obfuscated_ticket_age modulo 2^32) is within a small tolerance of the time since the ticket was issued (see Section 8).  If it is not, the server SHOULD proceed with the handshake but reject 0-RTT, and SHOULD NOT take any other action that assumes that this ClientHello is fresh.
@@ -65,7 +67,7 @@ The server's end-entity certificate's public key (and associated restrictions) M
 The certificate MUST allow the key to be used for signing (i.e., the digitalSignature bit MUST be set if the Key Usage extension is present) with a signature scheme indicated in the client's "signature_algorithms"/"signature_algorithms_cert" extensions (see Section 4.2.3).
 
 All certificates provided by the server MUST be signed by a signature algorithm advertised by the client if it is able to provide such a chain (see Section 4.2.3).
-   
+
 This fallback chain SHOULD NOT use the deprecated SHA-1 hash algorithm in general, but MAY do so if the client's advertisement permits it, and MUST NOT do so otherwise.
 
 If the client cannot construct an acceptable chain using the provided certificates and decides to abort the handshake, then it MUST abort the handshake with an appropriate certificate-related alert (by default, "unsupported_certificate"; see Section 6.2 for more information).

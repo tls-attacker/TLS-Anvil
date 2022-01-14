@@ -132,10 +132,14 @@ public class SignatureAlgorithms extends Tls12Test {
         });
     }
     
-    @TlsTest(description = "A server receiving a ClientHello MUST correctly ignore all " +
-        "unrecognized cipher suites, extensions, and other parameters.")
+    @TlsTest(description = "Each SignatureAndHashAlgorithm value lists a single hash/signature " +
+        "pair that the client is willing to verify.  The values are indicated " +
+        "in descending order of preference. [...]" + 
+        "Because not all signature algorithms and hash algorithms may be " +
+        "accepted by an implementation (e.g., DSA with SHA-1, but not " +
+        "SHA-256), algorithms here are listed in pairs.")
     //This requirement also applies to older versions
-    @RFC(number = 8446, section = "9.3. Protocol Invariants")
+    @RFC(number = 5246, section = "7.4.1.4.1.  Signature Algorithms")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

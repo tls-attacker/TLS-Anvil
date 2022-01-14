@@ -36,6 +36,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import org.junit.jupiter.api.Disabled;
 
 @ServerTest
 @RFC(number = 5246, section = "7.4.8. Certificate Verify")
@@ -58,6 +59,7 @@ public class CertificateVerify extends Tls12Test {
     @CryptoCategory(SeverityLevel.CRITICAL)
     @CertificateCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.LOW)
+    @Disabled
     public void invalidCertificateVerify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

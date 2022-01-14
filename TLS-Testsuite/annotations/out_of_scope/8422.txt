@@ -12,11 +12,9 @@ A server participating in an ECDHE_ECDSA key exchange may use different curves f
 
 ECC public keys MUST be encoded in certificates as described in Section 5.9.
 
-Certificate MUST contain an ECDSA- or EdDSA-capable
+| Certificate MUST contain an ECDSA- or EdDSA-capable
 
 Certificate MUST contain an RSA public key. 
-
-the public key in the server's certificate MUST respect the client's choice of elliptic curves.  A server that cannot satisfy this requirement MUST NOT choose an ECC cipher suite in its ServerHello message.) 
 
 For the X25519 and X448 curves, the only valid representation is the one specified in [RFC7748], a 32- or 56-octet representation of the u value of the point.  This structure MUST NOT be used with Ed25519 and Ed448 public keys.
 

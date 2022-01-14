@@ -22,8 +22,6 @@ When a client negotiates SSL 2.0 but also supports TLS, it MUST set the right-ha
 
 Note: this extension is not meaningful for TLS versions prior to 1.2. Clients MUST NOT offer it if they are offering prior versions.
 
-Servers MUST NOT send this extension.  TLS servers MUST support receiving this extension.
-
 Implementors upgrading from SSLv3 MUST modify their implementations to generate and accept the correct encoding.
 
 If the decompression function encounters a TLSCompressed.fragment that would decompress to a length in excess of 2^14 bytes, it MUST report a fatal decompression failure error.

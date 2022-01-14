@@ -116,9 +116,6 @@ public class ServerHello extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
             Validator.receivedFatalAlert(i);
-
-            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
     }
 

@@ -1,3 +1,5 @@
+Implementations MUST NOT send zero-length fragments of Handshake, Alert, or ChangeCipherSpec content types. Zero-length fragments of Application data MAY be sent as they are potentially useful as a  traffic analysis countermeasure.
+
 These current states MUST be updated for each record processed.
 
 The sequence number MUST be set to zero whenever a connection state is made the active state.
@@ -5,6 +7,8 @@ The sequence number MUST be set to zero whenever a connection state is made the 
 However, records MUST be delivered to the network in the same order as they are protected by the record layer.
 
 Recipients MUST receive and process interleaved application layer traffic during handshakes subsequent to the first one on a connection.
+
+Servers and clients MUST forget any session-identifiers, keys, and secrets associated with a failed connection.
 
 The Initialization Vector (IV) SHOULD be chosen at random, and MUST be unpredictable.
 

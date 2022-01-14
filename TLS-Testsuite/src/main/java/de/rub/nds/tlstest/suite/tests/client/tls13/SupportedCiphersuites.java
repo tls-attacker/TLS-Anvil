@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @ClientTest
@@ -63,6 +64,7 @@ public class SupportedCiphersuites extends Tls13Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
+    @Tag("new")
     public void supportsLessCipherSuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
         List<CipherSuite> advertised = CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue()).stream().filter(CipherSuite::isTLS13).collect(Collectors.toList());

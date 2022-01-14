@@ -89,7 +89,10 @@ public class TLSExtensionForECC extends Tls12Test {
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
     @TlsTest(description = "A server that receives a ClientHello containing one or both of these "
             + "extensions MUST use the client's enumerated capabilities to guide its "
-            + "selection of an appropriate cipher suite.  One of the proposed ECC ")
+            + "selection of an appropriate cipher suite.  One of the proposed ECC "
+            + "cipher suites must be negotiated only if the server can successfully "
+            + "complete the handshake while using the curves and point formats "
+            + "supported by the client (cf. Sections 5.3 and 5.4).")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @InteroperabilityCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.MEDIUM)

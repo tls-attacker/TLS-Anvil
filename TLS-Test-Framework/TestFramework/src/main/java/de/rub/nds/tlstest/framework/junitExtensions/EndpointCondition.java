@@ -30,6 +30,10 @@ public class EndpointCondition extends BaseCondition {
         Method testMethod = context.getRequiredTestMethod();
         Class<?> testClass = context.getRequiredTestClass();
 
+        return endpointOfMethod(testMethod, testClass);
+    }
+    
+    public static TestEndpointType endpointOfMethod(Method testMethod, Class<?> testClass) {
         if (testMethod.isAnnotationPresent(ClientTest.class)) {
             return TestEndpointType.CLIENT;
         } else if (testMethod.isAnnotationPresent(ServerTest.class)) {

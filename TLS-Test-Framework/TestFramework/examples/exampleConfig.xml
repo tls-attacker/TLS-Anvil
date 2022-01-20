@@ -1,0 +1,265 @@
+<!--
+  ~  TLS-Test-Framework - A framework for modeling TLS tests
+  ~
+  ~  Copyright 2020 Ruhr University Bochum and
+  ~  TÜV Informationstechnik GmbH
+  ~
+  ~  Licensed under Apache License 2.0
+  ~  http://www.apache.org/licenses/LICENSE-2.0
+  -->
+
+<!-- This is an example for a configuration options config file. It shows which fields can/must be used and how. -->
+<!-- Fields marked as 'Optional' can be left out without parsing errors. -->
+
+<config>
+    <!-- The name of the library to test. Can be chosen freely. -->
+    <tlsLibraryName>OpenSSL</tlsLibraryName>
+    <!-- The name of the library version. In OpenSSL the version name must match with a branch name of OpenSSL's github repository
+         This version is then used to create builds. -->
+    <tlsVersionName>OpenSSL_1_1_1</tlsVersionName>
+    <!-- The ConfigurationOptionsBuildManager that is responsible for providing the build. -->
+    <buildManager>OpenSSLBuildManager</buildManager>
+    <!-- Come config for working with docker  -->
+    <dockerConfig>
+        <!-- The path to the docker library  -->
+        <dockerLibraryPath>/path/to/TLS-Docker-Library</dockerLibraryPath>
+        <!-- The host address all built containers are bind to.  -->
+        <dockerHostName>127.0.0.42</dockerHostName>
+        <!-- A range of ports that is used by the docker builds. Blocked ports are skipped automatically.
+             Each container required 2 ports -->
+        <portRange>8100-20000</portRange>
+        <!-- Only required for client tests. Configures the address containers need to connect to (i.e. where this framework runs)
+             Note that localhost of containers is not localhost of the host. Use 'host.docker.internal' for the host's localhost. -->
+        <dockerClientDestinationHost>host.docker.internal</dockerClientDestinationHost>
+    </dockerConfig>
+    <!-- Optional: Disables the console logs for site reports. Default: false -->
+    <disableSiteReportConsoleLog>true</disableSiteReportConsoleLog>
+    <!-- Optional: Enables code coverage. For OpenSSL other dockerfiles are used for testing with coverage. Default: false -->
+    <withCoverage>true</withCoverage>
+    <!-- Optional: Configures how many containers are running simultaneously. Rarely used containers are paused meanwhile. Default: 16 -->
+    <maxRunningContainers>6</maxRunningContainers>
+
+    <optionsToTest>
+
+        <!-- 1st Priority Options -->
+        <optionEntry>
+            <!-- The derivation type exactly like in the enum:
+                 de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType -->
+            <derivationType>ConfigOptionDerivationType.SeedingMethod</derivationType>
+            <!-- Optional: Enables or disables the respective option. Disabled options are ignored. Default: true  -->
+            <enabled>true</enabled>
+            <!-- Defines how option values are translated to library specific build flags/values. How to process these
+                 values is up to the respective build managers. -->
+            <valueTranslation type="SingleValueOption">
+                <!-- Single option values are options that have an identifier and a single value like: '- -with-rand-seed=<seeding_method>' -->
+                <identifier>--with-rand-seed</identifier>
+                <!-- Every possible value must appear here. It is translated to a value that can be parsed by the tls library -->
+                <value key="OsEntropySource">os</value>
+                <value key="GetRandom">getrandom</value>
+                <value key="DevRandom">devrandom</value>
+                <value key="EntropyGeneratingDaemon">egd</value>
+                <value key="CpuCommand">rdcpu</value>
+                <value key="None">none</value>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.EnableNistEcOptimizations</derivationType>
+            <enabled>true</enabled>
+            <valueTranslation type="Flag">
+                <!-- Translations of type flag only have two values. Either the flag is set or not.
+                     The translation data for a set flag is entered in the <true>-block. For an unset
+                     flag in the <false>-block -->
+                <true>enable-ec_nistp_64_gcc_128</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableSse2</derivationType>
+            <enabled>true</enabled>
+            <valueTranslation type="Flag">
+                <true>no-sse2</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableBinaryEllipticCurves</derivationType>
+            <enabled>true</enabled>
+            <valueTranslation type="Flag">
+                <true>no-ec2m</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableMultiblock</derivationType>
+            <enabled>true</enabled>
+            <valueTranslation type="Flag">
+                <true>no-multiblock</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisablePsk</derivationType>
+            <enabled>true</enabled>
+            <valueTranslation type="Flag">
+                <true>no-psk</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.EnableCompression</derivationType>
+            <enabled>true</enabled>
+            <valueTranslation type="Flag">
+                <true>zlib</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+
+
+
+        <!-- 2nd Priority Options -->
+        <!-- In this example file we only enable the 7 options with the highest priority. However we can
+             easily reuse config files for other option sets. We only need to toggle the <enabled> field.-->
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableAfalgEngine</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>no-afalgeng</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.EnableEntropyGatheringDaemon</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>enable-egd</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableRdrand</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>no-rdrand</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableCertificateTransparency</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>no-ct</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableNextProtocolNegotiationExtension</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>no-nextprotoneg</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableOcspSupport</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>no-ocsp</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.EnableWeakSslCiphers</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>enable-weak-ssl-ciphers</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.EnableMd2</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>enable-md2</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.EnableRc5</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>enable-rc5</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableAssemblerCode</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>no-asm</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+
+
+        <!-- 3rd Priority Options -->
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisablePadlockEngine</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>no-hw-padlock</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisablePosixIo</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>no-posix-io</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableExtensionForIpAddressesAndAsIdentifiers</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>no-rfc3779</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableSrpCiphersuites</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>no-srp</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.EnableDevelopmentFlags</derivationType>
+            <!-- Causes trouble in connection with with-rand-seed=devrandom/cpucommand -->
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>--strict-warnings</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.EnableMemoryDebuggingSupport</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>enable-crypto-mdebug</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableErrorStrings</derivationType>
+            <enabled>false</enabled>
+            <valueTranslation type="Flag">
+                <true>no-err</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
+
+    <!-- Tutorial clear! :P -->
+    </optionsToTest>
+</config>

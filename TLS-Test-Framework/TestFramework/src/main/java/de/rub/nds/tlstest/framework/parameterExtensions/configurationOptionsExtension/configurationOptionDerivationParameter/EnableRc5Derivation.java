@@ -19,12 +19,12 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 import java.util.LinkedList;
 import java.util.List;
 
-public class DisablePskDerivation extends ConfigurationOptionDerivationParameter {
-    public DisablePskDerivation(){
-        super(ConfigOptionDerivationType.DisablePsk);
+public class EnableRc5Derivation extends ConfigurationOptionDerivationParameter {
+    public EnableRc5Derivation(){
+        super(ConfigOptionDerivationType.EnableRc5);
     }
 
-    public DisablePskDerivation(ConfigurationOptionValue selectedValue) {
+    public EnableRc5Derivation(ConfigurationOptionValue selectedValue) {
         this();
         setSelectedValue(selectedValue);
     }
@@ -32,14 +32,14 @@ public class DisablePskDerivation extends ConfigurationOptionDerivationParameter
     @Override
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new DisablePskDerivation(new ConfigurationOptionValue(false)));
-        parameterValues.add(new DisablePskDerivation(new ConfigurationOptionValue(true)));
+        parameterValues.add(new EnableRc5Derivation(new ConfigurationOptionValue(false)));
+        parameterValues.add(new EnableRc5Derivation(new ConfigurationOptionValue(true)));
 
         return parameterValues;
     }
 
     @Override
     public ConfigurationOptionValue getMaxFeatureValue() {
-        return new ConfigurationOptionValue(false);
+        return new ConfigurationOptionValue(true);
     }
 }

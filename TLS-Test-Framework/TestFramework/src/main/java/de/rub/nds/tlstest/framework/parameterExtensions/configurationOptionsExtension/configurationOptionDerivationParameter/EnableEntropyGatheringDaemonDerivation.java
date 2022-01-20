@@ -19,12 +19,12 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 import java.util.LinkedList;
 import java.util.List;
 
-public class DisablePskDerivation extends ConfigurationOptionDerivationParameter {
-    public DisablePskDerivation(){
-        super(ConfigOptionDerivationType.DisablePsk);
+public class EnableEntropyGatheringDaemonDerivation extends ConfigurationOptionDerivationParameter {
+    public EnableEntropyGatheringDaemonDerivation(){
+        super(ConfigOptionDerivationType.EnableEntropyGatheringDaemon);
     }
 
-    public DisablePskDerivation(ConfigurationOptionValue selectedValue) {
+    public EnableEntropyGatheringDaemonDerivation(ConfigurationOptionValue selectedValue) {
         this();
         setSelectedValue(selectedValue);
     }
@@ -32,14 +32,14 @@ public class DisablePskDerivation extends ConfigurationOptionDerivationParameter
     @Override
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new DisablePskDerivation(new ConfigurationOptionValue(false)));
-        parameterValues.add(new DisablePskDerivation(new ConfigurationOptionValue(true)));
+        parameterValues.add(new EnableEntropyGatheringDaemonDerivation(new ConfigurationOptionValue(false)));
+        parameterValues.add(new EnableEntropyGatheringDaemonDerivation(new ConfigurationOptionValue(true)));
 
         return parameterValues;
     }
 
     @Override
     public ConfigurationOptionValue getMaxFeatureValue() {
-        return new ConfigurationOptionValue(false);
+        return new ConfigurationOptionValue(true);
     }
 }

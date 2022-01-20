@@ -10,9 +10,6 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
-import de.rub.nds.tlstest.framework.model.DerivationManager;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.SeedingMethodDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.*;
 import org.junit.Test;
@@ -36,10 +33,12 @@ public class ConfigurationOptionsConfigTest {
                         "    </dockerConfig>\n" +
                         "    <disableSiteReportConsoleLog>false</disableSiteReportConsoleLog>\n" +
                         "    <withCoverage>true</withCoverage>\n" +
+                        "    <maxRunningContainers>42</maxRunningContainers>\n" +
                         "\n" +
                         "    <optionsToTest>\n" +
                         "        <optionEntry>\n" +
-                        "            <derivationType>ConfigOptionDerivationType.DisablePSK</derivationType>\n" +
+                        "            <derivationType>ConfigOptionDerivationType.DisablePsk</derivationType>\n" +
+                        "            <enabled>true</enabled>\n" +
                         "            <valueTranslation type=\"Flag\">\n" +
                         "                <true>no-psk</true>\n" +
                         "                <false></false>\n" +
@@ -88,10 +87,11 @@ public class ConfigurationOptionsConfigTest {
         assertTrue(config.getDockerLibraryPath().endsWith("Path/to/dockerLib/"));
         assertEquals("127.0.0.42", config.getDockerHostName());
         assertEquals(PortRange.fromString("4433-5433"), config.getDockerPortRange());
+        assertEquals(42, config.getMaxRunningContainers());
 
         // Check flag translation
         {
-            ConfigOptionValueTranslation translation = config.getOptionsToTranslationMap().get(ConfigOptionDerivationType.DisablePSK);
+            ConfigOptionValueTranslation translation = config.getOptionsToTranslationMap().get(ConfigOptionDerivationType.DisablePsk);
             assertNotNull(translation);
             assertTrue(translation instanceof FlagTranslation);
             FlagTranslation flagTranslation = (FlagTranslation) translation;

@@ -10,10 +10,8 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
 import de.rub.nds.tlstest.framework.model.*;
-import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePskDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.SeedingMethodDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.*;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,10 +45,57 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         }
         ConfigOptionDerivationType basicType = (ConfigOptionDerivationType) type;
         switch(basicType) {
-            case DisablePSK:
+            case DisablePsk:
                 return new DisablePskDerivation();
             case SeedingMethod:
                 return new SeedingMethodDerivation();
+            case EnableNistEcOptimizations:
+                return new EnableNistEcOptimizationsDerivation();
+            case DisableSse2:
+                return new DisableSse2Derivation();
+            case DisableBinaryEllipticCurves:
+                return new DisableBinaryEllipticCurvesDerivation();
+            case DisableMultiblock:
+                return new DisableMultiblockDerivation();
+            case EnableCompression:
+                return new EnableCompressionDerivation();
+
+            case DisableAfalgEngine:
+                return new DisableAfalgEngineDerivation();
+            case EnableEntropyGatheringDaemon:
+                return new EnableEntropyGatheringDaemonDerivation();
+            case DisableRdrand:
+                return new DisableRdrandDerivation();
+            case DisableCertificateTransparency:
+                return new DisableCertificateTransparencyDerivation();
+            case DisableNextProtocolNegotiationExtension:
+                return new DisableNextProtocolNegotiationExtensionDerivation();
+            case DisableOcspSupport:
+                return new DisableOcspSupportDerivation();
+            case EnableWeakSslCiphers:
+                return new EnableWeakSslCiphersDerivation();
+            case EnableMd2:
+                return new EnableMd2Derivation();
+            case EnableRc5:
+                return new EnableRc5Derivation();
+            case DisableAssemblerCode:
+                return new DisableAssemblerCodeDerivation();
+
+            case DisablePadlockEngine:
+                return new DisablePadlockEngineDerivation();
+            case DisablePosixIo:
+                return new DisablePosixIoDerivation();
+            case DisableExtensionForIpAddressesAndAsIdentifiers:
+                return new DisableExtensionForIpAddressesAndAsIdentifiersDerivation();
+            case DisableSrpCiphersuites:
+                return new DisableSrpCiphersuitesDerivation();
+            case EnableDevelopmentFlags:
+                return new EnableDevelopmentFlagsDerivation();
+            case EnableMemoryDebuggingSupport:
+                return new EnableMemoryDebuggingSupportDerivation();
+            case DisableErrorStrings:
+                return new DisableErrorStringsDerivation();
+
             default:
                 LOGGER.error("Derivation Type {} not implemented", type);
                 throw new UnsupportedOperationException("Derivation Type not implemented");

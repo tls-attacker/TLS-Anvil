@@ -38,6 +38,8 @@ public abstract class ConfigurationOptionsBuildManager {
 
     public abstract TestSiteReport getMaximalFeatureSiteReport();
 
+    public abstract void onTestFinished(Set<ConfigurationOptionDerivationParameter> optionSet);
+
     /**
      * Method is called before the ConfigurationOptionsExtension is unloaded.
      */

@@ -19,6 +19,7 @@ public class DockerContainerInfo {
     private String containerId;
     private DockerContainerState containerState;
 
+
     public DockerContainerInfo(String dockerTag, String containerId, DockerContainerState containerState){
         this.dockerTag = dockerTag;
         this.containerId = containerId;

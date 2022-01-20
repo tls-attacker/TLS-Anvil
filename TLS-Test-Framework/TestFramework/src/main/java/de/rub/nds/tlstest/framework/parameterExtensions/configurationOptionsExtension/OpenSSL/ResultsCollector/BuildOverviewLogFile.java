@@ -25,6 +25,8 @@ public class BuildOverviewLogFile extends LogFile {
 
     private Set<String> loggedDockerTags;
 
+    private Integer number;
+
     public BuildOverviewLogFile(Path folderDirectoryPath, String fileName, ConfigurationOptionsConfig config){
         super(folderDirectoryPath, fileName);
         this.config = config;
@@ -38,12 +40,14 @@ public class BuildOverviewLogFile extends LogFile {
         Collections.sort(optionHeaders, Comparator.comparing(Enum::name));
 
         //String header = "Docker Tag,Build Time,";
+        header.add("No");
         header.add("Docker Tag");
         header.add("Build Time (in sec)");
         for(ConfigOptionDerivationType optionHeaderEntry : optionHeaders){
             header.add(optionHeaderEntry.name());
         }
         log(String.join(",", header)+"\n");
+        number = 1;
     }
 
     private String getTimeStringFromMs(long timeInMs){
@@ -62,6 +66,8 @@ public class BuildOverviewLogFile extends LogFile {
         }
 
         List<String> line = new LinkedList<>();
+        line.add(number.toString());
+        number += 1;
         line.add(dockerTag);
         if(buildTime >= 0){
             line.add(getTimeStringFromMs(buildTime));

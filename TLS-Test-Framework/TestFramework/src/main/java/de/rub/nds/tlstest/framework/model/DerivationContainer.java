@@ -131,6 +131,19 @@ public class DerivationContainer {
         }
     }
 
+    /**
+     * This method is called after the respective using this container is executed. Every derivation parameter can
+     * react, so that they can make final configurations. This is only necessary in rare cases (e.g. for configuration
+     * options support).
+     */
+    public void finalizeContainer(){
+        for (DerivationParameter listed : derivations) {
+            if(underlyingScope.isAutoApplyToConfig(listed.getType())) {
+                listed.onContainerFinalized(this);
+            }
+        }
+    }
+
     public Map<String, Object> getSharedData(){
         return sharedData;
     }

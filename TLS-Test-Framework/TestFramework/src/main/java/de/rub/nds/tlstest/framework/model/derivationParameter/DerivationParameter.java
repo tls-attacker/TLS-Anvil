@@ -96,6 +96,9 @@ public abstract class DerivationParameter<T> {
     public void configureParameterDependencies(Config config, TestContext context, DerivationContainer container){
     }
 
+    public void onContainerFinalized(DerivationContainer container){
+    }
+
     public final T getSelectedValue() {
         return selectedValue;
     }

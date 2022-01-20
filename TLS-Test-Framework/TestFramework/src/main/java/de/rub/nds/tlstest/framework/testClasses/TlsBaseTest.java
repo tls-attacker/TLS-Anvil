@@ -29,6 +29,7 @@ import de.rub.nds.tlstest.framework.model.DerivationScope;
 import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -77,6 +78,13 @@ public abstract class TlsBaseTest {
         if(context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS13_PSK_DHE) == TestResult.TRUE &&
                 context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS13_PSK) == TestResult.FALSE) {
             config.setPSKKeyExchangeModes(Arrays.asList(PskKeyExchangeMode.PSK_DHE_KE));
+        }
+    }
+
+    @AfterEach
+    public void tearDown(){
+        if(derivationContainer != null){
+            derivationContainer.finalizeContainer();
         }
     }
     

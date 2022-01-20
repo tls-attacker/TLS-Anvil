@@ -47,6 +47,7 @@ public class ConfigurationOptionsConfig {
 
     private boolean siteReportConsoleLogDisabled;
     private boolean withCoverage;
+    private int maxRunningContainers; // default 16
 
     // Docker Config (not required, but necessary for build managers that work with docker)
     private boolean dockerConfigPresent;
@@ -115,6 +116,10 @@ public class ConfigurationOptionsConfig {
         return new HashSet<>(optionsToTranslation.keySet());
     }
 
+    public int getMaxRunningContainers() {
+        return maxRunningContainers;
+    }
+
     private void parseConfigFile(InputStream inputStream){
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -171,6 +176,14 @@ public class ConfigurationOptionsConfig {
                 withCoverage = false;
             }
 
+            Element maxRunningContainersElement =  XmlParseUtils.findElement(rootElement, "maxRunningContainers", false);
+            if(maxRunningContainersElement != null){
+                maxRunningContainers = Integer.parseInt(maxRunningContainersElement.getTextContent());
+            }
+            else{
+                maxRunningContainers = 16; // default
+            }
+
             // Parse options-translation list
             NodeList list = optionsToTest.getElementsByTagName("optionEntry");
 
@@ -179,8 +192,18 @@ public class ConfigurationOptionsConfig {
                 Node optionEntryNode = list.item(optionEntryIdx);
 
                 if (optionEntryNode.getNodeType() == Node.ELEMENT_NODE) {
-
                     Element optionEntry = (Element) optionEntryNode;
+
+                    // Disable the option if enabled is set to false. Options are enabled by default (i.e. if the element is not given)
+                    Element enabledElement =  XmlParseUtils.findElement(optionEntry, "enabled", false);
+                    if(enabledElement != null){
+                        boolean optionEnabled = Boolean.parseBoolean(enabledElement.getTextContent());
+                        if(!optionEnabled){
+                            continue;
+                        }
+                    }
+
+                    
 
                     // Parse derivation type
                     ConfigOptionDerivationType derivationType = derivationTypeFromString(XmlParseUtils.findElement(optionEntry, "derivationType", true).getTextContent());

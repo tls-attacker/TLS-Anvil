@@ -25,9 +25,42 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
  * 5) If required: Add constraints regarding your new option to the required tests in your testsuite.
  */
 public enum ConfigOptionDerivationType implements DerivationType {
-    DisablePSK,
-    SeedingMethod;
-    //Todo: MoreOptions;
+    // 1st Priority
+    SeedingMethod,
+    EnableNistEcOptimizations,
+    DisableSse2,
+
+    DisableBinaryEllipticCurves,
+    DisableMultiblock,
+    DisablePsk,
+
+    EnableCompression,
+
+    // 2nd Priority
+    DisableAfalgEngine,
+    EnableEntropyGatheringDaemon,
+    DisableRdrand,
+
+    DisableCertificateTransparency,
+    DisableNextProtocolNegotiationExtension,
+    DisableOcspSupport,
+
+    EnableWeakSslCiphers,
+    EnableMd2,
+    EnableRc5,
+
+    DisableAssemblerCode,
+
+    // 3rd Priority
+    DisablePadlockEngine,
+    DisablePosixIo,
+
+    DisableExtensionForIpAddressesAndAsIdentifiers,
+    DisableSrpCiphersuites,
+
+    EnableDevelopmentFlags, // OpenSSL: --strict-warnings
+    EnableMemoryDebuggingSupport,
+    DisableErrorStrings;
 
     public boolean isBitmaskDerivation() {
         return false;

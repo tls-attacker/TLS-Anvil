@@ -285,6 +285,7 @@ public class OpenSSLDockerHelper {
                 .withDnsSearch(new ArrayList<String>())
                 .withBlkioWeightDevice(new ArrayList<>())
                 .withDevices(new ArrayList<Device>())
+                .withExtraHosts("host.docker.internal:host-gateway")
                 .withBinds(volumeBindings);
 
         List<ExposedPort> exposedPorts = new LinkedList<>();

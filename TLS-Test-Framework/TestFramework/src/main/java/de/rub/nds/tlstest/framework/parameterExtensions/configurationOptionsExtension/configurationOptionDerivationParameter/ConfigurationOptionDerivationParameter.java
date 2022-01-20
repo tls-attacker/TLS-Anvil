@@ -28,6 +28,19 @@ public abstract class ConfigurationOptionDerivationParameter extends DerivationP
         super(type, ConfigurationOptionValue.class);
     }
 
+    private Set<ConfigurationOptionDerivationParameter> extractConfigOptionDerivationSetFromContainer(DerivationContainer container){
+        Set<ConfigurationOptionDerivationParameter> configOptionDerivations = new HashSet<>();
+        for(DerivationParameter derivation : container.getDerivationList()){
+            if(derivation instanceof ConfigurationOptionDerivationParameter){
+                ConfigurationOptionDerivationParameter configOptionDerivation = (ConfigurationOptionDerivationParameter) derivation;
+                configOptionDerivations.add(configOptionDerivation);
+            }
+        }
+
+        return configOptionDerivations;
+
+    }
+
     @Override
     public void configureParameterDependencies(Config config, TestContext context, DerivationContainer container){
         // Use a shared flag to check if the ConfigurationOptions were already configured. They only need to be
@@ -46,13 +59,7 @@ public abstract class ConfigurationOptionDerivationParameter extends DerivationP
             }
         }
 
-        Set<ConfigurationOptionDerivationParameter> configOptionDerivations = new HashSet<>();
-        for(DerivationParameter derivation : container.getDerivationList()){
-            if(derivation instanceof ConfigurationOptionDerivationParameter){
-                ConfigurationOptionDerivationParameter configOptionDerivation = (ConfigurationOptionDerivationParameter) derivation;
-                configOptionDerivations.add(configOptionDerivation);
-            }
-        }
+        Set<ConfigurationOptionDerivationParameter> configOptionDerivations = extractConfigOptionDerivationSetFromContainer(container);
 
         TestSiteReport report = ConfigurationOptionsDerivationManager.getInstance()
                 .getConfigurationOptionsBuildManager()
@@ -61,6 +68,30 @@ public abstract class ConfigurationOptionDerivationParameter extends DerivationP
         container.setAssociatedSiteReport(report);
 
         sharedData.put(SETUP_DONE, Boolean.TRUE);
+    }
+
+    @Override
+    public void onContainerFinalized(DerivationContainer container) {
+        super.onContainerFinalized(container);
+
+        final String FINALIZATION_DONE = "CONFIGURATION_OPTION_FINALIZATION_DONE";
+        Map<String, Object> sharedData = container.getSharedData();
+        if(sharedData.containsKey(FINALIZATION_DONE)){
+            if(!(sharedData.get(FINALIZATION_DONE) instanceof Boolean)){
+                throw new IllegalStateException(
+                        String.format("The shared data of the DerivationContainer must not contain the key '%s' of" +
+                                "non Boolean data type. Stop messing with it :P", FINALIZATION_DONE));
+            }
+            Boolean setupAlreadyDone = (Boolean) sharedData.get(FINALIZATION_DONE);
+            if(setupAlreadyDone){
+                return;
+            }
+        }
+
+        Set<ConfigurationOptionDerivationParameter> configOptionDerivations = extractConfigOptionDerivationSetFromContainer(container);
+        ConfigurationOptionsDerivationManager.getInstance().getConfigurationOptionsBuildManager().onTestFinished(configOptionDerivations);
+
+        container.getSharedData().put(FINALIZATION_DONE, Boolean.TRUE);
     }
 
     @Override

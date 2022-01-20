@@ -63,25 +63,28 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
 
     private Path dockerfileMinPath;
 
-
-
     private ConfigurationOptionsConfig configOptionsConfig;
 
     private final String CCACHE_VOLUME_NAME = "ccache-cache";
-
     private final List<String> TRIGGER_COMMAND_PREFIX = Arrays.asList("curl");
-
     private final String TLS_SERVER_HOST;
+
 
     private OpenSSLDockerHelper dockerHelper;
 
     private String /*DockerTag*/ maximalFeatureContainerDockerTag;
+
+    private Map<String, Integer> dockerTagToAccessCount;
+    private Map<String, Integer> dockerTagToCurrentUseCount;
+
 
     public OpenSSLBuildManager(ConfigurationOptionsConfig configurationOptionsConfig){
         configOptionsConfig = configurationOptionsConfig;
         usedPorts = new HashSet<>();
         dockerTagToSiteReport = new HashMap<>();
         dockerTagToContainerInfo = new HashMap<>();
+        dockerTagToAccessCount = new HashMap<>();
+        dockerTagToCurrentUseCount = new HashMap<>();
         TLS_SERVER_HOST = configurationOptionsConfig.getDockerClientDestinationHostName();
     }
 
@@ -118,6 +121,10 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         }
         // Used to override host and port in the next execution of get createConfig
         TestContext.getInstance().getConfig().clearConfigCache();
+
+        // Assure that the max implementation is never paused
+        startContainerUsage(maximalFeatureContainerDockerTag);
+
     }
 
     @Override
@@ -194,8 +201,20 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         configOpenSSLDefaultConnection();
     }
 
+    /**
+     * Configures the config using the passed optionSet to delegate the connection to an implementation built with
+     * the respective option set. Calling this function blocks the respective docker container, so it can't be paused.
+     * To unblock it the onTestFinished function is called at the end of each test.
+     *
+     * @param config - the specified Config
+     * @param context - the test context
+     * @param optionSet - the set of configurationOptionDerivationParameters that contain selected values.
+     * @return
+     */
     @Override
     public synchronized TestSiteReport configureOptionSetAndGetSiteReport(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet) {
+        String dockerTag = getDockerTagFromOptionSet(optionSet);
+        startContainerUsage(dockerTag);
         String buildTag =  provideOpenSSLImplementation(optionSet);
         DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(buildTag);
         TestSiteReport report = getSiteReport(buildTag);
@@ -219,54 +238,43 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         return report;
     }
 
-    /*@Override
-    public synchronized TestSiteReport createSiteReportFromOptionSet(Set<ConfigurationOptionDerivationParameter> optionSet) {
-        List<String> cliOptions = createConfigOptionCliList(optionSet);
-        String dockerTag = dockerHelper.computeDockerTag(cliOptions, configOptionsConfig.getTlsLibraryName(), configOptionsConfig.getTlsVersionName());
-        String dockerNameWithTag = dockerHelper.getOpenSSLBuildImageNameAndTag(dockerTag);
-        if(!dockerNameWithTagExists(dockerNameWithTag)){
-            dockerHelper.buildOpenSSLImageWithFactory(cliOptions, dockerTag, dockerfileMinPath, configOptionsConfig.getTlsVersionName(), resultsCollector);
-            existingDockerImageNameWithTags.add(dockerNameWithTag);
-        }
-        TestSiteReport report;
-        if(!dockerTagToSiteReport.containsKey(dockerTag)){
-            report = createSiteReport(dockerTag);
-            dockerTagToSiteReport.put(dockerTag, report);
-        }
-        else{
-            report = dockerTagToSiteReport.get(dockerTag);
-        }
-        return report;
-    }*/
-
     @Override
-    public synchronized void onShutdown(){
-        resultsCollector.finalizeResults();
+    public synchronized void onTestFinished(Set<ConfigurationOptionDerivationParameter> optionSet){
+        String dockerTag = getDockerTagFromOptionSet(optionSet);
+        endContainerUsage(dockerTag);
+    }
 
-        // Trigger the shutdown process of all created containers
-        LOGGER.info("Shutdown and clear all containers...");
-        for (Map.Entry<String, DockerContainerInfo> entry : dockerTagToContainerInfo.entrySet()) {
-            if(entry.getValue().getContainerState() == DockerContainerState.PAUSED){
-                dockerHelper.unpauseContainer(entry.getValue());
+    private synchronized void shutdownContainerSet(Set<String> dockerTagsToShutdown){
+        for (String entry : dockerTagsToShutdown) {
+            DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(entry);
+            if(containerInfo == null){
+                continue;
+            }
+            if(containerInfo.getContainerState() == DockerContainerState.NOT_RUNNING){
+                continue;
+            }
+
+            if(containerInfo.getContainerState() == DockerContainerState.PAUSED){
+                dockerHelper.unpauseContainer(containerInfo);
             }
 
             List<String> shutdownHttpRequest;
-            if(entry.getValue() instanceof DockerClientContainerInfo){
-                DockerClientContainerInfo containerInfo = (DockerClientContainerInfo) entry.getValue();
-                shutdownHttpRequest = Arrays.asList(String.format("http://%s:%d/shutdown", containerInfo.getDockerHost(), containerInfo.getManagerPort()));
+            if(containerInfo instanceof DockerClientContainerInfo){
+                DockerClientContainerInfo clientContainerInfo = (DockerClientContainerInfo) containerInfo;
+                shutdownHttpRequest = Arrays.asList(String.format("http://%s:%d/shutdown", clientContainerInfo.getDockerHost(), clientContainerInfo.getManagerPort()));
             }
-            else if(entry.getValue() instanceof DockerServerContainerInfo){
-                DockerServerContainerInfo containerInfo = (DockerServerContainerInfo) entry.getValue();
-                shutdownHttpRequest = Arrays.asList(String.format("http://%s:%d/shutdown", containerInfo.getDockerHost(), containerInfo.getManagerPort()));
+            else if(containerInfo instanceof DockerServerContainerInfo){
+                DockerServerContainerInfo serverContainerInfo = (DockerServerContainerInfo) containerInfo;
+                shutdownHttpRequest = Arrays.asList(String.format("http://%s:%d/shutdown", serverContainerInfo.getDockerHost(), serverContainerInfo.getManagerPort()));
             }
             else {
-                dockerHelper.stopContainer(entry.getValue());
+                // Should not happen
+                dockerHelper.stopContainer(containerInfo);
                 continue;
             }
 
             List<String> shutdownCommand = Stream.concat(TRIGGER_COMMAND_PREFIX.stream(), shutdownHttpRequest.stream())
                     .collect(Collectors.toList());
-
 
             try {
                 ProcessBuilder processBuilder = new ProcessBuilder(shutdownCommand);
@@ -277,12 +285,13 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         }
 
         // Wait for containers to shutdown properly and remove them afterwards
-        for (Map.Entry<String, DockerContainerInfo> entry : dockerTagToContainerInfo.entrySet()) {
+        for (String entry : dockerTagsToShutdown) {
+            DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(entry);
             // Wait for container to finish
             boolean isRunning;
             do{
                 try {
-                    InspectContainerResponse containerResp = dockerClient.inspectContainerCmd(entry.getValue().getContainerId()).exec();
+                    InspectContainerResponse containerResp = dockerClient.inspectContainerCmd(containerInfo.getContainerId()).exec();
                     isRunning = containerResp.getState().getRunning();
                     if(isRunning){
                         Thread.sleep(1000);
@@ -296,8 +305,56 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
             while(isRunning);
 
             // Remove the container afterwards
-            dockerHelper.removeContainer(entry.getValue());
+            dockerHelper.removeContainer(containerInfo);
         }
+
+    }
+
+    @Override
+    public synchronized void onShutdown(){
+        resultsCollector.finalizeResults();
+
+        Set<String> runningContainers = new HashSet<>();
+        List<Set<String>> pausedContainersSubsets = new LinkedList<>();
+        pausedContainersSubsets.add(new HashSet<>());
+        int currentPausedContainersSetsIdx = 0;
+        int currentSubsetSize = 0;
+        for(Map.Entry<String, DockerContainerInfo> entry : dockerTagToContainerInfo.entrySet()){
+            if (entry.getValue().getContainerState() == DockerContainerState.RUNNING) {
+                runningContainers.add(entry.getKey());
+            }
+            // Split the paused containers in subsets of MAX_RUNNING_DOCKER_CONTAINERS containers which are
+            // shutdown simultaneously
+            else if(entry.getValue().getContainerState() == DockerContainerState.PAUSED){
+                if(currentSubsetSize >= configOptionsConfig.getMaxRunningContainers()){
+                    pausedContainersSubsets.add(new HashSet<>());
+                    currentPausedContainersSetsIdx += 1;
+                    currentSubsetSize = 0;
+                }
+                pausedContainersSubsets.get(currentPausedContainersSetsIdx).add(entry.getKey());
+                currentSubsetSize += 1;
+
+            }
+        }
+
+        // Shutdown running containers first to free resources
+        LOGGER.info("Shutdown and clear all containers. This may take a while...");
+        shutdownContainerSet(runningContainers);
+
+        // Shutdown the remaining (paused) containers
+        for(Set<String> pausedSubset : pausedContainersSubsets){
+            shutdownContainerSet(pausedSubset);
+        }
+
+        // Pause all containers
+        for (Map.Entry<String, DockerContainerInfo> entry : dockerTagToContainerInfo.entrySet()) {
+            if (entry.getValue().getContainerState() == DockerContainerState.RUNNING) {
+                dockerHelper.unpauseContainer(entry.getValue());
+            }
+        }
+
+        // Trigger the shutdown process of all created containers
+        LOGGER.info("Shutdown and clear all containers...");
     }
 
     private Set<ConfigurationOptionDerivationParameter> getMaxFeatureOptionSet(){
@@ -332,8 +389,55 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         return report;
     }
 
+    private String getDockerTagFromOptionSet(Set<ConfigurationOptionDerivationParameter> optionSet){
+        List<String> cliOptions = createConfigOptionCliList(optionSet);
+        String dockerTag = dockerHelper.computeDockerTag(cliOptions, configOptionsConfig.getTlsLibraryName(), configOptionsConfig.getTlsVersionName());
+        return dockerTag;
+    }
+
+    private synchronized void startContainerUsage(String dockerTag){
+        if(!dockerTagToCurrentUseCount.containsKey(dockerTag)){
+            dockerTagToCurrentUseCount.put(dockerTag, 0);
+        }
+        if(dockerTagToContainerInfo.containsKey(dockerTag)){
+            DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(dockerTag);
+            if(containerInfo.getContainerState() == DockerContainerState.PAUSED){
+                dockerHelper.unpauseContainer(containerInfo);
+            }
+        }
+
+
+        Integer currentInUseCount = dockerTagToCurrentUseCount.get(dockerTag);
+        currentInUseCount += 1;
+        dockerTagToCurrentUseCount.put(dockerTag, currentInUseCount);
+        
+        pauseRarelyUsedContainers();
+    }
+
+    private synchronized void endContainerUsage(String dockerTag){
+        Integer currentInUseCount = dockerTagToCurrentUseCount.get(dockerTag);
+        currentInUseCount -= 1;
+
+        if(currentInUseCount < 0){
+            LOGGER.error(String.format("Use count of docker tag '%s' is smaller than 0. This should not happen.", dockerTag));
+            currentInUseCount = 0;
+        }
+
+        dockerTagToCurrentUseCount.put(dockerTag, currentInUseCount);
+    }
+
+    private synchronized boolean isContainerInUse(String dockerTag){
+        if(!dockerTagToCurrentUseCount.containsKey(dockerTag)){
+            return false;
+        }
+        else{
+            return (dockerTagToCurrentUseCount.get(dockerTag) > 0);
+        }
+    }
+
     /**
-     * Starts a docker container with the given options
+     * Starts a docker container with the given options. Calling this method increases the use count for the respective
+     * docker tag by one.
      *
      * @param optionSet - the options set to use
      * @returns the dockerTag for the created implementation. The tag can be used to find the created container and the TestSiteReport.
@@ -377,9 +481,51 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
             dockerHelper.startContainer(providedContainer);
             resultsCollector.logOpenSSLContainer(providedContainer);
             dockerTagToContainerInfo.put(dockerTag, providedContainer);
+            dockerTagToAccessCount.put(dockerTag, 0);
         }
+
+    
+
         resultsCollector.logBuildAccess(optionSet, dockerTag);
+        dockerTagToAccessCount.put(dockerTag, dockerTagToAccessCount.get(dockerTag)+1);
         return dockerTag;
+    }
+
+
+    private synchronized void pauseRarelyUsedContainers(){
+        // Count running containers
+        Set<String> runningUnusedContainerDockerTags = new HashSet<>();
+        int currentlyUsedCount = 0;
+        for (Map.Entry<String, DockerContainerInfo> entry : dockerTagToContainerInfo.entrySet()) {
+            // Currently used containers are ignored
+            if(isContainerInUse(entry.getKey())){
+                currentlyUsedCount += 1;
+                continue;
+            }
+
+            if(entry.getValue().getContainerState() == DockerContainerState.RUNNING){
+                runningUnusedContainerDockerTags.add(entry.getKey());
+            }
+        }
+        if(runningUnusedContainerDockerTags.size() <= configOptionsConfig.getMaxRunningContainers() - currentlyUsedCount){
+            return;
+        }
+
+        List<Map.Entry<String, Integer>> runningContainersAccessCounts = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : dockerTagToAccessCount.entrySet()) {
+            if(runningUnusedContainerDockerTags.contains(entry.getKey())){
+                runningContainersAccessCounts.add(entry);
+            }
+        }
+
+        // Pause the running containers with the lowest access count
+        runningContainersAccessCounts.sort(Map.Entry.comparingByValue());
+        int freeSlotsCount =Math.max(0,configOptionsConfig.getMaxRunningContainers() - currentlyUsedCount);
+        for(int idx = 0; idx < runningContainersAccessCounts.size() - freeSlotsCount; idx++){
+            DockerContainerInfo containerToPause = dockerTagToContainerInfo.get(runningContainersAccessCounts.get(idx).getKey());
+            dockerHelper.pauseContainer(containerToPause);
+        }
+
     }
 
     public synchronized TestSiteReport createSiteReport(String dockerTag){
@@ -397,33 +543,22 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
     }
 
     public synchronized TestSiteReport createServerSiteReport(String dockerTag){
+        startContainerUsage(dockerTag);
         DockerServerContainerInfo serverContainerInfo = (DockerServerContainerInfo) dockerTagToContainerInfo.get(dockerTag);
-        //DockerServerContainerInfo container = dockerHelper.createDockerServer(dockerTag, configOptionsConfig.getDockerHostName(), occupyNextPort(), occupyNextPort());
-        //dockerHelper.startContainer(container);
-
         TestSiteReport report = TestSiteReportFactory.createServerSiteReport(configOptionsConfig.getDockerHostName(), serverContainerInfo.getTlsServerPort(), configOptionsConfig.isSiteReportConsoleLogDisabled());
-
-        // Remove container
-        //dockerHelper.removeContainer(container);
-        //freeOccupiedPort(container.getTlsServerPort());
-        //freeOccupiedPort(container.getManagerPort());
+        endContainerUsage(dockerTag);
 
         return report;
     }
 
     public synchronized TestSiteReport createClientSiteReport(String dockerTag){
-        //Integer port = occupyNextPort();
-        //DockerClientContainerInfo container = dockerHelper.createDockerClient(dockerTag,configOptionsConfig.getDockerHostName(), port, TLS_SERVER_HOST, TestContext.getInstance().getConfig().getTestClientDelegate().getPort());
-        //dockerHelper.startContainer(container);
+        startContainerUsage(dockerTag);
         DockerClientContainerInfo clientContainerInfo = (DockerClientContainerInfo) dockerTagToContainerInfo.get(dockerTag);
 
         Config config = TestContext.getInstance().getConfig().createConfig();
         InboundConnectionWithCustomTriggerArgs ibConnectionWCTA = createTriggerConnectionForContainer(clientContainerInfo, config);
         TestSiteReport report =  TestSiteReportFactory.createClientSiteReport(TestContext.getInstance().getConfig(), ibConnectionWCTA, configOptionsConfig.isSiteReportConsoleLogDisabled());
-
-        // Remove container
-        //dockerHelper.removeContainer(container);
-        //freeOccupiedPort(port);
+        endContainerUsage(dockerTag);
 
         return report;
     }

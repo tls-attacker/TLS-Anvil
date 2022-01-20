@@ -19,12 +19,12 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 import java.util.LinkedList;
 import java.util.List;
 
-public class DisablePskDerivation extends ConfigurationOptionDerivationParameter {
-    public DisablePskDerivation(){
-        super(ConfigOptionDerivationType.DisablePsk);
+public class DisableSrpCiphersuitesDerivation extends ConfigurationOptionDerivationParameter {
+    public DisableSrpCiphersuitesDerivation(){
+        super(ConfigOptionDerivationType.DisableSrpCiphersuites);
     }
 
-    public DisablePskDerivation(ConfigurationOptionValue selectedValue) {
+    public DisableSrpCiphersuitesDerivation(ConfigurationOptionValue selectedValue) {
         this();
         setSelectedValue(selectedValue);
     }
@@ -32,8 +32,8 @@ public class DisablePskDerivation extends ConfigurationOptionDerivationParameter
     @Override
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new DisablePskDerivation(new ConfigurationOptionValue(false)));
-        parameterValues.add(new DisablePskDerivation(new ConfigurationOptionValue(true)));
+        parameterValues.add(new DisableSrpCiphersuitesDerivation(new ConfigurationOptionValue(false)));
+        parameterValues.add(new DisableSrpCiphersuitesDerivation(new ConfigurationOptionValue(true)));
 
         return parameterValues;
     }

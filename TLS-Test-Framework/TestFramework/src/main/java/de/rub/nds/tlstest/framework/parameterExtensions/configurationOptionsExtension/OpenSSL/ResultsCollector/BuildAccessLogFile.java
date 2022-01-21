@@ -13,6 +13,9 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import java.nio.file.Path;
 import java.util.*;
 
+/**
+ * LogFile to count how often  single library builds (identified by docker tags) are used by all ran tests.
+ */
 public class BuildAccessLogFile extends LogFile{
     Map<String, Integer> dockerTagToAccessCounter;
 

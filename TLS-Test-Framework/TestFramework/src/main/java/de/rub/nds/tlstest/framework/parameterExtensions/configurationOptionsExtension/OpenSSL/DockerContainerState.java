@@ -10,6 +10,9 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL;
 
+/**
+ * Represents a docker container state.
+ */
 public enum DockerContainerState{
     NOT_RUNNING,
     PAUSED,

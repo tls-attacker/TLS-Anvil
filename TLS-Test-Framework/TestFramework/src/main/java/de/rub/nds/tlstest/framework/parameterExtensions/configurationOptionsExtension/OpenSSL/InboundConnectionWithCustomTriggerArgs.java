@@ -14,6 +14,11 @@ import de.rub.nds.tlsattacker.core.connection.InboundConnection;
 
 import java.util.List;
 
+/**
+ * An Inbound connection that additionally stores trigger arguments to trigger the client the connection is delegated
+ * to. The trigger args can be used by the used trigger script. This is (currently) necessary, because the trigger
+ * script is in a single global variable and can't be chosen individually.
+ */
 public class InboundConnectionWithCustomTriggerArgs extends InboundConnection {
     List<String> triggerArgs;
 

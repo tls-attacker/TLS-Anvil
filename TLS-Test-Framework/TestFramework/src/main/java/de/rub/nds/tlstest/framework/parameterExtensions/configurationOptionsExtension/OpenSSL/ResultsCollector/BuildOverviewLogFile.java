@@ -19,6 +19,9 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * LogFile to give an overview of all used builds including build time and configuration options.
+ */
 public class BuildOverviewLogFile extends LogFile {
     private ConfigurationOptionsConfig config;
     private List<ConfigOptionDerivationType> optionHeaders;

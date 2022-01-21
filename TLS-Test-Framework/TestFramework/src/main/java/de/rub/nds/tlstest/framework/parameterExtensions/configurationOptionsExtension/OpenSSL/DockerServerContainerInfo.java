@@ -10,6 +10,12 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL;
 
+/**
+ * Info of a DockerContainer that runs a tls server for testing purposes.
+ * The dockerHost is the host address the docker containers ports are bound to.
+ * The tlsServerPort is the host's port on which the tls server is available.
+ * The managerPort is the host's port on which the docker container's http server listens for the /shutdown command.
+ */
 public class DockerServerContainerInfo extends DockerContainerInfo{
     private String dockerHost;
     private Integer tlsServerPort;

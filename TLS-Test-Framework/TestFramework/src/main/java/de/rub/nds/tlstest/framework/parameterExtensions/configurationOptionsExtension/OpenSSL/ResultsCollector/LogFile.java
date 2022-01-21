@@ -23,9 +23,12 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import java.io.*;
 import java.nio.file.Path;
 
+/**
+ * Using LogFile a new file for logging can be created. The file can be appended using the 'log' function. Additionally
+ * a log4j2 pattern for logging can be defined (see https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout).
+ * log4j2 is used for logging.
+ */
 public class LogFile {
-    protected Path path;
-    protected String fileName;
     protected Logger logger;
 
     private void generateLogger(String path, String pattern) {
@@ -67,7 +70,7 @@ public class LogFile {
     }
 
     public LogFile(Path folderDirectoryPath, String fileName, String logPattern){
-        path = folderDirectoryPath.resolve(fileName);
+        Path path = folderDirectoryPath.resolve(fileName);
         File logFile = path.toFile();
         if(logFile.exists()){
             logFile.delete();

@@ -17,6 +17,10 @@ import org.w3c.dom.NodeList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Translation for an option with a single value, e.g. 'fruit=apple'. In this example 'fruit' is the identifier and 'apple'
+ * a possible value. All values that can appear must be covered.
+ */
 public class SingleValueOptionTranslation extends ConfigOptionValueTranslation{
     private String identifier;
     private Map<String, String> valueTranslationMap;

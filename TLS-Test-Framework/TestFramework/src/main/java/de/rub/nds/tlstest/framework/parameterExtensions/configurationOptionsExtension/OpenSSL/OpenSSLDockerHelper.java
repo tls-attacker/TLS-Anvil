@@ -15,7 +15,6 @@ import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.*;
-import com.github.dockerjava.core.command.LogContainerResultCallback;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.ResultsCollector.OpenSSLConfigOptionsResultsCollector;
 import de.rub.nds.tlstest.framework.utils.Utils;
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +28,7 @@ import java.util.*;
 import java.util.function.Predicate;
 
 /**
- * This class provides various static helper functions that are used to build OpenSSL docker images
+ * This class provides various helper functions that are used to build OpenSSL docker images
  * and manage containers.
  */
 public class OpenSSLDockerHelper {
@@ -360,25 +359,6 @@ public class OpenSSLDockerHelper {
         dockerClient.removeContainerCmd(containerInfo.getContainerId()).withForce(true).exec();
         containerInfo.updateContainerState(DockerContainerState.INVALID);
     }
-
-    // For Debugging
-    public void printContainerLogDebug(String containerId){
-        List<String> logs = new ArrayList<>();
-        System.out.println(String.format("===== Output of Docker Container (id = %s) =====", containerId));
-        try {
-            dockerClient.logContainerCmd(containerId).withStdOut(true).
-                    withStdErr(true).withFollowStream(true).exec(new LogContainerResultCallback() {
-                @Override
-                public void onNext(Frame item) {
-                    System.out.print(new String(item.getPayload()));
-                }
-            }).awaitCompletion();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println("===== End: Output of Docker Container =====");
-    }
-
 
     private Optional<Container> containerByName(String name){
         final String cName;

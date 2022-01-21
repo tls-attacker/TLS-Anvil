@@ -19,6 +19,9 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Used to log the output of a docker container.
+ */
 public class DockerContainerLogFile extends LogFile{
     private DockerClient dockerClient;
 

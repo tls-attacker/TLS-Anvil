@@ -37,6 +37,8 @@ import java.io.IOException;
  * Contains all configuration data that is contained in the configuration option XML config file. These data are used
  * to specify which TLS library is built and how. Additionally, the set of used ConfigOptionDerivationParameter%s
  * is specified and how to translate them to library specific configurations (e.g. OpenSSL cli parameters).
+ *
+ * Check out the exampleConfig.xml file in examples/ for usage instructions.
  */
 public class ConfigurationOptionsConfig {
 
@@ -131,120 +133,113 @@ public class ConfigurationOptionsConfig {
 
             Element rootElement = doc.getDocumentElement();
 
-            // Parse basic configurations
-            tlsLibraryName = XmlParseUtils.findElement(rootElement, "tlsLibraryName", true).getTextContent();
-            tlsVersionName = XmlParseUtils.findElement(rootElement, "tlsVersionName", true).getTextContent();
+            parseAndConfigureTLSLibraryName(rootElement);
+            parseAndConfigureTLSVersionName(rootElement);
+            parseAndConfigureDockerConfig(rootElement);
+            parseAndConfigureDisableSiteReportConsoleLog(rootElement);
+            parseAndConfigureWithCoverage(rootElement);
+            parseAndConfigureMaxRunningContainers(rootElement);
+            parseAndConfigureOptionsToTest(rootElement);
+            parseAndConfigureBuildManager(rootElement);
 
-
-            //dockerLibraryPath = Paths.get(rootElement.getElementsByTagName("dockerLibraryPath").item(0).getTextContent());
-
-            Element optionsToTest = (Element) rootElement.getElementsByTagName("optionsToTest").item(0);
-
-            // Parse docker config if present
-            NodeList dockerConfigList = rootElement.getElementsByTagName("dockerConfig");
-            if(dockerConfigList.getLength() > 0){
-                Element dockerConfigElement = (Element) dockerConfigList.item(0);
-                dockerLibraryPath = Paths.get(XmlParseUtils.findElement(dockerConfigElement, "dockerLibraryPath", true).getTextContent());
-                dockerHostName = XmlParseUtils.findElement(dockerConfigElement, "dockerHostName", true).getTextContent();
-                dockerPortRange = PortRange.fromString(XmlParseUtils.findElement(dockerConfigElement, "portRange", true).getTextContent());
-                // Docker client dest is required for client tests
-                Element dockerClientDestElement =  XmlParseUtils.findElement(dockerConfigElement, "dockerClientDestinationHost", (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT));
-                if(dockerClientDestElement != null){
-                    dockerClientDestinationHostName = dockerClientDestElement.getTextContent();
-                }
-                dockerConfigPresent = true;
-            }
-            else{
-                dockerConfigPresent = false;
-            }
-
-            buildManager = getBuildManagerFromString(XmlParseUtils.findElement(rootElement, "buildManager", true).getTextContent());
-
-            Element disableSiteReportConsoleLogElement =  XmlParseUtils.findElement(rootElement, "disableSiteReportConsoleLog", false);
-            if(disableSiteReportConsoleLogElement != null){
-                siteReportConsoleLogDisabled = Boolean.parseBoolean(disableSiteReportConsoleLogElement.getTextContent());
-            }
-            else{
-                siteReportConsoleLogDisabled = false;
-            }
-
-            Element withCoverageElement =  XmlParseUtils.findElement(rootElement, "withCoverage", false);
-            if(withCoverageElement != null){
-                withCoverage = Boolean.parseBoolean(withCoverageElement.getTextContent());
-            }
-            else{
-                withCoverage = false;
-            }
-
-            Element maxRunningContainersElement =  XmlParseUtils.findElement(rootElement, "maxRunningContainers", false);
-            if(maxRunningContainersElement != null){
-                maxRunningContainers = Integer.parseInt(maxRunningContainersElement.getTextContent());
-            }
-            else{
-                maxRunningContainers = 16; // default
-            }
-
-            // Parse options-translation list
-            NodeList list = optionsToTest.getElementsByTagName("optionEntry");
-
-            for (int optionEntryIdx = 0; optionEntryIdx < list.getLength(); optionEntryIdx++) {
-
-                Node optionEntryNode = list.item(optionEntryIdx);
-
-                if (optionEntryNode.getNodeType() == Node.ELEMENT_NODE) {
-                    Element optionEntry = (Element) optionEntryNode;
-
-                    // Disable the option if enabled is set to false. Options are enabled by default (i.e. if the element is not given)
-                    Element enabledElement =  XmlParseUtils.findElement(optionEntry, "enabled", false);
-                    if(enabledElement != null){
-                        boolean optionEnabled = Boolean.parseBoolean(enabledElement.getTextContent());
-                        if(!optionEnabled){
-                            continue;
-                        }
-                    }
-
-                    
-
-                    // Parse derivation type
-                    ConfigOptionDerivationType derivationType = derivationTypeFromString(XmlParseUtils.findElement(optionEntry, "derivationType", true).getTextContent());
-
-                    // Parse value translation
-                    ConfigOptionValueTranslation translation = getTranslationFromElement(XmlParseUtils.findElement(optionEntry, "valueTranslation", true));
-
-                    optionsToTranslation.put(derivationType, translation);
-                }
-            }
         }
         catch(IOException | SAXException | ParserConfigurationException e){
             e.printStackTrace();
             throw new RuntimeException("Parsing failure.");
         }
-        catch(NullPointerException e){
-            e.printStackTrace();
-            throw new RuntimeException("Parsing failure. There are missing entries.");
+    }
+
+    private void parseAndConfigureTLSLibraryName(Element rootElement){
+        tlsLibraryName = XmlParseUtils.findElement(rootElement, "tlsLibraryName", true).getTextContent();
+    }
+
+    private void parseAndConfigureTLSVersionName(Element rootElement){
+        tlsVersionName = XmlParseUtils.findElement(rootElement, "tlsVersionName", true).getTextContent();
+    }
+
+    private void parseAndConfigureBuildManager(Element rootElement){
+        buildManager = getBuildManagerFromString(XmlParseUtils.findElement(rootElement, "buildManager", true).getTextContent());
+    }
+
+    private void parseAndConfigureDisableSiteReportConsoleLog(Element rootElement){
+        Element disableSiteReportConsoleLogElement =  XmlParseUtils.findElement(rootElement, "disableSiteReportConsoleLog", false);
+        if(disableSiteReportConsoleLogElement != null){
+            siteReportConsoleLogDisabled = Boolean.parseBoolean(disableSiteReportConsoleLogElement.getTextContent());
+        }
+        else{
+            siteReportConsoleLogDisabled = false;
         }
     }
 
-    /*private Element findElement(Element root, String tagName, boolean required){
-        NodeList elementList = root.getElementsByTagName(tagName);
-        if(elementList.getLength() < 1){
-            if(required){
-                throw new RuntimeException(String.format("Missing required child '%s' of '%s'.", tagName, root.getTagName()));
-            }
-            else{
-                return null;
-            }
+    private void parseAndConfigureWithCoverage(Element rootElement){
+        Element withCoverageElement =  XmlParseUtils.findElement(rootElement, "withCoverage", false);
+        if(withCoverageElement != null){
+            withCoverage = Boolean.parseBoolean(withCoverageElement.getTextContent());
         }
-        else if(elementList.getLength() > 1){
-            throw new RuntimeException(String.format("Multiple children '%s' in '%s' found.", tagName));
+        else{
+            withCoverage = false;
         }
-        if (elementList.item(0).getNodeType() != Node.ELEMENT_NODE) {
-            throw new RuntimeException(String.format("Config entry of tag '%s' is no element node.", tagName));
-        }
-        Element element = (Element) elementList.item(0);
+    }
 
-        return element;
-    }*/
+    private void parseAndConfigureMaxRunningContainers(Element rootElement){
+        Element maxRunningContainersElement =  XmlParseUtils.findElement(rootElement, "maxRunningContainers", false);
+        if(maxRunningContainersElement != null){
+            maxRunningContainers = Integer.parseInt(maxRunningContainersElement.getTextContent());
+        }
+        else{
+            maxRunningContainers = 16; // default
+        }
+    }
+
+    private void parseAndConfigureDockerConfig(Element rootElement){
+        NodeList dockerConfigList = rootElement.getElementsByTagName("dockerConfig");
+        if(dockerConfigList.getLength() > 0){
+            Element dockerConfigElement = (Element) dockerConfigList.item(0);
+            dockerLibraryPath = Paths.get(XmlParseUtils.findElement(dockerConfigElement, "dockerLibraryPath", true).getTextContent());
+            dockerHostName = XmlParseUtils.findElement(dockerConfigElement, "dockerHostName", true).getTextContent();
+            dockerPortRange = PortRange.fromString(XmlParseUtils.findElement(dockerConfigElement, "portRange", true).getTextContent());
+            // Docker client dest is required for client tests
+            Element dockerClientDestElement =  XmlParseUtils.findElement(dockerConfigElement, "dockerClientDestinationHost", (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT));
+            if(dockerClientDestElement != null){
+                dockerClientDestinationHostName = dockerClientDestElement.getTextContent();
+            }
+            dockerConfigPresent = true;
+        }
+        else{
+            dockerConfigPresent = false;
+        }
+    }
+
+    private void parseAndConfigureOptionsToTest(Element rootElement){
+        // Parse options-translation list
+        Element optionsToTest = XmlParseUtils.findElement(rootElement, "optionsToTest", true);
+        NodeList list = optionsToTest.getElementsByTagName("optionEntry");
+
+        for (int optionEntryIdx = 0; optionEntryIdx < list.getLength(); optionEntryIdx++) {
+
+            Node optionEntryNode = list.item(optionEntryIdx);
+
+            if (optionEntryNode.getNodeType() == Node.ELEMENT_NODE) {
+                Element optionEntry = (Element) optionEntryNode;
+
+                // Disable the option if enabled is set to false. Options are enabled by default (i.e. if the element is not given)
+                Element enabledElement =  XmlParseUtils.findElement(optionEntry, "enabled", false);
+                if(enabledElement != null){
+                    boolean optionEnabled = Boolean.parseBoolean(enabledElement.getTextContent());
+                    if(!optionEnabled){
+                        continue;
+                    }
+                }
+
+                // Parse derivation type
+                ConfigOptionDerivationType derivationType = derivationTypeFromString(XmlParseUtils.findElement(optionEntry, "derivationType", true).getTextContent());
+
+                // Parse value translation
+                ConfigOptionValueTranslation translation = getTranslationFromElement(XmlParseUtils.findElement(optionEntry, "valueTranslation", true));
+                optionsToTranslation.put(derivationType, translation);
+            }
+        }
+    }
 
     private ConfigurationOptionsBuildManager getBuildManagerFromString(String str)
     {

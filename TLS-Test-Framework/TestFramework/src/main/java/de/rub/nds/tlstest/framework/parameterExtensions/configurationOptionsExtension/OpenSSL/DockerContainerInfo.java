@@ -11,7 +11,7 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL;
 
 /**
- * This private class is used to store information regarding docker containers. It is faster to store these information
+ * This class is used to store information regarding docker containers. It is faster to store these information
  * than to perform a docker inspect container command every time.
  */
 public class DockerContainerInfo {

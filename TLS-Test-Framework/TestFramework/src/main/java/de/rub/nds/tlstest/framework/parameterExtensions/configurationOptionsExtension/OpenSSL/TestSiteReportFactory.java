@@ -38,7 +38,6 @@ import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsattacker.transport.Connection;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlsscanner.serverscanner.ConsoleLogger;
-import de.rub.nds.tlsscanner.serverscanner.ThreadedScanJobExecutor;
 import de.rub.nds.tlsscanner.serverscanner.TlsScanner;
 import de.rub.nds.tlsscanner.serverscanner.config.ScannerConfig;
 import de.rub.nds.tlsscanner.serverscanner.constants.ProbeType;
@@ -64,7 +63,6 @@ import java.util.stream.Collectors;
  * Helper class to create TestSiteReports. This code is basically a copy of the code in TestRunner, but since it is does
  * not provide an interface for TestSiteReports (and is not responsible for that) we copied it. Maybe we can use this
  * factory to build the TestRunner's SiteReports in the future.
- *
  */
 public class TestSiteReportFactory {
     private static final Logger LOGGER = LogManager.getLogger(TestSiteReportFactory.class);

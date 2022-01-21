@@ -14,6 +14,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * A collection of static utils functions that is used to support XML parsing using org.w3c.dom.
+ */
 public class XmlParseUtils {
 
     static public Element findElement(Element root, String tagName, boolean required){

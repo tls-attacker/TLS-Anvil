@@ -13,6 +13,9 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 
 import java.util.*;
 
+/**
+ * The ParameterExtensionManager is a global singleton used to register, load and unload ParameterExtensions.
+ */
 public class ParameterExtensionManager {
     private static ParameterExtensionManager instance = null;
     private Map<String, ParameterExtension> availableExtensions;

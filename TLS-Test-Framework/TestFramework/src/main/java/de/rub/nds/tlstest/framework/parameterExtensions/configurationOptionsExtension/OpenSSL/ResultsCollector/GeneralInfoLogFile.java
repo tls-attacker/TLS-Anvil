@@ -16,6 +16,9 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * LogFile used for general information
+ */
 public class GeneralInfoLogFile extends LogFile{
 
     private ConfigurationOptionsConfig config;

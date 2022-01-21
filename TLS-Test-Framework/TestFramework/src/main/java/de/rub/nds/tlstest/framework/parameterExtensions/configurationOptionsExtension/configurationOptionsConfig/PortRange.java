@@ -10,11 +10,12 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig;
 
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
-import net.bytebuddy.pool.TypePool;
-
 import java.util.IllegalFormatException;
 
+/**
+ * Represents a range of ports. The class can parse a string in form '[Min Port]-[Max Port]'. E.g. '123-456' represents
+ * the ports 123,124,...,456.
+ */
 public class PortRange{
     private Integer minPort;
     private Integer maxPort;
@@ -22,6 +23,10 @@ public class PortRange{
     public PortRange(Integer minPort, Integer maxPort){
         if(maxPort < minPort){
             throw new IllegalArgumentException("Invalid PortRange. maxPort must not be smaller than minPort.");
+        }
+
+        if(minPort < 0 || maxPort > 65535){
+            throw new IllegalArgumentException("Illegal port range. Ports can only be defined in between 0-65535");
         }
 
         this.minPort = minPort;

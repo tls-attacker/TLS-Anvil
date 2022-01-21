@@ -145,6 +145,6 @@ public class DerivationManager {
     }
 
     public synchronized List<DerivationCategoryManager> getRegisteredCategoryManagers(){
-        return new ArrayList<DerivationCategoryManager>(categoryManagers.values());
+        return new ArrayList<>(categoryManagers.values());
     }
 }

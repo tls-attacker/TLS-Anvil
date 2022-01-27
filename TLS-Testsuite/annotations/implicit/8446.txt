@@ -45,3 +45,5 @@ This field is deprecated and MUST be ignored for all purposes.
 This section describes invariants that TLS endpoints and middleboxes MUST follow.
 
 Because the ClientHello, EndOfEarlyData, ServerHello, Finished, and KeyUpdate messages can immediately precede a key change, implementations MUST send these messages in alignment with a record boundary.
+
+After sending a KeyUpdate message, the sender SHALL send all its traffic using the next generation of keys

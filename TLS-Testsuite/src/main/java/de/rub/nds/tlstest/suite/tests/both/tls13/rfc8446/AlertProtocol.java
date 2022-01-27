@@ -7,6 +7,7 @@ import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
@@ -18,6 +19,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
@@ -102,10 +104,12 @@ public class AlertProtocol extends Tls13Test {
     }
 
     private void peformUnknownFatalAlertTest(WorkflowTrace trace, WorkflowRunner runner, Config config) {
+        catchOptionalPostHandshakeMessage(trace);
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
         alert.setDescription(Modifiable.explicit((byte)200));
         trace.addTlsAction(new SendAction(alert));
+        catchOptionalAlertResponse(trace, config);
         
         runner.execute(trace, config).validateFinal(i -> {
             assertTrue("The socket has not been closed for an unknown alert with level fatal", Validator.socketClosed(i));
@@ -113,10 +117,12 @@ public class AlertProtocol extends Tls13Test {
     }
     
     private void peformUnknownWarningAlertTest(WorkflowTrace trace, WorkflowRunner runner, Config config) {
+        catchOptionalPostHandshakeMessage(trace);
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
         alert.setDescription(Modifiable.explicit((byte)200));
         trace.addTlsAction(new SendAction(alert));
+        catchOptionalAlertResponse(trace, config);
         
         runner.execute(trace, config).validateFinal(i -> {
             assertTrue("The socket has not been closed for an unknown alert with level warning", Validator.socketClosed(i));
@@ -128,13 +134,29 @@ public class AlertProtocol extends Tls13Test {
     }
     
     private void performFatalAlertWithWarningLevelTest(WorkflowTrace trace, WorkflowRunner runner, Config config) {
+        catchOptionalPostHandshakeMessage(trace);
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));
         alert.setDescription(Modifiable.explicit(derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue().getValue()));
         trace.addTlsAction(new SendAction(alert));
+        catchOptionalAlertResponse(trace, config);
         
         runner.execute(trace, config).validateFinal(i -> {
             assertTrue("The socket has not been closed for a fatal alert with level warning", Validator.socketClosed(i));
         });
+    }
+    
+    private void catchOptionalPostHandshakeMessage(WorkflowTrace trace) {
+        if(context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
+            trace.addTlsAction(new GenericReceiveAction());
+        }
+    }
+    
+    private void catchOptionalAlertResponse(WorkflowTrace trace, Config config) {
+        //we usually read the socket state with a timeout to allow the library
+        //to process our messages first - adding a GenericReceiveAction
+        //which exceeds the full timeout is identical (albeit less efficient)
+        config.setReceiveFinalTcpSocketStateWithTimeout(false);
+        trace.addTlsAction(new GenericReceiveAction());
     }
 }

@@ -3,3 +3,5 @@ Since it is possible for a client to present a different server_name in the appl
 Implementations MUST ensure that a buffer overflow does not occur, whatever the values of the length fields in server_name.
 
 The ServerNameList MUST NOT contain more than one name of the same name_type.
+
+The "extension_data" field of this extension SHALL contain "ServerNameList" where:

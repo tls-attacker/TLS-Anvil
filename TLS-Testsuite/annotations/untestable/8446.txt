@@ -95,3 +95,5 @@ Clients MUST NOT use cookies in their initial ClientHello in subsequent connecti
 Therefore, in normal operation, clients will not know which, if any, of these mechanisms servers actually implement and hence MUST only send early data which they deem safe to be replayed.
 
 The server MUST ensure that any instance of it (be it a machine, a thread, or any other entity within the relevant serving infrastructure) would accept 0-RTT for the same 0-RTT handshake at most once; this limits the number of replays to the number of server instances in the deployment.
+
+Otherwise (in the case of server authentication), this field SHALL be zero length.

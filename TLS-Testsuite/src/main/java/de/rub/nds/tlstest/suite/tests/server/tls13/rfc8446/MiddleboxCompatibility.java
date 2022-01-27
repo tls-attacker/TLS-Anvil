@@ -52,7 +52,7 @@ public class MiddleboxCompatibility extends Tls13Test {
     public void respectsClientCompatibilityWish(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.getFirstSendMessage(ClientHelloMessage.class).setSessionId(Modifiable.explicit(config.getDefaultClientSessionId()));
+        workflowTrace.getFirstSendMessage(ClientHelloMessage.class).setSessionId(Modifiable.explicit(config.getDefaultClientTicketResumptionSessionId()));
         runner.execute(workflowTrace, config).validateFinal(i -> {
             Validator.executedAsPlanned(i);
             assertTrue("Did not receive a compatibility CCS", WorkflowTraceUtil.didReceiveMessage(ProtocolMessageType.CHANGE_CIPHER_SPEC, i.getWorkflowTrace()));
@@ -79,7 +79,7 @@ public class MiddleboxCompatibility extends Tls13Test {
         //enforce HRR
         config.setDefaultClientKeyShareNamedGroups(new LinkedList<>());
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.getFirstSendMessage(ClientHelloMessage.class).setSessionId(Modifiable.explicit(config.getDefaultClientSessionId()));
+        workflowTrace.getFirstSendMessage(ClientHelloMessage.class).setSessionId(Modifiable.explicit(config.getDefaultClientTicketResumptionSessionId()));
         runner.execute(workflowTrace, config).validateFinal(i -> {
             assertTrue("Did not receive a compatibility CCS", WorkflowTraceUtil.didReceiveMessage(ProtocolMessageType.CHANGE_CIPHER_SPEC, i.getWorkflowTrace()));
             List<ProtocolMessage> receivedMessages = WorkflowTraceUtil.getAllReceivedMessages(workflowTrace);

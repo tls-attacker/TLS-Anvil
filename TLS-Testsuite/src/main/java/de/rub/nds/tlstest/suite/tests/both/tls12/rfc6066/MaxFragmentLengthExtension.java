@@ -8,6 +8,7 @@ import de.rub.nds.tlsattacker.core.constants.MaxFragmentLength;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.MaxFragmentLengthExtensionMessage;
+import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -15,6 +16,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -22,6 +24,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -51,6 +54,7 @@ public class MaxFragmentLengthExtension extends Tls12Test {
     @HandshakeCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
+    @ScopeLimitations(DerivationType.MAX_FRAGMENT_LENGTH)
     @MethodCondition(method="supportsMaxFragmentLength")
     @Tag("new")
     public void enforcesRecordLimit(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -61,8 +65,14 @@ public class MaxFragmentLengthExtension extends Tls12Test {
         ApplicationMessage overflowingAppData = new ApplicationMessage(config);
         overflowingAppData.setData(Modifiable.explicit(new byte[MaxFragmentLength.getIntegerRepresentation(maxLength) + 256 + 32]));
         
+        SendAction sendOverflowingRecord = new SendAction(overflowingAppData);
+        
+        //use a record that ignores the extension's limitations
+        Record fullRecord = new Record();
+        fullRecord.setMaxRecordLengthConfig(16384);
+        sendOverflowingRecord.setRecords(fullRecord);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace.addTlsAction(new SendAction(overflowingAppData));
+        workflowTrace.addTlsAction(sendOverflowingRecord);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         
         runner.execute(workflowTrace, config).validateFinal(i -> {

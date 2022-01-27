@@ -25,3 +25,17 @@ All Certificates MUST conform to [RFC5280].
 DER (as opposed to BER) encoding MUST be used.  If this type is sent over a 7-bit transport, base64 encoding SHOULD be used.
 
 To avoid "breaking" existing clients and servers, these alerts MUST NOT be sent unless the sending party has received an extended hello message from the party they are communicating with.
+
+In this event, the server SHALL include an extension of type "server_name" in the (extended) server hello.  The "extension_data" field of this extension SHALL be empty.
+
+In order to negotiate sending certificate URLs to a server, clients MAY include an extension of type "client_certificate_url" in the (extended) client hello.  The "extension_data" field of this extension SHALL be empty.
+
+Servers receiving "CertificateURL" SHALL attempt to retrieve the client's certificate chain from the URLs and then process the certificate chain as usual. 
+
+If the protocol used to retrieve certificates or certificate chains returns a MIME-formatted response (as HTTP does), then the following MIME Content-Types SHALL be used
+
+The "extension_data" field of this extension SHALL contain "TrustedAuthorities" where
+
+In this event, the server SHALL include an extension of type "trusted_ca_keys" in the (extended) server hello.  The "extension_data" field of this extension SHALL be empty.
+
+The "extension_data" field of this extension SHALL contain "CertificateStatusRequest" where:

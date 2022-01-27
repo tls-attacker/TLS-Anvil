@@ -114,4 +114,5 @@ A TLS-compliant application MUST support digital signatures with rsa_pkcs1_sha25
 
 "psk_key_exchange_modes" is REQUIRED for PSK key agreement.
 
+This field SHALL be zero length unless used for the post-handshake authentication exchanges described in Section 4.6.2.
 

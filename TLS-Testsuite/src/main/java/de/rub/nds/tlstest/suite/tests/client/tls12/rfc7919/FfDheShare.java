@@ -173,7 +173,7 @@ public class FfDheShare extends Tls12Test {
             
             WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_KEY_EXCHANGE);
             DHEServerKeyExchangeMessage dheServerKeyExchange = new DHEServerKeyExchangeMessage(config);
-            workflowTrace.addTlsAction(new SendAction(dheServerKeyExchange));
+            workflowTrace.addTlsAction(new SendAction(dheServerKeyExchange, new ServerHelloDoneMessage()));
             workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
             
             runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);

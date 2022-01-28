@@ -8,6 +8,7 @@ import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
@@ -25,6 +26,8 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.Assert;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -101,6 +104,25 @@ public class AlertProtocol extends Tls13Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         peformUnknownFatalAlertTest(trace, runner, config);
+    }
+    
+    @TlsTest(description = "Each party MUST send a \"close_notify\" alert before closing its write side of the connection, unless it has already sent some error alert.")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @Tag("new")
+    public void sendsCloseNotify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        AlertMessage alert = new AlertMessage(config);
+        alert.setConfig(AlertLevel.WARNING, AlertDescription.CLOSE_NOTIFY);
+        trace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        
+        runner.execute(trace, config).validateFinal(i -> {
+            AlertMessage receivedAlert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+            assertNotNull("No alert has been received", receivedAlert);
+            Validator.testAlertDescription(i, AlertDescription.CLOSE_NOTIFY, receivedAlert);    
+        });
     }
 
     private void peformUnknownFatalAlertTest(WorkflowTrace trace, WorkflowRunner runner, Config config) {

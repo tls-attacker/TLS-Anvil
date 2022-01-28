@@ -236,10 +236,41 @@ public class ServerHello extends Tls13Test {
     public void testSessionIdEchoed(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        //WolfSSL expects 32 bytes - to be determined if this is correct behavior
         byte[] sessionId = new byte[32];
         sessionId[0] = (byte) 0xFF;
         sessionId[16] = (byte) 0xFF;
+        
+        c.setDefaultClientSessionId(sessionId);
+
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        workflowTrace.addTlsActions(
+                new SendAction(new ClientHelloMessage(c)),
+                new ReceiveTillAction(new CertificateVerifyMessage(c))
+        );
+
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            WorkflowTrace trace = i.getWorkflowTrace();
+            Validator.executedAsPlanned(i);
+
+            ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+            assertArrayEquals("Session ID not echoed", sessionId, msg.getSessionId().getValue());
+        });
+    }
+    
+    @TlsTest(description = "A client which receives a legacy_session_id_echo " +
+            "field that does not match what it sent in the ClientHello MUST " +
+            "abort the handshake with an \"illegal_parameter\" alert.")
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AlertCategory(SeverityLevel.MEDIUM)
+    @Tag("new")
+    public void testShortSessionIdEchoed(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+
+        byte[] sessionId = new byte[8];
+        sessionId[0] = (byte) 0xFF;
         
         c.setDefaultClientSessionId(sessionId);
 

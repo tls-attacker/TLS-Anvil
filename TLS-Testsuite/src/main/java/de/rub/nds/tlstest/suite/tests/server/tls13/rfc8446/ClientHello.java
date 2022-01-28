@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
+import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -26,18 +27,17 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
+import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
+import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -288,5 +288,18 @@ public class ClientHello extends Tls13Test {
         config.setAddEllipticCurveExtension(false);
         
         performMissingExtensionTest(config, runner);
+    }
+    
+    @TlsTest(description = "Note that TLS 1.3 servers might receive TLS 1.2 or prior ClientHellos which contain other compression methods and (if negotiating such a prior version) MUST follow the procedures for the appropriate prior version of TLS.")
+    @KeyExchange(supported = KeyExchangeType.ALL12)
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @Tag("new")
+    public void acceptsCompressionListForLegacyClient(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+        config.setDefaultClientSupportedCompressionMethods(CompressionMethod.NULL, CompressionMethod.DEFLATE);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 }

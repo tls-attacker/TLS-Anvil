@@ -233,7 +233,7 @@ public class FfDheShare extends Tls12Test {
         "not offer one, even if the client offered an FFDHE group in the " +
         "Supported Groups extension.")
     @RFC(number = 7919, section = "4. Server Behavior")
-    @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.ECDH})
+    @KeyExchange(supported = {KeyExchangeType.ECDH})
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)
     @InteroperabilityCategory(SeverityLevel.HIGH)

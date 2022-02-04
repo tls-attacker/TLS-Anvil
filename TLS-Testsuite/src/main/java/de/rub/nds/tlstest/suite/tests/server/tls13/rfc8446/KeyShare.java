@@ -356,7 +356,7 @@ public class KeyShare extends Tls13Test {
         runner.execute(worklfowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
     
-    public List<DerivationParameter> getFfdheGroups() {
+    public List<DerivationParameter> getFfdheGroups(DerivationScope scope) {
         List<DerivationParameter> derivationParameters = new LinkedList<>();
         context.getSiteReport().getSupportedTls13FfdheNamedGroups().forEach(group -> derivationParameters.add(new NamedGroupDerivation(group)));
         return derivationParameters;
@@ -410,5 +410,5 @@ public class KeyShare extends Tls13Test {
         //we also include deprecated secp groups here if supported by peer
         return group.isCurve() && group.name().contains("SECP");
     }
-
+    
 }

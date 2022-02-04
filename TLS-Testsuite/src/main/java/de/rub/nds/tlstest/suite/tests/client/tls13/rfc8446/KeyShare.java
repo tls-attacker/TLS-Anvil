@@ -58,6 +58,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
@@ -299,7 +300,7 @@ public class KeyShare extends Tls13Test {
         runner.execute(worklfowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
     
-    public List<DerivationParameter> getFfdheGroups() {
+    public List<DerivationParameter> getFfdheGroups(DerivationScope scope) {
         List<DerivationParameter> derivationParameters = new LinkedList<>();
         context.getSiteReport().getSupportedTls13FfdheNamedGroups().forEach(group -> derivationParameters.add(new NamedGroupDerivation(group)));
         return derivationParameters;

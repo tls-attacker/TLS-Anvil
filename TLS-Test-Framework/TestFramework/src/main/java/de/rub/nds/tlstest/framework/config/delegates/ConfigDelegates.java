@@ -19,7 +19,7 @@ public enum ConfigDelegates {
 
     public static ConfigDelegates delegateForCommand(String command) {
         return Arrays.stream(ConfigDelegates.values())
-                .filter(i -> command.equals(i.getCommand()))
+                .filter(i -> i.getCommand().equals(command))
                 .findFirst()
                 .orElse(null);
     }

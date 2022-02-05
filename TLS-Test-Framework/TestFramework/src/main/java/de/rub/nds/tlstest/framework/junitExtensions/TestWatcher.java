@@ -19,21 +19,31 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 /**
  * The class contains methods that are called when a test case terminates.
  * If no AnnotatedStateContainer is associated with the finished test case
  * a new container is created.
+ *
+ * Be careful: For the last test case, these methods are called after
+ * AnnotatedStateContainer.finished, therefore the container is already removed
+ * from the TestContext.
  */
 public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher {
     private static final Logger LOGGER = LogManager.getLogger();
 
+    @Nullable
     private AnnotatedStateContainer createResult(ExtensionContext context, TestResult result) {
 
         String uniqueId = Utils.getTemplateContainerExtensionContext(context).getUniqueId();
         AnnotatedStateContainer container = TestContext.getInstance().getTestResults().get(uniqueId);
+
+        // Do not repplace || with && :D
         if (container != null || TestContext.getInstance().testIsFinished(uniqueId)) {
+            // could be null, if AnnotatedStateContainer.finished was called before
+            // see note above
             return container;
         }
 
@@ -60,7 +70,19 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
     @Override
     synchronized public void testFailed(ExtensionContext context, Throwable cause) {
         TestContext.getInstance().testFailed();
+
+        if (!(cause instanceof AssertionError)) {
+            LOGGER.error("Test failed without AssertionError {}\n", context.getDisplayName(), cause);
+        }
+
+        String uniqueId = Utils.getTemplateContainerExtensionContext(context).getUniqueId();
         AnnotatedStateContainer container = createResult(context, TestResult.FAILED);
+        if (container == null && TestContext.getInstance().testIsFinished(uniqueId))
+            return;
+        else if (container == null) {
+            LOGGER.error("This should not happen... AnnotatedStateContainer is null but Test is not finished yet");
+        }
+
         AnnotatedState state = container.getStates().stream()
                 .filter(i -> i.getExtensionContext().getUniqueId().equals(context.getUniqueId()))
                 .findFirst()
@@ -77,10 +99,6 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
                 container.setFailedReason(ExecptionPrinter.stacktraceToString(cause));
                 container.finished();
             }
-        }
-
-        if (!(cause instanceof AssertionError)) {
-            LOGGER.error("Test failed without AssertionError {}\n", context.getDisplayName(), cause);
         }
     }
 

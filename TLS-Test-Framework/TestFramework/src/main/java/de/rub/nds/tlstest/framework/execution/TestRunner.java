@@ -90,12 +90,14 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -112,7 +114,7 @@ public class TestRunner {
 
     private final TestConfig testConfig;
     private final TestContext testContext;
-
+    private Process tcpdumpProcess;
 
     private boolean targetIsReady = false;
 
@@ -442,9 +444,42 @@ public class TestRunner {
 
     }
 
+    private void startTcpDump() {
+        if (tcpdumpProcess != null) {
+            LOGGER.warn("This should not happen...");
+            return;
+        }
+
+        String networkInterface = testConfig.getNetworkInterface();
+
+        // tcpdump -i eth0 -w /output/dump.pcap
+        ProcessBuilder tcpdump = new ProcessBuilder(
+                "tcpdump",
+                "-i", networkInterface,
+                "-w", Paths.get(testConfig.getOutputFolder(), "dump.pcap").toString()
+        );
+
+        try {
+            tcpdumpProcess = tcpdump.start();
+            boolean isFinished = tcpdumpProcess.waitFor(2, TimeUnit.SECONDS);
+            if (!isFinished) throw new IllegalStateException();
+            String out = new String(tcpdumpProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            out += new String(tcpdumpProcess.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
+            throw new RuntimeException(out);
+        } catch (IllegalStateException ignored) {
+
+        } catch (Exception e) {
+            LOGGER.error("Starting tcpdump failed", e);
+        }
+    }
+
     public void prepareTestExecution() {
         if (!testConfig.isParsedArgs()) {
             return;
+        }
+
+        if (!testConfig.isDisableTcpDump()) {
+            startTcpDump();
         }
 
         ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);

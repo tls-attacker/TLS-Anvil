@@ -104,6 +104,13 @@ public class TestConfig extends TLSDelegateConfig {
 
     @Parameter(names = "-prettyPrintJSON", description = "Pretty print json output")
     private boolean prettyPrintJSON = false;
+
+    @Parameter(names = "-networkInterface", description = "Network interface from which packets are recorded using tcpdump. " +
+            "(Default value: any")
+    private String networkInterface = "any";
+
+    @Parameter(names = "-disableTcpDump", description = "Disables the packet capturing with tcpdump")
+    private boolean disableTcpDump = false;
     
     //we might want to turn these into CLI parameters in the future
     private boolean expectTls13Alerts = false;
@@ -205,6 +212,7 @@ public class TestConfig extends TLSDelegateConfig {
             outputFolder = outputFolder.toAbsolutePath();
 
             this.outputFolder = outputFolder.toString();
+            Paths.get(this.outputFolder).toFile().mkdirs();
 
             if (timeoutActionCommand.size() > 0) {
                 timeoutActionScript = () -> {
@@ -523,5 +531,21 @@ public class TestConfig extends TLSDelegateConfig {
 
     public TestExtractorDelegate getTestExtractorDelegate() {
         return testExtractorDelegate;
+    }
+
+    public String getNetworkInterface() {
+        return networkInterface;
+    }
+
+    public void setNetworkInterface(String networkInterface) {
+        this.networkInterface = networkInterface;
+    }
+
+    public boolean isDisableTcpDump() {
+        return disableTcpDump;
+    }
+
+    public void setDisableTcpDump(boolean disableTcpDump) {
+        this.disableTcpDump = disableTcpDump;
     }
 }

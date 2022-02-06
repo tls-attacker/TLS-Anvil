@@ -216,6 +216,10 @@ public class TestConfig extends TLSDelegateConfig {
                         return p.exitValue();
                 };
             }
+
+            if (this.getGeneralDelegate().getKeylogfile() == null) {
+                this.getGeneralDelegate().setKeylogfile(Path.of(this.outputFolder, "keyfile.log").toString());
+            }
         } catch (Exception e) {
             throw new ParameterException(e);
         }

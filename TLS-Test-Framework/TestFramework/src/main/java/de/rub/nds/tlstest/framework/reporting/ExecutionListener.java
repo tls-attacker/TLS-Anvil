@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.config.TestConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.platform.engine.TestExecutionResult;
@@ -22,6 +23,8 @@ import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,15 +62,18 @@ public class ExecutionListener implements TestExecutionListener {
         long elapsedTime = System.currentTimeMillis() - start;
         Summary s = new Summary();
 
+        TestConfig testConfig = TestContext.getInstance().getConfig();
+        TestContext testContext = TestContext.getInstance();
+
         s.setElapsedTime(elapsedTime);
-        s.setTestEndpointType(TestContext.getInstance().getConfig().getTestEndpointMode());
-        s.setIdentifier(TestContext.getInstance().getConfig().getIdentifier());
-        s.setDate(TestContext.getInstance().getStartTime());
-        s.setHandshakes(TestContext.getInstance().getPerformedHandshakes());
-        s.setTestsDisabled(TestContext.getInstance().getTestsDisabled());
-        s.setTestsFailed(TestContext.getInstance().getTestsFailed());
-        s.setTestsSucceeded(TestContext.getInstance().getTestsSucceeded());
-        s.setScoreContainer(TestContext.getInstance().getScoreContainer());
+        s.setTestEndpointType(testConfig.getTestEndpointMode());
+        s.setIdentifier(testConfig.getIdentifier());
+        s.setDate(testContext.getStartTime());
+        s.setHandshakes(testContext.getPerformedHandshakes());
+        s.setTestsDisabled(testContext.getTestsDisabled());
+        s.setTestsFailed(testContext.getTestsFailed());
+        s.setTestsSucceeded(testContext.getTestsSucceeded());
+        s.setScoreContainer(testContext.getScoreContainer());
 
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -77,15 +83,21 @@ public class ExecutionListener implements TestExecutionListener {
                     .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                     .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
-            if (TestContext.getInstance().getConfig().isPrettyPrintJSON()) {
+            if (testConfig.isPrettyPrintJSON()) {
                 mapper.enable(SerializationFeature.INDENT_OUTPUT);
             }
 
-            String summaryPath = Paths.get(TestContext.getInstance().getConfig().getOutputFolder(), "summary.json").toString();
+            String summaryPath = Paths.get(testConfig.getOutputFolder(), "summary.json").toString();
             File f = new File(summaryPath);
             f.createNewFile();
 
             mapper.writeValue(f, s);
+
+            Path logDir = Paths.get("./logs");
+            if (logDir.toFile().isDirectory()) {
+                Files.move(logDir, Paths.get(testConfig.getOutputFolder(), "logs"));
+            }
+
         } catch (Exception e) {
             LOGGER.error("", e);
             throw new RuntimeException(e);

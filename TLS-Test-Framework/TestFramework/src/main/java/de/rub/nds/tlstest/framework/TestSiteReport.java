@@ -44,10 +44,10 @@ public class TestSiteReport extends SiteReport {
 
     public static TestSiteReport fromSiteReport(SiteReport siteReport) {
         try {
-            TestSiteReport report = new TestSiteReport();
+            TestSiteReport report = new TestSiteReport(siteReport.getHost());
 
             report.setCipherSuites(siteReport.getCipherSuites());
-            report.setSupportedSignatureAndHashAlgorithms(siteReport.getSupportedSignatureAndHashAlgorithms());
+            report.setSupportedSignatureAndHashAlgorithmsSke(siteReport.getSupportedSignatureAndHashAlgorithms());
             report.setVersions(siteReport.getVersions());
             report.setSupportedNamedGroups(siteReport.getSupportedNamedGroups());
             report.setVersionSuitePairs(siteReport.getVersionSuitePairs());

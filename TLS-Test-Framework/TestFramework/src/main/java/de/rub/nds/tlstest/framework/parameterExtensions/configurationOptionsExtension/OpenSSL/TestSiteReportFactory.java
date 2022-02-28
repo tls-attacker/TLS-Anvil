@@ -285,7 +285,7 @@ public class TestSiteReportFactory {
 
         SignatureAndHashAlgorithmsExtensionMessage sahExt = clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
         if (sahExt != null) {
-            report.setSupportedSignatureAndHashAlgorithms(
+            report.setSupportedSignatureAndHashAlgorithmsSke(
                     SignatureAndHashAlgorithm.getSignatureAndHashAlgorithms(sahExt.getSignatureAndHashAlgorithms().getValue()).stream()
                             .filter(i -> SignatureAndHashAlgorithm.getImplemented().contains(i))
                             .collect(Collectors.toList())

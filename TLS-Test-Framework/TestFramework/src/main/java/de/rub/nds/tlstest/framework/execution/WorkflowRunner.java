@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.framework.execution;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
@@ -24,6 +25,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.TlsMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.record.layer.RecordLayerFactory;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -335,6 +337,11 @@ public class WorkflowRunner {
         ClientHelloMessage failingClientHello = new ClientHelloMessage();
         ServerHelloMessage helloRetryRequest = new ServerHelloMessage(preparedConfig);
         helloRetryRequest.setRandom(Modifiable.explicit(ServerHelloMessage.getHelloRetryRequestRandom()));
+        
+        if(requestedGroup != preparedConfig.getDefaultSelectedNamedGroup() && helloRetryRequest.containsExtension(ExtensionType.KEY_SHARE)) {
+            KeyShareExtensionMessage keyShareExtension = helloRetryRequest.getExtension(KeyShareExtensionMessage.class);
+            keyShareExtension.setKeyShareListBytes(Modifiable.explicit(requestedGroup.getValue()));
+        }
         
         trace.getTlsActions().add(0, new SendAction(helloRetryRequest));
         trace.getTlsActions().add(0, new ReceiveAction(failingClientHello));

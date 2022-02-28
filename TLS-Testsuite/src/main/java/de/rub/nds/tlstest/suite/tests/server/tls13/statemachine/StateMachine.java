@@ -96,7 +96,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "An"
+    @TlsTest(description = "An "
             + "implementation which receives any other change_cipher_spec value or "
             + "which receives a protected change_cipher_spec record MUST abort the "
             + "handshake with an \"unexpected_message\" alert.")

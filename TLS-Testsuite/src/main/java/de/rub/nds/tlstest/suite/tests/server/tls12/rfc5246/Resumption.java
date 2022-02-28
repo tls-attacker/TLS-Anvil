@@ -54,7 +54,7 @@ public class Resumption extends Tls12Test {
     }
 
     public ConditionEvaluationResult supportsResumption() {
-        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_SESSION_IDS) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_SESSION_ID_RESUMPTION) == TestResult.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
             return ConditionEvaluationResult.disabled("Does not support session resumption");
@@ -140,8 +140,12 @@ public class Resumption extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.")
-    @RFC(number = 5246, section = "7.2.2 Error Alerts")
+    @TlsTest(description = "In this case, other connections corresponding to the " +
+        "session may continue, but the session identifier MUST be invalidated, " +
+        "preventing the failed session from being used to establish new " +
+        "connections. [...]" +
+        "Thus, any connection terminated with a fatal alert MUST NOT be resumed.")
+    @RFC(number = 5246, section = "7.2. Alert Protocol and 7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
     @ScopeExtensions(DerivationType.ALERT)
     @ScopeLimitations(DerivationType.INCLUDE_SESSION_TICKET_EXTENSION)

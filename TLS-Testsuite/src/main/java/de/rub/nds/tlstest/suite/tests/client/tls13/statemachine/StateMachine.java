@@ -85,7 +85,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "An"
+    @TlsTest(description = "An "
             + "implementation which receives any other change_cipher_spec value or "
             + "which receives a protected change_cipher_spec record MUST abort the "
             + "handshake with an \"unexpected_message\" alert.")
@@ -109,7 +109,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "An"
+    @TlsTest(description = "An "
             + "implementation which receives any other change_cipher_spec value or "
             + "which receives a protected change_cipher_spec record MUST abort the "
             + "handshake with an \"unexpected_message\" alert.")
@@ -234,7 +234,7 @@ public class StateMachine extends Tls13Test {
     }
 
     @RFC(number = 8446, section = "4.5. End of Early Data")
-    @TlsTest(description = "Servers MUST NOT send this message, and clients receiving it MUST" +
+    @TlsTest(description = "Servers MUST NOT send this message, and clients receiving it MUST " +
             "terminate the connection with an \"unexpected_message\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.MEDIUM)

@@ -8,6 +8,7 @@ import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -33,6 +34,7 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests;
 import java.util.Arrays;
 import java.util.LinkedList;
 import static org.junit.Assert.assertTrue;
@@ -55,12 +57,15 @@ public class HelloRetryRequest extends Tls13Test {
     @TlsTest(description = "The server will send this message in response to a ClientHello "
             + "message if it is able to find an acceptable set of parameters but the "
             + "ClientHello does not contain sufficient information to proceed with "
-            + "the handshake.")
-    @RFC(number = 8446, section = "4.2.10 Early Data Indication")
+            + "the handshake. [...]"
+            + "The server's extensions MUST contain \"supported_versions\". [...]"
+            + "\"supported_versions\" is REQUIRED for all ClientHello, ServerHello, and HelloRetryRequest messages.")
+    @RFC(number = 8446, section = "4.1.4 Hello Retry Request and 9.2.  Mandatory-to-Implement Extensions")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
+    @Tag("adjusted")
     public void helloRetryRequestValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipher = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
@@ -74,11 +79,14 @@ public class HelloRetryRequest extends Tls13Test {
             Validator.executedAsPlanned(i);
 
             ServerHelloMessage sHello = (ServerHelloMessage) WorkflowTraceUtil.getFirstReceivedMessage(HandshakeMessageType.SERVER_HELLO, i.getWorkflowTrace());
+            ClientHelloMessage cHello = i.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
             if (sHello != null) {
                 assertTrue("Server did not send a HelloRetryRequest", sHello.isTls13HelloRetryRequest());
                 assertTrue("Server selected an unproposed CipherSuite", Arrays.equals(selectedCipher.getByteValue(), sHello.getSelectedCipherSuite().getValue()));
                 assertTrue("Server did not include a SupportedVersions Extension", sHello.containsExtension(ExtensionType.SUPPORTED_VERSIONS));
-
+                SharedExtensionTests.checkForDuplicateExtensions(sHello);
+                ServerHello.checkForForbiddenExtensions(sHello);
+                ServerHello.checkForUnproposedExtensions(sHello, cHello);
                 KeyShareExtensionMessage ksExtension = sHello.getExtension(KeyShareExtensionMessage.class);
                 if (ksExtension != null) {
                     assertTrue("Server did not include exactly one NamedGroup in KeyShare Extension", ksExtension.getKeyShareList().size() == 1);
@@ -88,7 +96,7 @@ public class HelloRetryRequest extends Tls13Test {
             }
         });
     }
-
+    
     @TlsTest(description = "Servers MUST ensure that they negotiate the "
             + "same cipher suite when receiving a conformant updated ClientHello")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
@@ -140,14 +148,43 @@ public class HelloRetryRequest extends Tls13Test {
         });
     }
     
+    @TlsTest(description = "The value of selected_version in the HelloRetryRequest " +
+            "\"supported_versions\" extension MUST be retained in the ServerHello")
+    @InteroperabilityCategory(SeverityLevel.HIGH)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @SecurityCategory(SeverityLevel.MEDIUM)
+    @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
+    @Tag("new")
+    public void retainsProtocolVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+
+        WorkflowTrace workflowTrace = getHelloRetryWorkflowTrace(runner);
+
+        runner.execute(workflowTrace, c).validateFinal(i -> {
+            Validator.executedAsPlanned(i);
+
+            ServerHelloMessage helloRetryRequest = (ServerHelloMessage) WorkflowTraceUtil.getFirstReceivedMessage(HandshakeMessageType.SERVER_HELLO, i.getWorkflowTrace());
+            ServerHelloMessage actualServerHello = (ServerHelloMessage) WorkflowTraceUtil.getLastReceivedMessage(HandshakeMessageType.SERVER_HELLO, i.getWorkflowTrace());
+            if (helloRetryRequest != null && actualServerHello != null) {
+                assertTrue("Server did not retain the selected Protocol Version in Supported Versions Extension", Arrays.equals(helloRetryRequest.getExtension(SupportedVersionsExtensionMessage.class).getSupportedVersions().getValue(), actualServerHello.getExtension(SupportedVersionsExtensionMessage.class).getSupportedVersions().getValue()));
+            }
+        });
+    }
+    
     @Test
     /*
     Clients MAY send an empty client_shares vector in order to request
     group selection from the server, at the cost of an additional round
     trip
     */
-    @RFC(number = 8446, section = "4.2.8.  Key Share")
-    @TestDescription("Evaluate if the server replied with a Hello Retry Request upon receiving a Client Hello without any Key Shares")
+    @RFC(number = 8446, section = "4.1.1 Cryptographic Negotiation and 4.2.8.  Key Share")
+    @TestDescription("If the server selects an (EC)DHE group and the client did not offer a " +
+        "compatible \"key_share\" extension in the initial ClientHello, the " +
+        "server MUST respond with a HelloRetryRequest (Section 4.1.4) message. " + 
+        "[...] Clients MAY send an empty client_shares vector in order to request " +
+        "group selection from the server, at the cost of an additional round " +
+        "trip")
     @ComplianceCategory(SeverityLevel.HIGH)
     @InteroperabilityCategory(SeverityLevel.LOW)
     public void sentHelloRetryRequest() {

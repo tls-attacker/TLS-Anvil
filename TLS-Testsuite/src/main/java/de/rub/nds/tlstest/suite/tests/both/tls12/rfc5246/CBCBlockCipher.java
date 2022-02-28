@@ -13,11 +13,14 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
+import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -44,10 +47,12 @@ import org.junit.jupiter.api.Tag;
 
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
+import static org.junit.Assert.assertTrue;
 
 
-@RFC(number = 5264, section = "6.2.3.2 CBC Block Cipher")
+@RFC(number = 5246, section = "6.2.3.2 CBC Block Cipher")
 public class CBCBlockCipher extends Tls12Test {
 
     //tests are supposed to test validity with different padding sizes etc
@@ -99,11 +104,11 @@ public class CBCBlockCipher extends Tls12Test {
 
     }
 
-    @TlsTest(description = "bad_record_mac - [...] This alert also MUST be returned if an alert is sent because " +
+    @TlsTest(description = "bad_record_mac[...]This alert also MUST be returned if an alert is sent because " +
             "a TLSCiphertext decrypted in an invalid way: either it wasn’t an " +
             "even multiple of the block length, or its padding values, when " +
             "checked, weren’t correct.")
-    @RFC(number = 5446, section = "7.2.2. Error Alerts")
+    @RFC(number = 5246, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.CIPHERTEXT_BITMASK)
@@ -156,9 +161,9 @@ public class CBCBlockCipher extends Tls12Test {
     }
 
 
-    @TlsTest(description = "bad_record_mac - This alert is returned if a record is received with an incorrect " +
+    @TlsTest(description = "bad_record_mac[...]This alert is returned if a record is received with an incorrect " +
             "MAC.")
-    @RFC(number = 5446, section = "7.2.2. Error Alerts")
+    @RFC(number = 5246, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(DerivationType.MAC_BITMASK)
@@ -193,6 +198,38 @@ public class CBCBlockCipher extends Tls12Test {
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
+        });
+    }
+    
+    @TlsTest(description = "A sequence number is incremented after each " +
+        "record: specifically, the first record transmitted under a " +
+        "particular connection state MUST use sequence number 0.")
+    @RFC(number = 5246, section = "6.1. Connection States")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
+    @CryptoCategory(SeverityLevel.MEDIUM)
+    @RecordLayerCategory(SeverityLevel.CRITICAL)
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @Tag("new")
+    public void checkReceivedMac(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        runner.execute(workflowTrace, config).validateFinal(i -> {
+            Validator.executedAsPlanned(i);
+            boolean sawCCS = false;
+            for(AbstractRecord abstractRecord : WorkflowTraceUtil.getAllReceivedRecords(i.getWorkflowTrace())) {
+                if(abstractRecord.getContentMessageType() == ProtocolMessageType.CHANGE_CIPHER_SPEC) {
+                    sawCCS = true;
+                }
+                if(sawCCS && abstractRecord.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
+                    Record encryptedFin = (Record) abstractRecord;
+                    assertTrue("Finished record MAC invalid - is the SQN correct?", encryptedFin.getComputations().getMacValid());
+                } else if(sawCCS && abstractRecord.getContentMessageType() == ProtocolMessageType.APPLICATION_DATA) {
+                    Record encryptedFin = (Record) abstractRecord;
+                    assertTrue("App Data record MAC invalid", encryptedFin.getComputations().getMacValid());
+                }
+            }
         });
     }
 

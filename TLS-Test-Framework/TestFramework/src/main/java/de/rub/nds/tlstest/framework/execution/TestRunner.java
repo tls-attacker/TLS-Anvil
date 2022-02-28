@@ -58,7 +58,9 @@ import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
+import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
+import de.rub.nds.tlstest.framework.extractor.TestCaseExtractor;
 import de.rub.nds.tlstest.framework.reporting.ExecutionListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,12 +90,14 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -110,7 +114,7 @@ public class TestRunner {
 
     private final TestConfig testConfig;
     private final TestContext testContext;
-
+    private Process tcpdumpProcess;
 
     private boolean targetIsReady = false;
 
@@ -420,7 +424,7 @@ public class TestRunner {
 
         SignatureAndHashAlgorithmsExtensionMessage sahExt = clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
         if (sahExt != null) {
-            report.setSupportedSignatureAndHashAlgorithms(
+            report.setSupportedSignatureAndHashAlgorithmsSke(
                     SignatureAndHashAlgorithm.getSignatureAndHashAlgorithms(sahExt.getSignatureAndHashAlgorithms().getValue()).stream()
                             .filter(i -> SignatureAndHashAlgorithm.getImplemented().contains(i))
                             .collect(Collectors.toList())
@@ -440,9 +444,42 @@ public class TestRunner {
 
     }
 
+    private void startTcpDump() {
+        if (tcpdumpProcess != null) {
+            LOGGER.warn("This should not happen...");
+            return;
+        }
+
+        String networkInterface = testConfig.getNetworkInterface();
+
+        // tcpdump -i eth0 -w /output/dump.pcap
+        ProcessBuilder tcpdump = new ProcessBuilder(
+                "tcpdump",
+                "-i", networkInterface,
+                "-w", Paths.get(testConfig.getOutputFolder(), "dump.pcap").toString()
+        );
+
+        try {
+            tcpdumpProcess = tcpdump.start();
+            boolean isFinished = tcpdumpProcess.waitFor(2, TimeUnit.SECONDS);
+            if (!isFinished) throw new IllegalStateException();
+            String out = new String(tcpdumpProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            out += new String(tcpdumpProcess.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
+            throw new RuntimeException(out);
+        } catch (IllegalStateException ignored) {
+
+        } catch (Exception e) {
+            LOGGER.error("Starting tcpdump failed", e);
+        }
+    }
+
     public void prepareTestExecution() {
         if (!testConfig.isParsedArgs()) {
             return;
+        }
+
+        if (!testConfig.isDisableTcpDump()) {
+            startTcpDump();
         }
 
         ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
@@ -515,12 +552,18 @@ public class TestRunner {
     }
 
     public void runTests(Class<?> mainClass) {
-        prepareTestExecution();
-
         String packageName = mainClass.getPackage().getName();
         if (testConfig.getTestPackage() != null) {
             packageName = testConfig.getTestPackage();
         }
+
+        if (testConfig.getParsedCommand() == ConfigDelegates.EXTRACT_TESTS) {
+            TestCaseExtractor extractor = new TestCaseExtractor(packageName);
+            extractor.start();
+            return;
+        }
+
+        prepareTestExecution();
 
         LauncherDiscoveryRequestBuilder builder = LauncherDiscoveryRequestBuilder.request()
                 .selectors(

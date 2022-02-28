@@ -27,12 +27,12 @@ import org.junit.jupiter.api.Test;
 @RFC(number = 5246, section = "A.5. The Cipher Suite")
 public class A5CipherSuite extends Tls12Test {
 
-    /*@TlsTest(description = "TLS_NULL_WITH_NULL_NULL is specified and is the initial state of a TLS connection during " +
-            "the first handshake on that channel, but MUST NOT be negotiated, as it provides no more protection " +
-            "than an unsecured connection.", securitySeverity = SeverityLevel.CRITICAL)*/
     @Test
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @TestDescription("The initial Cipher Suite state with NULL algorithms must not be negotiated")
+    @TestDescription("TLS_NULL_WITH_NULL_NULL is specified and is the initial state of a " +
+        "TLS connection during the first handshake on that channel, but MUST " +
+        "NOT be negotiated, as it provides no more protection than an " +
+        "unsecured connection.")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void negotiateTLS_NULL_WITH_NULL_NULL() {
@@ -46,7 +46,10 @@ public class A5CipherSuite extends Tls12Test {
             "layer has specifically requested to allow anonymous key exchange", securitySeverity = SeverityLevel.HIGH)*/
     @Test
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @TestDescription("Anonymous Cipher Suites must not be used unless requested by application layer")
+    @TestDescription("These " +
+        "cipher suites MUST NOT be used by TLS 1.2 implementations unless the " +
+        "application layer has specifically requested to allow anonymous key " +
+        "exchange.")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void anonCipherSuites() {

@@ -39,13 +39,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 6176, section = "3")
+@RFC(number = 6176, section = "3.  Changes to TLS")
 @ClientTest
 public class ProhibitingSSLv2 extends Tls12Test {
 
     
-    @TlsTest(description = "TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT-"
-            + "HELLO message format.")
+    @TlsTest(description = "TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT- " +
+            "HELLO message format.")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -63,8 +63,8 @@ public class ProhibitingSSLv2 extends Tls12Test {
     }
 
     @TlsTest(description = "TLS servers MUST NOT reply with an SSL 2.0 SERVER-HELLO with a"
-            + "protocol version that is less than { 0x03, 0x00 } and instead MUST"
-            + "abort the connection")
+            + " protocol version that is less than { 0x03, 0x00 } and instead MUST"
+            + " abort the connection")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)

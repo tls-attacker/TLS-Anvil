@@ -46,7 +46,7 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5264, section = "6.2.1 Fragmentation")
+@RFC(number = 5246, section = "6.2.1 Fragmentation")
 @ServerTest
 public class Fragmentation extends Tls12Test {
 
@@ -112,9 +112,12 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest
+    @TlsTest(description = "Client " +
+        "message boundaries are not preserved in the record layer (i.e., " +
+        "multiple client messages of the same ContentType MAY be coalesced " +
+        "into a single TLSPlaintext record, or a single message MAY be " +
+        "fragmented across several records).")
     @ScopeLimitations({DerivationType.RECORD_LENGTH, DerivationType.TCP_FRAGMENTATION})
-    @TestDescription("Handshake messages spread across different records should be accepted")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -138,9 +141,12 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(description = "")
+    @TlsTest(description = "Client " +
+        "message boundaries are not preserved in the record layer (i.e., " +
+        "multiple client messages of the same ContentType MAY be coalesced " +
+        "into a single TLSPlaintext record, or a single message MAY be " +
+        "fragmented across several records).")
     @ScopeLimitations({DerivationType.RECORD_LENGTH, DerivationType.TCP_FRAGMENTATION})
-    @TestDescription("Handshake messages spread across different records should be accepted")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

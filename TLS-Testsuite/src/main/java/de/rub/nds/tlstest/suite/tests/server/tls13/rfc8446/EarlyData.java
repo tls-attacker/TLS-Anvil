@@ -48,6 +48,7 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.List;
 import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -80,7 +81,7 @@ public class EarlyData extends Tls13Test {
         return null;
     }
 
-    @TlsTest(description = "If the server supplies an \"early_data\" extension, the client MUST"
+    @TlsTest(description = "If the server supplies an \"early_data\" extension, the client MUST "
             + "verify that the server's selected_identity is 0.") 
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "supports0rtt")
@@ -88,6 +89,7 @@ public class EarlyData extends Tls13Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.MEDIUM)
+    @Disabled
     public void selectedFirstIdentity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddPSKKeyExchangeModesExtension(true);
@@ -109,16 +111,17 @@ public class EarlyData extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "[The server] MUST verify that the"
-            + "following values are the same as those associated with the"
+    @TlsTest(description = "[The server] MUST verify that the "
+            + "following values are the same as those associated with the "
             + "selected PSK: [...] The selected cipher suite [...]"
-            + "If any of these checks fail, the server MUST NOT respond with the"
+            + "If any of these checks fail, the server MUST NOT respond with the "
             + "extension")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "tls13multipleCipherSuites")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.MEDIUM)
+    @Disabled
     public void cipherSuiteDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddPSKKeyExchangeModesExtension(true);
@@ -141,16 +144,17 @@ public class EarlyData extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "[The server] MUST verify that the"
-            + "following values are the same as those associated with the"
+    @TlsTest(description = "[The server] MUST verify that the "
+            + "following values are the same as those associated with the "
             + "selected PSK: [...] The TLS version number [...]"
-            + "If any of these checks fail, the server MUST NOT respond with the"
+            + "If any of these checks fail, the server MUST NOT respond with the "
             + "extension")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "supports0rtt")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.MEDIUM)
+    @Disabled
     public void tlsVersionDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddPSKKeyExchangeModesExtension(true);
@@ -175,11 +179,11 @@ public class EarlyData extends Tls13Test {
         return lengthCandidate >= 50;
     }
 
-    @TlsTest(description = "If the server chooses to accept the \"early_data\" extension, then it"
-            + "MUST comply with the same error-handling requirements specified for"
-            + "all records when processing early data records.  Specifically, if the\n"
-            + "server fails to decrypt a 0-RTT record following an accepted\n"
-            + "\"early_data\" extension, it MUST terminate the connection with a\n"
+    @TlsTest(description = "If the server chooses to accept the \"early_data\" extension, then it "
+            + "MUST comply with the same error-handling requirements specified for "
+            + "all records when processing early data records.  Specifically, if the "
+            + "server fails to decrypt a 0-RTT record following an accepted "
+            + "\"early_data\" extension, it MUST terminate the connection with a "
             + "\"bad_record_mac\" alert as per Section 5.2.")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "supports0rtt")
@@ -190,6 +194,7 @@ public class EarlyData extends Tls13Test {
     @CryptoCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
+    @Disabled
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddPSKKeyExchangeModesExtension(true);
@@ -237,11 +242,11 @@ public class EarlyData extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "If the server chooses to accept the \"early_data\" extension, then it"
-            + "MUST comply with the same error-handling requirements specified for"
-            + "all records when processing early data records.  Specifically, if the\n"
-            + "server fails to decrypt a 0-RTT record following an accepted\n"
-            + "\"early_data\" extension, it MUST terminate the connection with a\n"
+    @TlsTest(description = "If the server chooses to accept the \"early_data\" extension, then it "
+            + "MUST comply with the same error-handling requirements specified for "
+            + "all records when processing early data records.  Specifically, if the "
+            + "server fails to decrypt a 0-RTT record following an accepted "
+            + "\"early_data\" extension, it MUST terminate the connection with a "
             + "\"bad_record_mac\" alert as per Section 5.2.")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
@@ -251,6 +256,7 @@ public class EarlyData extends Tls13Test {
     @CryptoCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
+    @Disabled
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddPSKKeyExchangeModesExtension(true);

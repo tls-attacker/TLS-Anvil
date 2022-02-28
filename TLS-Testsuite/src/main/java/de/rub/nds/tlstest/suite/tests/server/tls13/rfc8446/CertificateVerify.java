@@ -17,6 +17,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -51,6 +52,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
  */
 @Tag("signature")
 @ServerTest
+@RFC(number = 8446, section = "4.4.3.  Certificate Verify")
 public class CertificateVerify extends Tls13Test {
 
     @TlsTest(description = "Test if the Server sends Certificate Verify Messages with valid signatures")

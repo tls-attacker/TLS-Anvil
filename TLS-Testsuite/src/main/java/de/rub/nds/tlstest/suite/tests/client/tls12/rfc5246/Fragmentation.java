@@ -37,7 +37,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
-@RFC(number = 5264, section = "6.2.1 Fragmentation")
+@RFC(number = 5246, section = "6.2.1 Fragmentation")
 @ClientTest
 public class Fragmentation extends Tls12Test {
 
@@ -69,13 +69,12 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest
+    @TlsTest(description = "Client " +
+        "message boundaries are not preserved in the record layer (i.e., " +
+        "multiple client messages of the same ContentType MAY be coalesced " +
+        "into a single TLSPlaintext record, or a single message MAY be " +
+        "fragmented across several records).")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @TestDescription("Client" +
-        "   message boundaries are not preserved in the record layer (i.e.,\n" +
-        "   multiple client messages of the same ContentType MAY be coalesced\n" +
-        "   into a single TLSPlaintext record, or a single message MAY be\n" +
-        "   fragmented across several records).")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

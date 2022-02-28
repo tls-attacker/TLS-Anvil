@@ -1,0 +1,5 @@
+The client and server MUST NOT use encrypt-then-MAC unless both sides have successfully exchanged encrypt_then_mac extensions.
+
+Decryption reverses this processing.  The MAC SHALL be evaluated before any further processing such as decryption is performed, and if the MAC verification fails, then processing SHALL terminate immediately.  For TLS, a fatal bad_record_mac MUST be generated [2].
+
+The "extension_type" value for this extension SHALL be 22 (0x16), and the "extension_data" field of this extension SHALL be empty.

@@ -27,6 +27,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import static de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests.checkForDuplicateExtensions;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,7 +62,7 @@ public class ClientHello extends Tls12Test {
     
     @Test
     @RFC(number = 7457, section = "2.6.  Compression Attacks: CRIME, TIME, and BREACH")
-    @TestDescription("The CRIME attack (CVE-2012-4929) allows an active attacker to " +
+    @TestDescription("The CRIME attack [...] (CVE-2012-4929) allows an active attacker to " +
             "decrypt ciphertext (specifically, cookies) when TLS is used with TLS- " +
             "level compression.")
     @SecurityCategory(SeverityLevel.CRITICAL)
@@ -86,6 +87,7 @@ public class ClientHello extends Tls12Test {
     }
     
     @Test
+    @RFC(number = 5246, section = "7.4.1.4.1.  Signature Algorithms")
     @TestDescription("The client uses the \"signature_algorithms\" extension to indicate to " +
             "the server which signature/hash algorithm pairs may be used in " +
             "digital signatures.")
@@ -137,6 +139,26 @@ public class ClientHello extends Tls12Test {
         proposedCipherSuites.removeAll(coveredCipherSuites);
         assertTrue("Client did not provide a SignatureAlgorithm for all cipher suites " +
                         proposedCipherSuites.parallelStream().map(Enum::name).collect(Collectors.joining(",")),proposedCipherSuites.isEmpty());
+    }
+    
+    @Test
+    @TestDescription("There MUST NOT be more than one extension of the same type. [...]" +
+            "The \"anonymous\" value is meaningless in this context but used in " +
+            "Section 7.4.3.  It MUST NOT appear in this extension.")
+    @RFC(number = 5246, section = "7.4.1.4. Hello Extensions and 7.4.1.4.1. Signature Algorithms")
+    @InteroperabilityCategory(SeverityLevel.CRITICAL)
+    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @HandshakeCategory(SeverityLevel.CRITICAL)
+    @Tag("new")
+    public void checkExtensions() {
+        ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
+        checkForDuplicateExtensions(clientHelloMessage);
+        SignatureAndHashAlgorithmsExtensionMessage sigHashExtension = context.getReceivedClientHelloMessage().getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
+        if(sigHashExtension != null) {
+            List<SignatureAndHashAlgorithm> algorithmPairs = SignatureAndHashAlgorithm.getSignatureAndHashAlgorithms(sigHashExtension.getSignatureAndHashAlgorithms().getValue());
+            List<SignatureAndHashAlgorithm> anonAlgorithms = algorithmPairs.stream().filter(algo -> {return algo.getSignatureAlgorithm() == SignatureAlgorithm.ANONYMOUS;}).collect(Collectors.toList());
+            assertTrue("Client offered anonymous signature algorithms:" + anonAlgorithms.parallelStream().map(Enum::name).collect(Collectors.joining(",")), anonAlgorithms.isEmpty());
+        }
     }
         
     private boolean providedSignatureAlgorithm(SignatureAlgorithm requiredAlgorithm) {

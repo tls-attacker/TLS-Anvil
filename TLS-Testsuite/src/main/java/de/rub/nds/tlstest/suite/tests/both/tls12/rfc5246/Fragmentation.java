@@ -211,8 +211,7 @@ public class Fragmentation extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. "
-            + "The length MUST NOT exceed 2^14 + 2048.")
+    @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. " + "The length MUST NOT exceed 2^14 + 2048") //.  
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -243,7 +242,9 @@ public class Fragmentation extends Tls12Test {
     }
     
     @Test
-    @TestDescription("Evaluate if the preparation phase detected that the target is able to process fragmented Records")
+    @TestDescription("Client " +
+        "message boundaries are not preserved in the record layer [...] " +
+        "a single message MAY be fragmented across several records")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.CRITICAL)

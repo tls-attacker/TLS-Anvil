@@ -11,11 +11,15 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8422;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.attacks.ec.InvalidCurvePoint;
+import de.rub.nds.tlsattacker.attacks.ec.TwistedCurvePoint;
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ECPointFormat;
+import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
+import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.crypto.ec.CurveFactory;
 import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurve;
 import de.rub.nds.tlsattacker.core.crypto.ec.FieldElementFp;
@@ -24,17 +28,22 @@ import de.rub.nds.tlsattacker.core.crypto.ec.PointFormatter;
 import de.rub.nds.tlsattacker.core.crypto.ec.RFC7748Curve;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ECDHClientKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
@@ -63,34 +72,54 @@ import static org.junit.Assert.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 
 @RFC(number = 8422, section = "4. TLS Extensions for ECC")
 @ClientTest
 public class TLSExtensionForECC extends Tls12Test {
 
+    public ConditionEvaluationResult doesNotOfferEccCipherSuite() {
+        if (context.getSiteReport().getCipherSuites() == null || context.getSiteReport().getCipherSuites().stream().anyMatch(cipherSuite -> {return AlgorithmResolver.getKeyExchangeAlgorithm(cipherSuite).isEC();})) {
+            return ConditionEvaluationResult.disabled("Client supports ECC cipher suite");
+            
+        }
+        return ConditionEvaluationResult.enabled("");
+    }
+    
     @Test
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @TestDescription("Implementations of this document MUST support the" +
-            "uncompressed format for all of their supported curves and MUST NOT" +
-            "support other formats for curves defined in this specification.  For" +
-            "backwards compatibility purposes, the point format list extension MAY" +
-            "still be included and contain exactly one value: the uncompressed" +
+    @TestDescription("A client compliant with this specification that supports no other " +
+            "curves MUST send the following octets; note that the first two octets " +
+            "indicate the extension type (Supported Point Formats Extension)[...]" +
+            "If the Supported Point Formats " +
+            "Extension is indeed sent, it MUST contain the value 0 (uncompressed) " +
+            "as one of the items in the list of point formats. [...]" +
+            "Implementations of this document MUST support the " +
+            "uncompressed format for all of their supported curves and MUST NOT " +
+            "support other formats for curves defined in this specification.  For " +
+            "backwards compatibility purposes, the point format list extension MAY " +
+            "still be included and contain exactly one value: the uncompressed " +
             "point format (0).")
+    @RFC(number = 8422, section = "4. TLS Extensions for ECC, 5.1. Client Hello Extensions, and 5.1.2. Supported Point Formats Extension")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
+    @Tag("adjusted")
     public void invalidPointFormat() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
         ECPointFormatExtensionMessage poinfmtExt = msg.getExtension(ECPointFormatExtensionMessage.class);
         
         boolean rfc8422curves = false;
+        boolean nonRfc8422curve = false;
         for(NamedGroup group: context.getSiteReport().getSupportedNamedGroups()) {
             if(isRfc8422Curve(group)) {
                 rfc8422curves = true;
-                break;
+            } else {
+                nonRfc8422curve = true;
             }
         }
         
@@ -105,22 +134,19 @@ public class TLSExtensionForECC extends Tls12Test {
                 }
             }
             assertTrue("ECPointFormatExtension does not contain uncompressed format", contains_zero);
-            if(rfc8422curves) {
+            if(rfc8422curves && !nonRfc8422curve) {
                 assertFalse("ECPointFormatExtension contains compressed or invalid format", contains_other);
             }
         }
     }
     
-    /*@TlsTest(description = " RFC 4492 defined 25 different curves in the NamedCurve registry (now\n" +
-            "renamed the \"TLS Supported Groups\" registry, although the enumeration\n" +
-            "below is still named NamedCurve) for use in TLS.  Only three have\n" +
-            "seen much use.  This specification is deprecating the rest (with\n" +
-            "numbers 1-22).  This specification also deprecates the explicit " +
-            "curves with identifiers 0xFF01 and 0xFF02.  It also adds the new\n" +
-            "curves defined in [RFC7748]", securitySeverity = SeverityLevel.LOW)*/
     @Test
     @KeyExchange(supported = {KeyExchangeType.ECDH})
-    @TestDescription("Deprecated groups should not be offered by a client")
+    @TestDescription("RFC 4492 defined 25 different curves in the NamedCurve registry (now "  +
+        "renamed the \"TLS Supported Groups\" registry, although the enumeration " +
+        "below is still named NamedCurve) for use in TLS. Only three have " +
+        "seen much use. This specification is deprecating the rest (with " +
+        "numbers 1-22).")
     @CryptoCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.MEDIUM)
     @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
@@ -147,17 +173,22 @@ public class TLSExtensionForECC extends Tls12Test {
         return false;
     }
     
-    public boolean isInvalidCurveApplicableNamedGroup(NamedGroup group) {
+    public boolean isSecpCurve(NamedGroup group) {
         if(group != null && group.isCurve() && !group.isGost() && !(CurveFactory.getCurve(group) instanceof RFC7748Curve)) {
             return true;
         }
         return false;
     }
     
-    @TlsTest(description = "A lack of point validation might enable Invalid Curve Attacks")
+    @TlsTest(description = "With the NIST curves, each party MUST validate the public key sent by " +
+        "its peer in the ClientKeyExchange and ServerKeyExchange messages.  A " +
+        "receiving party MUST check that the x and y parameters from the " +
+        "peer's public value satisfy the curve equation, y^2 = x^3 + ax + b " +
+        "mod p.")
+    @RFC(number = 8422, section = "5.11. Public Key Validation")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isInvalidCurveApplicableNamedGroup")
+    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isSecpCurve")
     @CryptoCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -180,5 +211,76 @@ public class TLSExtensionForECC extends Tls12Test {
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+    }
+    
+    @TlsTest(description = "if either party obtains all-zeroes x_S, it MUST " +
+        "abort the handshake (as required by definition of X25519 and X448). [...]" +
+        "With X25519 and X448, a receiving party MUST check whether the " +
+        "computed premaster secret is the all-zero value and abort the " +
+        "handshake if so")
+    @RFC(number = 8422, section = "5.10. ECDH, ECDSA, and RSA Computations and 5.11. Public Key Validation")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
+    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isXCurve")
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @Tag("new")
+    public void abortsWhenSharedSecretIsZero(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_KEY_EXCHANGE);
+        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+        
+        TwistedCurvePoint groupSpecificPoint = TwistedCurvePoint.smallOrder(selectedGroup);
+        RFC7748Curve curve = (RFC7748Curve) CurveFactory.getCurve(selectedGroup);
+        Point invalidPoint = new Point(new FieldElementFp(groupSpecificPoint.getPublicPointBaseX(), curve.getModulus()),
+                new FieldElementFp(groupSpecificPoint.getPublicPointBaseY(), curve.getModulus()));
+
+        ECDHEServerKeyExchangeMessage serverKeyExchange = new ECDHEServerKeyExchangeMessage(config);
+        byte[] serializedPublicKey = curve.encodeCoordinate(invalidPoint.getFieldX().getData());
+        serverKeyExchange.setPublicKey(Modifiable.explicit(serializedPublicKey));
+        workflowTrace.addTlsAction(new SendAction(serverKeyExchange));
+        workflowTrace.addTlsAction(new SendAction(ActionOption.MAY_FAIL, new ServerHelloDoneMessage(config)));
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        
+        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+    }
+    
+    @TlsTest(description = "A client that receives a ServerHello message containing a Supported " +
+        "Point Formats Extension MUST respect the server's choice of point " +
+        "formats during the handshake (cf.  Sections 5.6 and 5.7).")
+    @RFC(number = 8422, section = "5.2. Server Hello Extension")
+    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isSecpCurve")
+    @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @InteroperabilityCategory(SeverityLevel.MEDIUM)
+    @Tag("new")
+    public void respectsPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        config.setDefaultServerSupportedPointFormats(ECPointFormat.UNCOMPRESSED);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
+        runner.execute(workflowTrace, config).validateFinal(i -> {
+            Validator.executedAsPlanned(i);
+            ECDHClientKeyExchangeMessage clientKeyExchange = i.getWorkflowTrace().getFirstReceivedMessage(ECDHClientKeyExchangeMessage.class);
+            assertEquals("Client did not respect our Point Format" , 0x04, clientKeyExchange.getPublicKey().getValue()[0]);
+        });
+    }
+    
+    @Test
+    @TestDescription("The client MUST NOT include these extensions in the ClientHello " +
+        "message if it does not propose any ECC cipher suites.")
+    @MethodCondition(method = "doesNotOfferEccCipherSuite")
+    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @Tag("new")
+    public void offersExtensionsWithoutCipher() {
+        ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
+        assertFalse("Client offered EC Point Formats without an ECC Cipher Suite", clientHello.containsExtension(ExtensionType.EC_POINT_FORMATS));
+        //testing for Elliptic Curves Extension is not sensible as the extension
+        //is now called Named Groups Extension and also negotiates FFDHE groups
+    }
+    
+    public boolean isXCurve(NamedGroup group) {
+        return group != null && group.name().contains("ECDH_X");
     }
 }

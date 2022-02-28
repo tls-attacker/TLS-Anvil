@@ -90,8 +90,8 @@ public class SignatureAlgorithms extends Tls12Test {
         return ConditionEvaluationResult.disabled("No ECDSA signature ciphersuites supported");
     }
 
-    @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
-            "If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), " +
+    @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:" +
+            "[...]If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), " +
             "behave as if the client had sent the value {sha1,dsa}.")
     @MethodCondition(method = "dssCiphersuitesSupported")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
@@ -111,9 +111,9 @@ public class SignatureAlgorithms extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
-            "If the negotiated key exchange algorithm is one of (ECDH_ECDSA, ECDHE_ECDSA), " +
-            "behave as if the client had sent value {sha1,ecdsa}.")
+    @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:" +
+            "[...]If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), " +
+            "behave as if the client had sent the value {sha1,dsa}.")
     @MethodCondition(method = "ecdsaCiphersuitesSupported")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -132,7 +132,14 @@ public class SignatureAlgorithms extends Tls12Test {
         });
     }
     
-    @TlsTest(description = "Perform a Handshake where the Signature and Hash Algorithms Extension contains an additional, undefined algorithm")
+    @TlsTest(description = "Each SignatureAndHashAlgorithm value lists a single hash/signature " +
+        "pair that the client is willing to verify.  The values are indicated " +
+        "in descending order of preference. [...]" + 
+        "Because not all signature algorithms and hash algorithms may be " +
+        "accepted by an implementation (e.g., DSA with SHA-1, but not " +
+        "SHA-256), algorithms here are listed in pairs.")
+    //This requirement also applies to older versions
+    @RFC(number = 5246, section = "7.4.1.4.1.  Signature Algorithms")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

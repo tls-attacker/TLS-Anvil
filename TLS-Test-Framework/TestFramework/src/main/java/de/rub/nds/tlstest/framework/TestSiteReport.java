@@ -37,17 +37,17 @@ public class TestSiteReport extends SiteReport {
     public TestSiteReport(String host) {
         super(host, 4433);
     }
-
-    private TestSiteReport() {
-        super();
+    
+    public TestSiteReport(String host, int port) {
+        super(host, port);
     }
 
     public static TestSiteReport fromSiteReport(SiteReport siteReport) {
         try {
-            TestSiteReport report = new TestSiteReport();
+            TestSiteReport report = new TestSiteReport(siteReport.getHost(), siteReport.getPort());
 
             report.setCipherSuites(siteReport.getCipherSuites());
-            report.setSupportedSignatureAndHashAlgorithms(siteReport.getSupportedSignatureAndHashAlgorithms());
+            report.setSupportedSignatureAndHashAlgorithmsSke(siteReport.getSupportedSignatureAndHashAlgorithms());
             report.setVersions(siteReport.getVersions());
             report.setSupportedNamedGroups(siteReport.getSupportedNamedGroups());
             report.setVersionSuitePairs(siteReport.getVersionSuitePairs());
@@ -80,6 +80,28 @@ public class TestSiteReport extends SiteReport {
             }
         }
         return keyShareGroups;
+    }
+    
+    @Override
+    public List<NamedGroup> getSupportedNamedGroups() {
+        //We limit the tests to EC Named Groups for now
+        return super.getSupportedNamedGroups().stream().filter(NamedGroup::isCurve).collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<NamedGroup> getSupportedTls13Groups() {
+        //We limit the tests to EC Named Groups for now
+        return super.getSupportedTls13Groups().stream().filter(NamedGroup::isCurve).collect(Collectors.toList());
+    }
+    
+    public List<NamedGroup> getSupportedFfdheNamedGroups() {
+        //We only use these for FFDHE RFC tests for now
+        return super.getSupportedNamedGroups().stream().filter(NamedGroup::isDhGroup).collect(Collectors.toList());
+    }
+    
+    public List<NamedGroup> getSupportedTls13FfdheNamedGroups() {
+        //We limit the tests to EC Named Groups for now
+        return super.getSupportedTls13Groups().stream().filter(NamedGroup::isDhGroup).collect(Collectors.toList());
     }
     
     public List<NamedGroup> getClientHelloNamedGroups() {

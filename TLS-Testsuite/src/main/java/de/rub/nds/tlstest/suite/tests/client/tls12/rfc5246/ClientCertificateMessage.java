@@ -29,10 +29,14 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
-@RFC(number = 5446, section = "7.4.6. Client Certificate")
+@RFC(number = 5246, section = "7.4.6. Client Certificate")
 public class ClientCertificateMessage extends Tls12Test {
 
-    @TlsTest(description = "If no suitable certificate is available, the client MUST send a certificate message containing no certificates.")
+    @TlsTest(description = "If the server has sent " +
+        "a CertificateRequest message, the client MUST send the Certificate " +
+        "message. [...]" + 
+        "If no suitable certificate is available, the client MUST send a certificate message containing no certificates.")
+    @RFC(number = 5246, section = "7.3. Handshake Protocol Overview and 7.4.6. Client Certificate")
     @ComplianceCategory(SeverityLevel.HIGH)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)

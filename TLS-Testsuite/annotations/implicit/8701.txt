@@ -1,0 +1,2 @@
+Implementations MUST honor protocol specifications when sending GREASE values.
+

@@ -133,6 +133,7 @@ public class EncryptedExtensions extends Tls13Test {
         });
     }
 
+    @RFC(number = 6066, section = "4. Maximum Fragment Length Negotiation")
     @TlsTest(description = "Similarly, if a client receives a maximum fragment length negotiation "
             + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")

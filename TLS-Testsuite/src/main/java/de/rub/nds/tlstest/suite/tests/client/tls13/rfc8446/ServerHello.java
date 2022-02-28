@@ -116,9 +116,6 @@ public class ServerHello extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
             Validator.receivedFatalAlert(i);
-
-            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
         });
     }
 
@@ -150,10 +147,10 @@ public class ServerHello extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "TLS 1.3 clients receiving a ServerHello indicating TLS 1.2 or below MUST "
-            + "check that the last 8 bytes are not equal to either of these values. "
-            + "If a match is found, the client MUST abort the handshake "
-            + "with an \"illegal_parameter\" alert.")
+    @TlsTest(description = "TLS 1.3 clients receiving a ServerHello indicating TLS 1.2 or below " +
+        "MUST check that the last 8 bytes are not equal to either of these " +
+        "values. [...] If a match is found, the client MUST abort the handshake with " +
+        "an \"illegal_parameter\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @HandshakeCategory(SeverityLevel.MEDIUM)

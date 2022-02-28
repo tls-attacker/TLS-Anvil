@@ -1,0 +1,118 @@
+If a server established a TLS connection with a previous version of TLS and receives a TLS 1.3 ClientHello in a renegotiation, it MUST retain the previous protocol version.  In particular, it MUST NOT negotiate TLS 1.3.
+
+A legacy TLS client performing renegotiation with TLS 1.2 or prior and which receives a TLS 1.3 ServerHello during renegotiation MUST abort the handshake with a "protocol_version" alert.
+
+The keys found in certificates MUST also be of appropriate type for the signature algorithms they are used with.
+
+Clients which desire the server to authenticate itself via a certificate MUST send the "signature_algorithms" extension.
+
+The length of the Salt MUST be equal to the length of the output of the digest algorithm. If the public key is carried in an X.509 certificate, it MUST use the rsaEncryption OID [RFC5280].
+
+The length of the Salt MUST be equal to the length of the digest algorithm.  If the public key is carried in an X.509 certificate, it MUST use the RSASSA-PSS OID [RFC5756].  When used in certificate signatures, the algorithm parameters MUST be DER encoded.  If the corresponding public key's parameters are present, then the parameters in the signature MUST be identical to those in the public key.
+
+TLS 1.3 servers MUST NOT offer a SHA-1 signed certificate unless no valid certificate chain can be produced without it (see Section 4.4.2.2).
+
+If the server has included a non-empty filters list, the client certificate included in the response MUST contain all of the specified extension OIDs that the client recognizes.  For each extension OID recognized by the client, all of the specified values MUST be present in the client certificate (but the certificate MAY have other values as well).  However, the client MUST ignore and skip any unrecognized certificate extension OIDs.  If the client ignored some of the required certificate extension OIDs and supplied a certificate that does not satisfy the request, the server MAY at its discretion either continue the connection without client authentication or abort the handshake with an "unsupported_certificate" alert.  Any given OID MUST NOT appear more than once in the filters list.
+
+The Extended Key Usage extension in a certificate matches the request when all key purpose OIDs present in the request are also found in the Extended Key Usage certificate extension.  The special anyExtendedKeyUsage OID MUST NOT be used in the request.
+
+In order to use PSKs, clients MUST also send a "psk_key_exchange_modes" extension.
+
+A client MUST provide a "psk_key_exchange_modes" extension if it offers a "pre_shared_key" extension. 
+
+In this mode, the client and server MUST supply "key_share" values as described in Section 4.2.8.
+
+When a PSK is used and early data is allowed for that PSK, the client can send Application Data in its first flight of messages.  If the client opts to do so, it MUST supply both the "pre_shared_key" and "early_data" extensions.
+
+If the client opts to send an OCSP response, the body of its "status_request" extension MUST be a CertificateStatus structure as defined in [RFC6066].
+
+The PSK used to encrypt the early data MUST be the first PSK listed in the client's "pre_shared_key" extension.
+
+For PSKs provisioned via NewSessionTicket, a server MUST validate that the ticket age for the selected PSK identity (computed by subtracting ticket_age_add from PskIdentity.obfuscated_ticket_age modulo 2^32) is within a small tolerance of the time since the ticket was issued (see Section 8).  If it is not, the server SHOULD proceed with the handshake but reject 0-RTT, and SHOULD NOT take any other action that assumes that this ClientHello is fresh.
+
+A server which receives an "early_data" extension MUST behave in one of three ways:
+
+Request that the client send another ClientHello by responding with a HelloRetryRequest.  A client MUST NOT include the "early_data" extension in its followup ClientHello.  The server then ignores early data by skipping all records with an external content type of "application_data" (indicating that they are encrypted), up to the configured max_early_data_size.
+
+The selected ALPN [RFC7301] protocol, if any
+
+A TLS implementation MUST NOT automatically resend early data unless the negotiated connection selects the same ALPN protocol.
+
+that the server selected a cipher suite indicating a Hash associated with the PSK, and that a server "key_share" extension is present if required by the ClientHello "psk_key_exchange_modes" extension.  If these values are not consistent, the client MUST abort the handshake with an "illegal_parameter" alert.
+
+A server which is authenticating with a certificate MAY optionally request a certificate from the client.  This message, if sent, MUST follow EncryptedExtensions.
+
+The certificate_request_context MUST be unique within the scope of this connection (thus preventing replay of client CertificateVerify messages).
+
+extensions:  A set of extensions describing the parameters of the certificate being requested.  The "signature_algorithms" extension MUST be specified, and other extensions may optionally be included if defined for this message.  Clients MUST ignore unrecognized extensions.
+
+Servers which are authenticating with a PSK MUST NOT send the CertificateRequest message in the main handshake, though they MAY send it in post-handshake authentication (see Section 4.6.2) provided that the client has sent the "post_handshake_auth" extension
+
+Extensions in the Certificate message from the server MUST correspond to ones from the ClientHello message.  Extensions in the Certificate message from the client MUST correspond to extensions in the CertificateRequest message from the server.
+
+The sender's certificate MUST come in the first CertificateEntry in the list.
+
+For maximum compatibility, all implementations SHOULD be prepared to handle potentially extraneous certificates and arbitrary orderings from any TLS version, with the exception of the end-entity certificate which MUST be first.
+
+If the RawPublicKey certificate type was negotiated, then the certificate_list MUST contain no more than one CertificateEntry, which contains an ASN1_subjectPublicKeyInfo value
+
+Specifically, the body of the "status_request" extension from the server MUST be a CertificateStatus structure as defined in [RFC6066], which is interpreted as defined in [RFC6960].
+
+The status_request_v2 extension [RFC6961] is deprecated. TLS 1.3 servers MUST NOT act upon its presence or information in it when processing ClientHello messages; in particular, they MUST NOT send the status_request_v2 extension in the EncryptedExtensions, CertificateRequest, or Certificate messages.  TLS 1.3 servers MUST be able to process ClientHello messages that include it, as it MAY be sent by clients that wish to use it in earlier protocol versions.
+
+The certificate type MUST be X.509v3 [RFC5280], unless explicitly negotiated otherwise (e.g., [RFC7250]).
+
+The server's end-entity certificate's public key (and associated restrictions) MUST be compatible with the selected authentication algorithm from the client's "signature_algorithms" extension (currently RSA, ECDSA, or EdDSA).
+
+The certificate MUST allow the key to be used for signing (i.e., the digitalSignature bit MUST be set if the Key Usage extension is present) with a signature scheme indicated in the client's "signature_algorithms"/"signature_algorithms_cert" extensions (see Section 4.2.3).
+
+All certificates provided by the server MUST be signed by a signature algorithm advertised by the client if it is able to provide such a chain (see Section 4.2.3).
+
+This fallback chain SHOULD NOT use the deprecated SHA-1 hash algorithm in general, but MAY do so if the client's advertisement permits it, and MUST NOT do so otherwise.
+
+If the client cannot construct an acceptable chain using the provided certificates and decides to abort the handshake, then it MUST abort the handshake with an appropriate certificate-related alert (by default, "unsupported_certificate"; see Section 6.2 for more information).
+
+The certificates MUST be signed using an acceptable signature algorithm, as described in Section 4.3.2.  Note that this relaxes the constraints on certificate-signing algorithms found in prior versions of TLS.
+
+If the CertificateRequest message contained a non-empty "oid_filters" extension, the end-entity certificate MUST match the extension OIDs that are recognized by the client, as described in Section 4.2.5.
+
+Any endpoint receiving any certificate which it would need to validate using any signature algorithm using an MD5 hash MUST abort the handshake with a "bad_certificate" alert.
+
+Clients MUST send this message whenever authenticating via a certificate (i.e., when the Certificate message is non-empty).  When sent, this message MUST appear immediately after the Certificate message and immediately prior to the Finished message.
+
+If sent by a client, the signature algorithm used in the signature MUST be one of those present in the supported_signature_algorithms field of the "signature_algorithms" extension in the CertificateRequest message.
+
+In addition, the signature algorithm MUST be compatible with the key in the sender's end-entity certificate.
+
+If the server sent an "early_data" extension in EncryptedExtensions, the client MUST send an EndOfEarlyData message after receiving the server Finished.
+
+If the server does not send an "early_data" extension in EncryptedExtensions, then the client MUST NOT send an EndOfEarlyData message.
+
+Clients MUST only resume if the new SNI value is valid for the server certificate presented in the original session and SHOULD only resume if the SNI value matches the one used in the original session.
+
+The client MUST respond with the appropriate Authentication messages (see Section 4.4).  If the client chooses to authenticate, it MUST send Certificate, CertificateVerify, and Finished.
+
+If it declines, it MUST send a Certificate message containing no certificates followed by Finished.
+
+A client that receives a CertificateRequest message without having sent the "post_handshake_auth" extension MUST send an "unexpected_message" fatal alert.
+
+Because client authentication could involve prompting the user, servers MUST be prepared for some delay, including receiving an arbitrary number of other messages between sending the CertificateRequest and receiving a response.
+
+A client that attempts to send 0-RTT data MUST fail a connection if it receives a ServerHello with TLS 1.2 or older.
+
+When multiple extensions of different types are present, the extensions MAY appear in any order, with the exception of "pre_shared_key" (Section 4.2.11) which MUST be the last extension in the ClientHello (but can appear anywhere in the ServerHello extensions block).
+
+If the server supplies an "early_data" extension, the client MUST verify that the server's selected_identity is 0.  If any other value is returned, the client MUST abort the handshake with an "illegal_parameter" alert.
+
+In order to avoid deadlocks, when accepting "early_data", servers MUST process the client's ClientHello and then immediately send their flight of messages, rather than waiting for the client's EndOfEarlyData message before sending its ServerHello.
+
+A TLS-compliant application MUST support digital signatures with rsa_pkcs1_sha256 (for certificates), rsa_pss_rsae_sha256 (for CertificateVerify and certificates), and ecdsa_secp256r1_sha256.
+
+"signature_algorithms" is REQUIRED for certificate authentication.
+
+"pre_shared_key" is REQUIRED for PSK key agreement.
+
+"psk_key_exchange_modes" is REQUIRED for PSK key agreement.
+
+This field SHALL be zero length unless used for the post-handshake authentication exchanges described in Section 4.6.2.
+

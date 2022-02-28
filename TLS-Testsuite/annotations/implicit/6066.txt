@@ -1,0 +1,5 @@
+Note that any messages associated with these extensions that are sent during the TLS handshake MUST be included in the hash calculations involved in "Finished" messages.
+
+The "extension_data" field of this extension SHALL contain:
+
+The "extension_data" field of this extension SHALL contain a "MaxFragmentLength" whose value is the same as the requested maximum fragment length.

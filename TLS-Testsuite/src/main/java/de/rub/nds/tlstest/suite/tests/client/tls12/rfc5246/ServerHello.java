@@ -123,8 +123,9 @@ public class ServerHello extends Tls12Test {
         return !proposedCompressionMethods.contains(compressionMethod);
     }
 
-    @TlsTest(description = "The single compression algorithm selected by the server from the"
+    @TlsTest(description = "The single compression algorithm selected by the server from the "
             + "list in ClientHello.compression_methods.")
+    @RFC(number = 5246, section = "7.4.1.3.  Server Hello")
     @ScopeExtensions(DerivationType.COMPRESSION_METHOD)
     @DynamicValueConstraints(affectedTypes = DerivationType.COMPRESSION_METHOD, methods = "isUnproposedCompressionMethod")
     @ComplianceCategory(SeverityLevel.HIGH)

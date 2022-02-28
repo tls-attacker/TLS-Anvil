@@ -25,6 +25,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
@@ -45,11 +46,12 @@ public class PreSharedKey extends Tls13Test {
             "the handshake with an \"illegal_parameter\" alert.")*/
     @Test
     @MethodCondition(method = "sendsPSKExtension")
-    @TestDescription("The Pre-Shared Key extension must be the last extension of the Client Hello")
+    @TestDescription("The \"pre_shared_key\" extension MUST be the last extension in the ClientHello")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
+    @Disabled
     public void isLastExtension() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         if (!chm.getExtensions().get(chm.getExtensions().size() - 1).getClass().equals(PreSharedKeyExtensionMessage.class)) {

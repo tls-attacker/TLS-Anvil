@@ -30,13 +30,12 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import org.junit.jupiter.api.Test;
 
-@RFC(number = 5264, section = "1.2 Major Differences from TLS 1.1")
+@RFC(number = 5246, section = "1.2 Major Differences from TLS 1.1")
 public class CipherSuites extends Tls12Test {
 
-    //@TlsTest(description = "Removed IDEA and DES cipher suites. They are now deprecated and will be documented in a separate document.", )
     @Test
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @TestDescription("IDEA and DES cipher suites must not be used for TLS 1.2")
+    @TestDescription("Removed IDEA and DES cipher suites. They are now deprecated and will be documented in a separate document.")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)

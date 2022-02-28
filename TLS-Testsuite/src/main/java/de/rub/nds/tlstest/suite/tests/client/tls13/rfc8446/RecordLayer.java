@@ -132,7 +132,7 @@ public class RecordLayer extends Tls13Test {
     }
     
     @TlsTest(description = "Handshake messages MUST NOT be interleaved "
-            + "with other record types. That is, if a handshake message is split over two or more\n"
+            + "with other record types. That is, if a handshake message is split over two or more "
             + "records, there MUST NOT be any other records between them.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @ScopeExtensions(DerivationType.ALERT)
@@ -214,5 +214,39 @@ public class RecordLayer extends Tls13Test {
             trace.addTlsActions(action, new ReceiveAction(new AlertMessage()));
         }
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+    }
+    
+    
+    @TlsTest(description = "Handshake messages MUST NOT span key changes. Implementations " +
+        "MUST verify that all messages immediately preceding a key change " +
+        "align with a record boundary; if not, then they MUST terminate the " +
+        "connection with an \"unexpected_message\" alert.")
+    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @RecordLayerCategory(SeverityLevel.HIGH)
+    @ComplianceCategory(SeverityLevel.HIGH)
+    @Tag("new")
+    public void incompleteCertVerifyBeforeFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE_VERIFY);
+        SendAction sendCertVerifyPart = new SendAction(new CertificateVerifyMessage());
+        
+        Record certVerifyPart = new Record();
+        certVerifyPart.setMaxRecordLengthConfig(15);
+        //this record will take the remaining bytes but they won't be written
+        //to the wire
+        Record dummyRecord = new Record();
+        dummyRecord.setCompleteRecordBytes(Modifiable.explicit(new byte[0]));
+        sendCertVerifyPart.setRecords(certVerifyPart, dummyRecord);
+        
+        workflowTrace.addTlsActions(sendCertVerifyPart, new SendAction(new FinishedMessage(config)));
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        
+        runner.execute(workflowTrace, config).validateFinal(i -> {
+            Validator.receivedFatalAlert(i);
+            //Depending on the parsing behavior, this might yield a different
+            //alert
+            //Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE);
+        });
+        
     }
 }

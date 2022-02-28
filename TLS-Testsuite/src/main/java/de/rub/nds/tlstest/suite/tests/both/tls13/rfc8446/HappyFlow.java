@@ -8,6 +8,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
@@ -24,6 +25,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
  * parameter-related bugs.
  */
 @Tag("happyflow13")
+@RFC(number = 8446, section = "2.  Protocol Overview")
 public class HappyFlow extends Tls13Test {
     
     @TlsTest(description = "A benign handshake executed with all parameter combinations "

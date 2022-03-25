@@ -34,15 +34,16 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.ServerSocket;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * The OpenSSLBuildManager is a ConfigurationOptionsBuildManager to build modern OpenSSL versions.
@@ -69,7 +70,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
     private Set<Integer> usedPorts;
 
     private final String CCACHE_VOLUME_NAME = "ccache-cache";
-    private final List<String> TRIGGER_COMMAND_PREFIX = Arrays.asList("curl");
+    //private final List<String> TRIGGER_COMMAND_PREFIX = Arrays.asList("");
     private final String TLS_SERVER_HOST;
 
 
@@ -509,6 +510,56 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         return inboundConnectionWCTA;
     }
 
+    private static void sendHttpRequestToDockerContainer(String urlString){
+        final int MAX_ATTEMPTS = 3;
+        final int ATTEMPT_DELAY = 2000;//ms
+
+        boolean connected;
+        int attempts = 0;
+        
+        URL url;
+        try{
+            url = new URL(urlString);
+        }
+        catch(MalformedURLException e){
+            throw new RuntimeException(String.format("URL '%s' is malformed", urlString));
+        }
+
+        do
+        {
+            try{
+                HttpURLConnection http = (HttpURLConnection)url.openConnection();
+                http.disconnect();
+                int responseCode = http.getResponseCode();
+                if(responseCode != 200){
+                    LOGGER.warn(String.format("Client docker container at '%s' cannot be triggered. Response Code: %i. Try new attempt.", url.toString(), responseCode));
+                    connected = false;
+                }
+                else{
+                    connected = true;
+                }
+            }
+            catch(Exception e){
+                LOGGER.warn(String.format("Client docker container at '%s' cannot be triggered.", url.toString()));
+                connected = false;
+            }
+            if(!connected){
+                attempts += 1;
+                if(attempts > MAX_ATTEMPTS){
+                    throw new RuntimeException("Cannot send http request to client docker container.");
+                }
+                try{
+                    Thread.sleep(ATTEMPT_DELAY);
+                }
+                catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+        while(!connected);
+
+    }
+
     private Function<State, Integer> getOpenSSLClientTriggerScript(){
         if(TestContext.getInstance().getConfig().getTestEndpointMode() != TestEndpointType.CLIENT){
             throw new IllegalStateException("Function must not be called in Server Mode!");
@@ -531,28 +582,20 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
 
         Function<State, Integer> triggerScript = (State state) -> {
             InboundConnection inboundConnection = state.getConfig().getDefaultServerConnection();
-            // Build the process
-            List<String> triggerCommand;
+            String triggerUrl;
             if(!(inboundConnection instanceof InboundConnectionWithCustomTriggerArgs)){
                 LOGGER.warn("InboundConnection has no args. Maximal-Feature container is used.");
-                triggerCommand = Stream.concat(TRIGGER_COMMAND_PREFIX.stream(), Stream.of(MAX_FEATURE_CONTAINER_TRIGGER_ADDRESS))
-                        .collect(Collectors.toList());
+                triggerUrl = MAX_FEATURE_CONTAINER_TRIGGER_ADDRESS;
             }
             else {
                 InboundConnectionWithCustomTriggerArgs inboundConnectionWCTA =
                         (InboundConnectionWithCustomTriggerArgs) inboundConnection;
-                triggerCommand = Stream.concat(TRIGGER_COMMAND_PREFIX.stream(), inboundConnectionWCTA.getTriggerArgs().stream())
-                        .collect(Collectors.toList());
+                triggerUrl = inboundConnectionWCTA.getTriggerArgs().get(0);
             }
-            // Run the process
-            try {
-                ProcessBuilder processBuilder = new ProcessBuilder(triggerCommand);
-                Process p = processBuilder.start();
-                return 0;
-            } catch (IOException ex) {
-                LOGGER.error(ex);
-                return 1;
-            }
+            
+            OpenSSLBuildManager.sendHttpRequestToDockerContainer(triggerUrl);
+
+            return 0;
         };
 
         return triggerScript;
@@ -621,14 +664,14 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
                 dockerHelper.unpauseContainer(containerInfo);
             }
 
-            List<String> shutdownHttpRequest;
+            String shutdownHttpUrl;
             if(containerInfo instanceof DockerClientContainerInfo){
                 DockerClientContainerInfo clientContainerInfo = (DockerClientContainerInfo) containerInfo;
-                shutdownHttpRequest = Arrays.asList(String.format("http://%s:%d/shutdown", clientContainerInfo.getDockerHost(), clientContainerInfo.getManagerPort()));
+                shutdownHttpUrl = String.format("http://%s:%d/shutdown", clientContainerInfo.getDockerHost(), clientContainerInfo.getManagerPort());
             }
             else if(containerInfo instanceof DockerServerContainerInfo){
                 DockerServerContainerInfo serverContainerInfo = (DockerServerContainerInfo) containerInfo;
-                shutdownHttpRequest = Arrays.asList(String.format("http://%s:%d/shutdown", serverContainerInfo.getDockerHost(), serverContainerInfo.getManagerPort()));
+                shutdownHttpUrl = String.format("http://%s:%d/shutdown", serverContainerInfo.getDockerHost(), serverContainerInfo.getManagerPort());
             }
             else {
                 // Should not happen
@@ -636,15 +679,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
                 continue;
             }
 
-            List<String> shutdownCommand = Stream.concat(TRIGGER_COMMAND_PREFIX.stream(), shutdownHttpRequest.stream())
-                    .collect(Collectors.toList());
-
-            try {
-                ProcessBuilder processBuilder = new ProcessBuilder(shutdownCommand);
-                Process p = processBuilder.start();
-            } catch (IOException ex) {
-                LOGGER.error(ex);
-            }
+            OpenSSLBuildManager.sendHttpRequestToDockerContainer(shutdownHttpUrl);
         }
 
         // Wait for containers to shutdown properly and remove them afterwards

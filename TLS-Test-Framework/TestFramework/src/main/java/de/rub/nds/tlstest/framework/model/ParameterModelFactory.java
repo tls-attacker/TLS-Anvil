@@ -9,10 +9,10 @@
  */
 package de.rub.nds.tlstest.framework.model;
 
+import de.rub.nds.scanner.core.constants.TestResult;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
@@ -164,15 +164,15 @@ public class ParameterModelFactory {
             }
         }
         
-        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_CIPHER_SUITE_INTOLERANCE) != TestResult.TRUE) {
+        if(TestContext.getInstance().getSiteReport().getResult(TlsAnalyzedProperty.HAS_GREASE_CIPHER_SUITE_INTOLERANCE) != TestResult.TRUE) {
             derivationTypes.add(DerivationType.INCLUDE_GREASE_CIPHER_SUITES);
         }
         
-        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_NAMED_GROUP_INTOLERANCE) != TestResult.TRUE) {
+        if(TestContext.getInstance().getSiteReport().getResult(TlsAnalyzedProperty.HAS_GREASE_NAMED_GROUP_INTOLERANCE) != TestResult.TRUE) {
             derivationTypes.add(DerivationType.INCLUDE_GREASE_NAMED_GROUPS);
         }
         
-        if(TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.HAS_GREASE_SIGNATURE_AND_HASH_ALGORITHM_INTOLERANCE) != TestResult.TRUE) {
+        if(TestContext.getInstance().getSiteReport().getResult(TlsAnalyzedProperty.HAS_GREASE_SIGNATURE_AND_HASH_ALGORITHM_INTOLERANCE) != TestResult.TRUE) {
             derivationTypes.add(DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS);
         }
         return derivationTypes;

@@ -6,6 +6,7 @@
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.scanner.core.constants.TestResult;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
@@ -30,8 +31,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -71,8 +71,8 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class PreSharedKey extends Tls13Test {
 
     public ConditionEvaluationResult supportsPsk() {
-        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS13_PSK) == TestResult.TRUE
-                || context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS13_PSK_DHE) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK) == TestResult.TRUE
+                || context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK_DHE) == TestResult.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
             return ConditionEvaluationResult.disabled("Does not support PSK handshakes");
@@ -96,7 +96,7 @@ public class PreSharedKey extends Tls13Test {
     }
     
     public ConditionEvaluationResult supportsPskOnlyHandshake() {
-        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS13_PSK) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK) == TestResult.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
             return ConditionEvaluationResult.disabled("Does not support PSK handshakes");
@@ -104,7 +104,7 @@ public class PreSharedKey extends Tls13Test {
     }
     
     public ConditionEvaluationResult supportsPskDheHandshake() {
-        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS13_PSK_DHE) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK_DHE) == TestResult.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
             return ConditionEvaluationResult.disabled("Does not support PSK handshakes");

@@ -19,9 +19,9 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
-import de.rub.nds.tlsscanner.serverscanner.report.result.VersionSuiteListPair;
+import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlstest.framework.ServerTestSiteReport;
 import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestExtractorDelegate;
@@ -245,7 +245,7 @@ public class TestConfig extends TLSDelegateConfig {
     synchronized public Config createConfig() {
         if (cachedConfig != null) {
             Config config = cachedConfig.createCopy();
-            TestSiteReport report = TestContext.getInstance().getSiteReport();
+            ServerTestSiteReport report = TestContext.getInstance().getSiteReport();
             if (report != null) {
                 List<CipherSuite> supported = new ArrayList<>();
                 if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {

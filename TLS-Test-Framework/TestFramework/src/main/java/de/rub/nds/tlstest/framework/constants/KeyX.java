@@ -16,7 +16,7 @@ import de.rub.nds.tlsattacker.core.constants.KeyExchangeAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlstest.framework.ServerTestSiteReport;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import org.apache.logging.log4j.LogManager;
@@ -84,7 +84,7 @@ public class KeyX implements KeyExchange {
      */
     public void filterSupportedKexs() {
         TestContext context = TestContext.getInstance();
-        TestSiteReport report = context.getSiteReport();
+        ServerTestSiteReport report = context.getSiteReport();
         Set<CipherSuite> ciphers = report.getCipherSuites();
         if (ciphers == null) {
             ciphers = new HashSet<>();

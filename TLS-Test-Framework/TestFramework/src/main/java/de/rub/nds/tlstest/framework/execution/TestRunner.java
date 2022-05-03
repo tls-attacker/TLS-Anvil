@@ -50,13 +50,12 @@ import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsattacker.transport.Connection;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
-import de.rub.nds.tlsscanner.serverscanner.TlsScanner;
-import de.rub.nds.tlsscanner.serverscanner.config.ScannerConfig;
-import de.rub.nds.tlsscanner.serverscanner.constants.ProbeType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsProbeType;
+import de.rub.nds.tlsscanner.serverscanner.config.ServerScannerConfig;
+import de.rub.nds.tlsscanner.serverscanner.execution.TlsServerScanner;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlstest.framework.ServerTestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
@@ -124,7 +123,7 @@ public class TestRunner {
     }
 
 
-    private void saveToCache(@Nonnull TestSiteReport report) {
+    private void saveToCache(@Nonnull ServerTestSiteReport report) {
         String fileName;
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
             fileName = testConfig.getTestClientDelegate().getPort().toString();
@@ -148,7 +147,7 @@ public class TestRunner {
     }
 
     @Nullable
-    private TestSiteReport loadFromCache() {
+    private ServerTestSiteReport loadFromCache() {
         String fileName;
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
             fileName = testConfig.getTestClientDelegate().getPort().toString();
@@ -162,7 +161,7 @@ public class TestRunner {
                 FileInputStream fis = new FileInputStream(fileName);
                 ObjectInputStream ois = new ObjectInputStream(fis);
                 LOGGER.info("Using cached siteReport");
-                return (TestSiteReport) ois.readObject();
+                return (ServerTestSiteReport) ois.readObject();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -226,14 +225,14 @@ public class TestRunner {
     private void serverTestPreparation() {
         waitForServer();
 
-        TestSiteReport cachedReport = loadFromCache();
+        ServerTestSiteReport cachedReport = loadFromCache();
         if (cachedReport != null) {
             testContext.setSiteReport(cachedReport);
             return;
         }
 
         LOGGER.info("Server available, starting TLS-Scanner");
-        ScannerConfig scannerConfig = new ScannerConfig(testConfig.getGeneralDelegate(), testConfig.getTestServerDelegate());
+        ServerScannerConfig scannerConfig = new ServerScannerConfig(testConfig.getGeneralDelegate(), testConfig.getTestServerDelegate());
         scannerConfig.setTimeout(testConfig.getConnectionTimeout());
         Config config = scannerConfig.createConfig();
         config.setAddServerNameIndicationExtension(testConfig.createConfig().isAddServerNameIndicationExtension());
@@ -242,24 +241,24 @@ public class TestRunner {
         scannerConfig.setBaseConfig(config);
 
         scannerConfig.setProbes(
-                ProbeType.COMMON_BUGS,
-                ProbeType.CIPHER_SUITE,
-                ProbeType.CERTIFICATE,
-                ProbeType.COMPRESSIONS,
-                ProbeType.NAMED_GROUPS,
-                ProbeType.PROTOCOL_VERSION,
-                ProbeType.EC_POINT_FORMAT,
-                ProbeType.RESUMPTION,
-                ProbeType.EXTENSIONS,
-                ProbeType.RECORD_FRAGMENTATION,
-                ProbeType.HELLO_RETRY
+                TlsProbeType.COMMON_BUGS,
+                TlsProbeType.CIPHER_SUITE,
+                TlsProbeType.CERTIFICATE,
+                TlsProbeType.COMPRESSIONS,
+                TlsProbeType.NAMED_GROUPS,
+                TlsProbeType.PROTOCOL_VERSION,
+                TlsProbeType.EC_POINT_FORMAT,
+                TlsProbeType.RESUMPTION,
+                TlsProbeType.EXTENSIONS,
+                TlsProbeType.RECORD_FRAGMENTATION,
+                TlsProbeType.HELLO_RETRY
         );
         scannerConfig.setOverallThreads(1);
         scannerConfig.setParallelProbes(1);
 
-        TlsScanner scanner = new TlsScanner(scannerConfig);
+        TlsServerScanner scanner = new TlsServerScanner(scannerConfig);
 
-        TestSiteReport report = TestSiteReport.fromSiteReport(scanner.scan());
+        ServerTestSiteReport report = ServerTestSiteReport.fromSiteReport(scanner.scan());
         saveToCache(report);
 
         testContext.setSiteReport(report);
@@ -270,7 +269,7 @@ public class TestRunner {
     private void clientTestPreparation() {
         waitForClient();
 
-        TestSiteReport cachedReport = loadFromCache();
+        ServerTestSiteReport cachedReport = loadFromCache();
         if (cachedReport != null) {
             testContext.setSiteReport(cachedReport);
             testContext.setReceivedClientHelloMessage(cachedReport.getReceivedClientHello());
@@ -393,11 +392,11 @@ public class TestRunner {
         int dssMinCertKeySize = getCertMinimumKeySize(executor, tls12CipherSuites, CertificateKeyType.DSS);
         boolean supportsRecordFragmentation = clientSupportsRecordFragmentation(executor, tls12CipherSuites, tls13CipherSuites);
         
-        TestSiteReport report = new TestSiteReport("");
+        ServerTestSiteReport report = new ServerTestSiteReport("");
         report.addCipherSuites(tls12CipherSuites);
         report.addCipherSuites(tls13CipherSuites);
         report.setReceivedClientHello(clientHello);
-        report.putResult(AnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION, supportsRecordFragmentation);
+        report.putResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION, supportsRecordFragmentation);
         report.setMinimumRsaCertKeySize(rsaMinCertKeySize);
         report.setMinimumDssCertKeySize(dssMinCertKeySize);
         additionalTls13Groups.addAll(report.getClientHelloKeyShareGroups());

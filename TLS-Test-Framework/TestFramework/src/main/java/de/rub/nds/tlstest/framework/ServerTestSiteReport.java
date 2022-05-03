@@ -10,6 +10,7 @@
 package de.rub.nds.tlstest.framework;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.rub.nds.scanner.core.constants.AnalyzedProperty;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
@@ -17,8 +18,8 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
-import de.rub.nds.tlsscanner.serverscanner.report.SiteReport;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
+import de.rub.nds.tlsscanner.serverscanner.report.ServerReport;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,22 +30,22 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-public class TestSiteReport extends SiteReport {
+public class ServerTestSiteReport extends ServerReport {
 
     @JsonIgnore
     private ClientHelloMessage receivedClientHello;
 
-    public TestSiteReport(String host) {
+    public ServerTestSiteReport(String host) {
         super(host, 4433);
     }
     
-    public TestSiteReport(String host, int port) {
+    public ServerTestSiteReport(String host, int port) {
         super(host, port);
     }
 
-    public static TestSiteReport fromSiteReport(SiteReport siteReport) {
+    public static ServerTestSiteReport fromSiteReport(ServerReport siteReport) {
         try {
-            TestSiteReport report = new TestSiteReport(siteReport.getHost(), siteReport.getPort());
+            ServerTestSiteReport report = new ServerTestSiteReport(siteReport.getHost(), siteReport.getPort());
 
             report.setCipherSuites(siteReport.getCipherSuites());
             report.setSupportedSignatureAndHashAlgorithmsSke(siteReport.getSupportedSignatureAndHashAlgorithms());
@@ -58,7 +59,7 @@ public class TestSiteReport extends SiteReport {
             report.setSupportedExtensions(siteReport.getSupportedExtensions());
             
             for(String key : siteReport.getResultMap().keySet()) {
-                report.putResult(AnalyzedProperty.valueOf(key), siteReport.getResultMap().get(key));
+                report.putResult(TlsAnalyzedProperty.valueOf(key), siteReport.getResultMap().get(key));
             }
             
             return report;

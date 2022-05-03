@@ -10,6 +10,7 @@
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.scanner.core.constants.TestResult;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
@@ -28,8 +29,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -250,6 +250,6 @@ public class Fragmentation extends Tls12Test {
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.HIGH)
     public void recordFragmentationSupported() {
-        assertTrue("Record fragmentation support has not been detected", context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION) == TestResult.TRUE);
+        assertTrue("Record fragmentation support has not been detected", context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION) == TestResult.TRUE);
     }
 }

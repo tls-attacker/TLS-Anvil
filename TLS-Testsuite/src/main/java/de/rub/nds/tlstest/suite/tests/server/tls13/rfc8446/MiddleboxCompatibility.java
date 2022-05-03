@@ -1,6 +1,7 @@
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.scanner.core.constants.TestResult;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
@@ -10,8 +11,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -35,7 +35,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class MiddleboxCompatibility extends Tls13Test {
     
     public ConditionEvaluationResult sendsHelloRetryRequestForEmptyKeyShare() {
-        if (context.getSiteReport().getResult(AnalyzedProperty.SENDS_HELLO_RETRY_REQUEST) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SENDS_HELLO_RETRY_REQUEST) == TestResult.TRUE) {
             return ConditionEvaluationResult.enabled("");
         }
         return ConditionEvaluationResult.disabled("Target does not send a Hello Retry Request");

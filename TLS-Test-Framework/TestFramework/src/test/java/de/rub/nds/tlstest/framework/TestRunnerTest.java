@@ -41,7 +41,7 @@ public class TestRunnerTest {
         URL scriptPath = TestRunnerTest.class.getClassLoader().getResource("trigger.sh");
         String path = scriptPath.toString().replaceAll("^file:", "");
 
-        context.getConfig().parse(new String[]{"-keylogfile", "/Users/philipp/", "client", "-port", "443", "-script", path});
+        context.getConfig().parse(new String[]{"-keylogfile", "/Users/philipp/", "client", "-port", "443", "-triggerScript", path});
         context.getTestRunner().prepareTestExecution();
 
         assertEquals("No ciphersuites supported",27, context.getSiteReport().getCipherSuites().size());

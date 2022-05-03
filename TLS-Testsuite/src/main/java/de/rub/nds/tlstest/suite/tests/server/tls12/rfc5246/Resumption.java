@@ -6,6 +6,7 @@
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.scanner.core.constants.TestResult;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
@@ -23,8 +24,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.annotations.*;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -54,7 +54,7 @@ public class Resumption extends Tls12Test {
     }
 
     public ConditionEvaluationResult supportsResumption() {
-        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_SESSION_ID_RESUMPTION) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_SESSION_ID_RESUMPTION) == TestResult.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
             return ConditionEvaluationResult.disabled("Does not support session resumption");

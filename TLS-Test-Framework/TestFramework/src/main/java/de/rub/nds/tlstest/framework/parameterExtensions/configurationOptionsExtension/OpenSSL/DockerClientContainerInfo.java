@@ -19,14 +19,16 @@ public class DockerClientContainerInfo extends DockerContainerInfo{
 
     private String dockerHost;
     private Integer managerPort;
+    private Integer inboundConnectionPort;
 
     public DockerClientContainerInfo(String dockerTag, String containerId, DockerContainerState containerState,
-                                     String dockerHost, Integer managerPort)
+                                     String dockerHost, Integer managerPort, Integer inboundConnectionPort)
     {
         super(dockerTag, containerId, containerState);
 
         this.dockerHost = dockerHost;
         this.managerPort = managerPort;
+        this.inboundConnectionPort = inboundConnectionPort;
     }
 
     public String getDockerHost() {
@@ -43,5 +45,13 @@ public class DockerClientContainerInfo extends DockerContainerInfo{
 
     public void setManagerPort(Integer managerPort) {
         this.managerPort = managerPort;
+    }
+
+    public Integer getInboundConnectionPort() {
+        return inboundConnectionPort;
+    }
+
+    public void setInboundConnectionPort(Integer inboundConnectionPort) {
+        this.inboundConnectionPort = inboundConnectionPort;
     }
 }

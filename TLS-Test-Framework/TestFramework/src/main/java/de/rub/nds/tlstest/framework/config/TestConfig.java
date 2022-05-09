@@ -380,6 +380,10 @@ public class TestConfig extends TLSDelegateConfig {
         return testClientDelegate;
     }
 
+    public void setTestClientDelegate(TestClientDelegate testClientDelegate) {
+        this.testClientDelegate = testClientDelegate;
+    }
+
     public void setArgParser(JCommander argParser) {
         if (parsedArgs) {
             LOGGER.warn("Args are already parsed, setting the argParse requires calling parse() again.");

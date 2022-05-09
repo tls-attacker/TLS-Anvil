@@ -113,6 +113,14 @@
                 <false></false>
             </valueTranslation>
         </optionEntry>
+        <optionEntry>
+            <derivationType>ConfigOptionDerivationType.DisableAssemblerCode</derivationType>
+            <enabled>true</enabled>
+            <valueTranslation type="Flag">
+                <true>no-asm</true>
+                <false></false>
+            </valueTranslation>
+        </optionEntry>
 
 
 
@@ -191,14 +199,7 @@
                 <false></false>
             </valueTranslation>
         </optionEntry>
-        <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableAssemblerCode</derivationType>
-            <enabled>false</enabled>
-            <valueTranslation type="Flag">
-                <true>no-asm</true>
-                <false></false>
-            </valueTranslation>
-        </optionEntry>
+
 
 
         <!-- 3rd Priority Options -->

@@ -248,7 +248,7 @@ public class OpenSSLDockerHelper {
 
         String dockerContainerId = createDockerContainer(dockerTag, entrypoint, portBindings, volumeBindings);
         DockerClientContainerInfo containerInfo = new DockerClientContainerInfo(dockerTag, dockerContainerId, DockerContainerState.NOT_RUNNING,
-                dockerManagerHost, dockeManagerPort);
+                dockerManagerHost, dockeManagerPort, tlsServerPort);
 
         return containerInfo;
     }
@@ -353,6 +353,37 @@ public class OpenSSLDockerHelper {
         }
         dockerClient.unpauseContainerCmd(containerInfo.getContainerId()).exec();
         containerInfo.updateContainerState(DockerContainerState.RUNNING);
+    }
+
+    // Unpauses the container and sleeps to give the container time to unpause
+    public void unpauseContainer(DockerContainerInfo containerInfo, boolean waitForUnpausing) {
+        unpauseContainer(containerInfo);
+
+        if(waitForUnpausing){
+            final long CHECK_INTERVAL = 200; // 0.2 sec
+            final long TIMEOUT_AFTER = 30000; // 30 sec
+            InspectContainerResponse containerResp;
+            long timeoutCtr = 0;
+            do {
+                containerResp = dockerClient.inspectContainerCmd(containerInfo.getContainerId()).exec();
+                if(containerResp.getState().getPaused() == false){
+                    break;
+                }
+                else{
+                    try{
+                        Thread.sleep(CHECK_INTERVAL);
+                    }
+                    catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    timeoutCtr+=CHECK_INTERVAL;
+                    if(timeoutCtr > TIMEOUT_AFTER){
+                        LOGGER.error(String.format("Cannot unpause container with tag '%s'", containerInfo.getDockerTag()));
+                        break;
+                    }
+                }
+            } while(true);
+        }
     }
 
     public void removeContainer(DockerContainerInfo containerInfo){

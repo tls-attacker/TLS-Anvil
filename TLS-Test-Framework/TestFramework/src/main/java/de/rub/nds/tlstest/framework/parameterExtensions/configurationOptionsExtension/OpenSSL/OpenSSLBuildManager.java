@@ -20,6 +20,7 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.connection.InboundConnection;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
 import de.rub.nds.tlsattacker.core.state.State;
+import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
@@ -154,6 +155,8 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         }
 
         dockerfileMinPath = pathToMinDockerfile;
+        ParallelExecutor executor = new ParallelExecutorWithTimeout(TestContext.getInstance().getConfig().getParallelHandshakes(), 2, 600);
+        TestContext.getInstance().setStateExecutor(executor);
 
         configOpenSSLDefaultConnection();
     }
@@ -185,8 +188,8 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         else if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT){
             DockerClientContainerInfo clientContainerInfo = (DockerClientContainerInfo) containerInfo;
 
-            InboundConnectionWithCustomTriggerArgs inboundConnectionWCTA = createTriggerConnectionForContainer(clientContainerInfo, config);
-            config.setDefaultServerConnection(inboundConnectionWCTA);
+            InboundConnection inboundConnection = createInboundConnectionForContainer(clientContainerInfo);
+            config.setDefaultServerConnection(inboundConnection);
         }
         else{
             throw new IllegalStateException("TestEndpointMode is invalid.");
@@ -215,7 +218,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
                 dockerHelper.startContainer(providedContainer);
             }
             else if(providedContainer.getContainerState() == DockerContainerState.PAUSED){
-                dockerHelper.unpauseContainer(providedContainer);
+                dockerHelper.unpauseContainer(providedContainer, true);
             }
         }
         // Case: A new container has to be created
@@ -229,7 +232,10 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
             }
 
             if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT){
-                providedContainer = dockerHelper.createDockerClient(dockerTag, configOptionsConfig.getDockerHostName(), occupyNextPort(), TLS_SERVER_HOST, TestContext.getInstance().getConfig().getTestClientDelegate().getPort());
+                DockerClientContainerInfo container = dockerHelper.createDockerClient(dockerTag, configOptionsConfig.getDockerHostName(), occupyNextPort(), TLS_SERVER_HOST, occupyNextPort());
+                TestCOMultiClientDelegate delegate = (TestCOMultiClientDelegate)TestContext.getInstance().getConfig().getTestClientDelegate();
+                delegate.registerNewConnection(container.getDockerHost(), container.getManagerPort(), container.getInboundConnectionPort());
+                providedContainer = container;
             }
             else if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER){
                 providedContainer = dockerHelper.createDockerServer(dockerTag, configOptionsConfig.getDockerHostName(), occupyNextPort(), occupyNextPort());
@@ -320,8 +326,8 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         DockerClientContainerInfo clientContainerInfo = (DockerClientContainerInfo) dockerTagToContainerInfo.get(dockerTag);
 
         Config config = TestContext.getInstance().getConfig().createConfig();
-        InboundConnectionWithCustomTriggerArgs ibConnectionWCTA = createTriggerConnectionForContainer(clientContainerInfo, config);
-        TestSiteReport report =  TestSiteReportFactory.createClientSiteReport(TestContext.getInstance().getConfig(), ibConnectionWCTA, configOptionsConfig.isSiteReportConsoleLogDisabled());
+        InboundConnection ibConnection = createInboundConnectionForContainer(clientContainerInfo);
+        TestSiteReport report =  TestSiteReportFactory.createClientSiteReport(TestContext.getInstance().getConfig(), ibConnection, configOptionsConfig.isSiteReportConsoleLogDisabled());
         endContainerUsage(dockerTag);
 
         return report;
@@ -336,7 +342,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         if(dockerTagToContainerInfo.containsKey(dockerTag)){
             DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(dockerTag);
             if(containerInfo.getContainerState() == DockerContainerState.PAUSED){
-                dockerHelper.unpauseContainer(containerInfo);
+                dockerHelper.unpauseContainer(containerInfo, true);
             }
         }
 
@@ -476,8 +482,24 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
      * connection is delegated to these maximal feature builds.
      */
     private void configOpenSSLDefaultConnection(){
+
         if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT){
-            TestContext.getInstance().getConfig().getTestClientDelegate().setTriggerScript(getOpenSSLClientTriggerScript());
+            TestCOMultiClientDelegate delegate = new TestCOMultiClientDelegate();
+            TestContext.getInstance().getConfig().setTestClientDelegate(delegate);
+            //TestContext.getInstance().getConfig().getTestClientDelegate().setTriggerScript(getOpenSSLClientTriggerScript());
+
+            if(maximalFeatureContainerDockerTag == null) {
+                Set<ConfigurationOptionDerivationParameter> optionSet = getMaxFeatureOptionSet();
+                maximalFeatureContainerDockerTag = provideOpenSSLImplementation(optionSet);
+            }
+
+            DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(maximalFeatureContainerDockerTag);
+            if(!(containerInfo instanceof DockerClientContainerInfo)){
+                throw new IllegalStateException("Maximal-Feature docker container is not a client container in client mode. This should never happen.");
+            }
+            DockerClientContainerInfo clientContainerInfo = (DockerClientContainerInfo) containerInfo;
+            delegate.configureDefaultInboundPort(clientContainerInfo.getInboundConnectionPort());
+
         }
         else if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER){
             if(maximalFeatureContainerDockerTag == null) {
@@ -504,10 +526,9 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
 
     }
 
-    private InboundConnectionWithCustomTriggerArgs createTriggerConnectionForContainer(DockerClientContainerInfo clientContainerInfo, Config config){
-        InboundConnectionWithCustomTriggerArgs inboundConnectionWCTA = new InboundConnectionWithCustomTriggerArgs(config.getDefaultServerConnection());
-        inboundConnectionWCTA.setTriggerArgs(Arrays.asList(String.format("http://%s:%d/trigger",clientContainerInfo.getDockerHost(), clientContainerInfo.getManagerPort())));
-        return inboundConnectionWCTA;
+    private InboundConnection createInboundConnectionForContainer(DockerClientContainerInfo clientContainerInfo){
+        InboundConnection inboundConnection = new InboundConnection(clientContainerInfo.getInboundConnectionPort(), configOptionsConfig.getDockerClientDestinationHostName());
+        return inboundConnection;
     }
 
     private static void sendHttpRequestToDockerContainer(String urlString){
@@ -638,19 +659,10 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         for(Set<String> pausedSubset : pausedContainersSubsets){
             shutdownContainerSet(pausedSubset);
         }
-
-        // Pause all containers
-        for (Map.Entry<String, DockerContainerInfo> entry : dockerTagToContainerInfo.entrySet()) {
-            if (entry.getValue().getContainerState() == DockerContainerState.RUNNING) {
-                dockerHelper.unpauseContainer(entry.getValue());
-            }
-        }
-
-        // Trigger the shutdown process of all created containers
-        LOGGER.info("Shutdown and clear all containers...");
     }
 
     private synchronized void shutdownContainerSet(Set<String> dockerTagsToShutdown){
+        Set<String> failedShutdownTags = new HashSet<>();
         for (String entry : dockerTagsToShutdown) {
             DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(entry);
             if(containerInfo == null){
@@ -661,7 +673,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
             }
 
             if(containerInfo.getContainerState() == DockerContainerState.PAUSED){
-                dockerHelper.unpauseContainer(containerInfo);
+                dockerHelper.unpauseContainer(containerInfo, true);
             }
 
             String shutdownHttpUrl;
@@ -678,21 +690,38 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
                 dockerHelper.stopContainer(containerInfo);
                 continue;
             }
-
-            OpenSSLBuildManager.sendHttpRequestToDockerContainer(shutdownHttpUrl);
+            try {
+                OpenSSLBuildManager.sendHttpRequestToDockerContainer(shutdownHttpUrl);
+            }
+            catch(RuntimeException ex){
+                ex.printStackTrace();
+                failedShutdownTags.add(entry);
+            }
         }
 
         // Wait for containers to shutdown properly and remove them afterwards
+        final int TIMEOUT_AFTER_MS = 600000; // timeout after 10 min
+        final int SLEEP_DURATION = 1000;
         for (String entry : dockerTagsToShutdown) {
+            if(failedShutdownTags.contains(entry)){
+                continue;
+            }
+
             DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(entry);
             // Wait for container to finish
             boolean isRunning;
+            int timeoutTimer = 0;
             do{
                 try {
                     InspectContainerResponse containerResp = dockerClient.inspectContainerCmd(containerInfo.getContainerId()).exec();
                     isRunning = containerResp.getState().getRunning();
                     if(isRunning){
-                        Thread.sleep(1000);
+                        Thread.sleep(SLEEP_DURATION);
+                        timeoutTimer += SLEEP_DURATION;
+                        if(timeoutTimer > TIMEOUT_AFTER_MS){
+                            LOGGER.error(String.format("Cannot shutdown docker container with tag '%s'.", containerInfo.getDockerTag()));
+                            break;
+                        }
                     }
                 }
                 catch(InterruptedException | NullPointerException e){

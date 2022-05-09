@@ -46,6 +46,7 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.TestCOMultiClientDelegate;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -207,7 +208,8 @@ public class TestSiteReportFactory {
                     StateExecutionTask task = new StateExecutionTask(state, 2);
                     Connection connection = state.getConfig().getDefaultServerConnection();
                     try {
-                        state.getTlsContext().setTransportHandler(new ServerTcpTransportHandler(testConfig.getConnectionTimeout(), testConfig.getConnectionTimeout(), testConfig.getTestClientDelegate().getServerSocket()));
+                        TestCOMultiClientDelegate delegate =  (TestCOMultiClientDelegate)testConfig.getTestClientDelegate();
+                        state.getTlsContext().setTransportHandler(new ServerTcpTransportHandler(testConfig.getConnectionTimeout(), testConfig.getConnectionTimeout(), delegate.getServerSocket(state.getConfig())));
                     } catch (IOException ex) {
                         if(disableConsoleLog){
                             removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
@@ -311,7 +313,8 @@ public class TestSiteReportFactory {
 
     private static void prepareStateForConnection(State state, TestConfig testConfig) {
         try {
-            state.getTlsContext().setTransportHandler(new ServerTcpTransportHandler(testConfig.getConnectionTimeout(), testConfig.getConnectionTimeout(), testConfig.getTestClientDelegate().getServerSocket()));
+            TestCOMultiClientDelegate delegate =  (TestCOMultiClientDelegate)testConfig.getTestClientDelegate();
+            state.getTlsContext().setTransportHandler(new ServerTcpTransportHandler(testConfig.getConnectionTimeout(), testConfig.getConnectionTimeout(), delegate.getServerSocket(state.getConfig())));
             state.getTlsContext().setRecordLayer(
                     RecordLayerFactory.getRecordLayer(state.getTlsContext().getRecordLayerType(), state.getTlsContext()));
         } catch (IOException ex) {

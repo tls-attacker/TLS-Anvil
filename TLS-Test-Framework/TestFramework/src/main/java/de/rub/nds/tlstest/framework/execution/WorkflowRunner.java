@@ -42,10 +42,12 @@ import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsattacker.transport.TransportHandlerType;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.constants.KeyX;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.TestCOMultiClientDelegate;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
 import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
@@ -142,7 +144,16 @@ public class WorkflowRunner {
             context.getStateExecutor().bulkExecuteTasks(task);
         } else {
             try {
-                annotatedState.getState().getTlsContext().setTransportHandler(new ServerTcpTransportHandler(context.getConfig().getConnectionTimeout(), context.getConfig().getConnectionTimeout(), context.getConfig().getTestClientDelegate().getServerSocket()));
+                TestClientDelegate testClientDelegate = context.getConfig().getTestClientDelegate();
+                // For ConfigOptions Tests the socket must be selected using the Config.
+                // (Is hardcoded because we cannot manipulate the WorkflowRunner easily in the current architecture (e.g. by using a subclass of the WorkflowRunner))
+                if(testClientDelegate instanceof TestCOMultiClientDelegate){
+                    TestCOMultiClientDelegate testCOMultiClientDelegate = (TestCOMultiClientDelegate) testClientDelegate;
+                    annotatedState.getState().getTlsContext().setTransportHandler(new ServerTcpTransportHandler(context.getConfig().getConnectionTimeout(), context.getConfig().getConnectionTimeout(), testCOMultiClientDelegate.getServerSocket(config)));
+                }
+                else{
+                    annotatedState.getState().getTlsContext().setTransportHandler(new ServerTcpTransportHandler(context.getConfig().getConnectionTimeout(), context.getConfig().getConnectionTimeout(), testClientDelegate.getServerSocket()));
+                }
                 annotatedState.getState().getTlsContext().setRecordLayer(RecordLayerFactory.getRecordLayer(annotatedState.getState().getTlsContext().getRecordLayerType(), annotatedState.getState().getTlsContext()));
                 StateExecutionTask task = new StateExecutionTask(annotatedState.getState(), 2);
                 

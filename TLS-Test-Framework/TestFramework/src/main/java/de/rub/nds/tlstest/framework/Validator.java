@@ -80,32 +80,46 @@ public class Validator {
         }
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        List<ProtocolMessage> receivedAlerts = WorkflowTraceUtil.getAllReceivedMessages(trace, ProtocolMessageType.ALERT);
-        if(receivedAlerts.size() > 1) {
-            i.addAdditionalResultInfo("Received multiple Alerts while waiting for Fatal Alert (" + 
-                    receivedAlerts.stream().map(alert -> ((TlsMessage)alert).toCompactString()).collect(Collectors.joining(","))+ ")");
-        }
+        checkReceivedMultipleAlerts(trace, i);
         boolean socketClosed = socketClosed(i);
-        if (msg == null && socketClosed) {
-            if(i.getState().getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13 && !TestContext.getInstance().getConfig().isExpectTls13Alerts()) {
-                i.addAdditionalResultInfo("SUT chose not to send an alert in TLS 1.3");
-                return;
-            }
-            i.addAdditionalResultInfo("Only socket closed (" + i.getState().getTlsContext().getFinalSocketState() + ")");
-            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
-            LOGGER.debug("Timeout");
-            return;
-        }
+        if (closedWithoutAlert(msg, socketClosed, i)) return;
         assertNotNull("No Alert message received and socket is still open.", msg);
-        if(AlertLevel.WARNING.getValue() == msg.getLevel().getValue() 
+        if(closedWithCloseNotify(msg, socketClosed, i)) return; 
+        assertEquals(AssertMsgs.NoFatalAlert, AlertLevel.FATAL.getValue(), msg.getLevel().getValue().byteValue());
+        assertTrue("Socket still open after fatal alert", socketClosed);
+    }
+
+    private static boolean closedWithCloseNotify(AlertMessage msg, boolean socketClosed, AnnotatedState i) {
+        if (AlertLevel.WARNING.getValue() == msg.getLevel().getValue() 
                 && AlertDescription.CLOSE_NOTIFY.getValue() == msg.getDescription().getValue()
                 && socketClosed) {
             i.addAdditionalResultInfo("Only sent Close Notify and closed socket (" + i.getState().getTlsContext().getFinalSocketState() + ")");
             i.setResult(TestResult.PARTIALLY_SUCCEEDED);
-            return;
+            return true;
         }
-        assertEquals(AssertMsgs.NoFatalAlert, AlertLevel.FATAL.getValue(), msg.getLevel().getValue().byteValue());
-        assertTrue("Socket still open after fatal alert", socketClosed);
+        return false;
+    }
+
+    private static boolean closedWithoutAlert(AlertMessage msg, boolean socketClosed, AnnotatedState i) {
+        if (msg == null && socketClosed) {
+            if (i.getState().getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13 && !TestContext.getInstance().getConfig().isExpectTls13Alerts()) {
+                i.addAdditionalResultInfo("SUT chose not to send an alert in TLS 1.3");
+                return true;
+            }
+            i.addAdditionalResultInfo("Only socket closed (" + i.getState().getTlsContext().getFinalSocketState() + ")");
+            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
+            LOGGER.debug("Timeout");
+            return true;
+        }
+        return false;
+    }
+
+    public static void checkReceivedMultipleAlerts(WorkflowTrace trace, AnnotatedState i) {
+        List<ProtocolMessage> receivedAlerts = WorkflowTraceUtil.getAllReceivedMessages(trace, ProtocolMessageType.ALERT);
+        if(receivedAlerts.size() > 1) {
+            i.addAdditionalResultInfo("Received multiple Alerts while waiting for Fatal Alert (" +
+                    receivedAlerts.stream().map(alert -> ((TlsMessage)alert).toCompactString()).collect(Collectors.joining(","))+ ")");
+        }
     }
 
     public static void receivedFatalAlert(AnnotatedState i) {

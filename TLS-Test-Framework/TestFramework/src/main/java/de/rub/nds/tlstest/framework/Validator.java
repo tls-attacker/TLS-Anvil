@@ -31,6 +31,7 @@ import de.rub.nds.tlsattacker.core.record.crypto.RecordDecryptor;
 import de.rub.nds.tlsattacker.core.state.TlsContext;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
@@ -244,9 +245,11 @@ public class Validator {
             } else if (messages.get(messages.size() - 1).getClass().equals(AlertMessage.class)) {
                 return;
             }
+        } else if (lastReceivingAction instanceof GenericReceiveAction) {
+            return;
         }
 
-        throw new AssertionError("Last action is not a receiving action");
+        throw new AssertionError("Last action is not an expected receiving action");
     }
     
     /**

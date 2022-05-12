@@ -225,6 +225,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         else{
             // SubCase: The image for the container does not already exists
             if(!dockerNameWithTagExists(dockerNameWithTag)){
+                LOGGER.info(String.format("Build new OpenSSL image with tag '%s'...", dockerTag));
                 long timer = System.currentTimeMillis();
                 dockerHelper.buildOpenSSLImageWithFactory(cliOptions, dockerTag, dockerfileMinPath, configOptionsConfig.getTlsVersionName(), resultsCollector);
                 resultsCollector.logNewOpenSSLBuildCreated(optionSet, dockerTag, System.currentTimeMillis() - timer);
@@ -299,6 +300,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
     }
 
     public synchronized TestSiteReport createSiteReport(String dockerTag){
+        LOGGER.info(String.format("Create site report for OpenSSL image with tag '%s'...", dockerTag));
         TestSiteReport report;
         if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT){
             report = createClientSiteReport(dockerTag);
@@ -550,8 +552,9 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         {
             try{
                 HttpURLConnection http = (HttpURLConnection)url.openConnection();
-                http.disconnect();
+                http.setConnectTimeout(10000);
                 int responseCode = http.getResponseCode();
+
                 if(responseCode != 200){
                     LOGGER.warn(String.format("Client docker container at '%s' cannot be triggered. Response Code: %i. Try new attempt.", url.toString(), responseCode));
                     connected = false;
@@ -559,9 +562,11 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
                 else{
                     connected = true;
                 }
+                http.disconnect();
             }
             catch(Exception e){
                 LOGGER.warn(String.format("Client docker container at '%s' cannot be triggered.", url.toString()));
+                e.printStackTrace();
                 connected = false;
             }
             if(!connected){

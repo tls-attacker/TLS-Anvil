@@ -25,12 +25,9 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import javax.print.attribute.standard.Severity;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 5246, section = "E.1. Compatibility with TLS 1.0/1.1 and SSL 3.0")
@@ -57,10 +54,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
-            WorkflowTrace trace = i.getWorkflowTrace();
-
-            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.PROTOCOL_VERSION, msg);
+            Validator.testAlertDescription(i, AlertDescription.PROTOCOL_VERSION, AlertDescription.ILLEGAL_PARAMETER);
         });
     }
 }

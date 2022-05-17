@@ -23,6 +23,7 @@ import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.action.ChangeConnectionTimeoutAction;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
@@ -47,6 +48,8 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
+import de.rub.nds.tlstest.framework.model.derivationParameter.AdditionalPaddingLengthDerivation;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
@@ -163,9 +166,6 @@ public class RecordProtocol extends Tls13Test {
     public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        c.getDefaultClientConnection().setTimeout(2000);
-        c.getDefaultServerConnection().setTimeout(2000);
-
         ApplicationMessage msg = new ApplicationMessage(c);
         Record overflowRecord = new Record();
         overflowRecord.setCleanProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
@@ -174,6 +174,7 @@ public class RecordProtocol extends Tls13Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
+                new ChangeConnectionTimeoutAction((long)(context.getConfig().getConnectionTimeout() * 2.5)),
                 sendOverflow,
                 new ReceiveAction(new AlertMessage())
         );
@@ -227,18 +228,33 @@ public class RecordProtocol extends Tls13Test {
     @TlsTest(description = "All encrypted TLS records can be padded to inflate the size of the "
             + "TLSCiphertext.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "isReasonableRecordSize")
     @ScopeExtensions(DerivationType.ADDITIONAL_PADDING_LENGTH)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void acceptsOptionalPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-
+        int selectedPaddingLength = derivationContainer.getDerivation(AdditionalPaddingLengthDerivation.class).getSelectedValue();
+        if(selectedPaddingLength >= 100) {
+            applyTimeoutMultiplier(c, 1.5);
+        }
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);
         });
+    }
+    
+    public boolean isReasonableRecordSize(Integer recordSize) {
+        //using very small records significantly increases reponse time of some SUTs
+        return recordSize >= 50;
+    }
+
+    public void applyTimeoutMultiplier(Config c, double multiplier) {
+        int baseTimeout = context.getConfig().getConnectionTimeout();
+        c.getDefaultClientConnection().setTimeout((int)(baseTimeout * multiplier));
+        c.getDefaultServerConnection().setTimeout((int)(baseTimeout * multiplier));
     }
 
     @TlsTest(description = "The length MUST NOT exceed 2^14 + 256 bytes. "
@@ -256,8 +272,7 @@ public class RecordProtocol extends Tls13Test {
     public void sendRecordWithCiphertextOver2pow14plus256(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        c.getDefaultClientConnection().setTimeout(2000);
-        c.getDefaultServerConnection().setTimeout(2000);
+        applyTimeoutMultiplier(c, 2.5);
 
         Record overflowRecord = new Record();
         overflowRecord.setProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 257]));
@@ -324,7 +339,14 @@ public class RecordProtocol extends Tls13Test {
         sendAction.setRecords(r);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        int baseTimeout = context.getConfig().getConnectionTimeout();
+        if(context.getSiteReport().getClosedAfterAppDataDelta() > 0 && context.getSiteReport().getClosedAfterAppDataDelta() < context.getConfig().getConnectionTimeout()) {
+            baseTimeout = context.getSiteReport().getClosedAfterAppDataDelta().intValue();
+        }
+        final int reducedTimeout = baseTimeout / 2; 
+        ChangeConnectionTimeoutAction changeTimeoutAction = new ChangeConnectionTimeoutAction(reducedTimeout);
         workflowTrace.addTlsActions(
+                changeTimeoutAction,
                 sendAction,
                 new GenericReceiveAction()
         );
@@ -332,8 +354,15 @@ public class RecordProtocol extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(state -> {
             Validator.executedAsPlanned(state);
             AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            assertNull("Received alert message", msg);
-            assertFalse("Socket was closed", Validator.socketClosed(state));
+            state.addAdditionalResultInfo("Evaluated with timeout " + reducedTimeout);
+            if(context.getSiteReport().getClosedAfterAppDataDelta() > 0) {
+                assertNull("Received alert message", msg);
+                assertFalse("Socket was closed", Validator.socketClosed(state));
+            } else {
+                if(msg != null) {
+                    assertEquals("SUT sent an alert that was not a Close Notify", AlertDescription.CLOSE_NOTIFY.getValue(), (byte)msg.getDescription().getValue());
+                }
+            }
         });
     }
     

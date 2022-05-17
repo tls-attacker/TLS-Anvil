@@ -16,6 +16,7 @@ import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.DeactivateEncryptionAction;
+import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
@@ -78,6 +79,7 @@ public class StateMachine extends Tls12Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
+    @Tag("beat")
     public void sendHeartbeatRequestAfterChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -326,11 +328,13 @@ public class StateMachine extends Tls12Test {
 
     private void genericHeartbeatStateTest(WorkflowRunner runner, WorkflowTrace workflowTrace, Config config) {
         workflowTrace.addTlsAction(new SendAction(new HeartbeatMessage()));
-        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        workflowTrace.addTlsAction(new GenericReceiveAction());
         runner.execute(workflowTrace, config).validateFinal(state -> {
             WorkflowTrace executedTrace = state.getWorkflowTrace();
             if (WorkflowTraceUtil.didReceiveMessage(ProtocolMessageType.HEARTBEAT, executedTrace)) {
                 return;
+            } else if(executedTrace.executedAsPlanned() && !Validator.socketClosed(state)) {
+                state.addAdditionalResultInfo("SUT chose to silently discard Heartbeat Request");
             } else {
                 Validator.receivedFatalAlert(state);
             }

@@ -26,20 +26,15 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -54,10 +49,8 @@ import de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -301,6 +294,7 @@ public class ServerHello extends Tls13Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         runner.execute(workflowTrace, c).validateFinal(i -> {
+            assertNotNull("No ServerHello has been sent", i.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class));
             assertEquals("invalid compression method",
                     0,
                     i.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class).getSelectedCompressionMethod().getValue().byteValue()

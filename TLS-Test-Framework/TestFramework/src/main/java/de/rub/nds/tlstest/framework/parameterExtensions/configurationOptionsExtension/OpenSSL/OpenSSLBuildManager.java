@@ -215,7 +215,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         if(dockerTagToContainerInfo.containsKey(dockerTag)){
             providedContainer = dockerTagToContainerInfo.get(dockerTag);
             if(providedContainer.getContainerState() == DockerContainerState.NOT_RUNNING) {
-                dockerHelper.startContainer(providedContainer);
+                dockerHelper.startContainer(providedContainer, true);
             }
             else if(providedContainer.getContainerState() == DockerContainerState.PAUSED){
                 dockerHelper.unpauseContainer(providedContainer, true);
@@ -245,7 +245,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
                 throw new IllegalStateException("TestEndpointMode is invalid.");
             }
 
-            dockerHelper.startContainer(providedContainer);
+            dockerHelper.startContainer(providedContainer, true);
             resultsCollector.logOpenSSLContainer(providedContainer);
             dockerTagToContainerInfo.put(dockerTag, providedContainer);
             dockerTagToAccessCount.put(dockerTag, 0);
@@ -346,6 +346,9 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
             if(containerInfo.getContainerState() == DockerContainerState.PAUSED){
                 dockerHelper.unpauseContainer(containerInfo, true);
             }
+            else if(containerInfo.getContainerState() == DockerContainerState.NOT_RUNNING){
+                dockerHelper.startContainer(containerInfo, true);
+            }
         }
 
 
@@ -353,7 +356,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         currentInUseCount += 1;
         dockerTagToCurrentUseCount.put(dockerTag, currentInUseCount);
 
-        pauseRarelyUsedContainers();
+        stopRarelyUsedContainers();
     }
 
     private synchronized void endContainerUsage(String dockerTag){
@@ -377,7 +380,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         }
     }
 
-    private synchronized void pauseRarelyUsedContainers(){
+    private synchronized void stopRarelyUsedContainers(){
         // Count running containers
         Set<String> runningUnusedContainerDockerTags = new HashSet<>();
         int currentlyUsedCount = 0;
@@ -403,12 +406,12 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
             }
         }
 
-        // Pause the running containers with the lowest access count
+        // Stop the running containers with the lowest access count
         runningContainersAccessCounts.sort(Map.Entry.comparingByValue());
         int freeSlotsCount =Math.max(0,configOptionsConfig.getMaxRunningContainers() - currentlyUsedCount);
         for(int idx = 0; idx < runningContainersAccessCounts.size() - freeSlotsCount; idx++){
-            DockerContainerInfo containerToPause = dockerTagToContainerInfo.get(runningContainersAccessCounts.get(idx).getKey());
-            dockerHelper.pauseContainer(containerToPause);
+            DockerContainerInfo containerToStop = dockerTagToContainerInfo.get(runningContainersAccessCounts.get(idx).getKey());
+            dockerHelper.stopContainer(containerToStop);
         }
     }
 
@@ -634,23 +637,23 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         resultsCollector.finalizeResults();
 
         Set<String> runningContainers = new HashSet<>();
-        List<Set<String>> pausedContainersSubsets = new LinkedList<>();
-        pausedContainersSubsets.add(new HashSet<>());
-        int currentPausedContainersSetsIdx = 0;
+        List<Set<String>> notRunningContainersSubsets = new LinkedList<>();
+        notRunningContainersSubsets.add(new HashSet<>());
+        int currentNotRunningContainersSetsIdx = 0;
         int currentSubsetSize = 0;
         for(Map.Entry<String, DockerContainerInfo> entry : dockerTagToContainerInfo.entrySet()){
             if (entry.getValue().getContainerState() == DockerContainerState.RUNNING) {
                 runningContainers.add(entry.getKey());
             }
-            // Split the paused containers in subsets of MAX_RUNNING_DOCKER_CONTAINERS containers which are
+            // Split the paused/stopped containers in subsets of MAX_RUNNING_DOCKER_CONTAINERS containers which are
             // shutdown simultaneously
-            else if(entry.getValue().getContainerState() == DockerContainerState.PAUSED){
+            else if(entry.getValue().getContainerState() == DockerContainerState.PAUSED || entry.getValue().getContainerState() == DockerContainerState.NOT_RUNNING){
                 if(currentSubsetSize >= configOptionsConfig.getMaxRunningContainers()){
-                    pausedContainersSubsets.add(new HashSet<>());
-                    currentPausedContainersSetsIdx += 1;
+                    notRunningContainersSubsets.add(new HashSet<>());
+                    currentNotRunningContainersSetsIdx += 1;
                     currentSubsetSize = 0;
                 }
-                pausedContainersSubsets.get(currentPausedContainersSetsIdx).add(entry.getKey());
+                notRunningContainersSubsets.get(currentNotRunningContainersSetsIdx).add(entry.getKey());
                 currentSubsetSize += 1;
 
             }
@@ -661,8 +664,8 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
         shutdownContainerSet(runningContainers);
 
         // Shutdown the remaining (paused) containers
-        for(Set<String> pausedSubset : pausedContainersSubsets){
-            shutdownContainerSet(pausedSubset);
+        for(Set<String> notRunningSubset : notRunningContainersSubsets){
+            shutdownContainerSet(notRunningSubset);
         }
     }
 
@@ -674,7 +677,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
                 continue;
             }
             if(containerInfo.getContainerState() == DockerContainerState.NOT_RUNNING){
-                continue;
+                dockerHelper.startContainer(containerInfo, true);
             }
 
             if(containerInfo.getContainerState() == DockerContainerState.PAUSED){

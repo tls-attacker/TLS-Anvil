@@ -331,6 +331,36 @@ public class OpenSSLDockerHelper {
         containerInfo.updateContainerState(DockerContainerState.RUNNING);
     }
 
+    public void startContainer(DockerContainerInfo containerInfo, boolean waitForStarted) {
+        startContainer(containerInfo);
+
+        if(waitForStarted){
+            final long CHECK_INTERVAL = 200; // 0.2 sec
+            final long TIMEOUT_AFTER = 30000; // 30 sec
+            InspectContainerResponse containerResp;
+            long timeoutCtr = 0;
+            do {
+                containerResp = dockerClient.inspectContainerCmd(containerInfo.getContainerId()).exec();
+                if(containerResp.getState().getRunning() == true){
+                    break;
+                }
+                else{
+                    try{
+                        Thread.sleep(CHECK_INTERVAL);
+                    }
+                    catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    timeoutCtr+=CHECK_INTERVAL;
+                    if(timeoutCtr > TIMEOUT_AFTER){
+                        LOGGER.error(String.format("Cannot start container with tag '%s'", containerInfo.getDockerTag()));
+                        break;
+                    }
+                }
+            } while(true);
+        }
+    }
+
     public void stopContainer(DockerContainerInfo containerInfo){
         if(containerInfo.getContainerState() == DockerContainerState.NOT_RUNNING){
             throw new IllegalStateException("Cannot stop a stopped container.");

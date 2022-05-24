@@ -12,8 +12,8 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsBuildManager;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.OpenSSLBuildManager;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.OpenSSL.OpenSSLBuildManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

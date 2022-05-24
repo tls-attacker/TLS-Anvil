@@ -8,7 +8,7 @@
  *  http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
+package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement;
 
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;

@@ -8,7 +8,7 @@
  *  http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL;
+package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
 
 /**
  * Represents a docker container state.

@@ -8,7 +8,7 @@
  *  http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL;
+package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
@@ -46,7 +46,6 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.TestCOMultiClientDelegate;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

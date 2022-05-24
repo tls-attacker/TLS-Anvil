@@ -8,10 +8,10 @@
  *  http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.ResultsCollector;
+package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ResultsCollector;
 
 import com.github.dockerjava.api.DockerClient;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.DockerContainerInfo;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerTestContainer;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 
@@ -79,15 +79,15 @@ public class OpenSSLConfigOptionsResultsCollector {
         buildAccessLogFile.finalizeResults();
     }
 
-    public synchronized void logBuildContainer(DockerContainerInfo container){
+    public synchronized void logBuildContainer(DockerTestContainer container){
         logDockerContainer(container, buildContainerLogDirectoryPath);
     }
 
-    public synchronized void logOpenSSLContainer(DockerContainerInfo container){
+    public synchronized void logOpenSSLContainer(DockerTestContainer container){
         logDockerContainer(container, containerLogDirectoryPath);
     }
 
-    private synchronized void logDockerContainer(DockerContainerInfo container, Path path) {
+    private synchronized void logDockerContainer(DockerTestContainer container, Path path) {
         String containerId = container.getContainerId();
         if(containerIdToLogger.containsKey(containerId)){
             // Logger does already exist

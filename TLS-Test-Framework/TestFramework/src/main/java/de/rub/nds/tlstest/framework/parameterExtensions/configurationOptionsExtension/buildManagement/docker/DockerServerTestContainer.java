@@ -8,7 +8,9 @@
  *  http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL;
+package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
+
+import com.github.dockerjava.api.DockerClient;
 
 /**
  * Info of a DockerContainer that runs a tls server for testing purposes.
@@ -16,16 +18,16 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
  * The tlsServerPort is the host's port on which the tls server is available.
  * The managerPort is the host's port on which the docker container's http server listens for the /shutdown command.
  */
-public class DockerServerContainerInfo extends DockerContainerInfo{
+public class DockerServerTestContainer extends DockerTestContainer {
     private String dockerHost;
     private Integer tlsServerPort;
-    private Integer managerPort;
+    DockerClient dockerClient;
 
-    public DockerServerContainerInfo(String dockerTag, String containerId, DockerContainerState containerState, String dockerHost, Integer tlsServerPort, Integer managerPort) {
-        super(dockerTag, containerId, containerState);
+    public DockerServerTestContainer(DockerClient dockerClient, String dockerTag, String containerId, String dockerHost,
+                                     Integer tlsServerPort, Integer managerPort) {
+        super(dockerClient, dockerTag, containerId, managerPort);
         this.dockerHost = dockerHost;
         this.tlsServerPort = tlsServerPort;
-        this.managerPort = managerPort;
     }
 
     public String getDockerHost() {
@@ -44,13 +46,6 @@ public class DockerServerContainerInfo extends DockerContainerInfo{
         this.tlsServerPort = tlsServerPort;
     }
 
-    public Integer getManagerPort() {
-        return managerPort;
-    }
-
-    public void setManagerPort(Integer managerPort) {
-        this.managerPort = managerPort;
-    }
 
 
 }

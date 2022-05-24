@@ -8,12 +8,12 @@
  *  http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.ResultsCollector;
+package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ResultsCollector;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.OpenSSL.DockerContainerInfo;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerTestContainer;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -30,7 +30,7 @@ public class DockerContainerLogFile extends LogFile{
         this.dockerClient = dockerClient;
     }
 
-    public void logDockerContainer(DockerContainerInfo containerInfo){
+    public void logDockerContainer(DockerTestContainer containerInfo){
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         String timeStamp = dtf.format(now);

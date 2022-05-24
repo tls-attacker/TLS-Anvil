@@ -173,7 +173,7 @@ public class TestCOMultiClientDelegate extends TestClientDelegate {
                 }
             }
             catch(Exception e){
-                LOGGER.warn(String.format("Client docker container at '%s' cannot be triggered.", url.toString()));
+                //LOGGER.warn(String.format("Client docker container at '%s' cannot be triggered.", url.toString()));
                 connected = false;
             }
             if(!connected){

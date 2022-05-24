@@ -50,6 +50,9 @@ public class ConfigurationOptionsConfig {
     private boolean siteReportConsoleLogDisabled;
     private boolean withCoverage;
     private int maxRunningContainers; // default 16
+    /** Defines how many containers should be shutdown simultaneously. When measuring coverage the coverage data
+     * is collected at the shutdown. Therefore it is much more CPU expensive than a simple shutdown.*/
+    private int maxRunningContainerShutdowns; // default 8 with coverage or maxRunningContainers/2 without coverage
 
     // Docker Config (not required, but necessary for build managers that work with docker)
     private boolean dockerConfigPresent;
@@ -122,6 +125,10 @@ public class ConfigurationOptionsConfig {
         return maxRunningContainers;
     }
 
+    public int getMaxRunningContainerShutdowns() {
+        return maxRunningContainerShutdowns;
+    }
+
     private void parseConfigFile(InputStream inputStream){
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -139,6 +146,7 @@ public class ConfigurationOptionsConfig {
             parseAndConfigureDisableSiteReportConsoleLog(rootElement);
             parseAndConfigureWithCoverage(rootElement);
             parseAndConfigureMaxRunningContainers(rootElement);
+            parseAndConfigureMaxRunningContainerShutdowns(rootElement);
             parseAndConfigureOptionsToTest(rootElement);
             parseAndConfigureBuildManager(rootElement);
 
@@ -188,6 +196,23 @@ public class ConfigurationOptionsConfig {
         }
         else{
             maxRunningContainers = 16; // default
+        }
+    }
+
+    // Must be called after parseAndConfigureWithCoverage and parseAndConfigureMaxRunningContainers
+    private void parseAndConfigureMaxRunningContainerShutdowns(Element rootElement){
+        Element maxRunningContainersElement =  XmlParseUtils.findElement(rootElement, "maxRunningContainerShutdowns", false);
+        if(maxRunningContainersElement != null){
+            maxRunningContainerShutdowns = Integer.parseInt(maxRunningContainersElement.getTextContent());
+        }
+        else{
+            if(withCoverage){
+                maxRunningContainerShutdowns = 8; // default
+            }
+            else{
+                // Ceil ensures that maxRunningContainerShutdowns > 0
+                maxRunningContainerShutdowns = (int) Math.ceil( ( (float) maxRunningContainers) / 2.0f );
+            }
         }
     }
 

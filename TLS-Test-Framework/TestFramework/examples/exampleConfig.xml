@@ -38,6 +38,11 @@
     <withCoverage>true</withCoverage>
     <!-- Optional: Configures how many containers are running simultaneously. Rarely used containers are paused meanwhile. Default: 16 -->
     <maxRunningContainers>6</maxRunningContainers>
+    <!-- Optional: Configures how many containers are shutdown simultaneously. Note that for coverage mode the coverage is
+         collected during the final shutdown. Therefore it takes much more CPU than the non coverage version. When this value
+         is to high it may happen that some containers are not shutdown properly and the coverage data is not correctly collected.
+         Default: 8 for enabled coverage, maxRunningContainers/2 otherwise -->
+    <maxRunningContainers>6</maxRunningContainers>
 
     <optionsToTest>
 

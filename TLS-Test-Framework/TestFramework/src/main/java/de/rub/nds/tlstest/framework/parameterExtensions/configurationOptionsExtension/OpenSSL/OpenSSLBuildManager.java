@@ -71,6 +71,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
     private Set<Integer> usedPorts;
 
     private final String CCACHE_VOLUME_NAME = "ccache-cache";
+
     //private final List<String> TRIGGER_COMMAND_PREFIX = Arrays.asList("");
     private final String TLS_SERVER_HOST;
 
@@ -569,7 +570,6 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
             }
             catch(Exception e){
                 LOGGER.warn(String.format("Client docker container at '%s' cannot be triggered.", url.toString()));
-                e.printStackTrace();
                 connected = false;
             }
             if(!connected){
@@ -579,6 +579,7 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
                 }
                 try{
                     Thread.sleep(ATTEMPT_DELAY);
+                    LOGGER.warn(String.format("Retry...", url.toString()));
                 }
                 catch(Exception e){
                     e.printStackTrace();
@@ -636,35 +637,31 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
     public synchronized void onShutdown(){
         resultsCollector.finalizeResults();
 
-        Set<String> runningContainers = new HashSet<>();
-        List<Set<String>> notRunningContainersSubsets = new LinkedList<>();
-        notRunningContainersSubsets.add(new HashSet<>());
-        int currentNotRunningContainersSetsIdx = 0;
-        int currentSubsetSize = 0;
+        // Stop all running containers
         for(Map.Entry<String, DockerContainerInfo> entry : dockerTagToContainerInfo.entrySet()){
             if (entry.getValue().getContainerState() == DockerContainerState.RUNNING) {
-                runningContainers.add(entry.getKey());
-            }
-            // Split the paused/stopped containers in subsets of MAX_RUNNING_DOCKER_CONTAINERS containers which are
-            // shutdown simultaneously
-            else if(entry.getValue().getContainerState() == DockerContainerState.PAUSED || entry.getValue().getContainerState() == DockerContainerState.NOT_RUNNING){
-                if(currentSubsetSize >= configOptionsConfig.getMaxRunningContainers()){
-                    notRunningContainersSubsets.add(new HashSet<>());
-                    currentNotRunningContainersSetsIdx += 1;
-                    currentSubsetSize = 0;
-                }
-                notRunningContainersSubsets.get(currentNotRunningContainersSetsIdx).add(entry.getKey());
-                currentSubsetSize += 1;
-
+                dockerHelper.stopContainer(entry.getValue());
             }
         }
 
-        // Shutdown running containers first to free resources
-        LOGGER.info("Shutdown and clear all containers. This may take a while...");
-        shutdownContainerSet(runningContainers);
+        // Devide all containers in subsets of <maxRunningContainer> containers for simultaneous shutdown.
+        List<Set<String>> containersSubsets = new LinkedList<>();
+        containersSubsets.add(new HashSet<>());
+        int containerSetsIdx = 0;
+        int currentSubsetSize = 0;
+        for(Map.Entry<String, DockerContainerInfo> entry : dockerTagToContainerInfo.entrySet()){
+            if(currentSubsetSize >= configOptionsConfig.getMaxRunningContainerShutdowns()){
+                containersSubsets.add(new HashSet<>());
+                containerSetsIdx += 1;
+                currentSubsetSize = 0;
+            }
+            containersSubsets.get(containerSetsIdx).add(entry.getKey());
+            currentSubsetSize += 1;
+        }
 
-        // Shutdown the remaining (paused) containers
-        for(Set<String> notRunningSubset : notRunningContainersSubsets){
+        LOGGER.info("Shutdown and clear all containers. This may take a while...");
+        // Shutdown all containers
+        for(Set<String> notRunningSubset : containersSubsets){
             shutdownContainerSet(notRunningSubset);
         }
     }

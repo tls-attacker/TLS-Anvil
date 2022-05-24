@@ -12,6 +12,8 @@ package de.rub.nds.tlstest.framework.execution;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.tlsattacker.attacks.util.response.ResponseExtractor;
+import de.rub.nds.tlsattacker.attacks.util.response.ResponseFingerprint;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -31,6 +33,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
@@ -43,13 +46,14 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
-import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsattacker.transport.Connection;
+import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
+import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlsscanner.core.constants.TlsProbeType;
 import de.rub.nds.tlsscanner.serverscanner.config.ServerScannerConfig;
@@ -175,7 +179,7 @@ public class TestRunner {
         try {
             new Thread(() -> {
                 while (!targetIsReady) {
-                    LOGGER.warn("Waiting for the client to get ready...");
+                    LOGGER.info("Waiting for the client to get ready...");
                     try {
                         State state = new State();
                         testConfig.getTestClientDelegate().executeTriggerScript(state);
@@ -251,7 +255,9 @@ public class TestRunner {
                 TlsProbeType.RESUMPTION,
                 TlsProbeType.EXTENSIONS,
                 TlsProbeType.RECORD_FRAGMENTATION,
-                TlsProbeType.HELLO_RETRY
+                TlsProbeType.HELLO_RETRY,
+                TlsProbeType.HTTP_HEADER,
+                TlsProbeType.CONNECTION_CLOSING_DELTA
         );
         scannerConfig.setOverallThreads(1);
         scannerConfig.setParallelProbes(1);
@@ -265,7 +271,7 @@ public class TestRunner {
         LOGGER.debug("TLS-Scanner finished!");
     }
 
-
+    
     private void clientTestPreparation() {
         waitForClient();
 
@@ -347,20 +353,15 @@ public class TestRunner {
              
         List<State> keyShareStates = new LinkedList<>();
         List<TlsTask> keyShareTasks = new LinkedList<>();       
+        if (clientHello == null) {
+            throw new RuntimeException("Client preparation could not be completed.");
+        }
+        
         if(clientHello.containsExtension(ExtensionType.ELLIPTIC_CURVES) && clientHello.containsExtension(ExtensionType.KEY_SHARE)) {
             keyShareStates = buildClientKeyShareProbeStates(clientHello);
             if(!keyShareStates.isEmpty()) {
                 for(State state: keyShareStates) {
-                    StateExecutionTask task = new StateExecutionTask(state, 2);
-                    Connection connection = state.getConfig().getDefaultServerConnection();
-                    try {
-                        state.getTlsContext().setTransportHandler(new ServerTcpTransportHandler(testConfig.getConnectionTimeout(), testConfig.getConnectionTimeout(), testConfig.getTestClientDelegate().getServerSocket()));
-                    } catch (IOException ex) {
-                        throw new RuntimeException("Failed to set TransportHandler");
-                    }
-                    state.getTlsContext().setRecordLayer(
-                    RecordLayerFactory.getRecordLayer(state.getTlsContext().getRecordLayerType(), state.getTlsContext()));
-                    task.setBeforeTransportInitCallback(testConfig.getTestClientDelegate().getTriggerScript());
+                    StateExecutionTask task = buildStateExecutionServerTask(state);
                     keyShareTasks.add(task);
                 }
                 executor.bulkExecuteTasks(keyShareTasks);
@@ -383,10 +384,7 @@ public class TestRunner {
             }
         }
 
-        LOGGER.info(String.format("%d/%d client preparation workflows failed.", failed, states.size()));
-        if (failed == states.size()) {
-            throw new RuntimeException("Client preparation could not be completed.");
-        }
+        LOGGER.info("Determined support for {} cipher suites", states.size() - failed);
 
         int rsaMinCertKeySize = getCertMinimumKeySize(executor, tls12CipherSuites, CertificateKeyType.RSA);
         int dssMinCertKeySize = getCertMinimumKeySize(executor, tls12CipherSuites, CertificateKeyType.DSS);
@@ -412,6 +410,10 @@ public class TestRunner {
             );
         }
 
+        List<CipherSuite> ecdheCipherSuites = tls12CipherSuites.stream().filter(cipher -> cipher.name().contains("TLS_ECDHE")).collect(Collectors.toList());
+        testHandshakeWithUndefinedPointFormat(ecdheCipherSuites, report, executor);
+        determineClosingDeltas(report, executor);
+        
         SupportedVersionsExtensionMessage supportedVersionsExt = clientHello.getExtension(SupportedVersionsExtensionMessage.class);
         List<ProtocolVersion> versions = new ArrayList<>();
         versions.add(ProtocolVersion.getProtocolVersion(clientHello.getProtocolVersion().getValue()));
@@ -441,6 +443,96 @@ public class TestRunner {
         testContext.setSiteReport(report);
         executor.shutdown();
 
+    }
+
+    public void testHandshakeWithUndefinedPointFormat(List<CipherSuite> ecdheCipherSuites, ServerTestSiteReport report, ParallelExecutor executor) throws RuntimeException {
+        if(!ecdheCipherSuites.isEmpty() && report.getSupportedNamedGroups() != null && !report.getSupportedNamedGroups().isEmpty()) {
+            Config config = this.testConfig.createConfig();
+            config.setDefaultServerSupportedCipherSuites(ecdheCipherSuites);
+            config.setDefaultServerNamedGroups(report.getSupportedNamedGroups());
+            config.setAddECPointFormatExtension(true);
+            State state = new State(config);
+            state.getWorkflowTrace().getFirstSendMessage(ServerHelloMessage.class).getExtension(ECPointFormatExtensionMessage.class).setPointFormats(Modifiable.explicit(new byte[] {(byte) 0xE4}));
+            TlsTask tlsTask = buildStateExecutionServerTask(state);
+            executor.bulkExecuteTasks(tlsTask);
+            if(state.getWorkflowTrace().executedAsPlanned()) {
+                report.putResult(TlsAnalyzedProperty.HANDSHAKES_WITH_UNDEFINED_POINT_FORMAT, true);
+            } else {
+                report.putResult(TlsAnalyzedProperty.HANDSHAKES_WITH_UNDEFINED_POINT_FORMAT, false);
+            }
+        }
+    }
+    
+    private void determineClosingDeltas(ServerTestSiteReport report, ParallelExecutor executor) {
+        final int TIMEOUT_LIMIT = 5000;
+        Config config = this.testConfig.createConfig();
+        config.setDefaultServerNamedGroups(report.getSupportedNamedGroups());
+        config.setWorkflowExecutorShouldClose(false);
+        State state = new State(config);
+        
+        TlsTask tlsTask = buildStateExecutionServerTask(state);
+        executor.bulkExecuteTasks(tlsTask);
+        long closedAfterHandshakeDelta = getClosingDelta(state, TIMEOUT_LIMIT);
+        report.setClosedAfterFinishedDelta(closedAfterHandshakeDelta);
+        
+        if(closedAfterHandshakeDelta > 0) {
+            config = this.testConfig.createConfig();
+            config.setDefaultServerNamedGroups(report.getSupportedNamedGroups());
+            config.setWorkflowExecutorShouldClose(false);
+            state = new State(config);
+            state.getWorkflowTrace().addTlsAction(new SendAction(new ApplicationMessage(config)));
+            tlsTask = buildStateExecutionServerTask(state);
+            executor.bulkExecuteTasks(tlsTask);
+            report.setClosedAfterAppDataDelta(getClosingDelta(state, TIMEOUT_LIMIT));
+        } else {
+            report.setClosedAfterAppDataDelta(closedAfterHandshakeDelta);
+        }
+    }
+
+    public long getClosingDelta(State state, final int TIMEOUT_LIMIT) {
+        SocketState socketState = null;
+        long delta = 0;
+        do {
+            try {
+                socketState = (((TcpTransportHandler) (state.getTlsContext().getTransportHandler())).getSocketState());
+                switch (socketState) {
+                    case CLOSED:
+                    case IO_EXCEPTION:
+                    case PEER_WRITE_CLOSED:
+                    case SOCKET_EXCEPTION:
+                    case TIMEOUT:
+                        closeSocket(state);
+                        return delta;
+                    default:
+                }
+                Thread.sleep(10);
+                delta += 10;
+            }catch (InterruptedException ignored) {
+            }
+        } while (delta < TIMEOUT_LIMIT);
+        closeSocket(state);
+        return -1;
+    }
+    
+    private void closeSocket(State state) {
+        try {
+            state.getTlsContext().getTransportHandler().closeConnection();
+        } catch (IOException ignored) {
+        }
+    }
+
+    public StateExecutionTask buildStateExecutionServerTask(State state) throws RuntimeException {
+        StateExecutionTask task = new StateExecutionTask(state, 2);
+        Connection connection = state.getConfig().getDefaultServerConnection();
+        try {
+            state.getTlsContext().setTransportHandler(new ServerTcpTransportHandler(testConfig.getConnectionTimeout(), testConfig.getConnectionTimeout(), testConfig.getTestClientDelegate().getServerSocket()));
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to set TransportHandler");
+        }
+        state.getTlsContext().setRecordLayer(
+                RecordLayerFactory.getRecordLayer(state.getTlsContext().getRecordLayerType(), state.getTlsContext()));
+        task.setBeforeTransportInitCallback(testConfig.getTestClientDelegate().getTriggerScript());
+        return task;
     }
 
     private void startTcpDump() {

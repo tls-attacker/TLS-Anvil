@@ -176,7 +176,6 @@ public class TestContext {
         return startTime;
     }
     
-    @Deprecated
     public ServerTestSiteReport getSiteReport() {
         return (ServerTestSiteReport) siteReport;
     }

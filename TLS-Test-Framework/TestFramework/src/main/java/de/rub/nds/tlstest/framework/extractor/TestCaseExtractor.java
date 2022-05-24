@@ -70,8 +70,13 @@ public class TestCaseExtractor {
                 || extractionMethod.getDescription().contains("SHALL")
                 || extractionMethod.getDescription().contains("REQUIRED"))).collect(Collectors.toSet());
         
-        LOGGER.info("Found {} RFC tests, {} of which without a mandatory statement, and additionally {} State Machine and {} Lengthfield Tests", testMethods.size(), nonMandatoryTests.size(), stateMachineMethods.size(), lengthfieldMethods.size());
+        Set<ExtractionMethod> consideredTestsWithCt = new HashSet<>(testMethods);
+        consideredTestsWithCt.addAll(stateMachineMethods);
+        consideredTestsWithCt.addAll(lengthfieldMethods);
+        consideredTestsWithCt = consideredTestsWithCt.stream().filter(extractionMethod -> extractionMethod.m.getAnnotation(TlsTest.class) != null).collect(Collectors.toSet());
         
+        LOGGER.info("Found {} RFC tests, {} of which without a mandatory statement, and additionally {} State Machine and {} Lengthfield Tests (Total unique test templates considered: {})", testMethods.size(), nonMandatoryTests.size(), stateMachineMethods.size(), lengthfieldMethods.size(), testMethods.size() + stateMachineMethods.size() + lengthfieldMethods.size());
+        LOGGER.info("Among these, {} use CT", consideredTestsWithCt.size());
         if(detailedOutput) {
             LOGGER.info("Non-Mandatory tests: \n{}", String.join("\n", nonMandatoryTests.stream().map(ExtractionMethod::getFullTestName).collect(Collectors.joining("\n"))));
         }

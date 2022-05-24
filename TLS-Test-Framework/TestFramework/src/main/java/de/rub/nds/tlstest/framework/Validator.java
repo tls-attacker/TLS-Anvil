@@ -21,6 +21,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.TlsMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.UnknownMessage;
 import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipher;
@@ -129,15 +130,23 @@ public class Validator {
         }
     }
 
+    public static void checkForUnknownMessage(AnnotatedState i) {
+        if(i.getWorkflowTrace().getFirstReceivedMessage(UnknownMessage.class) != null) {
+            i.addAdditionalResultInfo("Found unknown message");
+        }
+    }
+    
     public static void receivedFatalAlert(AnnotatedState i) {
         receivedFatalAlert(i, true);
     }
 
     public static void executedAsPlanned(AnnotatedState i) {
+        checkForUnknownMessage(i);
         assertTrue(AssertMsgs.WorkflowNotExecuted, i.getWorkflowTrace().executedAsPlanned());
     }
 
     public static void receivedWarningAlert(AnnotatedState i) {
+        checkForUnknownMessage(i);
         WorkflowTrace trace = i.getWorkflowTrace();
         Validator.smartExecutedAsPlanned(i);
 
@@ -178,6 +187,7 @@ public class Validator {
 
 
     public static void smartExecutedAsPlanned(AnnotatedState state) {
+        checkForUnknownMessage(state);
         WorkflowTrace trace = state.getWorkflowTrace();
         if(state.getState().getTlsContext().isReceivedMessageWithWrongTls13KeyType()
                 && state.getState().getTlsContext().getActiveKeySetTypeRead() != Tls13KeySetType.NONE) {

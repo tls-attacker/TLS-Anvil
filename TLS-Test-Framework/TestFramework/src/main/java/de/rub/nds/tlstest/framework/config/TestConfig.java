@@ -15,6 +15,7 @@ import com.beust.jcommander.ParameterException;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
+import de.rub.nds.tlsattacker.core.constants.ChooserType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
@@ -293,7 +294,8 @@ public class TestConfig extends TLSDelegateConfig {
         }
 
         Config config = super.createConfig();
-
+        config.setChooserType(ChooserType.SMART_RECORD_SIZE);
+        
         // Server test -> TLS-Attacker acts as Client
         config.getDefaultClientConnection().setFirstTimeout((parallelHandshakes + 1) * connectionTimeout);
         config.getDefaultClientConnection().setTimeout(connectionTimeout);

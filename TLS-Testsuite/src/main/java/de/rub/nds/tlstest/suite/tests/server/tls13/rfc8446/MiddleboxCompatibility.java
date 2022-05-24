@@ -1,7 +1,7 @@
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
-import de.rub.nds.scanner.core.constants.TestResult;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
@@ -35,7 +35,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class MiddleboxCompatibility extends Tls13Test {
     
     public ConditionEvaluationResult sendsHelloRetryRequestForEmptyKeyShare() {
-        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SENDS_HELLO_RETRY_REQUEST) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SENDS_HELLO_RETRY_REQUEST) == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         }
         return ConditionEvaluationResult.disabled("Target does not send a Hello Retry Request");

@@ -1,7 +1,7 @@
 
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import de.rub.nds.scanner.core.constants.TestResult;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
@@ -35,7 +35,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class NewSessionTicket extends Tls13Test {
     
     public ConditionEvaluationResult issuesTickets() {
-        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_SESSION_TICKETS) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_SESSION_TICKETS) == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
             return ConditionEvaluationResult.disabled("Does not send TLS 1.3 session tickets");

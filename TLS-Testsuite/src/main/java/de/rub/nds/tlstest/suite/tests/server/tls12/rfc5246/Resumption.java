@@ -1,12 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * TLS-Testsuite - A testsuite for the TLS protocol
+ *
+ * Copyright 2020 Ruhr University Bochum and
+ * TÜV Informationstechnik GmbH
+ *
+ * Licensed under Apache License 2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
-import de.rub.nds.scanner.core.constants.TestResult;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
@@ -54,7 +58,7 @@ public class Resumption extends Tls12Test {
     }
 
     public ConditionEvaluationResult supportsResumption() {
-        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_SESSION_ID_RESUMPTION) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_SESSION_ID_RESUMPTION) == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
             return ConditionEvaluationResult.disabled("Does not support ID based session resumption");

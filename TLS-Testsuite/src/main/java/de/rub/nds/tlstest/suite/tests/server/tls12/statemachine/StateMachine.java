@@ -1,7 +1,7 @@
 package de.rub.nds.tlstest.suite.tests.server.tls12.statemachine;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
-import de.rub.nds.scanner.core.constants.TestResult;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
@@ -79,7 +79,6 @@ public class StateMachine extends Tls12Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
-    @Tag("beat")
     public void sendHeartbeatRequestAfterChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -199,7 +198,7 @@ public class StateMachine extends Tls12Test {
     }
 
     public ConditionEvaluationResult onlySupportsTls12() {
-        if(TestContext.getInstance().getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS_1_3) == TestResult.FALSE) {
+        if(TestContext.getInstance().getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS_1_3) == TestResults.FALSE) {
             return ConditionEvaluationResult.enabled("Server does not support TLS 1.3");
         }
         return ConditionEvaluationResult.disabled("Server supports TLS 1.3, where a CCS at the beginning of the handshake is permitted by RFC 8446 4.2.2");

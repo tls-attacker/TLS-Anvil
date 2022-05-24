@@ -1,7 +1,7 @@
 package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
-import de.rub.nds.scanner.core.constants.TestResult;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
@@ -47,7 +47,7 @@ public class ECPointFormatExtension extends TlsGenericTest {
         ECPointFormatExtensionMessage pointFormatExtension = getTargetedExtension(ECPointFormatExtensionMessage.class, workflowTrace);
         pointFormatExtension.setPointFormatsLength(Modifiable.sub(1));
         runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(i -> {
-            boolean skipsExtensionContent = context.getSiteReport().getResult(TlsAnalyzedProperty.HANDSHAKES_WITH_UNDEFINED_POINT_FORMAT) == TestResult.TRUE;
+            boolean skipsExtensionContent = context.getSiteReport().getResult(TlsAnalyzedProperty.HANDSHAKES_WITH_UNDEFINED_POINT_FORMAT) == TestResults.TRUE;
             if(i.getWorkflowTrace().executedAsPlanned() && skipsExtensionContent) {
                 i.addAdditionalResultInfo("SUT skips over extension content");
                 return;

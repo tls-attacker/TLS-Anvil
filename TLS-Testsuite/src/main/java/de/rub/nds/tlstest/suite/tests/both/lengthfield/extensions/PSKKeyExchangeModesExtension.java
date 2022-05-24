@@ -1,7 +1,7 @@
 package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
-import de.rub.nds.scanner.core.constants.TestResult;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
@@ -37,7 +37,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class PSKKeyExchangeModesExtension extends TlsGenericTest {
     
     public ConditionEvaluationResult contentCanBeTested() {
-        if(context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_SESSION_TICKETS) == TestResult.TRUE) {
+        if(context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_SESSION_TICKETS) == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("The Extension content can be tested");
         }
         return ConditionEvaluationResult.disabled("Server does not issue Session Tickets and might ignore the extension");

@@ -9,7 +9,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.scanner.core.constants.TestResult;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
@@ -33,7 +33,7 @@ public class RecordLengthDerivation extends DerivationParameter<Integer>  {
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
 
-        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION) == TestResults.TRUE) {
             parameterValues.add(new RecordLengthDerivation(50));
             parameterValues.add(new RecordLengthDerivation(111));
             parameterValues.add(new RecordLengthDerivation(1));

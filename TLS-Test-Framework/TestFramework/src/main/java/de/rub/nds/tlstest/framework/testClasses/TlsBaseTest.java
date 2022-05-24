@@ -9,7 +9,7 @@
  */
 package de.rub.nds.tlstest.framework.testClasses;
 
-import de.rub.nds.scanner.core.constants.TestResult;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
@@ -73,8 +73,8 @@ public abstract class TlsBaseTest {
     }
     
     public void adjustPreSharedKeyModes(Config config) {
-        if(context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK_DHE) == TestResult.TRUE &&
-                context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK) == TestResult.FALSE) {
+        if(context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK_DHE) == TestResults.TRUE &&
+                context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK) == TestResults.FALSE) {
             config.setPSKKeyExchangeModes(Arrays.asList(PskKeyExchangeMode.PSK_DHE_KE));
         }
     }

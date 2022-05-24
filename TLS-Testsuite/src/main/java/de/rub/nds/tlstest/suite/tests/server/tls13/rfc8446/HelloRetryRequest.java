@@ -1,7 +1,7 @@
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
-import de.rub.nds.scanner.core.constants.TestResult;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -48,7 +48,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class HelloRetryRequest extends Tls13Test {
     
     public ConditionEvaluationResult sendsHelloRetryRequestForEmptyKeyShare() {
-        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SENDS_HELLO_RETRY_REQUEST) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SENDS_HELLO_RETRY_REQUEST) == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         }
         return ConditionEvaluationResult.disabled("Target does not send a Hello Retry Request");
@@ -188,7 +188,7 @@ public class HelloRetryRequest extends Tls13Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @InteroperabilityCategory(SeverityLevel.LOW)
     public void sentHelloRetryRequest() {
-        assertTrue("No Hello Retry Request received by Scanner", context.getSiteReport().getResult(TlsAnalyzedProperty.SENDS_HELLO_RETRY_REQUEST) == TestResult.TRUE);
+        assertTrue("No Hello Retry Request received by Scanner", context.getSiteReport().getResult(TlsAnalyzedProperty.SENDS_HELLO_RETRY_REQUEST) == TestResults.TRUE);
     }
     
     private WorkflowTrace getHelloRetryWorkflowTrace(WorkflowRunner runner) {
@@ -197,7 +197,7 @@ public class HelloRetryRequest extends Tls13Test {
         KeyShareExtensionMessage ksExt = initialHello.getExtension(KeyShareExtensionMessage.class);
         ksExt.setKeyShareListBytes(Modifiable.explicit(new byte[0]));
 
-        if(context.getSiteReport().getResult(TlsAnalyzedProperty.ISSUES_COOKIE_IN_HELLO_RETRY) == TestResult.TRUE) {
+        if(context.getSiteReport().getResult(TlsAnalyzedProperty.ISSUES_COOKIE_IN_HELLO_RETRY) == TestResults.TRUE) {
            runner.getPreparedConfig().setAddCookieExtension(Boolean.TRUE); 
         }
         WorkflowTrace secondHelloTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);

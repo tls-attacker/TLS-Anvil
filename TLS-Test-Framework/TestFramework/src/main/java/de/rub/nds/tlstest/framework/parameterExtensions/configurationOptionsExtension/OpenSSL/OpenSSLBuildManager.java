@@ -668,6 +668,28 @@ public class OpenSSLBuildManager extends ConfigurationOptionsBuildManager {
 
     private synchronized void shutdownContainerSet(Set<String> dockerTagsToShutdown){
         Set<String> failedShutdownTags = new HashSet<>();
+        // Start all containers that have to be shutdown
+        for (String entry : dockerTagsToShutdown) {
+            DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(entry);
+            if (containerInfo == null) {
+                continue;
+            }
+            if (containerInfo.getContainerState() == DockerContainerState.NOT_RUNNING) {
+                dockerHelper.startContainer(containerInfo, true);
+            }
+            if(containerInfo.getContainerState() == DockerContainerState.PAUSED){
+                dockerHelper.unpauseContainer(containerInfo, true);
+            }
+        }
+        // Little delay to give containers time to start properly
+        try {
+            Thread.sleep(800);
+        }
+        catch(InterruptedException e){
+            e.printStackTrace();
+        }
+
+
         for (String entry : dockerTagsToShutdown) {
             DockerContainerInfo containerInfo = dockerTagToContainerInfo.get(entry);
             if(containerInfo == null){

@@ -12,8 +12,11 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigOptionValueTranslation;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -34,10 +37,20 @@ public abstract class ConfigurationOptionsBuildManager {
      */
     public abstract TestSiteReport configureOptionSetAndGetSiteReport(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet);
 
-    //public abstract TestSiteReport createSiteReportFromOptionSet(Set<ConfigurationOptionDerivationParameter> optionSet);
-
+    /**
+     * Get the SiteReport for the tls library built that has the most possible available features using the
+     * enabled configuration options.
+     *
+     * @returns the TestSiteReport of the maximal build
+     */
     public abstract TestSiteReport getMaximalFeatureSiteReport();
 
+    /**
+     * Method that should be called on the end of each test. Can be used to let the manager know that a certain
+     * library built is not used anymore.
+     *
+     * @param optionSet - The option set of the test that is finished
+     */
     public abstract void onTestFinished(Set<ConfigurationOptionDerivationParameter> optionSet);
 
     /**
@@ -49,4 +62,13 @@ public abstract class ConfigurationOptionsBuildManager {
      * Method to initialize the respective build manager (e.g. initialize docker)
      */
     public void init() { }
+
+    /**
+     * Translates a given configuration option to a tls library specific string.
+     *
+     * @param optionParameter - the configuration option to translate (including its set value)
+     * @param optionsToTranslationMap - the translation map of the configuration options config
+     * @returns the translated string
+     */
+    protected abstract String translateOptionValue(ConfigurationOptionDerivationParameter optionParameter, Map<ConfigOptionDerivationType, ConfigOptionValueTranslation> optionsToTranslationMap);
 }

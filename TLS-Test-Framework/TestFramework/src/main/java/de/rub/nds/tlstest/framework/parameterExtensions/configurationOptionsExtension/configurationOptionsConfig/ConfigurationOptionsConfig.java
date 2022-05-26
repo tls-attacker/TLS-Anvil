@@ -85,10 +85,6 @@ public class ConfigurationOptionsConfig {
         return buildManager;
     }
 
-    public boolean isSiteReportConsoleLogDisabled(){
-        return siteReportConsoleLogDisabled;
-    }
-
     public boolean isWithCoverage() {
         return withCoverage;
     }
@@ -143,7 +139,6 @@ public class ConfigurationOptionsConfig {
             parseAndConfigureTLSLibraryName(rootElement);
             parseAndConfigureTLSVersionName(rootElement);
             parseAndConfigureDockerConfig(rootElement);
-            parseAndConfigureDisableSiteReportConsoleLog(rootElement);
             parseAndConfigureWithCoverage(rootElement);
             parseAndConfigureMaxRunningContainers(rootElement);
             parseAndConfigureMaxRunningContainerShutdowns(rootElement);
@@ -167,16 +162,6 @@ public class ConfigurationOptionsConfig {
 
     private void parseAndConfigureBuildManager(Element rootElement){
         buildManager = getBuildManagerFromString(XmlParseUtils.findElement(rootElement, "buildManager", true).getTextContent());
-    }
-
-    private void parseAndConfigureDisableSiteReportConsoleLog(Element rootElement){
-        Element disableSiteReportConsoleLogElement =  XmlParseUtils.findElement(rootElement, "disableSiteReportConsoleLog", false);
-        if(disableSiteReportConsoleLogElement != null){
-            siteReportConsoleLogDisabled = Boolean.parseBoolean(disableSiteReportConsoleLogElement.getTextContent());
-        }
-        else{
-            siteReportConsoleLogDisabled = false;
-        }
     }
 
     private void parseAndConfigureWithCoverage(Element rootElement){

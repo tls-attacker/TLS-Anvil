@@ -11,39 +11,49 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
 
 import com.github.dockerjava.api.DockerClient;
+import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.connection.InboundConnection;
+import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.TestSiteReportFactory;
 
 /**
- * Info of a DockerContainer that runs tls clients for testing purposes.
- * The dockerHost is the host address the docker containers ports are bound to.
- * The managerPort is the host's port on which the docker container's http server listens for the /trigger and /shutdown command.
+ * Represents a DockerContainer that runs tls clients for testing purposes.
  */
 public class DockerClientTestContainer extends DockerTestContainer {
 
-    private String dockerHost;
+    private String inboundConnectionHost;
     private Integer inboundConnectionPort;
 
+    /**
+     * Constructor for the docker client test container.
+     *
+     * @param dockerClient - the docker client
+     * @param dockerTag - the dockerTag of the image the container is built on
+     * @param containerId - the containers id (used to identify the container with the dockerClient)
+     * @param dockerHost - the host address the docker container is bound on
+     * @param managerPort - the port (on the docker host) the containers manager listens for http requests (e.g. /trigger)
+     * @param inboundConnectionHost - the host the client should connect to
+     * @param inboundConnectionPort - the port the client should connect to
+     */
     public DockerClientTestContainer(DockerClient dockerClient, String dockerTag, String containerId,
-                                     String dockerHost, Integer managerPort, Integer inboundConnectionPort)
+                                     String dockerHost, Integer managerPort, String inboundConnectionHost, Integer inboundConnectionPort)
     {
-        super(dockerClient, dockerTag, containerId, managerPort);
+        super(dockerClient, dockerTag, containerId, dockerHost, managerPort);
 
-        this.dockerHost = dockerHost;
+        this.inboundConnectionHost = inboundConnectionHost;
         this.inboundConnectionPort = inboundConnectionPort;
-    }
-
-    public String getDockerHost() {
-        return dockerHost;
-    }
-
-    public void setDockerHost(String dockerHost) {
-        this.dockerHost = dockerHost;
     }
 
     public Integer getInboundConnectionPort() {
         return inboundConnectionPort;
     }
 
-    public void setInboundConnectionPort(Integer inboundConnectionPort) {
-        this.inboundConnectionPort = inboundConnectionPort;
+    @Override
+    protected synchronized TestSiteReport createSiteReport(){
+        InboundConnection inboundConnection = new InboundConnection(inboundConnectionPort, inboundConnectionHost);
+        TestSiteReport report = TestSiteReportFactory.createClientSiteReport(TestContext.getInstance().getConfig(), inboundConnection, false);
+        return report;
     }
+
 }

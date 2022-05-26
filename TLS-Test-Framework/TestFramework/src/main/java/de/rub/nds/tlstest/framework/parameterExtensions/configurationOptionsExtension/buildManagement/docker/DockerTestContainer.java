@@ -11,166 +11,204 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.InspectContainerResponse;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.Test;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.concurrent.TimeoutException;
 
 /**
- * This class is used to store information regarding docker containers. It is faster to store these information
- * than to perform a docker inspect container command every time.
+ * Represents a DockerContainer used for testing. It runs an http server at [dockerHost]:[mangerPort] used to
+ * shutdown it properly or triggering it if it is a client.
+ *
+ * It stores and can generate a SiteReport (abstract methods).
+ *
+ * Additionally it keeps track about it usages by providing functions startUsage, stopUsage and isInUse. This can be
+ * used to check if the container is currently unused (however the applications must use these functions properly)
  */
-public class DockerTestContainer {
+public abstract class DockerTestContainer extends DockerContainer{
     private static final Logger LOGGER = LogManager.getLogger();
-    private String dockerTag;
-    private String containerId;
-    private DockerContainerState containerState;
-    private DockerClient dockerClient;
-    // -1 if there is no manager port
-    private Integer managerPort;
+    protected Integer managerPort;
+    protected TestSiteReport siteReport;
+    protected String dockerHost;
+    protected int inUseCount;
 
-
-
-    public DockerTestContainer(DockerClient dockerClient, String dockerTag, String containerId, Integer managerPort){
-        this.dockerTag = dockerTag;
-        this.containerId = containerId;
-        this.containerState = containerState;
-        this.dockerClient = dockerClient;
+    /**
+     * Constructor.
+     *
+     * @param dockerClient - the docker client
+     * @param dockerTag - the dockerTag of the image the container is built on
+     * @param containerId - the containers id (used to identify the container with the dockerClient)
+     * @param dockerHost - the host address the docker container is bound on
+     * @param managerPort - the port (on the docker host) the containers manager listens for http requests (e.g. /trigger)
+     */
+    public DockerTestContainer(DockerClient dockerClient, String dockerTag, String containerId, String dockerHost, Integer managerPort){
+        super(dockerTag, containerId, dockerClient);
+        this.dockerHost = dockerHost;
         this.managerPort = managerPort;
-        updateContainerState();
+        this.siteReport = null;
+        this.inUseCount = 0;
     }
 
-    public DockerTestContainer(DockerClient dockerClient, String dockerTag, String containerId){
-        this(dockerClient, dockerTag, containerId, -1);
-    }
-
-    public String getDockerTag() {
-        return dockerTag;
-    }
-
-    public String getContainerId() {
-        return containerId;
-    }
-
-    public DockerContainerState getContainerState() {
-        return containerState;
-    }
-
-    public DockerContainerState updateContainerState() {
-        InspectContainerResponse containerResp = dockerClient.inspectContainerCmd(this.getContainerId()).exec();
-        InspectContainerResponse.ContainerState state = containerResp.getState();
-        if(containerState == DockerContainerState.INVALID){
-            return DockerContainerState.INVALID;
-        }
-        if(state.getRunning()){
-            this.containerState = DockerContainerState.RUNNING;
-            return DockerContainerState.RUNNING;
-        }
-        else if(state.getPaused()){
-            this.containerState = DockerContainerState.PAUSED;
-            return DockerContainerState.PAUSED;
-        }
-        else{
-            this.containerState = DockerContainerState.NOT_RUNNING;
-            return DockerContainerState.NOT_RUNNING;
-        }
+    public String getDockerHost() {
+        return dockerHost;
     }
 
     public Integer getManagerPort() { return managerPort; }
 
 
-    // Management
-    public void start(){
-        if(this.getContainerState() != DockerContainerState.NOT_RUNNING){
-            throw new IllegalStateException("Cannot start a running (or paused) container.");
-        }
-        dockerClient.startContainerCmd(this.getContainerId()).exec();
-        this.containerState = DockerContainerState.RUNNING;
-    }
-
-    public void startAndWait() {
-        this.start();
-
-        final long CHECK_INTERVAL = 200; // 0.2 sec
-        final long TIMEOUT_AFTER = 30000; // 30 sec
-        InspectContainerResponse containerResp;
-        long timeoutCtr = 0;
-        do {
-            containerResp = dockerClient.inspectContainerCmd(this.getContainerId()).exec();
-            if(containerResp.getState().getRunning() == true){
-                break;
-            }
-            else{
-                try{
-                    Thread.sleep(CHECK_INTERVAL);
-                }
-                catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                timeoutCtr+=CHECK_INTERVAL;
-                if(timeoutCtr > TIMEOUT_AFTER){
-                    LOGGER.error(String.format("Cannot start container with tag '%s'", this.getDockerTag()));
-                    break;
-                }
-            }
-        } while(true);
-    }
-
-    public void stop(){
-        if(this.getContainerState() == DockerContainerState.NOT_RUNNING){
-            throw new IllegalStateException("Cannot stop a stopped container.");
-        }
-        dockerClient.stopContainerCmd(this.getContainerId()).exec();
-        this.containerState =DockerContainerState.NOT_RUNNING;
-    }
-
-    public void pause(){
+    /**
+     * Send an http request to the manager running within the docker container. (e.g. 'shutdown')
+     *
+     * @param request - the request to send.
+     * @returns the manager servers response as a string.
+     */
+    public String sendHttpRequestToManager(String request){
         if(this.getContainerState() != DockerContainerState.RUNNING){
-            throw new IllegalStateException("Cannot pause a non running container.");
+            throw new IllegalStateException(String.format("Cannot send request to docker container '%s'. Container is in state '%s'.",
+                    getDockerTag(), this.getContainerState().toString()));
         }
-        dockerClient.pauseContainerCmd(this.getContainerId()).exec();
-        this.containerState = DockerContainerState.PAUSED;
-    }
 
-    public void unpause(){
-        if(this.getContainerState() != DockerContainerState.PAUSED){
-            throw new IllegalStateException("Cannot unpause a non paused container.");
+        String requestHttpUrlString = String.format("http://%s:%d/%s", dockerHost, managerPort, request);
+
+        final int MAX_ATTEMPTS = 3;
+        final int ATTEMPT_DELAY = 2000;//ms
+
+        boolean connected;
+        int attempts = 0;
+
+        URL url;
+        try{
+            url = new URL(requestHttpUrlString);
         }
-        dockerClient.unpauseContainerCmd(this.getContainerId()).exec();
-        this.containerState = DockerContainerState.RUNNING;
-    }
+        catch(MalformedURLException e){
+            throw new RuntimeException(String.format("URL '%s' is malformed", requestHttpUrlString));
+        }
 
-    // Unpauses the container and sleeps to give the container time to unpause
-    public void unpauseAndWait() {
-        unpause();
+        String response = "";
+        do
+        {
+            try{
+                HttpURLConnection http = (HttpURLConnection)url.openConnection();
+                http.setConnectTimeout(10000);
+                int responseCode = http.getResponseCode();
 
-        final long CHECK_INTERVAL = 200; // 0.2 sec
-        final long TIMEOUT_AFTER = 30000; // 30 sec
-        InspectContainerResponse containerResp;
-        long timeoutCtr = 0;
-        do {
-            containerResp = dockerClient.inspectContainerCmd(this.getContainerId()).exec();
-            if(containerResp.getState().getPaused() == false){
-                break;
-            }
-            else{
-                try{
-                    Thread.sleep(CHECK_INTERVAL);
+                if(responseCode != 200){
+                    LOGGER.warn(String.format("Docker container at '%s' cannot be triggered. Response Code: %i. Try new attempt.", url.toString(), responseCode));
+                    connected = false;
                 }
-                catch (InterruptedException e) {
+                else{
+                    connected = true;
+                    // Get the response
+                    BufferedReader br = new BufferedReader(new InputStreamReader((http.getInputStream())));
+                    StringBuilder sb = new StringBuilder();
+                    String output;
+                    while ((output = br.readLine()) != null) {
+                        sb.append(output);
+                    }
+                    br.close();
+                    response = sb.toString();
+
+                }
+                http.disconnect();
+            }
+            catch(Exception e){
+                LOGGER.warn(String.format("Client docker container at '%s' cannot be triggered.", url.toString()));
+                connected = false;
+            }
+            if(!connected){
+                attempts += 1;
+                if(attempts > MAX_ATTEMPTS){
+                    throw new RuntimeException("Cannot send http request to client docker container.");
+                }
+                try{
+                    Thread.sleep(ATTEMPT_DELAY);
+                    LOGGER.warn(String.format("Retry..."));
+                }
+                catch(Exception e){
                     e.printStackTrace();
                 }
-                timeoutCtr+=CHECK_INTERVAL;
-                if(timeoutCtr > TIMEOUT_AFTER){
-                    LOGGER.error(String.format("Cannot unpause container with tag '%s'", this.getDockerTag()));
-                    break;
-                }
             }
-        } while(true);
+        }
+        while(!connected);
+
+        return response;
     }
 
-    public void remove(){
-        dockerClient.removeContainerCmd(this.getContainerId()).withForce(true).exec();
-        this.containerState = DockerContainerState.INVALID;
+    /**
+     * Checks if an application currently registered the usage of this container using startUsage()
+     *
+     * @returns true iff the container is in use
+     */
+    public boolean isInUse(){
+        return (inUseCount > 0);
     }
 
+    /**
+     * Registers the start of the usage of this container.
+     */
+    public synchronized void startUsage(){
+        inUseCount += 1;
+    }
+
+    /**
+     * Registers the end of the usage of this container.
+     */
+    public synchronized void endUsage(){
+        inUseCount -= 1;
+        if(inUseCount < 0){
+            throw new IllegalStateException("Negative usage count. Please use 'startUsage()' before calling this method.");
+        }
+    }
+
+    /**
+     * Gets the TestSiteReport for this container. The site report is generated here if it is not created yet.
+     *
+     * @returns the containers TestSiteReport
+     */
+    public TestSiteReport getSiteReport(){
+        if(siteReport == null){
+            DockerContainerState state = getContainerState();
+            startUsage();
+            try{
+                if(state == DockerContainerState.PAUSED){
+                    unpauseAndWait();
+                    siteReport = createSiteReport();
+                    pause();
+                }
+                else if(state == DockerContainerState.NOT_RUNNING){
+                    startAndWait();
+                    siteReport = createSiteReport();
+                    stop();
+                }
+                else if(state == DockerContainerState.RUNNING){
+                    siteReport = createSiteReport();
+                }
+                else{
+                    throw new RuntimeException("Can't create SiteReport in invalid container state.");
+                };
+            }
+            catch(TimeoutException e){
+                endUsage();
+                throw new RuntimeException("Cannot create site report. Container cannot be started.");
+            }
+            endUsage();
+
+        }
+        return siteReport;
+    }
+
+    /**
+     * Abstract method to create a site report. Note that while this method is called the usage is already registered, and
+     * the container is already running.
+     *
+     * @returns the created TestSiteReport
+     */
+    protected abstract TestSiteReport createSiteReport();
 }

@@ -10,26 +10,25 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.OpenSSL;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.*;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ResultsCollector.OpenSSLConfigOptionsResultsCollector;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerClientTestContainer;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerFactory;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerServerTestContainer;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerTestContainer;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ResultsCollector.ConfigOptionsResultsCollector;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.*;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import de.rub.nds.tlstest.framework.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
- * This class provides various helper functions that are used to build OpenSSL docker images
- * and manage containers.
+ * DockerFactory to build OpenSSL server and client containers using a two-step build procedure to utilize ccache.
+ * Utilizes the files in '[TLS-Docker-Library path]/images/openssl/configurationOptionsFactoryWithCoverage/'
  */
 public class OpenSSLDockerFactory extends DockerFactory {
 
@@ -52,9 +51,13 @@ public class OpenSSLDockerFactory extends DockerFactory {
     private boolean withCoverage;
     private final String COVERAGE_DIRECTORY_NAME;
 
-    public OpenSSLDockerFactory(DockerClient dockerClient, boolean withCoverage){
-        super(dockerClient, "openssl_img");
-        this.withCoverage = withCoverage;
+    private final String CCACHE_VOLUME_NAME = "ccache-cache";
+
+    private Path dockerfileMinPath;
+
+    public OpenSSLDockerFactory(ConfigurationOptionsConfig configurationOptionsConfig){
+        super(configurationOptionsConfig, "openssl_img");
+        this.withCoverage = configurationOptionsConfig.isWithCoverage();
 
         String coverageSuffix = "";
         if(withCoverage){
@@ -70,13 +73,66 @@ public class OpenSSLDockerFactory extends DockerFactory {
         COVERAGE_DIRECTORY_NAME = "CoverageReport_" + Utils.DateToISO8601UTC(new Date());
     }
 
+    @Override
+    public void init(){
+        super.init();
+
+        // Create a ccache volume if it does not exist so far
+        if(!dockerClient.listVolumesCmd().exec().getVolumes().stream().anyMatch(response -> response.getName().equals(CCACHE_VOLUME_NAME))){
+            // If a volume with the specified name exists:
+            dockerClient.createVolumeCmd().withName(CCACHE_VOLUME_NAME).exec();
+        }
+
+        Path dockerLibraryPath = configOptionsConfig.getDockerLibraryPath();
+        String subfolderName;
+        if(configOptionsConfig.isWithCoverage()){
+            subfolderName = "configurationOptionsFactoryWithCoverage";
+        }
+        else{
+            subfolderName = "configurationOptionsFactory";
+        }
+
+        Path partialPathToFactoryDockerfile = Paths.get("images", "openssl", subfolderName, "Dockerfile_Factory_OpenSSL");
+        Path pathToFactoryDockerfile = dockerLibraryPath.resolve(partialPathToFactoryDockerfile);
+
+        Path partialPathToMinDockerfile = Paths.get("images", "openssl", subfolderName, "Dockerfile_Min_OpenSSL");
+        Path pathToMinDockerfile = dockerLibraryPath.resolve(partialPathToMinDockerfile);
+
+        if(!Files.exists(pathToMinDockerfile)){
+            throw new RuntimeException(
+                    String.format("Dockerfile '%s' does not exist. Have you configured the right Docker Library path? " +
+                            "Or are you using an old DockerLibrary Version?", pathToMinDockerfile.toString()));
+        }
+
+
+        if(!Files.exists(pathToFactoryDockerfile)){
+            throw new RuntimeException(
+                    String.format("Dockerfile '%s' does not exist. Have you configured the right Docker Library path? " +
+                            "Or are you using an old DockerLibrary Version?", pathToFactoryDockerfile.toString()));
+        }
+
+
+
+        // Build the factory if it does not exist
+        // Note that the library name must be a branch in OpenSSL's github.
+        String openSSLBranchName = configOptionsConfig.getTlsVersionName();
+        String factoryImageNameWithTag = getFactoryImageNameAndTag(openSSLBranchName);
+        if(!dockerNameWithTagExists(factoryImageNameWithTag)){
+            createFactoryImage(pathToFactoryDockerfile, openSSLBranchName);
+        }
+
+        dockerfileMinPath = pathToMinDockerfile;
+
+
+    }
 
 
     public String getFactoryImageNameAndTag(String openSSLBranchName){
         return String.format("%s:%s",FACTORY_REPRO_NAME, openSSLBranchName);
     }
 
-    public synchronized void buildOpenSSLImageWithFactory(List<String> cliOptions, String dockerTag, Path dockerfileMinPath, String openSSLBranchName, OpenSSLConfigOptionsResultsCollector resultsCollector)  {
+    @Override
+    protected synchronized void buildDockerImage(List<String> cliOptions, String dockerTag, String openSSLBranchName, ConfigOptionsResultsCollector resultsCollector)  {
         LOGGER.debug(String.format("Build with option string: '%s'", cliOptions));
 
         // Create the docker factory image for the respective OpenSSL version, if it does not exist so far
@@ -104,7 +160,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
                 = dockerClient.inspectContainerCmd(tempContainer.getId()).exec();
 
         if(resultsCollector != null){
-            resultsCollector.logBuildContainer(new DockerTestContainer(dockerClient, dockerTag, containerResp.getId()));
+            resultsCollector.logBuildContainer(new DockerContainer(dockerTag, containerResp.getId(),dockerClient));
         }
 
         LOGGER.debug("Factory Container started.");
@@ -129,7 +185,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
                 .exec();
 
         String buildArg = String.format("%s:%s", TEMP_REPRO_NAME, dockerTag);
-        String finalImageTag = getOpenSSLBuildImageNameAndTag(dockerTag);
+        String finalImageTag = getBuildImageNameAndTag(dockerTag);
         dockerClient.buildImageCmd()
                 .withDockerfile(dockerfileMinPath.toFile())
                 .withTags(new HashSet<>(Arrays.asList(finalImageTag)))
@@ -144,8 +200,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
     public DockerServerTestContainer createDockerServer(String dockerTag,
                                                         String dockerHost,
-                                                        Integer dockerTlsPort,
-                                                        Integer managerPort)
+                                                        Integer dockerManagerPort, Integer dockerTlsPort)
     {
         final Integer CONTAINER_PORT_TLS_SERVER = 4433;
         final Integer CONTAINER_MANAGER_PORT = 8090;
@@ -164,7 +219,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
         portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(dockerHost, dockerTlsPort), exposedTlsServerPort));
 
         ExposedPort exposedManagerPort = ExposedPort.tcp(CONTAINER_MANAGER_PORT);
-        portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(dockerHost, managerPort), exposedManagerPort));
+        portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(dockerHost, dockerManagerPort), exposedManagerPort));
 
         volumeBindings.add(new Bind(volumeNameCert, targetVolumeCert, AccessMode.ro, SELContext.DEFAULT, true));
         if(withCoverage){
@@ -172,15 +227,15 @@ public class OpenSSLDockerFactory extends DockerFactory {
         }
 
         String containerName = String.format("%s_server_%s", CONTAINER_NAME_PREFIX, dockerTag);
-        String dockerContainerId = createDockerContainer(getOpenSSLBuildImageNameAndTag(dockerTag), entrypoint, portBindings, volumeBindings, containerName);
-        DockerServerTestContainer containerInfo = new DockerServerTestContainer(dockerClient, dockerTag, dockerContainerId, dockerHost, dockerTlsPort, managerPort);
+        String dockerContainerId = createDockerContainer(getBuildImageNameAndTag(dockerTag), entrypoint, portBindings, volumeBindings, containerName);
+        DockerServerTestContainer containerInfo = new DockerServerTestContainer(dockerClient, dockerTag, dockerContainerId, dockerHost, dockerManagerPort, dockerTlsPort);
 
         return containerInfo;
     }
 
     public DockerClientTestContainer createDockerClient(String dockerTag,
                                                         String dockerManagerHost,
-                                                        Integer dockeManagerPort,
+                                                        Integer dockerManagerPort,
                                                         String tlsServerHost,
                                                         Integer tlsServerPort)
     {
@@ -200,17 +255,17 @@ public class OpenSSLDockerFactory extends DockerFactory {
         List<Bind> volumeBindings = new LinkedList<>();
 
         ExposedPort exposedManagerPort = ExposedPort.tcp(CONTAINER_PORT_MANAGER);
-        portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(dockerManagerHost, dockeManagerPort), exposedManagerPort));
+        portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(dockerManagerHost, dockerManagerPort), exposedManagerPort));
 
         if(withCoverage){
             volumeBindings.add(new Bind(volumeNameCoverage, targetVolumeCoverage));
         }
 
         String containerName = String.format("%s_client_%s", CONTAINER_NAME_PREFIX, dockerTag);
-        String dockerContainerId = createDockerContainer(getOpenSSLBuildImageNameAndTag(dockerTag), entrypoint, portBindings, volumeBindings, containerName);
+        String dockerContainerId = createDockerContainer(getBuildImageNameAndTag(dockerTag), entrypoint, portBindings, volumeBindings, containerName);
 
         DockerClientTestContainer containerInfo = new DockerClientTestContainer(dockerClient, dockerTag, dockerContainerId,
-                dockerManagerHost, dockeManagerPort, tlsServerPort);
+                dockerManagerHost, dockerManagerPort, configOptionsConfig.getDockerClientDestinationHostName(), tlsServerPort);
 
         return containerInfo;
     }

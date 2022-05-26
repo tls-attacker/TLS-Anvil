@@ -13,47 +13,152 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.*;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
+import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.transport.DockerHttpClient;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ResultsCollector.ConfigOptionsResultsCollector;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.DatatypeConverter;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Predicate;
+import java.nio.file.Path;
 
+/**
+ * Abstract factory to create DockerServerTestContainer%s and DockerClientTestContainer%s. Which Dockerfiles of the
+ * TLS docker library are used and how and with which arguments the images and containers are created is up to
+ * the sub class implementations.
+ */
 public abstract class DockerFactory {
     private static final Logger LOGGER = LogManager.getLogger();
     protected DockerClient dockerClient;
     protected String BUILD_REPRO_NAME;
     protected String CONTAINER_NAME_PREFIX;
 
+    protected Set<String> existingDockerImageNameWithTags;
 
+    protected ConfigurationOptionsConfig configOptionsConfig;
 
-    public DockerFactory(DockerClient dockerClient, String buildReproName){
-        this.dockerClient = dockerClient;
+    /**
+     * Constructor.
+     *
+     * @param configurationOptionsConfig - The configuration options config
+     * @param buildReproName - The repository name the images should have.
+     */
+    public DockerFactory(ConfigurationOptionsConfig configurationOptionsConfig, String buildReproName){
         this.BUILD_REPRO_NAME = buildReproName;
         this.CONTAINER_NAME_PREFIX = "container";
+        this.configOptionsConfig = configurationOptionsConfig;
     }
 
-    public void init(){
-
+    /**
+     * Given a set of cliOptions this function builds a build image that utilized the cliOptions for building.
+     *
+     * @param cliOptions - The list of cliOptions to compile the tls library
+     * @param dockerTag - The docker tag the image should have (should be derived from the cliOptions and the version)
+     * @param libraryVersionName - The version of the tls library (e.g. the respective git branch tag)
+     * @param resultsCollector - The result collector to log build and container information
+     */
+    public void buildTlsLibraryDockerImage(List<String> cliOptions, String dockerTag, String libraryVersionName, ConfigOptionsResultsCollector resultsCollector){
+        buildDockerImage(cliOptions, dockerTag, libraryVersionName, resultsCollector);
+        String dockerNameWithTag = this.getBuildImageNameAndTag(dockerTag);
+        existingDockerImageNameWithTags.add(dockerNameWithTag);
     }
 
+    /**
+     * Given a set of cliOptions this function builds a build image that utilized the cliOptions for building. The actual
+     * procedure is up to the subclasses.
+     *
+     * @param cliOptions - The list of cliOptions to compile the tls library
+     * @param dockerTag - The docker tag the image should have (should be derived from the cliOptions and the version)
+     * @param libraryVersionName - The version of the tls library (e.g. the respective git branch tag)
+     * @param resultsCollector - The result collector to log build and container information
+     */
+    protected abstract void buildDockerImage(List<String> cliOptions, String dockerTag, String libraryVersionName, ConfigOptionsResultsCollector resultsCollector);
+
+    /**
+     * Create a DockerClientTestContainer using the respective configurations. An image for the respective docker tag must
+     * exist otherwise it will fail.
+     *
+     * @param dockerTag - The docker tag of the image the container is derived from
+     * @param dockerManagerHost - the host address the docker container is bound on
+     * @param dockerManagerPort - the port (on the docker host) the containers manager listens for http requests (e.g. 'trigger')
+     * @param tlsServerHost - the server host the client connects to
+     * @param tlsServerPort - the sever port the client connects to
+     * @returns the DockerClientTestContainer of the already built docker container
+     */
     public abstract DockerClientTestContainer createDockerClient(String dockerTag,
-                                                        String dockerManagerHost,
-                                                        Integer dockeManagerPort,
-                                                        String tlsServerHost,
-                                                        Integer tlsServerPort);
+                                                                 String dockerManagerHost,
+                                                                 Integer dockerManagerPort,
+                                                                 String tlsServerHost,
+                                                                 Integer tlsServerPort);
 
-
-
+    /**
+     * Create a DockerServerTestContainer using the respective configurations. An image for the respective docker tag must
+     * exist otherwise it will fail.
+     *
+     * @param dockerTag - The docker tag of the image the container is derived from
+     * @param dockerManagerHost - the host address the docker container is bound on
+     * @param dockerManagerPort - the port (on the docker host) the containers manager listens for http requests (e.g. 'shutdown')
+     * @param dockerTlsPort - the port (on the docker host) the tls server runs on
+     * @returns the DockerServerTestContainer of the already built docker container
+     */
     public abstract DockerServerTestContainer createDockerServer(String dockerTag,
-                                                                 String dockerHost,
-                                                                 Integer dockerTlsPort,
-                                                                 Integer managerPort);
+                                                                 String dockerManagerHost,
+                                                                 Integer dockerManagerPort,
+                                                                 Integer dockerTlsPort);
 
-    public String getOpenSSLBuildImageNameAndTag(String dockerTag){
+    /**
+     * Initializes the docker factory (e.g. create base builds, etc.). Must be called before any images are build using
+     * the other functions.
+     */
+    public void init(){
+        List<Image> imageList;
+        try{
+            DefaultDockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
+
+            DockerHttpClient httpClient = (new com.github.dockerjava.jaxrs.JerseyDockerHttpClient.Builder()).dockerHost(config.getDockerHost()).sslConfig(config.getSSLConfig()).build();
+
+            this.dockerClient = DockerClientBuilder
+                    .getInstance(config)
+                    .withDockerHttpClient(httpClient)
+                    .build();
+
+            imageList = dockerClient.listImagesCmd().withDanglingFilter(false).exec();
+        }
+        catch(Exception e){
+            LOGGER.error("Cannot initialize the docker client. Is docker installed and started?",e);
+            throw new RuntimeException("Cannot initialize docker.");
+        }
+
+
+        // Get all existing docker tags
+        // Note that it is assumed, that no (relevant) docker images are created or deleted manually during the test executions
+        existingDockerImageNameWithTags = new HashSet<>();
+        for(Image img : imageList){
+            Object tagsObj = img.getRawValues().get("RepoTags");
+            List<String> tags = (List<String>) tagsObj;
+            existingDockerImageNameWithTags.addAll(tags);
+        }
+
+
+        // Find dockerfile paths
+        Path dockerLibraryPath = configOptionsConfig.getDockerLibraryPath();
+        if(!Files.exists(dockerLibraryPath)){
+            throw new RuntimeException(
+                    String.format("Docker library path '%s' does not exist. Have you configured the right Docker Library path?", dockerLibraryPath.toAbsolutePath()));
+        }
+    }
+
+    /*--------------------
+        Utility Functions
+     ---------------------*/
+    public String getBuildImageNameAndTag(String dockerTag){
         return String.format("%s:%s",BUILD_REPRO_NAME, dockerTag);
     }
 
@@ -95,10 +200,10 @@ public abstract class DockerFactory {
     /**
      * Creates a docker container and returns the container id of the created container.
      *
-     * @param dockerImageTag
-     * @param entrypoint
-     * @param portBindings
-     * @param volumeBindings
+     * @param dockerImageTag - the tag of the docker image to create the build from
+     * @param entrypoint - the entrypoint to use
+     * @param portBindings - the port bindings
+     * @param volumeBindings - the volume bindings
      * @return the container id
      */
     public synchronized String createDockerContainer(String dockerImageTag,
@@ -148,6 +253,15 @@ public abstract class DockerFactory {
         return createContainerCmd.getId();
     }
 
+    /**
+     * Gets the dockerClient this factory has uses (created automatically in init).
+     *
+     * @returns the DockerClient
+     */
+    public DockerClient getDockerClient() {
+        return dockerClient;
+    }
+
     protected Optional<Container> containerByName(String name){
         final String cName;
         if(!name.startsWith("/")){
@@ -158,5 +272,16 @@ public abstract class DockerFactory {
         }
         Predicate<Container> pred = container -> Arrays.asList(container.getNames()).stream().anyMatch(n -> n.equals(cName));
         return dockerClient.listContainersCmd().withShowAll(true).exec().stream().filter(pred).findFirst();
+    }
+
+    /**
+     * Checks if and image of the specified image exists.
+     * (Does not catch any shenanigans with docker (e.g. manual deletions) during the execution)
+     *
+     * @param dockerTag - The docker image tag
+     * @returns true iff the docker image exists
+     */
+    public boolean dockerNameWithTagExists(String dockerTag){
+        return existingDockerImageNameWithTags.contains(dockerTag);
     }
 }

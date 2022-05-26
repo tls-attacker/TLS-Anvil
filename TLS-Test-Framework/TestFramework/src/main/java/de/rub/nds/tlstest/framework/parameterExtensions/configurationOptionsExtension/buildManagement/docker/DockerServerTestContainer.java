@@ -11,41 +11,38 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
 
 import com.github.dockerjava.api.DockerClient;
+import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.TestSiteReportFactory;
 
 /**
- * Info of a DockerContainer that runs a tls server for testing purposes.
- * The dockerHost is the host address the docker containers ports are bound to.
- * The tlsServerPort is the host's port on which the tls server is available.
- * The managerPort is the host's port on which the docker container's http server listens for the /shutdown command.
+ * Represents a DockerContainer that runs a tls server for testing purposes.
  */
 public class DockerServerTestContainer extends DockerTestContainer {
-    private String dockerHost;
     private Integer tlsServerPort;
-    DockerClient dockerClient;
 
+    /**
+     * Constructor for the docker server test container.
+     *
+     * @param dockerClient - the docker client
+     * @param dockerTag - the dockerTag of the image the container is built on
+     * @param containerId - the containers id (used to identify the container with the dockerClient)
+     * @param dockerHost - the host address the docker container is bound on
+     * @param managerPort - the port (on the docker host) the containers manager listens for http requests (e.g. /shutdown)
+     * @param tlsServerPort - the port (on the docker host) the tls server runs on
+     */
     public DockerServerTestContainer(DockerClient dockerClient, String dockerTag, String containerId, String dockerHost,
-                                     Integer tlsServerPort, Integer managerPort) {
-        super(dockerClient, dockerTag, containerId, managerPort);
-        this.dockerHost = dockerHost;
+                                     Integer managerPort, Integer tlsServerPort) {
+        super(dockerClient, dockerTag, containerId, dockerHost, managerPort);
         this.tlsServerPort = tlsServerPort;
-    }
-
-    public String getDockerHost() {
-        return dockerHost;
-    }
-
-    public void setDockerHost(String dockerHost) {
-        this.dockerHost = dockerHost;
     }
 
     public Integer getTlsServerPort() {
         return tlsServerPort;
     }
 
-    public void setTlsServerPort(Integer tlsServerPort) {
-        this.tlsServerPort = tlsServerPort;
+    public synchronized TestSiteReport createSiteReport(){
+        TestSiteReport report = TestSiteReportFactory.createServerSiteReport(dockerHost, tlsServerPort, false);
+        return report;
     }
-
-
 
 }

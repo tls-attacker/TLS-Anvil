@@ -14,8 +14,12 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
  * Represents a docker container state.
  */
 public enum DockerContainerState{
+    /** The container is not yet started or was stopped.*/
     NOT_RUNNING,
+    /** The container is paused.*/
     PAUSED,
+    /** The container is running, i.e. not stopped or paused.*/
     RUNNING,
+    /** The container does not exist or must not be accessed.*/
     INVALID
 }

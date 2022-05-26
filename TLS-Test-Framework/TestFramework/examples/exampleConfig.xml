@@ -32,8 +32,6 @@
              Note that localhost of containers is not localhost of the host. Use 'host.docker.internal' for the host's localhost. -->
         <dockerClientDestinationHost>host.docker.internal</dockerClientDestinationHost>
     </dockerConfig>
-    <!-- Optional: Disables the console logs for site reports. Default: false -->
-    <disableSiteReportConsoleLog>true</disableSiteReportConsoleLog>
     <!-- Optional: Enables code coverage. For OpenSSL other dockerfiles are used for testing with coverage. Default: false -->
     <withCoverage>true</withCoverage>
     <!-- Optional: Configures how many containers are running simultaneously. Rarely used containers are paused meanwhile. Default: 16 -->

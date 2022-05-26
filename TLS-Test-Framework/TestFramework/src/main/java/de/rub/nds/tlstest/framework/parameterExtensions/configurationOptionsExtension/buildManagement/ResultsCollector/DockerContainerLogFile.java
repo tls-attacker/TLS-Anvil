@@ -13,7 +13,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.core.command.LogContainerResultCallback;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerTestContainer;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerContainer;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -30,7 +30,7 @@ public class DockerContainerLogFile extends LogFile{
         this.dockerClient = dockerClient;
     }
 
-    public void logDockerContainer(DockerTestContainer containerInfo){
+    public void logDockerContainer(DockerContainer containerInfo){
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         String timeStamp = dtf.format(now);

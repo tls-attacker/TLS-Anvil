@@ -51,7 +51,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     }
     
     @TlsTest(description = "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations("BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
+    @ScopeLimitations({"BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION", "ConfigOptionDerivationType.DisablePsk"})
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "supportsPsk")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -65,7 +65,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     }
     
     @TlsTest(description = "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations("BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
+    @ScopeLimitations({"BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION", "ConfigOptionDerivationType.DisablePsk"})
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "supportsPsk")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -79,7 +79,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     }
         
     @TlsTest(description = "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations("BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
+    @ScopeLimitations({"BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION", "ConfigOptionDerivationType.DisablePsk"})
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "supportsPsk")
     @MessageStructureCategory(SeverityLevel.MEDIUM)

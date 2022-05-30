@@ -13,6 +13,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -100,7 +101,8 @@ public class HelloRetryRequest extends Tls13Test {
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     public void selectsSameCipherSuiteAllAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        c.setDefaultClientSupportedCipherSuites(new LinkedList<>(context.getSiteReport().getSupportedTls13CipherSuites()));
+        TestSiteReport siteReport = derivationContainer.getAssociatedSiteReport();
+        c.setDefaultClientSupportedCipherSuites(new LinkedList<>(siteReport.getSupportedTls13CipherSuites()));
         WorkflowTrace workflowTrace = getHelloRetryWorkflowTrace(runner);
         
         runner.execute(workflowTrace, c).validateFinal(i -> {
@@ -109,7 +111,7 @@ public class HelloRetryRequest extends Tls13Test {
             ServerHelloMessage helloRetryRequest = (ServerHelloMessage) WorkflowTraceUtil.getFirstReceivedMessage(HandshakeMessageType.SERVER_HELLO, i.getWorkflowTrace());
             ServerHelloMessage actualServerHello = (ServerHelloMessage) WorkflowTraceUtil.getLastReceivedMessage(HandshakeMessageType.SERVER_HELLO, i.getWorkflowTrace());
             if (helloRetryRequest != null && actualServerHello != null) {
-                assertTrue("Server selected an unproposed CipherSuite in HelloRetryRequest", context.getSiteReport().getSupportedTls13CipherSuites().contains(CipherSuite.getCipherSuite(helloRetryRequest.getSelectedCipherSuite().getValue())));
+                assertTrue("Server selected an unproposed CipherSuite in HelloRetryRequest", siteReport.getSupportedTls13CipherSuites().contains(CipherSuite.getCipherSuite(helloRetryRequest.getSelectedCipherSuite().getValue())));
                 assertTrue("Server selected a different CipherSuite in ServerHello than in HelloRetryRequest", Arrays.equals(helloRetryRequest.getSelectedCipherSuite().getValue(), actualServerHello.getSelectedCipherSuite().getValue()));
             }
         });

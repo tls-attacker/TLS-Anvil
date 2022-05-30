@@ -107,7 +107,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         ProtocolVersion version = ProtocolVersion.SSL3;
-        List<ProtocolVersion> versions = context.getSiteReport().getVersions();
+        List<ProtocolVersion> versions = derivationContainer.getAssociatedSiteReport().getVersions();
         if (!versions.contains(ProtocolVersion.TLS11)) {
             version = ProtocolVersion.TLS11;
         } else if (!versions.contains(ProtocolVersion.TLS10)) {

@@ -29,6 +29,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -149,6 +150,7 @@ public class PreSharedKey extends Tls13Test {
     @TlsTest(description = "Prior to accepting PSK key establishment, the server MUST validate"
             + "the corresponding binder value")
     @ScopeExtensions("BasicDerivationType.PRF_BITMASK")
+    @ScopeLimitations("ConfigOptionDerivationType.DisablePsk")
     @MethodCondition(method = "supportsPsk")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -176,6 +178,7 @@ public class PreSharedKey extends Tls13Test {
     @TlsTest(description = "Prior to accepting PSK key establishment, the server MUST validate"
             + "the corresponding binder value")
     @MethodCondition(method = "supportsPsk")
+    @ScopeLimitations("ConfigOptionDerivationType.DisablePsk")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -204,6 +207,7 @@ public class PreSharedKey extends Tls13Test {
     @TlsTest(description = "Clients MUST verify that the server’s selected_identity is within the "
             + "range supplied by the client")
     @MethodCondition(method = "supportsPsk")
+    @ScopeLimitations("ConfigOptionDerivationType.DisablePsk")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)

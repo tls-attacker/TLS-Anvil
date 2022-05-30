@@ -86,7 +86,7 @@ public class RC4Ciphersuites extends Tls12Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
 
-        List<CipherSuite> implemented = new ArrayList<>(TestContext.getInstance().getSiteReport().getCipherSuites());
+        List<CipherSuite> implemented = new ArrayList<>(derivationContainer.getAssociatedSiteReport().getCipherSuites());
         implemented.removeIf(i -> !i.toString().contains("RC4"));
         c.setDefaultClientSupportedCipherSuites(implemented);
         c.getDefaultClientSupportedCipherSuites().add(selectedCipherSuite);

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
 
-tcpdump -i eth0 -w /output/dump.pcap &
+tcpdump -i lo -w ./output/dump.pcap &
 
 java -jar /apps/TLS-Testsuite.jar $@

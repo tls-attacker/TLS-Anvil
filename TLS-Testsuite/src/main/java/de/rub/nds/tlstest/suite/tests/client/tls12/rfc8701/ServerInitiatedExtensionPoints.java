@@ -26,6 +26,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -70,8 +71,9 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.setProtocolVersion(Modifiable.explicit(greaseVersion.getValue()));
 
+        TestSiteReport siteReport = derivationContainer.getAssociatedSiteReport();
         runner.execute(workflowTrace, c).validateFinal(i -> {
-            if(context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS_1_3) == TestResult.TRUE) {
+            if(siteReport.getResult(AnalyzedProperty.SUPPORTS_TLS_1_3) == TestResult.TRUE) {
                 //In TLS 1.3, alerts are not mandatory - at this point no version
                 //has been negotiated
                 assertTrue("Socket has not been closed",Validator.socketClosed(i));

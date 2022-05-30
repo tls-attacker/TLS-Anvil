@@ -115,7 +115,7 @@ public class SupportedVersions extends Tls13Test {
     public void oldLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite tls13CipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
-        c.setDefaultClientSupportedCipherSuites(context.getSiteReport().getCipherSuites().stream().filter(i -> !i.isTLS13()).collect(Collectors.toList()));
+        c.setDefaultClientSupportedCipherSuites(derivationContainer.getAssociatedSiteReport().getCipherSuites().stream().filter(i -> !i.isTLS13()).collect(Collectors.toList()));
         c.getDefaultClientSupportedCipherSuites().add(tls13CipherSuite);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);

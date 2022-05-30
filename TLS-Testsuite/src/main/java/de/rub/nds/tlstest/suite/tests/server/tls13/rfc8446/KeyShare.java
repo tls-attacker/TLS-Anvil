@@ -116,7 +116,7 @@ public class KeyShare extends Tls13Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     public void serverOnlyOffersOneKeyshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        List<NamedGroup> supportedTls13 = context.getSiteReport().getSupportedTls13Groups();
+        List<NamedGroup> supportedTls13 = derivationContainer.getAssociatedSiteReport().getSupportedTls13Groups();
         
         //place selected group at the top to avoid (optional) HRR
         NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
@@ -136,7 +136,7 @@ public class KeyShare extends Tls13Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     public void serverOnlyOffersOneKeyshareAllGroupsAtOnce(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        List<NamedGroup> supportedTls13 = context.getSiteReport().getSupportedTls13Groups();
+        List<NamedGroup> supportedTls13 = derivationContainer.getAssociatedSiteReport().getSupportedTls13Groups();
         c.setDefaultClientKeyShareNamedGroups(supportedTls13);
         c.setDefaultClientNamedGroups(supportedTls13);
         performOneKeyshareTest(c, runner);

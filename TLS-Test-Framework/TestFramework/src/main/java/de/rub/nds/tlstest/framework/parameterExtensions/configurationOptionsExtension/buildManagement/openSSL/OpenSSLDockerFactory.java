@@ -118,6 +118,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
         String openSSLBranchName = configOptionsConfig.getTlsVersionName();
         String factoryImageNameWithTag = getFactoryImageNameAndTag(openSSLBranchName);
         if(!dockerNameWithTagExists(factoryImageNameWithTag)){
+            LOGGER.info("Create OpenSSL factory docker image...");
             createFactoryImage(pathToFactoryDockerfile, openSSLBranchName);
         }
 
@@ -210,7 +211,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
             entrypoint = Arrays.asList("/usr/opensslEntrypoint.sh", "-d", coverageOutDir, "server");
         }
         else{
-            entrypoint = Arrays.asList("server-entrypoint", "openssl", "s_server","-accept", CONTAINER_PORT_TLS_SERVER.toString(), "-key", "/cert/ec256key.pem", "-cert", "/cert/ec256cert.pem");
+            entrypoint = Arrays.asList("server-entrypoint", "openssl", "s_server","-accept", CONTAINER_PORT_TLS_SERVER.toString(), "-key", "/cert/ec256key.pem", "-cert", "/cert/ec256cert.pem", "-comp");
         }
         List<PortBinding> portBindings = new LinkedList<>();
         List<Bind> volumeBindings = new LinkedList<>();
@@ -248,7 +249,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
             entrypoint = Arrays.asList("/usr/opensslEntrypoint.sh", "-d", coverageOutDir, "client", connectionDest);
         }
         else{
-            entrypoint = Arrays.asList("client-entrypoint", "openssl", "s_client", "-connect", connectionDest/*, "-bind", CONTAINER_PORT_TLS_CLIENT.toString()*/);
+            entrypoint = Arrays.asList("client-entrypoint", "openssl", "s_client", "-connect", connectionDest, "-comp");
         }
 
         List<PortBinding> portBindings = new LinkedList<>();

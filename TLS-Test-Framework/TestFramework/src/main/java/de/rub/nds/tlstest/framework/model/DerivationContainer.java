@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.concurrent.Callable;
 
 /**
  *
@@ -39,12 +40,15 @@ public class DerivationContainer {
     private Map<String, Object> sharedData;
 
     // The site report that must be used for the respective derivations. By default the global site report is taken.
-    private TestSiteReport associatedSiteReport;
-    
+    //private TestSiteReport associatedSiteReport;
+    /** Used to get the site report that must be used for the respective derivations. By default the global site report is taken.
+     A callable is used, so site reports are only created if necessary.*/
+    private Callable<TestSiteReport> getAssociatedSiteReportCallable;
+
     public DerivationContainer(List<Object> objects) {
         derivations = new LinkedList<>();
         sharedData = new HashMap<>();
-        associatedSiteReport = TestContext.getInstance().getSiteReport();
+        getAssociatedSiteReportCallable = (Callable) () -> TestContext.getInstance().getSiteReport();
         for (Object derivation : objects) {
             if (derivation instanceof DerivationParameter) {
                 derivations.add((DerivationParameter) derivation);
@@ -148,12 +152,22 @@ public class DerivationContainer {
         return sharedData;
     }
 
-    public void setAssociatedSiteReport(TestSiteReport associatedSiteReport) {
-        this.associatedSiteReport = associatedSiteReport;
+
+    public void configureGetAssociatedSiteReportCallable(Callable<TestSiteReport> getSiteReportCallable){
+        this.getAssociatedSiteReportCallable = getSiteReportCallable;
     }
 
     public TestSiteReport getAssociatedSiteReport(){
-        return this.associatedSiteReport;
+        try {
+            return this.getAssociatedSiteReportCallable.call();
+        }
+        catch (RuntimeException e){
+            throw e;
+        }
+        catch(Exception e){
+            LOGGER.error("Received checked exception. This should not happen.", e);
+            throw new RuntimeException("Received checked exception while getting a test site report.");
+        }
     }
 
     public String toString() {

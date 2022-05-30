@@ -18,6 +18,7 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 /**
  * A ConfigurationOptionsBuildManager knows how to build a specific TLS library in a specific version range. It is
@@ -25,17 +26,20 @@ import java.util.Set;
  * a TestSiteReport of the
  */
 public abstract class ConfigurationOptionsBuildManager {
+
     /**
      * This function provides access to a TLS library that was built using the specified configuration options set.
      * The Config is manipulated so that the connection is delegated to the required library. The implementation
-     * also provides a TestSiteReport as a return value that contains information about library build that is chosen/built.
+     * also provides a callable to get the TestSiteReport as a return value that contains information about
+     * the library build that is chosen/built. A Callable is used for lazy evaluation (so if a site report is
+     * not used, it is not created).
      *
      * @param config - the specified Config
      * @param context - the test context
      * @param optionSet - the set of configurationOptionDerivationParameters that contain selected values.
      * @returns the TestSiteReport of the provided library build.
      */
-    public abstract TestSiteReport configureOptionSetAndGetSiteReport(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet);
+    public abstract Callable<TestSiteReport> configureOptionSetAndReturnGetSiteReportCallable(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet);
 
     /**
      * Get the SiteReport for the tls library built that has the most possible available features using the

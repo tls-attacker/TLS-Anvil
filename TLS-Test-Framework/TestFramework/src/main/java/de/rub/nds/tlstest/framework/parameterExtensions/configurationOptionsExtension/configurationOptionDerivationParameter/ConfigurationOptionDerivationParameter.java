@@ -22,6 +22,7 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 public abstract class ConfigurationOptionDerivationParameter extends DerivationParameter<ConfigurationOptionValue> {
     public ConfigurationOptionDerivationParameter(ConfigOptionDerivationType type) {
@@ -61,11 +62,11 @@ public abstract class ConfigurationOptionDerivationParameter extends DerivationP
 
         Set<ConfigurationOptionDerivationParameter> configOptionDerivations = extractConfigOptionDerivationSetFromContainer(container);
 
-        TestSiteReport report = ConfigurationOptionsDerivationManager.getInstance()
+        Callable<TestSiteReport> reportCallable = ConfigurationOptionsDerivationManager.getInstance()
                 .getConfigurationOptionsBuildManager()
-                .configureOptionSetAndGetSiteReport(config, context, configOptionDerivations);
+                .configureOptionSetAndReturnGetSiteReportCallable(config, context, configOptionDerivations);
 
-        container.setAssociatedSiteReport(report);
+        container.configureGetAssociatedSiteReportCallable(reportCallable);
 
         sharedData.put(SETUP_DONE, Boolean.TRUE);
     }

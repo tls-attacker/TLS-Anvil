@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.net.*;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -55,6 +56,21 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     protected Map<String, Integer> dockerTagToAccessCount;
     protected Set<Integer> usedPorts;
     private String maximalFeatureContainerDockerTag;
+
+    /**
+     * Callable to create/get site reports.
+     */
+    public class SiteReportCallback implements Callable<TestSiteReport> {
+        DockerTestContainer container;
+        private SiteReportCallback(DockerTestContainer container){
+            this.container = container;
+        }
+
+        @Override
+        public TestSiteReport call() {
+            return container.getSiteReport();
+        }
+    }
 
     /**
      * Constructor. The DockerFactory passed decides which how specific builds are generated.
@@ -93,12 +109,13 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * @returns the site report of the built for the passed option set
      */
     @Override
-    public synchronized TestSiteReport configureOptionSetAndGetSiteReport(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet) {
+    public synchronized Callable<TestSiteReport> configureOptionSetAndReturnGetSiteReportCallable(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet) {
         String buildTag =  provideDockerContainer(optionSet);
         DockerTestContainer containerInfo = dockerTagToContainerInfo.get(buildTag);
         containerInfo.startUsage();
         stopRarelyUsedContainers();
-        TestSiteReport report = containerInfo.getSiteReport();
+        //TestSiteReport report = containerInfo.getSiteReport();
+        Callable<TestSiteReport> siteReportCallback = new SiteReportCallback(containerInfo);
 
         // Configure the port in the config
         if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER){
@@ -116,7 +133,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
             throw new IllegalStateException("TestEndpointMode is invalid.");
         }
 
-        return report;
+        return siteReportCallback;
     }
 
     /**

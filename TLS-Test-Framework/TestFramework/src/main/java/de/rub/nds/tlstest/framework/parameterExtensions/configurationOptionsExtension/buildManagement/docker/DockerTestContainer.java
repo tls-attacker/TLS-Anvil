@@ -174,6 +174,7 @@ public abstract class DockerTestContainer extends DockerContainer{
      */
     public TestSiteReport getSiteReport(){
         if(siteReport == null){
+            LOGGER.info("Create site report for container with tag '{}'...", this.dockerTag);
             DockerContainerState state = getContainerState();
             startUsage();
             try{

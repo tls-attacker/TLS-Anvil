@@ -35,6 +35,7 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -127,6 +128,7 @@ public class ServerHello extends Tls12Test {
             + "list in ClientHello.compression_methods.")
     @ScopeExtensions("BasicDerivationType.COMPRESSION_METHOD")
     @DynamicValueConstraints(affectedTypes = "BasicDerivationType.COMPRESSION_METHOD", methods = "isUnproposedCompressionMethod")
+    @ScopeLimitations("ConfigOptionDerivationType.EnableCompression")
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)

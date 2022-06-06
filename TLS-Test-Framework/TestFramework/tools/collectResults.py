@@ -77,7 +77,7 @@ class BuildInfoLine(ExcelLine):
 
 
     def __prepareLine(self):
-        self.standardEntries = [self.no, self.tag, self.bTime, self.lCov, self.fCov, self.accesses]
+        self.standardEntries = [self.no, self.tag, self.bTime, self.lC, self.lMax, self.lCov, self.fC, self.fMax, self.fCov, self.accesses]
         self.row = []
         for e in (self.standardEntries+self.optionList):
             if e != None:
@@ -91,8 +91,8 @@ class BuildInfoLine(ExcelLine):
         super().appendRowToWs(ws)
 
     def configureStyle(self, cellRow):
-        cellRow[3].number_format = "0.00%"
-        cellRow[4].number_format = "0.00%"
+        cellRow[5].number_format = "0.00%"
+        cellRow[8].number_format = "0.00%"
         cellRow[2].alignment = Alignment(horizontal="right")
 
         sign_check = "Yes"
@@ -238,7 +238,7 @@ def appendBuildAccessInfo(ws, buildInfoLines, buildInfoHeader):
                 if idx == 0:
                     headerLine = HeaderLine(row, ["left","right"])
                     headerLine.appendRowToWs(ws)
-                    buildInfoHeader.row[5] = row[1]
+                    buildInfoHeader.row[9] = row[1]
                     buildInfoHeader.row[1] = row[0]
 
                 elif row[0] == "Total":
@@ -275,9 +275,9 @@ def appendCoverageInfo(ws, buildInfoLines, buildInfoHeader):
                 if idx == 0:
                     headerLine = HeaderLine(row, ["left"]+6*["right"])
                     headerLine.appendRowToWs(ws)
-                    buildInfoHeader.row[3:5] = row[3], row[6]
+                    buildInfoHeader.row[3:9] = row[1:7]
                     buildInfoHeader.row[1] = row[0]
-                    buildInfoHeader.alignment[3:5] = 2*["right"]
+                    buildInfoHeader.alignment[3:9] = 6*["right"]
                 elif row[0] == "Collectively":
                     covLine = CoverageInfoLine(row, bold=True)
                     covLine.appendRowToWs(ws)
@@ -332,7 +332,7 @@ def main(path):
     res_xlsx_path = os.path.join(path, OUTPUT_FILE_NAME)
 
     wb = openpyxl.Workbook()
-    buildInfoHeader = HeaderLine(6*[""],6*["left"])
+    buildInfoHeader = HeaderLine(10*[""],6*["left"])
 
     wsCov = wb.active
     wsCov.title = "Coverage"

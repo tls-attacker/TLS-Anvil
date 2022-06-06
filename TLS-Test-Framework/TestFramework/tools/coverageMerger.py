@@ -74,23 +74,45 @@ class CoverageReport:
         str(functionCov.value), str(functionCov.maxValue), functionCov.getPercentage()])
         return line
 
-        
+def progressStr(i, iMax)->str:
+    pc = min((100*i) // (iMax), 100)
+    return f"{str(pc).rjust(3)}% [{((pc//10)*'=').ljust(10)}]"
+
 
 def getMergedCoverageReport(infoFileList: list, outPath):
     outFileName = "merged.info"
-    outFilePath = os.path.join(outPath,outFileName)
-    command = ["lcov"]
-    for infoFile in infoFileList:
-        command.append("-a")
-        command.append(infoFile)
-    
-    command.append("-o")
-    command.append(outFilePath)
 
-    commandStr = " ".join(command)
-    p = Popen(commandStr, shell=True, stdout=PIPE, stderr=PIPE)
-    _, _ = p.communicate()
+    processFilesPerCommand=20
+    iterMax = (len(infoFileList)-1)//processFilesPerCommand + 1
 
+    for i in range(iterMax):
+        infoFilesSubset = infoFileList[i*processFilesPerCommand:min((i+1)*processFilesPerCommand, len(infoFileList))]
+        print(f"\r{progressStr(i,iterMax)} - Merging coverage reports...".ljust(120), end="")
+        oName = outFileName if i == (iterMax-1) else f"mergedTmp{i}.info"
+
+        outFilePath = os.path.join(outPath,oName)
+        lastTmpFile = os.path.join(outPath,f"mergedTmp{i-1}.info") if i>0 else "xxx"
+
+        command = ["lcov"]
+        if i > 0:
+            command.append("-a")
+            command.append(lastTmpFile)
+
+        for infoFile in infoFilesSubset:
+            command.append("-a")
+            command.append(infoFile)
+        
+        command.append("-o")
+        command.append(outFilePath)
+
+        commandStr = " ".join(command)
+        p = Popen(commandStr, shell=True, stdout=PIPE, stderr=PIPE)
+        _, _ = p.communicate()
+
+        if i > 0:
+            os.remove(lastTmpFile)
+
+    print(f"\r{progressStr(iterMax,iterMax)} - Merging coverage reports. Done!".ljust(120), end="")
     res = CoverageReport("Collectively", outFilePath)
     return res
 
@@ -121,7 +143,6 @@ def main(path):
     for r in partialReports:
         print(f"\rProcess: {r}".ljust(120), end="")
 
-    print(f"\rProcess: Merge Reports...".ljust(120), end="")
     mergedReport = getMergedCoverageReport([pr.coverageFilePath for pr in partialReports], path)
     print(f"\rProcess: {mergedReport}".ljust(120), end="")
 

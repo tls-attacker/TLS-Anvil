@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>TLS-Test-Framework</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>1.0</version>
     <groupId>de.rub.nds.tlstest</groupId>
     <name>TLS-Test-Framework</name>
 

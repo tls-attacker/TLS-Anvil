@@ -7,7 +7,7 @@
     <groupId>de.rub.nds.tlstest</groupId>
     <artifactId>TLS-Test-Framework-Aggregator</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <name>TLS-Test-Framework-Aggregator</name>
 
     <modules>

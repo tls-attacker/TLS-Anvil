@@ -97,8 +97,8 @@ public class TestConfig extends TLSDelegateConfig {
             "Defaults to the hostname of the target or the port. The identifier is visible in the test report.")
     private String identifier = null;
 
-    @Parameter(names = "-strength", description = "Strength of the pairwise test. (Default value: 4)")
-    private int strength = 4;
+    @Parameter(names = "-strength", description = "Strength of the pairwise test. (Default value: 2)")
+    private int strength = 2;
     
     @Parameter(names = "-connectionTimeout", description = "The default timeout for TLS sessions in ms. (Default value: 1500)")
     private int connectionTimeout = 1500;
@@ -182,7 +182,11 @@ public class TestConfig extends TLSDelegateConfig {
 
         this.argParser.parse(args);
         this.parsedCommand = ConfigDelegates.delegateForCommand(this.argParser.getParsedCommand());
-        if (argParser.getParsedCommand() == null) {
+        
+        if (getGeneralDelegate().isHelp()) {
+            argParser.usage();
+            System.exit(0);
+        } else if (argParser.getParsedCommand() == null) {
             argParser.usage();
             throw new ParameterException("You have to use the client or server command");
         } else if (argParser.getParsedCommand().equals(ConfigDelegates.EXTRACT_TESTS.getCommand())) {
@@ -190,10 +194,6 @@ public class TestConfig extends TLSDelegateConfig {
         }
 
         this.setTestEndpointMode(argParser.getParsedCommand());
-
-        if (getGeneralDelegate().isHelp()) {
-            argParser.usage();
-        }
 
         if (this.identifier == null) {
             if (argParser.getParsedCommand().equals(ConfigDelegates.SERVER.getCommand())) {

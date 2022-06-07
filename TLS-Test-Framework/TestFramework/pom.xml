@@ -24,11 +24,6 @@
             <version>${tlsattacker.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.rub.nds.tlsattacker</groupId>
-            <artifactId>Attacks</artifactId>
-            <version>${tlsattacker.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.jupiter.version}</version>

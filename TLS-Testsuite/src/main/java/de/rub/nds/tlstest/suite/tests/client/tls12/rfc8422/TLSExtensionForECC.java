@@ -10,8 +10,8 @@
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8422;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
-import de.rub.nds.tlsattacker.attacks.ec.InvalidCurvePoint;
-import de.rub.nds.tlsattacker.attacks.ec.TwistedCurvePoint;
+import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.InvalidCurvePoint;
+import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.TwistedCurvePoint;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;

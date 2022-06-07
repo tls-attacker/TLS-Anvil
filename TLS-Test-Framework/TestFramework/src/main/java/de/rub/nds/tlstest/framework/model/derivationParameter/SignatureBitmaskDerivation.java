@@ -152,7 +152,6 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
                 //we do not include these as we can't know beforehand 
                 int signatureLength = 6 + 2 * pkByteSize;
                 if (pkSize == 521) {
-                    //SECP521R1 encoding differs from other groups
                     signatureLength -= 1;
                 }
                 return signatureLength;

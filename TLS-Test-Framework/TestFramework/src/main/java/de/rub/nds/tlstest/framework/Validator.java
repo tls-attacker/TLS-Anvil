@@ -21,6 +21,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.TlsMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.UnknownMessage;
 import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipher;
@@ -31,6 +32,7 @@ import de.rub.nds.tlsattacker.core.record.crypto.RecordDecryptor;
 import de.rub.nds.tlsattacker.core.state.TlsContext;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
@@ -47,6 +49,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -71,51 +74,79 @@ public class Validator {
                 if(traceFailedBeforeAlertAction(trace)) {
                     i.addAdditionalResultInfo(AssertMsgs.WorkflowNotExecutedBeforeAlert);
                 } else {
-                    ReceivingAction alertReceivingAction = (ReceivingAction) WorkflowTraceUtil.getFirstReceivingActionForMessage(ProtocolMessageType.ALERT, trace);
-                    i.addAdditionalResultInfo("Workflow failed at Alert receiving action. Received: " + alertReceivingAction.getReceivedMessages().stream().map(ProtocolMessage::toCompactString).collect(Collectors.joining(",")));
+                    ReceivingAction lastReceive = trace.getLastReceivingAction();
+                    if (lastReceive != null && lastReceive instanceof GenericReceiveAction) {
+                        ReceivingAction alertReceivingAction = (ReceivingAction) WorkflowTraceUtil.getFirstReceivingActionForMessage(ProtocolMessageType.ALERT, trace);
+                        if(lastReceive != alertReceivingAction) {
+                            LOGGER.warn("Found receive action expecting an alert before final receive action");
+                        }
+                        i.addAdditionalResultInfo("Workflow failed at Alert receiving action. Received: " + alertReceivingAction.getReceivedMessages().stream().map(ProtocolMessage::toCompactString).collect(Collectors.joining(",")));
+                    }
                 }
                 throw e;
             }
         }
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        List<ProtocolMessage> receivedAlerts = WorkflowTraceUtil.getAllReceivedMessages(trace, ProtocolMessageType.ALERT);
-        if(receivedAlerts.size() > 1) {
-            i.addAdditionalResultInfo("Received multiple Alerts while waiting for Fatal Alert (" + 
-                    receivedAlerts.stream().map(alert -> ((TlsMessage)alert).toCompactString()).collect(Collectors.joining(","))+ ")");
-        }
+        checkReceivedMultipleAlerts(trace, i);
         boolean socketClosed = socketClosed(i);
-        if (msg == null && socketClosed) {
-            if(i.getState().getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13 && !TestContext.getInstance().getConfig().isExpectTls13Alerts()) {
-                i.addAdditionalResultInfo("SUT chose not to send an alert in TLS 1.3");
-                return;
-            }
-            i.addAdditionalResultInfo("Only socket closed (" + i.getState().getTlsContext().getFinalSocketState() + ")");
-            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
-            LOGGER.debug("Timeout");
-            return;
-        }
+        if (closedWithoutAlert(msg, socketClosed, i)) return;
         assertNotNull("No Alert message received and socket is still open.", msg);
-        if(AlertLevel.WARNING.getValue() == msg.getLevel().getValue() 
-                && AlertDescription.CLOSE_NOTIFY.getValue() == msg.getDescription().getValue()
-                && socketClosed) {
-            i.addAdditionalResultInfo("Only sent Close Notify and closed socket (" + i.getState().getTlsContext().getFinalSocketState() + ")");
-            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
-            return;
-        }
+        if(closedWithCloseNotify(msg, socketClosed, i)) return; 
         assertEquals(AssertMsgs.NoFatalAlert, AlertLevel.FATAL.getValue(), msg.getLevel().getValue().byteValue());
         assertTrue("Socket still open after fatal alert", socketClosed);
     }
 
+    private static boolean closedWithCloseNotify(AlertMessage msg, boolean socketClosed, AnnotatedState i) {
+        if (AlertLevel.WARNING.getValue() == msg.getLevel().getValue() 
+                && AlertDescription.CLOSE_NOTIFY.getValue() == msg.getDescription().getValue()
+                && socketClosed) {
+            i.addAdditionalResultInfo("Only sent Close Notify and closed socket (" + i.getState().getTlsContext().getFinalSocketState() + ")");
+            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean closedWithoutAlert(AlertMessage msg, boolean socketClosed, AnnotatedState i) {
+        if (msg == null && socketClosed) {
+            if (i.getState().getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13 && !TestContext.getInstance().getConfig().isExpectTls13Alerts()) {
+                i.addAdditionalResultInfo("SUT chose not to send an alert in TLS 1.3");
+                return true;
+            }
+            i.addAdditionalResultInfo("Only socket closed (" + i.getState().getTlsContext().getFinalSocketState() + ")");
+            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
+            LOGGER.debug("Timeout");
+            return true;
+        }
+        return false;
+    }
+
+    public static void checkReceivedMultipleAlerts(WorkflowTrace trace, AnnotatedState i) {
+        List<ProtocolMessage> receivedAlerts = WorkflowTraceUtil.getAllReceivedMessages(trace, ProtocolMessageType.ALERT);
+        if(receivedAlerts.size() > 1) {
+            i.addAdditionalResultInfo("Received multiple Alerts while waiting for Fatal Alert (" +
+                    receivedAlerts.stream().map(alert -> ((TlsMessage)alert).toCompactString()).collect(Collectors.joining(","))+ ")");
+        }
+    }
+
+    public static void checkForUnknownMessage(AnnotatedState i) {
+        if(i.getWorkflowTrace().getFirstReceivedMessage(UnknownMessage.class) != null) {
+            i.addAdditionalResultInfo("Found unknown message");
+        }
+    }
+    
     public static void receivedFatalAlert(AnnotatedState i) {
         receivedFatalAlert(i, true);
     }
 
     public static void executedAsPlanned(AnnotatedState i) {
+        checkForUnknownMessage(i);
         assertTrue(AssertMsgs.WorkflowNotExecuted, i.getWorkflowTrace().executedAsPlanned());
     }
 
     public static void receivedWarningAlert(AnnotatedState i) {
+        checkForUnknownMessage(i);
         WorkflowTrace trace = i.getWorkflowTrace();
         Validator.smartExecutedAsPlanned(i);
 
@@ -125,6 +156,10 @@ public class Validator {
     }
 
     public static void testAlertDescription(AnnotatedState i, AlertDescription expected, AlertMessage msg) {
+        testAlertDescription(i, new AlertDescription[] {expected}, msg);
+    }
+    
+    public static void testAlertDescription(AnnotatedState i, AlertDescription[] expected, AlertMessage msg) {
         if (msg == null) {
             i.addAdditionalResultInfo("No alert received to test description for");
             return;
@@ -135,22 +170,24 @@ public class Validator {
         }
 
         AlertDescription received = AlertDescription.getAlertDescription(msg.getDescription().getValue());
-        if (expected != received) {
+        List<AlertDescription> expectedList = Arrays.asList(expected);
+        if (!expectedList.contains(received)) {
             i.addAdditionalResultInfo("Unexpected Alert Description");
-            i.addAdditionalResultInfo(String.format("Expected: %s", expected));
+            i.addAdditionalResultInfo(String.format("Expected: %s", expectedList.stream().map(AlertDescription::name).collect(Collectors.joining(","))));
             i.addAdditionalResultInfo(String.format("Received: %s", received));
             i.setResult(TestResult.PARTIALLY_SUCCEEDED);
             LOGGER.debug(i.getAdditionalResultInformation());
         }
     }
     
-    public static void testAlertDescription(AnnotatedState i, AlertDescription expected) {
+    public static void testAlertDescription(AnnotatedState i, AlertDescription... expected) {
         AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
         testAlertDescription(i, expected, alert);
     }
 
 
     public static void smartExecutedAsPlanned(AnnotatedState state) {
+        checkForUnknownMessage(state);
         WorkflowTrace trace = state.getWorkflowTrace();
         if(state.getState().getTlsContext().isReceivedMessageWithWrongTls13KeyType()
                 && state.getState().getTlsContext().getActiveKeySetTypeRead() != Tls13KeySetType.NONE) {
@@ -244,9 +281,11 @@ public class Validator {
             } else if (messages.get(messages.size() - 1).getClass().equals(AlertMessage.class)) {
                 return;
             }
+        } else if (lastReceivingAction instanceof GenericReceiveAction) {
+            return;
         }
 
-        throw new AssertionError("Last action is not a receiving action");
+        throw new AssertionError("Last action is not an expected receiving action");
     }
     
     /**
@@ -363,6 +402,10 @@ public class Validator {
 
     private static boolean traceFailedBeforeAlertAction(WorkflowTrace workflowTrace) {
         TlsAction alertReceivingAction = WorkflowTraceUtil.getFirstReceivingActionForMessage(ProtocolMessageType.ALERT, workflowTrace);
+        TlsAction lastReceiveAction = (TlsAction)workflowTrace.getLastReceivingAction();
+        if(alertReceivingAction == null && lastReceiveAction != null && lastReceiveAction instanceof GenericReceiveAction) {
+            alertReceivingAction = lastReceiveAction;
+        }
         TlsAction firstFailed = WorkflowTraceUtil.getFirstFailedAction(workflowTrace);
         return firstFailed != alertReceivingAction && workflowTrace.getTlsActions().indexOf(firstFailed) < workflowTrace.getTlsActions().indexOf(alertReceivingAction);
     }

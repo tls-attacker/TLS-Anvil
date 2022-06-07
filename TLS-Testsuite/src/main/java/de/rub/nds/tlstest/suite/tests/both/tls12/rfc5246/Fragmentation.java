@@ -10,6 +10,7 @@
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
@@ -23,13 +24,14 @@ import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.action.ChangeConnectionTimeoutAction;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
+import de.rub.nds.tlsscanner.serverscanner.probe.ConnectionClosingProbe;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -48,8 +50,8 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import static org.junit.Assert.assertEquals;
 import org.junit.jupiter.api.Tag;
 
 import static org.junit.Assert.assertFalse;
@@ -107,7 +109,14 @@ public class Fragmentation extends Tls12Test {
         sendAction.setRecords(r);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        int baseTimeout = context.getConfig().getConnectionTimeout();
+        if(context.getSiteReport().getClosedAfterAppDataDelta() > 0 && context.getSiteReport().getClosedAfterAppDataDelta() < context.getConfig().getConnectionTimeout()) {
+            baseTimeout = context.getSiteReport().getClosedAfterAppDataDelta().intValue();
+        }
+        final int reducedTimeout = baseTimeout / 2; 
+        ChangeConnectionTimeoutAction changeTimeoutAction = new ChangeConnectionTimeoutAction(reducedTimeout);
         workflowTrace.addTlsActions(
+                changeTimeoutAction,
                 sendAction,
                 new GenericReceiveAction()
         );
@@ -117,8 +126,15 @@ public class Fragmentation extends Tls12Test {
             assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
 
             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            assertNull("Received alert message", msg);
-            assertFalse("Socket was closed", Validator.socketClosed(i));
+            i.addAdditionalResultInfo("Evaluated with timeout " + reducedTimeout);
+            if(context.getSiteReport().getClosedAfterAppDataDelta() > 0) {
+                assertNull("Received alert message", msg);
+                assertFalse("Socket was closed", Validator.socketClosed(i));
+            } else {
+                if(msg != null) {
+                    assertEquals("SUT sent an alert that was not a Close Notify", AlertDescription.CLOSE_NOTIFY.getValue(), (byte)msg.getDescription().getValue());
+                }
+            }
         });
     }
 
@@ -186,9 +202,6 @@ public class Fragmentation extends Tls12Test {
     public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        c.getDefaultClientConnection().setTimeout(2000);
-        c.getDefaultServerConnection().setTimeout(2000);
-
         ApplicationMessage msg = new ApplicationMessage(c);
         msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
 
@@ -200,6 +213,7 @@ public class Fragmentation extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
+                new ChangeConnectionTimeoutAction(context.getConfig().getConnectionTimeout() * 3),
                 sendOverflow,
                 new ReceiveAction(new AlertMessage())
         );
@@ -219,9 +233,6 @@ public class Fragmentation extends Tls12Test {
     public void sendRecordWithCiphertextOver2pow14plus2048(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        c.getDefaultClientConnection().setTimeout(2000);
-        c.getDefaultServerConnection().setTimeout(2000);
-
         Record overflowRecord = new Record();
         overflowRecord.setProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 2049]));
         //add dummy Application Message
@@ -230,6 +241,7 @@ public class Fragmentation extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
+                new ChangeConnectionTimeoutAction(context.getConfig().getConnectionTimeout() * 2),
                 sendOverflow,
                 new ReceiveAction(new AlertMessage())
         );
@@ -250,6 +262,6 @@ public class Fragmentation extends Tls12Test {
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.HIGH)
     public void recordFragmentationSupported() {
-        assertTrue("Record fragmentation support has not been detected", context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION) == TestResult.TRUE);
+        assertTrue("Record fragmentation support has not been detected", context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION) == TestResults.TRUE);
     }
 }

@@ -9,6 +9,8 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8701;
 
+import de.rub.nds.modifiablevariable.util.ArrayConverter;
+import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -19,6 +21,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.AlpnExtensionMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.alpn.AlpnEntry;
@@ -130,16 +133,14 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
     public void advertiseGreaseNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         NamedGroup selectedGrease = derivationContainer.getDerivation(GreaseNamedGroupDerivation.class).getSelectedValue();
-        NamedGroup actualGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
-
-        c.getDefaultClientNamedGroups().add(0, selectedGrease);
-        //add actual NamedGroup second time to obtain dummy entry
-        c.getDefaultClientKeyShareNamedGroups().add(actualGroup);
-
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        
+        byte[] greaseLength = new byte[] {0, 32};
+        byte[] greaseKeyShare = new byte[32];
+        byte[] completeGreaseKeyShareEntry = ArrayConverter.concatenate(selectedGrease.getValue(), greaseLength, greaseKeyShare) ;
 
-        List<KeyShareEntry> ks = workflowTrace.getFirstSendMessage(ClientHelloMessage.class).getExtension(KeyShareExtensionMessage.class).getKeyShareList();
-        ks.get(0).setGroupConfig(selectedGrease);
+        workflowTrace.getFirstSendMessage(ClientHelloMessage.class).getExtension(EllipticCurvesExtensionMessage.class).setSupportedGroups(Modifiable.insert(selectedGrease.getValue(), 0));
+        workflowTrace.getFirstSendMessage(ClientHelloMessage.class).getExtension(KeyShareExtensionMessage.class).setKeyShareListBytes(Modifiable.insert(completeGreaseKeyShareEntry, 0));
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.executedAsPlanned(i);

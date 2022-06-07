@@ -21,6 +21,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EncryptThenMacExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PaddingExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.RenegotiationInfoExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ServerNameIndicationExtensionMessage;
@@ -95,10 +96,13 @@ public class ServerHello extends Tls12Test {
             extensionMessage = rie;
         } else if (!types.contains(ExtensionType.PADDING)) {
             PaddingExtensionMessage pem = new PaddingExtensionMessage();
-            pem.setExtensionBytes(Modifiable.explicit(new byte[10]));
+            pem.setPaddingBytes(Modifiable.explicit(new byte[10]));
             extensionMessage = pem;
         } else {
-            throw new AssertionError("Every extension was sent by the client...");
+            GreaseExtensionMessage greaseExtension = new GreaseExtensionMessage(ExtensionType.GREASE_00, new byte[10]);
+            // modify 0A 0A to E4 04
+            greaseExtension.setExtensionBytes(Modifiable.xor(new byte[] {(byte) 0xee, (byte) 0x0e}, 0));
+            extensionMessage = greaseExtension;
         }
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -111,7 +115,7 @@ public class ServerHello extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             Validator.receivedFatalAlert(i);
-
+            
             AlertMessage alertMsg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
             Validator.testAlertDescription(i, AlertDescription.UNSUPPORTED_EXTENSION, alertMsg);
         });

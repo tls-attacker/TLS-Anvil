@@ -11,7 +11,7 @@ package de.rub.nds.tlstest.framework.annotations.tlsVersion;
 
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlstest.framework.ServerTestSiteReport;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
@@ -30,7 +30,7 @@ public class TlsVersionAnnotationClass {
     @BeforeAll
     static void setup() {
         TestContext testContext = TestContext.getInstance();
-        TestSiteReport report = new TestSiteReport("");
+        ServerTestSiteReport report = new ServerTestSiteReport("");
 
         report.setVersions(new ArrayList<ProtocolVersion>() {
             {

@@ -9,6 +9,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc8422;
 
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
@@ -17,8 +18,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExte
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -101,7 +101,7 @@ public class RespectClientExtensions extends Tls12Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void respectsChosenCurveForCertificates() {
-        assertTrue("The server does not respect the client's supported curves when selecting the certificate", TestContext.getInstance().getSiteReport().getResult(AnalyzedProperty.IGNORES_ECDSA_GROUP_DISPARITY) != TestResult.TRUE);
+        assertTrue("The server does not respect the client's supported curves when selecting the certificate", TestContext.getInstance().getSiteReport().getResult(TlsAnalyzedProperty.IGNORES_ECDSA_GROUP_DISPARITY) != TestResults.TRUE);
     }
 
     private void constructTest(WorkflowRunner runner, Config c) {

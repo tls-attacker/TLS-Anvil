@@ -10,6 +10,7 @@
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8701;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -24,8 +25,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMes
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -71,7 +71,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         sh.setProtocolVersion(Modifiable.explicit(greaseVersion.getValue()));
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
-            if(context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS_1_3) == TestResult.TRUE) {
+            if(context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS_1_3) == TestResults.TRUE) {
                 //In TLS 1.3, alerts are not mandatory - at this point no version
                 //has been negotiated
                 assertTrue("Socket has not been closed",Validator.socketClosed(i));

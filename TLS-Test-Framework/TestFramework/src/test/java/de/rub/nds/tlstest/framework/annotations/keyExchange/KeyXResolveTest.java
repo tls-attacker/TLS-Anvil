@@ -12,7 +12,7 @@ package de.rub.nds.tlstest.framework.annotations.keyExchange;
 
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlstest.framework.ServerTestSiteReport;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.KeyX;
@@ -32,7 +32,7 @@ public class KeyXResolveTest {
     @BeforeAll
     public static void setup() {
         TestContext context = TestContext.getInstance();
-        TestSiteReport siteReport = new TestSiteReport("");
+        ServerTestSiteReport siteReport = new ServerTestSiteReport("");
 
         siteReport.addCipherSuites(new HashSet<CipherSuite>(){
             {

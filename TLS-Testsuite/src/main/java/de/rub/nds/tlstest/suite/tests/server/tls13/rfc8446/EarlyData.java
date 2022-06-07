@@ -1,6 +1,7 @@
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -29,8 +30,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.*;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -57,7 +57,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class EarlyData extends Tls13Test {
 
     public ConditionEvaluationResult supports0rtt() {
-        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS13_0_RTT) == TestResult.TRUE) {
+        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_0_RTT) == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
             return ConditionEvaluationResult.disabled("Does not support 0-RTT early data");
@@ -65,7 +65,7 @@ public class EarlyData extends Tls13Test {
     }
 
     public ConditionEvaluationResult tls13multipleCipherSuites() {
-        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS13_0_RTT) == TestResult.TRUE && context.getSiteReport().getSupportedTls13CipherSuites() != null && context.getSiteReport().getSupportedTls13CipherSuites().size() > 1) {
+        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_0_RTT) == TestResults.TRUE && context.getSiteReport().getSupportedTls13CipherSuites() != null && context.getSiteReport().getSupportedTls13CipherSuites().size() > 1) {
             return ConditionEvaluationResult.enabled("");
         } else {
             return ConditionEvaluationResult.disabled("Does not support 0-RTT early data or only offers one Cipher Suite");

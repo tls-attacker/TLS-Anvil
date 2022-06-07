@@ -328,7 +328,7 @@ public class KeyShare extends Tls13Test {
         ShareOutOfBoundsDerivation.OutOfBoundsType type = derivationContainer.getDerivation(ShareOutOfBoundsDerivation.class).getSelectedValue();
         
         WorkflowTrace worklfowTrace = new WorkflowTrace();
-        ClientHelloMessage clientHello = worklfowTrace.getFirstSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage clientHello = new ClientHelloMessage(config);
         worklfowTrace.addTlsAction(new SendAction(clientHello));
         
         List<KeyShareEntry> keyShareList = new LinkedList<>();

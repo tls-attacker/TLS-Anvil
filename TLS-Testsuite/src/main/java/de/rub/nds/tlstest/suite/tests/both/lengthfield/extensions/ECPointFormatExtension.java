@@ -1,10 +1,12 @@
 package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
@@ -44,6 +46,14 @@ public class ECPointFormatExtension extends TlsGenericTest {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         ECPointFormatExtensionMessage pointFormatExtension = getTargetedExtension(ECPointFormatExtensionMessage.class, workflowTrace);
         pointFormatExtension.setPointFormatsLength(Modifiable.sub(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
+        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(i -> {
+            boolean skipsExtensionContent = context.getSiteReport().getResult(TlsAnalyzedProperty.HANDSHAKES_WITH_UNDEFINED_POINT_FORMAT) == TestResults.TRUE;
+            if(i.getWorkflowTrace().executedAsPlanned() && skipsExtensionContent) {
+                i.addAdditionalResultInfo("SUT skips over extension content");
+                return;
+            }
+            super.validateLengthTest(i);
+        }     
+        );
     }
 }

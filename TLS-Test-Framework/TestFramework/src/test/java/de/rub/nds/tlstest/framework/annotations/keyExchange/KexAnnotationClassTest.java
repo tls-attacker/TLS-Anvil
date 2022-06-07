@@ -11,7 +11,7 @@ package de.rub.nds.tlstest.framework.annotations.keyExchange;
 
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlstest.framework.ServerTestSiteReport;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -32,7 +32,7 @@ public class KexAnnotationClassTest {
     @BeforeAll
     static void setup() {
         TestContext testContext = TestContext.getInstance();
-        TestSiteReport report = new TestSiteReport("");
+        ServerTestSiteReport report = new ServerTestSiteReport("");
 
         report.addCipherSuites(new HashSet<CipherSuite>(){
             {

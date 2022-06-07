@@ -100,8 +100,8 @@ public class TestConfig extends TLSDelegateConfig {
     @Parameter(names = "-strength", description = "Strength of the pairwise test. (Default value: 4)")
     private int strength = 4;
     
-    @Parameter(names = "-connectionTimeout", description = "The default timeout for TLS sessions in ms. (Default value: 1000)")
-    private int connectionTimeout = 1000;
+    @Parameter(names = "-connectionTimeout", description = "The default timeout for TLS sessions in ms. (Default value: 1500)")
+    private int connectionTimeout = 1500;
 
     @Parameter(names = "-prettyPrintJSON", description = "Pretty print json output")
     private boolean prettyPrintJSON = false;

@@ -240,9 +240,7 @@ public class TestRunner {
         scannerConfig.setTimeout(testConfig.getConnectionTimeout());
         Config config = scannerConfig.createConfig();
         config.setAddServerNameIndicationExtension(testConfig.createConfig().isAddServerNameIndicationExtension());
-
         config.getDefaultClientConnection().setConnectionTimeout(0);
-        scannerConfig.setBaseConfig(config);
 
         scannerConfig.setProbes(
                 TlsProbeType.COMMON_BUGS,
@@ -261,6 +259,7 @@ public class TestRunner {
         );
         scannerConfig.setOverallThreads(1);
         scannerConfig.setParallelProbes(1);
+        scannerConfig.setConfigSearchCooldown(true);
 
         TlsServerScanner scanner = new TlsServerScanner(scannerConfig);
 
@@ -343,7 +342,7 @@ public class TestRunner {
                 }
                 else {
                     failed++;
-                    LOGGER.debug("Workflow failed (" + s.getConfig().getDefaultSelectedCipherSuite() + ")");
+                    LOGGER.debug("SUT does not support Cipher Suite {}", s.getConfig().getDefaultSelectedCipherSuite());
                 }
             } catch (Exception e) {
                 LOGGER.error(e);

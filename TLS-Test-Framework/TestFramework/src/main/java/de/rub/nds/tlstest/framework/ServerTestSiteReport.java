@@ -55,6 +55,8 @@ public class ServerTestSiteReport extends ServerReport {
             report.setSupportedExtensions(siteReport.getSupportedExtensions());
             report.setClosedAfterAppDataDelta(siteReport.getClosedAfterAppDataDelta());
             report.setClosedAfterFinishedDelta(siteReport.getClosedAfterFinishedDelta());
+            report.setConfigProfileIdentifier(siteReport.getConfigProfileIdentifier());
+            report.setConfigProfileIdentifierTls13(siteReport.getConfigProfileIdentifierTls13());
             
             for(String key : siteReport.getResultMap().keySet()) {
                 report.putResult(TlsAnalyzedProperty.valueOf(key), siteReport.getResultMap().get(key));

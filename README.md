@@ -1,5 +1,5 @@
 # TLS-Anvil
-TLS-Anvil is a test suite for the evaluation of the RFC compliance of Transport Layer Security (TLS) libraries using combinatorial testing (CT).
+TLS-Anvil is a test suite for the evaluation of RFC compliance of Transport Layer Security (TLS) libraries using combinatorial testing (CT).
 
 The test suite contains around 408 client and server tests for TLS 1.2 and TLS 1.3 based on the following RFCs:
 * RFC 4492 - Elliptic Curve Cryptography (ECC) Cipher Suites for Transport Layer Security (TLS)
@@ -18,7 +18,7 @@ The test suite contains around 408 client and server tests for TLS 1.2 and TLS 1
 
 ## Project Structure
 * TLS-Testsuite: Contains the test templates
-* TLS-Test-Framework: Aggregator that combines coffee4j and implements basic test functionalities
+* TLS-Test-Framework: Aggregator that combines coffee4j and implements JUnit extensions, annotations and the API for modeling tests for the TLS protocol
 * Report-Analyzer: Standalone browser application that facilitates the analysis of TLS-Anvil's output 
 
 ## Build

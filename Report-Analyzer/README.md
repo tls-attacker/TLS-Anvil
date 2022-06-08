@@ -1,6 +1,6 @@
 # TLS-Testsuite-Report-Analyzer
 
-This web application visualizes the test report created by the [TLS-Testsuite](https://github.com/RUB-NDS/TLS-Testsuite).  
+This web application visualizes the test report created by TLS-Anvil.
 The easiest way to run this project locally is using Docker.
 
 ```shell

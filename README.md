@@ -37,7 +37,7 @@ git clone https://github.com/tls-attacker/TLS-Attacker-Development.git
 ( cd TLS-Attacker-Development && git checkout 0e94899fcf2673e540fb1dec37a3fbb2b3520381 )
 
 git clone https://github.com/tls-attacker/TLS-Scanner-Development.git
-( cd TLS-Scanner-Development && git checkout bd80c1b3463ac2a2eebfe794e5c109595dbd57dc && git submodule update --init --recursive )
+( cd TLS-Scanner-Development && git checkout f0780ea22664939ea42a31719cf30a3b9ce1bb7c && git submodule update --init --recursive )
 
 git clone https://github.com/tls-attacker/TLS-Anvil-Development.git
 

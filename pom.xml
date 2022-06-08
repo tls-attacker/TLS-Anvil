@@ -8,12 +8,11 @@
     <version>1.0</version>
     <name>TLS-Anvil</name>
     <packaging>pom</packaging>
-
     <modules>
         <module>TLS-Test-Framework</module>
         <module>TLS-Testsuite</module>
     </modules>
-    <build>
+    <build> 
     </build>
 
     <properties>

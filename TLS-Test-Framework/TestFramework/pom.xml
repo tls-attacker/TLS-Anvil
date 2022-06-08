@@ -5,7 +5,11 @@
     <version>1.0</version>
     <groupId>de.rub.nds.tlstest</groupId>
     <name>TLS-Test-Framework</name>
-
+    <parent>
+        <groupId>de.rub.nds.tlstest</groupId>
+        <artifactId>TLS-Test-Framework-Aggregator</artifactId>
+        <version>1.0</version>
+    </parent>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -14,15 +18,8 @@
         <junit.minor-version>7.0</junit.minor-version>
         <junit.jupiter.version>5.${junit.minor-version}</junit.jupiter.version>
         <junit.platform.version>1.${junit.minor-version}</junit.platform.version>
-        <tlsattacker.version>3.8.0-SNAPSHOT</tlsattacker.version>
-        <tlsscanner.version>4.2.0-SNAPSHOT</tlsscanner.version>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>de.rub.nds.tlsattacker</groupId>
-            <artifactId>TLS-Core</artifactId>
-            <version>${tlsattacker.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -51,7 +48,7 @@
         <dependency>
             <artifactId>TLS-Server-Scanner</artifactId>
             <groupId>de.rub.nds.tlsscanner</groupId>
-            <version>${tlsscanner.version}</version>
+            <version>4.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

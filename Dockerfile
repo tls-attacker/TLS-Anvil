@@ -5,31 +5,31 @@ RUN mvn install -DskipTests
 
 FROM maven:3.6-openjdk-11 as build-asn1-tool
 COPY --from=build-modifiableVariable /root/.m2 /root/.m2/
-COPY ASN.1-Tool-Development /src/ASN.1-Tool/
+COPY ASN.1-Tool /src/ASN.1-Tool/
 WORKDIR /src/ASN.1-Tool
 RUN mvn install -DskipTests
 
 FROM maven:3.6-openjdk-11 as build-x509-attacker
 COPY --from=build-asn1-tool /root/.m2 /root/.m2/
-COPY X509-Attacker-Development /src/X509-Attacker/
+COPY X509-Attacker /src/X509-Attacker/
 WORKDIR /src/X509-Attacker
 RUN mvn install -DskipTests
 
 FROM maven:3.6-openjdk-11 as build-tlsattacker
 COPY --from=build-x509-attacker /root/.m2 /root/.m2/
-COPY TLS-Attacker-Development /src/TLS-Attacker/
+COPY TLS-Attacker /src/TLS-Attacker/
 WORKDIR /src/TLS-Attacker
 RUN mvn install -DskipTests
 
 FROM maven:3.6-openjdk-11 as build-tlsscanner
 COPY --from=build-tlsattacker /root/.m2 /root/.m2/
-COPY TLS-Scanner-Development /src/TLS-Scanner/
+COPY TLS-Scanner /src/TLS-Scanner/
 WORKDIR /src/TLS-Scanner
 RUN mvn install -DskipTests
 
 FROM maven:3.6-openjdk-11 as build-tlsanvil
 COPY --from=build-tlsscanner /root/.m2 /root/.m2/
-COPY TLS-Anvil-Development /src/TLS-Anvil/
+COPY TLS-Anvil /src/TLS-Anvil/
 WORKDIR /src/TLS-Anvil
 RUN mvn install -DskipTests
 

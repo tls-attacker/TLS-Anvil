@@ -36,7 +36,7 @@ RUN mvn install -DskipTests
 FROM openjdk:11
 RUN apt-get update && apt-get install -y tcpdump
 COPY --from=build-tlsanvil /src/TLS-Anvil/TLS-Testsuite/apps /apps/
-COPY --from=build-tlsanvil /src/TLS-Anvil/TLS-Testsuite/entrypoint.sh /apps/
+COPY --from=build-tlsanvil /src/TLS-Anvil/entrypoint.sh /apps/
 ENV DOCKER=1
 WORKDIR /output/
 VOLUME /output

@@ -1,8 +1,7 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2020 Ruhr University Bochum and
- * TÜV Informationstechnik GmbH
+ * Copyright 2022 Ruhr University Bochum
  *
  * Licensed under Apache License 2.0
  * http://www.apache.org/licenses/LICENSE-2.0
@@ -12,8 +11,6 @@ package de.rub.nds.tlstest.framework.execution;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.modifiablevariable.util.Modifiable;
-import de.rub.nds.tlsattacker.attacks.util.response.ResponseExtractor;
-import de.rub.nds.tlsattacker.attacks.util.response.ResponseFingerprint;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;

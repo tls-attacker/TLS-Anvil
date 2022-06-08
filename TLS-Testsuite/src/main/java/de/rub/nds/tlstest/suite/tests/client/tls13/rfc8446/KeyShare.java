@@ -1,8 +1,7 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2020 Ruhr University Bochum and
- * TÜV Informationstechnik GmbH
+ * Copyright 2022 Ruhr University Bochum
  *
  * Licensed under Apache License 2.0
  * http://www.apache.org/licenses/LICENSE-2.0
@@ -11,8 +10,6 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
-import de.rub.nds.tlsattacker.attacks.ec.InvalidCurvePoint;
-import de.rub.nds.tlsattacker.attacks.ec.TwistedCurvePoint;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.Bits;
 import de.rub.nds.tlsattacker.core.constants.ECPointFormat;
@@ -37,6 +34,8 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.InvalidCurvePoint;
+import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.TwistedCurvePoint;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;

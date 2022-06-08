@@ -46,7 +46,7 @@ docker build -f TLS-Anvil-Development/Dockerfile . -t tlsanvil
 
 ## Run
 ```
-docker run --rm -it testsuite -help
+docker run --rm -it tlsanvil -help
 ```
 
 The foundation of TLS-Anvil was developed as part of the master's thesis *Development and Evaluation of a TLS-Testsuite* by Philipp Nieting at *Ruhr University Bochum* in cooperation with the *TÜV Informationstechnik GmbH*.

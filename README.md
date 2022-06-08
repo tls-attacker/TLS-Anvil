@@ -40,6 +40,7 @@ git clone https://github.com/tls-attacker/TLS-Scanner.git
 ( cd TLS-Scanner && git checkout f0780ea22664939ea42a31719cf30a3b9ce1bb7c && git submodule update --init --recursive )
 
 git clone https://github.com/tls-attacker/TLS-Anvil.git
+(cd TLS-Anvil && git checkout e0521a25a37fcea248803f9585f8da349d85d2f4)
 
 docker build -f TLS-Anvil/Dockerfile . -t tlsanvil
 ```

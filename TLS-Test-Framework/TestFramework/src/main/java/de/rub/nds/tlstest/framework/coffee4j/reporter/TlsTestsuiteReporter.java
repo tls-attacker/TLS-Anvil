@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package de.rub.nds.tlstest.framework.coffee4j.reporter;
 
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;

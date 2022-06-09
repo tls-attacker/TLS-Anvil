@@ -12,16 +12,13 @@ package de.rub.nds.tlstest.framework.model;
 import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationManager;
 import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * The manager that knows and manages all DerivationCategoryManager%s. It is used to collect the set of DerivationParameter%s
@@ -65,6 +62,8 @@ public class DerivationManager {
         for (Map.Entry<Class, DerivationCategoryManager> entry : categoryManagers.entrySet()) {
             derivationsOfModel.addAll(entry.getValue().getDerivationsOfModel(derivationScope, baseModel));
         }
+        sortDerivationTypes(derivationsOfModel);
+
         return derivationsOfModel;
     }
 
@@ -73,6 +72,7 @@ public class DerivationManager {
         for (Map.Entry<Class, DerivationCategoryManager> entry : categoryManagers.entrySet()) {
             allDerivations.addAll(entry.getValue().getAllDerivations());
         }
+        sortDerivationTypes(allDerivations);
         return allDerivations;
     }
 
@@ -146,5 +146,23 @@ public class DerivationManager {
 
     public synchronized List<DerivationCategoryManager> getRegisteredCategoryManagers(){
         return new ArrayList<>(categoryManagers.values());
+    }
+
+    // Temporary for speed testing
+    private void sortDerivationTypes(List<DerivationType> typeList){
+        Collections.sort(typeList, (d1, d2) -> {
+            if((d1 instanceof ConfigOptionDerivationType)!= (d2 instanceof ConfigOptionDerivationType)){
+                if(d1 instanceof ConfigOptionDerivationType){
+                    return -1;
+                }
+                else {
+                    return 1;
+                }
+            }
+            else{
+                return d1.toString().compareTo(d2.toString());
+            }
+        });
+
     }
 }

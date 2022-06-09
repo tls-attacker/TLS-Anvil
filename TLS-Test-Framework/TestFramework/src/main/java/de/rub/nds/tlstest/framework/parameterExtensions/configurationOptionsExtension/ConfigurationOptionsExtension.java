@@ -14,6 +14,8 @@ import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.model.*;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
@@ -28,6 +30,8 @@ import java.util.Set;
  * were selected by a config file; Its path must be passed using a String.
  */
 public class ConfigurationOptionsExtension implements ParameterExtension {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private static ConfigurationOptionsExtension instance = null;
     private ConfigurationOptionsConfig config;
@@ -59,6 +63,7 @@ public class ConfigurationOptionsExtension implements ParameterExtension {
             e.printStackTrace();
             throw new IllegalArgumentException(String.format("The passed configuration options config file '%s' could not be found.",configPath));
         }
+        LOGGER.info("Testing with configuration options: {}", config.getEnabledConfigOptionDerivations());
 
         ConfigurationOptionsDerivationManager.getInstance().setConfigOptionsConfig(config);
         config.getBuildManager().init();

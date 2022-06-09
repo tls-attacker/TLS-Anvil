@@ -57,6 +57,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     protected Set<Integer> usedPorts;
     private String maximalFeatureContainerDockerTag;
 
+
     /**
      * Callable to create/get site reports.
      */
@@ -156,12 +157,19 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
         }
         // Case: A new container has to be created
         else{
+            if(dockerFactory.buildFailedForTag(dockerTag)){
+                throw new RuntimeException(String.format("Cannot create docker container for tag '%s'. Building has already failed.", dockerTag));
+            }
+
             // SubCase: The image for the container does not already exists
             if(!dockerFactory.dockerNameWithTagExists(dockerNameWithTag)){
                 LOGGER.info(String.format("Build new image with tag '%s'...", dockerTag));
                 long timer = System.currentTimeMillis();
-                dockerFactory.buildTlsLibraryDockerImage(cliOptions, dockerTag, configOptionsConfig.getTlsVersionName(), resultsCollector);
-                resultsCollector.logNewBuildCreated(optionSet, dockerTag, System.currentTimeMillis() - timer);
+                boolean success = dockerFactory.buildTlsLibraryDockerImage(cliOptions, dockerTag, configOptionsConfig.getTlsVersionName(), resultsCollector);
+                resultsCollector.logNewBuildCreated(optionSet, dockerTag, System.currentTimeMillis() - timer, success);
+                if(!success){
+                    throw new RuntimeException(String.format("Cannot create docker container for tag '%s'. Building failed.", dockerTag));
+                }
             }
 
             if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT){
@@ -178,7 +186,8 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
             }
             runContainer(providedContainer);
 
-            resultsCollector.logContainer(providedContainer);
+            //resultsCollector.logContainer(providedContainer);
+            providedContainer.enableContainerLogging(resultsCollector, "ContainerLog");
             dockerTagToContainerInfo.put(dockerTag, providedContainer);
             dockerTagToAccessCount.put(dockerTag, 0);
         }
@@ -208,7 +217,9 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     @Override
     public synchronized void onTestFinished(Set<ConfigurationOptionDerivationParameter> optionSet){
         String dockerTag = getDockerTagFromOptionSet(optionSet);
-        dockerTagToContainerInfo.get(dockerTag).endUsage();
+        if(dockerTagToContainerInfo.containsKey(dockerTag)){
+            dockerTagToContainerInfo.get(dockerTag).endUsage();
+        }
     }
 
     /* === Site Report Management === */

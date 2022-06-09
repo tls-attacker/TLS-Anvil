@@ -16,15 +16,18 @@ import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.*;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.ConfigOptionsResultsCollector;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.*;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.DockerContainerLogFile;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import de.rub.nds.tlstest.framework.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 
 /**
  * DockerFactory to build OpenSSL server and client containers using a two-step build procedure to utilize ccache.
@@ -133,8 +136,14 @@ public class OpenSSLDockerFactory extends DockerFactory {
     }
 
     @Override
-    protected synchronized void buildDockerImage(List<String> cliOptions, String dockerTag, String openSSLBranchName, ConfigOptionsResultsCollector resultsCollector)  {
+    protected synchronized boolean buildDockerImage(List<String> cliOptions, String dockerTag, String openSSLBranchName, ConfigOptionsResultsCollector resultsCollector)  {
+        if(resultsCollector == null){
+            throw new NullPointerException("resultsCollector is null.");
+        }
+
+
         LOGGER.debug(String.format("Build with option string: '%s'", cliOptions));
+
 
         // Create the docker factory image for the respective OpenSSL version, if it does not exist so far
         String factoryImageTag = String.format("%s:%s",FACTORY_REPRO_NAME, openSSLBranchName);
@@ -153,21 +162,37 @@ public class OpenSSLDockerFactory extends DockerFactory {
                 .withCmd(cliOptions)
                 .exec();
 
+        DockerContainer factoryContainer = new DockerContainer(factoryImageTag, tempContainer.getId(), dockerClient);
+
         LOGGER.debug("Factory Container created.");
 
         // Start the created container
-        dockerClient.startContainerCmd(tempContainer.getId()).exec();
+        factoryContainer.start();
+        /*dockerClient.startContainerCmd(tempContainer.getId()).exec();
         InspectContainerResponse containerResp
-                = dockerClient.inspectContainerCmd(tempContainer.getId()).exec();
+                = dockerClient.inspectContainerCmd(tempContainer.getId()).exec();*/
 
-        if(resultsCollector != null){
-            resultsCollector.logBuildContainer(new DockerContainer(dockerTag, containerResp.getId(),dockerClient));
-        }
+        //DockerContainerLogFile logFile = null;
+        //if(resultsCollector != null){
+
+            //logFile = resultsCollector.logBuildContainer(new DockerContainer(dockerTag, containerResp.getId(),dockerClient));
+            //logFilePath = logFile.getLogFile().getAbsolutePath();
+        //}
+        DockerContainerLogFile logFile = factoryContainer.enableContainerLogging(resultsCollector, "BuildLog");
+
 
         LOGGER.debug("Factory Container started.");
+        final int timeoutMs = 1800000; // 30 min
+        try {
+            factoryContainer.waitForState(DockerContainerState.NOT_RUNNING, timeoutMs); // Building timeout 30 min
+        } catch (TimeoutException e) {
+            factoryContainer.remove();
+            LOGGER.error("Timeout while building OpenSSL docker image. (tag: '{}', configured with: '{}', timeout after {} min)", dockerTag, cliOptions, timeoutMs/60000);
+            return false;
+        }
 
         // Wait for the build process to finish and the container stops
-        while(containerResp.getState().getRunning()){
+        /*while(containerResp.getState().getRunning()){
             try {
                 Thread.sleep(1000);
                 containerResp = dockerClient.inspectContainerCmd(tempContainer.getId()).exec();
@@ -175,7 +200,18 @@ public class OpenSSLDockerFactory extends DockerFactory {
             catch(InterruptedException e){
                 e.printStackTrace();
             }
+        }*/
+        InspectContainerResponse containerResp = dockerClient.inspectContainerCmd(factoryContainer.getContainerId()).exec();
+
+        if(containerResp.getState().getExitCodeLong() > 0) {
+            LOGGER.error("Cannot build OpenSSL docker image. (tag: '{}', configured with: '{}')", dockerTag, cliOptions);
+            if(logFile != null){
+                LOGGER.error("See docker build log ({}) for more information.", logFile.getLogFile().getAbsolutePath());
+            }
+            dockerClient.removeContainerCmd(tempContainer.getId()).exec();
+            return false;
         }
+
 
         LOGGER.debug("\nFactory Container finished.");
 
@@ -196,7 +232,9 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
         // Remove the temporary image and container
         dockerClient.removeImageCmd(tempImageId).exec();
-        dockerClient.removeContainerCmd(tempContainer.getId()).exec();
+        factoryContainer.remove();
+        //dockerClient.removeContainerCmd(tempContainer.getId()).exec();
+        return true;
     }
 
     public DockerServerTestContainer createDockerServer(String dockerTag,

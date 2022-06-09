@@ -12,9 +12,12 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.ConfigOptionsResultsCollector;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.DockerContainerLogFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -35,6 +38,7 @@ public class DockerContainer {
     protected String containerId;
     protected DockerContainerState containerState;
     protected DockerClient dockerClient;
+    protected DockerContainerLogFile containerLogger;
 
     /**
      * Constructor.
@@ -48,6 +52,7 @@ public class DockerContainer {
         this.dockerTag = dockerTag;
         this.containerId = containerId;
         this.containerState = updateContainerState();
+        containerLogger = null;
     }
 
     public String getDockerTag() {
@@ -60,6 +65,15 @@ public class DockerContainer {
 
     public DockerContainerState getContainerState() {
         return containerState;
+    }
+
+    public DockerClient getDockerClient() {
+        return dockerClient;
+    }
+
+    public DockerContainerLogFile enableContainerLogging(ConfigOptionsResultsCollector resultsCollector, String category){
+        containerLogger = resultsCollector.logContainer(this, category);
+        return containerLogger;
     }
 
     /**
@@ -98,6 +112,9 @@ public class DockerContainer {
             throw new IllegalStateException("Cannot start a running (or paused) container.");
         }
         dockerClient.startContainerCmd(this.getContainerId()).exec();
+        if(containerLogger != null){
+            containerLogger.notifyContainerStart();
+        }
         this.containerState = DockerContainerState.RUNNING;
     }
 

@@ -30,6 +30,7 @@ import java.nio.file.Path;
  */
 public class LogFile {
     protected Logger logger;
+    protected File logFile;
 
     private void generateLogger(String path, String pattern) {
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
@@ -71,7 +72,7 @@ public class LogFile {
 
     public LogFile(Path folderDirectoryPath, String fileName, String logPattern){
         Path path = folderDirectoryPath.resolve(fileName);
-        File logFile = path.toFile();
+        logFile = path.toFile();
         if(logFile.exists()){
             logFile.delete();
         }
@@ -81,6 +82,10 @@ public class LogFile {
 
     public void log(String data){
         logger.info(data);
+    }
+
+    public File getLogFile(){
+        return this.logFile;
     }
 
 }

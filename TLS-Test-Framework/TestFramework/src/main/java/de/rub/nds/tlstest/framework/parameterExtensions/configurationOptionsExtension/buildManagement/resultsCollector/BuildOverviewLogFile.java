@@ -60,7 +60,7 @@ public class BuildOverviewLogFile extends LogFile {
         return String.format("%d.%d", sec, ms);
     }
 
-    public void logBuild(Set<ConfigurationOptionDerivationParameter> optionSet, String dockerTag, long buildTime){
+    public void logBuild(Set<ConfigurationOptionDerivationParameter> optionSet, String dockerTag, long buildTime, boolean success){
         if(loggedDockerTags.contains(dockerTag)){
             return;
         }
@@ -72,12 +72,18 @@ public class BuildOverviewLogFile extends LogFile {
         line.add(number.toString());
         number += 1;
         line.add(dockerTag);
-        if(buildTime >= 0){
-            line.add(getTimeStringFromMs(buildTime));
+        if(success){
+            if(buildTime >= 0){
+                line.add(getTimeStringFromMs(buildTime));
+            }
+            else{
+                line.add("EXISTED");
+            }
         }
         else{
-            line.add("EXISTED");
+            line.add("FAILED");
         }
+
 
         Map<ConfigOptionDerivationType, ConfigurationOptionValue> optionTypeToValue = new HashMap<>();
         for(ConfigurationOptionDerivationParameter configOptionDervivation : optionSet){

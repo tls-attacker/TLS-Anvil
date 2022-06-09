@@ -77,9 +77,9 @@ public class ConfigOptionsResultsCollector {
      * @param dockerTag - the docker image tag of the build
      * @param buildTime - the time it took for building the build
      */
-    public synchronized void logNewBuildCreated(Set<ConfigurationOptionDerivationParameter> optionSet, String dockerTag, long buildTime)
+    public synchronized void logNewBuildCreated(Set<ConfigurationOptionDerivationParameter> optionSet, String dockerTag, long buildTime, boolean success)
     {
-        buildOverviewLogFile.logBuild(optionSet, dockerTag, buildTime);
+        buildOverviewLogFile.logBuild(optionSet, dockerTag, buildTime, success);
     }
 
     /**
@@ -90,7 +90,7 @@ public class ConfigOptionsResultsCollector {
      */
     public synchronized void logBuildAccess(Set<ConfigurationOptionDerivationParameter> optionSet, String dockerTag){
         buildAccessLogFile.increaseAccessCounter(dockerTag);
-        buildOverviewLogFile.logBuild(optionSet, dockerTag, -1);
+        buildOverviewLogFile.logBuild(optionSet, dockerTag, -1, true);
     }
 
     /**
@@ -105,29 +105,40 @@ public class ConfigOptionsResultsCollector {
      *
      * @param container - The container to log
      */
-    public synchronized void logBuildContainer(DockerContainer container){
-        logDockerContainer(container, buildContainerLogDirectoryPath);
-    }
+    /*public synchronized DockerContainerLogFile logBuildContainer(DockerContainer container){
+        return logDockerContainer(container, buildContainerLogDirectoryPath);
+    }*/
 
     /**
      * Log a container.
      *
      * @param container - The container to log
      */
-    public synchronized void logContainer(DockerContainer container){
-        logDockerContainer(container, containerLogDirectoryPath);
+    /*public synchronized DockerContainerLogFile logContainer(DockerContainer container){
+        return logDockerContainer(container, containerLogDirectoryPath);
+    }*/
+
+    /**
+     * Log a container.
+     *
+     * @param container - The container to log
+     */
+    public synchronized DockerContainerLogFile logContainer(DockerContainer container, String category){
+        Path logDirectoryPath = folderDirectoryPath.resolve(category+"/");
+        prepareDirectory(logDirectoryPath);
+        return logDockerContainer(container, logDirectoryPath);
     }
 
 
-    private synchronized void logDockerContainer(DockerContainer container, Path path) {
+    private synchronized DockerContainerLogFile logDockerContainer(DockerContainer container, Path path) {
         String containerId = container.getContainerId();
         if(containerIdToLogger.containsKey(containerId)){
             // Logger does already exist
-            return;
+            throw new  RuntimeException("Cannot log non-existing container!");
         }
-        DockerContainerLogFile containerLogger = new DockerContainerLogFile(path, "Log"+container.getDockerTag()+".log", dockerClient);
+        DockerContainerLogFile containerLogger = new DockerContainerLogFile(path, "Log_"+container.getDockerTag()+".log", container);
         containerIdToLogger.put(containerId, containerLogger);
-        containerLogger.logDockerContainer(container);
+        return containerLogger;
     }
 
     private void prepareDirectory(Path directoryPath){

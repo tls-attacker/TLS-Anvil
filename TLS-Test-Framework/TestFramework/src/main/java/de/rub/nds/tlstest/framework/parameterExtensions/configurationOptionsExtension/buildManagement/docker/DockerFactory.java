@@ -40,6 +40,7 @@ public abstract class DockerFactory {
     protected String BUILD_REPRO_NAME;
     protected String CONTAINER_NAME_PREFIX;
 
+    protected Set<String> failedBuildDockerTags;
     protected Set<String> existingDockerImageNameWithTags;
 
     protected ConfigurationOptionsConfig configOptionsConfig;
@@ -54,6 +55,7 @@ public abstract class DockerFactory {
         this.BUILD_REPRO_NAME = buildReproName;
         this.CONTAINER_NAME_PREFIX = "container";
         this.configOptionsConfig = configurationOptionsConfig;
+        this.failedBuildDockerTags = new HashSet<>();
     }
 
     /**
@@ -64,10 +66,16 @@ public abstract class DockerFactory {
      * @param libraryVersionName - The version of the tls library (e.g. the respective git branch tag)
      * @param resultsCollector - The result collector to log build and container information
      */
-    public void buildTlsLibraryDockerImage(List<String> cliOptions, String dockerTag, String libraryVersionName, ConfigOptionsResultsCollector resultsCollector){
-        buildDockerImage(cliOptions, dockerTag, libraryVersionName, resultsCollector);
+    public boolean buildTlsLibraryDockerImage(List<String> cliOptions, String dockerTag, String libraryVersionName, ConfigOptionsResultsCollector resultsCollector){
+        boolean success = buildDockerImage(cliOptions, dockerTag, libraryVersionName, resultsCollector);
         String dockerNameWithTag = this.getBuildImageNameAndTag(dockerTag);
-        existingDockerImageNameWithTags.add(dockerNameWithTag);
+        if(success){
+            existingDockerImageNameWithTags.add(dockerNameWithTag);
+        }
+        else{
+            failedBuildDockerTags.add(dockerNameWithTag);
+        }
+        return success;
     }
 
     /**
@@ -78,8 +86,9 @@ public abstract class DockerFactory {
      * @param dockerTag - The docker tag the image should have (should be derived from the cliOptions and the version)
      * @param libraryVersionName - The version of the tls library (e.g. the respective git branch tag)
      * @param resultsCollector - The result collector to log build and container information
+     * @returns true iff the image was successfully built. If false is returned no image was created (not even an invalid one)
      */
-    protected abstract void buildDockerImage(List<String> cliOptions, String dockerTag, String libraryVersionName, ConfigOptionsResultsCollector resultsCollector);
+    protected abstract boolean buildDockerImage(List<String> cliOptions, String dockerTag, String libraryVersionName, ConfigOptionsResultsCollector resultsCollector);
 
     /**
      * Create a DockerClientTestContainer using the respective configurations. An image for the respective docker tag must
@@ -253,6 +262,11 @@ public abstract class DockerFactory {
         return createContainerCmd.getId();
     }
 
+    public boolean buildFailedForTag(String dockerTag){
+        String dockerNameWithTag = this.getBuildImageNameAndTag(dockerTag);
+        return this.failedBuildDockerTags.contains(dockerNameWithTag);
+    }
+
     /**
      * Gets the dockerClient this factory has uses (created automatically in init).
      *
@@ -284,4 +298,7 @@ public abstract class DockerFactory {
     public boolean dockerNameWithTagExists(String dockerTag){
         return existingDockerImageNameWithTags.contains(dockerTag);
     }
+
+
+
 }

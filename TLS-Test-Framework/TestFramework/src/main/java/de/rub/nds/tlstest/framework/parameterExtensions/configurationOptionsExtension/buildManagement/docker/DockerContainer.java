@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.exception.NotModifiedException;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.ConfigOptionsResultsCollector;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.DockerContainerLogFile;
 import org.apache.logging.log4j.LogManager;
@@ -111,7 +112,13 @@ public class DockerContainer {
         if(this.getContainerState() != DockerContainerState.NOT_RUNNING){
             throw new IllegalStateException("Cannot start a running (or paused) container.");
         }
-        dockerClient.startContainerCmd(this.getContainerId()).exec();
+        try {
+            dockerClient.startContainerCmd(this.getContainerId()).exec();
+        }
+        catch(NotModifiedException e){
+            LOGGER.warn("Got unexpected state (RUNNING) of docker container while trying to start it.");
+        }
+
         if(containerLogger != null){
             containerLogger.notifyContainerStart();
         }
@@ -125,9 +132,16 @@ public class DockerContainer {
      * @throws TimeoutException
      */
     public synchronized void startAndWait() throws TimeoutException {
+        final int WAIT_AFTER_STARTED = 1000;
         this.start();
-
         waitForState(DockerContainerState.RUNNING, 30000);
+        // Wait some time so the server/client has time to get ready (cannot by requested from docker)
+        try{
+            Thread.sleep(WAIT_AFTER_STARTED);
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -137,8 +151,13 @@ public class DockerContainer {
         if(this.getContainerState() == DockerContainerState.NOT_RUNNING){
             throw new IllegalStateException("Cannot stop a stopped container.");
         }
-        dockerClient.stopContainerCmd(this.getContainerId()).exec();
-        this.containerState =DockerContainerState.NOT_RUNNING;
+        try {
+            dockerClient.stopContainerCmd(this.getContainerId()).exec();
+        }
+        catch(NotModifiedException e){
+            LOGGER.warn("Got unexpected state (NOT_RUNNING) of docker container while trying to stop it.");
+        }
+        this.containerState = DockerContainerState.NOT_RUNNING;
     }
 
     /**
@@ -148,7 +167,12 @@ public class DockerContainer {
         if(this.getContainerState() != DockerContainerState.RUNNING){
             throw new IllegalStateException("Cannot pause a non running container.");
         }
-        dockerClient.pauseContainerCmd(this.getContainerId()).exec();
+        try {
+            dockerClient.pauseContainerCmd(this.getContainerId()).exec();
+        }
+        catch(NotModifiedException e){
+            LOGGER.warn("Got unexpected state (PAUSED) of docker container while trying to pause it.");
+        }
         this.containerState = DockerContainerState.PAUSED;
     }
 
@@ -159,7 +183,12 @@ public class DockerContainer {
         if(this.getContainerState() != DockerContainerState.PAUSED){
             throw new IllegalStateException("Cannot unpause a non paused container.");
         }
-        dockerClient.unpauseContainerCmd(this.getContainerId()).exec();
+        try {
+            dockerClient.unpauseContainerCmd(this.getContainerId()).exec();
+        }
+        catch(NotModifiedException e){
+            LOGGER.warn("Got unexpected state (RUNNING) of docker container while trying to unpause it.");
+        }
         this.containerState = DockerContainerState.RUNNING;
     }
 

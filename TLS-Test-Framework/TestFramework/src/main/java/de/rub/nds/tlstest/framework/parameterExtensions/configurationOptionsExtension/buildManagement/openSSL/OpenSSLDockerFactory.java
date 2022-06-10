@@ -168,16 +168,6 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
         // Start the created container
         factoryContainer.start();
-        /*dockerClient.startContainerCmd(tempContainer.getId()).exec();
-        InspectContainerResponse containerResp
-                = dockerClient.inspectContainerCmd(tempContainer.getId()).exec();*/
-
-        //DockerContainerLogFile logFile = null;
-        //if(resultsCollector != null){
-
-            //logFile = resultsCollector.logBuildContainer(new DockerContainer(dockerTag, containerResp.getId(),dockerClient));
-            //logFilePath = logFile.getLogFile().getAbsolutePath();
-        //}
         DockerContainerLogFile logFile = factoryContainer.enableContainerLogging(resultsCollector, "BuildLog");
 
 
@@ -191,16 +181,6 @@ public class OpenSSLDockerFactory extends DockerFactory {
             return false;
         }
 
-        // Wait for the build process to finish and the container stops
-        /*while(containerResp.getState().getRunning()){
-            try {
-                Thread.sleep(1000);
-                containerResp = dockerClient.inspectContainerCmd(tempContainer.getId()).exec();
-            }
-            catch(InterruptedException e){
-                e.printStackTrace();
-            }
-        }*/
         InspectContainerResponse containerResp = dockerClient.inspectContainerCmd(factoryContainer.getContainerId()).exec();
 
         if(containerResp.getState().getExitCodeLong() > 0) {

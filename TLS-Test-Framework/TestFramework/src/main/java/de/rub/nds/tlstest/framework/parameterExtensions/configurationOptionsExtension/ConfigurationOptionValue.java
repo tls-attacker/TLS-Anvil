@@ -1,4 +1,4 @@
-/**
+/*
  *  TLS-Test-Framework - A framework for modeling TLS tests
  *
  *  Copyright 2020 Ruhr University Bochum and
@@ -11,7 +11,7 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,10 +19,10 @@ import java.util.List;
  * or one or multiple Strings as option values.
  */
 public class ConfigurationOptionValue {
-    private boolean optionIsSet;
+    private final boolean optionIsSet;
     private List<String> stringValues;
 
-    private boolean isFlag;
+    private final boolean isFlag;
 
     /**
      * Constructor for flags.
@@ -45,7 +45,7 @@ public class ConfigurationOptionValue {
     public ConfigurationOptionValue(String optionValue){
         this.isFlag = false;
         this.optionIsSet = true;
-        stringValues = Arrays.asList(optionValue);
+        stringValues = Collections.singletonList(optionValue);
     }
 
     /**
@@ -64,7 +64,7 @@ public class ConfigurationOptionValue {
     /**
      * Returns true iff the value is a flag, i.e. it contains no option value (list).
      *
-     * @returns true iff the value is a flag
+     * @return true iff the value is a flag
      */
     public boolean isFlag(){
         return isFlag;
@@ -83,7 +83,7 @@ public class ConfigurationOptionValue {
      * Returns the list of passed option values. If the one-value constructor was called this function returns a
      * list with one element. If the this Value is a flag an empty list is returned.
      *
-     * @returns the option values as a String List
+     * @return the option values as a String List
      */
     public List<String> getOptionValues(){
         if(isFlag){

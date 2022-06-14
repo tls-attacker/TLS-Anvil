@@ -23,10 +23,10 @@ import java.util.concurrent.TimeUnit;
  * LogFile to give an overview of all used builds including build time and configuration options.
  */
 public class BuildOverviewLogFile extends LogFile {
-    private ConfigurationOptionsConfig config;
+    private final ConfigurationOptionsConfig config;
     private List<ConfigOptionDerivationType> optionHeaders;
 
-    private Set<String> loggedDockerTags;
+    private final Set<String> loggedDockerTags;
 
     private Integer number;
 
@@ -40,7 +40,7 @@ public class BuildOverviewLogFile extends LogFile {
     private void init(){
         List<String> header = new LinkedList<>();
         optionHeaders = new ArrayList<>(config.getEnabledConfigOptionDerivations());
-        Collections.sort(optionHeaders, Comparator.comparing(Enum::name));
+        optionHeaders.sort(Comparator.comparing(Enum::name));
 
         //String header = "Docker Tag,Build Time,";
         header.add("No");

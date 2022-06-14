@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter;
  */
 public class GeneralInfoLogFile extends LogFile{
 
-    private ConfigurationOptionsConfig config;
+    private final ConfigurationOptionsConfig config;
 
     public GeneralInfoLogFile(Path folderDirectoryPath, String fileName, ConfigurationOptionsConfig config){
         super(folderDirectoryPath, fileName);

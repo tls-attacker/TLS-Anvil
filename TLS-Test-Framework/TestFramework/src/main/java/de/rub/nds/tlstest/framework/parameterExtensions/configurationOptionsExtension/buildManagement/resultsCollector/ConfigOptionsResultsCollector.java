@@ -14,6 +14,8 @@ import com.github.dockerjava.api.DockerClient;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerContainer;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -26,6 +28,8 @@ import java.util.Set;
  * build procedure of the different required docker images.
  */
 public class ConfigOptionsResultsCollector {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     final String RESULTS_FOLDER_NAME = "ConfigOptionsResults/";
     final String CONTAINER_LOG_FOLDER_NAME = "ContainerLog/";
@@ -101,24 +105,6 @@ public class ConfigOptionsResultsCollector {
     }
 
     /**
-     * Log a container that is used for building tls library (is stored in another directory than logContainer).
-     *
-     * @param container - The container to log
-     */
-    /*public synchronized DockerContainerLogFile logBuildContainer(DockerContainer container){
-        return logDockerContainer(container, buildContainerLogDirectoryPath);
-    }*/
-
-    /**
-     * Log a container.
-     *
-     * @param container - The container to log
-     */
-    /*public synchronized DockerContainerLogFile logContainer(DockerContainer container){
-        return logDockerContainer(container, containerLogDirectoryPath);
-    }*/
-
-    /**
      * Log a container.
      *
      * @param container - The container to log
@@ -145,7 +131,11 @@ public class ConfigOptionsResultsCollector {
         File directory = directoryPath.toFile();
 
         if(!directory.exists()){
-            directory.mkdirs();
+            boolean success = directory.mkdirs();
+            if (!success) {
+                LOGGER.error("Cannot create directories '{}'", directory);
+                throw new RuntimeException("Cannot create directories.");
+            }
         }
     }
 

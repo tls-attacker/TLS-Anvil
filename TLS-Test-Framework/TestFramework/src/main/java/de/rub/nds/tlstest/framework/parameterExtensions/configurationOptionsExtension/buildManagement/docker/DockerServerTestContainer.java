@@ -18,7 +18,7 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
  * Represents a DockerContainer that runs a tls server for testing purposes.
  */
 public class DockerServerTestContainer extends DockerTestContainer {
-    private Integer tlsServerPort;
+    private final Integer tlsServerPort;
 
     /**
      * Constructor for the docker server test container.
@@ -41,8 +41,7 @@ public class DockerServerTestContainer extends DockerTestContainer {
     }
 
     public synchronized TestSiteReport createSiteReport(){
-        TestSiteReport report = TestSiteReportFactory.createServerSiteReport(dockerHost, tlsServerPort, false);
-        return report;
+        return TestSiteReportFactory.createServerSiteReport(dockerHost, tlsServerPort, false);
     }
 
 }

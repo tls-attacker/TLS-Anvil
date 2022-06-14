@@ -25,7 +25,7 @@ import java.util.concurrent.Callable;
 
 public class ConfigurationOptionCompoundParameter extends DerivationParameter<List<ConfigurationOptionDerivationParameter>> {
 
-    private List<List<ConfigurationOptionDerivationParameter>> configOptionsSetupsList;
+    private final List<List<ConfigurationOptionDerivationParameter>> configOptionsSetupsList;
 
     @SuppressWarnings("unchecked")
     public ConfigurationOptionCompoundParameter(List<List<ConfigurationOptionDerivationParameter>> setupsList){

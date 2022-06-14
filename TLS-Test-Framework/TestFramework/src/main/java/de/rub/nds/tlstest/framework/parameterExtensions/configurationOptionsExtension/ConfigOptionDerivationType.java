@@ -1,4 +1,4 @@
-/**
+/*
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
  * Copyright 2020 Ruhr University Bochum and

@@ -35,21 +35,21 @@ public class BuildAccessLogFile extends LogFile{
     }
 
     public void finalizeResults(){
-        String resultsString;
+        StringBuilder resultsString;
         List<Map.Entry<String, Integer>> entryList =  new ArrayList<>(dockerTagToAccessCounter.entrySet());
 
         // Sort after occurences
-        Collections.sort(entryList, Comparator.comparing(Map.Entry::getValue));
+        entryList.sort(Map.Entry.comparingByValue());
 
-        resultsString = String.format("%s,%s\n", "Docker Tag", "Access Count");
+        resultsString = new StringBuilder(String.format("%s,%s\n", "Docker Tag", "Access Count"));
         int totalSum = 0;
         for (Map.Entry<String, Integer> entry : entryList) {
-            resultsString += String.format("%s,%d\n", entry.getKey(), entry.getValue());
+            resultsString.append(String.format("%s,%d\n", entry.getKey(), entry.getValue()));
             totalSum += entry.getValue();
         }
-        resultsString += String.format("%s,%d\n", "Total", totalSum);
+        resultsString.append(String.format("%s,%d\n", "Total", totalSum));
 
-        log(resultsString);
+        log(resultsString.toString());
     }
 
 }

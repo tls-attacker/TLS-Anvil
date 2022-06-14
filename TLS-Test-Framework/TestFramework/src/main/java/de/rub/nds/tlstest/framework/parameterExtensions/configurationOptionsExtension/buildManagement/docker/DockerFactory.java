@@ -86,7 +86,7 @@ public abstract class DockerFactory {
      * @param dockerTag - The docker tag the image should have (should be derived from the cliOptions and the version)
      * @param libraryVersionName - The version of the tls library (e.g. the respective git branch tag)
      * @param resultsCollector - The result collector to log build and container information
-     * @returns true iff the image was successfully built. If false is returned no image was created (not even an invalid one)
+     * @return true iff the image was successfully built. If false is returned no image was created (not even an invalid one)
      */
     protected abstract boolean buildDockerImage(List<String> cliOptions, String dockerTag, String libraryVersionName, ConfigOptionsResultsCollector resultsCollector);
 
@@ -99,7 +99,7 @@ public abstract class DockerFactory {
      * @param dockerManagerPort - the port (on the docker host) the containers manager listens for http requests (e.g. 'trigger')
      * @param tlsServerHost - the server host the client connects to
      * @param tlsServerPort - the sever port the client connects to
-     * @returns the DockerClientTestContainer of the already built docker container
+     * @return the DockerClientTestContainer of the already built docker container
      */
     public abstract DockerClientTestContainer createDockerClient(String dockerTag,
                                                                  String dockerManagerHost,
@@ -115,7 +115,7 @@ public abstract class DockerFactory {
      * @param dockerManagerHost - the host address the docker container is bound on
      * @param dockerManagerPort - the port (on the docker host) the containers manager listens for http requests (e.g. 'shutdown')
      * @param dockerTlsPort - the port (on the docker host) the tls server runs on
-     * @returns the DockerServerTestContainer of the already built docker container
+     * @return the DockerServerTestContainer of the already built docker container
      */
     public abstract DockerServerTestContainer createDockerServer(String dockerTag,
                                                                  String dockerManagerHost,
@@ -151,8 +151,18 @@ public abstract class DockerFactory {
         existingDockerImageNameWithTags = new HashSet<>();
         for(Image img : imageList){
             Object tagsObj = img.getRawValues().get("RepoTags");
-            List<String> tags = (List<String>) tagsObj;
-            existingDockerImageNameWithTags.addAll(tags);
+            if(!(tagsObj instanceof List<?>)){
+                throw new RuntimeException("Cannot get repoTags");
+            }
+            try {
+                @SuppressWarnings("unchecked")
+                List<String> tags = (List<String>)tagsObj;
+                existingDockerImageNameWithTags.addAll(tags);
+            }
+            catch(ClassCastException e){
+                LOGGER.error(e);
+                throw new RuntimeException("Failed to get current docker images.");
+            }
         }
 
 
@@ -182,7 +192,7 @@ public abstract class DockerFactory {
      *
      * @param cliOptions - The command line string that is passed the buildscript
      * @param libraryNameAndVersion - The library's version (e.g. '1.1.1e')
-     * @returns the resulting docker tag
+     * @return the resulting docker tag
      */
     public String computeDockerTag(List<String> cliOptions, String libraryNameAndVersion){
         String cliString = String.join("", cliOptions);
@@ -201,7 +211,7 @@ public abstract class DockerFactory {
         cliStringHashString = cliStringHashString.substring(0,Math.min(16, cliStringHashString.length()));
 
         String res = String.format("_%s_%s", libraryVersionPart, cliStringHashString);
-        res = res.replaceAll("[^a-zA-Z0-9_\\.\\-]", "");
+        res = res.replaceAll("[^a-zA-Z0-9_.\\-]", "");
         return res;
     }
 
@@ -230,11 +240,11 @@ public abstract class DockerFactory {
 
         HostConfig hostConfig = HostConfig.newHostConfig()
                 .withPortBindings(portBindings)
-                .withDns(new ArrayList<String>())
-                .withDnsOptions(new ArrayList<String>())
-                .withDnsSearch(new ArrayList<String>())
+                .withDns(new ArrayList<>())
+                .withDnsOptions(new ArrayList<>())
+                .withDnsSearch(new ArrayList<>())
                 .withBlkioWeightDevice(new ArrayList<>())
-                .withDevices(new ArrayList<Device>())
+                .withDevices(new ArrayList<>())
                 .withExtraHosts("host.docker.internal:host-gateway")
                 .withBinds(volumeBindings);
 
@@ -270,7 +280,7 @@ public abstract class DockerFactory {
     /**
      * Gets the dockerClient this factory has uses (created automatically in init).
      *
-     * @returns the DockerClient
+     * @return the DockerClient
      */
     public DockerClient getDockerClient() {
         return dockerClient;
@@ -284,7 +294,7 @@ public abstract class DockerFactory {
         else{
             cName = name;
         }
-        Predicate<Container> pred = container -> Arrays.asList(container.getNames()).stream().anyMatch(n -> n.equals(cName));
+        Predicate<Container> pred = container -> Arrays.asList(container.getNames()).contains(cName);
         return dockerClient.listContainersCmd().withShowAll(true).exec().stream().filter(pred).findFirst();
     }
 
@@ -293,7 +303,7 @@ public abstract class DockerFactory {
      * (Does not catch any shenanigans with docker (e.g. manual deletions) during the execution)
      *
      * @param dockerTag - The docker image tag
-     * @returns true iff the docker image exists
+     * @return true iff the docker image exists
      */
     public boolean dockerNameWithTagExists(String dockerTag){
         return existingDockerImageNameWithTags.contains(dockerTag);

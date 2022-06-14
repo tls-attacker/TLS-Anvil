@@ -17,8 +17,8 @@ import java.util.IllegalFormatException;
  * the ports 123,124,...,456.
  */
 public class PortRange{
-    private Integer minPort;
-    private Integer maxPort;
+    private final Integer minPort;
+    private final Integer maxPort;
 
     public PortRange(Integer minPort, Integer maxPort){
         if(maxPort < minPort){
@@ -50,7 +50,7 @@ public class PortRange{
      * the column ':' is also an allowed separator.
      *
      * @param str - the string to parse
-     * @returns the port range
+     * @return the port range
      */
     public static PortRange fromString(String str){
         str = str.replace(":","-");
@@ -59,8 +59,8 @@ public class PortRange{
         if(splittedStr.length != 2){
             throw new IllegalArgumentException("Illegal port range format. Syntax is \"[Min Port]-[Max Port]\"");
         }
-        Integer minPort;
-        Integer maxPort;
+        int minPort;
+        int maxPort;
         try{
             minPort = Integer.parseInt(splittedStr[0]);
             maxPort = Integer.parseInt(splittedStr[1]);
@@ -75,9 +75,7 @@ public class PortRange{
                     "Max port must not be smaller than min port.");
         }
 
-        PortRange portRange = new PortRange(minPort, maxPort);
-
-        return portRange;
+        return new PortRange(minPort, maxPort);
     }
 
     @Override

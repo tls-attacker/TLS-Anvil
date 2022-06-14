@@ -35,7 +35,6 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
-import de.rub.nds.tlsattacker.transport.Connection;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlsscanner.serverscanner.ConsoleLogger;
 import de.rub.nds.tlsscanner.serverscanner.TlsScanner;
@@ -108,7 +107,7 @@ public class TestSiteReportFactory {
         TestSiteReport report = TestSiteReport.fromSiteReport(scanner.scan());
 
         if(disableConsoleLog){
-            removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
+            removeFilterFromLogger(noInfoAndWarningsFilter);
         }
         return report;
     }
@@ -192,7 +191,7 @@ public class TestSiteReportFactory {
             } catch (Exception e) {
                 LOGGER.error(e);
                 if(disableConsoleLog){
-                    removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
+                    removeFilterFromLogger(noInfoAndWarningsFilter);
                 }
                 throw new RuntimeException(e);
             }
@@ -200,18 +199,18 @@ public class TestSiteReportFactory {
 
         List<State> keyShareStates = new LinkedList<>();
         List<TlsTask> keyShareTasks = new LinkedList<>();
+        assert clientHello != null;
         if(clientHello.containsExtension(ExtensionType.ELLIPTIC_CURVES) && clientHello.containsExtension(ExtensionType.KEY_SHARE)) {
             keyShareStates = buildClientKeyShareProbeStates(clientHello, testConfig, inboundConnection);
             if(!keyShareStates.isEmpty()) {
                 for(State state: keyShareStates) {
                     StateExecutionTask task = new StateExecutionTask(state, 2);
-                    Connection connection = state.getConfig().getDefaultServerConnection();
                     try {
                         TestCOMultiClientDelegate delegate =  (TestCOMultiClientDelegate)testConfig.getTestClientDelegate();
                         state.getTlsContext().setTransportHandler(new ServerTcpTransportHandler(testConfig.getConnectionTimeout(), testConfig.getConnectionTimeout(), delegate.getServerSocket(state.getConfig())));
                     } catch (IOException ex) {
                         if(disableConsoleLog){
-                            removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
+                            removeFilterFromLogger(noInfoAndWarningsFilter);
                         }
                         throw new RuntimeException("Failed to set TransportHandler");
                     }
@@ -237,7 +236,7 @@ public class TestSiteReportFactory {
             } catch (Exception e) {
                 LOGGER.error(e);
                 if(disableConsoleLog){
-                    removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
+                    removeFilterFromLogger(noInfoAndWarningsFilter);
                 }
                 throw new RuntimeException(e);
             }
@@ -246,7 +245,7 @@ public class TestSiteReportFactory {
         LOGGER.info(String.format("%d/%d client preparation workflows failed.", failed, states.size()));
         if (failed == states.size()) {
             if(disableConsoleLog){
-                removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
+                removeFilterFromLogger(noInfoAndWarningsFilter);
             }
             throw new RuntimeException("Client preparation could not be completed.");
         }
@@ -303,7 +302,7 @@ public class TestSiteReportFactory {
         executor.shutdown();
 
         if(disableConsoleLog){
-            removeFilterFromLogger(ConsoleLogger.CONSOLE, noInfoAndWarningsFilter);
+            removeFilterFromLogger(noInfoAndWarningsFilter);
         }
 
         return report;
@@ -448,12 +447,11 @@ public class TestSiteReportFactory {
 
         config.addLoggerFilter(coreLogger, filter);
     }
-    private static void removeFilterFromLogger(Logger logger, Filter filter){
-        org.apache.logging.log4j.core.Logger coreLogger = (org.apache.logging.log4j.core.Logger) logger;
+    private static void removeFilterFromLogger(Filter filter){
         final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         final Configuration config = ctx.getConfiguration();
 
-        config.getLoggerConfig(logger.getName()).removeFilter(filter);
+        config.getLoggerConfig(ConsoleLogger.CONSOLE.getName()).removeFilter(filter);
     }
 
 }

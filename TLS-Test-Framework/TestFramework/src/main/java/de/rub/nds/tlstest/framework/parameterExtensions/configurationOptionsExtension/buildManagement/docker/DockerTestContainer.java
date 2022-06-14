@@ -14,7 +14,6 @@ import com.github.dockerjava.api.DockerClient;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -67,7 +66,7 @@ public abstract class DockerTestContainer extends DockerContainer{
      * Send an http request to the manager running within the docker container. (e.g. 'shutdown')
      *
      * @param request - the request to send.
-     * @returns the manager servers response as a string.
+     * @return the manager servers response as a string.
      */
     public String sendHttpRequestToManager(String request){
         if(this.getContainerState() != DockerContainerState.RUNNING){
@@ -100,7 +99,7 @@ public abstract class DockerTestContainer extends DockerContainer{
                 int responseCode = http.getResponseCode();
 
                 if(responseCode != 200){
-                    LOGGER.warn(String.format("Docker container at '%s' cannot be triggered. Response Code: %i. Try new attempt.", url.toString(), responseCode));
+                    LOGGER.warn(String.format("Docker container at '%s' cannot be triggered. Response Code: %d. Try new attempt.", url, responseCode));
                     connected = false;
                 }
                 else{
@@ -119,7 +118,7 @@ public abstract class DockerTestContainer extends DockerContainer{
                 http.disconnect();
             }
             catch(Exception e){
-                LOGGER.warn(String.format("Client docker container at '%s' cannot be triggered.", url.toString()));
+                LOGGER.warn(String.format("Client docker container at '%s' cannot be triggered.", url));
                 connected = false;
             }
             if(!connected){
@@ -129,7 +128,7 @@ public abstract class DockerTestContainer extends DockerContainer{
                 }
                 try{
                     Thread.sleep(ATTEMPT_DELAY);
-                    LOGGER.warn(String.format("Retry..."));
+                    LOGGER.warn("Retry...");
                 }
                 catch(Exception e){
                     e.printStackTrace();
@@ -144,7 +143,7 @@ public abstract class DockerTestContainer extends DockerContainer{
     /**
      * Checks if an application currently registered the usage of this container using startUsage()
      *
-     * @returns true iff the container is in use
+     * @return true iff the container is in use
      */
     public boolean isInUse(){
         return (inUseCount > 0);
@@ -170,7 +169,7 @@ public abstract class DockerTestContainer extends DockerContainer{
     /**
      * Gets the TestSiteReport for this container. The site report is generated here if it is not created yet.
      *
-     * @returns the containers TestSiteReport
+     * @return the containers TestSiteReport
      */
     public TestSiteReport getSiteReport(){
         if(siteReport == null){
@@ -193,7 +192,7 @@ public abstract class DockerTestContainer extends DockerContainer{
                 }
                 else{
                     throw new RuntimeException("Can't create SiteReport in invalid container state.");
-                };
+                }
             }
             catch(TimeoutException e){
                 endUsage();
@@ -209,7 +208,7 @@ public abstract class DockerTestContainer extends DockerContainer{
      * Abstract method to create a site report. Note that while this method is called the usage is already registered, and
      * the container is already running.
      *
-     * @returns the created TestSiteReport
+     * @return the created TestSiteReport
      */
     protected abstract TestSiteReport createSiteReport();
 }

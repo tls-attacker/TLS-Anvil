@@ -1,4 +1,4 @@
-/**
+/*
  *  TLS-Test-Framework - A framework for modeling TLS tests
  *
  *  Copyright 2020 Ruhr University Bochum and
@@ -12,17 +12,13 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
-import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 
 import java.util.*;
-import java.util.concurrent.Callable;
 
 public abstract class ConfigurationOptionDerivationParameter extends DerivationParameter<ConfigurationOptionValue> {
     public ConfigurationOptionDerivationParameter(ConfigOptionDerivationType type) {

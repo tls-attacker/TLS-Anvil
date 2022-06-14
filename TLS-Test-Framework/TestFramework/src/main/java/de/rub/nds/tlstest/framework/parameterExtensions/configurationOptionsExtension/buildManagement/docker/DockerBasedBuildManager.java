@@ -18,7 +18,6 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
@@ -61,7 +60,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     /**
      * Callable to create/get site reports.
      */
-    public class SiteReportCallback implements Callable<TestSiteReport> {
+    public static class SiteReportCallback implements Callable<TestSiteReport> {
         DockerTestContainer container;
         private SiteReportCallback(DockerTestContainer container){
             this.container = container;
@@ -107,7 +106,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * @param config the specified Config
      * @param context the test context
      * @param optionSet the set of configurationOptionDerivationParameters that contain selected values.
-     * @returns the site report of the built for the passed option set
+     * @return the site report of the built for the passed option set
      */
     @Override
     public synchronized Callable<TestSiteReport> configureOptionSetAndReturnGetSiteReportCallable(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet) {
@@ -142,7 +141,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * docker tag by one.
      *
      * @param optionSet - the options set to use
-     * @returns the dockerTag for the created implementation. The tag can be used to find the created container and the TestSiteReport.
+     * @return the dockerTag for the created implementation. The tag can be used to find the created container and the TestSiteReport.
      */
     protected synchronized String provideDockerContainer(Set<ConfigurationOptionDerivationParameter> optionSet){
         List<String> cliOptions = createConfigOptionCliList(optionSet);
@@ -200,7 +199,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     /**
      * Return the option set that leads to a build supporting the most features.
      *
-     * @returns the option set
+     * @return the option set
      */
     protected Set<ConfigurationOptionDerivationParameter> getMaxFeatureOptionSet(){
         List<ConfigOptionDerivationType> derivationTypes = ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes();
@@ -230,8 +229,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
             maximalFeatureContainerDockerTag = provideDockerContainer(optionSet);
         }
         DockerTestContainer container = dockerTagToContainerInfo.get(maximalFeatureContainerDockerTag);
-        TestSiteReport report = container.getSiteReport();
-        return report;
+        return container.getSiteReport();
     }
 
     /**
@@ -278,17 +276,14 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     /**
      * Get a new free port within the port range defined in the configOptionsConfig file. Ports already used by other
      * processes are skipped.
-     * @return
+     * @return the occupied port
      */
     protected synchronized Integer occupyNextPort(){
         PortRange portRange = configOptionsConfig.getDockerPortRange();
         Integer port;
         boolean portFound = false;
         for(port =  portRange.getMinPort(); port <= portRange.getMaxPort(); port++){
-            if(usedPorts.contains(port)){
-                continue;
-            }
-            else{
+            if(!usedPorts.contains(port)){
                 if(DockerBasedBuildManager.isPortAvailable(port)){
                     portFound = true;
                     break;
@@ -304,10 +299,11 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     }
 
     /**
-     * Free a port that was occupied by occupyNextPort() so it can be occupied again.
+     * Free a port that was occupied by occupyNextPort() so it can be occupied again. Currently unused.
      *
      * @param port - The port to free.
      */
+    @SuppressWarnings("unused")
     protected void freeOccupiedPort(Integer port){
         usedPorts.remove(port);
     }
@@ -316,7 +312,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * Checks if a port is still available on the system. (Stackoverflow code)
      *
      * @param port - the port to check
-     * @returns true iff the port is still available
+     * @return true iff the port is still available
      */
     protected static boolean isPortAvailable(int port) {
 
@@ -328,7 +324,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
             ds = new DatagramSocket(port);
             ds.setReuseAddress(true);
             return true;
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         } finally {
             if (ds != null) {
                 ds.close();

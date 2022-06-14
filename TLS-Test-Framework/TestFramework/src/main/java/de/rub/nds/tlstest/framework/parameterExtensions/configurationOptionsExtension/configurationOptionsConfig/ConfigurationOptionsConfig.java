@@ -45,9 +45,8 @@ public class ConfigurationOptionsConfig {
     private String tlsLibraryName;
     private String tlsVersionName;
     private ConfigurationOptionsBuildManager buildManager;
-    private Map<ConfigOptionDerivationType, ConfigOptionValueTranslation> optionsToTranslation;
+    private final Map<ConfigOptionDerivationType, ConfigOptionValueTranslation> optionsToTranslation;
 
-    private boolean siteReportConsoleLogDisabled;
     private boolean withCoverage;
     private int maxRunningContainers; // default 16
     /** Defines how many containers should be shutdown simultaneously. When measuring coverage the coverage data
@@ -153,15 +152,15 @@ public class ConfigurationOptionsConfig {
     }
 
     private void parseAndConfigureTLSLibraryName(Element rootElement){
-        tlsLibraryName = XmlParseUtils.findElement(rootElement, "tlsLibraryName", true).getTextContent();
+        tlsLibraryName = Objects.requireNonNull(XmlParseUtils.findElement(rootElement, "tlsLibraryName", true)).getTextContent();
     }
 
     private void parseAndConfigureTLSVersionName(Element rootElement){
-        tlsVersionName = XmlParseUtils.findElement(rootElement, "tlsVersionName", true).getTextContent();
+        tlsVersionName = Objects.requireNonNull(XmlParseUtils.findElement(rootElement, "tlsVersionName", true)).getTextContent();
     }
 
     private void parseAndConfigureBuildManager(Element rootElement){
-        buildManager = getBuildManagerFromString(XmlParseUtils.findElement(rootElement, "buildManager", true).getTextContent());
+        buildManager = getBuildManagerFromString(Objects.requireNonNull(XmlParseUtils.findElement(rootElement, "buildManager", true)).getTextContent());
     }
 
     private void parseAndConfigureWithCoverage(Element rootElement){
@@ -205,9 +204,9 @@ public class ConfigurationOptionsConfig {
         NodeList dockerConfigList = rootElement.getElementsByTagName("dockerConfig");
         if(dockerConfigList.getLength() > 0){
             Element dockerConfigElement = (Element) dockerConfigList.item(0);
-            dockerLibraryPath = Paths.get(XmlParseUtils.findElement(dockerConfigElement, "dockerLibraryPath", true).getTextContent());
-            dockerHostName = XmlParseUtils.findElement(dockerConfigElement, "dockerHostName", true).getTextContent();
-            dockerPortRange = PortRange.fromString(XmlParseUtils.findElement(dockerConfigElement, "portRange", true).getTextContent());
+            dockerLibraryPath = Paths.get(Objects.requireNonNull(XmlParseUtils.findElement(dockerConfigElement, "dockerLibraryPath", true)).getTextContent());
+            dockerHostName = Objects.requireNonNull(XmlParseUtils.findElement(dockerConfigElement, "dockerHostName", true)).getTextContent();
+            dockerPortRange = PortRange.fromString(Objects.requireNonNull(XmlParseUtils.findElement(dockerConfigElement, "portRange", true)).getTextContent());
             // Docker client dest is required for client tests
             Element dockerClientDestElement =  XmlParseUtils.findElement(dockerConfigElement, "dockerClientDestinationHost", (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT));
             if(dockerClientDestElement != null){
@@ -223,6 +222,7 @@ public class ConfigurationOptionsConfig {
     private void parseAndConfigureOptionsToTest(Element rootElement){
         // Parse options-translation list
         Element optionsToTest = XmlParseUtils.findElement(rootElement, "optionsToTest", true);
+        assert optionsToTest != null;
         NodeList list = optionsToTest.getElementsByTagName("optionEntry");
 
         for (int optionEntryIdx = 0; optionEntryIdx < list.getLength(); optionEntryIdx++) {
@@ -242,10 +242,10 @@ public class ConfigurationOptionsConfig {
                 }
 
                 // Parse derivation type
-                ConfigOptionDerivationType derivationType = derivationTypeFromString(XmlParseUtils.findElement(optionEntry, "derivationType", true).getTextContent());
+                ConfigOptionDerivationType derivationType = derivationTypeFromString(Objects.requireNonNull(XmlParseUtils.findElement(optionEntry, "derivationType", true)).getTextContent());
 
                 // Parse value translation
-                ConfigOptionValueTranslation translation = getTranslationFromElement(XmlParseUtils.findElement(optionEntry, "valueTranslation", true));
+                ConfigOptionValueTranslation translation = getTranslationFromElement(Objects.requireNonNull(XmlParseUtils.findElement(optionEntry, "valueTranslation", true)));
                 optionsToTranslation.put(derivationType, translation);
             }
         }
@@ -253,15 +253,13 @@ public class ConfigurationOptionsConfig {
 
     private ConfigurationOptionsBuildManager getBuildManagerFromString(String str)
     {
-        switch(str){
-            case "OpenSSLBuildManager":
-                if(!dockerConfigPresent){
-                    throw new RuntimeException("dockerConfig field is required for using the OpenSSLBuildManager");
-                }
-                return new OpenSSLBuildManager(this);
-            default:
-                throw new UnsupportedOperationException(String.format("There is no ConfigurationOptionsBuildManager of name '%s' known to this parser.", str));
+        if ("OpenSSLBuildManager".equals(str)) {
+            if (!dockerConfigPresent) {
+                throw new RuntimeException("dockerConfig field is required for using the OpenSSLBuildManager");
+            }
+            return new OpenSSLBuildManager(this);
         }
+        throw new UnsupportedOperationException(String.format("There is no ConfigurationOptionsBuildManager of name '%s' known to this parser.", str));
     }
 
     private ConfigOptionDerivationType derivationTypeFromString(String str) throws IllegalArgumentException
@@ -273,12 +271,10 @@ public class ConfigurationOptionsConfig {
         }
 
         ConfigOptionDerivationType res;
-        switch(splittedStr[0]) {
-            case "ConfigOptionDerivationType":
-                res = ConfigOptionDerivationType.valueOf(splittedStr[1]);
-                break;
-            default:
-                throw new IllegalArgumentException("Unsupported derivation type \'"+splittedStr[0]+"\'");
+        if ("ConfigOptionDerivationType".equals(splittedStr[0])) {
+            res = ConfigOptionDerivationType.valueOf(splittedStr[1]);
+        } else {
+            throw new IllegalArgumentException("Unsupported derivation type '" + splittedStr[0] + "'");
         }
 
         return res;
@@ -293,7 +289,7 @@ public class ConfigurationOptionsConfig {
             case "SingleValueOption":
                 return new SingleValueOptionTranslation(translationElement);
             default:
-                throw new IllegalArgumentException("Unsupported translation type \'"+type+"\'");
+                throw new IllegalArgumentException("Unsupported translation type '"+type+"'");
         }
     }
 

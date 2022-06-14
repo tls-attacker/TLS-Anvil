@@ -11,13 +11,11 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter;
 
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 
 import java.util.*;
@@ -31,7 +29,7 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
         DevRandom,
         EntropyGeneratingDaemon, // <- build failure in OpenSSL without edg (also it seems, it does not work in docker containers)
         CpuCommand,
-        None; // <- cannot be used in environment. Therefore unused.
+        None // <- cannot be used in environment. Therefore unused.
     }
 
     public SeedingMethodDerivation(){
@@ -65,11 +63,7 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
     @Override
     public List<ConditionalConstraint> getStaticConditionalConstraints() {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-
-        //List<DerivationType> activatedCODerivations = ConfigurationOptionsDerivationManager.getInstance().getDerivationsOfModel(scope, scope.getBaseModel());
-        //if(activatedCODerivations.contains(ConfigOptionDerivationType.EnableEntropyGatheringDaemon)){
         condConstraints.add(getEntropyGeneratingDaemonEnabledConstraint());
-        //}
         return condConstraints;
     }
 
@@ -83,12 +77,8 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
                 ConfigurationOptionValue selectedSeedingMethod = seedingMethodDerivation.getSelectedValue();
                 ConfigurationOptionValue selectedEgdFlag = enableEgdDerivation.getSelectedValue();
 
-                if(selectedSeedingMethod.getOptionValues().get(0).equals(SeedingMethodType.EntropyGeneratingDaemon.name()) &&
-                        !selectedEgdFlag.isOptionSet())
-                {
-                    return false;
-                }
-                return true;
+                return !selectedSeedingMethod.getOptionValues().get(0).equals(SeedingMethodType.EntropyGeneratingDaemon.name()) ||
+                        selectedEgdFlag.isOptionSet();
             }));
     }
 

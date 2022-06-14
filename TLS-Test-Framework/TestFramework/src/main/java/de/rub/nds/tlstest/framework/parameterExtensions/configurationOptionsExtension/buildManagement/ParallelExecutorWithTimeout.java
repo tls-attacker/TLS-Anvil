@@ -14,8 +14,6 @@ import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlsattacker.core.workflow.task.ITask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,9 +26,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class ParallelExecutorWithTimeout extends ParallelExecutor {
-	private static final Logger LOGGER = LogManager.getLogger();
 
-	private long timeoutAfter;
+	private final long timeoutAfter;
 
 	public ParallelExecutorWithTimeout(int size, int reexecutions, long timeoutSec) {
 		super(size, reexecutions);
@@ -45,8 +42,7 @@ public class ParallelExecutorWithTimeout extends ParallelExecutor {
 		try {
 			Method addStateTaskMethod = ParallelExecutor.class.getDeclaredMethod("addStateTask", State.class);
 			addStateTaskMethod.setAccessible(true);
-			Future<ITask> returnValue = (Future<ITask>) addStateTaskMethod.invoke(this, state);
-			return returnValue;
+			return (Future<ITask>) addStateTaskMethod.invoke(this, state);
 		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();
 			throw new UnsupportedOperationException("addStateTask of ParallelExecutor does not exist (anymore?).");
@@ -61,8 +57,7 @@ public class ParallelExecutorWithTimeout extends ParallelExecutor {
 		try {
 			Method addTaskMethod = ParallelExecutor.class.getDeclaredMethod("addTask", TlsTask.class);
 			addTaskMethod.setAccessible(true);
-			Future<ITask> returnValue = (Future<ITask>) addTaskMethod.invoke(this, task);
-			return returnValue;
+			return (Future<ITask>) addTaskMethod.invoke(this, task);
 		} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
 			e.printStackTrace();
 			throw new UnsupportedOperationException("addTask of ParallelExecutor does not exist (anymore?).");
@@ -77,7 +72,7 @@ public class ParallelExecutorWithTimeout extends ParallelExecutor {
 		}
 		for (Future<ITask> future : futureList) {
 			try {
-				ITask res = future.get(timeoutAfter, TimeUnit.SECONDS);
+				future.get(timeoutAfter, TimeUnit.SECONDS);
 			}
 			catch( TimeoutException ex){
 				throw new RuntimeException(String.format("Failed to execute task! Timed out after %d sec.", timeoutAfter), ex);
@@ -91,7 +86,7 @@ public class ParallelExecutorWithTimeout extends ParallelExecutor {
 	@Override
 	public List<ITask> bulkExecuteTasks(Iterable<TlsTask> taskList) {
 		List<Future<ITask>> futureList = new LinkedList<>();
-		List<ITask> resultList = new ArrayList<>(futureList.size());
+		List<ITask> resultList = new ArrayList<>(0);
 		for (TlsTask tlStask : taskList) {
 			futureList.add(addTask(tlStask));
 		}

@@ -10,23 +10,16 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector;
 
-import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.model.Frame;
-import com.github.dockerjava.core.async.ResultCallbackTemplate;
-import com.github.dockerjava.core.command.LogContainerResultCallback;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -34,7 +27,7 @@ import java.util.List;
  */
 public class DockerContainerLogFile extends LogFile{
 
-    private DockerContainer dockerContainer;
+    private final DockerContainer dockerContainer;
     private boolean loggingIsActive;
 
     public DockerContainerLogFile(Path folderDirectoryPath, String fileName, DockerContainer dockerContainer){
@@ -45,7 +38,7 @@ public class DockerContainerLogFile extends LogFile{
     }
 
     /**
-     * Somehow the logging must be enabled after every container start.
+     * Somehow the logging must be enabled after every container start. (Currently a docker bug (or so it seems))
      */
     public void notifyContainerStart(){
         //startLogging();
@@ -86,33 +79,9 @@ public class DockerContainerLogFile extends LogFile{
                 "==================================\n",
                 String.join("\n", infoFields) );
 
-
-
         log(header);
+        startLogging();
 
-        /*try {
-            dockerClient.logContainerCmd(containerInfo.getContainerId()).withStdOut(true).
-                    withStdErr(true).withFollowStream(true).exec(new LogContainerResultCallback() {
-                @Override
-                public void onNext(Frame item) {
-                    log(new String(item.getPayload()));
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-
-        //ResultCallback<Frame> rc = getNewResultsCallback();
-
-        //try {
-        //dockerContainer.getDockerClient().logContainerCmd(dockerContainer.getContainerId()).withStdOut(true).
-        //        withStdErr(true).withFollowStream(true).withTimestamps(true).exec(rc);
-        //} catch (Exception e) {
-        //    e.printStackTrace();
-        //}
-        if(dockerContainer.getContainerState() == DockerContainerState.RUNNING){
-            startLogging();
-        }
     }
 
     private void startLogging(){
@@ -149,7 +118,7 @@ public class DockerContainerLogFile extends LogFile{
             }
 
             @Override
-            public void close() throws IOException {
+            public void close() {
 
             }
         };

@@ -21,7 +21,6 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 import de.rub.nds.tlstest.framework.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,21 +36,19 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private String FACTORY_REPRO_NAME;
-    private String TEMP_CONTAINER_NAME;
-    private String TEMP_REPRO_NAME;
+    private final String FACTORY_REPRO_NAME;
+    private final String TEMP_CONTAINER_NAME;
+    private final String TEMP_REPRO_NAME;
 
 
     // Required by the docker library
-    private Volume targetVolumeCcache = new Volume("/src/ccache/");
-    private Volume targetVolumeCoverage = new Volume("/covVolume/");
-    private Volume targetVolumeCert = new Volume("/cert/");
+    private final Volume targetVolumeCcache = new Volume("/src/ccache/");
+    private final Volume targetVolumeCoverage = new Volume("/covVolume/");
+    private final Volume targetVolumeCert = new Volume("/cert/");
 
-    private final String volumeNameCcache = "ccache";
     private final String volumeNameCoverage = "coverage";
-    private final String volumeNameCert = "cert-data";
 
-    private boolean withCoverage;
+    private final boolean withCoverage;
     private final String COVERAGE_DIRECTORY_NAME;
 
     private final String CCACHE_VOLUME_NAME = "ccache-cache";
@@ -81,7 +78,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
         super.init();
 
         // Create a ccache volume if it does not exist so far
-        if(!dockerClient.listVolumesCmd().exec().getVolumes().stream().anyMatch(response -> response.getName().equals(CCACHE_VOLUME_NAME))){
+        if(dockerClient.listVolumesCmd().exec().getVolumes().stream().noneMatch(response -> response.getName().equals(CCACHE_VOLUME_NAME))){
             // If a volume with the specified name exists:
             dockerClient.createVolumeCmd().withName(CCACHE_VOLUME_NAME).exec();
         }
@@ -104,14 +101,14 @@ public class OpenSSLDockerFactory extends DockerFactory {
         if(!Files.exists(pathToMinDockerfile)){
             throw new RuntimeException(
                     String.format("Dockerfile '%s' does not exist. Have you configured the right Docker Library path? " +
-                            "Or are you using an old DockerLibrary Version?", pathToMinDockerfile.toString()));
+                            "Or are you using an old DockerLibrary Version?", pathToMinDockerfile));
         }
 
 
         if(!Files.exists(pathToFactoryDockerfile)){
             throw new RuntimeException(
                     String.format("Dockerfile '%s' does not exist. Have you configured the right Docker Library path? " +
-                            "Or are you using an old DockerLibrary Version?", pathToFactoryDockerfile.toString()));
+                            "Or are you using an old DockerLibrary Version?", pathToFactoryDockerfile));
         }
 
 
@@ -156,6 +153,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
         }
 
         // Create a temporary container to build OpenSSL using ccache
+        String volumeNameCcache = "ccache";
         CreateContainerResponse tempContainer = dockerClient.createContainerCmd(factoryImageTag)
                 .withName(TEMP_CONTAINER_NAME)
                 .withHostConfig(HostConfig.newHostConfig().withBinds(new Bind(volumeNameCcache, targetVolumeCcache)))
@@ -183,7 +181,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
         InspectContainerResponse containerResp = dockerClient.inspectContainerCmd(factoryContainer.getContainerId()).exec();
 
-        if(containerResp.getState().getExitCodeLong() > 0) {
+        if(containerResp.getState().getExitCodeLong() == null || containerResp.getState().getExitCodeLong() > 0) {
             LOGGER.error("Cannot build OpenSSL docker image. (tag: '{}', configured with: '{}')", dockerTag, cliOptions);
             if(logFile != null){
                 LOGGER.error("See docker build log ({}) for more information.", logFile.getLogFile().getAbsolutePath());
@@ -205,7 +203,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
         String finalImageTag = getBuildImageNameAndTag(dockerTag);
         dockerClient.buildImageCmd()
                 .withDockerfile(dockerfileMinPath.toFile())
-                .withTags(new HashSet<>(Arrays.asList(finalImageTag)))
+                .withTags(new HashSet<>(Collections.singletonList(finalImageTag)))
                 .withBuildArg("TEMP_REPRO", buildArg).exec(new BuildImageResultCallback()).awaitImageId();
 
         LOGGER.debug("Final Image built");
@@ -221,15 +219,15 @@ public class OpenSSLDockerFactory extends DockerFactory {
                                                         String dockerHost,
                                                         Integer dockerManagerPort, Integer dockerTlsPort)
     {
-        final Integer CONTAINER_PORT_TLS_SERVER = 4433;
-        final Integer CONTAINER_MANAGER_PORT = 8090;
+        final int CONTAINER_PORT_TLS_SERVER = 4433;
+        final int CONTAINER_MANAGER_PORT = 8090;
         List<String> entrypoint;
         if(withCoverage){
             final String coverageOutDir = String.format("%s/%s", COVERAGE_DIRECTORY_NAME, dockerTag);
             entrypoint = Arrays.asList("/usr/opensslEntrypoint.sh", "-d", coverageOutDir, "server");
         }
         else{
-            entrypoint = Arrays.asList("server-entrypoint", "openssl", "s_server","-accept", CONTAINER_PORT_TLS_SERVER.toString(), "-key", "/cert/ec256key.pem", "-cert", "/cert/ec256cert.pem", "-comp");
+            entrypoint = Arrays.asList("server-entrypoint", "openssl", "s_server","-accept", Integer.toString(CONTAINER_PORT_TLS_SERVER), "-key", "/cert/ec256key.pem", "-cert", "/cert/ec256cert.pem", "-comp");
         }
         List<PortBinding> portBindings = new LinkedList<>();
         List<Bind> volumeBindings = new LinkedList<>();
@@ -240,6 +238,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
         ExposedPort exposedManagerPort = ExposedPort.tcp(CONTAINER_MANAGER_PORT);
         portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(dockerHost, dockerManagerPort), exposedManagerPort));
 
+        String volumeNameCert = "cert-data";
         volumeBindings.add(new Bind(volumeNameCert, targetVolumeCert, AccessMode.ro, SELContext.DEFAULT, true));
         if(withCoverage){
             volumeBindings.add(new Bind(volumeNameCoverage, targetVolumeCoverage));
@@ -247,9 +246,8 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
         String containerName = String.format("%s_server_%s", CONTAINER_NAME_PREFIX, dockerTag);
         String dockerContainerId = createDockerContainer(getBuildImageNameAndTag(dockerTag), entrypoint, portBindings, volumeBindings, containerName);
-        DockerServerTestContainer containerInfo = new DockerServerTestContainer(dockerClient, dockerTag, dockerContainerId, dockerHost, dockerManagerPort, dockerTlsPort);
 
-        return containerInfo;
+        return new DockerServerTestContainer(dockerClient, dockerTag, dockerContainerId, dockerHost, dockerManagerPort, dockerTlsPort);
     }
 
     public DockerClientTestContainer createDockerClient(String dockerTag,
@@ -258,7 +256,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
                                                         String tlsServerHost,
                                                         Integer tlsServerPort)
     {
-        final Integer CONTAINER_PORT_MANAGER = 8090;
+        final int CONTAINER_PORT_MANAGER = 8090;
 
         String connectionDest = String.format("%s:%d", tlsServerHost, tlsServerPort);
         List<String> entrypoint;
@@ -283,10 +281,8 @@ public class OpenSSLDockerFactory extends DockerFactory {
         String containerName = String.format("%s_client_%s", CONTAINER_NAME_PREFIX, dockerTag);
         String dockerContainerId = createDockerContainer(getBuildImageNameAndTag(dockerTag), entrypoint, portBindings, volumeBindings, containerName);
 
-        DockerClientTestContainer containerInfo = new DockerClientTestContainer(dockerClient, dockerTag, dockerContainerId,
+        return new DockerClientTestContainer(dockerClient, dockerTag, dockerContainerId,
                 dockerManagerHost, dockerManagerPort, configOptionsConfig.getDockerClientDestinationHostName(), tlsServerPort);
-
-        return containerInfo;
     }
 
 
@@ -296,7 +292,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
         LOGGER.debug("Build factory image.");
         dockerClient.buildImageCmd()
                 .withDockerfile(dockerfileFactoryPath.toFile())
-                .withTags(new HashSet<>(Arrays.asList(factoryImageTag)))
+                .withTags(new HashSet<>(Collections.singletonList(factoryImageTag)))
                 .withBuildArg("OPENSSL_BRANCH", openSSLBranchName).exec(new BuildImageResultCallback()).awaitImageId();
 
         return factoryImageTag;

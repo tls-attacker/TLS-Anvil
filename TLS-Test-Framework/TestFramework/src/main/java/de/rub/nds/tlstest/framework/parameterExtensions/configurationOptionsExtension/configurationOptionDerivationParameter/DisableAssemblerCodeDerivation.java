@@ -11,7 +11,6 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter;
 
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;

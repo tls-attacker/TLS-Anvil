@@ -11,7 +11,6 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
 
 import com.github.dockerjava.api.DockerClient;
-import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.connection.InboundConnection;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
@@ -22,8 +21,8 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
  */
 public class DockerClientTestContainer extends DockerTestContainer {
 
-    private String inboundConnectionHost;
-    private Integer inboundConnectionPort;
+    private final String inboundConnectionHost;
+    private final Integer inboundConnectionPort;
 
     /**
      * Constructor for the docker client test container.
@@ -52,8 +51,7 @@ public class DockerClientTestContainer extends DockerTestContainer {
     @Override
     protected synchronized TestSiteReport createSiteReport(){
         InboundConnection inboundConnection = new InboundConnection(inboundConnectionPort, inboundConnectionHost);
-        TestSiteReport report = TestSiteReportFactory.createClientSiteReport(TestContext.getInstance().getConfig(), inboundConnection, false);
-        return report;
+        return TestSiteReportFactory.createClientSiteReport(TestContext.getInstance().getConfig(), inboundConnection, false);
     }
 
 }

@@ -30,13 +30,12 @@ public class XmlParseUtils {
             }
         }
         else if(elementList.getLength() > 1){
-            throw new RuntimeException(String.format("Multiple children '%s' in '%s' found.", tagName));
+            throw new RuntimeException(String.format("Multiple children in '%s' found.", tagName));
         }
         if (elementList.item(0).getNodeType() != Node.ELEMENT_NODE) {
             throw new RuntimeException(String.format("Config entry of tag '%s' is no element node.", tagName));
         }
-        Element element = (Element) elementList.item(0);
 
-        return element;
+        return (Element) elementList.item(0);
     }
 }

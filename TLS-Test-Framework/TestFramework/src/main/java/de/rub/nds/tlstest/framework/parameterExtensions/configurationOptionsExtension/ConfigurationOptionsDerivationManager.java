@@ -1,4 +1,4 @@
-/**
+/*
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
  * Copyright 2020 Ruhr University Bochum and
@@ -132,14 +132,12 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         if(config == null){
             throw new IllegalStateException("No ConfigurationOptionsConfig was set so far. Register it before calling this method.");
         }
-        return new LinkedList<>(Arrays.asList(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter));
-        //return new LinkedList<>(config.getEnabledConfigOptionDerivations());
+        return new LinkedList<>(Collections.singletonList(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter));
     }
 
     @Override
     public List<DerivationType> getAllDerivations() {
-        return new LinkedList<>(Arrays.asList(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter));
-        //return new LinkedList<>(config.getEnabledConfigOptionDerivations());
+        return new LinkedList<>(Collections.singletonList(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter));
     }
 
     public List<ConfigOptionDerivationType> getAllActivatedCOTypes() {
@@ -165,7 +163,7 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         }
         return config.getBuildManager();
     }
-    public class LoggerReporter implements Reporter{
+    public static class LoggerReporter implements Reporter{
         @Override
         public void report(ReportLevel level, Report report) {
             LOGGER.warn("Generation Reporter ({}): {}", level.toString(), report);
@@ -183,7 +181,7 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
 
         // -- Create the IPM of coffee4j
         InputParameterModel.Builder builder = InputParameterModel.inputParameterModel("configuration-options-model");
-        builder = builder.strength(strength);
+        builder.strength(strength);
         for(ConfigOptionDerivationType coType : config.getEnabledConfigOptionDerivations()){
             ConfigurationOptionDerivationParameter coDerivationParameter = (ConfigurationOptionDerivationParameter)getDerivationParameterInstance(coType);
             List<DerivationParameter> derivationParameterValues = coDerivationParameter.getAllParameterValues(TestContext.getInstance());
@@ -192,13 +190,16 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
             for(int idx = 0; idx < derivationParameterValues.size(); idx++){
                 values.add(new Value(idx, derivationParameterValues.get(idx)));
             }
-            builder = builder.parameter(new Parameter(coType.name(), values));
+            builder.parameter(new Parameter(coType.name(), values));
             // - Add constraints
             List<ConditionalConstraint> constraints = coDerivationParameter.getStaticConditionalConstraints();
             for(ConditionalConstraint condConstraint : constraints){
-                boolean allRequiredParametersAvailable = condConstraint.getRequiredDerivations().stream().allMatch(reqDerivation -> config.getEnabledConfigOptionDerivations().contains(reqDerivation));
+                boolean allRequiredParametersAvailable = condConstraint.getRequiredDerivations().stream().allMatch(
+                        reqDerivation -> (reqDerivation instanceof ConfigOptionDerivationType) && config.getEnabledConfigOptionDerivations().contains((ConfigOptionDerivationType)reqDerivation));
+
+
                 if(allRequiredParametersAvailable){
-                    builder = builder.exclusionConstraint(condConstraint.getConstraint());
+                    builder.exclusionConstraint(condConstraint.getConstraint());
                 }
             }
         }

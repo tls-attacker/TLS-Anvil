@@ -23,13 +23,13 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class TestCOMultiClientDelegate extends TestClientDelegate {
-    private Map<Integer,ClientConnectionInfo> inboundPortToClientConnectionInfo;
+    private final Map<Integer,ClientConnectionInfo> inboundPortToClientConnectionInfo;
 
     private Integer defaultInboundPort;
 
-    private class ClientConnectionInfo {
+    private static class ClientConnectionInfo {
         DockerClientTestContainer clientContainer;
-        private ServerSocket serverSocket;
+        private final ServerSocket serverSocket;
 
 
         public ClientConnectionInfo(DockerClientTestContainer clientContainer) {

@@ -1,4 +1,4 @@
-/**
+/*
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
  * Copyright 2020 Ruhr University Bochum and
@@ -50,7 +50,7 @@ public class ConfigurationOptionsExtension implements ParameterExtension {
         String configPathString = (String) initData;
         Path configPath = Paths.get(configPathString);
         if(Files.notExists(configPath)){
-            throw new IllegalArgumentException(String.format("Illegal path was passed. No file at '%s' can be found.", configPath.toAbsolutePath().toString()));
+            throw new IllegalArgumentException(String.format("Illegal path was passed. No file at '%s' can be found.", configPath.toAbsolutePath()));
         }
         try {
             config = new ConfigurationOptionsConfig(configPath);

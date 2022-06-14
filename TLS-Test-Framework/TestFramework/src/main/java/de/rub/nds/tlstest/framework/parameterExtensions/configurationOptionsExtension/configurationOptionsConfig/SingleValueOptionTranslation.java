@@ -16,6 +16,7 @@ import org.w3c.dom.NodeList;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Translation for an option with a single value, e.g. 'fruit=apple'. In this example 'fruit' is the identifier and 'apple'
@@ -23,7 +24,7 @@ import java.util.Map;
  */
 public class SingleValueOptionTranslation extends ConfigOptionValueTranslation{
     private String identifier;
-    private Map<String, String> valueTranslationMap;
+    private final Map<String, String> valueTranslationMap;
 
     public SingleValueOptionTranslation(Element xmlElement)
     {
@@ -37,7 +38,7 @@ public class SingleValueOptionTranslation extends ConfigOptionValueTranslation{
 
     public String getValueTranslation(String key){
         if(!valueTranslationMap.containsKey(key)){
-            throw new IllegalArgumentException(String.format("Cannot get translation for key '%s'. It was not configured in the config file."));
+            throw new IllegalArgumentException("Cannot get translation for key '%s'. It was not configured in the config file.");
         }
         return valueTranslationMap.get(key);
     }
@@ -46,7 +47,7 @@ public class SingleValueOptionTranslation extends ConfigOptionValueTranslation{
     protected void setFromXmlElement(Element xmlElement) {
         try{
 
-            this.identifier = XmlParseUtils.findElement(xmlElement, "identifier", true).getTextContent();
+            this.identifier = Objects.requireNonNull(XmlParseUtils.findElement(xmlElement, "identifier", true)).getTextContent();
             NodeList valueElementList = xmlElement.getElementsByTagName("value");
 
             for (int optionEntryIdx = 0; optionEntryIdx < valueElementList.getLength(); optionEntryIdx++) {
@@ -65,7 +66,7 @@ public class SingleValueOptionTranslation extends ConfigOptionValueTranslation{
 
     private void addValueTranslationByElement(Element valueElement){
         String key = valueElement.getAttribute("key");
-        if(key == ""){
+        if(key.equals("")){
             throw new IllegalArgumentException(String.format("In OptionWithSingleValue translation with identifier '%s': <value> element does not contain required attribute 'key'.",
                     identifier));
         }

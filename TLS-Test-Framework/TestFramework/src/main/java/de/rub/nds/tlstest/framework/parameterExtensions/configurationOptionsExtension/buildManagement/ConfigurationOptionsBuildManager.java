@@ -37,7 +37,7 @@ public abstract class ConfigurationOptionsBuildManager {
      * @param config - the specified Config
      * @param context - the test context
      * @param optionSet - the set of configurationOptionDerivationParameters that contain selected values.
-     * @returns the TestSiteReport of the provided library build.
+     * @return the TestSiteReport of the provided library build.
      */
     public abstract Callable<TestSiteReport> configureOptionSetAndReturnGetSiteReportCallable(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet);
 
@@ -45,7 +45,7 @@ public abstract class ConfigurationOptionsBuildManager {
      * Get the SiteReport for the tls library built that has the most possible available features using the
      * enabled configuration options.
      *
-     * @returns the TestSiteReport of the maximal build
+     * @return the TestSiteReport of the maximal build
      */
     public abstract TestSiteReport getMaximalFeatureSiteReport();
 
@@ -72,7 +72,7 @@ public abstract class ConfigurationOptionsBuildManager {
      *
      * @param optionParameter - the configuration option to translate (including its set value)
      * @param optionsToTranslationMap - the translation map of the configuration options config
-     * @returns the translated string
+     * @return the translated string
      */
     protected abstract String translateOptionValue(ConfigurationOptionDerivationParameter optionParameter, Map<ConfigOptionDerivationType, ConfigOptionValueTranslation> optionsToTranslationMap);
 }

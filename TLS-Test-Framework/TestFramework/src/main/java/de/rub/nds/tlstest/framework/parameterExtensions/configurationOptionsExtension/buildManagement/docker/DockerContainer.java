@@ -18,7 +18,7 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -81,7 +81,7 @@ public class DockerContainer {
      * Requests the dockerClient for the real state the container is in. Updates the cached state
      * accordingly.
      *
-     * @returns the real state the container is currently in.
+     * @return the real state the container is currently in.
      */
     public DockerContainerState updateContainerState() {
         InspectContainerResponse containerResp = dockerClient.inspectContainerCmd(this.getContainerId()).exec();
@@ -89,11 +89,11 @@ public class DockerContainer {
         if(containerState == DockerContainerState.INVALID){
             return DockerContainerState.INVALID;
         }
-        if(state.getRunning()){
+        if(state.getRunning() != null && state.getRunning()){
             this.containerState = DockerContainerState.RUNNING;
             return DockerContainerState.RUNNING;
         }
-        else if(state.getPaused()){
+        else if(state.getPaused() != null && state.getPaused()){
             this.containerState = DockerContainerState.PAUSED;
             return DockerContainerState.PAUSED;
         }
@@ -128,8 +128,6 @@ public class DockerContainer {
     /**
      * Starts a stopped container and waits for the container to reach the real state RUNNING. A TimeoutException
      * is thrown if the container does not reach this state in 30 sec.
-     *
-     * @throws TimeoutException
      */
     public synchronized void startAndWait() throws TimeoutException {
         final int WAIT_AFTER_STARTED = 1000;
@@ -195,8 +193,6 @@ public class DockerContainer {
     /**
      * Unpauses a paused container and waits for the container to reach the real state RUNNING. A TimeoutException
      * is thrown if the container does not reach this state in 30 sec.
-     *
-     * @throws TimeoutException
      */
     public synchronized void unpauseAndWait() throws TimeoutException {
         unpause();
@@ -220,7 +216,6 @@ public class DockerContainer {
      *
      * @param state - the state to wait for
      * @param timeoutMs - the maximal waiting time in ms.
-     * @throws TimeoutException
      */
     public synchronized void waitForState(DockerContainerState state, int timeoutMs) throws TimeoutException {
         final long CHECK_INTERVAL = 200; // 0.2 sec
@@ -232,7 +227,7 @@ public class DockerContainer {
             }
             else{
                 try{
-                    Thread.sleep(CHECK_INTERVAL);
+                    TimeUnit.MILLISECONDS.sleep(CHECK_INTERVAL);
                 }
                 catch (InterruptedException e) {
                     e.printStackTrace();

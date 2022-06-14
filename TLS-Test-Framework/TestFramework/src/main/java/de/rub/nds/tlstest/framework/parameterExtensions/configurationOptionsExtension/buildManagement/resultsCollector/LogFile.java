@@ -29,6 +29,8 @@ import java.nio.file.Path;
  * log4j2 is used for logging.
  */
 public class LogFile {
+    private static final Logger LOGGER = LogManager.getLogger();
+
     protected Logger logger;
     protected File logFile;
 
@@ -74,7 +76,11 @@ public class LogFile {
         Path path = folderDirectoryPath.resolve(fileName);
         logFile = path.toFile();
         if(logFile.exists()){
-            logFile.delete();
+            boolean success = logFile.delete();
+            if(!success){
+                LOGGER.error("Cannot overwrite existing log file '{}'.", logFile);
+                throw new RuntimeException("Cannot overwrite existing log file.");
+            }
         }
         generateLogger(path.toAbsolutePath().toString(), logPattern);
 

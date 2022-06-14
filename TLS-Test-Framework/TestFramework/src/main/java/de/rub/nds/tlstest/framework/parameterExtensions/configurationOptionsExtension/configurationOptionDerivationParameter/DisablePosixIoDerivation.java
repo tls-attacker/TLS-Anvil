@@ -30,7 +30,7 @@ public class DisablePosixIoDerivation extends ConfigurationOptionDerivationParam
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new DisablePosixIoDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new DisablePosixIoDerivation(new ConfigurationOptionValue(true)));

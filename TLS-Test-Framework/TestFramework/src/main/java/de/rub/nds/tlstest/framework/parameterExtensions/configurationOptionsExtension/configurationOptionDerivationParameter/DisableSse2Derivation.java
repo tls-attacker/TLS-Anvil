@@ -30,7 +30,7 @@ public class DisableSse2Derivation extends ConfigurationOptionDerivationParamete
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new DisableSse2Derivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new DisableSse2Derivation(new ConfigurationOptionValue(true)));

@@ -36,9 +36,6 @@ public class DerivationContainer {
     private final List<DerivationParameter> derivations;
     private DerivationScope underlyingScope;
 
-    // Data that can be accessed and manipulated during the configureDependencies function
-    private Map<String, Object> sharedData;
-
     // The site report that must be used for the respective derivations. By default the global site report is taken.
     //private TestSiteReport associatedSiteReport;
     /** Used to get the site report that must be used for the respective derivations. By default the global site report is taken.
@@ -47,7 +44,6 @@ public class DerivationContainer {
 
     public DerivationContainer(List<Object> objects) {
         derivations = new LinkedList<>();
-        sharedData = new HashMap<>();
         getAssociatedSiteReportCallable = (Callable) () -> TestContext.getInstance().getSiteReport();
         for (Object derivation : objects) {
             if (derivation instanceof DerivationParameter) {
@@ -147,11 +143,6 @@ public class DerivationContainer {
             }
         }
     }
-
-    public Map<String, Object> getSharedData(){
-        return sharedData;
-    }
-
 
     public void configureGetAssociatedSiteReportCallable(Callable<TestSiteReport> getSiteReportCallable){
         this.getAssociatedSiteReportCallable = getSiteReportCallable;

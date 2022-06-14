@@ -25,6 +25,8 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
  * 5) If required: Add constraints regarding your new option to the required tests in your testsuite.
  */
 public enum ConfigOptionDerivationType implements DerivationType {
+    ConfigurationOptionCompoundParameter,
+
     // 1st Priority
     SeedingMethod,
     EnableNistEcOptimizations,

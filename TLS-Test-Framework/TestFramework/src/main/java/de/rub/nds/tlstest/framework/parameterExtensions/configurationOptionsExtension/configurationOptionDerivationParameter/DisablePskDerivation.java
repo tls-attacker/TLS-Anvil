@@ -30,7 +30,7 @@ public class DisablePskDerivation extends ConfigurationOptionDerivationParameter
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new DisablePskDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new DisablePskDerivation(new ConfigurationOptionValue(true)));

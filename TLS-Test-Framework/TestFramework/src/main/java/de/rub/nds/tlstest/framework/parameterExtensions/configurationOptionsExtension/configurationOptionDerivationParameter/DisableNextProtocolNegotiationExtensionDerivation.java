@@ -30,7 +30,7 @@ public class DisableNextProtocolNegotiationExtensionDerivation extends Configura
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new DisableNextProtocolNegotiationExtensionDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new DisableNextProtocolNegotiationExtensionDerivation(new ConfigurationOptionValue(true)));

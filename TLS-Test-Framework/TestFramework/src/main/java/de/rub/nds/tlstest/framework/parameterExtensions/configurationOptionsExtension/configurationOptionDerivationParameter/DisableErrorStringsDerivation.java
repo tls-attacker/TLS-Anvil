@@ -30,7 +30,7 @@ public class DisableErrorStringsDerivation extends ConfigurationOptionDerivation
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new DisableErrorStringsDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new DisableErrorStringsDerivation(new ConfigurationOptionValue(true)));

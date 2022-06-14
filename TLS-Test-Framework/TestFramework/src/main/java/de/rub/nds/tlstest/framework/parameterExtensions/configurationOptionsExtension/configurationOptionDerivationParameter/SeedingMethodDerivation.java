@@ -44,7 +44,7 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<SeedingMethodType> seedingMethodsToAdd = new LinkedList<>(Arrays.asList(
                 SeedingMethodType.OsEntropySource, SeedingMethodType.GetRandom,
@@ -52,7 +52,7 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
 
         //List<DerivationType> activatedCODerivations = ConfigurationOptionsDerivationManager.getInstance().getDerivationsOfModel(scope, scope.getBaseModel());
         //if(activatedCODerivations.contains(ConfigOptionDerivationType.EnableEntropyGatheringDaemon)){
-        //    seedingMethodsToAdd.add(SeedingMethodType.EntropyGeneratingDaemon);
+        //seedingMethodsToAdd.add(SeedingMethodType.EntropyGeneratingDaemon);
         //}
 
         for(SeedingMethodType seedingMethodType : seedingMethodsToAdd){
@@ -63,12 +63,12 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
     }
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
+    public List<ConditionalConstraint> getStaticConditionalConstraints() {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         //List<DerivationType> activatedCODerivations = ConfigurationOptionsDerivationManager.getInstance().getDerivationsOfModel(scope, scope.getBaseModel());
         //if(activatedCODerivations.contains(ConfigOptionDerivationType.EnableEntropyGatheringDaemon)){
-            //condConstraints.add(getEntropyGeneratingDaemonEnabledConstraint());
+        condConstraints.add(getEntropyGeneratingDaemonEnabledConstraint());
         //}
         return condConstraints;
     }
@@ -83,7 +83,7 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
                 ConfigurationOptionValue selectedSeedingMethod = seedingMethodDerivation.getSelectedValue();
                 ConfigurationOptionValue selectedEgdFlag = enableEgdDerivation.getSelectedValue();
 
-                if(selectedSeedingMethod.getOptionValues().get(0) == ConfigOptionDerivationType.EnableEntropyGatheringDaemon.name() &&
+                if(selectedSeedingMethod.getOptionValues().get(0).equals(SeedingMethodType.EntropyGeneratingDaemon.name()) &&
                         !selectedEgdFlag.isOptionSet())
                 {
                     return false;
@@ -94,6 +94,11 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
 
     @Override
     public ConfigurationOptionValue getMaxFeatureValue() {
+        return new ConfigurationOptionValue(SeedingMethodType.OsEntropySource.name());
+    }
+
+    @Override
+    public ConfigurationOptionValue getDefaultValue() {
         return new ConfigurationOptionValue(SeedingMethodType.OsEntropySource.name());
     }
 }

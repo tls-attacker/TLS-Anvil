@@ -203,7 +203,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * @returns the option set
      */
     protected Set<ConfigurationOptionDerivationParameter> getMaxFeatureOptionSet(){
-        List<DerivationType> derivationTypes = ConfigurationOptionsDerivationManager.getInstance().getDerivationsOfModel(ModelType.GENERIC);
+        List<ConfigOptionDerivationType> derivationTypes = ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes();
         Set<ConfigurationOptionDerivationParameter> optionSet = new HashSet<>();
         for (DerivationType type : derivationTypes) {
             ConfigurationOptionDerivationParameter configOptionDerivation
@@ -397,8 +397,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     }
 
     private InboundConnection createInboundConnectionForContainer(DockerClientTestContainer clientContainerInfo){
-        InboundConnection inboundConnection = new InboundConnection(clientContainerInfo.getInboundConnectionPort(), configOptionsConfig.getDockerClientDestinationHostName());
-        return inboundConnection;
+        return new InboundConnection(clientContainerInfo.getInboundConnectionPort(), configOptionsConfig.getDockerClientDestinationHostName());
     }
 
     /**
@@ -439,10 +438,6 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     }
 
     /**
-     * Shutdown a set of  The amount of containers shutdown
-     * simultaneously is defined in the config options config
-     */
-    /**
      * Shutdown a set of docker containers. The amount of containers shutdown
      * simultaneously is defined in the config options config
      *
@@ -454,6 +449,9 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
         for (String entry : dockerTagsToShutdown) {
             DockerTestContainer containerInfo = dockerTagToContainerInfo.get(entry);
             if (containerInfo == null) {
+                continue;
+            }
+            if (containerInfo.getContainerState() == DockerContainerState.INVALID){
                 continue;
             }
             runContainer(containerInfo);
@@ -470,6 +468,9 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
         for (String entry : dockerTagsToShutdown) {
             DockerTestContainer containerInfo = dockerTagToContainerInfo.get(entry);
             if(containerInfo == null){
+                continue;
+            }
+            if (containerInfo.getContainerState() == DockerContainerState.INVALID){
                 continue;
             }
             runContainer(containerInfo);
@@ -489,7 +490,11 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
                 continue;
             }
 
+
             DockerTestContainer containerInfo = dockerTagToContainerInfo.get(entry);
+            if (containerInfo.getContainerState() == DockerContainerState.INVALID){
+                continue;
+            }
             // Wait for container to finish
             try{
                 containerInfo.waitForState(DockerContainerState.NOT_RUNNING, 600000); // 10 min
@@ -510,12 +515,11 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * Computes the dockerTag that is assigned to a specific optionSet (which also depends on the library version)
      *
      * @param optionSet - the option set to create the docker tag for
-     * @returns the resulting docker tag
+     * @return the resulting docker tag
      */
     protected String getDockerTagFromOptionSet(Set<ConfigurationOptionDerivationParameter> optionSet){
         List<String> cliOptions = createConfigOptionCliList(optionSet);
-        String dockerTag = dockerFactory.computeDockerTag(cliOptions, configOptionsConfig.getTlsVersionName());
-        return dockerTag;
+        return dockerFactory.computeDockerTag(cliOptions, configOptionsConfig.getTlsVersionName());
     }
 
     /**
@@ -526,7 +530,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * It is assumed that options are defined in any order in a single command line command. (Must be overridden by subclasses otherwise).
      *
      * @param optionSet - the set of configuration options.
-     * @return
+     * @return the sorted list of command line options
      */
     protected List<String> createConfigOptionCliList(Set<ConfigurationOptionDerivationParameter> optionSet){
         Map<ConfigOptionDerivationType, ConfigOptionValueTranslation> optionsToTranslationMap = configOptionsConfig.getOptionsToTranslationMap();

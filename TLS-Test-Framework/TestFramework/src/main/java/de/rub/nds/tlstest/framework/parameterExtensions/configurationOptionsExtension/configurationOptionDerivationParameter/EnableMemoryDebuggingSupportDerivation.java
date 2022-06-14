@@ -30,7 +30,7 @@ public class EnableMemoryDebuggingSupportDerivation extends ConfigurationOptionD
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new EnableMemoryDebuggingSupportDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new EnableMemoryDebuggingSupportDerivation(new ConfigurationOptionValue(true)));

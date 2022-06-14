@@ -9,15 +9,32 @@
  */
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.*;
+import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.*;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
+
+import de.rwth.swc.coffee4j.engine.constraint.HardConstraintCheckerFactory;
+import de.rwth.swc.coffee4j.engine.generator.TestInputGroup;
+import de.rwth.swc.coffee4j.engine.generator.ipog.Ipog;
+import de.rwth.swc.coffee4j.engine.report.Report;
+import de.rwth.swc.coffee4j.engine.report.ReportLevel;
+import de.rwth.swc.coffee4j.model.Combination;
+import de.rwth.swc.coffee4j.model.InputParameterModel;
+import de.rwth.swc.coffee4j.engine.report.Reporter;
+
+import de.rwth.swc.coffee4j.model.Parameter;
+import de.rwth.swc.coffee4j.model.Value;
+import de.rwth.swc.coffee4j.model.converter.IndexBasedModelConverter;
+import de.rwth.swc.coffee4j.model.converter.ModelConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * The DerivationCategoryManager responsible for the ConfigOptionsDerivationType. It also contains the configured
@@ -27,6 +44,7 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
     private static ConfigurationOptionsDerivationManager instance = null;
     private static final Logger LOGGER = LogManager.getLogger();
     private ConfigurationOptionsConfig config;
+    private List<List<ConfigurationOptionDerivationParameter>> compoundSetupList;
 
     public static synchronized ConfigurationOptionsDerivationManager getInstance() {
         if (ConfigurationOptionsDerivationManager.instance == null) {
@@ -37,6 +55,7 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
 
     private ConfigurationOptionsDerivationManager(){
         config = null;
+        compoundSetupList = null;
     }
 
     @Override
@@ -46,6 +65,11 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         }
         ConfigOptionDerivationType basicType = (ConfigOptionDerivationType) type;
         switch(basicType) {
+            case ConfigurationOptionCompoundParameter:
+                if(compoundSetupList == null){
+                    throw new IllegalStateException("Cannot get ConfigurationOptionCompoundParameter before ConfigurationOptionsConfig was initialized.");
+                }
+                return new ConfigurationOptionCompoundParameter(compoundSetupList);
             case DisablePsk:
                 return new DisablePskDerivation();
             case SeedingMethod:
@@ -108,11 +132,17 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         if(config == null){
             throw new IllegalStateException("No ConfigurationOptionsConfig was set so far. Register it before calling this method.");
         }
-        return new LinkedList<>(config.getEnabledConfigOptionDerivations());
+        return new LinkedList<>(Arrays.asList(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter));
+        //return new LinkedList<>(config.getEnabledConfigOptionDerivations());
     }
 
     @Override
     public List<DerivationType> getAllDerivations() {
+        return new LinkedList<>(Arrays.asList(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter));
+        //return new LinkedList<>(config.getEnabledConfigOptionDerivations());
+    }
+
+    public List<ConfigOptionDerivationType> getAllActivatedCOTypes() {
         return new LinkedList<>(config.getEnabledConfigOptionDerivations());
     }
 
@@ -120,8 +150,9 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         return getDerivationsOfModel(null, baseModel);
     }
 
-    public void setConfigOptionsConfig(ConfigurationOptionsConfig optionsConfig){
+    public void initializeConfigOptionsConfig(ConfigurationOptionsConfig optionsConfig){
         config = optionsConfig;
+        initCompoundParameterSetup();
     }
 
     public ConfigurationOptionsConfig getConfigurationOptionsConfig(){
@@ -134,6 +165,83 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         }
         return config.getBuildManager();
     }
+    public class LoggerReporter implements Reporter{
+        @Override
+        public void report(ReportLevel level, Report report) {
+            LOGGER.warn("Generation Reporter ({}): {}", level.toString(), report);
+        }
+
+        @Override
+        public void report(ReportLevel level, Supplier<Report> reportSupplier) {
+            LOGGER.warn("Generation Reporter ({}): {}", level.toString(), reportSupplier.get());
+        }
+    }
+
+    private void initCompoundParameterSetup(){
+        compoundSetupList = new LinkedList<>();
+        int strength = TestContext.getInstance().getConfig().getStrength();
+
+        // -- Create the IPM of coffee4j
+        InputParameterModel.Builder builder = InputParameterModel.inputParameterModel("configuration-options-model");
+        builder = builder.strength(strength);
+        for(ConfigOptionDerivationType coType : config.getEnabledConfigOptionDerivations()){
+            ConfigurationOptionDerivationParameter coDerivationParameter = (ConfigurationOptionDerivationParameter)getDerivationParameterInstance(coType);
+            List<DerivationParameter> derivationParameterValues = coDerivationParameter.getAllParameterValues(TestContext.getInstance());
+            // - Add values
+            List<Value> values = new LinkedList<>();
+            for(int idx = 0; idx < derivationParameterValues.size(); idx++){
+                values.add(new Value(idx, derivationParameterValues.get(idx)));
+            }
+            builder = builder.parameter(new Parameter(coType.name(), values));
+            // - Add constraints
+            List<ConditionalConstraint> constraints = coDerivationParameter.getStaticConditionalConstraints();
+            for(ConditionalConstraint condConstraint : constraints){
+                boolean allRequiredParametersAvailable = condConstraint.getRequiredDerivations().stream().allMatch(reqDerivation -> config.getEnabledConfigOptionDerivations().contains(reqDerivation));
+                if(allRequiredParametersAvailable){
+                    builder = builder.exclusionConstraint(condConstraint.getConstraint());
+                }
+            }
+        }
+        InputParameterModel ipm = builder.build();
+        // -- Convert the IPM to a model the IPOG algorithm can use.
+        final ModelConverter converter = new IndexBasedModelConverter(ipm);
+        // -- Create the combinations for combinatorial testing in the converted model.
+        Ipog ipog = new Ipog(new HardConstraintCheckerFactory());
+        Set<Supplier<TestInputGroup>> suppliers = ipog.generate(converter.getConvertedModel(), new LoggerReporter());
+
+        TestInputGroup testInputGroup = null;
+        for(Supplier<TestInputGroup> s : suppliers){
+            TestInputGroup group = s.get();
+            if(group.getIdentifier() == "Positive IpogAlgorithm Tests"){
+                testInputGroup = group;
+                break;
+            }
+        }
+        if(testInputGroup == null){
+            throw new RuntimeException("Configuration option combination could not be created.");
+        }
+
+        // -- Convert the computed combinations back to the model of the IPM and collect the derivation parameter combinations
+        for(int[] testInput : testInputGroup.getTestInputs()){
+            Combination convertedCombination = converter.convertCombination(testInput);
+            List<ConfigurationOptionDerivationParameter> parameterCombinationList = new LinkedList<>();
+            for (Value value : convertedCombination.getParameterValueMap().values()){
+                if(!(value.get() instanceof ConfigurationOptionDerivationParameter)){
+                    throw new RuntimeException("Value is no configuration option derivation parameter. This should never happen...");
+                }
+                ConfigurationOptionDerivationParameter codParameter = (ConfigurationOptionDerivationParameter)value.get();
+                parameterCombinationList.add(codParameter);
+            }
+            // Sort after type for consistent order (not necessary)
+            parameterCombinationList.sort(Comparator.comparing(e -> e.getType().toString()));
+            compoundSetupList.add(Collections.unmodifiableList(parameterCombinationList));
+        }
+
+        compoundSetupList = Collections.unmodifiableList(compoundSetupList);
+
+        LOGGER.debug("Testing configuration options with default combinations:\n{}", compoundSetupList);
+    }
+
 }
 
 

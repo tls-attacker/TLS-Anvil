@@ -30,7 +30,7 @@ public class DisableMultiblockDerivation extends ConfigurationOptionDerivationPa
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new DisableMultiblockDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new DisableMultiblockDerivation(new ConfigurationOptionValue(true)));

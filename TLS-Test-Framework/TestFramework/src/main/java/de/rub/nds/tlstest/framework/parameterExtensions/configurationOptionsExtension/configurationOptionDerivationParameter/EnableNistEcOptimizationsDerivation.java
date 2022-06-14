@@ -30,7 +30,7 @@ public class EnableNistEcOptimizationsDerivation extends ConfigurationOptionDeri
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new EnableNistEcOptimizationsDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new EnableNistEcOptimizationsDerivation(new ConfigurationOptionValue(true)));

@@ -184,7 +184,7 @@ public abstract class DockerFactory {
      * @param libraryNameAndVersion - The library's version (e.g. '1.1.1e')
      * @returns the resulting docker tag
      */
-    public static String computeDockerTag(List<String> cliOptions, String libraryNameAndVersion){
+    public String computeDockerTag(List<String> cliOptions, String libraryNameAndVersion){
         String cliString = String.join("", cliOptions);
         String libraryVersionPart = libraryNameAndVersion.substring(0,Math.min(20, libraryNameAndVersion.length()));
         String cliStringHashString;

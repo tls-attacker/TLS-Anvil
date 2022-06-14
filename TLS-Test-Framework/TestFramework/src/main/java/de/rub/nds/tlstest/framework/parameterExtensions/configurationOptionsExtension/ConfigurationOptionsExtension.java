@@ -12,7 +12,6 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.model.*;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,9 +20,6 @@ import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * This parameter extension is used to add ConfigOptionsDerivationType DerivationParameter%s to the IPM. The DerivationParameters
@@ -65,7 +61,7 @@ public class ConfigurationOptionsExtension implements ParameterExtension {
         }
         LOGGER.info("Testing with configuration options: {}", config.getEnabledConfigOptionDerivations());
 
-        ConfigurationOptionsDerivationManager.getInstance().setConfigOptionsConfig(config);
+        ConfigurationOptionsDerivationManager.getInstance().initializeConfigOptionsConfig(config);
         config.getBuildManager().init();
         DerivationManager.getInstance().registerCategoryManager(ConfigOptionDerivationType.class, ConfigurationOptionsDerivationManager.getInstance());
 
@@ -77,7 +73,6 @@ public class ConfigurationOptionsExtension implements ParameterExtension {
     public void unload() {
         config.getBuildManager().onShutdown();
         DerivationManager.getInstance().unregisterCategoryManager(ConfigOptionDerivationType.class);
-        ConfigurationOptionsDerivationManager.getInstance().setConfigOptionsConfig(null);
         config = null;
     }
 

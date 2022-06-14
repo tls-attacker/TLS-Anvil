@@ -30,7 +30,7 @@ public class DisablePadlockEngineDerivation extends ConfigurationOptionDerivatio
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new DisablePadlockEngineDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new DisablePadlockEngineDerivation(new ConfigurationOptionValue(true)));

@@ -30,7 +30,7 @@ public class EnableWeakSslCiphersDerivation extends ConfigurationOptionDerivatio
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new EnableWeakSslCiphersDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new EnableWeakSslCiphersDerivation(new ConfigurationOptionValue(true)));

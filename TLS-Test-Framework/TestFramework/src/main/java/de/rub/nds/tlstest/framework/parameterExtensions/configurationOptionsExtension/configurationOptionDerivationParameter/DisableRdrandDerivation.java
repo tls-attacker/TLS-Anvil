@@ -30,7 +30,7 @@ public class DisableRdrandDerivation extends ConfigurationOptionDerivationParame
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new DisableRdrandDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new DisableRdrandDerivation(new ConfigurationOptionValue(true)));

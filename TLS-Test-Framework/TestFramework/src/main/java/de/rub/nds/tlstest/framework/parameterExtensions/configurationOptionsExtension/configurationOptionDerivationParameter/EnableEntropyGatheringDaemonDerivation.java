@@ -30,7 +30,7 @@ public class EnableEntropyGatheringDaemonDerivation extends ConfigurationOptionD
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new EnableEntropyGatheringDaemonDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new EnableEntropyGatheringDaemonDerivation(new ConfigurationOptionValue(true)));

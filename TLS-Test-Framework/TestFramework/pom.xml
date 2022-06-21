@@ -164,7 +164,7 @@
                     </includes>
                     <properties>
                         <year>${project.inceptionYear}</year>
-                        <owner>Ruhr University Bochum, TÜV Informationstechnik GmbH</owner>
+                        <owner>Ruhr University Bochum</owner>
                     </properties>
                 </configuration>
             </plugin>

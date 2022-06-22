@@ -28,17 +28,17 @@ services:
       - app
 
   app:
-    image: reportanalyzer
-    restart: always
-    environment: 
-      PRODUCTION: '1'
+    image: ghcr.io/tls-attacker/tlsanvil-reportanalyzer:latest
     build: 
       context: .
       args:
         REST_API_BASE_URL: http://localhost:5000/api/v1
+    restart: always
+    environment: 
+      PRODUCTION: '1'
     ports:
       - 5000:5000
     networks:
       - app
-      
+
 

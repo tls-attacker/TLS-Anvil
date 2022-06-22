@@ -181,10 +181,10 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
 
     private void initCompoundParameterSetup(){
         compoundSetupList = new LinkedList<>();
-        int strength = TestContext.getInstance().getConfig().getStrength();
+        int strength = config.getConfigOptionsIpmStrength();
 
         // -- Create the IPM of coffee4j
-        InputParameterModel.Builder builder = InputParameterModel.inputParameterModel("configuration-options-model");
+        InputParameterModel.Builder builder = InputParameterModel.inputParameterModel("configuration-options-ipm");
         builder.strength(strength);
         for(ConfigOptionDerivationType coType : config.getEnabledConfigOptionDerivations()){
             ConfigurationOptionDerivationParameter coDerivationParameter = (ConfigurationOptionDerivationParameter)getDerivationParameterInstance(coType);

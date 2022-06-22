@@ -19,7 +19,7 @@
     <tlsVersionName>OpenSSL_1_1_1</tlsVersionName>
     <!-- The ConfigurationOptionsBuildManager that is responsible for providing the build. -->
     <buildManager>OpenSSLBuildManager</buildManager>
-    <!-- Come config for working with docker  -->
+    <!-- Config for working with docker  -->
     <dockerConfig>
         <!-- The path to the docker library  -->
         <dockerLibraryPath>/path/to/TLS-Docker-Library</dockerLibraryPath>
@@ -41,6 +41,9 @@
          is to high it may happen that some containers are not shutdown properly and the coverage data is not correctly collected.
          Default: 8 for enabled coverage, maxRunningContainers/2 otherwise -->
     <maxRunningContainers>6</maxRunningContainers>
+    <!-- Optional: Strength of the input parameter model computing the configuration option parameter combinations.
+         Default is the strength of the main IPM configured using the Testsuite's CLI parameter '-strength' -->
+    <configOptionsIpmStrength>2</configOptionsIpmStrength>
 
     <optionsToTest>
 

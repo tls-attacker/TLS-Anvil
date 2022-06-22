@@ -14,6 +14,7 @@ import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.openSSL.OpenSSLBuildManager;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -46,6 +47,8 @@ public class ConfigurationOptionsConfig {
     private String tlsVersionName;
     private ConfigurationOptionsBuildManager buildManager;
     private final Map<ConfigOptionDerivationType, ConfigOptionValueTranslation> optionsToTranslation;
+
+    private int configOptionsIpmStrength; // default: strength of main IPM
 
     private boolean withCoverage;
     private int maxRunningContainers; // default 16
@@ -87,6 +90,8 @@ public class ConfigurationOptionsConfig {
     public boolean isWithCoverage() {
         return withCoverage;
     }
+
+    public int getConfigOptionsIpmStrength() { return configOptionsIpmStrength; }
 
     public boolean isDockerConfigPresent() {
         return dockerConfigPresent;
@@ -137,8 +142,12 @@ public class ConfigurationOptionsConfig {
 
             parseAndConfigureTLSLibraryName(rootElement);
             parseAndConfigureTLSVersionName(rootElement);
+            parseAndConfigureConfigOptionsIpmStrength(rootElement);
+
+
             parseAndConfigureDockerConfig(rootElement);
             parseAndConfigureWithCoverage(rootElement);
+
             parseAndConfigureMaxRunningContainers(rootElement);
             parseAndConfigureMaxRunningContainerShutdowns(rootElement);
             parseAndConfigureOptionsToTest(rootElement);
@@ -170,6 +179,16 @@ public class ConfigurationOptionsConfig {
         }
         else{
             withCoverage = false;
+        }
+    }
+
+    private void parseAndConfigureConfigOptionsIpmStrength(Element rootElement){
+        Element configOptionsIpmStrengthElement =  XmlParseUtils.findElement(rootElement, "configOptionsIpmStrength", false);
+        if(configOptionsIpmStrengthElement != null){
+            configOptionsIpmStrength = Integer.parseInt(configOptionsIpmStrengthElement.getTextContent());
+        }
+        else{
+            configOptionsIpmStrength = TestContext.getInstance().getConfig().getStrength(); // default
         }
     }
 

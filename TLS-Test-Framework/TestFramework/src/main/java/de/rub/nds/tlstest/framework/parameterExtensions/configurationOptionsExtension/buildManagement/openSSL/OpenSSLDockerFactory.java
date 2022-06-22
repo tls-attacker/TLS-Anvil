@@ -166,7 +166,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
         // Start the created container
         factoryContainer.start();
-        DockerContainerLogFile logFile = factoryContainer.enableContainerLogging(resultsCollector, "BuildLog");
+        DockerContainerLogFile logFile = factoryContainer.enableContainerLogging(resultsCollector, "BuildLog", dockerTag);
 
 
         LOGGER.debug("Factory Container started.");

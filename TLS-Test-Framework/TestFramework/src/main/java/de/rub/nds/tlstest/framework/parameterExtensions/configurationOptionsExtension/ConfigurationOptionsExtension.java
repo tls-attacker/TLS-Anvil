@@ -61,8 +61,11 @@ public class ConfigurationOptionsExtension implements ParameterExtension {
         }
         LOGGER.info("Testing with configuration options: {}", config.getEnabledConfigOptionDerivations());
 
+
         ConfigurationOptionsDerivationManager.getInstance().initializeConfigOptionsConfig(config);
         config.getBuildManager().init();
+        ConfigurationOptionsDerivationManager.getInstance().preBuildAndValidateAndFilterSetups();
+
         DerivationManager.getInstance().registerCategoryManager(ConfigOptionDerivationType.class, ConfigurationOptionsDerivationManager.getInstance());
 
         TestSiteReport maxSiteReport = config.getBuildManager().getMaximalFeatureSiteReport();

@@ -10,13 +10,18 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter;
 
+import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
+import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class EnableWeakSslCiphersDerivation extends ConfigurationOptionDerivationParameter {
     public EnableWeakSslCiphersDerivation(){
@@ -39,6 +44,6 @@ public class EnableWeakSslCiphersDerivation extends ConfigurationOptionDerivatio
 
     @Override
     public ConfigurationOptionValue getMaxFeatureValue() {
-        return new ConfigurationOptionValue(true);
+        return new ConfigurationOptionValue(false);
     }
 }

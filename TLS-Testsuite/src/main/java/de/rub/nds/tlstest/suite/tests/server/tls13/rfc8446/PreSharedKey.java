@@ -42,7 +42,10 @@ import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundParameter;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePskDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Arrays;
 import static org.junit.Assert.assertTrue;
@@ -66,6 +69,18 @@ public class PreSharedKey extends Tls13Test {
         WorkflowConfigurationFactory dummyFactory = new WorkflowConfigurationFactory(c);
         WorkflowTrace dummyTrace = dummyFactory.createWorkflowTrace(WorkflowTraceType.SHORT_HELLO, RunningModeType.CLIENT);
         return dummyTrace.getFirstSendMessage(ClientHelloMessage.class).getExtensions().size();
+    }
+
+    private boolean cipherSuitesDisabledByConfigOptionsDerivation(DerivationContainer derivationContainer){
+        ConfigurationOptionCompoundParameter coCompoundParam = derivationContainer.getDerivation(ConfigurationOptionCompoundParameter.class);
+        if(coCompoundParam != null){
+            DisablePskDerivation disablePskDerivation = coCompoundParam.getDerivation(DisablePskDerivation.class);
+            if(disablePskDerivation != null && disablePskDerivation.getSelectedValue().isOptionSet()){
+                // Psk ciphersuites are manually disabled using the disablePsk configuration option.
+                return true;
+            }
+        }
+        return false;
     }
 
     /*@TlsTest(description = "The \"pre_shared_key\" extension MUST be the last extension "
@@ -150,7 +165,6 @@ public class PreSharedKey extends Tls13Test {
     @TlsTest(description = "Prior to accepting PSK key establishment, the server MUST validate"
             + "the corresponding binder value")
     @ScopeExtensions("BasicDerivationType.PRF_BITMASK")
-    @ScopeLimitations("ConfigOptionDerivationType.DisablePsk")
     @MethodCondition(method = "supportsPsk")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -159,6 +173,9 @@ public class PreSharedKey extends Tls13Test {
     @AlertCategory(SeverityLevel.LOW)
     public void invalidBinder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
+        if(cipherSuitesDisabledByConfigOptionsDerivation(derivationContainer)){
+            return;
+        }
         setupPskConfig(c);
         c.setLimitPsksToOne(true);
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
@@ -178,7 +195,6 @@ public class PreSharedKey extends Tls13Test {
     @TlsTest(description = "Prior to accepting PSK key establishment, the server MUST validate"
             + "the corresponding binder value")
     @MethodCondition(method = "supportsPsk")
-    @ScopeLimitations("ConfigOptionDerivationType.DisablePsk")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -186,6 +202,9 @@ public class PreSharedKey extends Tls13Test {
     @AlertCategory(SeverityLevel.LOW)
     public void noBinder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
+        if(cipherSuitesDisabledByConfigOptionsDerivation(derivationContainer)){
+            return;
+        }
         setupPskConfig(c);
         c.setLimitPsksToOne(true);
 
@@ -207,12 +226,14 @@ public class PreSharedKey extends Tls13Test {
     @TlsTest(description = "Clients MUST verify that the server’s selected_identity is within the "
             + "range supplied by the client")
     @MethodCondition(method = "supportsPsk")
-    @ScopeLimitations("ConfigOptionDerivationType.DisablePsk")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
     public void selectedPSKIndexIsWithinOfferedListSize(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
+        if(cipherSuitesDisabledByConfigOptionsDerivation(derivationContainer)){
+            return;
+        }
         setupPskConfig(config);
 
         WorkflowTrace workflowTrace;

@@ -9,7 +9,9 @@
  */
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.model.*;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
@@ -34,6 +36,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 
 /**
@@ -163,6 +166,7 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         }
         return config.getBuildManager();
     }
+
     public static class LoggerReporter implements Reporter{
         @Override
         public void report(ReportLevel level, Report report) {
@@ -241,6 +245,50 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         compoundSetupList = Collections.unmodifiableList(compoundSetupList);
 
         LOGGER.debug("Testing configuration options with default combinations:\n{}", compoundSetupList);
+    }
+
+    public void preBuildAndValidateAndFilterSetups(){
+        // List<List<ConfigurationOptionDerivationParameter>> compoundSetupList;
+        LOGGER.info("== Precompute config options builds ==");
+        int buildFailedSetupCount = 0;
+
+        List<List<ConfigurationOptionDerivationParameter>> successfulSetups = new LinkedList<>();
+
+        for(List<ConfigurationOptionDerivationParameter> setup : compoundSetupList){
+            try {
+                Set<ConfigurationOptionDerivationParameter> setupSet = new HashSet<>(setup);
+                Config config = Config.createEmptyConfig();
+                Callable<TestSiteReport> testSiteReportCallable =
+                        getConfigurationOptionsBuildManager().configureOptionSetAndReturnGetSiteReportCallable(config, TestContext.getInstance(), setupSet);
+                TestSiteReport siteReport = testSiteReportCallable.call();
+
+                successfulSetups.add(setup);
+                int failedValidations = 0;
+                for(ConfigurationOptionDerivationParameter derivationParameter : setupSet){
+                    boolean validationSuccessful = derivationParameter.validateExpectedBehavior(setupSet, siteReport);
+                    if(!validationSuccessful){
+                        LOGGER.warn("Behavior of CO parameter {} does not satisfy the expected behavior in test setup {}.", derivationParameter, setup);
+                        failedValidations+=1;
+                    }
+                }
+                if(failedValidations > 0){
+                    LOGGER.warn("-> {} behavior validations failed for for test setup {}.", failedValidations, setup);
+                }
+            }
+            catch(Exception e){
+                LOGGER.error("Exception occurred while pre-building container for setup with options {}. Exception: ", setup, e);
+                buildFailedSetupCount += 1;
+            }
+        }
+
+        compoundSetupList = successfulSetups;
+        if(buildFailedSetupCount > 0){
+            LOGGER.warn("{} builds failed. Continuing with reduced setup (see below). Due to the reduced option set the " +
+                    "configured test strength cannot be guaranteed. Consider stopping and reconfiguring the tests or adding" +
+                    "constraints to prevent invalid combinations. " +
+                    "Reduced options set: {}",buildFailedSetupCount, compoundSetupList);
+        }
+
     }
 
 }

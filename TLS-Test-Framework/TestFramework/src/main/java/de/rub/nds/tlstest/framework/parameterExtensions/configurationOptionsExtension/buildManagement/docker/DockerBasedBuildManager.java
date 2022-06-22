@@ -186,7 +186,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
             runContainer(providedContainer);
 
             //resultsCollector.logContainer(providedContainer);
-            providedContainer.enableContainerLogging(resultsCollector, "ContainerLog");
+            providedContainer.enableContainerLogging(resultsCollector, "ContainerLog", dockerTag);
             dockerTagToContainerInfo.put(dockerTag, providedContainer);
             dockerTagToAccessCount.put(dockerTag, 0);
         }

@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
@@ -68,5 +69,20 @@ public abstract class ConfigurationOptionDerivationParameter extends DerivationP
     public ConfigurationOptionValue getDefaultValue(){
         // Default (Override for non-flag values)
         return new ConfigurationOptionValue(false);
+    }
+
+    /**
+     * For a given set of CO derivation parameters (including this one) and a site report of a build using it
+     * validate if the behavior of this option matches with the expected behavior.
+     *
+     * Returns true if the expectation is satisfied, false otherwise (including a meaningful error log).
+     *
+     * @param setup - the setup of derivation parameters
+     * @param report - the site report of the build, created by the parameters in setup
+     * @return true iff the report shows the expected behavior
+     */
+    public boolean validateExpectedBehavior(Set<ConfigurationOptionDerivationParameter> setup, TestSiteReport report){
+        // Default: no special behavior expected
+        return true;
     }
 }

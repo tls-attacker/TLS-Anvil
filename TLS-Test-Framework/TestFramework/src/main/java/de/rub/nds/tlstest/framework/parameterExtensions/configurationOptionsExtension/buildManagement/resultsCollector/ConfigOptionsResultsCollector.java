@@ -109,20 +109,20 @@ public class ConfigOptionsResultsCollector {
      *
      * @param container - The container to log
      */
-    public synchronized DockerContainerLogFile logContainer(DockerContainer container, String category){
+    public synchronized DockerContainerLogFile logContainer(DockerContainer container, String category, String name){
         Path logDirectoryPath = folderDirectoryPath.resolve(category+"/");
         prepareDirectory(logDirectoryPath);
-        return logDockerContainer(container, logDirectoryPath);
+        return logDockerContainer(container, logDirectoryPath, name);
     }
 
 
-    private synchronized DockerContainerLogFile logDockerContainer(DockerContainer container, Path path) {
+    private synchronized DockerContainerLogFile logDockerContainer(DockerContainer container, Path path, String name) {
         String containerId = container.getContainerId();
         if(containerIdToLogger.containsKey(containerId)){
             // Logger does already exist
             throw new  RuntimeException("Cannot log non-existing container!");
         }
-        DockerContainerLogFile containerLogger = new DockerContainerLogFile(path, "Log_"+container.getDockerTag()+".log", container);
+        DockerContainerLogFile containerLogger = new DockerContainerLogFile(path, "Log_"+name+".log", container);
         containerIdToLogger.put(containerId, containerLogger);
         return containerLogger;
     }

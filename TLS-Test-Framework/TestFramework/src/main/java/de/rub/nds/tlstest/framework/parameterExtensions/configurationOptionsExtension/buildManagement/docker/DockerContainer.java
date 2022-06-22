@@ -72,8 +72,8 @@ public class DockerContainer {
         return dockerClient;
     }
 
-    public DockerContainerLogFile enableContainerLogging(ConfigOptionsResultsCollector resultsCollector, String category){
-        containerLogger = resultsCollector.logContainer(this, category);
+    public DockerContainerLogFile enableContainerLogging(ConfigOptionsResultsCollector resultsCollector, String category, String name){
+        containerLogger = resultsCollector.logContainer(this, category, name);
         return containerLogger;
     }
 

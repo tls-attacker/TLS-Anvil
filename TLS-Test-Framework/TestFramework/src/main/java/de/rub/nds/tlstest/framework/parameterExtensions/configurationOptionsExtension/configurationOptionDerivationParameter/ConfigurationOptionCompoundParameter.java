@@ -64,6 +64,17 @@ public class ConfigurationOptionCompoundParameter extends DerivationParameter<Li
         return parameterValues;
     }
 
+    public <T extends ConfigurationOptionDerivationParameter> T getDerivation(Class<T> clazz) {
+        for(ConfigurationOptionDerivationParameter coParam : getSelectedValue()) {
+            if(clazz.equals(coParam.getClass())) {
+                @SuppressWarnings("unchecked") // if statement already checks class
+                T castedCOParam = (T)coParam;
+                return (T)castedCOParam;
+            }
+        }
+        return null;
+    }
+
     @Override
     public void configureParameterDependencies(Config config, TestContext context, DerivationContainer container){
         Set<ConfigurationOptionDerivationParameter> configOptionDerivations = new HashSet<>(getSelectedValue());

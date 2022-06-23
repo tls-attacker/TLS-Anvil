@@ -59,6 +59,12 @@ public class EnableCompressionDerivation extends ConfigurationOptionDerivationPa
             return true;
         }
         List<CompressionMethod> supportedNonNullCompressionMethods = new LinkedList<>();
+        List<CompressionMethod> supportedCompressionMethods = report.getSupportedCompressionMethods();
+        if(supportedCompressionMethods == null){
+            // Currently not scanned in client tests
+            return true;
+        }
+
         for(CompressionMethod compressionMethod : report.getSupportedCompressionMethods()){
             if(compressionMethod != CompressionMethod.NULL){
                 supportedNonNullCompressionMethods.add(compressionMethod);

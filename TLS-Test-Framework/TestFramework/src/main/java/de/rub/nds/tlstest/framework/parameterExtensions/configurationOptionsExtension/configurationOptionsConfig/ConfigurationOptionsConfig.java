@@ -60,6 +60,9 @@ public class ConfigurationOptionsConfig {
     private boolean dockerConfigPresent;
 
     private Path dockerLibraryPath;
+    /** The address the docker host is bound to (e.g. 127.0.0.1, or 0.0.0.0) */
+    private String dockerHostBinding;
+    /** Thee address to access the host (may differ from dockerHostBinding when using docker with WSL) */
     private String dockerHostName;
     private PortRange dockerPortRange;
     private String dockerClientDestinationHostName;
@@ -99,6 +102,10 @@ public class ConfigurationOptionsConfig {
 
     public Path getDockerLibraryPath() {
         return dockerLibraryPath;
+    }
+
+    public String getDockerHostBinding() {
+        return dockerHostBinding;
     }
 
     public String getDockerHostName() {
@@ -225,6 +232,7 @@ public class ConfigurationOptionsConfig {
             Element dockerConfigElement = (Element) dockerConfigList.item(0);
             dockerLibraryPath = Paths.get(Objects.requireNonNull(XmlParseUtils.findElement(dockerConfigElement, "dockerLibraryPath", true)).getTextContent());
             dockerHostName = Objects.requireNonNull(XmlParseUtils.findElement(dockerConfigElement, "dockerHostName", true)).getTextContent();
+            dockerHostBinding = Objects.requireNonNull(XmlParseUtils.findElement(dockerConfigElement, "dockerHostBinding", true)).getTextContent();
             dockerPortRange = PortRange.fromString(Objects.requireNonNull(XmlParseUtils.findElement(dockerConfigElement, "portRange", true)).getTextContent());
             // Docker client dest is required for client tests
             Element dockerClientDestElement =  XmlParseUtils.findElement(dockerConfigElement, "dockerClientDestinationHost", (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT));
@@ -237,6 +245,8 @@ public class ConfigurationOptionsConfig {
             dockerConfigPresent = false;
         }
     }
+
+
 
     private void parseAndConfigureOptionsToTest(Element rootElement){
         // Parse options-translation list

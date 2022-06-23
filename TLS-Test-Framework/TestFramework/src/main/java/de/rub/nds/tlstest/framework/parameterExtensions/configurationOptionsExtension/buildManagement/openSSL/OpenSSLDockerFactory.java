@@ -233,10 +233,10 @@ public class OpenSSLDockerFactory extends DockerFactory {
         List<Bind> volumeBindings = new LinkedList<>();
 
         ExposedPort exposedTlsServerPort = ExposedPort.tcp(CONTAINER_PORT_TLS_SERVER);
-        portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(dockerHost, dockerTlsPort), exposedTlsServerPort));
+        portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(configOptionsConfig.getDockerHostBinding(), dockerTlsPort), exposedTlsServerPort));
 
         ExposedPort exposedManagerPort = ExposedPort.tcp(CONTAINER_MANAGER_PORT);
-        portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(dockerHost, dockerManagerPort), exposedManagerPort));
+        portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(configOptionsConfig.getDockerHostBinding(), dockerManagerPort), exposedManagerPort));
 
         String volumeNameCert = "cert-data";
         volumeBindings.add(new Bind(volumeNameCert, targetVolumeCert, AccessMode.ro, SELContext.DEFAULT, true));
@@ -272,7 +272,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
         List<Bind> volumeBindings = new LinkedList<>();
 
         ExposedPort exposedManagerPort = ExposedPort.tcp(CONTAINER_PORT_MANAGER);
-        portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(dockerManagerHost, dockerManagerPort), exposedManagerPort));
+        portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(configOptionsConfig.getDockerHostBinding(), dockerManagerPort), exposedManagerPort));
 
         if(withCoverage){
             volumeBindings.add(new Bind(volumeNameCoverage, targetVolumeCoverage));

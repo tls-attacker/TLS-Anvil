@@ -24,6 +24,8 @@
         <!-- The path to the docker library  -->
         <dockerLibraryPath>/path/to/TLS-Docker-Library</dockerLibraryPath>
         <!-- The host address all built containers are bind to.  -->
+        <dockerHostBinding>127.0.0.42</dockerHostBinding>
+        <!-- The address the docker container can be reached (May differ from dockerHostBinding when using docker with WSL on windows) -->
         <dockerHostName>127.0.0.42</dockerHostName>
         <!-- A range of ports that is used by the docker builds. Blocked ports are skipped automatically.
              Each container required 2 ports -->

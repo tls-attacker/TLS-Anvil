@@ -54,6 +54,7 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.filter.ThresholdFilter;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,6 +66,7 @@ import java.util.stream.Collectors;
  */
 public class TestSiteReportFactory {
     private static final Logger LOGGER = LogManager.getLogger(TestSiteReportFactory.class);
+    private static boolean targetIsReady = false;
 
     public static TestSiteReport createServerSiteReport(String hostName, Integer port, boolean disableConsoleLog) {
 
@@ -113,7 +115,6 @@ public class TestSiteReportFactory {
     }
 
     public static TestSiteReport createClientSiteReport(TestConfig testConfig, InboundConnection inboundConnection,  boolean disableConsoleLog) {
-
         Filter noInfoAndWarningsFilter = ThresholdFilter.createFilter( Level.ERROR, Filter.Result.ACCEPT, Filter.Result.DENY );
         if(disableConsoleLog){
             applyFilterOnLogger(LOGGER, noInfoAndWarningsFilter);
@@ -139,6 +140,8 @@ public class TestSiteReportFactory {
             config.setDefaultServerSupportedCipherSuites(Collections.singletonList(i));
             config.setDefaultSelectedCipherSuite(i);
             config.setEnforceSettings(true);
+
+            waitForClient(testConfig, config);
 
             try {
                 WorkflowConfigurationFactory configurationFactory = new WorkflowConfigurationFactory(config);
@@ -307,6 +310,32 @@ public class TestSiteReportFactory {
 
         return report;
 
+    }
+
+    private static void waitForClient(TestConfig testConfig, Config config) {
+        targetIsReady = false;
+        try {
+            new Thread(() -> {
+                while (!targetIsReady) {
+                    LOGGER.warn("Waiting for the client to get ready...");
+                    try {
+                        State state = new State();
+                        testConfig.getTestClientDelegate().executeTriggerScript(state);
+                    } catch (Exception ignored) {}
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (Exception ignored) {}
+                }
+            }).start();
+
+            TestCOMultiClientDelegate delegate =  (TestCOMultiClientDelegate)testConfig.getTestClientDelegate();
+
+            delegate.getServerSocket(config).accept();
+            targetIsReady = true;
+        } catch (Exception ignored) { }
+
+        LOGGER.info("Client is ready, prepapring client exploration...");
     }
 
     private static void prepareStateForConnection(State state, TestConfig testConfig) {

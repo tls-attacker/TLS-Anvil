@@ -141,7 +141,7 @@ public class TestSiteReportFactory {
             config.setDefaultSelectedCipherSuite(i);
             config.setEnforceSettings(true);
 
-            waitForClient(testConfig, config);
+            //waitForClient(testConfig, config);
 
             try {
                 WorkflowConfigurationFactory configurationFactory = new WorkflowConfigurationFactory(config);
@@ -320,6 +320,7 @@ public class TestSiteReportFactory {
                     LOGGER.warn("Waiting for the client to get ready...");
                     try {
                         State state = new State();
+                        TestCOMultiClientDelegate delegate =  (TestCOMultiClientDelegate)testConfig.getTestClientDelegate();
                         testConfig.getTestClientDelegate().executeTriggerScript(state);
                     } catch (Exception ignored) {}
 

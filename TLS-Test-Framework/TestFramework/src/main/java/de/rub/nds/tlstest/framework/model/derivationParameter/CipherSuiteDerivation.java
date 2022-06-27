@@ -47,6 +47,10 @@ public class CipherSuiteDerivation extends DerivationParameter<CipherSuite> {
         Set<CipherSuite> cipherSuiteList = context.getSiteReport().getCipherSuites();
         cipherSuiteList.addAll(context.getSiteReport().getSupportedTls13CipherSuites());
         for (CipherSuite cipherSuite : cipherSuiteList) {
+            // TODO: Temporary to remove troublesome cipher suite (current TLS Attacker problem) - remove me when fixed
+            if(cipherSuite == CipherSuite.TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384){
+                continue;
+            }
             if(scope.getKeyExchangeRequirements().compatibleWithCiphersuite(cipherSuite)) {
                 parameterValues.add(new CipherSuiteDerivation(cipherSuite));
             }

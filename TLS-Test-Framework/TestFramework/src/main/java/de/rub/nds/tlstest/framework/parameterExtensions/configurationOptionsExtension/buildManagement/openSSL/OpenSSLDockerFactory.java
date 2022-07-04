@@ -153,10 +153,9 @@ public class OpenSSLDockerFactory extends DockerFactory {
         }
 
         // Create a temporary container to build OpenSSL using ccache
-        String volumeNameCcache = "ccache";
         CreateContainerResponse tempContainer = dockerClient.createContainerCmd(factoryImageTag)
                 .withName(TEMP_CONTAINER_NAME)
-                .withHostConfig(HostConfig.newHostConfig().withBinds(new Bind(volumeNameCcache, targetVolumeCcache)))
+                .withHostConfig(HostConfig.newHostConfig().withBinds(new Bind(CCACHE_VOLUME_NAME, targetVolumeCcache)))
                 .withCmd(cliOptions)
                 .exec();
 

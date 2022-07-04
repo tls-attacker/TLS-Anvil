@@ -42,7 +42,7 @@
          collected during the final shutdown. Therefore it takes much more CPU than the non coverage version. When this value
          is to high it may happen that some containers are not shutdown properly and the coverage data is not correctly collected.
          Default: 8 for enabled coverage, maxRunningContainers/2 otherwise -->
-    <maxRunningContainers>6</maxRunningContainers>
+    <maxRunningContainerShutdowns>6</maxRunningContainerShutdowns>
     <!-- Optional: Strength of the input parameter model computing the configuration option parameter combinations.
          Default is the strength of the main IPM configured using the Testsuite's CLI parameter '-strength' -->
     <configOptionsIpmStrength>2</configOptionsIpmStrength>

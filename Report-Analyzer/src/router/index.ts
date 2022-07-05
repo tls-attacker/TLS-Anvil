@@ -1,19 +1,19 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
-import Upload from '../views/Main_Upload.vue'
+import Analyzer from '../views/Analyzer.vue'
 
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
   {
     path: '/',
-    name: 'Upload',
-    component: Upload
+    name: 'Analyzer',
+    component: Analyzer
   },
   {
     path: '/analyzer',
     name: 'Analyzer',
-    component: () => import(/* webpackChunkName: "analyzer" */ '../views/Analyzer.vue')
+    component: Analyzer
   },
   {
     path: '/states',

@@ -46,10 +46,4 @@ public class DisableNextProtocolNegotiationExtensionDerivation extends Configura
     public ConfigurationOptionValue getMaxFeatureValue() {
         return new ConfigurationOptionValue(false);
     }
-
-    @Override
-    public boolean validateExpectedBehavior(Set<ConfigurationOptionDerivationParameter> setup, TestSiteReport report){
-        // Next protocol negotiation extension not yet in tls attacker
-        return true;
-    }
 }

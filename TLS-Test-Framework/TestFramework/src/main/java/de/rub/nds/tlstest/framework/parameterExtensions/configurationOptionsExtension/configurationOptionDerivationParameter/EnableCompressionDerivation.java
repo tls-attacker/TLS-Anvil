@@ -51,31 +51,4 @@ public class EnableCompressionDerivation extends ConfigurationOptionDerivationPa
     public ConfigurationOptionValue getMaxFeatureValue() {
         return new ConfigurationOptionValue(false);
     }
-
-    @Override
-    public boolean validateExpectedBehavior(Set<ConfigurationOptionDerivationParameter> setup, TestSiteReport report){
-        // If this option is not set, we can't make expectations
-        if(!getSelectedValue().isOptionSet()){
-            return true;
-        }
-        List<CompressionMethod> supportedNonNullCompressionMethods = new LinkedList<>();
-        List<CompressionMethod> supportedCompressionMethods = report.getSupportedCompressionMethods();
-        if(supportedCompressionMethods == null){
-            // Currently not scanned in client tests
-            return true;
-        }
-
-        for(CompressionMethod compressionMethod : report.getSupportedCompressionMethods()){
-            if(compressionMethod != CompressionMethod.NULL){
-                supportedNonNullCompressionMethods.add(compressionMethod);
-            }
-        }
-
-        if(supportedNonNullCompressionMethods.size() == 0){
-            LOGGER.warn("No compression method was enabled using the EnableCompressionDerivation.");
-            return false;
-        }
-
-        return true;
-    }
 }

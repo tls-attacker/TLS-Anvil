@@ -55,30 +55,4 @@ public class DisablePskDerivation extends ConfigurationOptionDerivationParameter
         return new ConfigurationOptionValue(false);
     }
 
-    @Override
-    public boolean validateExpectedBehavior(Set<ConfigurationOptionDerivationParameter> setup, TestSiteReport report){
-        // If this option is not set, we can't make expectations
-        if(!getSelectedValue().isOptionSet()){
-            return true;
-        }
-
-        List<AnalyzedProperty> expectedDisabledProperties = Arrays.asList(
-                AnalyzedProperty.SUPPORTS_PSK_PLAIN,
-                AnalyzedProperty.SUPPORTS_PSK_RSA,
-                AnalyzedProperty.SUPPORTS_PSK_DHE,
-                AnalyzedProperty.SUPPORTS_PSK_ECDHE
-        );
-
-        boolean allValid = true;
-        for(AnalyzedProperty expectedDisabledProperty : expectedDisabledProperties){
-            if(report.getResult(expectedDisabledProperty) == TestResult.TRUE){
-                // Unexpectedly disabled.
-                LOGGER.warn("PSK cipher suites should be disabled, but feature '{}' is enabled.", expectedDisabledProperty);
-                allValid = false;
-            }
-        }
-        return allValid;
-
-
-    }
 }

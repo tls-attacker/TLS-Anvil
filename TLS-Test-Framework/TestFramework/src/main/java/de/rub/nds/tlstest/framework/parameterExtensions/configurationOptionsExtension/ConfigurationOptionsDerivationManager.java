@@ -263,17 +263,6 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
                 TestSiteReport siteReport = testSiteReportCallable.call();
 
                 successfulSetups.add(setup);
-                int failedValidations = 0;
-                for(ConfigurationOptionDerivationParameter derivationParameter : setupSet){
-                    boolean validationSuccessful = derivationParameter.validateExpectedBehavior(setupSet, siteReport);
-                    if(!validationSuccessful){
-                        LOGGER.warn("Behavior of CO parameter {} does not satisfy the expected behavior in test setup {}.", derivationParameter, setup);
-                        failedValidations+=1;
-                    }
-                }
-                if(failedValidations > 0){
-                    LOGGER.warn("-> {} behavior validations failed for for test setup {}.", failedValidations, setup);
-                }
             }
             catch(Exception e){
                 LOGGER.error("Exception occurred while pre-building container for setup with options {}. Exception: ", setup, e);

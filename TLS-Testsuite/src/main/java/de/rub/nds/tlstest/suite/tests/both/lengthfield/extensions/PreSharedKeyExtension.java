@@ -24,9 +24,6 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundParameter;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePskDerivation;
-import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -47,21 +44,9 @@ public class PreSharedKeyExtension extends TlsGenericTest {
             return ConditionEvaluationResult.disabled("Does not support PSK handshakes");
         }
     }
-
-    private boolean cipherSuitesDisabledByConfigOptionsDerivation(DerivationContainer derivationContainer){
-        ConfigurationOptionCompoundParameter coCompoundParam = derivationContainer.getDerivation(ConfigurationOptionCompoundParameter.class);
-        if(coCompoundParam != null){
-            DisablePskDerivation disablePskDerivation = coCompoundParam.getDerivation(DisablePskDerivation.class);
-            if(disablePskDerivation != null && disablePskDerivation.getSelectedValue().isOptionSet()){
-                // Psk ciphersuites are manually disabled using the disablePsk configuration option.
-                return true;
-            }
-        }
-        return false;
-    }
     
     @TlsTest(description = "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations({"BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION"})
+    @ScopeLimitations({"BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION", "ConfigOptionDerivationType.DisablePsk"})
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "supportsPsk")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -69,9 +54,6 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     @AlertCategory(SeverityLevel.LOW)
     public void preSharedKeyExtensionLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
-        if(cipherSuitesDisabledByConfigOptionsDerivation(derivationContainer)){
-            return;
-        }
 
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
         pskExtension.setExtensionLength(Modifiable.sub(1));
@@ -79,7 +61,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     }
     
     @TlsTest(description = "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations({"BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION"})
+    @ScopeLimitations({"BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION", "ConfigOptionDerivationType.DisablePsk"})
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "supportsPsk")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -87,9 +69,6 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     @AlertCategory(SeverityLevel.LOW)
     public void preSharedKeyExtensionIdentityListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
-        if(cipherSuitesDisabledByConfigOptionsDerivation(derivationContainer)){
-            return;
-        }
 
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
         pskExtension.setIdentityListLength(Modifiable.sub(1));
@@ -97,7 +76,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     }
         
     @TlsTest(description = "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations({"BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION"})
+    @ScopeLimitations({"BasicDerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION", "ConfigOptionDerivationType.DisablePsk"})
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "supportsPsk")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -105,9 +84,6 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     @AlertCategory(SeverityLevel.LOW)
     public void preSharedKeyExtensionBinderListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
-        if(cipherSuitesDisabledByConfigOptionsDerivation(derivationContainer)){
-            return;
-        }
 
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
         pskExtension.setBinderListLength(Modifiable.sub(1));

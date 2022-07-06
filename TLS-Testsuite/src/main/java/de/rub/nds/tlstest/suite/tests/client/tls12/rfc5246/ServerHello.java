@@ -35,6 +35,7 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -44,8 +45,6 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CompressionMethodDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundParameter;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableCompressionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import java.util.ArrayList;
@@ -127,21 +126,13 @@ public class ServerHello extends Tls12Test {
             + "list in ClientHello.compression_methods.")
     @ScopeExtensions("BasicDerivationType.COMPRESSION_METHOD")
     @DynamicValueConstraints(affectedTypes = "BasicDerivationType.COMPRESSION_METHOD", methods = "isUnproposedCompressionMethod")
+    @ScopeLimitations("ConfigOptionDerivationType.EnableCompression")
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
     public void selectUnproposedCompressionMethod(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CompressionMethod selectedCompressionMethod = derivationContainer.getDerivation(CompressionMethodDerivation.class).getSelectedValue();
-
-        ConfigurationOptionCompoundParameter coCompoundParam = derivationContainer.getDerivation(ConfigurationOptionCompoundParameter.class);
-        if(coCompoundParam != null){
-            EnableCompressionDerivation enableCompressionDerivation = coCompoundParam.getDerivation(EnableCompressionDerivation.class);
-            if(enableCompressionDerivation != null && enableCompressionDerivation.getSelectedValue().isOptionSet()){
-                // Compression is manually enabled using the enable compression configuration option. Test case cannot be applied.
-                return;
-            }
-        }
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));

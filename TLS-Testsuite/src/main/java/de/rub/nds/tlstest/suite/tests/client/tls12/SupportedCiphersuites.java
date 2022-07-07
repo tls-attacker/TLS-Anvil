@@ -39,7 +39,7 @@ import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.ParameterExtensionManager;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
-@Tag("debug")
+
 @ClientTest
 public class SupportedCiphersuites extends Tls12Test {
 

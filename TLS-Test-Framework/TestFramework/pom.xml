@@ -2,13 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>TLS-Test-Framework</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <groupId>de.rub.nds.tlstest</groupId>
     <name>TLS-Test-Framework</name>
     <parent>
         <groupId>de.rub.nds.tlstest</groupId>
         <artifactId>TLS-Test-Framework-Aggregator</artifactId>
-        <version>1.0</version>
+        <version>1.0.1</version>
     </parent>
     <packaging>jar</packaging>
     <properties>
@@ -48,7 +48,7 @@
         <dependency>
             <artifactId>TLS-Server-Scanner</artifactId>
             <groupId>de.rub.nds.tlsscanner</groupId>
-            <version>4.2.0-SNAPSHOT</version>
+            <version>4.2.3</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

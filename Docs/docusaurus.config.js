@@ -7,12 +7,12 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'TLS-Anvil',
-  tagline: 'An automated testsuite for TLS',
-  url: 'https://tls-anvil.de/',
+  tagline: 'An automated test suite for TLS',
+  url: 'https://tls-anvil.com/',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  //favicon: 'img/favicon.ico',
+  favicon: 'img/logo.png',
   staticDirectories: ['static'],
 
   // GitHub pages deployment config.
@@ -59,10 +59,10 @@ const config = {
     ({
       navbar: {
         title: 'TLS-Anvil',
-        // logo: {
-        //   alt: 'TLS-Anvil Logo',
-        //   src: 'img/logo.svg',
-        // },
+         logo: {
+           alt: 'TLS-Anvil Logo',
+           src: 'img/logo.png',
+         },
         items: [
           {
             type: 'doc',

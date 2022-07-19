@@ -23,5 +23,3 @@ TLS-Anvil is structured into two java modules.
 * TLS-Test-Framework: This module contains all JUnit extensions and test execution logic.
 
 See the next chapter for an example test template and how new templates can be added.
-
-https://thumbs.dreamstime.com/b/anvil-hammer-blacksmith-design-vector-illustration-stock-icon-anvil-hammer-blacksmith-design-vector-illustration-208164209.jpg

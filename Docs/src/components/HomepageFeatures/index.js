@@ -8,7 +8,7 @@ const FeatureList = [
    // Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        TLS-Anvil is available as Docker Container, so there as no hassle for
+        TLS-Anvil is available as Docker Container, so there is no hassle for
         you to compile the project. The CLI provides all the options to test your
         TLS server or client. 
       </>
@@ -21,7 +21,7 @@ const FeatureList = [
       <>
         If everything works as expected, testing a TLS server or client is as
         easy as starting TLS-Anvil and let it know how to connect to your target.
-        <br></br>However, there are for sure annoying implementations violating RFCs that
+        <br></br>However, there are for sure some implementations violating RFCs that
         TLS-Anvil fails to test out of the box.
       </>
     ),

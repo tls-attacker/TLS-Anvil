@@ -32,14 +32,14 @@ java -jar TLS-Anvil.jar
 
 ## Setup IDE
 
-TLS-Anvil is mainly developed in IntelliJ IDEA and Netbeans (?).
+TLS-Anvil was mainly developed in IntelliJ IDEA and Netbeans. Since IDEA offers a deeper JUnit integration, the following section explain a basic IDEA setup.
 
 ### IDEA
 
-1. Open the TLS-Testsuite Project in IntelliJ
+1. Open the TLS-Testsuite Project (`pom.xml`) in IntelliJ
 1. Open the `Project Structure` -> `Module` Menu.
 1. Add the `TLS-Test-Framework` (`TLS-Test-Framework/pom.xml`) as new Module
-1. If TLS-Attacker and TLS-Scanner are not installed in your maven repository
+1. If you want or need to modify TLS-Attacker and TLS-Scanner as well:
     1. Add `TLS-Attacker` (`Dependencies/TLS-Attacker/pom.xml`) as new Module
     1. Add `TLS-Scanner` (`Dependencies/TLS-Scanner/pom.xml`) as new Module
 
@@ -69,3 +69,8 @@ The recommended way is to edit the JUnit 5 template of IDEA.
 
 When the environment variables are configured, it is possible to run a client or server test by clicking the green play buttons next to a function. The specified variables are used by TLS-Anvil to setup the test backend accordingly.
 
+### Netbeans or other
+
+TLS-Anvil is based on Maven and can be compiled like any other Maven Java project. To only execute specific test templates during the development, the CLI of TLS-Anvil offers two options.
+* `-testPackage [package]` runs all tests inside a specific Java package.
+* `-tags [tag]` runs only test templates that are annotated with a specific tag. When you develop a new test case, annotate the test function temporarily with `@Tag("tag")` to be able to only run this specific test template.

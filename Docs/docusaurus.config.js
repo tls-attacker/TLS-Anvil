@@ -12,7 +12,7 @@ const config = {
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'img/logo.png',
+  favicon: 'img/logo-only.png',
   staticDirectories: ['static'],
 
   // GitHub pages deployment config.
@@ -61,7 +61,7 @@ const config = {
         title: 'TLS-Anvil',
          logo: {
            alt: 'TLS-Anvil Logo',
-           src: 'img/logo.png',
+           src: 'img/logo-only.png',
          },
         items: [
           {

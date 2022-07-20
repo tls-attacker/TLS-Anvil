@@ -17,7 +17,7 @@ export default function Definition({id}) {
   return (
     <>
       <Tippy content={<Details details={details} />} placement="bottom" arrow={true} hideOnClick={true}>
-        <span className={styles.tag}>{id} &#9432;</span>
+        <span className={styles.tag}>{id}&nbsp;&#9432;</span>
       </Tippy>
     </>
   )

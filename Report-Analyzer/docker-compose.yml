@@ -28,7 +28,7 @@ services:
       - app
 
   app:
-    image: reportanalyzer
+    image: ghcr.io/tls-attacker/tlsanvil-reportanalyzer
     restart: always
     environment: 
       PRODUCTION: '1'

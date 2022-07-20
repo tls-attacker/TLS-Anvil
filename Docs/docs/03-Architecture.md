@@ -3,7 +3,7 @@ import Definition from '@site/src/components/Definition'
 # Architecture
 
 The picture below shows the general architecture of TLS-Anvil including the different phases that are executed during a test execution.
-Each of those phases is explained in our Usenix Paper in Section 4.1. Please have a look there, take the our [Definitions](/definitions) page for help with technical terms.
+Each of those phases is explained in our Usenix Paper in Section 4.1. Please have a look there.
 
 ![](/Architecture.png)
 

@@ -12,6 +12,7 @@ on:
 jobs:
   deploy:
     name: Deploy Docs to GitHub Pages
+    if: github.repository == 'tls-attacker/TLS-Anvil'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

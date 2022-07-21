@@ -85,7 +85,7 @@ public class AlertProtocol extends Tls12Test {
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
             if (message == null && Validator.socketClosed(i)) {
                 i.addAdditionalResultInfo("No close_notify alert received.");
-                i.setResult(TestResult.PARTIALLY_SUCCEEDED);
+                i.setResult(TestResult.CONCEPTUALLY_SUCCEEDED);
                 return;
             }
             assertTrue("Socket has not been closed", Validator.socketClosed(i));
@@ -120,7 +120,7 @@ public class AlertProtocol extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             if (Validator.socketClosed(i)) {
-                i.setResult(TestResult.SUCCEEDED);
+                i.setResult(TestResult.STRICTLY_SUCCEEDED);
             }
         });
     }
@@ -149,7 +149,7 @@ public class AlertProtocol extends Tls12Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             if (Validator.socketClosed(i)) {
-                i.setResult(TestResult.SUCCEEDED);
+                i.setResult(TestResult.STRICTLY_SUCCEEDED);
             }
         });
     }

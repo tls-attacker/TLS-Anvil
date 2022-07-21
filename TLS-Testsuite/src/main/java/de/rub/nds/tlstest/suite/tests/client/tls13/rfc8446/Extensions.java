@@ -32,12 +32,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -155,8 +150,8 @@ public class Extensions extends Tls13Test {
             Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
             if(msg != null && msg.getDescription().getValue() == AlertDescription.UNSUPPORTED_EXTENSION.getValue()
                     && !context.getReceivedClientHelloMessage().containsExtension(ExtensionType.HEARTBEAT)
-                    && i.getResult() == TestResult.PARTIALLY_SUCCEEDED) {
-                i.setResult(TestResult.SUCCEEDED);
+                    && i.getResult() == TestResult.CONCEPTUALLY_SUCCEEDED) {
+                i.setResult(TestResult.STRICTLY_SUCCEEDED);
                 i.addAdditionalResultInfo("Description is acceptable as Heartbeat was not proposed by client");
             }
         });

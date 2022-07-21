@@ -5,8 +5,8 @@ export interface IStatusFilter {
 }
 
 export const statusFilterOptions = [
-  TestResult.SUCCEEDED,
-  TestResult.PARTIALLY_SUCCEEDED,
-  TestResult.FAILED,
+  TestResult.STRICTLY_SUCCEEDED,
+  TestResult.CONCEPTUALLY_SUCCEEDED,
+  TestResult.FULLY_FAILED,
   TestResult.PARTIALLY_FAILED
 ]

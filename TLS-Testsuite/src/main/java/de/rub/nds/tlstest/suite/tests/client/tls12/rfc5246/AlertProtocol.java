@@ -30,7 +30,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
-import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.ModelType;
@@ -39,7 +38,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.junit.jupiter.api.Tag;
+
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 5246, section = "7.2.1 Closure Alerts")
@@ -81,7 +80,7 @@ public class AlertProtocol extends Tls12Test {
             AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
             if (message == null && Validator.socketClosed(i)) {
                 i.addAdditionalResultInfo("No CLOSE NOTIFY Alert received.");
-                i.setResult(TestResult.PARTIALLY_SUCCEEDED);
+                i.setResult(TestResult.CONCEPTUALLY_SUCCEEDED);
                 return;
             }
             assertTrue("Socket has not been closed", Validator.socketClosed(i));

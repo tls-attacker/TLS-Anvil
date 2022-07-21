@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <b-navbar toggleable="md" type="dark" variant="secondary">
-      <b-navbar-brand href="#">TestReport Analyzer</b-navbar-brand>
+      <b-navbar-brand href="#"><img src="/favicon.ico" width="40" /> Report Analyzer</b-navbar-brand>
 
       <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 

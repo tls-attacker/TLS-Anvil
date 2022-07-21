@@ -13,10 +13,10 @@ import java.util.List;
 
 public enum TestResult {
     NOT_SPECIFIED(1, 0),
-    SUCCEEDED(1 << 1, 100),
-    PARTIALLY_SUCCEEDED(1 << 2, 80),
+    STRICTLY_SUCCEEDED(1 << 1, 100),
+    CONCEPTUALLY_SUCCEEDED(1 << 2, 80),
     PARTIALLY_FAILED(1 << 3, 20),
-    FAILED(1 << 4, 0),
+    FULLY_FAILED(1 << 4, 0),
     DISABLED(1 << 5, 0);
 
     private final int value;
@@ -63,8 +63,8 @@ public enum TestResult {
             throw new UnsupportedOperationException("TestResult Bitmask contains NOT_SPECIFIED");
         }
 
-        if (result.contains(FAILED) || result.contains(PARTIALLY_FAILED)) {
-            if (result.contains(PARTIALLY_SUCCEEDED) || result.contains(SUCCEEDED)) {
+        if (result.contains(FULLY_FAILED) || result.contains(PARTIALLY_FAILED)) {
+            if (result.contains(CONCEPTUALLY_SUCCEEDED) || result.contains(STRICTLY_SUCCEEDED)) {
                 return PARTIALLY_FAILED;
             }
         }

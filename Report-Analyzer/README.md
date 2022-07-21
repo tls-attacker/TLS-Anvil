@@ -1,10 +1,9 @@
-# TLS-Testsuite-Report-Analyzer
+# TLS-Anvil Report Analyzer
 
 This web application visualizes the test report created by TLS-Anvil.
 The easiest way to run this project locally is using Docker.
 
 ```shell
-docker-compose build
 docker-compose up -d
 ```
 

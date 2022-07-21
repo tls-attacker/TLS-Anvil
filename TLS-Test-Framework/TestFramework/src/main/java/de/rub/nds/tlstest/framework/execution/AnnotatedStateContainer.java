@@ -139,7 +139,7 @@ public class  AnnotatedStateContainer {
         TestContext.getInstance().increasePerformedHandshakes(this.getStates().size());
 
         for (AnnotatedState state : this.getStates()) {
-            if (state.getResult() == TestResult.FAILED) {
+            if (state.getResult() == TestResult.FULLY_FAILED) {
                 errors.add(state.getFailedReason());
                 failed = true;
             }
@@ -193,7 +193,7 @@ public class  AnnotatedStateContainer {
     
     private void printFailedContainers() {
         LOGGER.info("Individual failed Containers for test " + testMethodConfig.getMethodName() +":\n");
-        states.stream().filter(state -> state.getResult() != TestResult.SUCCEEDED)
+        states.stream().filter(state -> state.getResult() != TestResult.STRICTLY_SUCCEEDED)
                 .forEach(state -> LOGGER.info(state.getDerivationContainer().toString()));
     }
 
@@ -244,7 +244,7 @@ public class  AnnotatedStateContainer {
     }
     
     private boolean anyStateSucceeded() {
-        return states.stream().anyMatch(state -> state.getResult() == TestResult.SUCCEEDED || state.getResult() == TestResult.PARTIALLY_SUCCEEDED);
+        return states.stream().anyMatch(state -> state.getResult() == TestResult.STRICTLY_SUCCEEDED || state.getResult() == TestResult.CONCEPTUALLY_SUCCEEDED);
     }
 
     public List<DerivationContainer> getFailureInducingCombinations() {

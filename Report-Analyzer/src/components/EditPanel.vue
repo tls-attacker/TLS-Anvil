@@ -111,10 +111,10 @@ export default {
       ],
       resultOptions: [
         { text: "Disabled", value: TestResult.DISABLED},
-        { text: "Succeeded", value: TestResult.SUCCEEDED},
-        { text: "Partially Succeeded", value: TestResult.PARTIALLY_SUCCEEDED},
+        { text: "Strictly Succeeded", value: TestResult.STRICTLY_SUCCEEDED},
+        { text: "Conceptually Succeeded", value: TestResult.CONCEPTUALLY_SUCCEEDED},
         { text: "Partially Failed", value: TestResult.PARTIALLY_FAILED},
-        { text: "Failed", value: TestResult.FAILED},
+        { text: "Fully Failed", value: TestResult.FULLY_FAILED},
       ]
     }
   },

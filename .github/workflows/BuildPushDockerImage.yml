@@ -15,6 +15,7 @@ on:
   push:
     branches:
       - main
+      - CI
     tags:
       - 'v*'
   pull_request:
@@ -24,6 +25,9 @@ on:
 env:
   IS_RELEASE: ${{ contains(github.ref, 'refs/tag') }}
   SHOULD_PUSH: ${{ github.event_name == 'push' && github.repository == 'tls-attacker/TLS-Anvil' }}
+
+permissions:
+  packages: write
 
 jobs:
   tlsanvil:
@@ -58,7 +62,7 @@ jobs:
         with:
           context: .
           push: ${{ fromJSON(env.SHOULD_PUSH) }}
-          tags: 'tls-attacker/tlsanvil:${{ env.DOCKER_TAG }}'
+          tags: 'ghcr.io/tls-attacker/tlsanvil:${{ env.DOCKER_TAG }}'
 
 
 
@@ -94,7 +98,7 @@ jobs:
         with:
           context: ./Report-Analyzer
           push: ${{ fromJSON(env.SHOULD_PUSH) }}
-          tags: 'tls-attacker/tlsanvil-reportanalyzer:${{ env.DOCKER_TAG }}'
+          tags: 'ghcr.io/tls-attacker/tlsanvil-reportanalyzer:${{ env.DOCKER_TAG }}'
 
 
   createRelease:

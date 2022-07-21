@@ -103,6 +103,11 @@ const config = {
         additionalLanguages: ["java"],
         darkTheme: darkCodeTheme,
       },
+      colorMode: {
+        defaultMode: "light",
+        disableSwitch: true,
+        respectPrefersColorScheme: false
+      }
     }),
 };
 

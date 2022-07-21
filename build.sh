@@ -1,15 +1,12 @@
-mkdir build-dependencies
-cd build-dependencies/
-git clone https://github.com/tls-attacker/ModifiableVariable.git
+#!/bin/bash
 
-git clone https://github.com/tls-attacker/ASN.1-Tool.git
+set -e
 
-git clone https://github.com/tls-attacker/X509-Attacker.git
+cd "$(dirname $0)"
 
-git clone https://github.com/tls-attacker/TLS-Attacker.git
-git clone https://github.com/tls-attacker/TLS-Scanner.git
-( cd TLS-Scanner && git submodule update --init --recursive )
+git submodule update --init --recursive
 
-cd ..
-
-docker build -f Dockerfile . -t tlsanvil
+docker build -t tlsanvil .
+echo "TLS-Anvil was built as a Docker image named 'tlsanvil'"
+echo "It can be started using:"
+echo "    docker run --rm -it -v $(pwd):/output tlsanvil [CLI options]"

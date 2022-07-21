@@ -1,0 +1,122 @@
+# This action is builds and pushes the TLS-Anvil and ReportAnalyzer Docker images when:
+#   - a tag is pushed. This builds and pushes a Docker image with the name of the pushed tag and also creates a draft release.
+#   - a new commit is pushed to the main branch. The tag of the Docker image is set to 'latest'
+#   - a pull request to the main branch is created. The image is only built to check if everything compiles. 
+#     This image is not pushed to the ghcr.io repository!
+#
+# NOTE: Both jobs are copy pasted (GitHub does not support yaml anchors...).
+#       So if you change something in one job, check the other job as well...
+#
+#       The docker images are only pushed for events on the public repository.
+
+name: Build and push TLS-Anvil and ReportAnalyzer Docker images
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+
+env:
+  IS_RELEASE: ${{ contains(github.ref, 'refs/tag') }}
+  SHOULD_PUSH: ${{ github.event_name == 'push' && github.repository == 'tls-attacker/TLS-Anvil' }}
+
+jobs:
+  tlsanvil:
+    name: TLS-Anvil Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine tag          
+        run: |
+          if [[ $IS_RELEASE == 'true' ]]; then
+            echo "DOCKER_TAG=$GITHUB_REF_NAME" >> $GITHUB_ENV
+          else
+            echo "DOCKER_TAG=latest" >> $GITHUB_ENV
+          fi
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: ${{ fromJSON(env.SHOULD_PUSH) }}
+          tags: 'tls-attacker/tlsanvil:${{ env.DOCKER_TAG }}'
+
+
+
+  reportAnalyzer:
+    name: Report Analyzer Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine tag          
+        run: |
+          if [[ $IS_RELEASE == 'true' ]]; then
+            echo "DOCKER_TAG=$GITHUB_REF_NAME" >> $GITHUB_ENV
+          else
+            echo "DOCKER_TAG=latest" >> $GITHUB_ENV
+          fi
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./Report-Analyzer
+          push: ${{ fromJSON(env.SHOULD_PUSH) }}
+          tags: 'tls-attacker/tlsanvil-reportanalyzer:${{ env.DOCKER_TAG }}'
+
+
+  createRelease:
+    name: Create release
+    runs-on: ubuntu-latest
+    needs: tlsanvil
+    steps:
+      - name: Get Artifacts from Docker image
+        if: env.IS_RELEASE == 'true' && env.SHOULD_PUSH == 'true'
+        run: |
+          id=$(docker create ghcr.io/tls-attacker/tlsanvil:$GITHUB_REF_NAME)
+          docker cp $id:/apps/ - > TLS-Anvil.jar.tar
+          docker rm -v $id
+
+      - name: GH Release
+        uses: softprops/action-gh-release@v0.1.14
+        if: env.IS_RELEASE == 'true' && env.SHOULD_PUSH == 'true'
+        with:
+          files: TLS-Anvil.jar.tar
+          generate_release_notes: true
+          draft: true
+
+    
+
+

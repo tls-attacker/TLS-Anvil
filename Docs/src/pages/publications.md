@@ -1,7 +1,7 @@
 # Publications
 
-### Usenix 2022
-We released TLS-Anvil along with our paper for USENIX 2022.    
+### USENIX Security
+We released TLS-Anvil along with our paper for USENIX Security 2022.    
 [TLS-Anvil: Adapting Combinatorial Testing for TLS Libraries](https://www.usenix.org/conference/usenixsecurity22/presentation/maehren)  
 
 The paper covers the following topics:

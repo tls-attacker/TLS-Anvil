@@ -13,7 +13,7 @@ This template aims to test if the <Definition id="SUT" /> sends the correct TLS 
     * Line 6: Adds additional parameters to the IPM
     * Line 7: Adds a constraint to the Cipher Suite parameter of the IPM, so that the test only runs when a CBC Cipher Suite is selected. The `isCBC` method is called on the TLS-Attacker Cipher Suite enum.
     * Line 8: Adds a constraint to the Record Length parameter. The `recordLengthAllowsModification` method is called on the current class (line 43), given the selected value as argument.
-* Line 9-13: Each test is annotated with categories and a severity level. Depending on the test result, a score is calculated for each test. Since it is not possible to choose the categories and severity levels objectively, those are not mentioned in our Usenix paper.
+* Line 9-13: Each test is annotated with categories and a severity level. Depending on the test result, a score is calculated for each test. Since it is not possible to choose the categories and severity levels objectively, those are not mentioned in our USENIX Security paper.
 
 ### Test function
 * Line 15: This is line basically part of every test case, it generates the TLS-Attacker `Config` that defines how the TLS-Attacker Server/Client should behave (e.g. which algorithms are offered, etc.)

@@ -96,7 +96,7 @@ const config = {
             href: "https://github.com/tls-attacker/TLS-Anvil"
           }
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} TLS-Anvil. Built with ❤️ and Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} TLS-Anvil.</br>Built with <a href="https://docusaurus.io/">Docusaurus</a>, <a href="https://github.com/tls-attacker/TLS-Attacker">TLS-Attacker</a> and <a href="https://coffee4j.github.io/">coffee4j</a>.`,
       },
       prism: {
         theme: lightCodeTheme,

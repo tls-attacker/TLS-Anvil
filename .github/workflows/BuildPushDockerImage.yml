@@ -15,7 +15,6 @@ on:
   push:
     branches:
       - main
-      - CI
     tags:
       - 'v*'
   pull_request:
@@ -25,9 +24,6 @@ on:
 env:
   IS_RELEASE: ${{ contains(github.ref, 'refs/tag') }}
   SHOULD_PUSH: ${{ github.event_name == 'push' && github.repository == 'tls-attacker/TLS-Anvil' }}
-
-permissions:
-  packages: write
 
 jobs:
   tlsanvil:

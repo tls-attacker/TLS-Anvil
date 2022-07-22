@@ -31,7 +31,7 @@ export default function Home() {
   return (
     <Layout
       title={`TLS-Anvil`}
-      description="Description will go into a meta tag in <head />">
+      description="A fully automated TLS test suite for clients and servers.">
       <HomepageHeader />
       <main>
         <HomepageFeatures />

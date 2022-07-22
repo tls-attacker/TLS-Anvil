@@ -31,9 +31,9 @@ export function resolveSeverityLevel(level: string) {
 
 function scoreForStatus(status: TestResult, total: number): number {
   switch (status) {
-    case TestResult.SUCCEEDED:
+    case TestResult.STRICTLY_SUCCEEDED:
       return 1.0 * total
-    case TestResult.PARTIALLY_SUCCEEDED:
+    case TestResult.CONCEPTUALLY_SUCCEEDED:
       return 0.8 * total
     case TestResult.PARTIALLY_FAILED:
       return 0.2 * total

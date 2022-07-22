@@ -16,30 +16,30 @@ public class TestStatusTest {
 
     @Test
     public void partiallyFailed() {
-        TestResult status = TestResult.resultForBitmask((TestResult.SUCCEEDED.getValue() | TestResult.FAILED.getValue() | TestResult.PARTIALLY_SUCCEEDED.getValue()));
+        TestResult status = TestResult.resultForBitmask((TestResult.STRICTLY_SUCCEEDED.getValue() | TestResult.FULLY_FAILED.getValue() | TestResult.CONCEPTUALLY_SUCCEEDED.getValue()));
         assertEquals(TestResult.PARTIALLY_FAILED, status);
 
-        status = TestResult.resultForBitmask((TestResult.FAILED.getValue() | TestResult.PARTIALLY_SUCCEEDED.getValue()));
+        status = TestResult.resultForBitmask((TestResult.FULLY_FAILED.getValue() | TestResult.CONCEPTUALLY_SUCCEEDED.getValue()));
         assertEquals(TestResult.PARTIALLY_FAILED, status);
 
-        status = TestResult.resultForBitmask((TestResult.FAILED.getValue() | TestResult.SUCCEEDED.getValue()));
+        status = TestResult.resultForBitmask((TestResult.FULLY_FAILED.getValue() | TestResult.STRICTLY_SUCCEEDED.getValue()));
         assertEquals(TestResult.PARTIALLY_FAILED, status);
     }
 
     @Test
     public void partiallySucceeded() {
-        TestResult status = TestResult.resultForBitmask((TestResult.SUCCEEDED.getValue() | TestResult.PARTIALLY_SUCCEEDED.getValue()));
-        assertEquals(TestResult.PARTIALLY_SUCCEEDED, status);
+        TestResult status = TestResult.resultForBitmask((TestResult.STRICTLY_SUCCEEDED.getValue() | TestResult.CONCEPTUALLY_SUCCEEDED.getValue()));
+        assertEquals(TestResult.CONCEPTUALLY_SUCCEEDED, status);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void containsNotSpecified() {
-        TestResult.resultForBitmask((TestResult.SUCCEEDED.getValue() | TestResult.NOT_SPECIFIED.getValue()));
+        TestResult.resultForBitmask((TestResult.STRICTLY_SUCCEEDED.getValue() | TestResult.NOT_SPECIFIED.getValue()));
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void containsDisabled() {
-        TestResult.resultForBitmask((TestResult.SUCCEEDED.getValue() | TestResult.DISABLED.getValue()));
+        TestResult.resultForBitmask((TestResult.STRICTLY_SUCCEEDED.getValue() | TestResult.DISABLED.getValue()));
     }
 
     @Test()

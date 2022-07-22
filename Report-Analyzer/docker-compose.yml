@@ -36,9 +36,6 @@ services:
       context: .
       args:
         REST_API_BASE_URL: http://localhost:5000/api/v1
-    restart: always
-    environment: 
-      PRODUCTION: '1'
     ports:
       - 5000:5000
     networks:

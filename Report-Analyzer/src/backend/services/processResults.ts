@@ -29,19 +29,19 @@ export function process(results: ITestResult[], identifiers: {_id: string, Ident
 
   const items: TableRow[] = [{
     rowHead: {
-      value: "Succeeded",
+      value: "Strictly Succeeded",
       isHead: true,
       data: null,
     }
   }, {
     rowHead: {
-      value: "Partially Succeeded",
+      value: "Conceptually Succeeded",
       isHead: true,
       data: null,
     }
   }, {
     rowHead: {
-      value: "Failed",
+      value: "Fully Failed",
       isHead: true,
       data: null,
     }
@@ -84,9 +84,9 @@ export function process(results: ITestResult[], identifiers: {_id: string, Ident
     const identifier = identifiers.filter(d => d._id.toString() == result.ContainerId.toString())[0].Identifier
     resultData[identifier] = r_copy
 
-    items[0][identifier] = {isHead: true, data: null, value: result.States.filter((j) => j.Result == TestResult.SUCCEEDED).length.toString()}
-    items[1][identifier] = {isHead: true, data: null, value: result.States.filter((j) => j.Result == TestResult.PARTIALLY_SUCCEEDED).length.toString()}
-    items[2][identifier] = {isHead: true, data: null, value: result.States.filter((j) => j.Result == TestResult.FAILED).length.toString()}
+    items[0][identifier] = {isHead: true, data: null, value: result.States.filter((j) => j.Result == TestResult.STRICTLY_SUCCEEDED).length.toString()}
+    items[1][identifier] = {isHead: true, data: null, value: result.States.filter((j) => j.Result == TestResult.CONCEPTUALLY_SUCCEEDED).length.toString()}
+    items[2][identifier] = {isHead: true, data: null, value: result.States.filter((j) => j.Result == TestResult.FULLY_FAILED).length.toString()}
     items[3][identifier] = {isHead: true, data: null, value: result.States.filter((j) => j.Result == TestResult.PARTIALLY_FAILED).length.toString()}
     items[4][identifier] = {isHead: true, data: null, value: resolveStatus(result.Result)}
     items[5][identifier] = {isHead: true, data: result.appliedEdit, value: result.edited ? '✅' : ''}

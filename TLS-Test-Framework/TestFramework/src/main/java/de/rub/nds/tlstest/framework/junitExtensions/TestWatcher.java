@@ -56,7 +56,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
     @Override
     synchronized public void testSuccessful(ExtensionContext context) {
         TestContext.getInstance().testSucceeded();
-        AnnotatedStateContainer container = createResult(context, TestResult.SUCCEEDED);
+        AnnotatedStateContainer container = createResult(context, TestResult.STRICTLY_SUCCEEDED);
 
         if (!Utils.extensionContextIsBasedOnCombinatorialTesting(context.getParent().get())) {
             // test does not belong to a test case performing handshakes
@@ -75,7 +75,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
         }
 
         String uniqueId = Utils.getTemplateContainerExtensionContext(context).getUniqueId();
-        AnnotatedStateContainer container = createResult(context, TestResult.FAILED);
+        AnnotatedStateContainer container = createResult(context, TestResult.FULLY_FAILED);
         if (container == null && TestContext.getInstance().testIsFinished(uniqueId))
             return;
         else if (container == null) {

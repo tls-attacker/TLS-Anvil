@@ -85,14 +85,14 @@ public class AnnotatedState {
 
     public void setFailedReason(Throwable failedReason) {
         this.failedReason = failedReason;
-        this.result = this.failedReason != null ? TestResult.FAILED : TestResult.NOT_SPECIFIED;
+        this.result = this.failedReason != null ? TestResult.FULLY_FAILED : TestResult.NOT_SPECIFIED;
     }
 
     public void validateFinal(Consumer<AnnotatedState> validateFunction) {
         try {
             validateFunction.accept(this);
             if (result == TestResult.NOT_SPECIFIED) {
-                result = TestResult.SUCCEEDED;
+                result = TestResult.STRICTLY_SUCCEEDED;
             }
         } catch (Throwable err) {
             if (state.getExecutionException() != null) {

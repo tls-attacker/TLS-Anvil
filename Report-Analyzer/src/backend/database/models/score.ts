@@ -50,7 +50,7 @@ export function calculateScoreDelta(scoreMap: IScoreMap, newResult: TestResult):
     const newReached = score(value.SeverityLevel, newResult)
     const reachedDelta = newReached - value.Reached
     
-    const newTotal = newResult === TestResult.DISABLED ? 0 : score(value.SeverityLevel, TestResult.SUCCEEDED)
+    const newTotal = newResult === TestResult.DISABLED ? 0 : score(value.SeverityLevel, TestResult.STRICTLY_SUCCEEDED)
     const totalDelta =  newTotal - value.Total
 
     r[<CategoriesStrings>key] = {

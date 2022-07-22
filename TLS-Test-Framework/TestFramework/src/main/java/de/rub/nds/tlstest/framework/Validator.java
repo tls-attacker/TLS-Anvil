@@ -101,7 +101,7 @@ public class Validator {
                 && AlertDescription.CLOSE_NOTIFY.getValue() == msg.getDescription().getValue()
                 && socketClosed) {
             i.addAdditionalResultInfo("Only sent Close Notify and closed socket (" + i.getState().getTlsContext().getFinalSocketState() + ")");
-            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
+            i.setResult(TestResult.CONCEPTUALLY_SUCCEEDED);
             return true;
         }
         return false;
@@ -114,7 +114,7 @@ public class Validator {
                 return true;
             }
             i.addAdditionalResultInfo("Only socket closed (" + i.getState().getTlsContext().getFinalSocketState() + ")");
-            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
+            i.setResult(TestResult.CONCEPTUALLY_SUCCEEDED);
             LOGGER.debug("Timeout");
             return true;
         }
@@ -174,7 +174,7 @@ public class Validator {
             i.addAdditionalResultInfo("Unexpected Alert Description");
             i.addAdditionalResultInfo(String.format("Expected: %s", expectedList.stream().map(AlertDescription::name).collect(Collectors.joining(","))));
             i.addAdditionalResultInfo(String.format("Received: %s", received));
-            i.setResult(TestResult.PARTIALLY_SUCCEEDED);
+            i.setResult(TestResult.CONCEPTUALLY_SUCCEEDED);
             LOGGER.debug(i.getAdditionalResultInformation());
         }
     }

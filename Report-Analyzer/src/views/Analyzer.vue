@@ -120,7 +120,24 @@
 
 
     <template v-if="this.selectedIdentifiers.length == 0">
-      <h3 style="margin-top: 30px">Please select at least one report!</h3>
+      <h3 style="margin-top: 30px">Please select at least one report from the dropdown on the top left!</h3>
+      <p>If no report is available there, you can upload one the following way:</p>
+      <pre>
+# Move to a folder where the results from TLS-Anvil are stored.
+# This folder is searched recursively for results,
+# so you can upload multiple reports at once.
+cd results
+
+# The executed container connects to the mongodb (default localhost:27017)
+# see --help for available options
+docker run \
+    --rm \
+    -it \
+    --network host \
+    -v $(pwd):/upload \
+    ghcr.io/tls-attacker/tlsanvil-result-uploader:latest
+
+      </pre>
     </template>
     <template v-else>
       <b-table

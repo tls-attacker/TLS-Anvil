@@ -2,7 +2,7 @@
 
 ### USENIX Security
 We released TLS-Anvil along with our paper for USENIX Security 2022.    
-[TLS-Anvil: Adapting Combinatorial Testing for TLS Libraries](https://www.usenix.org/conference/usenixsecurity22/presentation/maehren)  
+[TLS-Anvil: Adapting Combinatorial Testing for TLS Libraries](/TLS-Anvil-Paper.pdf)  
 
 The paper covers the following topics:
 * Introduction to Combinatorial Testing

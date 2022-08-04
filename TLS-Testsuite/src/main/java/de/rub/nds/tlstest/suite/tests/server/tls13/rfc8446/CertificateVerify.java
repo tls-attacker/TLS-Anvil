@@ -24,33 +24,24 @@ import de.rub.nds.tlsattacker.core.workflow.action.MessageAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import de.rub.nds.tlstest.suite.util.SignatureValidation;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -84,19 +75,9 @@ public class CertificateVerify extends Tls13Test {
         SignatureAndHashAlgorithm selectedSignatureAndHashAlgo = SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(certificateVerify.getSignatureHashAlgorithm().getValue());
         byte[] givenSignature = certificateVerify.getSignature().getValue();
         byte[] signedData = getCompleteSignedData(annotatedState);
-        Signature signatureInstance;
 
         try {
-            signatureInstance = Signature.getInstance(selectedSignatureAndHashAlgo.getJavaName());
-            selectedSignatureAndHashAlgo.setupSignature(signatureInstance);
-
-            X509EncodedKeySpec rsaKeySpec = new X509EncodedKeySpec(annotatedState.getState().getTlsContext().getServerCertificate().getCertificateAt(0).getSubjectPublicKeyInfo().getEncoded());
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            PublicKey rsaPublicKey = keyFactory.generatePublic(rsaKeySpec);
-
-            signatureInstance.initVerify(rsaPublicKey);
-            signatureInstance.update(signedData);
-            return signatureInstance.verify(givenSignature);
+            return SignatureValidation.validationSuccessful(selectedSignatureAndHashAlgo, annotatedState, signedData, givenSignature);
         } catch (SignatureException | InvalidKeyException | InvalidKeySpecException | IOException | InvalidAlgorithmParameterException | NoSuchAlgorithmException ex) {
             throw new AssertionError("Was unable to process signature for validation: " + ex);
         }

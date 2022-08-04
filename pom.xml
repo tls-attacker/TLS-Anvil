@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.rub.nds</groupId>
     <artifactId>TLS-Anvil</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <name>TLS-Anvil</name>
     <packaging>pom</packaging>
     <modules>

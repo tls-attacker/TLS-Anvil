@@ -7,12 +7,12 @@
     <groupId>de.rub.nds.tlstest</groupId>
     <artifactId>TLS-Test-Framework-Aggregator</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <name>TLS-Test-Framework-Aggregator</name>
     <parent>
         <groupId>de.rub.nds</groupId>
         <artifactId>TLS-Anvil</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
     </parent>
     <modules>
         <module>coffee4j</module>

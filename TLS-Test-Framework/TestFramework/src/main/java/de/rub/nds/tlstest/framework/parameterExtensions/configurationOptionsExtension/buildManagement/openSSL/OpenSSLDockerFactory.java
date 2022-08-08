@@ -48,7 +48,6 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
     private final String volumeNameCoverage = "coverage";
 
-    private final boolean withCoverage;
     private final String COVERAGE_DIRECTORY_NAME;
 
     private final String CCACHE_VOLUME_NAME = "ccache-cache";
@@ -57,12 +56,8 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
     public OpenSSLDockerFactory(ConfigurationOptionsConfig configurationOptionsConfig){
         super(configurationOptionsConfig, "openssl_img");
-        this.withCoverage = configurationOptionsConfig.isWithCoverage();
 
-        String coverageSuffix = "";
-        if(withCoverage){
-            coverageSuffix = "-cov";
-        }
+        String coverageSuffix = "-cov";
 
         FACTORY_REPRO_NAME = "openssl-factory"+coverageSuffix;
         TEMP_CONTAINER_NAME = "temp-openssl-container"+coverageSuffix;
@@ -85,12 +80,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
         Path dockerLibraryPath = configOptionsConfig.getDockerLibraryPath();
         String subfolderName;
-        if(configOptionsConfig.isWithCoverage()){
-            subfolderName = "configurationOptionsFactoryWithCoverage";
-        }
-        else{
-            subfolderName = "configurationOptionsFactory";
-        }
+        subfolderName = "configurationOptionsFactoryWithCoverage";
 
         Path partialPathToFactoryDockerfile = Paths.get("images", "openssl", subfolderName, "Dockerfile_Factory_OpenSSL");
         Path pathToFactoryDockerfile = dockerLibraryPath.resolve(partialPathToFactoryDockerfile);
@@ -221,13 +211,10 @@ public class OpenSSLDockerFactory extends DockerFactory {
         final int CONTAINER_PORT_TLS_SERVER = 4433;
         final int CONTAINER_MANAGER_PORT = 8090;
         List<String> entrypoint;
-        if(withCoverage){
-            final String coverageOutDir = String.format("%s/%s", COVERAGE_DIRECTORY_NAME, dockerTag);
-            entrypoint = Arrays.asList("/usr/opensslEntrypoint.sh", "-d", coverageOutDir, "server");
-        }
-        else{
-            entrypoint = Arrays.asList("server-entrypoint", "openssl", "s_server","-accept", Integer.toString(CONTAINER_PORT_TLS_SERVER), "-key", "/cert/ec256key.pem", "-cert", "/cert/ec256cert.pem", "-comp");
-        }
+
+        final String coverageOutDir = String.format("%s/%s", COVERAGE_DIRECTORY_NAME, dockerTag);
+        entrypoint = Arrays.asList("/usr/opensslEntrypoint.sh", "-d", coverageOutDir, "server");
+
         List<PortBinding> portBindings = new LinkedList<>();
         List<Bind> volumeBindings = new LinkedList<>();
 
@@ -239,9 +226,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
         String volumeNameCert = "cert-data";
         volumeBindings.add(new Bind(volumeNameCert, targetVolumeCert, AccessMode.ro, SELContext.DEFAULT, true));
-        if(withCoverage){
-            volumeBindings.add(new Bind(volumeNameCoverage, targetVolumeCoverage));
-        }
+        volumeBindings.add(new Bind(volumeNameCoverage, targetVolumeCoverage));
 
         String containerName = String.format("%s_server_%s", CONTAINER_NAME_PREFIX, dockerTag);
         String dockerContainerId = createDockerContainer(getBuildImageNameAndTag(dockerTag), entrypoint, portBindings, volumeBindings, containerName);
@@ -259,23 +244,18 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
         String connectionDest = String.format("%s:%d", tlsServerHost, tlsServerPort);
         List<String> entrypoint;
-        if(withCoverage){
-            final String coverageOutDir = String.format("%s/%s", COVERAGE_DIRECTORY_NAME, dockerTag);
-            entrypoint = Arrays.asList("/usr/opensslEntrypoint.sh", "-d", coverageOutDir, "client", connectionDest);
-        }
-        else{
-            entrypoint = Arrays.asList("client-entrypoint", "openssl", "s_client", "-connect", connectionDest, "-comp");
-        }
+
+        final String coverageOutDir = String.format("%s/%s", COVERAGE_DIRECTORY_NAME, dockerTag);
+        entrypoint = Arrays.asList("/usr/opensslEntrypoint.sh", "-d", coverageOutDir, "client", connectionDest);
+
 
         List<PortBinding> portBindings = new LinkedList<>();
         List<Bind> volumeBindings = new LinkedList<>();
 
         ExposedPort exposedManagerPort = ExposedPort.tcp(CONTAINER_PORT_MANAGER);
         portBindings.add(new PortBinding(Ports.Binding.bindIpAndPort(configOptionsConfig.getDockerHostBinding(), dockerManagerPort), exposedManagerPort));
+        volumeBindings.add(new Bind(volumeNameCoverage, targetVolumeCoverage));
 
-        if(withCoverage){
-            volumeBindings.add(new Bind(volumeNameCoverage, targetVolumeCoverage));
-        }
 
         String containerName = String.format("%s_client_%s", CONTAINER_NAME_PREFIX, dockerTag);
         String dockerContainerId = createDockerContainer(getBuildImageNameAndTag(dockerTag), entrypoint, portBindings, volumeBindings, containerName);

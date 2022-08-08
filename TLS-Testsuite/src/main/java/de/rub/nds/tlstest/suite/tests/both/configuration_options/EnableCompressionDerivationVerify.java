@@ -10,6 +10,15 @@
 package de.rub.nds.tlstest.suite.tests.both.configuration_options;
 
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+
 import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
@@ -21,18 +30,9 @@ import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.ParameterExtensionManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundParameter;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableCompressionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-
-import java.util.LinkedList;
-import java.util.List;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-
-import static org.junit.Assert.assertTrue;
 
 @Tag("co")
 public class EnableCompressionDerivationVerify extends Tls12Test {
@@ -57,7 +57,7 @@ public class EnableCompressionDerivationVerify extends Tls12Test {
     public void compressionDisabledByOption(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         getPreparedConfig(argumentAccessor, runner);
         TestSiteReport report = this.derivationContainer.getAssociatedSiteReport();
-        ConfigurationOptionCompoundParameter compoundParameter = this.derivationContainer.getDerivation(ConfigurationOptionCompoundParameter.class);
+        ConfigurationOptionCompoundDerivation compoundParameter = this.derivationContainer.getDerivation(ConfigurationOptionCompoundDerivation.class);
         EnableCompressionDerivation enableCompressionDerivation = compoundParameter.getDerivation(EnableCompressionDerivation.class);
 
         if(!enableCompressionDerivation.getSelectedValue().isOptionSet()){

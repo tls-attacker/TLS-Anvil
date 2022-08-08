@@ -9,22 +9,18 @@
  */
 package de.rub.nds.tlstest.framework.model;
 
-import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
-import de.rub.nds.tlsattacker.core.constants.ExtensionType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
-import de.rwth.swc.coffee4j.model.InputParameterModel;
 import static de.rwth.swc.coffee4j.model.InputParameterModel.inputParameterModel;
-import de.rwth.swc.coffee4j.model.Parameter;
-import de.rwth.swc.coffee4j.model.constraints.Constraint;
+
 import java.util.LinkedList;
 import java.util.List;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rwth.swc.coffee4j.model.InputParameterModel;
+import de.rwth.swc.coffee4j.model.Parameter;
+import de.rwth.swc.coffee4j.model.constraints.Constraint;
 
 /**
  * Provides a model for Coffee4j or a SimpleTlsTest

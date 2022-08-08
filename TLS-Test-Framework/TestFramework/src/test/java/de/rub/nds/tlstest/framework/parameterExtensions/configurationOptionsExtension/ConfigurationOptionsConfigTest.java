@@ -32,7 +32,6 @@ public class ConfigurationOptionsConfigTest {
                         "        <dockerClientDestinationHost>172.26.103.178</dockerClientDestinationHost>\n" +
                         "    </dockerConfig>\n" +
                         "    <disableSiteReportConsoleLog>false</disableSiteReportConsoleLog>\n" +
-                        "    <withCoverage>true</withCoverage>\n" +
                         "    <maxRunningContainers>42</maxRunningContainers>\n" +
                         "\n" +
                         "    <optionsToTest>\n" +

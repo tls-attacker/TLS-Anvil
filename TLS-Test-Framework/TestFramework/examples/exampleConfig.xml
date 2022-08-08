@@ -34,8 +34,6 @@
              Note that localhost of containers is not localhost of the host. Use 'host.docker.internal' for the host's localhost. -->
         <dockerClientDestinationHost>host.docker.internal</dockerClientDestinationHost>
     </dockerConfig>
-    <!-- Optional: Enables code coverage. For OpenSSL other dockerfiles are used for testing with coverage. Default: false -->
-    <withCoverage>true</withCoverage>
     <!-- Optional: Configures how many containers are running simultaneously. Rarely used containers are paused meanwhile. Default: 16 -->
     <maxRunningContainers>6</maxRunningContainers>
     <!-- Optional: Configures how many containers are shutdown simultaneously. Note that for coverage mode the coverage is
@@ -240,15 +238,6 @@
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>no-srp</true>
-                <false></false>
-            </valueTranslation>
-        </optionEntry>
-        <optionEntry>
-            <derivationType>ConfigOptionDerivationType.EnableDevelopmentFlags</derivationType>
-            <!-- Causes trouble in connection with with-rand-seed=devrandom/cpucommand -->
-            <enabled>false</enabled>
-            <valueTranslation type="Flag">
-                <true>--strict-warnings</true>
                 <false></false>
             </valueTranslation>
         </optionEntry>

@@ -14,7 +14,6 @@ import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.openSSL.OpenSSLBuildManager;
-import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -50,11 +49,10 @@ public class ConfigurationOptionsConfig {
 
     private int configOptionsIpmStrength; // default: strength of main IPM
 
-    private boolean withCoverage;
     private int maxRunningContainers; // default 16
     /** Defines how many containers should be shutdown simultaneously. When measuring coverage the coverage data
      * is collected at the shutdown. Therefore it is much more CPU expensive than a simple shutdown.*/
-    private int maxRunningContainerShutdowns; // default 8 with coverage or maxRunningContainers/2 without coverage
+    private int maxRunningContainerShutdowns; // default 8
 
     // Docker Config (not required, but necessary for build managers that work with docker)
     private boolean dockerConfigPresent;
@@ -88,10 +86,6 @@ public class ConfigurationOptionsConfig {
 
     public ConfigurationOptionsBuildManager getBuildManager() { // temporary a String
         return buildManager;
-    }
-
-    public boolean isWithCoverage() {
-        return withCoverage;
     }
 
     public int getConfigOptionsIpmStrength() { return configOptionsIpmStrength; }
@@ -153,7 +147,6 @@ public class ConfigurationOptionsConfig {
 
 
             parseAndConfigureDockerConfig(rootElement);
-            parseAndConfigureWithCoverage(rootElement);
 
             parseAndConfigureMaxRunningContainers(rootElement);
             parseAndConfigureMaxRunningContainerShutdowns(rootElement);
@@ -179,16 +172,6 @@ public class ConfigurationOptionsConfig {
         buildManager = getBuildManagerFromString(Objects.requireNonNull(XmlParseUtils.findElement(rootElement, "buildManager", true)).getTextContent());
     }
 
-    private void parseAndConfigureWithCoverage(Element rootElement){
-        Element withCoverageElement =  XmlParseUtils.findElement(rootElement, "withCoverage", false);
-        if(withCoverageElement != null){
-            withCoverage = Boolean.parseBoolean(withCoverageElement.getTextContent());
-        }
-        else{
-            withCoverage = false;
-        }
-    }
-
     private void parseAndConfigureConfigOptionsIpmStrength(Element rootElement){
         Element configOptionsIpmStrengthElement =  XmlParseUtils.findElement(rootElement, "configOptionsIpmStrength", false);
         if(configOptionsIpmStrengthElement != null){
@@ -209,20 +192,14 @@ public class ConfigurationOptionsConfig {
         }
     }
 
-    // Must be called after parseAndConfigureWithCoverage and parseAndConfigureMaxRunningContainers
+    // Must be called after parseAndConfigureMaxRunningContainers
     private void parseAndConfigureMaxRunningContainerShutdowns(Element rootElement){
         Element maxRunningContainersElement =  XmlParseUtils.findElement(rootElement, "maxRunningContainerShutdowns", false);
         if(maxRunningContainersElement != null){
             maxRunningContainerShutdowns = Integer.parseInt(maxRunningContainersElement.getTextContent());
         }
         else{
-            if(withCoverage){
-                maxRunningContainerShutdowns = 8; // default
-            }
-            else{
-                // Ceil ensures that maxRunningContainerShutdowns > 0
-                maxRunningContainerShutdowns = (int) Math.ceil( ( (float) maxRunningContainers) / 2.0f );
-            }
+            maxRunningContainerShutdowns = 8; // default
         }
     }
 

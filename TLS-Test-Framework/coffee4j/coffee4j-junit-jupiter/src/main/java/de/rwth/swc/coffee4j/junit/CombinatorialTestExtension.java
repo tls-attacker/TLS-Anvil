@@ -1,11 +1,14 @@
 package de.rwth.swc.coffee4j.junit;
 
-import de.rwth.swc.coffee4j.junit.provider.configuration.ConfigurationLoader;
-import de.rwth.swc.coffee4j.junit.provider.model.ModelLoader;
-import de.rwth.swc.coffee4j.model.Combination;
-import de.rwth.swc.coffee4j.model.InputParameterModel;
-import de.rwth.swc.coffee4j.model.manager.CombinatorialTestConsumerManager;
-import de.rwth.swc.coffee4j.model.manager.CombinatorialTestConsumerManagerConfiguration;
+import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
+import static org.junit.platform.commons.util.AnnotationUtils.isAnnotated;
+
+import java.lang.reflect.Method;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
@@ -14,14 +17,12 @@ import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 import org.junit.platform.commons.JUnitException;
 import org.junit.platform.commons.util.Preconditions;
 
-import java.lang.reflect.Method;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
-import static org.junit.platform.commons.util.AnnotationUtils.isAnnotated;
+import de.rwth.swc.coffee4j.junit.provider.configuration.ConfigurationLoader;
+import de.rwth.swc.coffee4j.junit.provider.model.ModelLoader;
+import de.rwth.swc.coffee4j.model.Combination;
+import de.rwth.swc.coffee4j.model.InputParameterModel;
+import de.rwth.swc.coffee4j.model.manager.CombinatorialTestConsumerManager;
+import de.rwth.swc.coffee4j.model.manager.CombinatorialTestConsumerManagerConfiguration;
 
 /**
  * The extension handling a {@link CombinatorialTest}. Creates one {@link CombinatorialTestInvocationContext}

@@ -10,6 +10,16 @@
 package de.rub.nds.tlstest.suite.tests.both.configuration_options;
 
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+
 import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestSiteReport;
@@ -22,19 +32,9 @@ import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.ParameterExtensionManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundParameter;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePskDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-
-import static org.junit.Assert.assertEquals;
 
 @Tag("co")
 public class DisablePskDerivationVerify extends Tls12Test {
@@ -59,7 +59,7 @@ public class DisablePskDerivationVerify extends Tls12Test {
     public void pskCiphersuitesDisabled(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         getPreparedConfig(argumentAccessor, runner);
         TestSiteReport report = this.derivationContainer.getAssociatedSiteReport();
-        ConfigurationOptionCompoundParameter compoundParameter = this.derivationContainer.getDerivation(ConfigurationOptionCompoundParameter.class);
+        ConfigurationOptionCompoundDerivation compoundParameter = this.derivationContainer.getDerivation(ConfigurationOptionCompoundDerivation.class);
         DisablePskDerivation disablePskDerivation = compoundParameter.getDerivation(DisablePskDerivation.class);
 
         if(!disablePskDerivation.getSelectedValue().isOptionSet()){

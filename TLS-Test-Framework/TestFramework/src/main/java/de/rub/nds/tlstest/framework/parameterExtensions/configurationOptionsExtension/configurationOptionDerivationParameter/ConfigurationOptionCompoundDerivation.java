@@ -10,30 +10,38 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter;
 
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
+import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 
-import java.util.*;
-import java.util.concurrent.Callable;
-
-public class ConfigurationOptionCompoundParameter extends DerivationParameter<List<ConfigurationOptionDerivationParameter>> {
+public class ConfigurationOptionCompoundDerivation extends DerivationParameter<List<ConfigurationOptionDerivationParameter>> {
 
     private final List<List<ConfigurationOptionDerivationParameter>> configOptionsSetupsList;
 
     @SuppressWarnings("unchecked")
-    public ConfigurationOptionCompoundParameter(List<List<ConfigurationOptionDerivationParameter>> setupsList){
+    public ConfigurationOptionCompoundDerivation(List<List<ConfigurationOptionDerivationParameter>> setupsList){
         super(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter, (Class<List<ConfigurationOptionDerivationParameter>>)(Object)List.class);
         configOptionsSetupsList = setupsList;
     }
 
-    private ConfigurationOptionCompoundParameter(List<List<ConfigurationOptionDerivationParameter>> setupsList,
+    private ConfigurationOptionCompoundDerivation(List<List<ConfigurationOptionDerivationParameter>> setupsList,
                                                  List<ConfigurationOptionDerivationParameter> selectedValue){
         this(setupsList);
         setSelectedValue(selectedValue);
@@ -58,7 +66,7 @@ public class ConfigurationOptionCompoundParameter extends DerivationParameter<Li
                     constrainedSetupList.set(i, defaultParam);
                 }
             }
-            parameterValues.add(new ConfigurationOptionCompoundParameter(this.configOptionsSetupsList, constrainedSetupList));
+            parameterValues.add(new ConfigurationOptionCompoundDerivation(this.configOptionsSetupsList, constrainedSetupList));
         }
 
         return parameterValues;
@@ -97,5 +105,57 @@ public class ConfigurationOptionCompoundParameter extends DerivationParameter<Li
 
     @Override
     public void applyToConfig(Config config, TestContext context) { }
+
+    @Override
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
+        List<ConditionalConstraint> condConstraints = new LinkedList<>();
+        condConstraints.add(getWeakCipherSuitesMustBeEnabledToBeUsedConstraint());
+        return condConstraints;
+    }
+
+    private boolean isWeakCiphersuite(CipherSuite cipherSuite){
+        boolean isWeak = cipherSuite.isWeak();
+        isWeak = isWeak || cipherSuite.name().contains("RC2");
+        isWeak = isWeak || cipherSuite.name().contains("RC4");
+        isWeak = isWeak || cipherSuite.name().contains("MD5");
+        isWeak = isWeak || cipherSuite.name().contains("DES"); // DES or 3DES
+        
+        return isWeak;
+    }
+
+    /**
+     * When using the EnableWeakSslCiphersDerivation CO the CipherSuiteDerivation gets more cipher suites in its list.
+     * This list is created BEFORE the test vector creation, so we cannot demand from the Derivation that it only
+     * uses the weak cipher suites for tests with the EnableWeakSslCiphersDerivation CO set. The only sensible workaround
+     * seems to be to add a constraint to prevent combinations without the CO set and weak cipher suites.
+     *
+     * Note that this method slightly violates the covering array combinations between weak cipher suites and other
+     * config options since disabling combinations with a weak cipher suite and
+     * EnableWeakSslCiphersDerivation=FLAG_NOT_SET disables the entire test vector of CO. To minimize this effect
+     * we sort the values of the EnableWeakSslCiphersDerivation so that most test vectors enable the CO.
+     *
+     * @return the constraint.
+     */
+    private ConditionalConstraint getWeakCipherSuitesMustBeEnabledToBeUsedConstraint() {
+        Set<DerivationType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
+        requiredDerivations.add(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter);
+        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter.name(), BasicDerivationType.CIPHERSUITE.name()).withName("WeakCipherSuitesMustBeEnabledToBeUsed").by((ConfigurationOptionCompoundDerivation coCompoundDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
+            EnableWeakSslCiphersDerivation enableWeakSslCiphersDerivation = coCompoundDerivation.getDerivation(EnableWeakSslCiphersDerivation.class);
+            //return true; //TODO: Debug only
+            if(enableWeakSslCiphersDerivation == null){
+                // The EnableWeakSslCiphersDerivation is not used, so the cipher suite list has no weak cipher suites
+                return true;
+            }
+            if(enableWeakSslCiphersDerivation.getSelectedValue().isOptionSet()){
+                // Weak cipher suites are supported
+                return true;
+            }
+            // Selected cipher suite must not be weak
+            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
+
+            return !isWeakCiphersuite(selectedCipherSuite);
+        }));
+    }
 
 }

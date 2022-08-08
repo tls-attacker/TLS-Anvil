@@ -9,16 +9,15 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.constraint.ValueConstraint;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 public class CipherSuiteDerivation extends DerivationParameter<CipherSuite> {
     

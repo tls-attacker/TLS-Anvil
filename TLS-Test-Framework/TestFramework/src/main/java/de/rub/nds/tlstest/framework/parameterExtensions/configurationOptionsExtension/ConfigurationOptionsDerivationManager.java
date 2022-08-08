@@ -9,35 +9,67 @@
  */
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.function.Supplier;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
-import de.rub.nds.tlstest.framework.model.*;
+import de.rub.nds.tlstest.framework.model.DerivationCategoryManager;
+import de.rub.nds.tlstest.framework.model.DerivationScope;
+import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.*;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableAfalgEngineDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableAssemblerCodeDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableBinaryEllipticCurvesDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableCertificateTransparencyDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableErrorStringsDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableExtensionForIpAddressesAndAsIdentifiersDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableMultiblockDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableNextProtocolNegotiationExtensionDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableOcspSupportDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePadlockEngineDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePosixIoDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePskDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableRdrandDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableSrpCiphersuitesDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableSse2Derivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableCompressionDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableDevelopmentFlagsDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableEntropyGatheringDaemonDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableMd2Derivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableMemoryDebuggingSupportDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableNistEcOptimizationsDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableRc5Derivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableWeakSslCiphersDerivation;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.SeedingMethodDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
-
 import de.rwth.swc.coffee4j.engine.constraint.HardConstraintCheckerFactory;
 import de.rwth.swc.coffee4j.engine.generator.TestInputGroup;
 import de.rwth.swc.coffee4j.engine.generator.ipog.Ipog;
 import de.rwth.swc.coffee4j.engine.report.Report;
 import de.rwth.swc.coffee4j.engine.report.ReportLevel;
+import de.rwth.swc.coffee4j.engine.report.Reporter;
 import de.rwth.swc.coffee4j.model.Combination;
 import de.rwth.swc.coffee4j.model.InputParameterModel;
-import de.rwth.swc.coffee4j.engine.report.Reporter;
-
 import de.rwth.swc.coffee4j.model.Parameter;
 import de.rwth.swc.coffee4j.model.Value;
 import de.rwth.swc.coffee4j.model.converter.IndexBasedModelConverter;
 import de.rwth.swc.coffee4j.model.converter.ModelConverter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.function.Supplier;
 
 /**
  * The DerivationCategoryManager responsible for the ConfigOptionsDerivationType. It also contains the configured
@@ -72,7 +104,7 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
                 if(compoundSetupList == null){
                     throw new IllegalStateException("Cannot get ConfigurationOptionCompoundParameter before ConfigurationOptionsConfig was initialized.");
                 }
-                return new ConfigurationOptionCompoundParameter(compoundSetupList);
+                return new ConfigurationOptionCompoundDerivation(compoundSetupList);
             case DisablePsk:
                 return new DisablePskDerivation();
             case SeedingMethod:

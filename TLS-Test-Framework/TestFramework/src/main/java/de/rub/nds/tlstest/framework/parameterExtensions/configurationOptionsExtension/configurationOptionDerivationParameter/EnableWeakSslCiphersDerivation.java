@@ -10,18 +10,13 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter;
 
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import java.util.LinkedList;
+import java.util.List;
+
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 public class EnableWeakSslCiphersDerivation extends ConfigurationOptionDerivationParameter {
     public EnableWeakSslCiphersDerivation(){
@@ -36,14 +31,14 @@ public class EnableWeakSslCiphersDerivation extends ConfigurationOptionDerivatio
     @Override
     public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new EnableWeakSslCiphersDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new EnableWeakSslCiphersDerivation(new ConfigurationOptionValue(true)));
-
+        parameterValues.add(new EnableWeakSslCiphersDerivation(new ConfigurationOptionValue(false)));
+        
         return parameterValues;
     }
 
     @Override
     public ConfigurationOptionValue getMaxFeatureValue() {
-        return new ConfigurationOptionValue(false);
+        return new ConfigurationOptionValue(true);
     }
 }

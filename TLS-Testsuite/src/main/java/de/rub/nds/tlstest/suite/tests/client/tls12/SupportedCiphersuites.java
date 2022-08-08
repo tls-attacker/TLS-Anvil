@@ -39,7 +39,7 @@ import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.ParameterExtensionManager;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
-@Tag("debug")
+
 @ClientTest
 public class SupportedCiphersuites extends Tls12Test {
 
@@ -65,7 +65,7 @@ public class SupportedCiphersuites extends Tls12Test {
                 supported.size());
     }
 
-
+    // Note: Fails in current CO tests due to TLS-Attacker problems with ARIA and IDEA cipher suites.
     @Test
     @TestDescription("Client exploration detected less supported ciphersuites than " +
             "advertised by the client in the ClientHello message.")
@@ -125,6 +125,7 @@ public class SupportedCiphersuites extends Tls12Test {
                 supported.size());
     }
 
+     // Note: Fails in current CO tests due to TLS-Attacker problems with ARIA and IDEA cipher suites.
     @TlsTest(description = "Client exploration detected less supported ciphersuites than " +
         "advertised by the client in the ClientHello message. (Tested for all builds for configuration option tests)")
     @MethodCondition(method = "configurationOptionsTested")

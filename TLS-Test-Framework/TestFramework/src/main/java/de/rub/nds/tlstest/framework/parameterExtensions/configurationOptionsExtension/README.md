@@ -47,7 +47,7 @@ For deeper analysis, you may want to collect the information of all individual `
 
 ## Known Issues and TODOs
 -   It seems that the following cipher suite `TLS_ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384` does not work in the current version. Perhabs, a TLS-Attacker bug.
--   It seems that the FFDHE named groups do not work in the current version. Perhabs, a TLS-Attacker bug.
+-   It seems that the FFDHE named groups do not work in the current version for client tests. Perhabs, a TLS-Attacker bug.
 -   The exclusion of unfeatured test methods is based on a single 'maximal site report'. It contains the features supported by the build created with all 'enable' options and no 'disable' options. A more elegant solution is to use the site reports of all builds to to find the tests to exclude. However, to gracefully implement this approach, a new architecture is required to properly combine the needs for non-CO and CO exclusions. Otherwise, every exclusion would need something like: `if(<CO extension enabled>){for(<All Site Reports>){...}}`. This approach would be messy and against the spirit of an extension system.
 -   The cli command to start the extension should not require dummy values for host and port. However, we need a pretty invasive intervention in command handling to achieve this. For simplicity, it was left out.
 

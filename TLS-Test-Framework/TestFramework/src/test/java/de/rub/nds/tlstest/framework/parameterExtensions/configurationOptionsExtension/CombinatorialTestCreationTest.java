@@ -91,7 +91,7 @@ public class CombinatorialTestCreationTest {
                     "Combinations (CO alone):         %d\n"+
                     "Combinations (old combined):     %d\n"+
                     "Combinations (every-with-every): %d\n"+
-                    "Combinations (IPM-ception):      %d\n"+
+                    "Combinations (IPM-nesting):      %d\n"+
                     "----------------------------------------\n",
                     strength, defaultSize,COSize,oldSize,everyWithEverySize,ipmCeptionSize
             ));

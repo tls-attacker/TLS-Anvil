@@ -27,6 +27,7 @@ public class ConfigurationOptionsConfigTest {
                         "    <buildManager>OpenSSLBuildManager</buildManager>\n" +
                         "    <dockerConfig>\n" +
                         "        <dockerLibraryPath>/Path/to/dockerLib/</dockerLibraryPath>\n" +
+                        "        <dockerHostBinding>127.0.0.41</dockerHostBinding>\n" +
                         "        <dockerHostName>127.0.0.42</dockerHostName>\n" +
                         "        <portRange>4433-5433</portRange>\n" +
                         "        <dockerClientDestinationHost>172.26.103.178</dockerClientDestinationHost>\n" +
@@ -84,6 +85,7 @@ public class ConfigurationOptionsConfigTest {
         // Check docker stuff
         assertTrue(config.isDockerConfigPresent());
         assertTrue(config.getDockerLibraryPath().endsWith("Path/to/dockerLib/"));
+        assertEquals("127.0.0.41", config.getDockerHostBinding());
         assertEquals("127.0.0.42", config.getDockerHostName());
         assertEquals(PortRange.fromString("4433-5433"), config.getDockerPortRange());
         assertEquals(42, config.getMaxRunningContainers());

@@ -9,11 +9,14 @@
  */
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
@@ -80,6 +83,8 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
     private static final Logger LOGGER = LogManager.getLogger();
     private ConfigurationOptionsConfig config;
     private List<List<ConfigurationOptionDerivationParameter>> compoundSetupList;
+    private Map<List<ConfigurationOptionDerivationParameter>, TestSiteReport> compoundSetupToSiteReport;
+    
 
     public static synchronized ConfigurationOptionsDerivationManager getInstance() {
         if (ConfigurationOptionsDerivationManager.instance == null) {
@@ -91,6 +96,7 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
     private ConfigurationOptionsDerivationManager(){
         config = null;
         compoundSetupList = null;
+        compoundSetupToSiteReport = null;
     }
 
     @Override
@@ -199,6 +205,14 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         return config.getBuildManager();
     }
 
+    public Map<List<ConfigurationOptionDerivationParameter>, TestSiteReport> getCompoundSetupToSiteReport(){
+        return compoundSetupToSiteReport;
+    }
+
+    public List<TestSiteReport> getAllCompondSiteReports(){
+        return new ArrayList<TestSiteReport>(compoundSetupToSiteReport.values());
+    }
+
     public static class LoggerReporter implements Reporter{
         @Override
         public void report(ReportLevel level, Report report) {
@@ -285,6 +299,7 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         int buildFailedSetupCount = 0;
 
         List<List<ConfigurationOptionDerivationParameter>> successfulSetups = new LinkedList<>();
+        compoundSetupToSiteReport = new HashMap<List<ConfigurationOptionDerivationParameter>, TestSiteReport>();
 
         for(List<ConfigurationOptionDerivationParameter> setup : compoundSetupList){
             try {
@@ -294,6 +309,7 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
                         getConfigurationOptionsBuildManager().configureOptionSetAndReturnGetSiteReportCallable(config, TestContext.getInstance(), setupSet);
                 TestSiteReport siteReport = testSiteReportCallable.call();
 
+                compoundSetupToSiteReport.put(setup, siteReport);
                 successfulSetups.add(setup);
             }
             catch(Exception e){
@@ -313,31 +329,3 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//

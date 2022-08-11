@@ -129,10 +129,7 @@ public class ConfigurationOptionCompoundDerivation extends DerivationParameter<L
      * uses the weak cipher suites for tests with the EnableWeakSslCiphersDerivation CO set. The only sensible workaround
      * seems to be to add a constraint to prevent combinations without the CO set and weak cipher suites.
      *
-     * Note that this method slightly violates the covering array combinations between weak cipher suites and other
-     * config options since disabling combinations with a weak cipher suite and
-     * EnableWeakSslCiphersDerivation=FLAG_NOT_SET disables the entire test vector of CO. To minimize this effect
-     * we sort the values of the EnableWeakSslCiphersDerivation so that most test vectors enable the CO.
+     * Note that this method does not violate combinatorial testing (at least for one such constraint). 
      *
      * @return the constraint.
      */
@@ -142,7 +139,6 @@ public class ConfigurationOptionCompoundDerivation extends DerivationParameter<L
         requiredDerivations.add(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter);
         return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter.name(), BasicDerivationType.CIPHERSUITE.name()).withName("WeakCipherSuitesMustBeEnabledToBeUsed").by((ConfigurationOptionCompoundDerivation coCompoundDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
             EnableWeakSslCiphersDerivation enableWeakSslCiphersDerivation = coCompoundDerivation.getDerivation(EnableWeakSslCiphersDerivation.class);
-            //return true; //TODO: Debug only
             if(enableWeakSslCiphersDerivation == null){
                 // The EnableWeakSslCiphersDerivation is not used, so the cipher suite list has no weak cipher suites
                 return true;

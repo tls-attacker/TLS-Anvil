@@ -33,7 +33,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
 
         String uniqueId = Utils.getTemplateContainerExtensionContext(context).getUniqueId();
         AnnotatedStateContainer container = TestContext.getInstance().getTestResults().get(uniqueId);
-        if (container != null || TestContext.getInstance().testIsFinished(uniqueId)) {
+        if (container != null && TestContext.getInstance().testIsFinished(uniqueId)) {
             return container;
         }
 
@@ -61,6 +61,9 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
     synchronized public void testFailed(ExtensionContext context, Throwable cause) {
         TestContext.getInstance().testFailed();
         AnnotatedStateContainer container = createResult(context, TestResult.FAILED);
+        if(container == null){
+            int i = 0;
+        }
         AnnotatedState state = container.getStates().stream()
                 .filter(i -> i.getExtensionContext().getUniqueId().equals(context.getUniqueId()))
                 .findFirst()

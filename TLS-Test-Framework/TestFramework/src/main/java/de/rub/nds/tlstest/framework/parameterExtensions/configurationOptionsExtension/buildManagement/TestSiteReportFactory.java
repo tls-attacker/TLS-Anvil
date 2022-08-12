@@ -54,7 +54,6 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.filter.ThresholdFilter;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.util.*;
 import java.util.stream.Collectors;
 

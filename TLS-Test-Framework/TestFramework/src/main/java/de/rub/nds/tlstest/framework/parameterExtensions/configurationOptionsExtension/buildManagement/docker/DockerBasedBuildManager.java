@@ -109,31 +109,33 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * @return the site report of the built for the passed option set
      */
     @Override
-    public synchronized Callable<TestSiteReport> configureOptionSetAndReturnGetSiteReportCallable(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet) {
+    public Callable<TestSiteReport> configureOptionSetAndReturnGetSiteReportCallable(Config config, TestContext context, Set<ConfigurationOptionDerivationParameter> optionSet) {
         String buildTag =  provideDockerContainer(optionSet);
-        DockerTestContainer containerInfo = dockerTagToContainerInfo.get(buildTag);
-        containerInfo.startUsage();
-        stopRarelyUsedContainers();
-        //TestSiteReport report = containerInfo.getSiteReport();
-        Callable<TestSiteReport> siteReportCallback = new SiteReportCallback(containerInfo);
+        synchronized(this){
+            DockerTestContainer containerInfo = dockerTagToContainerInfo.get(buildTag);
+            containerInfo.startUsage();
+            stopRarelyUsedContainers();
 
-        // Configure the port in the config
-        if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER){
-            DockerServerTestContainer serverContainerInfo = (DockerServerTestContainer) containerInfo;
-            OutboundConnection connection = new OutboundConnection(serverContainerInfo.getTlsServerPort(), configOptionsConfig.getDockerHostName());
-            config.setDefaultClientConnection(connection);
-        }
-        else if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT){
-            DockerClientTestContainer clientContainerInfo = (DockerClientTestContainer) containerInfo;
+            Callable<TestSiteReport> siteReportCallback = new SiteReportCallback(containerInfo);
 
-            InboundConnection inboundConnection = createInboundConnectionForContainer(clientContainerInfo);
-            config.setDefaultServerConnection(inboundConnection);
-        }
-        else{
-            throw new IllegalStateException("TestEndpointMode is invalid.");
-        }
+            // Configure the port in the config
+            if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER){
+                DockerServerTestContainer serverContainerInfo = (DockerServerTestContainer) containerInfo;
+                OutboundConnection connection = new OutboundConnection(serverContainerInfo.getTlsServerPort(), configOptionsConfig.getDockerHostName());
+                config.setDefaultClientConnection(connection);
+            }
+            else if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT){
+                DockerClientTestContainer clientContainerInfo = (DockerClientTestContainer) containerInfo;
 
-        return siteReportCallback;
+                InboundConnection inboundConnection = createInboundConnectionForContainer(clientContainerInfo);
+                config.setDefaultServerConnection(inboundConnection);
+            }
+            else{
+                throw new IllegalStateException("TestEndpointMode is invalid.");
+            }
+
+            return siteReportCallback;
+        }
     }
 
     /**
@@ -143,7 +145,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * @param optionSet - the options set to use
      * @return the dockerTag for the created implementation. The tag can be used to find the created container and the TestSiteReport.
      */
-    protected synchronized String provideDockerContainer(Set<ConfigurationOptionDerivationParameter> optionSet){
+    protected String provideDockerContainer(Set<ConfigurationOptionDerivationParameter> optionSet){
         List<String> cliOptions = createConfigOptionCliList(optionSet);
         String dockerTag = dockerFactory.computeDockerTag(cliOptions, configOptionsConfig.getTlsVersionName());
         String dockerNameWithTag = dockerFactory.getBuildImageNameAndTag(dockerTag);
@@ -170,29 +172,32 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
                     throw new RuntimeException(String.format("Cannot create docker container for tag '%s'. Building failed.", dockerTag));
                 }
             }
+            synchronized(this)
+            {
+                if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT){
+                    DockerClientTestContainer container = dockerFactory.createDockerClient(dockerTag, configOptionsConfig.getDockerHostName(), occupyNextPort(), configOptionsConfig.getDockerClientDestinationHostName(), occupyNextPort());
+                    TestCOMultiClientDelegate delegate = (TestCOMultiClientDelegate)TestContext.getInstance().getConfig().getTestClientDelegate();
+                    delegate.registerNewConnection(container);
+                    providedContainer = container;
+                }
+                else if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER){
+                    providedContainer = dockerFactory.createDockerServer(dockerTag, configOptionsConfig.getDockerHostName(), occupyNextPort(), occupyNextPort());
+                }
+                else{
+                    throw new IllegalStateException("TestEndpointMode is invalid.");
+                }
+                runContainer(providedContainer);
 
-            if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT){
-                DockerClientTestContainer container = dockerFactory.createDockerClient(dockerTag, configOptionsConfig.getDockerHostName(), occupyNextPort(), configOptionsConfig.getDockerClientDestinationHostName(), occupyNextPort());
-                TestCOMultiClientDelegate delegate = (TestCOMultiClientDelegate)TestContext.getInstance().getConfig().getTestClientDelegate();
-                delegate.registerNewConnection(container);
-                providedContainer = container;
+                //resultsCollector.logContainer(providedContainer);
+                providedContainer.enableContainerLogging(resultsCollector, "ContainerLog", dockerTag);
+                dockerTagToContainerInfo.put(dockerTag, providedContainer);
+                dockerTagToAccessCount.put(dockerTag, 0);
             }
-            else if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER){
-                providedContainer = dockerFactory.createDockerServer(dockerTag, configOptionsConfig.getDockerHostName(), occupyNextPort(), occupyNextPort());
-            }
-            else{
-                throw new IllegalStateException("TestEndpointMode is invalid.");
-            }
-            runContainer(providedContainer);
-
-            //resultsCollector.logContainer(providedContainer);
-            providedContainer.enableContainerLogging(resultsCollector, "ContainerLog", dockerTag);
-            dockerTagToContainerInfo.put(dockerTag, providedContainer);
-            dockerTagToAccessCount.put(dockerTag, 0);
         }
-
-        resultsCollector.logBuildAccess(optionSet, dockerTag);
-        dockerTagToAccessCount.put(dockerTag, dockerTagToAccessCount.get(dockerTag)+1);
+        synchronized(this){
+            resultsCollector.logBuildAccess(optionSet, dockerTag);
+            dockerTagToAccessCount.put(dockerTag, dockerTagToAccessCount.get(dockerTag)+1);
+        }
         return dockerTag;
     }
 

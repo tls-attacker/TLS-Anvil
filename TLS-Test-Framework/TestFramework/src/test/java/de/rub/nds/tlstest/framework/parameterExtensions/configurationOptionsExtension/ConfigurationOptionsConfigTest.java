@@ -33,6 +33,7 @@ public class ConfigurationOptionsConfigTest {
                         "        <dockerClientDestinationHost>172.26.103.178</dockerClientDestinationHost>\n" +
                         "    </dockerConfig>\n" +
                         "    <disableSiteReportConsoleLog>false</disableSiteReportConsoleLog>\n" +
+                        "   <maxSimultaneousBuilds>3</maxSimultaneousBuilds>\n" +
                         "    <maxRunningContainers>42</maxRunningContainers>\n" +
                         "\n" +
                         "    <optionsToTest>\n" +
@@ -89,6 +90,7 @@ public class ConfigurationOptionsConfigTest {
         assertEquals("127.0.0.42", config.getDockerHostName());
         assertEquals(PortRange.fromString("4433-5433"), config.getDockerPortRange());
         assertEquals(42, config.getMaxRunningContainers());
+        assertEquals(3, config.getMaxSimultaneousBuilds());
 
         // Check flag translation
         {

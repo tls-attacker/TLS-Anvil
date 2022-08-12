@@ -37,7 +37,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
     private static final Logger LOGGER = LogManager.getLogger();
 
     private final String FACTORY_REPRO_NAME;
-    private final String TEMP_CONTAINER_NAME;
+    private final String TEMP_CONTAINER_PREFIX;
     private final String TEMP_REPRO_NAME;
 
 
@@ -60,7 +60,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
         String coverageSuffix = "-cov";
 
         FACTORY_REPRO_NAME = "openssl-factory"+coverageSuffix;
-        TEMP_CONTAINER_NAME = "temp-openssl-container"+coverageSuffix;
+        TEMP_CONTAINER_PREFIX = "temp-openssl-container"+coverageSuffix;
         TEMP_REPRO_NAME = "temp_openssl_img"+coverageSuffix;
         BUILD_REPRO_NAME = "openssl_img"+coverageSuffix;
         CONTAINER_NAME_PREFIX = "container"+coverageSuffix;
@@ -123,35 +123,40 @@ public class OpenSSLDockerFactory extends DockerFactory {
     }
 
     @Override
-    protected synchronized boolean buildDockerImage(List<String> cliOptions, String dockerTag, String openSSLBranchName, ConfigOptionsResultsCollector resultsCollector)  {
-        if(resultsCollector == null){
-            throw new NullPointerException("resultsCollector is null.");
+    protected boolean buildDockerImage(List<String> cliOptions, String dockerTag, String openSSLBranchName, ConfigOptionsResultsCollector resultsCollector)  {
+        DockerContainer factoryContainer;
+        CreateContainerResponse tempContainer;
+        String tempContainerName = String.format("%s_%s",TEMP_CONTAINER_PREFIX, dockerTag);
+        synchronized(this){
+            if(resultsCollector == null){
+                throw new NullPointerException("resultsCollector is null.");
+            }
+
+
+            LOGGER.debug(String.format("Build with option string: '%s'", cliOptions));
+
+
+            // Create the docker factory image for the respective OpenSSL version, if it does not exist so far
+            String factoryImageTag = String.format("%s:%s",FACTORY_REPRO_NAME, openSSLBranchName);
+
+            // Remove old containers (Only needs to be done if something went wrong) TODO
+            Optional<Container> oldTempContainer = containerByName(tempContainerName);
+            if(oldTempContainer.isPresent()){
+                dockerClient.removeContainerCmd(oldTempContainer.get().getId()).exec();
+                LOGGER.debug("Old Container with name '{}' removed.", tempContainerName);
+            }
+
+            // Create a temporary container to build OpenSSL using ccache
+            tempContainer = dockerClient.createContainerCmd(factoryImageTag)
+                    .withName(tempContainerName)
+                    .withHostConfig(HostConfig.newHostConfig().withBinds(new Bind(CCACHE_VOLUME_NAME, targetVolumeCcache)))
+                    .withCmd(cliOptions)
+                    .exec();
+
+            factoryContainer = new DockerContainer(factoryImageTag, tempContainer.getId(), dockerClient);
+
+            LOGGER.debug("Factory Container created.");
         }
-
-
-        LOGGER.debug(String.format("Build with option string: '%s'", cliOptions));
-
-
-        // Create the docker factory image for the respective OpenSSL version, if it does not exist so far
-        String factoryImageTag = String.format("%s:%s",FACTORY_REPRO_NAME, openSSLBranchName);
-
-        // Remove old containers (Only needs to be done if something went wrong)
-        Optional<Container> oldTempContainer = containerByName(TEMP_CONTAINER_NAME);
-        if(oldTempContainer.isPresent()){
-            dockerClient.removeContainerCmd(oldTempContainer.get().getId()).exec();
-            LOGGER.debug("Old Container Removed");
-        }
-
-        // Create a temporary container to build OpenSSL using ccache
-        CreateContainerResponse tempContainer = dockerClient.createContainerCmd(factoryImageTag)
-                .withName(TEMP_CONTAINER_NAME)
-                .withHostConfig(HostConfig.newHostConfig().withBinds(new Bind(CCACHE_VOLUME_NAME, targetVolumeCcache)))
-                .withCmd(cliOptions)
-                .exec();
-
-        DockerContainer factoryContainer = new DockerContainer(factoryImageTag, tempContainer.getId(), dockerClient);
-
-        LOGGER.debug("Factory Container created.");
 
         // Start the created container
         factoryContainer.start();
@@ -167,41 +172,42 @@ public class OpenSSLDockerFactory extends DockerFactory {
             LOGGER.error("Timeout while building OpenSSL docker image. (tag: '{}', configured with: '{}', timeout after {} min)", dockerTag, cliOptions, timeoutMs/60000);
             return false;
         }
+        synchronized(this){
+            InspectContainerResponse containerResp = dockerClient.inspectContainerCmd(factoryContainer.getContainerId()).exec();
 
-        InspectContainerResponse containerResp = dockerClient.inspectContainerCmd(factoryContainer.getContainerId()).exec();
-
-        if(containerResp.getState().getExitCodeLong() == null || containerResp.getState().getExitCodeLong() > 0) {
-            LOGGER.error("Cannot build OpenSSL docker image. (tag: '{}', configured with: '{}')", dockerTag, cliOptions);
-            if(logFile != null){
-                LOGGER.error("See docker build log ({}) for more information.", logFile.getLogFile().getAbsolutePath());
+            if(containerResp.getState().getExitCodeLong() == null || containerResp.getState().getExitCodeLong() > 0) {
+                LOGGER.error("Cannot build OpenSSL docker image. (tag: '{}', configured with: '{}')", dockerTag, cliOptions);
+                if(logFile != null){
+                    LOGGER.error("See docker build log ({}) for more information.", logFile.getLogFile().getAbsolutePath());
+                }
+                dockerClient.removeContainerCmd(tempContainer.getId()).exec();
+                return false;
             }
-            dockerClient.removeContainerCmd(tempContainer.getId()).exec();
-            return false;
+
+
+            LOGGER.debug("\nFactory Container finished.");
+
+            // Commit the build to create a final image
+            String tempImageId = dockerClient.commitCmd(tempContainer.getId())
+                    .withRepository(TEMP_REPRO_NAME)
+                    .withTag(dockerTag)
+                    .exec();
+
+            String buildArg = String.format("%s:%s", TEMP_REPRO_NAME, dockerTag);
+            String finalImageTag = getBuildImageNameAndTag(dockerTag);
+            dockerClient.buildImageCmd()
+                    .withDockerfile(dockerfileMinPath.toFile())
+                    .withTags(new HashSet<>(Collections.singletonList(finalImageTag)))
+                    .withBuildArg("TEMP_REPRO", buildArg).exec(new BuildImageResultCallback()).awaitImageId();
+
+            LOGGER.debug("Final Image built");
+
+            // Remove the temporary image and container
+            dockerClient.removeImageCmd(tempImageId).exec();
+            factoryContainer.remove();
+            //dockerClient.removeContainerCmd(tempContainer.getId()).exec();
+            return true;
         }
-
-
-        LOGGER.debug("\nFactory Container finished.");
-
-        // Commit the build to create a final image
-        String tempImageId = dockerClient.commitCmd(tempContainer.getId())
-                .withRepository(TEMP_REPRO_NAME)
-                .withTag(dockerTag)
-                .exec();
-
-        String buildArg = String.format("%s:%s", TEMP_REPRO_NAME, dockerTag);
-        String finalImageTag = getBuildImageNameAndTag(dockerTag);
-        dockerClient.buildImageCmd()
-                .withDockerfile(dockerfileMinPath.toFile())
-                .withTags(new HashSet<>(Collections.singletonList(finalImageTag)))
-                .withBuildArg("TEMP_REPRO", buildArg).exec(new BuildImageResultCallback()).awaitImageId();
-
-        LOGGER.debug("Final Image built");
-
-        // Remove the temporary image and container
-        dockerClient.removeImageCmd(tempImageId).exec();
-        factoryContainer.remove();
-        //dockerClient.removeContainerCmd(tempContainer.getId()).exec();
-        return true;
     }
 
     public DockerServerTestContainer createDockerServer(String dockerTag,
@@ -265,7 +271,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
     }
 
 
-    public String createFactoryImage(Path dockerfileFactoryPath, String openSSLBranchName){
+    public synchronized String createFactoryImage(Path dockerfileFactoryPath, String openSSLBranchName){
         // Create the docker factory image for the respective OpenSSL version, if it does not exist so far
         String factoryImageTag = String.format("%s:%s",FACTORY_REPRO_NAME, openSSLBranchName);
         LOGGER.debug("Build factory image.");

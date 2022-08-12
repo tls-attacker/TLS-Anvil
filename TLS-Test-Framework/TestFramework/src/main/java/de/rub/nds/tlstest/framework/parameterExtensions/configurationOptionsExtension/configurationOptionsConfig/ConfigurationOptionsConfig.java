@@ -50,6 +50,7 @@ public class ConfigurationOptionsConfig {
     private int configOptionsIpmStrength; // default: strength of main IPM
 
     private int maxRunningContainers; // default 16
+    private int maxSimultaneousBuilds; // default 1
     /** Defines how many containers should be shutdown simultaneously. When measuring coverage the coverage data
      * is collected at the shutdown. Therefore it is much more CPU expensive than a simple shutdown.*/
     private int maxRunningContainerShutdowns; // default 8
@@ -126,6 +127,10 @@ public class ConfigurationOptionsConfig {
         return maxRunningContainers;
     }
 
+    public int getMaxSimultaneousBuilds() {
+        return maxSimultaneousBuilds;
+    }
+
     public int getMaxRunningContainerShutdowns() {
         return maxRunningContainerShutdowns;
     }
@@ -149,6 +154,7 @@ public class ConfigurationOptionsConfig {
             parseAndConfigureDockerConfig(rootElement);
 
             parseAndConfigureMaxRunningContainers(rootElement);
+            parseAndConfigureMaxSimultaneousBuilds(rootElement);
             parseAndConfigureMaxRunningContainerShutdowns(rootElement);
             parseAndConfigureOptionsToTest(rootElement);
             parseAndConfigureBuildManager(rootElement);
@@ -179,6 +185,16 @@ public class ConfigurationOptionsConfig {
         }
         else{
             configOptionsIpmStrength = TestContext.getInstance().getConfig().getStrength(); // default
+        }
+    }
+
+    private void parseAndConfigureMaxSimultaneousBuilds(Element rootElement){
+        Element maxSimultaneousBuildsElement =  XmlParseUtils.findElement(rootElement, "maxSimultaneousBuilds", false);
+        if(maxSimultaneousBuildsElement != null){
+            maxSimultaneousBuilds = Integer.parseInt(maxSimultaneousBuildsElement.getTextContent());
+        }
+        else{
+            maxSimultaneousBuilds = 1; // default
         }
     }
 

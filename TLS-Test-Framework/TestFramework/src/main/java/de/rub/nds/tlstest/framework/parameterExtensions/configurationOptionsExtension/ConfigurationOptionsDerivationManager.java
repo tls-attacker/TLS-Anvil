@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
@@ -84,6 +87,8 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
     private ConfigurationOptionsConfig config;
     private List<List<ConfigurationOptionDerivationParameter>> compoundSetupList;
     private Map<List<ConfigurationOptionDerivationParameter>, TestSiteReport> compoundSetupToSiteReport;
+
+    private ExecutorService buildExecutor;
     
 
     public static synchronized ConfigurationOptionsDerivationManager getInstance() {
@@ -294,26 +299,50 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
     }
 
     public void preBuildAndValidateAndFilterSetups(){
-        // List<List<ConfigurationOptionDerivationParameter>> compoundSetupList;
+
         LOGGER.info("== Precompute config options builds ==");
         int buildFailedSetupCount = 0;
 
         List<List<ConfigurationOptionDerivationParameter>> successfulSetups = new LinkedList<>();
+        HashMap<List<ConfigurationOptionDerivationParameter>, Future<Callable<TestSiteReport>>> compoundSetupToFuture 
+            = new HashMap<List<ConfigurationOptionDerivationParameter>, Future<Callable<TestSiteReport>>>();
         compoundSetupToSiteReport = new HashMap<List<ConfigurationOptionDerivationParameter>, TestSiteReport>();
+        buildExecutor = Executors.newFixedThreadPool(config.getMaxSimultaneousBuilds());
 
+        // Create all builds (with multiple threads if configured)
         for(List<ConfigurationOptionDerivationParameter> setup : compoundSetupList){
-            try {
-                Set<ConfigurationOptionDerivationParameter> setupSet = new HashSet<>(setup);
-                Config config = Config.createEmptyConfig();
-                Callable<TestSiteReport> testSiteReportCallable =
-                        getConfigurationOptionsBuildManager().configureOptionSetAndReturnGetSiteReportCallable(config, TestContext.getInstance(), setupSet);
-                TestSiteReport siteReport = testSiteReportCallable.call();
+            Set<ConfigurationOptionDerivationParameter> setupSet = new HashSet<>(setup);
+            Config conf = Config.createEmptyConfig();
+            Future<Callable<TestSiteReport>> testSiteReportCallableFuture = createBuildAndGetSiteReportCallable(conf, TestContext.getInstance(), setupSet);
+            compoundSetupToFuture.put(setup, testSiteReportCallableFuture);
+        }
 
-                compoundSetupToSiteReport.put(setup, siteReport);
-                successfulSetups.add(setup);
+        // Wait until all builds are finished
+        for (Map.Entry<List<ConfigurationOptionDerivationParameter>, Future<Callable<TestSiteReport>>> setupToFuture : compoundSetupToFuture.entrySet()) {
+            while(!setupToFuture.getValue().isDone()){
+                try
+                {
+                    Thread.sleep(500);
+                }
+                catch(InterruptedException e)
+                {
+                    LOGGER.error(e);
+                }
+            }
+        }
+
+        LOGGER.info("== Check builds and precompute site reports ==");
+
+        // Create all site reports and check if the builds were successful
+        for (Map.Entry<List<ConfigurationOptionDerivationParameter>, Future<Callable<TestSiteReport>>> setupToFuture : compoundSetupToFuture.entrySet()) {
+            try {
+                TestSiteReport siteReport = setupToFuture.getValue().get().call();
+
+                compoundSetupToSiteReport.put(setupToFuture.getKey(), siteReport);
+                successfulSetups.add(setupToFuture.getKey());
             }
             catch(Exception e){
-                LOGGER.error("Exception occurred while pre-building container for setup with options {}. Exception: ", setup, e);
+                LOGGER.error("Exception occurred while pre-building container for setup with options {}. Exception: ", setupToFuture.getKey(), e);
                 buildFailedSetupCount += 1;
             }
         }
@@ -326,6 +355,12 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
                     "Reduced options set: {}",buildFailedSetupCount, compoundSetupList);
         }
 
+    }
+
+    private Future<Callable<TestSiteReport>> createBuildAndGetSiteReportCallable(Config conf, TestContext context, Set<ConfigurationOptionDerivationParameter> setupSet) {        
+        return buildExecutor.submit(() -> {
+            return getConfigurationOptionsBuildManager().configureOptionSetAndReturnGetSiteReportCallable(conf, TestContext.getInstance(), setupSet);
+        });
     }
 
 }

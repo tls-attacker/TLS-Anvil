@@ -9,7 +9,7 @@ networks:
 
 services:
   mongo:
-    image: mongo
+    image: mongo:5.0.6
     restart: always
     volumes:
       - mongodb_DB:/data/db
@@ -20,7 +20,7 @@ services:
       - app
 
   mongo-express:
-    image: mongo-express
+    image: mongo-express:1.0.0-alpha.4
     restart: always
     ports:
       - 8081:8081

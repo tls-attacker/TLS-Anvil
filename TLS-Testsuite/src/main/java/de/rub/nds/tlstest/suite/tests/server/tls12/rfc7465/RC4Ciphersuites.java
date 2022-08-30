@@ -25,6 +25,7 @@ import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
+import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -77,6 +78,7 @@ public class RC4Ciphersuites extends Tls12Test {
     @ManualConfig("BasicDerivationType.CIPHERSUITE")
     @MethodCondition(method = "supportsRC4")
     @DynamicValueConstraints(affectedTypes = "BasicDerivationType.CIPHERSUITE", methods="isNonRC4")
+    @ScopeLimitations("ConfigOptionDerivationType.EnableWeakSslCiphers")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.MEDIUM)
@@ -113,6 +115,7 @@ public class RC4Ciphersuites extends Tls12Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.MEDIUM)
+    @ScopeLimitations("ConfigOptionDerivationType.EnableWeakSslCiphers")
     @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)

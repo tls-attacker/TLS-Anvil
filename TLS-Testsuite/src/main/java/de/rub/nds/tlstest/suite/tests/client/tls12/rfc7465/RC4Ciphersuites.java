@@ -45,6 +45,7 @@ public class RC4Ciphersuites extends Tls12Test {
         return cipherSuite.name().contains("RC4");
     }
 
+    // Fails when testing the --enable-weak-cipher CO since the global site report contains RC$ ciphersuites then.
     @Test
     @TestDescription("TLS clients MUST NOT include RC4 cipher suites in the ClientHello message.")
     @SecurityCategory(SeverityLevel.HIGH)

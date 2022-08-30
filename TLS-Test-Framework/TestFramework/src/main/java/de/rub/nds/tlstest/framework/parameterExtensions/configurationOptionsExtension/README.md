@@ -7,7 +7,7 @@ java -jar <...>/TLS-Testsuite.jar \
  -configOptionsConfigFile <...>/TestFramework/examples/exampleConfig.xml \
  -parallelHandshakes 1 \
  -strength 2 \
- server -connect dummy:0
+ server -connect localhost:4433
 ```
 This command starts server tests with COs. The library to test and the tested COs are specified within the given configuration options config file (exampleConfig.xml in this case). To see how this file works, check out the [example config file](../../../../../../../../../../examples/exampleConfig.xml). 
 
@@ -18,7 +18,7 @@ The analog command for client testing is the following:
 java -jar <...>/TLS-Testsuite.jar \
  -configOptionsConfigFile <...>/TestFramework/examples/exampleConfig.xml \
  -strength 2 \
- -client -port 0000
+ -client -port 4433
 ```
 For clients, the port is a dummy value.
 

@@ -109,7 +109,22 @@ public class ConfigurationOptionCompoundDerivation extends DerivationParameter<L
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-        condConstraints.add(getWeakCipherSuitesMustBeEnabledToBeUsedConstraint());
+
+        // The constraint for weak cipher suites must not be added if there is no weak cipher suite
+        boolean testHasWeakCipherSuites = false;
+        if(!scope.isTls13Test()){
+            for(CipherSuite cipherSuite : TestContext.getInstance().getSiteReport().getCipherSuites()){
+                if(this.isWeakCiphersuite(cipherSuite)){
+                    testHasWeakCipherSuites = true;
+                    break;
+                }
+            }
+        }
+
+        if(testHasWeakCipherSuites && ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes().contains(ConfigOptionDerivationType.EnableWeakSslCiphers)){
+            condConstraints.add(getWeakCipherSuitesMustBeEnabledToBeUsedConstraint());
+        }
+
         return condConstraints;
     }
 

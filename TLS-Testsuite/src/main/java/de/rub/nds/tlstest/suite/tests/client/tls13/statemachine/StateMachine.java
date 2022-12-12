@@ -15,15 +15,12 @@ import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.DHEServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EndOfEarlyDataMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
-import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.DeactivateEncryptionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -41,10 +38,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.CVECategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -160,7 +154,7 @@ public class StateMachine extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new SendAction(new ServerHelloMessage(config)));
         workflowTrace.addTlsAction(new DeactivateEncryptionAction());
-        workflowTrace.addTlsAction(new SendAction(new CertificateMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(new CertificateMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
@@ -177,7 +171,7 @@ public class StateMachine extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new SendAction(new ServerHelloMessage(config)));
         workflowTrace.addTlsAction(new DeactivateEncryptionAction());
-        workflowTrace.addTlsAction(new SendAction(new CertificateMessage(config), new ECDHEServerKeyExchangeMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(new CertificateMessage(), new ECDHEServerKeyExchangeMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
@@ -194,7 +188,7 @@ public class StateMachine extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new SendAction(new ServerHelloMessage(config)));
         workflowTrace.addTlsAction(new DeactivateEncryptionAction());
-        workflowTrace.addTlsAction(new SendAction(new CertificateMessage(config), new DHEServerKeyExchangeMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(new CertificateMessage(), new DHEServerKeyExchangeMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);

@@ -70,7 +70,7 @@ public class MaxFragmentLengthExtension extends Tls12Test {
         config.setDefaultMaxFragmentLength(MaxFragmentLength.TWO_9);
         config.setAddMaxFragmentLengthExtension(true);
         MaxFragmentLength maxLength = getNegotiatedMaxFragmentLength(config); 
-        ApplicationMessage overflowingAppData = new ApplicationMessage(config);
+        ApplicationMessage overflowingAppData = new ApplicationMessage();
         overflowingAppData.setData(Modifiable.explicit(new byte[MaxFragmentLength.getIntegerRepresentation(maxLength) + 256 + 32]));
         
         SendAction sendOverflowingRecord = new SendAction(overflowingAppData);

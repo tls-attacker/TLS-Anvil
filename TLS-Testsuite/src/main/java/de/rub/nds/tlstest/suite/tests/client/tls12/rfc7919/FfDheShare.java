@@ -26,7 +26,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.ExplicitModelingConstraints;
@@ -180,7 +179,7 @@ public class FfDheShare extends Tls12Test {
             config.setDefaultServerDhModulus(unsafeSafePrime);
             
             WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_KEY_EXCHANGE);
-            DHEServerKeyExchangeMessage dheServerKeyExchange = new DHEServerKeyExchangeMessage(config);
+            DHEServerKeyExchangeMessage dheServerKeyExchange = new DHEServerKeyExchangeMessage();
             workflowTrace.addTlsAction(new SendAction(dheServerKeyExchange, new ServerHelloDoneMessage()));
             workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
             

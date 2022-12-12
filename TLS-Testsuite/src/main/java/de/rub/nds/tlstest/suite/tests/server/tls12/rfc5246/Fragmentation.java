@@ -92,7 +92,7 @@ public class Fragmentation extends Tls12Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
 
-        AlertMessage alertMsg = new AlertMessage(c);
+        AlertMessage alertMsg = new AlertMessage();
         alertMsg.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));
         alertMsg.setDescription(Modifiable.explicit(AlertDescription.CLOSE_NOTIFY.getValue()));
 
@@ -125,16 +125,16 @@ public class Fragmentation extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         if (c.isClientAuthentication()) {
-            workflowTrace.addTlsActions(new SendAction(new CertificateMessage(c)));
+            workflowTrace.addTlsActions(new SendAction(new CertificateMessage()));
         }
         workflowTrace.addTlsActions(new SendDynamicClientKeyExchangeAction());
 
         if (c.isClientAuthentication()) {
-            workflowTrace.addTlsActions(new SendAction(new CertificateVerifyMessage(c)));
+            workflowTrace.addTlsActions(new SendAction(new CertificateVerifyMessage()));
         }
 
-        workflowTrace.addTlsActions(new SendAction(new ChangeCipherSpecMessage(c)));
-        workflowTrace.addTlsActions(new SendAction(new FinishedMessage(c)));
+        workflowTrace.addTlsActions(new SendAction(new ChangeCipherSpecMessage()));
+        workflowTrace.addTlsActions(new SendAction(new FinishedMessage()));
         workflowTrace.addTlsActions(new ReceiveAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
@@ -155,15 +155,15 @@ public class Fragmentation extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         if (c.isClientAuthentication()) {
-            workflowTrace.addTlsActions(new SendAction(new CertificateMessage(c)));
+            workflowTrace.addTlsActions(new SendAction(new CertificateMessage()));
         }
         workflowTrace.addTlsActions(new SendDynamicClientKeyExchangeAction());
 
         if (c.isClientAuthentication()) {
-            workflowTrace.addTlsActions(new SendAction(new CertificateVerifyMessage(c)));
+            workflowTrace.addTlsActions(new SendAction(new CertificateVerifyMessage()));
         }
 
-        workflowTrace.addTlsActions(new SendAction(new ChangeCipherSpecMessage(c), new FinishedMessage(c)));
+        workflowTrace.addTlsActions(new SendAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
         workflowTrace.addTlsActions(new ReceiveAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);

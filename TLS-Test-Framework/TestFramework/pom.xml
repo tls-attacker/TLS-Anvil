@@ -46,9 +46,9 @@
             <version>2.17.2</version>
         </dependency>
         <dependency>
-            <artifactId>TLS-Server-Scanner</artifactId>
-            <groupId>de.rub.nds.tlsscanner</groupId>
-            <version>4.2.3</version>
+            <artifactId>tls-server-scanner</artifactId>
+            <groupId>de.rub.nds.tls.scanner</groupId>
+            <version>5.2.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

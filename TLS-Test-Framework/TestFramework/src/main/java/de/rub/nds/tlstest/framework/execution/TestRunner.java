@@ -20,14 +20,11 @@ import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
-import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
@@ -36,7 +33,6 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionM
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
-import de.rub.nds.tlsattacker.core.record.layer.RecordLayerFactory;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -476,7 +472,7 @@ public class TestRunner {
             config.setDefaultServerNamedGroups(report.getSupportedNamedGroups());
             config.setWorkflowExecutorShouldClose(false);
             state = new State(config);
-            state.getWorkflowTrace().addTlsAction(new SendAction(new ApplicationMessage(config)));
+            state.getWorkflowTrace().addTlsAction(new SendAction(new ApplicationMessage()));
             tlsTask = buildStateExecutionServerTask(state);
             executor.bulkExecuteTasks(tlsTask);
             report.setClosedAfterAppDataDelta(getClosingDelta(state, TIMEOUT_LIMIT));
@@ -525,8 +521,6 @@ public class TestRunner {
         } catch (IOException ex) {
             throw new RuntimeException("Failed to set TransportHandler");
         }
-        state.getTlsContext().setRecordLayer(
-                RecordLayerFactory.getRecordLayer(state.getTlsContext().getRecordLayerType(), state.getTlsContext()));
         task.setBeforeTransportInitCallback(testConfig.getTestClientDelegate().getTriggerScript());
         return task;
     }
@@ -855,8 +849,6 @@ public class TestRunner {
     private void prepareStateForConnection(State state) {
         try {
             state.getTlsContext().setTransportHandler(new ServerTcpTransportHandler(testConfig.getConnectionTimeout(), testConfig.getConnectionTimeout(), testConfig.getTestClientDelegate().getServerSocket()));
-            state.getTlsContext().setRecordLayer(
-                    RecordLayerFactory.getRecordLayer(state.getTlsContext().getRecordLayerType(), state.getTlsContext()));
         } catch (IOException ex) {
             throw new RuntimeException("Failed to set TransportHandlers");
         }

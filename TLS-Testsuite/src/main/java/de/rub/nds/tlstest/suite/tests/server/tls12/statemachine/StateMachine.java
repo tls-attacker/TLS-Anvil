@@ -117,7 +117,7 @@ public class StateMachine extends Tls12Test {
     public void sendFinishedAfterServerHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.addTlsAction(new SendAction(new FinishedMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(new FinishedMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
@@ -239,7 +239,7 @@ public class StateMachine extends Tls12Test {
         WorkflowTrace workflowTrace = new WorkflowTrace();
         Record record = new Record();
         record.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
-        ApplicationMessage emptyApplicationMessage = new ApplicationMessage(config);
+        ApplicationMessage emptyApplicationMessage = new ApplicationMessage();
         SendAction sendActionApplicationData = new SendAction(emptyApplicationMessage);
         sendActionApplicationData.setRecords(record);
 
@@ -327,7 +327,7 @@ public class StateMachine extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         SendAction sendActionclientSecondMessageBatch = (SendAction) workflowTrace.getTlsActions().get(workflowTrace.getTlsActions().size() - 1);
         sendActionclientSecondMessageBatch.getMessages().add(0, new ChangeCipherSpecMessage());
-        sendActionclientSecondMessageBatch.getMessages().add(new FinishedMessage(config));
+        sendActionclientSecondMessageBatch.getMessages().add(new FinishedMessage());
 
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);

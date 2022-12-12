@@ -17,11 +17,9 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.KeyUpdateMessage;
-import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
-import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -34,12 +32,10 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
-import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
-import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -65,7 +61,7 @@ public class KeyUpdate extends Tls13Test {
         config.setDefaultKeyUpdateRequestMode(KeyUpdateRequest.UPDATE_REQUESTED);
         
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
-        workflowTrace.addTlsAction(new SendAction(new KeyUpdateMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(new KeyUpdateMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         
         runner.execute(workflowTrace, config).validateFinal(i -> {
@@ -109,7 +105,7 @@ public class KeyUpdate extends Tls13Test {
         config.setDefaultKeyUpdateRequestMode(KeyUpdateRequest.UPDATE_REQUESTED);
         
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        KeyUpdateMessage keyUpdate = new KeyUpdateMessage(config);
+        KeyUpdateMessage keyUpdate = new KeyUpdateMessage();
         workflowTrace.addTlsAction(new SendAction(keyUpdate));
         workflowTrace.addTlsAction(new ReceiveAction(new KeyUpdateMessage()));
         
@@ -118,9 +114,9 @@ public class KeyUpdate extends Tls13Test {
             KeyUpdateMessage receivedKeyUpdate = i.getWorkflowTrace().getLastReceivedMessage(KeyUpdateMessage.class);
             assertNotNull("Did not receive a KeyUpdate response", receivedKeyUpdate);
             assertEquals("Peer did not set the correct KeyUpdate mode", (byte) KeyUpdateRequest.UPDATE_NOT_REQUESTED.getValue(), (byte) receivedKeyUpdate.getRequestMode().getValue()) ;
-            for(AbstractRecord abstractRecord: workflowTrace.getLastReceivingAction().getReceivedRecords()) {
-                if(abstractRecord.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
-                    assertTrue("Invalid authentication tag for received KeyUpdateMessage", ((Record)abstractRecord).getComputations().getAuthenticationTagValid());
+            for(Record record: workflowTrace.getLastReceivingAction().getReceivedRecords()) {
+                if(record.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
+                    assertTrue("Invalid authentication tag for received KeyUpdateMessage", ((Record)record).getComputations().getAuthenticationTagValid());
                 }
             }
         });
@@ -137,7 +133,7 @@ public class KeyUpdate extends Tls13Test {
         config.setDefaultKeyUpdateRequestMode(KeyUpdateRequest.UPDATE_REQUESTED);
         
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        KeyUpdateMessage keyUpdate = new KeyUpdateMessage(config);
+        KeyUpdateMessage keyUpdate = new KeyUpdateMessage();
         workflowTrace.addTlsAction(new SendAction(keyUpdate));
         workflowTrace.addTlsAction(new ReceiveAction(new KeyUpdateMessage()));
         workflowTrace.addTlsAction(new SendAction(new ApplicationMessage()));

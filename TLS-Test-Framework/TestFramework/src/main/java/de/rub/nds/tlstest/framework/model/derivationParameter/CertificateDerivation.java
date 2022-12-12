@@ -73,7 +73,7 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
         Set<CipherSuite> cipherSuites;
         if(!scope.isTls13Test()) {
             cipherSuites = TestContext.getInstance().getSiteReport().getCipherSuites();
-            return cipherSuites.stream().anyMatch(cipherSuite -> cert.isUsable(AlgorithmResolver.getCertificateKeyType(cipherSuite), cert.getCertSignatureType()));
+            return cipherSuites.stream().anyMatch(cipherSuite -> AlgorithmResolver.getCertificateKeyType(cipherSuite) == cert.getCertPublicKeyType());
         } else {
             switch(cert.getCertPublicKeyType()) {
                 case ECDH:
@@ -112,7 +112,7 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
             CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
 
             CertificateKeyType requiredCertKeyType = AlgorithmResolver.getCertificateKeyType(selectedCipherSuite);
-            return selectedCertKeyPair.isUsable(requiredCertKeyType, selectedCertKeyPair.getCertSignatureType());
+            return selectedCertKeyPair.getCertPublicKeyType() == requiredCertKeyType;
         }));
     }
 

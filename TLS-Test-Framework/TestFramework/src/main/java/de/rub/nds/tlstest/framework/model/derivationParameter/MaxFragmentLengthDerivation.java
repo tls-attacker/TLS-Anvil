@@ -36,9 +36,10 @@ public class MaxFragmentLengthDerivation extends DerivationParameter<MaxFragment
     public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
 
-        for(MaxFragmentLength maxFragmentLength : MaxFragmentLength.values()){
+        // TODO The layer system fails to process messages when max length was set
+        /*for(MaxFragmentLength maxFragmentLength : MaxFragmentLength.values()){
             parameterValues.add(new MaxFragmentLengthDerivation(maxFragmentLength));
-        }
+        }*/
 
         // A parameter where no max fragment length extension is included
         parameterValues.add(new MaxFragmentLengthDerivation(null));

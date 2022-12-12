@@ -131,7 +131,7 @@ public class StateMachine extends Tls13Test {
     public void sendLegacyFlowECDHClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.addTlsAction(new SendAction(new ECDHClientKeyExchangeMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(new ECDHClientKeyExchangeMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
@@ -144,7 +144,7 @@ public class StateMachine extends Tls13Test {
     public void sendLegacyFlowDHClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.addTlsAction(new SendAction(new DHClientKeyExchangeMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(new DHClientKeyExchangeMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
@@ -157,7 +157,7 @@ public class StateMachine extends Tls13Test {
     public void sendLegacyFlowRSAClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.addTlsAction(new SendAction(new RSAClientKeyExchangeMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(new RSAClientKeyExchangeMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);

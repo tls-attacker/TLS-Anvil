@@ -14,21 +14,19 @@ import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.Tls13KeySetType;
+import de.rub.nds.tlsattacker.core.layer.context.TlsContext;
 import de.rub.nds.tlsattacker.core.protocol.handler.AlertHandler;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.TlsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.UnknownMessage;
-import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipher;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipherFactory;
 import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySet;
 import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySetGenerator;
 import de.rub.nds.tlsattacker.core.record.crypto.RecordDecryptor;
-import de.rub.nds.tlsattacker.core.state.TlsContext;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
@@ -38,11 +36,13 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
+import de.rub.nds.tlsscanner.core.vector.response.ResponseExtractor;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.model.derivationParameter.TcpFragmentationDerivation;
+import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,14 +58,18 @@ import static org.junit.Assert.*;
 public class Validator {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static boolean socketClosed(AnnotatedState i) {
-        SocketState socketState = i.getState().getTlsContext().getFinalSocketState();
+    public static boolean socketClosed(SocketState socketState) {
         return (socketState == SocketState.SOCKET_EXCEPTION || socketState == SocketState.CLOSED || socketState == SocketState.IO_EXCEPTION);
+    }
+    
+    public static boolean socketClosed(AnnotatedState i) {
+        SocketState socketState = getSocketState(i);
+        return socketClosed(socketState);
     }
 
     public static void receivedFatalAlert(AnnotatedState i, boolean checkExecutedAsPlanned) {
         WorkflowTrace trace = i.getWorkflowTrace();
-
+        SocketState socketState = getSocketState(i);
         if (checkExecutedAsPlanned) {
             try {
                 Validator.smartExecutedAsPlanned(i);
@@ -88,32 +92,36 @@ public class Validator {
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
         checkReceivedMultipleAlerts(trace, i);
-        boolean socketClosed = socketClosed(i);
-        if (closedWithoutAlert(msg, socketClosed, i)) return;
+        if (closedWithoutAlert(msg, i, socketState)) return;
         assertNotNull("No Alert message received and socket is still open.", msg);
-        if(closedWithCloseNotify(msg, socketClosed, i)) return; 
+        if(closedWithCloseNotify(msg, i, socketState)) return; 
         assertEquals(AssertMsgs.NoFatalAlert, AlertLevel.FATAL.getValue(), msg.getLevel().getValue().byteValue());
-        assertTrue("Socket still open after fatal alert", socketClosed);
+        assertTrue("Socket still open after fatal alert", socketClosed(socketState));
     }
 
-    private static boolean closedWithCloseNotify(AlertMessage msg, boolean socketClosed, AnnotatedState i) {
+    private static SocketState getSocketState(AnnotatedState i) {
+        SocketState socketState = ResponseExtractor.getFingerprint(i.getState()).getSocketState();
+        return socketState;
+    }
+
+    private static boolean closedWithCloseNotify(AlertMessage msg, AnnotatedState i, SocketState socketState) {
         if (AlertLevel.WARNING.getValue() == msg.getLevel().getValue() 
                 && AlertDescription.CLOSE_NOTIFY.getValue() == msg.getDescription().getValue()
-                && socketClosed) {
-            i.addAdditionalResultInfo("Only sent Close Notify and closed socket (" + i.getState().getTlsContext().getFinalSocketState() + ")");
+                && socketClosed(socketState)) {
+            i.addAdditionalResultInfo("Only sent Close Notify and closed socket (" + socketState + ")");
             i.setResult(TestResult.CONCEPTUALLY_SUCCEEDED);
             return true;
         }
         return false;
     }
 
-    private static boolean closedWithoutAlert(AlertMessage msg, boolean socketClosed, AnnotatedState i) {
-        if (msg == null && socketClosed) {
+    private static boolean closedWithoutAlert(AlertMessage msg, AnnotatedState i, SocketState socketState) {
+        if (msg == null && socketClosed(socketState)) {
             if (i.getState().getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13 && !TestContext.getInstance().getConfig().isExpectTls13Alerts()) {
                 i.addAdditionalResultInfo("SUT chose not to send an alert in TLS 1.3");
                 return true;
             }
-            i.addAdditionalResultInfo("Only socket closed (" + i.getState().getTlsContext().getFinalSocketState() + ")");
+            i.addAdditionalResultInfo("Only socket closed (" + socketState + ")");
             i.setResult(TestResult.CONCEPTUALLY_SUCCEEDED);
             LOGGER.debug("Timeout");
             return true;
@@ -125,7 +133,7 @@ public class Validator {
         List<ProtocolMessage> receivedAlerts = WorkflowTraceUtil.getAllReceivedMessages(trace, ProtocolMessageType.ALERT);
         if(receivedAlerts.size() > 1) {
             i.addAdditionalResultInfo("Received multiple Alerts while waiting for Fatal Alert (" +
-                    receivedAlerts.stream().map(alert -> ((TlsMessage)alert).toCompactString()).collect(Collectors.joining(","))+ ")");
+                    receivedAlerts.stream().map(alert -> ((ProtocolMessage)alert).toCompactString()).collect(Collectors.joining(","))+ ")");
         }
     }
 
@@ -240,7 +248,7 @@ public class Validator {
                 receivedMessages = new ArrayList<>();
             }
 
-            TlsMessage lastExpected = (TlsMessage) expectedMessages.get(expectedMessages.size() - 1);
+            ProtocolMessage lastExpected = (ProtocolMessage) expectedMessages.get(expectedMessages.size() - 1);
             if (lastExpected.getClass().equals(AlertMessage.class)) {
                 if (receivedMessages.size() > 0) {
                     ProtocolMessage lastReceivedMessage = receivedMessages.get(receivedMessages.size() - 1);
@@ -331,8 +339,8 @@ public class Validator {
     private static boolean lastMessagesAreTooEarlyEncryptedAlertsTls13(AnnotatedState state, ReceiveAction lastReceiveAction) {
         ProtocolMessage lastReceivedMessage = lastReceiveAction.getReceivedMessages().get(lastReceiveAction.getReceivedMessages().size() - 1);
         List<ProtocolMessage> receivedMessages = lastReceiveAction.getReceivedMessages();
-        List<AbstractRecord> receivedRecords = lastReceiveAction.getReceivedRecords();
-        AbstractRecord lastAbstractRecord = lastReceiveAction.getReceivedRecords().get(receivedRecords.size() - 1);
+        List<Record> receivedRecords = lastReceiveAction.getReceivedRecords();
+        Record lastAbstractRecord = lastReceiveAction.getReceivedRecords().get(receivedRecords.size() - 1);
         if(lastAbstractRecord instanceof Record) {
             Record lastReceivedRecord = (Record) lastAbstractRecord;
             int expectedFirstEncryptedRecordIndex = 0;
@@ -382,15 +390,15 @@ public class Validator {
         return false;
     }
     
-    private static AlertMessage tryToDecryptRecordWithHandshakeSecrets(TlsContext context, AbstractRecord record) {
+    private static AlertMessage tryToDecryptRecordWithHandshakeSecrets(TlsContext context, Record record) {
         try {
             KeySet keySet = KeySetGenerator.generateKeySet(context, ProtocolVersion.TLS13, Tls13KeySetType.HANDSHAKE_TRAFFIC_SECRETS);
-            RecordCipher recordCipher = RecordCipherFactory.getRecordCipher(context, keySet, context.getSelectedCipherSuite());
+            RecordCipher recordCipher = RecordCipherFactory.getRecordCipher(context, keySet, false);
             RecordDecryptor dec = new RecordDecryptor(recordCipher, context);
             dec.decrypt(record);
             if(record.getContentMessageType() == ProtocolMessageType.ALERT) {
-                AlertHandler handler = new AlertHandler(context);
-                AlertMessage alert = handler.getParser(record.getCleanProtocolMessageBytes().getValue(), 0).parse();
+                AlertMessage alert = new AlertMessage();
+                alert.getParser(context, new ByteArrayInputStream(record.getCleanProtocolMessageBytes().getValue())).parse(alert);
                 return alert;
             }
             return null;

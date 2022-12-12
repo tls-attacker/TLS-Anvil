@@ -26,7 +26,6 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
-import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
@@ -453,7 +452,7 @@ public class HelloRetryRequest extends Tls13Test {
     
     private void testIfRecordVersionWasAdjusted(WorkflowTrace executedTrace) {
         ReceiveAction receiveSecondHello = (ReceiveAction) executedTrace.getLastReceivingAction();
-        for(AbstractRecord record: receiveSecondHello.getReceivedRecords()) {
+        for(Record record: receiveSecondHello.getReceivedRecords()) {
             if(record.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
                 assertArrayEquals("Record Version was not adjusted after Hello Retry Request", ((Record)record).getProtocolVersion().getValue(), ProtocolVersion.TLS12.getValue());
             }

@@ -17,15 +17,14 @@ import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
+import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.TlsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
-import de.rub.nds.tlsattacker.core.record.layer.RecordLayerFactory;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
@@ -144,7 +143,6 @@ public class WorkflowRunner {
         } else {
             try {
                 annotatedState.getState().getTlsContext().setTransportHandler(new ServerTcpTransportHandler(context.getConfig().getConnectionTimeout(), context.getConfig().getConnectionTimeout(), context.getConfig().getTestClientDelegate().getServerSocket()));
-                annotatedState.getState().getTlsContext().setRecordLayer(RecordLayerFactory.getRecordLayer(annotatedState.getState().getTlsContext().getRecordLayerType(), annotatedState.getState().getTlsContext()));
                 StateExecutionTask task = new StateExecutionTask(annotatedState.getState(), 2);
                 
                 task.setBeforeTransportInitCallback(context.getConfig().getTestClientDelegate().getTriggerScript());
@@ -377,7 +375,7 @@ public class WorkflowRunner {
         //add an optional NewSessionTicketMessage for Alert receiving action
         //this facilitates the tolerance mechanisms of the Validator
         if(lastReceive != null && lastReceive.getExpectedMessages() != null 
-                && lastReceive.getExpectedMessages().stream().anyMatch(message -> ((TlsMessage)message).getProtocolMessageType() == ProtocolMessageType.ALERT)
+                && lastReceive.getExpectedMessages().stream().anyMatch(message -> ((ProtocolMessage)message).getProtocolMessageType() == ProtocolMessageType.ALERT)
                 && mayReceiveNewSessionTicketFromNow) {
             NewSessionTicketMessage optionalExplicitNewSessionTicket = new NewSessionTicketMessage();
             optionalExplicitNewSessionTicket.setRequired(false);
@@ -452,7 +450,7 @@ public class WorkflowRunner {
         List<ReceivingAction> receivingActions = trace.getReceivingActions();
         ReceivingAction receiveFinished = (ReceivingAction) WorkflowTraceUtil.getFirstReceivingActionForMessage(HandshakeMessageType.FINISHED, trace);
         if(receiveFinished != null && receivingActions.indexOf(receiveFinished) < receivingActions.size() - 1) {
-            config.setQuickReceive(false);
+            LOGGER.warn("Quick receive is always disabled, this must be fixed prior to a new release");
         }            
     }
 

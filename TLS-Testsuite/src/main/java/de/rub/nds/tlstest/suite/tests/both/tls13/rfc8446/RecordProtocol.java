@@ -17,11 +17,9 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
-import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ChangeConnectionTimeoutAction;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -100,7 +98,7 @@ public class RecordProtocol extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
         Record record = new Record();
         record.setContentType(Modifiable.explicit((byte) 0xff));
-        FinishedMessage finished = new FinishedMessage(c);
+        FinishedMessage finished = new FinishedMessage();
         SendAction sendFinished = new SendAction(finished);
         sendFinished.setRecords(record);
         workflowTrace.addTlsActions(
@@ -165,7 +163,7 @@ public class RecordProtocol extends Tls13Test {
     public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        ApplicationMessage msg = new ApplicationMessage(c);
+        ApplicationMessage msg = new ApplicationMessage();
         Record overflowRecord = new Record();
         overflowRecord.setCleanProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
         SendAction sendOverflow = new SendAction(msg);
@@ -276,7 +274,7 @@ public class RecordProtocol extends Tls13Test {
         Record overflowRecord = new Record();
         overflowRecord.setProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 257]));
         //add dummy Application Message
-        SendAction sendOverflow = new SendAction(new ApplicationMessage(c));
+        SendAction sendOverflow = new SendAction(new ApplicationMessage());
         sendOverflow.setRecords(overflowRecord);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -302,7 +300,7 @@ public class RecordProtocol extends Tls13Test {
     public void sendEmptyRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ProtocolMessageType selectedRecordContentType = derivationContainer.getDerivation(ProtocolMessageTypeDerivation.class).getSelectedValue();
-        ApplicationMessage appMsg = new ApplicationMessage(c);
+        ApplicationMessage appMsg = new ApplicationMessage();
 
         Record r = new Record();
         r.setContentType(Modifiable.explicit(selectedRecordContentType.getValue()));
@@ -329,7 +327,7 @@ public class RecordProtocol extends Tls13Test {
     @InteroperabilityCategory(SeverityLevel.HIGH)
     public void sendZeroLengthApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        ApplicationMessage appMsg = new ApplicationMessage(c);
+        ApplicationMessage appMsg = new ApplicationMessage();
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
@@ -380,7 +378,7 @@ public class RecordProtocol extends Tls13Test {
         Record record = getRecordWithOnlyZeroOctets();
         
         WorkflowTrace trace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
-        trace.addTlsAction(new SendAction(new FinishedMessage(config)));
+        trace.addTlsAction(new SendAction(new FinishedMessage()));
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
         //define modified record for finished
         ((SendAction)trace.getLastSendingAction()).setRecords(record);
@@ -407,7 +405,7 @@ public class RecordProtocol extends Tls13Test {
         Record record = getRecordWithOnlyZeroOctets();
         
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        trace.addTlsAction(new SendAction(new ApplicationMessage(config)));
+        trace.addTlsAction(new SendAction(new ApplicationMessage()));
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
         //define modified record for finished
         ((SendAction)trace.getLastSendingAction()).setRecords(record);
@@ -443,12 +441,8 @@ public class RecordProtocol extends Tls13Test {
 
     private void testReceivedRecordVersions(WorkflowTrace executedTrace) {
         for(ReceivingAction receiving: executedTrace.getReceivingActions()) {
-            for(AbstractRecord abstractRecord : receiving.getReceivedRecords()) {
-                if(abstractRecord instanceof Record) {
-                    Record record = (Record) abstractRecord;
-                    assertFalse("Peer sent a record with Protocol Version below 0x03 00", record.getProtocolVersion().getValue()[0] < 0x03);
-                }
-                
+            for(Record record : receiving.getReceivedRecords()) {
+                    assertFalse("Peer sent a record with Protocol Version below 0x03 00", record.getProtocolVersion().getValue()[0] < 0x03); 
             }
         }
     }

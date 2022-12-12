@@ -106,7 +106,7 @@ public class Extensions extends Tls13Test {
         } else if (selectedExtension == ExtensionType.ALPN) {
             c.setDefaultProposedAlpnProtocols("http/1.1", "spdy/1", "spdy/2", "spdy/3", "stun.turn",
                     "stun.nat-discovery", "h2", "h2c", "webrtc", "c-webrtc", "ftp", "imap", "pop3", "managesieve");
-            AlpnExtensionMessage ext = new AlpnExtensionMessage(c);
+            AlpnExtensionMessage ext = new AlpnExtensionMessage();
             workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class).addExtension(ext);
         } else if (selectedExtension == ExtensionType.SERVER_NAME_INDICATION) {
             ServerNameIndicationExtensionMessage ext = new ServerNameIndicationExtensionMessage();

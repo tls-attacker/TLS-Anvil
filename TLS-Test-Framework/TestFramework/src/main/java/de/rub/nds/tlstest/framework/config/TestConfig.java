@@ -307,11 +307,10 @@ public class TestConfig extends TLSDelegateConfig {
 
 
         config.setWorkflowExecutorShouldClose(true);
-        config.setEarlyStop(false);
         config.setStealthMode(true);
         config.setRetryFailedClientTcpSocketInitialization(true);
         config.setReceiveFinalTcpSocketStateWithTimeout(true);
-        config.setPrefferedCertRsaKeySize(4096);
+        config.setPreferredCertRsaKeySize(4096);
         config.setPrefferedCertDssKeySize(3072);
         
         config.setFiltersKeepUserSettings(Boolean.FALSE);

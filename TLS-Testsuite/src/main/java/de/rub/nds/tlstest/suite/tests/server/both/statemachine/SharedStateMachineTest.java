@@ -32,7 +32,7 @@ public class SharedStateMachineTest {
         runner.setPreparedConfig(config);
         config.setDefaultApplicationMessageData("Test");
         WorkflowTrace workflowTrace = new WorkflowTrace();
-        ApplicationMessage applicationMessage = new ApplicationMessage(config);
+        ApplicationMessage applicationMessage = new ApplicationMessage();
         workflowTrace.addTlsAction(new SendAction(applicationMessage));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
@@ -49,7 +49,7 @@ public class SharedStateMachineTest {
     public static void sharedBeginWithFinishedTest(Config config, WorkflowRunner runner) {
         runner.setPreparedConfig(config);
         WorkflowTrace workflowTrace = new WorkflowTrace();
-        workflowTrace.addTlsAction(new SendAction(new FinishedMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(new FinishedMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }

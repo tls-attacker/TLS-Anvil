@@ -15,7 +15,6 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
-import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -217,15 +216,15 @@ public class CBCBlockCipher extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(i -> {
             Validator.executedAsPlanned(i);
             boolean sawCCS = false;
-            for(AbstractRecord abstractRecord : WorkflowTraceUtil.getAllReceivedRecords(i.getWorkflowTrace())) {
-                if(abstractRecord.getContentMessageType() == ProtocolMessageType.CHANGE_CIPHER_SPEC) {
+            for(Record record : WorkflowTraceUtil.getAllReceivedRecords(i.getWorkflowTrace())) {
+                if(record.getContentMessageType() == ProtocolMessageType.CHANGE_CIPHER_SPEC) {
                     sawCCS = true;
                 }
-                if(sawCCS && abstractRecord.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
-                    Record encryptedFin = (Record) abstractRecord;
+                if(sawCCS && record.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
+                    Record encryptedFin = record;
                     assertTrue("Finished record MAC invalid - is the SQN correct?", encryptedFin.getComputations().getMacValid());
-                } else if(sawCCS && abstractRecord.getContentMessageType() == ProtocolMessageType.APPLICATION_DATA) {
-                    Record encryptedFin = (Record) abstractRecord;
+                } else if(sawCCS && record.getContentMessageType() == ProtocolMessageType.APPLICATION_DATA) {
+                    Record encryptedFin = record;
                     assertTrue("App Data record MAC invalid", encryptedFin.getComputations().getMacValid());
                 }
             }

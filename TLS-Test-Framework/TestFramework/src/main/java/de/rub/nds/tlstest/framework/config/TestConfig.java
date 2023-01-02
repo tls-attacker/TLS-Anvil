@@ -56,7 +56,6 @@ public class TestConfig extends TLSDelegateConfig {
     private boolean parsedArgs = false;
 
     private Config cachedConfig = null;
-    private List<ProtocolVersion> supportedVersions = null;
     private Callable<Integer> timeoutActionScript;
 
     private ConfigDelegates parsedCommand = null;
@@ -311,7 +310,7 @@ public class TestConfig extends TLSDelegateConfig {
         config.setRetryFailedClientTcpSocketInitialization(true);
         config.setReceiveFinalTcpSocketStateWithTimeout(true);
         config.setPreferredCertRsaKeySize(4096);
-        config.setPrefferedCertDssKeySize(3072);
+        config.setPreferredCertDssKeySize(3072);
         
         config.setFiltersKeepUserSettings(Boolean.FALSE);
         config.setDefaultProposedAlpnProtocols("http/1.1", "spdy/1", "spdy/2", "spdy/3", "stun.turn",
@@ -427,18 +426,6 @@ public class TestConfig extends TLSDelegateConfig {
 
     public void setParallelHandshakes(int parallelHandshakes) {
         this.parallelHandshakes = parallelHandshakes;
-    }
-
-    public List<ProtocolVersion> getSupportedVersions() {
-        return supportedVersions;
-    }
-
-    public void setSupportedVersions(List<ProtocolVersion> supportedVersions) {
-        this.supportedVersions = supportedVersions;
-    }
-
-    public void setSupportedVersions(ProtocolVersion ...supportedVersions) {
-        this.supportedVersions = Arrays.asList(supportedVersions);
     }
 
     public Callable<Integer> getTimeoutActionScript() {

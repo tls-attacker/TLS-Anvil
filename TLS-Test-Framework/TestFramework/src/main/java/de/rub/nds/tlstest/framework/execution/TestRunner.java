@@ -81,6 +81,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
@@ -157,10 +158,12 @@ public class TestRunner {
             try {
                 FileInputStream fis = new FileInputStream(fileName);
                 ObjectInputStream ois = new ObjectInputStream(fis);
-                LOGGER.info("Using cached siteReport");
+                LOGGER.info("Reading cached ScanReport");
                 return (ServerTestSiteReport) ois.readObject();
+            } catch (InvalidClassException e) {
+                LOGGER.info("Cached SiteReport appears to be outdated");
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error("Failed to load cached ScanReport");
             }
         }
 
@@ -583,23 +586,12 @@ public class TestRunner {
             throw new RuntimeException("SiteReport is null after preparation phase");
         }
 
-        boolean targetSupportVersions = true;
-        if (testConfig.getSupportedVersions() != null) {
-            targetSupportVersions = false;
-            for (ProtocolVersion i : testConfig.getSupportedVersions()) {
-                if (testContext.getSiteReport().getVersions() != null && testContext.getSiteReport().getVersions().contains(i)) {
-                    targetSupportVersions = true;
-                    break;
-                }
-            }
-        }
-
         boolean startTestSuite = false;
-        if (testContext.getSiteReport().getVersions() == null || testContext.getSiteReport().getVersions().size() == 0) {
+        if (testContext.getSiteReport().getVersions() == null || testContext.getSiteReport().getVersions().isEmpty()) {
             LOGGER.error("Target does not support any ProtocolVersion");
-        } else if (testContext.getSiteReport().getCipherSuites().size() == 0 && testContext.getSiteReport().getSupportedTls13CipherSuites().size() == 0) {
+        } else if (testContext.getSiteReport().getCipherSuites().isEmpty() && testContext.getSiteReport().getSupportedTls13CipherSuites().isEmpty()) {
             LOGGER.error("Target does not support any CipherSuites");
-        } else if (!targetSupportVersions) {
+        } else if (!testContext.getSiteReport().getVersions().contains(ProtocolVersion.TLS12) && !testContext.getSiteReport().getVersions().contains(ProtocolVersion.TLS13)) {
             LOGGER.error("Target does not support any ProtocolVersion that the Testsuite supports");
         } else {
             startTestSuite = true;

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>TLS-Test-Framework</artifactId>
-    <version>1.0.3</version>
-    <groupId>de.rub.nds.tlstest</groupId>
-    <name>TLS-Test-Framework</name>
     <parent>
-        <groupId>de.rub.nds.tlstest</groupId>
+        <groupId>de.rub.nds.tls.test</groupId>
         <artifactId>TLS-Test-Framework-Aggregator</artifactId>
         <version>1.0.3</version>
     </parent>
+    <groupId>de.rub.nds.tls.test</groupId>
+    <artifactId>TLS-Test-Framework</artifactId>
+    <version>1.0.3</version>
     <packaging>jar</packaging>
+    <name>TLS-Test-Framework</name>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
@@ -21,51 +21,22 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.jupiter.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
-            <version>${junit.platform.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.17.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.17.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-jul</artifactId>
-            <version>2.17.2</version>
-        </dependency>
-        <dependency>
-            <artifactId>tls-server-scanner</artifactId>
-            <groupId>de.rub.nds.tls.scanner</groupId>
-            <version>5.2.3</version>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.10.0</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
-            <version>2.10.0</version>
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>me.tongfei</groupId>
-            <artifactId>progressbar</artifactId>
-            <version>0.8.1</version>
+            <groupId>de.rub.nds.tls.attacker</groupId>
+            <artifactId>tls-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds.tls.scanner</groupId>
+            <artifactId>tls-server-scanner</artifactId>
         </dependency>
         <dependency>
             <groupId>de.rwth.swc.coffee4j</groupId>
@@ -74,12 +45,12 @@
         </dependency>
         <dependency>
             <groupId>de.rwth.swc.coffee4j</groupId>
-            <artifactId>coffee4j-model</artifactId>
+            <artifactId>coffee4j-junit-jupiter</artifactId>
             <version>1.0.6</version>
         </dependency>
         <dependency>
             <groupId>de.rwth.swc.coffee4j</groupId>
-            <artifactId>coffee4j-junit-jupiter</artifactId>
+            <artifactId>coffee4j-model</artifactId>
             <version>1.0.6</version>
         </dependency>
         <dependency>
@@ -87,15 +58,42 @@
             <artifactId>junit</artifactId>
             <version>4.13.1</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.reflections</groupId>-->
-<!--            <artifactId>reflections</artifactId>-->
-<!--            <version>0.10.2</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>me.tongfei</groupId>
+            <artifactId>progressbar</artifactId>
+            <version>0.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jul</artifactId>
+        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.reflections</groupId>-->
+        <!--            <artifactId>reflections</artifactId>-->
+        <!--            <version>0.10.2</version>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.14.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.jupiter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>${junit.platform.version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -106,10 +104,10 @@
                 <executions>
                     <execution>
                         <id>copy</id>
-                        <phase>package</phase>
                         <goals>
                             <goal>copy</goal>
                         </goals>
+                        <phase>package</phase>
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
@@ -125,10 +123,10 @@
                     </execution>
                     <execution>
                         <id>copy-dependencies</id>
-                        <phase>package</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
+                        <phase>package</phase>
                         <configuration>
                             <outputDirectory>${basedir}/apps/lib</outputDirectory>
                             <!--Ensures only runnable dependencies are included-->
@@ -154,8 +152,8 @@
             </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
-                <version>3.0</version>
                 <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
                 <configuration>
                     <header>${basedir}/license_header_plain.txt</header>
                     <strictCheck>true</strictCheck>
@@ -178,6 +176,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
                 <configuration>
+                    <threadCount>2</threadCount>
                     <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
                 </configuration>
             </plugin>

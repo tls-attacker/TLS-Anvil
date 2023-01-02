@@ -536,7 +536,10 @@ public class TestRunner {
 
         String networkInterface = testConfig.getNetworkInterface();
 
-        // tcpdump -i eth0 -w /output/dump.pcap
+        if(networkInterface.equals("any")) {
+            LOGGER.warn("Tcpdump will capture on all interfaces. Use -networkInterface to reduce amount of collected data.");
+        }
+        
         ProcessBuilder tcpdump = new ProcessBuilder(
                 "tcpdump",
                 "-i", networkInterface,

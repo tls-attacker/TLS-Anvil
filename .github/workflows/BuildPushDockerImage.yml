@@ -17,9 +17,6 @@ on:
       - main
     tags:
       - 'v*'
-  pull_request:
-    branches:
-      - main
 
 env:
   IS_RELEASE: ${{ contains(github.ref, 'refs/tag') }}

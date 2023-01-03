@@ -37,13 +37,6 @@
         <skip.failsafe.tests>${skipTests}</skip.failsafe.tests>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>de.rub.nds.tls.attacker</groupId>
-            <artifactId>tls-core</artifactId>
-        </dependency>
-    </dependencies>
-
     <build>
         <pluginManagement>
             <plugins>

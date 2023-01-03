@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>de.rub.nds.tls.test</groupId>
-        <artifactId>TLS-Test-Framework-Aggregator</artifactId>
+        <groupId>de.rub.nds.tls.anvil</groupId>
+        <artifactId>tls-test-framework-aggregator</artifactId>
         <version>1.0.3</version>
     </parent>
-    <groupId>de.rub.nds.tls.test</groupId>
-    <artifactId>TLS-Test-Framework</artifactId>
+    <groupId>de.rub.nds.tls.anvil</groupId>
+    <artifactId>tls-test-framework</artifactId>
     <version>1.0.3</version>
     <packaging>jar</packaging>
     <name>TLS-Test-Framework</name>
@@ -75,11 +75,6 @@
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-jul</artifactId>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.reflections</groupId>-->
-        <!--            <artifactId>reflections</artifactId>-->
-        <!--            <version>0.10.2</version>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
@@ -88,12 +83,10 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>${junit.jupiter.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-launcher</artifactId>
-            <version>${junit.platform.version}</version>
         </dependency>
     </dependencies>
     <build>

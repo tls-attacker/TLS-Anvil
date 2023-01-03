@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>de.rub.nds.tlstest</groupId>
-    <artifactId>TLS-Test-Framework-Aggregator</artifactId>
-    <packaging>pom</packaging>
-    <version>1.0.3</version>
-    <name>TLS-Test-Framework-Aggregator</name>
     <parent>
-        <groupId>de.rub.nds</groupId>
-        <artifactId>TLS-Anvil</artifactId>
+        <groupId>de.rub.nds.tls</groupId>
+        <artifactId>tls-anvil</artifactId>
         <version>1.0.3</version>
     </parent>
+
+    <groupId>de.rub.nds.tls.anvil</groupId>
+    <artifactId>tls-test-framework-aggregator</artifactId>
+    <version>1.0.3</version>
+    <packaging>pom</packaging>
+    <name>TLS-Test-Framework-Aggregator</name>
     <modules>
-        <module>coffee4j</module>
         <module>TestFramework</module>
+        <module>coffee4j</module>
     </modules>
 
     <build>
-        <plugins>
-        </plugins>
+        <plugins />
     </build>
 
 </project>

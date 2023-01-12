@@ -32,7 +32,6 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 5246, section = "6.2.1 Fragmentation")
@@ -82,7 +81,6 @@ public class Fragmentation extends Tls12Test {
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @Tag("test")
     public void sendHandshakeMessagesWithinSingleRecord(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.execution;
 
@@ -22,10 +21,6 @@ import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
 import de.rub.nds.tlstest.framework.utils.Utils;
 import de.rwth.swc.coffee4j.model.Combination;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.extension.ExtensionContext;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -34,18 +29,21 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
- * Usually each test case performing a handshake is associated with a AnnotatedStateContainer.
- * This class contains a list of States / Handshakes that are the result
- * of the derivation process.
+ * Usually each test case performing a handshake is associated with a AnnotatedStateContainer. This
+ * class contains a list of States / Handshakes that are the result of the derivation process.
  */
-public class  AnnotatedStateContainer {
+public class AnnotatedStateContainer {
     private static final Logger LOGGER = LogManager.getLogger();
     private boolean finished = false;
     private final long startTime = System.currentTimeMillis();
@@ -60,7 +58,7 @@ public class  AnnotatedStateContainer {
 
     @JsonProperty("HasStateWithAdditionalResultInformation")
     private Boolean hasStateWithAdditionalResultInformation = false;
-    
+
     @JsonProperty("HasVaryingAdditionalResultInformation")
     private Boolean hasVaryingAdditionalResultInformation = false;
 
@@ -82,16 +80,16 @@ public class  AnnotatedStateContainer {
     @JsonProperty("States")
     private List<AnnotatedState> states = new ArrayList<>();
 
-    @JsonUnwrapped
-    private ScoreContainer scoreContainer;
+    @JsonUnwrapped private ScoreContainer scoreContainer;
 
     @Override
     public String toString() {
-        return String.format("AnnotatedStateContainer{displayName = %s, result = %s}",
-                testMethodConfig != null ? testMethodConfig.getClassName() + "." + testMethodConfig.getMethodName() : "null",
-                result != null ? result.name() : "null"
-        );
-
+        return String.format(
+                "AnnotatedStateContainer{displayName = %s, result = %s}",
+                testMethodConfig != null
+                        ? testMethodConfig.getClassName() + "." + testMethodConfig.getMethodName()
+                        : "null",
+                result != null ? result.name() : "null");
     }
 
     private AnnotatedStateContainer(ExtensionContext extensionContext) {
@@ -99,8 +97,10 @@ public class  AnnotatedStateContainer {
         this.scoreContainer = new ScoreContainer(extensionContext);
     }
 
-    synchronized public static AnnotatedStateContainer forExtensionContext(ExtensionContext extensionContext) {
-        ExtensionContext resolvedContext = Utils.getTemplateContainerExtensionContext(extensionContext);
+    public static synchronized AnnotatedStateContainer forExtensionContext(
+            ExtensionContext extensionContext) {
+        ExtensionContext resolvedContext =
+                Utils.getTemplateContainerExtensionContext(extensionContext);
 
         if (TestContext.getInstance().getTestResult(resolvedContext.getUniqueId()) != null) {
             return TestContext.getInstance().getTestResult(resolvedContext.getUniqueId());
@@ -134,7 +134,7 @@ public class  AnnotatedStateContainer {
         List<String> uuids = new ArrayList<>();
         List<Throwable> errors = new ArrayList<>();
         boolean failed = false;
-        
+
         String lastAdditionalResultInformation = "";
         TestContext.getInstance().increasePerformedHandshakes(this.getStates().size());
 
@@ -146,7 +146,7 @@ public class  AnnotatedStateContainer {
 
             if (!state.getAdditionalResultInformation().isEmpty()) {
                 this.setHasStateWithAdditionalResultInformation((Boolean) true);
-                if(!state.getAdditionalResultInformation().equals(lastAdditionalResultInformation)
+                if (!state.getAdditionalResultInformation().equals(lastAdditionalResultInformation)
                         && !lastAdditionalResultInformation.isEmpty()) {
                     this.setHasVaryingAdditionalResultInformation((Boolean) true);
                 }
@@ -154,46 +154,82 @@ public class  AnnotatedStateContainer {
             }
 
             if (uuids.contains(state.getUuid())) {
-                LOGGER.warn("uuids of states in container are not unique! ({}.{})", this.testMethodConfig.getClassName(), this.testMethodConfig.getMethodName());
+                LOGGER.warn(
+                        "uuids of states in container are not unique! ({}.{})",
+                        this.testMethodConfig.getClassName(),
+                        this.testMethodConfig.getMethodName());
                 continue;
             }
             uuids.add(state.getUuid());
         }
 
         if (failed) {
-            for (Throwable i: errors) {
-                if (System.getenv("DOCKER") != null) {
-                    LOGGER.debug("", i);
-                } else {
-                    LOGGER.error("", i);
-                }
-            }
+            printFailures(errors);
             failedReason = String.format("%d/%d tests failed", errors.size(), states.size());
         }
-  
-        if(anyStateSucceeded() && failed) {
-            LOGGER.info("Some generated inputs resulted in failures for test " + testMethodConfig.getMethodName()); 
+
+        if (anyStateSucceeded() && failed) {
+            LOGGER.info(
+                    "Some generated inputs resulted in failures for test "
+                            + testMethodConfig.getMethodName());
             if (failureInducingCombinations != null) {
-                String tmp = failureInducingCombinations.stream().map(DerivationContainer::toString).collect(Collectors.joining("\n\t"));
+                String tmp =
+                        failureInducingCombinations.stream()
+                                .map(DerivationContainer::toString)
+                                .collect(Collectors.joining("\n\t"));
                 LOGGER.info("The following parameters resulted in test failures:\n\t{}", tmp);
             } else {
                 LOGGER.info("No fault characterization result obtained");
             }
             printFailedContainers();
-        } else if(failed) {
-            LOGGER.info("All generated inputs resulted in failures for test " + testMethodConfig.getMethodName());
+        } else if (failed) {
+            LOGGER.info(
+                    "All generated inputs resulted in failures for test "
+                            + testMethodConfig.getMethodName());
         }
-        
+
         serialize();
+    }
+
+    private void printFailures(List<Throwable> errors) {
+        Map<String, Integer> reportedErrorCounter = new HashMap<>();
+        for (Throwable thrown : errors) {
+            if (thrown.getMessage() != null && thrown instanceof AssertionError) {
+                reportedErrorCounter.computeIfAbsent(thrown.getMessage(), k -> 0);
+                reportedErrorCounter.put(
+                        thrown.getMessage(), reportedErrorCounter.get(thrown.getMessage()) + 1);
+            } else if (!(thrown instanceof AssertionError)) {
+                LOGGER.error("Encountered exception: ", thrown);
+            }
+        }
+        for (String error : reportedErrorCounter.keySet()) {
+            if (System.getenv("DOCKER") != null) {
+                LOGGER.debug(
+                        "{}/{} failed due to: {}",
+                        reportedErrorCounter.get(error),
+                        states.size(),
+                        error);
+            } else {
+                LOGGER.error(
+                        "{}/{} failed due to: {}",
+                        reportedErrorCounter.get(error),
+                        states.size(),
+                        error);
+            }
+        }
     }
 
     public void stateFinished(TestResult result) {
         setResultRaw(this.resultRaw | result.getValue());
     }
-    
+
     private void printFailedContainers() {
-        LOGGER.info("Individual failed Containers for test " + testMethodConfig.getMethodName() +":\n");
-        states.stream().filter(state -> state.getResult() != TestResult.STRICTLY_SUCCEEDED)
+        LOGGER.info(
+                "Individual failed Containers for test "
+                        + testMethodConfig.getMethodName()
+                        + ":\n");
+        states.stream()
+                .filter(state -> state.getResult() != TestResult.STRICTLY_SUCCEEDED)
                 .forEach(state -> LOGGER.info(state.getDerivationContainer().toString()));
     }
 
@@ -242,9 +278,13 @@ public class  AnnotatedStateContainer {
     public Long getElapsedTime() {
         return elapsedTime;
     }
-    
+
     private boolean anyStateSucceeded() {
-        return states.stream().anyMatch(state -> state.getResult() == TestResult.STRICTLY_SUCCEEDED || state.getResult() == TestResult.CONCEPTUALLY_SUCCEEDED);
+        return states.stream()
+                .anyMatch(
+                        state ->
+                                state.getResult() == TestResult.STRICTLY_SUCCEEDED
+                                        || state.getResult() == TestResult.CONCEPTUALLY_SUCCEEDED);
     }
 
     public List<DerivationContainer> getFailureInducingCombinations() {
@@ -252,8 +292,7 @@ public class  AnnotatedStateContainer {
     }
 
     public void setFailureInducingCombinations(List<Combination> failureInducingCombinations) {
-        if (failureInducingCombinations == null || failureInducingCombinations.isEmpty())
-            return;
+        if (failureInducingCombinations == null || failureInducingCombinations.isEmpty()) return;
 
         List<DerivationContainer> parameters = new ArrayList<>();
         for (Combination i : failureInducingCombinations) {
@@ -284,7 +323,8 @@ public class  AnnotatedStateContainer {
         return hasStateWithAdditionalResultInformation;
     }
 
-    public void setHasStateWithAdditionalResultInformation(Boolean hasStateWithAdditionalResultInformation) {
+    public void setHasStateWithAdditionalResultInformation(
+            Boolean hasStateWithAdditionalResultInformation) {
         this.hasStateWithAdditionalResultInformation = hasStateWithAdditionalResultInformation;
     }
 
@@ -292,7 +332,8 @@ public class  AnnotatedStateContainer {
         return hasVaryingAdditionalResultInformation;
     }
 
-    public void setHasVaryingAdditionalResultInformation(Boolean hasVaryingAdditionalResultInformation) {
+    public void setHasVaryingAdditionalResultInformation(
+            Boolean hasVaryingAdditionalResultInformation) {
         this.hasVaryingAdditionalResultInformation = hasVaryingAdditionalResultInformation;
     }
 
@@ -305,16 +346,19 @@ public class  AnnotatedStateContainer {
 
         String[] folderComponents = method.split("\\.");
 
-        return Paths.get(TestContext.getInstance().getConfig().getOutputFolder(), folderComponents).toString();
+        return Paths.get(TestContext.getInstance().getConfig().getOutputFolder(), folderComponents)
+                .toString();
     }
 
     private void serialize() {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
-                .withFieldVisibility(JsonAutoDetect.Visibility.NONE)
-                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+        mapper.setVisibility(
+                mapper.getSerializationConfig()
+                        .getDefaultVisibilityChecker()
+                        .withFieldVisibility(JsonAutoDetect.Visibility.NONE)
+                        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                        .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                        .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
         if (TestContext.getInstance().getConfig().isPrettyPrintJSON()) {
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -330,14 +374,18 @@ public class  AnnotatedStateContainer {
         try {
             mapper.writeValue(f, this);
         } catch (Exception e) {
-            LOGGER.error("Failed to serialize AnnotatedStateContainer ({})", testMethodConfig.getCompleteMethodName(), e);
+            LOGGER.error(
+                    "Failed to serialize AnnotatedStateContainer ({})",
+                    testMethodConfig.getCompleteMethodName(),
+                    e);
             errorMsg.append("Failed to serialize AnnotatedStateContainer\n");
             errorMsg.append(ExecptionPrinter.stacktraceToString(e));
         }
-        
-        if(TestContext.getInstance().getConfig().isExportTraces()) {
+
+        if (TestContext.getInstance().getConfig().isExportTraces()) {
             try {
-                FileOutputStream fos = new FileOutputStream(Paths.get(targetFolder, "traces.zip").toString());
+                FileOutputStream fos =
+                        new FileOutputStream(Paths.get(targetFolder, "traces.zip").toString());
                 ZipOutputStream zipOut = new ZipOutputStream(fos);
                 for (AnnotatedState s : states) {
                     ZipEntry zipEntry = new ZipEntry(s.getUuid() + ".xml");
@@ -346,26 +394,31 @@ public class  AnnotatedStateContainer {
                         String serialized = WorkflowTraceSerializer.write(s.getWorkflowTrace());
                         zipOut.write(serialized.getBytes(StandardCharsets.UTF_8));
                     } catch (Exception e) {
-                        LOGGER.error("Failed to serialize State ({}, {})", testMethodConfig.getCompleteMethodName(), s.getUuid(), e);
+                        LOGGER.error(
+                                "Failed to serialize State ({}, {})",
+                                testMethodConfig.getCompleteMethodName(),
+                                s.getUuid(),
+                                e);
                         errorMsg.append("\nFailed to serialize WorkflowTraces");
                         errorMsg.append(ExecptionPrinter.stacktraceToString(e));
                     }
-                }   
+                }
                 zipOut.close();
                 fos.close();
-            } catch (Exception e){
+            } catch (Exception e) {
                 LOGGER.error("", e);
             }
         }
         try {
             String err = errorMsg.toString();
             if (!err.isEmpty()) {
-                FileWriter fileWriter = new FileWriter(Paths.get(targetFolder, "_error.txt").toString());
+                FileWriter fileWriter =
+                        new FileWriter(Paths.get(targetFolder, "_error.txt").toString());
                 PrintWriter printWriter = new PrintWriter(fileWriter);
                 printWriter.print(err);
                 printWriter.close();
             }
-        } catch (Exception ignored) {}
-
+        } catch (Exception ignored) {
+        }
     }
 }

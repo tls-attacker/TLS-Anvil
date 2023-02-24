@@ -799,7 +799,17 @@ public class TestRunner {
         } catch (Exception e) {
         }
 
+        stopTcpDump();
         System.exit(0);
+    }
+
+    private void stopTcpDump() {
+        if (tcpdumpProcess != null) {
+            try {
+                tcpdumpProcess.destroy();
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     private List<State> buildClientKeyShareProbeStates(ClientHelloMessage clientHello) {

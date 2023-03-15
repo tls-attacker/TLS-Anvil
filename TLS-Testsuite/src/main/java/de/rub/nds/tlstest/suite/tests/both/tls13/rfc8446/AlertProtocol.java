@@ -16,6 +16,7 @@ import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
+import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -143,7 +144,13 @@ public class AlertProtocol extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         AlertMessage alert = new AlertMessage();
         alert.setConfig(AlertLevel.WARNING, AlertDescription.CLOSE_NOTIFY);
-        trace.addTlsAction(new SendAction(alert));
+        
+        // TLS 1.3 forbids fragmented alerts
+        Record unfragmentedRecord = new Record();
+        unfragmentedRecord.setMaxRecordLengthConfig(2);
+        SendAction sendAlert = new SendAction(alert);
+        sendAlert.setRecords(unfragmentedRecord);
+        trace.addTlsAction(sendAlert);
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         runner.execute(trace, config)

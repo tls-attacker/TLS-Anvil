@@ -164,14 +164,12 @@ public class AnnotatedStateContainer {
         }
 
         if (failed) {
+            LOGGER.error("SUT did not pass test {}:", testMethodConfig.getMethodName());
             printFailures(errors);
             failedReason = String.format("%d/%d tests failed", errors.size(), states.size());
         }
 
         if (anyStateSucceeded() && failed) {
-            LOGGER.info(
-                    "Some generated inputs resulted in failures for test "
-                            + testMethodConfig.getMethodName());
             if (failureInducingCombinations != null) {
                 String tmp =
                         failureInducingCombinations.stream()

@@ -1,10 +1,9 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
@@ -35,8 +34,10 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "4.4.2.4. Receiving a Certificate Message")
 public class Certificate extends Tls13Test {
 
-    @TlsTest(description = "If the server supplies an empty Certificate message, " +
-            "the client MUST abort the handshake with a \"decode_error\" alert.")
+    @TlsTest(
+            description =
+                    "If the server supplies an empty Certificate message, "
+                            + "the client MUST abort the handshake with a \"decode_error\" alert.")
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.HIGH)
@@ -47,18 +48,27 @@ public class Certificate extends Tls13Test {
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        trace.getFirstSendMessage(CertificateMessage.class).setCompleteResultingMessage(Modifiable.explicit(new byte[] {HandshakeMessageType.CERTIFICATE.getValue(), 0, 0, 0}));
+        trace.getFirstSendMessage(CertificateMessage.class)
+                .setCompleteResultingMessage(
+                        Modifiable.explicit(
+                                new byte[] {HandshakeMessageType.CERTIFICATE.getValue(), 0, 0, 0}));
 
-        runner.execute(trace, config).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
+        runner.execute(trace, config)
+                .validateFinal(
+                        i -> {
+                            Validator.receivedFatalAlert(i);
 
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.DECODE_ERROR, alert);
-        });
+                            AlertMessage alert =
+                                    i.getWorkflowTrace()
+                                            .getFirstReceivedMessage(AlertMessage.class);
+                            Validator.testAlertDescription(i, AlertDescription.DECODE_ERROR, alert);
+                        });
     }
-    
-    @TlsTest(description = "If the server supplies an empty Certificate message, " +
-            "the client MUST abort the handshake with a \"decode_error\" alert.")
+
+    @TlsTest(
+            description =
+                    "If the server supplies an empty Certificate message, "
+                            + "the client MUST abort the handshake with a \"decode_error\" alert.")
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.HIGH)
@@ -69,13 +79,18 @@ public class Certificate extends Tls13Test {
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        trace.getFirstSendMessage(CertificateMessage.class).setCertificatesListBytes(Modifiable.explicit(new byte[]{}));
+        trace.getFirstSendMessage(CertificateMessage.class)
+                .setCertificatesListBytes(Modifiable.explicit(new byte[] {}));
 
-        runner.execute(trace, config).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
+        runner.execute(trace, config)
+                .validateFinal(
+                        i -> {
+                            Validator.receivedFatalAlert(i);
 
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.DECODE_ERROR, alert);
-        });
+                            AlertMessage alert =
+                                    i.getWorkflowTrace()
+                                            .getFirstReceivedMessage(AlertMessage.class);
+                            Validator.testAlertDescription(i, AlertDescription.DECODE_ERROR, alert);
+                        });
     }
 }

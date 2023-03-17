@@ -63,3 +63,11 @@ When multiple handshakes are performed for a <Definition id="test template"/>, t
 
 **Fully Failed (❌)**  
 A fully failed result means that the <Definition id="SUT" /> did not behave correctly for any <Definition id="test input"/>.
+
+
+### Result Annotations
+**Additional Information (❗️)**
+In some cases, test templates highlight details that affected the result of a test. Tests with these details are indicated by an exclamation mark. When viewing the individual sessions of a test, the collected details are shown when hovering on a single result.
+
+**Contradictory Additional information (⁉️)**
+If a test template added additional details for the result but these details differ between individual test cases of the template, the test result is annotated with ' ⁉️ '. This may hint towards unexpected behavioral differences. In the result view, you can filter for results with specific additional information.

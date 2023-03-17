@@ -63,7 +63,7 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         byte[] content = derivationContainer.getDerivation(InvalidCCSContentDerivation.class).getSelectedValue();
-        ChangeCipherSpecMessage changeCipherSpecMessage = new ChangeCipherSpecMessage(c);
+        ChangeCipherSpecMessage changeCipherSpecMessage = new ChangeCipherSpecMessage();
         changeCipherSpecMessage.setCcsProtocolType(Modifiable.explicit(content));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);

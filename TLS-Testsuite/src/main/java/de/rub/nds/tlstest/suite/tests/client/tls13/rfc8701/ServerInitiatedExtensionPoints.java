@@ -68,7 +68,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ExtensionType selectedGreaseExt = derivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace.addTlsActions(new SendAction(new NewSessionTicketMessage(c)));
+        workflowTrace.addTlsActions(new SendAction(new NewSessionTicketMessage()));
 
         NewSessionTicketMessage msg = workflowTrace.getFirstSendMessage(NewSessionTicketMessage.class);
         msg.addExtension(new GreaseExtensionMessage(selectedGreaseExt, 25));

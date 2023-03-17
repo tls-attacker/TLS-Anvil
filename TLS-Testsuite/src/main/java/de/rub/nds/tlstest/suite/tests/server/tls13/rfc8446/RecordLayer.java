@@ -14,13 +14,11 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
-import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -228,9 +226,9 @@ public class RecordLayer extends Tls13Test {
             for(ReceivingAction receiving : i.getWorkflowTrace().getReceivingActions()) {
                 ReceiveAction receiveAction = (ReceiveAction) receiving;
                 if(receiveAction.getReceivedRecords() != null && !receiveAction.getReceivedRecords().isEmpty()) {
-                    for(AbstractRecord abstractRecord : receiveAction.getReceivedRecords()) {
-                        if(abstractRecord.getContentMessageType() != ProtocolMessageType.CHANGE_CIPHER_SPEC) {
-                            assertArrayEquals("Record used wrong protocol version", ((Record)abstractRecord).getProtocolVersion().getValue(), ProtocolVersion.TLS12.getValue());
+                    for(Record record : receiveAction.getReceivedRecords()) {
+                        if(record.getContentMessageType() != ProtocolMessageType.CHANGE_CIPHER_SPEC) {
+                            assertArrayEquals("Record used wrong protocol version", record.getProtocolVersion().getValue(), ProtocolVersion.TLS12.getValue());
                         }
                     }
                 }

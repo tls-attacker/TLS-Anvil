@@ -129,7 +129,7 @@ public class TLSExtensionForECC extends Tls12Test {
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(chm),
-                new ReceiveAction(new AlertMessage(c))
+                new ReceiveAction(new AlertMessage())
         );
 
         chm.getExtension(EllipticCurvesExtensionMessage.class).setSupportedGroups(Modifiable.explicit(new byte[]{(byte) 123, 124}));

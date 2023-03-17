@@ -1,14 +1,18 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import de.rub.nds.modifiablevariable.util.ArrayConverter;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -26,7 +30,6 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
-import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
@@ -45,11 +48,9 @@ import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -67,12 +68,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -84,87 +79,121 @@ public class HelloRetryRequest extends Tls13Test {
     public List<DerivationParameter> getUnofferedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<NamedGroup> offeredGroups = context.getSiteReport().getClientHelloNamedGroups();
-        NamedGroup.getImplemented().stream().filter(group -> !offeredGroups.contains(group))
-                .forEach(unofferedGroup -> parameterValues.add(new NamedGroupDerivation(unofferedGroup)));
+        NamedGroup.getImplemented().stream()
+                .filter(group -> !offeredGroups.contains(group))
+                .forEach(
+                        unofferedGroup ->
+                                parameterValues.add(new NamedGroupDerivation(unofferedGroup)));
         return parameterValues;
     }
-    
-    @TlsTest(description = "Upon receipt of this extension in a HelloRetryRequest, the client "
-            + "MUST verify that (1) the selected_group field corresponds to a group "
-            + "which was provided in the \"supported_groups\" extension in the "
-            + "original ClientHello and [...] If either of these checks fails, then "
-            + "the client MUST abort the handshake with an \"illegal_parameter\" "
-            + "alert.")
+
+    @TlsTest(
+            description =
+                    "Upon receipt of this extension in a HelloRetryRequest, the client "
+                            + "MUST verify that (1) the selected_group field corresponds to a group "
+                            + "which was provided in the \"supported_groups\" extension in the "
+                            + "original ClientHello and [...] If either of these checks fails, then "
+                            + "the client MUST abort the handshake with an \"illegal_parameter\" "
+                            + "alert.")
     @RFC(number = 8446, section = "4.2.8 Key Share")
     @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getUnofferedGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
-    public void helloRetryRequestsUnofferedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void helloRetryRequestsUnofferedGroup(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         performHelloRetryRequestTest(argumentAccessor, runner);
     }
 
     public List<DerivationParameter> getUnofferedTls13CipherSuites(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        List<CipherSuite> offeredTls13 = CipherSuite.getCipherSuites(context.getReceivedClientHelloMessage().getCipherSuites().getValue());
-        CipherSuite.getImplementedTls13CipherSuites().stream().filter(cipherSuite -> !offeredTls13.contains(cipherSuite))
-                .forEach(cipherSuite -> parameterValues.add(new CipherSuiteDerivation(cipherSuite)));
+        List<CipherSuite> offeredTls13 =
+                CipherSuite.getCipherSuites(
+                        context.getReceivedClientHelloMessage().getCipherSuites().getValue());
+        CipherSuite.getImplementedTls13CipherSuites().stream()
+                .filter(cipherSuite -> !offeredTls13.contains(cipherSuite))
+                .forEach(
+                        cipherSuite -> parameterValues.add(new CipherSuiteDerivation(cipherSuite)));
         return parameterValues;
     }
 
-    @TlsTest(description = "A client which receives a cipher suite that was not offered MUST " +
-        "abort the handshake.")
-    @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getUnofferedTls13CipherSuites")
+    @TlsTest(
+            description =
+                    "A client which receives a cipher suite that was not offered MUST "
+                            + "abort the handshake.")
+    @ExplicitValues(
+            affectedTypes = DerivationType.CIPHERSUITE,
+            methods = "getUnofferedTls13CipherSuites")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.MEDIUM)
-    public void helloRetryRequestsUnofferedTls13CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void helloRetryRequestsUnofferedTls13CipherSuite(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
-        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+        NamedGroup selectedGroup =
+                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            //illegal parameter is not mentioned in the quote above but is mandatory
-            //for the ServerHello case
-            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
-        });
+        runner.execute(workflowTrace, c)
+                .validateFinal(
+                        i -> {
+                            Validator.receivedFatalAlert(i);
+                            AlertMessage alert =
+                                    i.getWorkflowTrace()
+                                            .getFirstReceivedMessage(AlertMessage.class);
+                            // illegal parameter is not mentioned in the quote above but is
+                            // mandatory
+                            // for the ServerHello case
+                            Validator.testAlertDescription(
+                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
+                        });
     }
 
     public boolean isKeyShareInInitialHello(NamedGroup group) {
         return context.getSiteReport().getClientHelloKeyShareGroups().contains(group);
     }
 
-    @TlsTest(description = "Clients MUST abort the handshake with an "
-            + "\"illegal_parameter\" alert if the HelloRetryRequest would not result "
-            + "in any change in the ClientHello.")
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isKeyShareInInitialHello")
+    @TlsTest(
+            description =
+                    "Clients MUST abort the handshake with an "
+                            + "\"illegal_parameter\" alert if the HelloRetryRequest would not result "
+                            + "in any change in the ClientHello.")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isKeyShareInInitialHello")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
-    public void helloRetryRequestResultsInNoChanges(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void helloRetryRequestResultsInNoChanges(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         performHelloRetryRequestTest(argumentAccessor, runner);
     }
 
-    private void performHelloRetryRequestTest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    private void performHelloRetryRequestTest(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
-        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+        NamedGroup selectedGroup =
+                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
-        });
+        runner.execute(workflowTrace, c)
+                .validateFinal(
+                        i -> {
+                            Validator.receivedFatalAlert(i);
+                            AlertMessage alert =
+                                    i.getWorkflowTrace()
+                                            .getFirstReceivedMessage(AlertMessage.class);
+                            Validator.testAlertDescription(
+                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
+                        });
     }
 
     public boolean isNotKeyShareInInitialHello(NamedGroup group) {
@@ -182,61 +211,94 @@ public class HelloRetryRequest extends Tls13Test {
 
     public ConditionEvaluationResult supportsMultipleNamedGroups() {
         if (context.getSiteReport().getSupportedTls13Groups().size() > 1) {
-            return ConditionEvaluationResult.enabled("More than one NamedGroup supported by target in TLS 1.3");
+            return ConditionEvaluationResult.enabled(
+                    "More than one NamedGroup supported by target in TLS 1.3");
         }
-        return ConditionEvaluationResult.disabled("Target does not support more than one NamedGroup in TLS 1.3");
+        return ConditionEvaluationResult.disabled(
+                "Target does not support more than one NamedGroup in TLS 1.3");
     }
 
-    @TlsTest(description = "If a client receives a second "
-            + "HelloRetryRequest in the same connection (i.e., where the ClientHello "
-            + "was itself in response to a HelloRetryRequest), it MUST abort the "
-            + "handshake with an \"unexpected_message\" alert.")
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @TlsTest(
+            description =
+                    "If a client receives a second "
+                            + "HelloRetryRequest in the same connection (i.e., where the ClientHello "
+                            + "was itself in response to a HelloRetryRequest), it MUST abort the "
+                            + "handshake with an \"unexpected_message\" alert.")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isNotKeyShareInInitialHello")
     @MethodCondition(method = "supportsMultipleNamedGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    public void sendSecondHelloRetryRequest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendSecondHelloRetryRequest(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
-        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
-        //re-requesting the same group is covered by another testcase
+        NamedGroup selectedGroup =
+                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+        // re-requesting the same group is covered by another testcase
         NamedGroup otherRequestableGroup = getOtherSupportedNamedGroup(selectedGroup);
 
-        //first hello retry gets added by WorkflowRunner
+        // first hello retry gets added by WorkflowRunner
         ServerHelloMessage secondHelloRetry = new ServerHelloMessage(c);
-        secondHelloRetry.setRandom(Modifiable.explicit(ServerHelloMessage.getHelloRetryRequestRandom()));
-        secondHelloRetry.getExtension(KeyShareExtensionMessage.class).setKeyShareListBytes(Modifiable.explicit(otherRequestableGroup.getValue()));
+        secondHelloRetry.setRandom(
+                Modifiable.explicit(ServerHelloMessage.getHelloRetryRequestRandom()));
+        secondHelloRetry
+                .getExtension(KeyShareExtensionMessage.class)
+                .setKeyShareListBytes(Modifiable.explicit(otherRequestableGroup.getValue()));
 
         workflowTrace.addTlsActions(
                 new ReceiveAction(new ClientHelloMessage()),
                 new SendAction(secondHelloRetry),
-                new ReceiveAction(new AlertMessage())
-        );
+                new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            assertFalse("Client replied to second HelloRetryRequest with ClientHello", WorkflowTraceUtil.getLastReceivedMessage(i.getWorkflowTrace()) instanceof ClientHelloMessage 
-                    && i.getWorkflowTrace().getLastReceivingAction().getReceivedMessages() != null
-                    && i.getWorkflowTrace().getLastReceivingAction().getReceivedMessages().contains(WorkflowTraceUtil.getLastReceivedMessage(i.getWorkflowTrace())));
-            Validator.receivedFatalAlert(i);
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, alert);
-        });
+        runner.execute(workflowTrace, c)
+                .validateFinal(
+                        i -> {
+                            assertFalse(
+                                    "Client replied to second HelloRetryRequest with ClientHello",
+                                    WorkflowTraceUtil.getLastReceivedMessage(i.getWorkflowTrace())
+                                                    instanceof ClientHelloMessage
+                                            && i.getWorkflowTrace()
+                                                            .getLastReceivingAction()
+                                                            .getReceivedMessages()
+                                                    != null
+                                            && i.getWorkflowTrace()
+                                                    .getLastReceivingAction()
+                                                    .getReceivedMessages()
+                                                    .contains(
+                                                            WorkflowTraceUtil
+                                                                    .getLastReceivedMessage(
+                                                                            i.getWorkflowTrace())));
+                            Validator.receivedFatalAlert(i);
+                            AlertMessage alert =
+                                    i.getWorkflowTrace()
+                                            .getFirstReceivedMessage(AlertMessage.class);
+                            Validator.testAlertDescription(
+                                    i, AlertDescription.UNEXPECTED_MESSAGE, alert);
+                        });
     }
 
     private ConditionEvaluationResult supportsMultipleCipherSuites() {
         if (context.getSiteReport().getSupportedTls13CipherSuites().size() > 1) {
-            return ConditionEvaluationResult.enabled("More than one CipherSuite supported by target in TLS 1.3");
+            return ConditionEvaluationResult.enabled(
+                    "More than one CipherSuite supported by target in TLS 1.3");
         }
-        return ConditionEvaluationResult.disabled("Target does not support more than one CipherSuite in TLS 1.3");
+        return ConditionEvaluationResult.disabled(
+                "Target does not support more than one CipherSuite in TLS 1.3");
     }
 
-    @TlsTest(description = "Upon receiving "
-            + "the ServerHello, clients MUST check that the cipher suite supplied in "
-            + "the ServerHello is the same as that in the HelloRetryRequest and "
-            + "otherwise abort the handshake with an \"illegal_parameter\" alert.")
+    @TlsTest(
+            description =
+                    "Upon receiving "
+                            + "the ServerHello, clients MUST check that the cipher suite supplied in "
+                            + "the ServerHello is the same as that in the HelloRetryRequest and "
+                            + "otherwise abort the handshake with an \"illegal_parameter\" alert.")
     @ScopeExtensions(DerivationType.MIRRORED_CIPHERSUITE)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isNotKeyShareInInitialHello")
     @MethodCondition(method = "supportsMultipleCipherSuites")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -244,32 +306,51 @@ public class HelloRetryRequest extends Tls13Test {
     public void cipherSuiteDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
-        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
-        CipherSuite helloRetryCipherSuite = derivationContainer.getDerivation(MirroredCipherSuiteDerivation.class).getSelectedValue();
+        NamedGroup selectedGroup =
+                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+        CipherSuite helloRetryCipherSuite =
+                derivationContainer
+                        .getDerivation(MirroredCipherSuiteDerivation.class)
+                        .getSelectedValue();
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilReceivingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilReceivingMessage(
+                        WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
 
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
-        ServerHelloMessage helloRetryRequest = (ServerHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
-        helloRetryRequest.setSelectedCipherSuite(Modifiable.explicit(helloRetryCipherSuite.getByteValue()));
+        ServerHelloMessage helloRetryRequest =
+                (ServerHelloMessage)
+                        WorkflowTraceUtil.getFirstSendMessage(
+                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+        helloRetryRequest.setSelectedCipherSuite(
+                Modifiable.explicit(helloRetryCipherSuite.getByteValue()));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
-        });
+        runner.execute(workflowTrace, c)
+                .validateFinal(
+                        i -> {
+                            Validator.receivedFatalAlert(i);
+                            AlertMessage alert =
+                                    i.getWorkflowTrace()
+                                            .getFirstReceivedMessage(AlertMessage.class);
+                            Validator.testAlertDescription(
+                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
+                        });
     }
-    
-    @TlsTest(description = "If using " +
-        "(EC)DHE key establishment and a HelloRetryRequest containing a " +
-        "\"key_share\" extension was received by the client, the client MUST " +
-        "verify that the selected NamedGroup in the ServerHello is the same as " +
-        "that in the HelloRetryRequest.  If this check fails, the client MUST " +
-        "abort the handshake with an \"illegal_parameter\" alert.")
+
+    @TlsTest(
+            description =
+                    "If using "
+                            + "(EC)DHE key establishment and a HelloRetryRequest containing a "
+                            + "\"key_share\" extension was received by the client, the client MUST "
+                            + "verify that the selected NamedGroup in the ServerHello is the same as "
+                            + "that in the HelloRetryRequest.  If this check fails, the client MUST "
+                            + "abort the handshake with an \"illegal_parameter\" alert.")
     @RFC(number = 8446, section = "4.2.8.  Key Share")
     @ScopeExtensions(DerivationType.MIRRORED_CIPHERSUITE)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isNotKeyShareInInitialHello")
     @ManualConfig(DerivationType.NAMED_GROUP)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -281,26 +362,35 @@ public class HelloRetryRequest extends Tls13Test {
         NamedGroup actualHelloGroup = context.getSiteReport().getClientHelloNamedGroups().get(0);
         config.setDefaultServerNamedGroups(actualHelloGroup);
         config.setDefaultSelectedNamedGroup(actualHelloGroup);
-        
-        NamedGroup hrrNamedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+
+        NamedGroup hrrNamedGroup =
+                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
         runner.insertHelloRetryRequest(workflowTrace, hrrNamedGroup);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        
-        
-        runner.execute(workflowTrace, config).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
-        });
+
+        runner.execute(workflowTrace, config)
+                .validateFinal(
+                        i -> {
+                            Validator.receivedFatalAlert(i);
+                            AlertMessage alert =
+                                    i.getWorkflowTrace()
+                                            .getFirstReceivedMessage(AlertMessage.class);
+                            Validator.testAlertDescription(
+                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
+                        });
     }
-    
-    @TlsTest(description = "The value of selected_version in the HelloRetryRequest " +
-        "\"supported_versions\" extension MUST be retained in the ServerHello, " +
-        "and a client MUST abort the handshake with an \"illegal_parameter\" " +
-        "alert if the value changes.")
+
+    @TlsTest(
+            description =
+                    "The value of selected_version in the HelloRetryRequest "
+                            + "\"supported_versions\" extension MUST be retained in the ServerHello, "
+                            + "and a client MUST abort the handshake with an \"illegal_parameter\" "
+                            + "alert if the value changes.")
     @ScopeExtensions(DerivationType.MIRRORED_CIPHERSUITE)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isNotKeyShareInInitialHello")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -308,97 +398,135 @@ public class HelloRetryRequest extends Tls13Test {
     public void versionDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
-        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+        NamedGroup selectedGroup =
+                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilSendingMessage(
+                        WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
         ServerHelloMessage modifiedServerHello = new ServerHelloMessage(config);
         workflowTrace.addTlsAction(new SendAction(modifiedServerHello));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
-        SupportedVersionsExtensionMessage supportedVersions = modifiedServerHello.getExtension(SupportedVersionsExtensionMessage.class);
+
+        SupportedVersionsExtensionMessage supportedVersions =
+                modifiedServerHello.getExtension(SupportedVersionsExtensionMessage.class);
         supportedVersions.setSupportedVersions(Modifiable.explicit(new byte[] {03, 05}));
-        
-        runner.execute(workflowTrace, config).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, alert);
-        });
+
+        runner.execute(workflowTrace, config)
+                .validateFinal(
+                        i -> {
+                            Validator.receivedFatalAlert(i);
+                            AlertMessage alert =
+                                    i.getWorkflowTrace()
+                                            .getFirstReceivedMessage(AlertMessage.class);
+                            Validator.testAlertDescription(
+                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
+                        });
     }
 
-    @TlsTest(description = "A client which receives a legacy_session_id_echo "
-            + "field that does not match what it sent in the ClientHello MUST "
-            + "abort the handshake with an \"illegal_parameter\" alert.")
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @TlsTest(
+            description =
+                    "A client which receives a legacy_session_id_echo "
+                            + "field that does not match what it sent in the ClientHello MUST "
+                            + "abort the handshake with an \"illegal_parameter\" alert.")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isNotKeyShareInInitialHello")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    public void helloRetryLegacySessionId(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void helloRetryLegacySessionId(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
         ServerHello.sharedSessionIdTest(workflowTrace, runner);
     }
 
-    @TlsTest(description = "legacy_compression_method: A single byte which "
-            + "MUST have the value 0.")
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @TlsTest(
+            description =
+                    "legacy_compression_method: A single byte which " + "MUST have the value 0.")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isNotKeyShareInInitialHello")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @DeprecatedFeatureCategory(SeverityLevel.HIGH)
-    public void helloRetryCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void helloRetryCompressionValue(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
         ServerHello.sharedCompressionValueTest(workflowTrace, runner);
     }
 
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
-            + "In particular, the client MUST fail the connection "
-            + "if a GREASE value appears in any of the following: "
-            + "[...] The \"cipher_suite\" value in a ServerHello")
+    @TlsTest(
+            description =
+                    "Clients MUST reject GREASE values when negotiated by the server. "
+                            + "In particular, the client MUST fail the connection "
+                            + "if a GREASE value appears in any of the following: "
+                            + "[...] The \"cipher_suite\" value in a ServerHello")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
     @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
     @ScopeLimitations(DerivationType.CIPHERSUITE)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isNotKeyShareInInitialHello")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    public void helloRetryGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void helloRetryGreaseCipherSuite(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
-        ServerInitiatedExtensionPoints.sharedGreaseCipherSuiteTest(workflowTrace, runner, derivationContainer);
+        ServerInitiatedExtensionPoints.sharedGreaseCipherSuiteTest(
+                workflowTrace, runner, derivationContainer);
     }
 
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
-            + "In particular, the client MUST fail the connection "
-            + "if a GREASE value appears in any of the following: "
-            + "[...] Any ServerHello extension")
+    @TlsTest(
+            description =
+                    "Clients MUST reject GREASE values when negotiated by the server. "
+                            + "In particular, the client MUST fail the connection "
+                            + "if a GREASE value appears in any of the following: "
+                            + "[...] Any ServerHello extension")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_EXTENSION)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isNotKeyShareInInitialHello")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    public void helloRetryGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void helloRetryGreaseExtension(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
-        ServerInitiatedExtensionPoints.sharedServerHelloGreaseExtensionTest(workflowTrace, runner, derivationContainer);
+        ServerInitiatedExtensionPoints.sharedServerHelloGreaseExtensionTest(
+                workflowTrace, runner, derivationContainer);
     }
 
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
-            + "In particular, the client MUST fail the connection "
-            + "if a GREASE value appears in any of the following: "
-            + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
+    @TlsTest(
+            description =
+                    "Clients MUST reject GREASE values when negotiated by the server. "
+                            + "In particular, the client MUST fail the connection "
+                            + "if a GREASE value appears in any of the following: "
+                            + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isNotKeyShareInInitialHello")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    public void helloRetryGreaseVersionSelected(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void helloRetryGreaseVersionSelected(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
-        ServerInitiatedExtensionPoints.sharedGreaseVersionTest(workflowTrace, runner, derivationContainer);
+        ServerInitiatedExtensionPoints.sharedGreaseVersionTest(
+                workflowTrace, runner, derivationContainer);
     }
 
-    private WorkflowTrace getSharedTestWorkflowTrace(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    private WorkflowTrace getSharedTestWorkflowTrace(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
-        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+        NamedGroup selectedGroup =
+                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
@@ -406,138 +534,230 @@ public class HelloRetryRequest extends Tls13Test {
         return workflowTrace;
     }
 
-    @RFC(number = 8446, section = "4.1.2 Client Hello, 4.1.3.  Server Hello, 4.1.4. Hello Retry Request, 4.2.8 Key Share, and 5.1. Record Layer")
-    @TlsTest(description = "The client will also send a "
-            + "ClientHello when the server has responded to its ClientHello with a "
-            + "HelloRetryRequest. In that case, the client MUST send the same "
-            + "ClientHello without modification, except as follows: [...]"
-            + "Upon receiving a message with type server_hello, implementations MUST " 
-            + "first examine the Random value and, if it matches this value, process " 
-            + "it as described in Section 4.1.4). [...]"
-            + "Otherwise, the client MUST process all extensions in the " 
-            + "HelloRetryRequest and send a second updated ClientHello. [...]"
-            + "Otherwise, when sending the new ClientHello, the client MUST replace the original \"key_share\" extension with one containing only a " 
-            + "new KeyShareEntry for the group indicated in the selected_group field " 
-            + "of the triggering HelloRetryRequest. [...]"
-            + "legacy_record_version:  MUST be set to 0x0303 for all records " 
-            + "generated by a TLS 1.3 implementation other than an initial "
-            + "ClientHello [...]"
-            + "In order to maximize backward "
-            + "compatibility, a record containing an initial ClientHello SHOULD have " 
-            + "version 0x0301 (reflecting TLS 1.0) and a record containing a second " 
-            + "ClientHello or a ServerHello MUST have version 0x0303 (reflecting " 
-            + "TLS 1.2).")
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @RFC(
+            number = 8446,
+            section =
+                    "4.1.2 Client Hello, 4.1.3.  Server Hello, 4.1.4. Hello Retry Request, 4.2.8 Key Share, and 5.1. Record Layer")
+    @TlsTest(
+            description =
+                    "The client will also send a "
+                            + "ClientHello when the server has responded to its ClientHello with a "
+                            + "HelloRetryRequest. In that case, the client MUST send the same "
+                            + "ClientHello without modification, except as follows: [...]"
+                            + "Upon receiving a message with type server_hello, implementations MUST "
+                            + "first examine the Random value and, if it matches this value, process "
+                            + "it as described in Section 4.1.4). [...]"
+                            + "Otherwise, the client MUST process all extensions in the "
+                            + "HelloRetryRequest and send a second updated ClientHello. [...]"
+                            + "Otherwise, when sending the new ClientHello, the client MUST replace the original \"key_share\" extension with one containing only a "
+                            + "new KeyShareEntry for the group indicated in the selected_group field "
+                            + "of the triggering HelloRetryRequest. [...]"
+                            + "legacy_record_version:  MUST be set to 0x0303 for all records "
+                            + "generated by a TLS 1.3 implementation other than an initial "
+                            + "ClientHello [...]"
+                            + "In order to maximize backward "
+                            + "compatibility, a record containing an initial ClientHello SHOULD have "
+                            + "version 0x0301 (reflecting TLS 1.0) and a record containing a second "
+                            + "ClientHello or a ServerHello MUST have version 0x0303 (reflecting "
+                            + "TLS 1.2).")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isNotKeyShareInInitialHello")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("adjusted")
-    public void actsCorrectlyUponHelloRetryRequest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void actsCorrectlyUponHelloRetryRequest(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        WorkflowTrace trace = runner.generateWorkflowTraceUntilLastSendingMessage(WorkflowTraceType.SHORT_HELLO, HandshakeMessageType.SERVER_HELLO);
+        WorkflowTrace trace =
+                runner.generateWorkflowTraceUntilLastSendingMessage(
+                        WorkflowTraceType.SHORT_HELLO, HandshakeMessageType.SERVER_HELLO);
 
-        runner.execute(trace, c).validateFinal(i -> {
-            WorkflowTrace executedTrace = i.getWorkflowTrace();
-            Validator.executedAsPlanned(i);
+        runner.execute(trace, c)
+                .validateFinal(
+                        i -> {
+                            WorkflowTrace executedTrace = i.getWorkflowTrace();
+                            Validator.executedAsPlanned(i);
 
-            ClientHelloMessage firstClientHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstReceivedMessage(HandshakeMessageType.CLIENT_HELLO, trace);
-            ClientHelloMessage retryClientHello = (ClientHelloMessage) WorkflowTraceUtil.getLastReceivedMessage(HandshakeMessageType.CLIENT_HELLO, trace);
-            assertTrue("Did not receive two Client Hello messages", firstClientHello != null && retryClientHello != null && firstClientHello != retryClientHello);
-            testIfKeyShareWasUpdated(retryClientHello);
-            testIfRecordVersionWasAdjusted(executedTrace);
-            testIfExtensionsAreEqual(firstClientHello, retryClientHello);
-            testIfClientHelloFieldsAreEqual(firstClientHello, retryClientHello);
-        });
+                            ClientHelloMessage firstClientHello =
+                                    (ClientHelloMessage)
+                                            WorkflowTraceUtil.getFirstReceivedMessage(
+                                                    HandshakeMessageType.CLIENT_HELLO, trace);
+                            ClientHelloMessage retryClientHello =
+                                    (ClientHelloMessage)
+                                            WorkflowTraceUtil.getLastReceivedMessage(
+                                                    HandshakeMessageType.CLIENT_HELLO, trace);
+                            assertTrue(
+                                    "Did not receive two Client Hello messages",
+                                    firstClientHello != null
+                                            && retryClientHello != null
+                                            && firstClientHello != retryClientHello);
+                            testIfKeyShareWasUpdated(retryClientHello);
+                            testIfRecordVersionWasAdjusted(executedTrace);
+                            testIfExtensionsAreEqual(firstClientHello, retryClientHello);
+                            testIfClientHelloFieldsAreEqual(firstClientHello, retryClientHello);
+                        });
     }
-    
+
     private void testIfRecordVersionWasAdjusted(WorkflowTrace executedTrace) {
         ReceiveAction receiveSecondHello = (ReceiveAction) executedTrace.getLastReceivingAction();
-        for(AbstractRecord record: receiveSecondHello.getReceivedRecords()) {
-            if(record.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
-                assertArrayEquals("Record Version was not adjusted after Hello Retry Request", ((Record)record).getProtocolVersion().getValue(), ProtocolVersion.TLS12.getValue());
+        for (Record record : receiveSecondHello.getReceivedRecords()) {
+            if (record.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
+                assertArrayEquals(
+                        "Record Version was not adjusted after Hello Retry Request",
+                        ((Record) record).getProtocolVersion().getValue(),
+                        ProtocolVersion.TLS12.getValue());
             }
         }
     }
-    
+
     private void testIfKeyShareWasUpdated(ClientHelloMessage retryClientHello) {
-        KeyShareExtensionMessage keyShareExtension = retryClientHello.getExtension(KeyShareExtensionMessage.class);
+        KeyShareExtensionMessage keyShareExtension =
+                retryClientHello.getExtension(KeyShareExtensionMessage.class);
         assertNotNull("No Key Share Extension provided in second ClientHello", keyShareExtension);
         List<KeyShareEntry> keyShareEntries = keyShareExtension.getKeyShareList();
-        assertEquals("Updated ClientHello did not contain exactly one key share", keyShareEntries.size(), 1);
-        assertEquals("Updated ClientHello offered a different group then demanded by server", keyShareEntries.get(0).getGroupConfig(), derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue());
+        assertEquals(
+                "Updated ClientHello did not contain exactly one key share",
+                keyShareEntries.size(),
+                1);
+        assertEquals(
+                "Updated ClientHello offered a different group then demanded by server",
+                keyShareEntries.get(0).getGroupConfig(),
+                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue());
     }
 
-    private void testIfExtensionsAreEqual(ClientHelloMessage firstClientHello, ClientHelloMessage retryClientHello) {
+    private void testIfExtensionsAreEqual(
+            ClientHelloMessage firstClientHello, ClientHelloMessage retryClientHello) {
         // the client MUST send the same ClientHello without modification, except as follows:
-        // -If a "key_share" extension was supplied in the HelloRetryRequest, replacing the list of shares with a list containing a single
+        // -If a "key_share" extension was supplied in the HelloRetryRequest, replacing the list of
+        // shares with a list containing a single
         //  KeyShareEntry from the indicated group.
         // (-Including a "cookie" extension if one was provided in the HelloRetryRequest)
-        // -Updating the "pre_shared_key" extension if present by recomputing the "obfuscated_ticket_age" and binder values
-        //  and (optionally) removing any PSKs which are incompatible with the server’s indicated cipher suite.
+        // -Updating the "pre_shared_key" extension if present by recomputing the
+        // "obfuscated_ticket_age" and binder values
+        //  and (optionally) removing any PSKs which are incompatible with the server’s indicated
+        // cipher suite.
         // -Optionally adding, removing, or changing the length of the "padding" extension
         List<ExtensionType> extensionsInSecondHello = new LinkedList<>();
-        retryClientHello.getExtensions().forEach(extension -> extensionsInSecondHello.add(extension.getExtensionTypeConstant()));
+        retryClientHello
+                .getExtensions()
+                .forEach(
+                        extension ->
+                                extensionsInSecondHello.add(extension.getExtensionTypeConstant()));
         for (ExtensionMessage extension : firstClientHello.getExtensions()) {
 
-            assertTrue("Extensions List not equal - second Client Hello did not contain " + extension.getExtensionTypeConstant(), retryClientHello.containsExtension(extension.getExtensionTypeConstant())
-                    || extension.getExtensionTypeConstant() == ExtensionType.PADDING
-                    || extension.getExtensionTypeConstant() == ExtensionType.EARLY_DATA
-                    || extension.getExtensionTypeConstant() == ExtensionType.COOKIE
-                    || extension.getExtensionTypeConstant() == ExtensionType.PRE_SHARED_KEY);
+            assertTrue(
+                    "Extensions List not equal - second Client Hello did not contain "
+                            + extension.getExtensionTypeConstant(),
+                    retryClientHello.containsExtension(extension.getExtensionTypeConstant())
+                            || extension.getExtensionTypeConstant() == ExtensionType.PADDING
+                            || extension.getExtensionTypeConstant() == ExtensionType.EARLY_DATA
+                            || extension.getExtensionTypeConstant() == ExtensionType.COOKIE
+                            || extension.getExtensionTypeConstant()
+                                    == ExtensionType.PRE_SHARED_KEY);
 
             if (extension.getExtensionTypeConstant() != ExtensionType.KEY_SHARE
                     && extension.getExtensionTypeConstant() != ExtensionType.PADDING
                     && extension.getExtensionTypeConstant() != ExtensionType.PRE_SHARED_KEY
                     && extension.getExtensionTypeConstant() != ExtensionType.EARLY_DATA
                     && extension.getExtensionTypeConstant() != ExtensionType.COOKIE) {
-                assertTrue("Extension " + extension.getExtensionTypeConstant() + " is not identical to second Client Hello", Arrays.equals(extension.getExtensionBytes().getValue(), retryClientHello.getExtension(extension.getClass()).getExtensionBytes().getValue()));
+                assertTrue(
+                        "Extension "
+                                + extension.getExtensionTypeConstant()
+                                + " is not identical to second Client Hello",
+                        Arrays.equals(
+                                extension.getExtensionBytes().getValue(),
+                                retryClientHello
+                                        .getExtension(extension.getClass())
+                                        .getExtensionBytes()
+                                        .getValue()));
             }
             extensionsInSecondHello.remove(extension.getExtensionTypeConstant());
         }
 
-        //only these extensions may be added to retry Hello
-        //we are not requesting a cookie value, that's a different test
+        // only these extensions may be added to retry Hello
+        // we are not requesting a cookie value, that's a different test
         if (extensionsInSecondHello.size() > 0) {
             extensionsInSecondHello.remove(ExtensionType.PADDING);
             extensionsInSecondHello.remove(ExtensionType.KEY_SHARE);
         }
-        assertTrue("Second Client Hello contained additional Extensions: " + extensionsInSecondHello.stream().map(ExtensionType::toString).collect(Collectors.joining(",")), extensionsInSecondHello.isEmpty());
+        assertTrue(
+                "Second Client Hello contained additional Extensions: "
+                        + extensionsInSecondHello.stream()
+                                .map(ExtensionType::toString)
+                                .collect(Collectors.joining(",")),
+                extensionsInSecondHello.isEmpty());
     }
 
-    private void testIfClientHelloFieldsAreEqual(ClientHelloMessage firstClientHello, ClientHelloMessage retryClientHello) {
-        assertTrue("Offered CipherSuites are not identical", Arrays.equals(firstClientHello.getCipherSuites().getValue(), retryClientHello.getCipherSuites().getValue()));
-        assertTrue("Offered CompressionList lengths are not identical", firstClientHello.getCompressionLength().getValue().equals(retryClientHello.getCompressionLength().getValue()));
-        assertTrue("Selected ClientRandoms are not identical", Arrays.equals(firstClientHello.getRandom().getValue(), retryClientHello.getRandom().getValue()));
-        assertTrue("Selected ProtocolVersions are not identical", Arrays.equals(firstClientHello.getProtocolVersion().getValue(), retryClientHello.getProtocolVersion().getValue()));
-        assertTrue("TLS 1.3 compatibility SessionIDs are not identical", Arrays.equals(firstClientHello.getSessionId().getValue(), retryClientHello.getSessionId().getValue()));
+    private void testIfClientHelloFieldsAreEqual(
+            ClientHelloMessage firstClientHello, ClientHelloMessage retryClientHello) {
+        assertTrue(
+                "Offered CipherSuites are not identical",
+                Arrays.equals(
+                        firstClientHello.getCipherSuites().getValue(),
+                        retryClientHello.getCipherSuites().getValue()));
+        assertTrue(
+                "Offered CompressionList lengths are not identical",
+                firstClientHello
+                        .getCompressionLength()
+                        .getValue()
+                        .equals(retryClientHello.getCompressionLength().getValue()));
+        assertTrue(
+                "Selected ClientRandoms are not identical",
+                Arrays.equals(
+                        firstClientHello.getRandom().getValue(),
+                        retryClientHello.getRandom().getValue()));
+        assertTrue(
+                "Selected ProtocolVersions are not identical",
+                Arrays.equals(
+                        firstClientHello.getProtocolVersion().getValue(),
+                        retryClientHello.getProtocolVersion().getValue()));
+        assertTrue(
+                "TLS 1.3 compatibility SessionIDs are not identical",
+                Arrays.equals(
+                        firstClientHello.getSessionId().getValue(),
+                        retryClientHello.getSessionId().getValue()));
     }
-    
+
     public List<DerivationParameter> getTls12CipherSuites(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        context.getSiteReport().getCipherSuites().forEach(cipherSuite -> parameterValues.add(new CipherSuiteDerivation(cipherSuite)));
+        context.getSiteReport()
+                .getCipherSuites()
+                .forEach(
+                        cipherSuite -> parameterValues.add(new CipherSuiteDerivation(cipherSuite)));
         return parameterValues;
     }
 
-    @TlsTest(description = "Similarly, cipher suites for TLS 1.2 and lower cannot be used with " +
-        "TLS 1.3.")
-    @RFC(number = 8446, section="B.4.  Cipher Suites")
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @TlsTest(
+            description =
+                    "Similarly, cipher suites for TLS 1.2 and lower cannot be used with "
+                            + "TLS 1.3.")
+    @RFC(number = 8446, section = "B.4.  Cipher Suites")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isNotKeyShareInInitialHello")
     @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getTls12CipherSuites")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.LOW)
-    public void helloRetryRequestsTls12CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void helloRetryRequestsTls12CipherSuite(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         performHelloRetryRequestTest(argumentAccessor, runner);
     }
-    
-    @TlsTest(description = "When sending the new ClientHello, the client MUST copy " +
-        "the contents of the extension received in the HelloRetryRequest into " +
-        "a \"cookie\" extension in the new ClientHello.")
-    @RFC(number = 8446, section="4.2.2.  Cookie")
+
+    @TlsTest(
+            description =
+                    "When sending the new ClientHello, the client MUST copy "
+                            + "the contents of the extension received in the HelloRetryRequest into "
+                            + "a \"cookie\" extension in the new ClientHello.")
+    @RFC(number = 8446, section = "4.2.2.  Cookie")
     @ScopeExtensions(DerivationType.HELLO_RETRY_COOKIE)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isNotKeyShareInInitialHello")
+    @DynamicValueConstraints(
+            affectedTypes = DerivationType.NAMED_GROUP,
+            methods = "isNotKeyShareInInitialHello")
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
@@ -545,20 +765,40 @@ public class HelloRetryRequest extends Tls13Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
         config.setAddCookieExtension(true);
         runner.setAutoHelloRetryRequest(false);
-        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
-        
+        NamedGroup selectedGroup =
+                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsAction(new ReceiveAction(new ClientHelloMessage()));
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
-        
-        
-        runner.execute(workflowTrace, config).validateFinal(i -> {
-            Validator.executedAsPlanned(i);
-            ClientHelloMessage secondClientHello = (ClientHelloMessage) WorkflowTraceUtil.getLastReceivedMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
-            assertNotEquals("Did not receive two ClientHello messages", secondClientHello, WorkflowTraceUtil.getFirstReceivedMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace));
-            assertTrue("Did not receive a Cookie Extension in updated ClientHello", secondClientHello.containsExtension(ExtensionType.COOKIE));
-            byte[] receivedCookie = secondClientHello.getExtension(CookieExtensionMessage.class).getCookie().getValue();
-            assertArrayEquals("Client sent a wrong cookie value", receivedCookie, config.getDefaultExtensionCookie());
-        });
+
+        runner.execute(workflowTrace, config)
+                .validateFinal(
+                        i -> {
+                            Validator.executedAsPlanned(i);
+                            ClientHelloMessage secondClientHello =
+                                    (ClientHelloMessage)
+                                            WorkflowTraceUtil.getLastReceivedMessage(
+                                                    HandshakeMessageType.CLIENT_HELLO,
+                                                    workflowTrace);
+                            assertFalse(
+                                    "Did not receive two ClientHello messages",
+                                    secondClientHello
+                                            == WorkflowTraceUtil.getFirstReceivedMessage(
+                                                    HandshakeMessageType.CLIENT_HELLO,
+                                                    workflowTrace));
+                            assertTrue(
+                                    "Did not receive a Cookie Extension in updated ClientHello",
+                                    secondClientHello.containsExtension(ExtensionType.COOKIE));
+                            byte[] receivedCookie =
+                                    secondClientHello
+                                            .getExtension(CookieExtensionMessage.class)
+                                            .getCookie()
+                                            .getValue();
+                            assertArrayEquals(
+                                    "Client sent a wrong cookie value",
+                                    receivedCookie,
+                                    config.getDefaultExtensionCookie());
+                        });
     }
 }

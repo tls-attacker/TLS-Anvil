@@ -13,7 +13,6 @@ import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.InvalidCurve
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.TwistedCurvePoint;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ECPointFormat;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
@@ -31,7 +30,6 @@ import de.rub.nds.tlsattacker.core.protocol.message.ECDHClientKeyExchangeMessage
 import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -64,7 +62,6 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
 import java.util.List;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -234,11 +231,11 @@ public class TLSExtensionForECC extends Tls12Test {
         Point invalidPoint = new Point(new FieldElementFp(groupSpecificPoint.getPublicPointBaseX(), curve.getModulus()),
                 new FieldElementFp(groupSpecificPoint.getPublicPointBaseY(), curve.getModulus()));
 
-        ECDHEServerKeyExchangeMessage serverKeyExchange = new ECDHEServerKeyExchangeMessage(config);
+        ECDHEServerKeyExchangeMessage serverKeyExchange = new ECDHEServerKeyExchangeMessage();
         byte[] serializedPublicKey = curve.encodeCoordinate(invalidPoint.getFieldX().getData());
         serverKeyExchange.setPublicKey(Modifiable.explicit(serializedPublicKey));
         workflowTrace.addTlsAction(new SendAction(serverKeyExchange));
-        workflowTrace.addTlsAction(new SendAction(ActionOption.MAY_FAIL, new ServerHelloDoneMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(ActionOption.MAY_FAIL, new ServerHelloDoneMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);

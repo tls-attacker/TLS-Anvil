@@ -8,14 +8,12 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.HelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
@@ -237,7 +235,7 @@ public class ServerHello extends Tls13Test {
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)),
-                new ReceiveTillAction(new CertificateVerifyMessage(c))
+                new ReceiveTillAction(new CertificateVerifyMessage())
         );
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
@@ -269,7 +267,7 @@ public class ServerHello extends Tls13Test {
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)),
-                new ReceiveTillAction(new CertificateVerifyMessage(c))
+                new ReceiveTillAction(new CertificateVerifyMessage())
         );
 
         runner.execute(workflowTrace, c).validateFinal(i -> {

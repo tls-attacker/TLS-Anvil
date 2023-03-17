@@ -1,31 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>de.rub.nds.tlstest</groupId>
-    <artifactId>TLS-Testsuite</artifactId>
-    <version>1.0.3</version>
-    <packaging>jar</packaging>
     <parent>
-        <groupId>de.rub.nds</groupId>
-        <artifactId>TLS-Anvil</artifactId>
+        <groupId>de.rub.nds.tls</groupId>
+        <artifactId>tls-anvil</artifactId>
         <version>1.0.3</version>
     </parent>
+    <groupId>de.rub.nds.tls.anvil</groupId>
+    <artifactId>tls-testsuite</artifactId>
+    <version>1.0.3</version>
+    <packaging>jar</packaging>
+    <name>TLS-Testsuite</name>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
     <dependencies>
+        <dependency>
+            <groupId>de.rub.nds.tls.anvil</groupId>
+            <artifactId>tls-test-framework</artifactId>
+            <version>1.0.3</version>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.7.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.7.0</version>
-        </dependency>
-        <dependency>
-            <groupId>de.rub.nds.tlstest</groupId>
-            <artifactId>TLS-Test-Framework</artifactId>
-            <version>1.0.3</version>
         </dependency>
     </dependencies>
     <build>
@@ -36,10 +39,10 @@
                 <executions>
                     <execution>
                         <id>copy</id>
-                        <phase>package</phase>
                         <goals>
                             <goal>copy</goal>
                         </goals>
+                        <phase>package</phase>
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
@@ -55,10 +58,10 @@
                     </execution>
                     <execution>
                         <id>copy-dependencies</id>
-                        <phase>package</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
+                        <phase>package</phase>
                         <configuration>
                             <outputDirectory>${basedir}/apps/lib</outputDirectory>
                             <!--Ensures only runnable dependencies are included-->
@@ -84,8 +87,8 @@
             </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
-                <version>3.0</version>
                 <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
                 <configuration>
                     <header>${basedir}/license_header_plain.txt</header>
                     <strictCheck>true</strictCheck>
@@ -116,9 +119,4 @@
             </plugin>
         </plugins>
     </build>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
 </project>

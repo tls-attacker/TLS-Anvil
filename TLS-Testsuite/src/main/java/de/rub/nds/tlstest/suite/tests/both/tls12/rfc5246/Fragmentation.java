@@ -12,9 +12,6 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
-import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -30,7 +27,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
-import de.rub.nds.tlsscanner.serverscanner.probe.ConnectionClosingProbe;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -77,7 +73,7 @@ public class Fragmentation extends Tls12Test {
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.CHANGE_CIPHER_SPEC);
         r.setMaxRecordLengthConfig(0);
-        SendAction sendAction = new SendAction(new ChangeCipherSpecMessage(c));
+        SendAction sendAction = new SendAction(new ChangeCipherSpecMessage());
         sendAction.setRecords(r);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -99,7 +95,7 @@ public class Fragmentation extends Tls12Test {
     public void sendZeroLengthApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        ApplicationMessage appMsg = new ApplicationMessage(c);
+        ApplicationMessage appMsg = new ApplicationMessage();
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
@@ -147,7 +143,7 @@ public class Fragmentation extends Tls12Test {
     public void sendEmptyApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        ApplicationMessage appMsg = new ApplicationMessage(c);
+        ApplicationMessage appMsg = new ApplicationMessage();
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
@@ -201,13 +197,13 @@ public class Fragmentation extends Tls12Test {
     public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        ApplicationMessage msg = new ApplicationMessage(c);
+        ApplicationMessage msg = new ApplicationMessage();
         msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
 
         Record overflowRecord = new Record();
         overflowRecord.setCleanProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
         //add dummy Application Message
-        SendAction sendOverflow = new SendAction(new ApplicationMessage(c));
+        SendAction sendOverflow = new SendAction(new ApplicationMessage());
         sendOverflow.setRecords(overflowRecord);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -235,7 +231,7 @@ public class Fragmentation extends Tls12Test {
         Record overflowRecord = new Record();
         overflowRecord.setProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 2049]));
         //add dummy Application Message
-        SendAction sendOverflow = new SendAction(new ApplicationMessage(c));
+        SendAction sendOverflow = new SendAction(new ApplicationMessage());
         sendOverflow.setRecords(overflowRecord);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);

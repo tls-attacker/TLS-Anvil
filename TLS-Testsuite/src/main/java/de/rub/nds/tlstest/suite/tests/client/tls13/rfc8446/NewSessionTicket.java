@@ -27,7 +27,6 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseExtensionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import static org.junit.Assert.assertFalse;
 import org.junit.jupiter.api.Tag;
@@ -48,7 +47,7 @@ public class NewSessionTicket extends Tls13Test {
     public void ignoresUnknownNewSessionTicketExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace.addTlsActions(new SendAction(new NewSessionTicketMessage(c)));
+        workflowTrace.addTlsActions(new SendAction(new NewSessionTicketMessage()));
 
         //we use a GREASE extension and overwrite its type
         //there are separate tests with GREASE groups 

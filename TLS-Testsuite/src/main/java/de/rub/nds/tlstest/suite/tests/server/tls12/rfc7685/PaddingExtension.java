@@ -58,7 +58,7 @@ public class PaddingExtension extends Tls12Test {
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(config)),
-                new ReceiveAction(new AlertMessage(config))
+                new ReceiveAction(new AlertMessage())
         );
 
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);

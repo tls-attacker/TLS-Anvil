@@ -25,7 +25,6 @@ import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PreSharedKeyExtensionMessage;
-import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipher;
@@ -33,7 +32,7 @@ import de.rub.nds.tlsattacker.core.record.cipher.RecordCipherFactory;
 import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySet;
 import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySetGenerator;
 import de.rub.nds.tlsattacker.core.record.crypto.RecordDecryptor;
-import de.rub.nds.tlsattacker.core.state.TlsContext;
+import de.rub.nds.tlsattacker.core.layer.context.TlsContext;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -44,16 +43,15 @@ import de.rub.nds.tlstest.framework.annotations.*;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Disabled;
@@ -235,7 +233,7 @@ public class EarlyData extends Tls13Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            List<AbstractRecord> records = trace.getLastReceivingAction().getReceivedRecords();
+            List<Record> records = trace.getLastReceivingAction().getReceivedRecords();
             List<ProtocolMessage> msgs = trace.getLastReceivingAction().getReceivedMessages();
             if (records.size() > msgs.size()) {
                 AlertMessage decAlert = tryToDecryptWithAppSecrets(i.getState().getTlsContext(), records.get(msgs.size()));
@@ -297,7 +295,7 @@ public class EarlyData extends Tls13Test {
 
         runner.execute(workflowTrace, c).validateFinal(i -> {
             WorkflowTrace trace = i.getWorkflowTrace();
-            List<AbstractRecord> records = trace.getLastReceivingAction().getReceivedRecords();
+            List<Record> records = trace.getLastReceivingAction().getReceivedRecords();
             List<ProtocolMessage> msgs = trace.getLastReceivingAction().getReceivedMessages();
             if (records.size() > msgs.size()) {
                 AlertMessage decAlert = tryToDecryptWithAppSecrets(i.getState().getTlsContext(), records.get(msgs.size()));
@@ -312,14 +310,15 @@ public class EarlyData extends Tls13Test {
         });
     }
 
-    private AlertMessage tryToDecryptWithAppSecrets(TlsContext context, AbstractRecord record) {
+    private AlertMessage tryToDecryptWithAppSecrets(TlsContext context, Record record) {
         try {
             KeySet keySet = KeySetGenerator.generateKeySet(context, ProtocolVersion.TLS13, Tls13KeySetType.APPLICATION_TRAFFIC_SECRETS);
-            RecordCipher recordCipher = RecordCipherFactory.getRecordCipher(context, keySet, context.getSelectedCipherSuite());
+            RecordCipher recordCipher = RecordCipherFactory.getRecordCipher(context, keySet, false);
             RecordDecryptor dec = new RecordDecryptor(recordCipher, context);
             dec.decrypt(record);
-            AlertHandler handler = new AlertHandler(context);
-            AlertMessage alert = handler.getParser(record.getCleanProtocolMessageBytes().getValue(), 0).parse();
+            AlertMessage alert = new AlertMessage();
+            alert.getParser(context, new ByteArrayInputStream(record.getCleanProtocolMessageBytes().getValue())).parse(alert);
+            
             return alert;
         } catch (Exception ex) {
             return null;

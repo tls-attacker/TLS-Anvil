@@ -116,7 +116,7 @@ public class RecordLayer extends Tls13Test {
         );
 
         WorkflowTraceMutator.deleteSendingMessage(trace, HandshakeMessageType.FINISHED);
-        SendAction finished = new SendAction(new FinishedMessage(c));
+        SendAction finished = new SendAction(new FinishedMessage());
         finished.setRecords(record);
         trace.addTlsAction(2, finished);
 
@@ -198,17 +198,17 @@ public class RecordLayer extends Tls13Test {
         SendAction action;
         if (affectedMessage == HandshakeMessageType.ENCRYPTED_EXTENSIONS) {
             trace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.ENCRYPTED_EXTENSIONS);
-            action = new SendAction(new EncryptedExtensionsMessage(c), new CertificateMessage(c), new CertificateVerifyMessage(c));
+            action = new SendAction(new EncryptedExtensionsMessage(), new CertificateMessage(), new CertificateVerifyMessage());
             action.setRecords(r);
             trace.addTlsActions(action, new ReceiveAction(new AlertMessage()));
         } else if (affectedMessage == HandshakeMessageType.CERTIFICATE) {
             trace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CERTIFICATE);
-            action = new SendAction(new CertificateMessage(c), new CertificateVerifyMessage(c));
+            action = new SendAction(new CertificateMessage(), new CertificateVerifyMessage());
             action.setRecords(r);
             trace.addTlsActions(action, new ReceiveAction(new AlertMessage()));
         } else if (affectedMessage == HandshakeMessageType.CERTIFICATE_VERIFY) {
             trace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CERTIFICATE_VERIFY);
-            action = new SendAction(new CertificateVerifyMessage(c));
+            action = new SendAction(new CertificateVerifyMessage());
             action.setRecords(r);
             trace.addTlsActions(action, new ReceiveAction(new AlertMessage()));
         }
@@ -237,7 +237,7 @@ public class RecordLayer extends Tls13Test {
         dummyRecord.setCompleteRecordBytes(Modifiable.explicit(new byte[0]));
         sendCertVerifyPart.setRecords(certVerifyPart, dummyRecord);
         
-        workflowTrace.addTlsActions(sendCertVerifyPart, new SendAction(new FinishedMessage(config)));
+        workflowTrace.addTlsActions(sendCertVerifyPart, new SendAction(new FinishedMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         
         runner.execute(workflowTrace, config).validateFinal(i -> {

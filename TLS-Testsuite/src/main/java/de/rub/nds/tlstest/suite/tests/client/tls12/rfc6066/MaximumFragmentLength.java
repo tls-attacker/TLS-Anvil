@@ -17,10 +17,8 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.MaxFragmentLengthExtensionMessage;
-import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -38,8 +36,6 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import java.util.LinkedList;
-import java.util.List;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -153,7 +149,7 @@ public class MaximumFragmentLength extends Tls12Test {
             for(int j = 1; j < trace.getReceivingActions().size(); j++) {
                 ReceivingAction receiveAction = trace.getReceivingActions().get(j);
                 if(receiveAction.getReceivedRecords() != null) {
-                    for(AbstractRecord receivedRecord: receiveAction.getReceivedRecords()) {
+                    for(Record receivedRecord: receiveAction.getReceivedRecords()) {
                         assertTrue("Plaintextbytes of record exceeded limit", ((Record)receivedRecord).getCleanProtocolMessageBytes().getValue().length <= maxPlaintextFragmentSize);
                     }
                 }

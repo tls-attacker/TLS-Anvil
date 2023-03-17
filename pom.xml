@@ -9,7 +9,7 @@
 
     <groupId>de.rub.nds.tls</groupId>
     <artifactId>tls-anvil</artifactId>
-    <version>1.0.3</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
     <name>TLS-Anvil</name>
 

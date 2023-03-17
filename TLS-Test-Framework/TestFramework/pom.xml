@@ -4,11 +4,11 @@
     <parent>
         <groupId>de.rub.nds.tls.anvil</groupId>
         <artifactId>tls-test-framework-aggregator</artifactId>
-        <version>1.0.3</version>
+        <version>1.1.0</version>
     </parent>
     <groupId>de.rub.nds.tls.anvil</groupId>
     <artifactId>tls-test-framework</artifactId>
-    <version>1.0.3</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
     <name>TLS-Test-Framework</name>
     <properties>

@@ -12,9 +12,12 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPacka
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.scanner.core.constants.ProbeType;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
+import de.rub.nds.tlsattacker.core.config.delegate.ServerDelegate;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
@@ -48,8 +51,12 @@ import de.rub.nds.tlsattacker.transport.Connection;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
+import de.rub.nds.tlsscanner.clientscanner.config.ClientScannerConfig;
+import de.rub.nds.tlsscanner.clientscanner.execution.TlsClientScanner;
+import de.rub.nds.tlsscanner.clientscanner.report.ClientReport;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlsscanner.core.constants.TlsProbeType;
+import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
 import de.rub.nds.tlsscanner.serverscanner.config.ServerScannerConfig;
 import de.rub.nds.tlsscanner.serverscanner.execution.TlsServerScanner;
 import de.rub.nds.tlstest.framework.ServerTestSiteReport;
@@ -279,205 +286,53 @@ public class TestRunner {
             return;
         }
 
-        List<TlsTask> tasks = new ArrayList<>();
-        List<State> states = new ArrayList<>();
+        ClientScannerConfig clientScannerConfig = new ClientScannerConfig(new GeneralDelegate());
+        List<ProbeType> probes = new LinkedList<>();
+        probes.add(TlsProbeType.BASIC);
+        probes.add(TlsProbeType.CIPHER_SUITE);
+        probes.add(TlsProbeType.NAMED_GROUPS);
+        probes.add(TlsProbeType.RECORD_FRAGMENTATION);
+        probes.add(TlsProbeType.EC_POINT_FORMAT);
+        clientScannerConfig.setProbes(probes);
+        ParallelExecutor preparedExecutor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
+        preparedExecutor.setDefaultBeforeTransportInitCallback(testConfig.getTestClientDelegate().getTriggerScript());
+        TlsClientScanner clientScanner = new TlsClientScanner(clientScannerConfig, preparedExecutor);
+        
+        ClientReport clientReport = clientScanner.scan();
+        // TODO extend client scanner
+        int rsaMinCertKeySize = 1024;
+        int dssMinCertKeySize = 1024;
+        
+        ServerTestSiteReport compatibilityServerReport = new ServerTestSiteReport("");
+        compatibilityServerReport.addCipherSuites(clientReport.getCipherSuites());
+        compatibilityServerReport.putResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION, clientReport.getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION));
+        compatibilityServerReport.setMinimumRsaCertKeySize(rsaMinCertKeySize);
+        compatibilityServerReport.setMinimumDssCertKeySize(dssMinCertKeySize);
+        compatibilityServerReport.setSupportedNamedGroups(clientReport.getClientAdvertisedNamedGroupsList());
+        compatibilityServerReport.setSupportedTls13Groups(clientReport.getClientAdvertisedKeyShareNamedGroupsList());
+        compatibilityServerReport.setSupportedExtensions(new LinkedList<>(clientReport.getClientAdvertisedExtensions()));
+        
+        //TODO extend point format client test - this is necessary to determine ignored point formats
+        compatibilityServerReport.putResult(TlsAnalyzedProperty.HANDSHAKES_WITH_UNDEFINED_POINT_FORMAT, true);
+        compatibilityServerReport.setVersions(new ArrayList<>());
 
-        List<CipherSuite> cipherList = CipherSuite.getImplemented();
-
-        for (CipherSuite i : cipherList) {
-            Config config = this.testConfig.createConfig();
-            if (i.isTLS13()) {
-                config = this.testConfig.createTls13Config();
-            }
-
-            config.setDefaultServerSupportedCipherSuites(Collections.singletonList(i));
-            config.setDefaultSelectedCipherSuite(i);
-            config.setEnforceSettings(true);
-
-            try {
-                WorkflowConfigurationFactory configurationFactory =
-                        new WorkflowConfigurationFactory(config);
-                WorkflowTrace trace =
-                        configurationFactory.createWorkflowTrace(
-                                WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER);
-                State state = new State(config, trace);
-                prepareStateForConnection(state);
-                StateExecutionTask task = new StateExecutionTask(state, 2);
-                task.setBeforeTransportInitCallback(
-                        testConfig.getTestClientDelegate().getTriggerScript());
-                tasks.add(task);
-                states.add(state);
-            } catch (Exception ignored) {
-
-            }
-        }
-
-        ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
-        LOGGER.info(
-                "Executing client exploration with {} parallel threads...",
-                testConfig.getParallelHandshakes());
-        executor.bulkExecuteTasks(tasks);
-
-        Set<CipherSuite> tls12CipherSuites = new HashSet<>();
-        Set<CipherSuite> tls13CipherSuites = new HashSet<>();
-        ClientHelloMessage clientHello = null;
-        ReceiveAction clientHelloReceiveAction = null;
-        long failed = 0;
-        for (State s : states) {
-            try {
-                // allow additional app data sent by tls 1.3 client
-                if (s.getConfig().getDefaultSelectedCipherSuite().isTLS13()) {
-                    ReceiveAction lastReceive =
-                            (ReceiveAction)
-                                    s.getWorkflowTrace()
-                                            .getReceivingActions()
-                                            .get(
-                                                    s.getWorkflowTrace()
-                                                                    .getReceivingActions()
-                                                                    .size()
-                                                            - 1);
-                    ApplicationMessage appMsg = new ApplicationMessage();
-                    appMsg.setRequired(false);
-                    lastReceive.getExpectedMessages().add(appMsg);
-                }
-                if (s.getWorkflowTrace().executedAsPlanned()) {
-                    if (clientHello == null) {
-                        clientHello =
-                                s.getWorkflowTrace()
-                                        .getFirstReceivedMessage(ClientHelloMessage.class);
-                        clientHelloReceiveAction =
-                                (ReceiveAction) s.getWorkflowTrace().getReceivingActions().get(0);
-                    }
-                    if (s.getTlsContext().getSelectedProtocolVersion() == ProtocolVersion.TLS12)
-                        tls12CipherSuites.add(s.getConfig().getDefaultSelectedCipherSuite());
-                    else if (s.getTlsContext().getSelectedProtocolVersion()
-                            == ProtocolVersion.TLS13)
-                        tls13CipherSuites.add(s.getConfig().getDefaultSelectedCipherSuite());
-                } else {
-                    failed++;
-                    LOGGER.debug(
-                            "SUT does not support Cipher Suite {}",
-                            s.getConfig().getDefaultSelectedCipherSuite());
-                }
-            } catch (Exception e) {
-                LOGGER.error(e);
-                throw new RuntimeException(e);
-            }
-        }
-
-        List<State> keyShareStates = new LinkedList<>();
-        List<TlsTask> keyShareTasks = new LinkedList<>();
-        if (clientHello == null) {
-            throw new RuntimeException("Client preparation could not be completed.");
-        }
-
-        if (clientHello.containsExtension(ExtensionType.ELLIPTIC_CURVES)
-                && clientHello.containsExtension(ExtensionType.KEY_SHARE)) {
-            keyShareStates = buildClientKeyShareProbeStates(clientHello);
-            if (!keyShareStates.isEmpty()) {
-                for (State state : keyShareStates) {
-                    StateExecutionTask task = buildStateExecutionServerTask(state);
-                    keyShareTasks.add(task);
-                }
-                executor.bulkExecuteTasks(keyShareTasks);
-            }
-        }
-        List<NamedGroup> additionalTls13Groups = new LinkedList<>();
-        for (State state : keyShareStates) {
-            try {
-                // test for Finished instead of asPlanned(), to ignore legacy CCS
-                if (WorkflowTraceUtil.didReceiveMessage(
-                        HandshakeMessageType.FINISHED, state.getWorkflowTrace())) {
-                    additionalTls13Groups.add(state.getConfig().getDefaultSelectedNamedGroup());
-                } else {
-                    failed++;
-                    LOGGER.debug(
-                            "Workflow failed ("
-                                    + state.getConfig().getDefaultSelectedNamedGroup()
-                                    + ")");
-                }
-            } catch (Exception e) {
-                LOGGER.error(e);
-                throw new RuntimeException(e);
-            }
-        }
-
-        LOGGER.info("Determined support for {} cipher suites", states.size() - failed);
-
-        int rsaMinCertKeySize =
-                getCertMinimumKeySize(executor, tls12CipherSuites, CertificateKeyType.RSA);
-        int dssMinCertKeySize =
-                getCertMinimumKeySize(executor, tls12CipherSuites, CertificateKeyType.DSS);
-        boolean supportsRecordFragmentation =
-                clientSupportsRecordFragmentation(executor, tls12CipherSuites, tls13CipherSuites);
-
-        ServerTestSiteReport report = new ServerTestSiteReport("");
-        report.addCipherSuites(tls12CipherSuites);
-        report.addCipherSuites(tls13CipherSuites);
-        report.setReceivedClientHello(clientHello);
-        report.putResult(
-                TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION, supportsRecordFragmentation);
-        report.setMinimumRsaCertKeySize(rsaMinCertKeySize);
-        report.setMinimumDssCertKeySize(dssMinCertKeySize);
-        additionalTls13Groups.addAll(report.getClientHelloKeyShareGroups());
-        report.setSupportedTls13Groups(additionalTls13Groups);
-
-        EllipticCurvesExtensionMessage ecExt =
-                clientHello.getExtension(EllipticCurvesExtensionMessage.class);
-        if (ecExt != null) {
-            report.setSupportedNamedGroups(
-                    NamedGroup.namedGroupsFromByteArray(ecExt.getSupportedGroups().getValue())
-                            .stream()
-                            .filter(i -> NamedGroup.getImplemented().contains(i))
-                            .collect(Collectors.toList()));
-        }
-
-        List<CipherSuite> ecdheCipherSuites =
-                tls12CipherSuites.stream()
-                        .filter(cipher -> cipher.name().contains("TLS_ECDHE"))
-                        .collect(Collectors.toList());
-        testHandshakeWithUndefinedPointFormat(ecdheCipherSuites, report, executor);
-        determineClosingDeltas(report, executor);
-
-        SupportedVersionsExtensionMessage supportedVersionsExt =
-                clientHello.getExtension(SupportedVersionsExtensionMessage.class);
-        List<ProtocolVersion> versions = new ArrayList<>();
-        versions.add(
-                ProtocolVersion.getProtocolVersion(clientHello.getProtocolVersion().getValue()));
-        versions.add(
-                ProtocolVersion.getProtocolVersion(
-                        ((Record) clientHelloReceiveAction.getReceivedRecords().get(0))
-                                .getProtocolVersion()
-                                .getValue()));
-        if (supportedVersionsExt != null) {
-            versions.addAll(
-                    ProtocolVersion.getProtocolVersions(
-                            supportedVersionsExt.getSupportedVersions().getValue()));
-        }
-        report.setVersions(new ArrayList<>(new HashSet<>(versions)));
-
-        SignatureAndHashAlgorithmsExtensionMessage sahExt =
-                clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
-        if (sahExt != null) {
-            report.setSupportedSignatureAndHashAlgorithmsSke(
-                    SignatureAndHashAlgorithm.getSignatureAndHashAlgorithms(
-                                    sahExt.getSignatureAndHashAlgorithms().getValue())
+        //TODO : determineClosingDeltas(report, executor);
+        compatibilityServerReport.setVersions(new ArrayList<>(clientReport.getVersions()));
+        
+        if(clientReport.getClientAdvertisedSignatureAndHashAlgorithms() != null) {
+            compatibilityServerReport.setSupportedSignatureAndHashAlgorithmsSke(
+                    clientReport
+                            .getClientAdvertisedSignatureAndHashAlgorithms()
                             .stream()
                             .filter(i -> SignatureAndHashAlgorithm.getImplemented().contains(i))
                             .collect(Collectors.toList()));
         }
+       
 
-        List<ExtensionType> extensions =
-                clientHello.getExtensions().stream()
-                        .map(i -> ExtensionType.getExtensionType(i.getExtensionType().getValue()))
-                        .collect(Collectors.toList());
-        report.setSupportedExtensions(extensions);
-
-        saveToCache(report);
-
-        testContext.setReceivedClientHelloMessage(clientHello);
-        testContext.setSiteReport(report);
-        executor.shutdown();
+        saveToCache(compatibilityServerReport);
+        //TODO : testContext.setReceivedClientHelloMessage(clientHello);
+        testContext.setSiteReport(compatibilityServerReport);
+        preparedExecutor.shutdown();
     }
 
     public void testHandshakeWithUndefinedPointFormat(

@@ -14,7 +14,6 @@
     <name>TLS-Test-Framework-Aggregator</name>
     <modules>
         <module>TestFramework</module>
-        <module>coffee4j</module>
     </modules>
 
     <build>

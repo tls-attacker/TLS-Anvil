@@ -76,7 +76,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c)
                 .validateFinal(
                         i -> {
-                            if (context.getSiteReport()
+                            if (context.getFeatureExtractionResult()
                                             .getResult(TlsAnalyzedProperty.SUPPORTS_TLS_1_3)
                                     == TestResults.TRUE) {
                                 // In TLS 1.3, alerts are not mandatory - at this point no version

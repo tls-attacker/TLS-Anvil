@@ -38,7 +38,7 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
     public ConditionEvaluationResult targetCanBeTested() {
         if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER
                 || TestContext.getInstance()
-                        .getSiteReport()
+                        .getFeatureExtractionResult()
                         .getReceivedClientHello()
                         .containsExtension(ExtensionType.EXTENDED_MASTER_SECRET)) {
             return ConditionEvaluationResult.enabled("The Extension can be tested");

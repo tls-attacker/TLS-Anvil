@@ -17,26 +17,18 @@ import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
-import de.rub.nds.tlsattacker.core.config.delegate.ServerDelegate;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
-import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
-import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
-import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -48,18 +40,15 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsattacker.transport.Connection;
-import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
-import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
 import de.rub.nds.tlsscanner.clientscanner.config.ClientScannerConfig;
 import de.rub.nds.tlsscanner.clientscanner.execution.TlsClientScanner;
-import de.rub.nds.tlsscanner.clientscanner.report.ClientReport;
-import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlsscanner.core.constants.TlsProbeType;
-import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
 import de.rub.nds.tlsscanner.serverscanner.config.ServerScannerConfig;
 import de.rub.nds.tlsscanner.serverscanner.execution.TlsServerScanner;
-import de.rub.nds.tlstest.framework.ServerTestSiteReport;
+import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
+import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
@@ -79,12 +68,12 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -107,7 +96,7 @@ import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
 /**
- * This class sets up and starts JUnit to excute the tests, when the runTests function is called.
+ * This class sets up and starts JUnit to execute the tests, when the runTests function is called.
  * Before the tests are started, the preparation phase is executed.
  */
 public class TestRunner {
@@ -124,7 +113,7 @@ public class TestRunner {
         this.testContext = testContext;
     }
 
-    private void saveToCache(@Nonnull ServerTestSiteReport report) {
+    private void saveToCache(@Nonnull FeatureExtractionResult report) {
         String fileName;
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
             fileName = testConfig.getTestClientDelegate().getPort().toString();
@@ -148,7 +137,7 @@ public class TestRunner {
     }
 
     @Nullable
-    private ServerTestSiteReport loadFromCache() {
+    private FeatureExtractionResult loadFromCache() {
         String fileName;
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
             fileName = testConfig.getTestClientDelegate().getPort().toString();
@@ -162,7 +151,7 @@ public class TestRunner {
                 FileInputStream fis = new FileInputStream(fileName);
                 ObjectInputStream ois = new ObjectInputStream(fis);
                 LOGGER.info("Reading cached ScanReport");
-                return (ServerTestSiteReport) ois.readObject();
+                return (FeatureExtractionResult) ois.readObject();
             } catch (InvalidClassException e) {
                 LOGGER.info("Cached SiteReport appears to be outdated");
             } catch (Exception e) {
@@ -233,9 +222,9 @@ public class TestRunner {
     private void serverTestPreparation() {
         waitForServer();
 
-        ServerTestSiteReport cachedReport = loadFromCache();
+        FeatureExtractionResult cachedReport = loadFromCache();
         if (cachedReport != null) {
-            testContext.setSiteReport(cachedReport);
+            testContext.setFeatureExtractionResult(cachedReport);
             return;
         }
 
@@ -249,42 +238,55 @@ public class TestRunner {
                 testConfig.createConfig().isAddServerNameIndicationExtension());
         config.getDefaultClientConnection().setConnectionTimeout(0);
 
-        scannerConfig.setProbes(
-                TlsProbeType.COMMON_BUGS,
-                TlsProbeType.CIPHER_SUITE,
-                TlsProbeType.CERTIFICATE,
-                TlsProbeType.COMPRESSIONS,
-                TlsProbeType.NAMED_GROUPS,
-                TlsProbeType.PROTOCOL_VERSION,
-                TlsProbeType.EC_POINT_FORMAT,
-                TlsProbeType.RESUMPTION,
-                TlsProbeType.EXTENSIONS,
-                TlsProbeType.RECORD_FRAGMENTATION,
-                TlsProbeType.HELLO_RETRY,
-                TlsProbeType.HTTP_HEADER,
-                TlsProbeType.CONNECTION_CLOSING_DELTA);
-        scannerConfig.setOverallThreads(1);
-        scannerConfig.setParallelProbes(1);
+        scannerConfig
+                .getExecutorConfig()
+                .setProbes(
+                        TlsProbeType.COMMON_BUGS,
+                        TlsProbeType.CIPHER_SUITE,
+                        TlsProbeType.CERTIFICATE,
+                        TlsProbeType.COMPRESSIONS,
+                        TlsProbeType.NAMED_GROUPS,
+                        TlsProbeType.PROTOCOL_VERSION,
+                        TlsProbeType.EC_POINT_FORMAT,
+                        TlsProbeType.RESUMPTION,
+                        TlsProbeType.EXTENSIONS,
+                        TlsProbeType.RECORD_FRAGMENTATION,
+                        TlsProbeType.HELLO_RETRY,
+                        TlsProbeType.HTTP_HEADER,
+                        TlsProbeType.CONNECTION_CLOSING_DELTA);
+        scannerConfig.getExecutorConfig().setOverallThreads(1);
+        scannerConfig.getExecutorConfig().setParallelProbes(1);
         scannerConfig.setConfigSearchCooldown(true);
 
         TlsServerScanner scanner = new TlsServerScanner(scannerConfig);
 
-        ServerTestSiteReport report = ServerTestSiteReport.fromSiteReport(scanner.scan());
+        FeatureExtractionResult report =
+                ServerFeatureExtractionResult.fromServerScanReport(scanner.scan());
         saveToCache(report);
 
-        testContext.setSiteReport(report);
+        testContext.setFeatureExtractionResult(report);
         LOGGER.debug("TLS-Scanner finished!");
     }
 
     private void clientTestPreparation() {
         waitForClient();
 
-        ServerTestSiteReport cachedReport = loadFromCache();
+        FeatureExtractionResult cachedReport = loadFromCache();
         if (cachedReport != null) {
-            testContext.setSiteReport(cachedReport);
+            testContext.setFeatureExtractionResult(cachedReport);
             testContext.setReceivedClientHelloMessage(cachedReport.getReceivedClientHello());
             return;
         }
+
+        ParallelExecutor preparedExecutor =
+                new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
+        preparedExecutor.setDefaultBeforeTransportPreInitCallback(getSocketManagementCallback());
+
+        ClientHelloMessage clientHello = catchClientHello(preparedExecutor);
+        if (clientHello == null) {
+            throw new RuntimeException("Failed to receive a ClientHello in test preparation");
+        }
+        LOGGER.info("Received Client Hello. Starting Client-Scanner for feature extraction.");
 
         ClientScannerConfig clientScannerConfig = new ClientScannerConfig(new GeneralDelegate());
         List<ProbeType> probes = new LinkedList<>();
@@ -293,133 +295,21 @@ public class TestRunner {
         probes.add(TlsProbeType.NAMED_GROUPS);
         probes.add(TlsProbeType.RECORD_FRAGMENTATION);
         probes.add(TlsProbeType.EC_POINT_FORMAT);
-        clientScannerConfig.setProbes(probes);
-        ParallelExecutor preparedExecutor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
-        preparedExecutor.setDefaultBeforeTransportInitCallback(testConfig.getTestClientDelegate().getTriggerScript());
-        TlsClientScanner clientScanner = new TlsClientScanner(clientScannerConfig, preparedExecutor);
-        
-        ClientReport clientReport = clientScanner.scan();
-        // TODO extend client scanner
-        int rsaMinCertKeySize = 1024;
-        int dssMinCertKeySize = 1024;
-        
-        ServerTestSiteReport compatibilityServerReport = new ServerTestSiteReport("");
-        compatibilityServerReport.addCipherSuites(clientReport.getCipherSuites());
-        compatibilityServerReport.putResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION, clientReport.getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION));
-        compatibilityServerReport.setMinimumRsaCertKeySize(rsaMinCertKeySize);
-        compatibilityServerReport.setMinimumDssCertKeySize(dssMinCertKeySize);
-        compatibilityServerReport.setSupportedNamedGroups(clientReport.getClientAdvertisedNamedGroupsList());
-        compatibilityServerReport.setSupportedTls13Groups(clientReport.getClientAdvertisedKeyShareNamedGroupsList());
-        compatibilityServerReport.setSupportedExtensions(new LinkedList<>(clientReport.getClientAdvertisedExtensions()));
-        
-        //TODO extend point format client test - this is necessary to determine ignored point formats
-        compatibilityServerReport.putResult(TlsAnalyzedProperty.HANDSHAKES_WITH_UNDEFINED_POINT_FORMAT, true);
-        compatibilityServerReport.setVersions(new ArrayList<>());
+        probes.add(TlsProbeType.SERVER_CERTIFICATE_MINIMUM_KEY_SIZE);
+        probes.add(TlsProbeType.CONNECTION_CLOSING_DELTA);
+        clientScannerConfig.getExecutorConfig().setProbes(probes);
+        clientScannerConfig.setExternalRunCallback(
+                testConfig.getTestClientDelegate().getTriggerScript());
 
-        //TODO : determineClosingDeltas(report, executor);
-        compatibilityServerReport.setVersions(new ArrayList<>(clientReport.getVersions()));
-        
-        if(clientReport.getClientAdvertisedSignatureAndHashAlgorithms() != null) {
-            compatibilityServerReport.setSupportedSignatureAndHashAlgorithmsSke(
-                    clientReport
-                            .getClientAdvertisedSignatureAndHashAlgorithms()
-                            .stream()
-                            .filter(i -> SignatureAndHashAlgorithm.getImplemented().contains(i))
-                            .collect(Collectors.toList()));
-        }
-       
+        TlsClientScanner clientScanner =
+                new TlsClientScanner(clientScannerConfig, preparedExecutor);
+        ClientFeatureExtractionResult extractionResult =
+                ClientFeatureExtractionResult.fromClientScanReport(clientScanner.scan());
 
-        saveToCache(compatibilityServerReport);
-        //TODO : testContext.setReceivedClientHelloMessage(clientHello);
-        testContext.setSiteReport(compatibilityServerReport);
+        saveToCache(extractionResult);
+        testContext.setReceivedClientHelloMessage(clientHello);
+        testContext.setFeatureExtractionResult(extractionResult);
         preparedExecutor.shutdown();
-    }
-
-    public void testHandshakeWithUndefinedPointFormat(
-            List<CipherSuite> ecdheCipherSuites,
-            ServerTestSiteReport report,
-            ParallelExecutor executor)
-            throws RuntimeException {
-        if (!ecdheCipherSuites.isEmpty()
-                && report.getSupportedNamedGroups() != null
-                && !report.getSupportedNamedGroups().isEmpty()) {
-            Config config = this.testConfig.createConfig();
-            config.setDefaultServerSupportedCipherSuites(ecdheCipherSuites);
-            config.setDefaultServerNamedGroups(report.getSupportedNamedGroups());
-            config.setAddECPointFormatExtension(true);
-            State state = new State(config);
-            state.getWorkflowTrace()
-                    .getFirstSendMessage(ServerHelloMessage.class)
-                    .getExtension(ECPointFormatExtensionMessage.class)
-                    .setPointFormats(Modifiable.explicit(new byte[] {(byte) 0xE4}));
-            TlsTask tlsTask = buildStateExecutionServerTask(state);
-            executor.bulkExecuteTasks(tlsTask);
-            if (state.getWorkflowTrace().executedAsPlanned()) {
-                report.putResult(TlsAnalyzedProperty.HANDSHAKES_WITH_UNDEFINED_POINT_FORMAT, true);
-            } else {
-                report.putResult(TlsAnalyzedProperty.HANDSHAKES_WITH_UNDEFINED_POINT_FORMAT, false);
-            }
-        }
-    }
-
-    private void determineClosingDeltas(ServerTestSiteReport report, ParallelExecutor executor) {
-        final int TIMEOUT_LIMIT = 5000;
-        Config config = this.testConfig.createConfig();
-        config.setDefaultServerNamedGroups(report.getSupportedNamedGroups());
-        config.setWorkflowExecutorShouldClose(false);
-        State state = new State(config);
-
-        TlsTask tlsTask = buildStateExecutionServerTask(state);
-        executor.bulkExecuteTasks(tlsTask);
-        long closedAfterHandshakeDelta = getClosingDelta(state, TIMEOUT_LIMIT);
-        report.setClosedAfterFinishedDelta(closedAfterHandshakeDelta);
-
-        if (closedAfterHandshakeDelta > 0) {
-            config = this.testConfig.createConfig();
-            config.setDefaultServerNamedGroups(report.getSupportedNamedGroups());
-            config.setWorkflowExecutorShouldClose(false);
-            state = new State(config);
-            state.getWorkflowTrace().addTlsAction(new SendAction(new ApplicationMessage()));
-            tlsTask = buildStateExecutionServerTask(state);
-            executor.bulkExecuteTasks(tlsTask);
-            report.setClosedAfterAppDataDelta(getClosingDelta(state, TIMEOUT_LIMIT));
-        } else {
-            report.setClosedAfterAppDataDelta(closedAfterHandshakeDelta);
-        }
-    }
-
-    public long getClosingDelta(State state, final int TIMEOUT_LIMIT) {
-        SocketState socketState = null;
-        long delta = 0;
-        do {
-            try {
-                socketState =
-                        (((TcpTransportHandler) (state.getTlsContext().getTransportHandler()))
-                                .getSocketState());
-                switch (socketState) {
-                    case CLOSED:
-                    case IO_EXCEPTION:
-                    case PEER_WRITE_CLOSED:
-                    case SOCKET_EXCEPTION:
-                    case TIMEOUT:
-                        closeSocket(state);
-                        return delta;
-                    default:
-                }
-                Thread.sleep(10);
-                delta += 10;
-            } catch (InterruptedException ignored) {
-            }
-        } while (delta < TIMEOUT_LIMIT);
-        closeSocket(state);
-        return -1;
-    }
-
-    private void closeSocket(State state) {
-        try {
-            state.getTlsContext().getTransportHandler().closeConnection();
-        } catch (IOException ignored) {
-        }
     }
 
     public StateExecutionTask buildStateExecutionServerTask(State state) throws RuntimeException {
@@ -501,19 +391,28 @@ public class TestRunner {
             serverTestPreparation();
         } else throw new RuntimeException("Invalid TestEndpointMode");
 
-        if (testContext.getSiteReport() == null) {
+        if (testContext.getFeatureExtractionResult() == null) {
             throw new RuntimeException("SiteReport is null after preparation phase");
         }
 
         boolean startTestSuite = false;
-        if (testContext.getSiteReport().getVersions() == null
-                || testContext.getSiteReport().getVersions().isEmpty()) {
+        if (testContext.getFeatureExtractionResult().getSupportedVersions() == null
+                || testContext.getFeatureExtractionResult().getSupportedVersions().isEmpty()) {
             LOGGER.error("Target does not support any ProtocolVersion");
-        } else if (testContext.getSiteReport().getCipherSuites().isEmpty()
-                && testContext.getSiteReport().getSupportedTls13CipherSuites().isEmpty()) {
+        } else if (testContext.getFeatureExtractionResult().getCipherSuites().isEmpty()
+                && testContext
+                        .getFeatureExtractionResult()
+                        .getSupportedTls13CipherSuites()
+                        .isEmpty()) {
             LOGGER.error("Target does not support any CipherSuites");
-        } else if (!testContext.getSiteReport().getVersions().contains(ProtocolVersion.TLS12)
-                && !testContext.getSiteReport().getVersions().contains(ProtocolVersion.TLS13)) {
+        } else if (!testContext
+                        .getFeatureExtractionResult()
+                        .getSupportedVersions()
+                        .contains(ProtocolVersion.TLS12)
+                && !testContext
+                        .getFeatureExtractionResult()
+                        .getSupportedVersions()
+                        .contains(ProtocolVersion.TLS13)) {
             LOGGER.error("Target does not support any ProtocolVersion that the Testsuite supports");
         } else {
             startTestSuite = true;
@@ -824,31 +723,36 @@ public class TestRunner {
         LOGGER.info(
                 "Supported NamedGroups:  "
                         + TestContext.getInstance()
-                                .getSiteReport()
+                                .getFeatureExtractionResult()
                                 .getSupportedNamedGroups()
                                 .stream()
                                 .map(NamedGroup::toString)
                                 .collect(Collectors.joining(",")));
         LOGGER.info(
                 "Supported CipherSuites: "
-                        + TestContext.getInstance().getSiteReport().getCipherSuites().stream()
+                        + TestContext.getInstance()
+                                .getFeatureExtractionResult()
+                                .getCipherSuites()
+                                .stream()
                                 .map(CipherSuite::toString)
                                 .collect(Collectors.joining(",")));
-        if (TestContext.getInstance().getSiteReport().getSupportedTls13Groups() != null) {
+        if (TestContext.getInstance().getFeatureExtractionResult().getSupportedTls13Groups()
+                != null) {
             LOGGER.info(
                     "Supported TLS 1.3 NamedGroups: "
                             + TestContext.getInstance()
-                                    .getSiteReport()
+                                    .getFeatureExtractionResult()
                                     .getSupportedTls13Groups()
                                     .stream()
                                     .map(NamedGroup::toString)
                                     .collect(Collectors.joining(",")));
         }
-        if (TestContext.getInstance().getSiteReport().getSupportedTls13CipherSuites() != null) {
+        if (TestContext.getInstance().getFeatureExtractionResult().getSupportedTls13CipherSuites()
+                != null) {
             LOGGER.info(
                     "Supported TLS 1.3 CipherSuites: "
                             + TestContext.getInstance()
-                                    .getSiteReport()
+                                    .getFeatureExtractionResult()
                                     .getSupportedTls13CipherSuites()
                                     .stream()
                                     .map(CipherSuite::toString)
@@ -867,5 +771,44 @@ public class TestRunner {
         } catch (IOException ex) {
             throw new RuntimeException("Failed to set TransportHandlers");
         }
+    }
+
+    private ClientHelloMessage catchClientHello(ParallelExecutor executor) {
+        LOGGER.info("Attempting to receive a Client Hello");
+        Config config = testConfig.createConfig();
+        WorkflowTrace catchHelloWorkflowTrace = new WorkflowTrace();
+        catchHelloWorkflowTrace.addTlsAction(new ReceiveAction(new ClientHelloMessage()));
+        State catchHelloState = new State(config, catchHelloWorkflowTrace);
+        StateExecutionTask catchHelloTask = new StateExecutionTask(catchHelloState, 2);
+        catchHelloTask.setBeforeTransportInitCallback(
+                testConfig.getTestClientDelegate().getTriggerScript());
+        catchHelloTask.setBeforeTransportPreInitCallback(getSocketManagementCallback());
+        executor.bulkExecuteTasks(catchHelloTask);
+
+        return (ClientHelloMessage)
+                WorkflowTraceUtil.getFirstReceivedMessage(
+                        HandshakeMessageType.CLIENT_HELLO, catchHelloWorkflowTrace);
+    }
+
+    /**
+     * Ensures that the ClientScanner always uses the externally managed socket
+     *
+     * @return Function to set socket in created state
+     */
+    private Function<State, Integer> getSocketManagementCallback() {
+        return (State state) -> {
+            try {
+                state.getTlsContext()
+                        .setTransportHandler(
+                                new ServerTcpTransportHandler(
+                                        testConfig.getConnectionTimeout(),
+                                        testConfig.getConnectionTimeout(),
+                                        testConfig.getTestClientDelegate().getServerSocket()));
+                return 0;
+            } catch (IOException ex) {
+                LOGGER.error("Failed to set server socket", ex);
+                return 1;
+            }
+        };
     }
 }

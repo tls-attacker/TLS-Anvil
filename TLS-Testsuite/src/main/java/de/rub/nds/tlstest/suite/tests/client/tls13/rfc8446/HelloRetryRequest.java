@@ -78,7 +78,8 @@ public class HelloRetryRequest extends Tls13Test {
 
     public List<DerivationParameter> getUnofferedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        List<NamedGroup> offeredGroups = context.getSiteReport().getClientHelloNamedGroups();
+        List<NamedGroup> offeredGroups =
+                context.getFeatureExtractionResult().getClientHelloNamedGroups();
         NamedGroup.getImplemented().stream()
                 .filter(group -> !offeredGroups.contains(group))
                 .forEach(
@@ -154,7 +155,7 @@ public class HelloRetryRequest extends Tls13Test {
     }
 
     public boolean isKeyShareInInitialHello(NamedGroup group) {
-        return context.getSiteReport().getClientHelloKeyShareGroups().contains(group);
+        return context.getFeatureExtractionResult().getClientHelloKeyShareGroups().contains(group);
     }
 
     @TlsTest(
@@ -197,11 +198,11 @@ public class HelloRetryRequest extends Tls13Test {
     }
 
     public boolean isNotKeyShareInInitialHello(NamedGroup group) {
-        return !context.getSiteReport().getClientHelloKeyShareGroups().contains(group);
+        return !context.getFeatureExtractionResult().getClientHelloKeyShareGroups().contains(group);
     }
 
     private NamedGroup getOtherSupportedNamedGroup(NamedGroup givenGroup) {
-        for (NamedGroup group : context.getSiteReport().getSupportedTls13Groups()) {
+        for (NamedGroup group : context.getFeatureExtractionResult().getSupportedTls13Groups()) {
             if (group != givenGroup) {
                 return group;
             }
@@ -210,7 +211,7 @@ public class HelloRetryRequest extends Tls13Test {
     }
 
     public ConditionEvaluationResult supportsMultipleNamedGroups() {
-        if (context.getSiteReport().getSupportedTls13Groups().size() > 1) {
+        if (context.getFeatureExtractionResult().getSupportedTls13Groups().size() > 1) {
             return ConditionEvaluationResult.enabled(
                     "More than one NamedGroup supported by target in TLS 1.3");
         }
@@ -281,7 +282,7 @@ public class HelloRetryRequest extends Tls13Test {
     }
 
     private ConditionEvaluationResult supportsMultipleCipherSuites() {
-        if (context.getSiteReport().getSupportedTls13CipherSuites().size() > 1) {
+        if (context.getFeatureExtractionResult().getSupportedTls13CipherSuites().size() > 1) {
             return ConditionEvaluationResult.enabled(
                     "More than one CipherSuite supported by target in TLS 1.3");
         }
@@ -359,7 +360,8 @@ public class HelloRetryRequest extends Tls13Test {
     public void namedGroupDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
-        NamedGroup actualHelloGroup = context.getSiteReport().getClientHelloNamedGroups().get(0);
+        NamedGroup actualHelloGroup =
+                context.getFeatureExtractionResult().getClientHelloNamedGroups().get(0);
         config.setDefaultServerNamedGroups(actualHelloGroup);
         config.setDefaultSelectedNamedGroup(actualHelloGroup);
 
@@ -723,7 +725,7 @@ public class HelloRetryRequest extends Tls13Test {
 
     public List<DerivationParameter> getTls12CipherSuites(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        context.getSiteReport()
+        context.getFeatureExtractionResult()
                 .getCipherSuites()
                 .forEach(
                         cipherSuite -> parameterValues.add(new CipherSuiteDerivation(cipherSuite)));

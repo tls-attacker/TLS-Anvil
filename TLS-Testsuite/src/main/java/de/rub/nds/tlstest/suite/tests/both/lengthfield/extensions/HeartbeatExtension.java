@@ -1,10 +1,9 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 
@@ -34,47 +33,57 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-
-
 public class HeartbeatExtension extends TlsGenericTest {
-    
+
     public ConditionEvaluationResult targetCanBeTested() {
-        if(TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER ||
-                TestContext.getInstance().getSiteReport().getReceivedClientHello().containsExtension(ExtensionType.HEARTBEAT)) {
+        if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER
+                || TestContext.getInstance()
+                        .getFeatureExtractionResult()
+                        .getReceivedClientHello()
+                        .containsExtension(ExtensionType.HEARTBEAT)) {
             return ConditionEvaluationResult.enabled("The Extension can be tested");
         }
-        return ConditionEvaluationResult.disabled("Target is not a server and did not include the required Extension in Client Hello");
+        return ConditionEvaluationResult.disabled(
+                "Target is not a server and did not include the required Extension in Client Hello");
     }
-    
+
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @TlsTest(description = "Send a Heartbeat Extension in the Hello Message with a modified length value (-1)")
+    @TlsTest(
+            description =
+                    "Send a Heartbeat Extension in the Hello Message with a modified length value (-1)")
     @ScopeLimitations(DerivationType.INCLUDE_HEARTBEAT_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "targetCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
-    public void heartbeatExtensionLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void heartbeatExtensionLengthTLS12(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         config.setAddHeartbeatExtension(true);
-        genericExtensionLengthTest(runner, argumentAccessor, config, HeartbeatExtensionMessage.class);
+        genericExtensionLengthTest(
+                runner, argumentAccessor, config, HeartbeatExtensionMessage.class);
     }
-    
+
     @Tag("tls13")
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @TlsTest(description = "Send a Heartbeat Extension in the Hello Message with a modified length value (-1)")
+    @TlsTest(
+            description =
+                    "Send a Heartbeat Extension in the Hello Message with a modified length value (-1)")
     @ScopeLimitations(DerivationType.INCLUDE_HEARTBEAT_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
-    public void heartbeatExtensionLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void heartbeatExtensionLengthTLS13(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddHeartbeatExtension(true);
-        genericExtensionLengthTest(runner, argumentAccessor, config, HeartbeatExtensionMessage.class);
+        genericExtensionLengthTest(
+                runner, argumentAccessor, config, HeartbeatExtensionMessage.class);
     }
 }

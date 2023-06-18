@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
@@ -12,7 +11,6 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeByteLength;
-import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -25,8 +23,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Determines the bytes that affect the bitmask used to alter the output of the
- * PRF (TLS 1.2) or HKDF (TLS 1.3)
+ * Determines the bytes that affect the bitmask used to alter the output of the PRF (TLS 1.2) or
+ * HKDF (TLS 1.3)
  */
 public class PRFBitmaskDerivation extends DerivationParameter<Integer> {
 
@@ -44,8 +42,10 @@ public class PRFBitmaskDerivation extends DerivationParameter<Integer> {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         if (scope.isTls13Test()) {
             int maxHkdfSize = 0;
-            for (CipherSuite cipherSuite : context.getSiteReport().getSupportedTls13CipherSuites()) {
-                int hkdfSize = AlgorithmResolver.getHKDFAlgorithm(cipherSuite).getMacAlgorithm().getSize();
+            for (CipherSuite cipherSuite :
+                    context.getFeatureExtractionResult().getSupportedTls13CipherSuites()) {
+                int hkdfSize =
+                        AlgorithmResolver.getHKDFAlgorithm(cipherSuite).getMacAlgorithm().getSize();
                 if (hkdfSize > maxHkdfSize) {
                     maxHkdfSize = hkdfSize;
                 }
@@ -62,8 +62,7 @@ public class PRFBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-    }
+    public void applyToConfig(Config config, TestContext context) {}
 
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
@@ -78,12 +77,21 @@ public class PRFBitmaskDerivation extends DerivationParameter<Integer> {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((PRFBitmaskDerivation prfBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
-            int selectedBitmaskBytePosition = prfBitmaskDerivation.getSelectedValue();
-            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
-            
-            return AlgorithmResolver.getHKDFAlgorithm(selectedCipherSuite).getMacAlgorithm().getSize() > selectedBitmaskBytePosition;
-        }));
-    }
+        return new ConditionalConstraint(
+                requiredDerivations,
+                ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name())
+                        .by(
+                                (PRFBitmaskDerivation prfBitmaskDerivation,
+                                        CipherSuiteDerivation cipherSuiteDerivation) -> {
+                                    int selectedBitmaskBytePosition =
+                                            prfBitmaskDerivation.getSelectedValue();
+                                    CipherSuite selectedCipherSuite =
+                                            cipherSuiteDerivation.getSelectedValue();
 
+                                    return AlgorithmResolver.getHKDFAlgorithm(selectedCipherSuite)
+                                                    .getMacAlgorithm()
+                                                    .getSize()
+                                            > selectedBitmaskBytePosition;
+                                }));
+    }
 }

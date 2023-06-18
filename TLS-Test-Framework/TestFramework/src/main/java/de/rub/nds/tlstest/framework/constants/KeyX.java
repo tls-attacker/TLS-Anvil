@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.constants;
 
@@ -14,24 +13,22 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.KeyExchangeAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.ServerTestSiteReport;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.extension.ExtensionContext;
-
-import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import javax.annotation.Nonnull;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class KeyX implements KeyExchange {
     private static final Logger LOGGER = LogManager.getLogger();
-    
+
     private KeyExchangeType[] supportedKxs = new KeyExchangeType[0];
     private boolean mergeSupportedWithClassSupported = true;
     private boolean requiresServerKeyExchMsg = false;
@@ -46,13 +43,16 @@ public class KeyX implements KeyExchange {
         this.mergeSupportedWithClassSupported = exchange.mergeSupportedWithClassSupported();
         this.requiresServerKeyExchMsg = exchange.requiresServerKeyExchMsg();
     }
-    
-    public KeyX(KeyExchangeType[] supportedKxs, boolean mergeSupportedWithClassSupported, boolean requiresServerKeyExchMsg) {
+
+    public KeyX(
+            KeyExchangeType[] supportedKxs,
+            boolean mergeSupportedWithClassSupported,
+            boolean requiresServerKeyExchMsg) {
         this.supportedKxs = supportedKxs;
         this.mergeSupportedWithClassSupported = mergeSupportedWithClassSupported;
         this.requiresServerKeyExchMsg = requiresServerKeyExchMsg;
     }
-    
+
     @Override
     public KeyExchangeType[] supported() {
         return this.supportedKxs;
@@ -77,13 +77,13 @@ public class KeyX implements KeyExchange {
         this.supportedKxs = supportedKxs;
     }
 
-
     /**
-     * filters supportedKxs, so that it only contains the KeyExchangeTypes that are actually supported by the server/client.
+     * filters supportedKxs, so that it only contains the KeyExchangeTypes that are actually
+     * supported by the server/client.
      */
     public void filterSupportedKexs() {
         TestContext context = TestContext.getInstance();
-        ServerTestSiteReport report = context.getSiteReport();
+        FeatureExtractionResult report = context.getFeatureExtractionResult();
         Set<CipherSuite> ciphers = report.getCipherSuites();
         if (ciphers == null) {
             ciphers = new HashSet<>();
@@ -94,28 +94,29 @@ public class KeyX implements KeyExchange {
         for (CipherSuite i : ciphers) {
             KeyExchangeAlgorithm kexalg = AlgorithmResolver.getKeyExchangeAlgorithm(i);
             ServerKeyExchangeMessage serverKeyExchangeMessage = null;
-            if(i.isEphemeral() || i.isSrp()) {
-                serverKeyExchangeMessage = new WorkflowConfigurationFactory(Config.createConfig()).createServerKeyExchangeMessage(kexalg);
+            if (i.isEphemeral() || i.isSrp()) {
+                serverKeyExchangeMessage =
+                        new WorkflowConfigurationFactory(Config.createConfig())
+                                .createServerKeyExchangeMessage(kexalg);
             }
             for (KeyExchangeType t : this.supported()) {
-                if (kexalg == null || (requiresServerKeyExchMsg && serverKeyExchangeMessage == null)) {
+                if (kexalg == null
+                        || (requiresServerKeyExchMsg && serverKeyExchangeMessage == null)) {
                     continue;
                 }
                 if (kexalg.isKeyExchangeEcdh() && t == KeyExchangeType.ECDH) {
                     filtered.add(t);
-                }
-                else if (kexalg.isKeyExchangeRsa() && t == KeyExchangeType.RSA) {
+                } else if (kexalg.isKeyExchangeRsa() && t == KeyExchangeType.RSA) {
                     filtered.add(t);
-                }
-                else if (kexalg.isKeyExchangeDh() && t == KeyExchangeType.DH) {
+                } else if (kexalg.isKeyExchangeDh() && t == KeyExchangeType.DH) {
                     filtered.add(t);
                 }
             }
         }
 
-        if (Arrays.asList(this.supported()).contains(KeyExchangeType.ALL13) &&
-                report.getSupportedTls13CipherSuites() != null &&
-                report.getSupportedTls13CipherSuites().size() > 0) {
+        if (Arrays.asList(this.supported()).contains(KeyExchangeType.ALL13)
+                && report.getSupportedTls13CipherSuites() != null
+                && report.getSupportedTls13CipherSuites().size() > 0) {
             filtered.add(KeyExchangeType.ALL13);
         }
 
@@ -142,7 +143,8 @@ public class KeyX implements KeyExchange {
                 resolvedKeyExchange = new KeyX(method);
 
                 KeyExchange cls = testClass.getAnnotation(KeyExchange.class);
-                Set<KeyExchangeType> supportedKexsSet = new HashSet<>(Arrays.asList(method.supported()));
+                Set<KeyExchangeType> supportedKexsSet =
+                        new HashSet<>(Arrays.asList(method.supported()));
 
                 if (method.mergeSupportedWithClassSupported()) {
                     supportedKexsSet.addAll(Arrays.asList(cls.supported()));
@@ -158,12 +160,17 @@ public class KeyX implements KeyExchange {
             resolvedKeyExchange = new KeyX(existing);
         } else {
             resolvedKeyExchange = new KeyX();
-            resolvedKeyExchange.setSupportedKxs(new KeyExchangeType[]{KeyExchangeType.ALL12, KeyExchangeType.ALL13});
+            resolvedKeyExchange.setSupportedKxs(
+                    new KeyExchangeType[] {KeyExchangeType.ALL12, KeyExchangeType.ALL13});
         }
 
-        boolean supportsAll = Arrays.asList(resolvedKeyExchange.supported()).contains(KeyExchangeType.ALL12);
+        boolean supportsAll =
+                Arrays.asList(resolvedKeyExchange.supported()).contains(KeyExchangeType.ALL12);
         if (supportsAll) {
-            resolvedKeyExchange.setSupportedKxs(new KeyExchangeType[]{KeyExchangeType.DH, KeyExchangeType.ECDH, KeyExchangeType.RSA});
+            resolvedKeyExchange.setSupportedKxs(
+                    new KeyExchangeType[] {
+                        KeyExchangeType.DH, KeyExchangeType.ECDH, KeyExchangeType.RSA
+                    });
         }
 
         if (resolvedKeyExchange.supported().length > 0) {
@@ -177,7 +184,7 @@ public class KeyX implements KeyExchange {
 
     public boolean compatibleWithCiphersuite(CipherSuite i) {
         if (i.isTLS13()) {
-            return  Arrays.asList(this.supported()).contains(KeyExchangeType.ALL13);
+            return Arrays.asList(this.supported()).contains(KeyExchangeType.ALL13);
         }
 
         KeyExchangeAlgorithm alg = AlgorithmResolver.getKeyExchangeAlgorithm(i);
@@ -185,8 +192,10 @@ public class KeyX implements KeyExchange {
         assert alg != null;
 
         ServerKeyExchangeMessage serverKeyExchangeMessage = null;
-        if(i.isEphemeral() || i.isSrp()) {
-           serverKeyExchangeMessage = new WorkflowConfigurationFactory(Config.createConfig()).createServerKeyExchangeMessage(alg); 
+        if (i.isEphemeral() || i.isSrp()) {
+            serverKeyExchangeMessage =
+                    new WorkflowConfigurationFactory(Config.createConfig())
+                            .createServerKeyExchangeMessage(alg);
         }
 
         boolean compatible = false;
@@ -196,14 +205,24 @@ public class KeyX implements KeyExchange {
                     compatible |= alg.isKeyExchangeRsa() && !this.requiresServerKeyExchMsg;
                     break;
                 case DH:
-                    // equivalent to alg.isKeyExchangeDh() && ((this.requiresServerKeyExchMsg && skxm != null) || !this.requiresServerKeyExchMsg)
-                    compatible |= alg.isKeyExchangeDh() && (!this.requiresServerKeyExchMsg || serverKeyExchangeMessage != null);
+                    // equivalent to alg.isKeyExchangeDh() && ((this.requiresServerKeyExchMsg &&
+                    // skxm != null) || !this.requiresServerKeyExchMsg)
+                    compatible |=
+                            alg.isKeyExchangeDh()
+                                    && (!this.requiresServerKeyExchMsg
+                                            || serverKeyExchangeMessage != null);
                     break;
                 case ECDH:
-                    compatible |= alg.isKeyExchangeEcdh() && (!this.requiresServerKeyExchMsg || serverKeyExchangeMessage != null);
+                    compatible |=
+                            alg.isKeyExchangeEcdh()
+                                    && (!this.requiresServerKeyExchMsg
+                                            || serverKeyExchangeMessage != null);
                     break;
                 case ALL12:
-                    compatible |= AlgorithmResolver.getKeyExchangeAlgorithm(i) != null && (!this.requiresServerKeyExchMsg || serverKeyExchangeMessage != null);
+                    compatible |=
+                            AlgorithmResolver.getKeyExchangeAlgorithm(i) != null
+                                    && (!this.requiresServerKeyExchMsg
+                                            || serverKeyExchangeMessage != null);
                     break;
                 case NOT_SPECIFIED:
                     break;
@@ -212,12 +231,13 @@ public class KeyX implements KeyExchange {
 
         return compatible;
     }
-    
+
     public boolean supports(KeyExchangeType keyExType) {
-        if(supported() == null) {
+        if (supported() == null) {
             return false;
         } else {
-            return Arrays.stream(supported()).anyMatch(supportedType -> keyExType.equals(supportedType));
+            return Arrays.stream(supported())
+                    .anyMatch(supportedType -> keyExType.equals(supportedType));
         }
     }
 }

@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
@@ -24,9 +23,9 @@ import java.util.List;
 import java.util.Set;
 
 public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
-    
-    private final static char ASCII_LETTER = 'A';
-    private final static int UNPADDED_MIN_LENGTH = 16;
+
+    private static final char ASCII_LETTER = 'A';
+    private static final int UNPADDED_MIN_LENGTH = 16;
 
     public AppMsgLengthDerivation() {
         super(DerivationType.APP_MSG_LENGHT, Integer.class);
@@ -36,26 +35,27 @@ public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
         this();
         setSelectedValue(selectedValue);
     }
-    
+
     public static char getAsciiLetter() {
         return ASCII_LETTER;
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getParameterValues(
+            TestContext context, DerivationScope scope) {
         int maxCipherTextByteLen = 0;
-        Set<CipherSuite> cipherSuiteList = context.getSiteReport().getCipherSuites();
+        Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
         if (scope.isTls13Test()) {
-            cipherSuiteList = context.getSiteReport().getSupportedTls13CipherSuites();
+            cipherSuiteList = context.getFeatureExtractionResult().getSupportedTls13CipherSuites();
         }
         for (CipherSuite cipherSuite : cipherSuiteList) {
             if (AlgorithmResolver.getCipher(cipherSuite).getBlocksize() > maxCipherTextByteLen) {
                 maxCipherTextByteLen = AlgorithmResolver.getCipher(cipherSuite).getBlocksize();
             }
         }
-        
-        if(maxCipherTextByteLen == 0) {
-            maxCipherTextByteLen = UNPADDED_MIN_LENGTH; 
+
+        if (maxCipherTextByteLen == 0) {
+            maxCipherTextByteLen = UNPADDED_MIN_LENGTH;
         }
 
         List<DerivationParameter> parameterValues = new LinkedList<>();
@@ -88,15 +88,26 @@ public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(DerivationType.APP_MSG_LENGHT.name(), DerivationType.CIPHERSUITE.name()).by((AppMsgLengthDerivation appMsgLengthDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
-            int selectedAppMsgLength = appMsgLengthDerivation.getSelectedValue();
-            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
-            
-            if(AlgorithmResolver.getCipherType(selectedCipherSuite) == CipherType.BLOCK) {
-                return AlgorithmResolver.getCipher(selectedCipherSuite).getBlocksize() >= selectedAppMsgLength;
-            }
-            return true;
-        }));
-    }
+        return new ConditionalConstraint(
+                requiredDerivations,
+                ConstraintBuilder.constrain(
+                                DerivationType.APP_MSG_LENGHT.name(),
+                                DerivationType.CIPHERSUITE.name())
+                        .by(
+                                (AppMsgLengthDerivation appMsgLengthDerivation,
+                                        CipherSuiteDerivation cipherSuiteDerivation) -> {
+                                    int selectedAppMsgLength =
+                                            appMsgLengthDerivation.getSelectedValue();
+                                    CipherSuite selectedCipherSuite =
+                                            cipherSuiteDerivation.getSelectedValue();
 
+                                    if (AlgorithmResolver.getCipherType(selectedCipherSuite)
+                                            == CipherType.BLOCK) {
+                                        return AlgorithmResolver.getCipher(selectedCipherSuite)
+                                                        .getBlocksize()
+                                                >= selectedAppMsgLength;
+                                    }
+                                    return true;
+                                }));
+    }
 }

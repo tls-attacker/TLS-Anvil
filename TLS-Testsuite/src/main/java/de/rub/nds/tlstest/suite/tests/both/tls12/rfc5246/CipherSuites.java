@@ -38,14 +38,14 @@ public class CipherSuites extends Tls12Test {
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void supportOfDeprecatedCipherSuites() {
         List<CipherSuite> suites;
-        if (context.getSiteReport().getVersionSuitePairs() != null) {
+        if (context.getFeatureExtractionResult().getVersionSuitePairs() != null) {
             suites =
-                    context.getSiteReport().getVersionSuitePairs().stream()
+                    context.getFeatureExtractionResult().getVersionSuitePairs().stream()
                             .filter(i -> i.getVersion() == ProtocolVersion.TLS12)
                             .flatMap(i -> i.getCipherSuiteList().stream())
                             .collect(Collectors.toList());
         } else {
-            suites = new LinkedList<>(context.getSiteReport().getCipherSuites());
+            suites = new LinkedList<>(context.getFeatureExtractionResult().getCipherSuites());
         }
 
         List<String> badSuites = new ArrayList<>();

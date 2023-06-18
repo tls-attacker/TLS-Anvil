@@ -13,6 +13,7 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -29,9 +30,11 @@ import java.util.StringJoiner;
 public class CertificateDerivation extends DerivationParameter<CertificateKeyPair> {
 
     private final int MIN_RSA_KEY_LEN =
-            TestContext.getInstance().getSiteReport().getMinimumRsaCertKeySize();
+            ((ClientFeatureExtractionResult) TestContext.getInstance().getFeatureExtractionResult())
+                    .getRequiredCertificateRSAPublicKeySize();
     private final int MIN_DSS_KEY_LEN =
-            TestContext.getInstance().getSiteReport().getMinimumDssCertKeySize();
+            ((ClientFeatureExtractionResult) TestContext.getInstance().getFeatureExtractionResult())
+                    .getRequiredCertificateDSSPublicKeySize();
     private final boolean ALLOW_DSS = true;
 
     public CertificateDerivation() {
@@ -80,7 +83,7 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
     private boolean filterEcdsaPublicKeyGroups(
             CertificateKeyPair cert, TestContext context, boolean allowUnsupportedPkGroups) {
         return (cert.getPublicKeyGroup() == null
-                        || context.getSiteReport()
+                        || context.getFeatureExtractionResult()
                                 .getSupportedNamedGroups()
                                 .contains(cert.getPublicKeyGroup()))
                 || allowUnsupportedPkGroups;
@@ -96,7 +99,7 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
             CertificateKeyPair cert, DerivationScope scope) {
         Set<CipherSuite> cipherSuites;
         if (!scope.isTls13Test()) {
-            cipherSuites = TestContext.getInstance().getSiteReport().getCipherSuites();
+            cipherSuites = TestContext.getInstance().getFeatureExtractionResult().getCipherSuites();
             return cipherSuites.stream()
                     .anyMatch(
                             cipherSuite ->

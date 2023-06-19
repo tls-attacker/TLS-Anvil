@@ -24,6 +24,17 @@ public class ClientFeatureExtractionResult extends FeatureExtractionResult {
         ClientFeatureExtractionResult extractionResult =
                 new ClientFeatureExtractionResult("client");
         extractionResult.setSharedFieldsFromReport(report);
+
+        extractionResult
+                .getSupportedNamedGroups()
+                .addAll(report.getClientAdvertisedNamedGroupsList());
+        extractionResult
+                .getSupportedTls13Groups()
+                .addAll(report.getClientAdvertisedKeyShareNamedGroupsList());
+        extractionResult
+                .getSupportedCompressionMethods()
+                .addAll(report.getClientAdvertisedCompressions());
+
         extractionResult.setRequiredCertificateDSSPublicKeySize(
                 report.getMinimumServerCertificateKeySizeDSS());
         extractionResult.setRequiredCertificateRSAPublicKeySize(

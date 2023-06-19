@@ -23,6 +23,7 @@ import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlsscanner.core.probe.closing.ConnectionClosingUtils;
 import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
 import de.rub.nds.tlsscanner.core.report.TlsScanReport;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -31,7 +32,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-public abstract class FeatureExtractionResult {
+public abstract class FeatureExtractionResult implements Serializable {
 
     @JsonIgnore private ClientHelloMessage receivedClientHello;
 
@@ -64,10 +65,8 @@ public abstract class FeatureExtractionResult {
         setResultMap(siteReport.getResultMap());
         getSupportedCipherSuites().addAll(siteReport.getSupportedCipherSuites());
         getSupportedVersions().addAll(siteReport.getSupportedProtocolVersions());
-        getSupportedNamedGroups().addAll(siteReport.getSupportedNamedGroups());
         getVersionSuitePairs().addAll(siteReport.getVersionSuitePairs());
-        getSupportedCompressionMethods().addAll(siteReport.getSupportedCompressionMethods());
-        getSupportedTls13Groups().addAll(siteReport.getSupportedTls13Groups());
+
         setClosedAfterAppDataDelta(siteReport.getClosedAfterAppDataDelta());
         setClosedAfterFinishedDelta(siteReport.getClosedAfterFinishedDelta());
     }

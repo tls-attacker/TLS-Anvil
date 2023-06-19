@@ -27,6 +27,14 @@ public class ServerFeatureExtractionResult extends FeatureExtractionResult {
         ServerFeatureExtractionResult extractionResult =
                 new ServerFeatureExtractionResult(serverReport.getHost(), serverReport.getPort());
         extractionResult.setSharedFieldsFromReport(serverReport);
+
+        // move to shared fields when scanner is updated
+        extractionResult.getSupportedNamedGroups().addAll(serverReport.getSupportedNamedGroups());
+        extractionResult.getSupportedTls13Groups().addAll(serverReport.getSupportedTls13Groups());
+        extractionResult
+                .getSupportedCompressionMethods()
+                .addAll(serverReport.getSupportedCompressionMethods());
+
         extractionResult.setNamedGroupWitnesses(serverReport.getSupportedNamedGroupsWitnesses());
         extractionResult.setNamedGroupWitnessesTls13(
                 serverReport.getSupportedNamedGroupsWitnessesTls13());

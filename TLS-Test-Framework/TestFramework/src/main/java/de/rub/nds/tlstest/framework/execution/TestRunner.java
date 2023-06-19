@@ -52,6 +52,7 @@ import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
+import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.extractor.TestCaseExtractor;
 import de.rub.nds.tlstest.framework.reporting.ExecutionListener;
@@ -292,11 +293,15 @@ public class TestRunner {
         List<ProbeType> probes = new LinkedList<>();
         probes.add(TlsProbeType.BASIC);
         probes.add(TlsProbeType.CIPHER_SUITE);
+        probes.add(TlsProbeType.PROTOCOL_VERSION);
         probes.add(TlsProbeType.NAMED_GROUPS);
         probes.add(TlsProbeType.RECORD_FRAGMENTATION);
         probes.add(TlsProbeType.EC_POINT_FORMAT);
         probes.add(TlsProbeType.SERVER_CERTIFICATE_MINIMUM_KEY_SIZE);
         probes.add(TlsProbeType.CONNECTION_CLOSING_DELTA);
+        clientScannerConfig
+                .getServerDelegate()
+                .setPort(testConfig.getDelegate(TestClientDelegate.class).getPort());
         clientScannerConfig.getExecutorConfig().setProbes(probes);
         clientScannerConfig.setExternalRunCallback(
                 testConfig.getTestClientDelegate().getTriggerScript());

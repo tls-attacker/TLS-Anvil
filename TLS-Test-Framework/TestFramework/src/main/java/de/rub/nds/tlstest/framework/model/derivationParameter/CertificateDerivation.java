@@ -16,7 +16,6 @@ import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
-import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -31,7 +30,7 @@ import java.util.StringJoiner;
 
 /** Selects CertificateKeyPairs for the IPM */
 public class CertificateDerivation extends DerivationParameter<CertificateKeyPair> {
-    
+
     private final int MIN_RSA_SIG_KEY_LEN;
     private final int MIN_RSA_KEY_LEN;
     private final int MIN_DSS_KEY_LEN;
@@ -39,20 +38,53 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
 
     public CertificateDerivation() {
         super(DerivationType.CERTIFICATE, CertificateKeyPair.class);
-        if(TestContext.getInstance().getFeatureExtractionResult().getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_RSA_SIG) == TestResults.TRUE) {
-            MIN_RSA_SIG_KEY_LEN = ((NumericResult)TestContext.getInstance().getFeatureExtractionResult().getResult(TlsAnalyzedProperty.SERVER_CERT_MIN_KEY_SIZE_RSA_SIG)).getValue().intValue();
+        if (TestContext.getInstance()
+                        .getFeatureExtractionResult()
+                        .getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_RSA_SIG)
+                == TestResults.TRUE) {
+            MIN_RSA_SIG_KEY_LEN =
+                    ((NumericResult)
+                                    TestContext.getInstance()
+                                            .getFeatureExtractionResult()
+                                            .getResult(
+                                                    TlsAnalyzedProperty
+                                                            .SERVER_CERT_MIN_KEY_SIZE_RSA_SIG))
+                            .getValue()
+                            .intValue();
         } else {
             MIN_RSA_SIG_KEY_LEN = 0;
         }
-        
-        if(TestContext.getInstance().getFeatureExtractionResult().getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_RSA) == TestResults.TRUE) {
-            MIN_RSA_KEY_LEN = ((NumericResult)TestContext.getInstance().getFeatureExtractionResult().getResult(TlsAnalyzedProperty.SERVER_CERT_MIN_KEY_SIZE_RSA)).getValue().intValue();
+
+        if (TestContext.getInstance()
+                        .getFeatureExtractionResult()
+                        .getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_RSA)
+                == TestResults.TRUE) {
+            MIN_RSA_KEY_LEN =
+                    ((NumericResult)
+                                    TestContext.getInstance()
+                                            .getFeatureExtractionResult()
+                                            .getResult(
+                                                    TlsAnalyzedProperty
+                                                            .SERVER_CERT_MIN_KEY_SIZE_RSA))
+                            .getValue()
+                            .intValue();
         } else {
             MIN_RSA_KEY_LEN = 0;
         }
-        
-        if(TestContext.getInstance().getFeatureExtractionResult().getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_DSS) == TestResults.TRUE) {
-            MIN_DSS_KEY_LEN = ((NumericResult)TestContext.getInstance().getFeatureExtractionResult().getResult(TlsAnalyzedProperty.SERVER_CERT_MIN_KEY_SIZE_DSS)).getValue().intValue();
+
+        if (TestContext.getInstance()
+                        .getFeatureExtractionResult()
+                        .getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_DSS)
+                == TestResults.TRUE) {
+            MIN_DSS_KEY_LEN =
+                    ((NumericResult)
+                                    TestContext.getInstance()
+                                            .getFeatureExtractionResult()
+                                            .getResult(
+                                                    TlsAnalyzedProperty
+                                                            .SERVER_CERT_MIN_KEY_SIZE_DSS))
+                            .getValue()
+                            .intValue();
         } else {
             MIN_DSS_KEY_LEN = 0;
         }
@@ -85,7 +117,8 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
 
     private boolean filterRsaKeySize(CertificateKeyPair cert) {
         return cert.getCertPublicKeyType() != CertificateKeyType.RSA
-                || (cert.getPublicKey().keySize() >= MIN_RSA_KEY_LEN && cert.getPublicKey().keySize() >= MIN_RSA_SIG_KEY_LEN);
+                || (cert.getPublicKey().keySize() >= MIN_RSA_KEY_LEN
+                        && cert.getPublicKey().keySize() >= MIN_RSA_SIG_KEY_LEN);
     }
 
     private boolean filterDssSignedCerts(CertificateKeyPair cert) {

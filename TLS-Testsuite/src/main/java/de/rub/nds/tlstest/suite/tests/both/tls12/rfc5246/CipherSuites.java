@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -23,7 +22,6 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 @RFC(number = 5246, section = "1.2 Major Differences from TLS 1.1")
@@ -37,7 +35,8 @@ public class CipherSuites extends Tls12Test {
     @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void supportOfDeprecatedCipherSuites() {
-        List<CipherSuite> suites = new LinkedList<>(context.getFeatureExtractionResult().getCipherSuites());
+        List<CipherSuite> suites =
+                new LinkedList<>(context.getFeatureExtractionResult().getCipherSuites());
 
         List<String> badSuites = new ArrayList<>();
         for (CipherSuite i : suites) {

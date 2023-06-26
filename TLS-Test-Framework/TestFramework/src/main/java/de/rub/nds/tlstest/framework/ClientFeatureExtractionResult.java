@@ -1,7 +1,6 @@
 package de.rub.nds.tlstest.framework;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import de.rub.nds.scanner.core.constants.NumericResult;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
@@ -10,7 +9,6 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExte
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
 import de.rub.nds.tlsscanner.clientscanner.report.ClientReport;
-import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;

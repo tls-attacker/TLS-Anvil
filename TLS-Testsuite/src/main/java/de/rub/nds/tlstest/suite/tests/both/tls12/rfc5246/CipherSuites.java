@@ -37,16 +37,7 @@ public class CipherSuites extends Tls12Test {
     @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void supportOfDeprecatedCipherSuites() {
-        List<CipherSuite> suites;
-        if (context.getFeatureExtractionResult().getVersionSuitePairs() != null) {
-            suites =
-                    context.getFeatureExtractionResult().getVersionSuitePairs().stream()
-                            .filter(i -> i.getVersion() == ProtocolVersion.TLS12)
-                            .flatMap(i -> i.getCipherSuiteList().stream())
-                            .collect(Collectors.toList());
-        } else {
-            suites = new LinkedList<>(context.getFeatureExtractionResult().getCipherSuites());
-        }
+        List<CipherSuite> suites = new LinkedList<>(context.getFeatureExtractionResult().getCipherSuites());
 
         List<String> badSuites = new ArrayList<>();
         for (CipherSuite i : suites) {

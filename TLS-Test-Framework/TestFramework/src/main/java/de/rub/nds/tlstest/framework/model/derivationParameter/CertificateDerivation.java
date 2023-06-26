@@ -84,7 +84,7 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
             CertificateKeyPair cert, TestContext context, boolean allowUnsupportedPkGroups) {
         return (cert.getPublicKeyGroup() == null
                         || context.getFeatureExtractionResult()
-                                .getSupportedNamedGroups()
+                                .getNamedGroups()
                                 .contains(cert.getPublicKeyGroup()))
                 || allowUnsupportedPkGroups;
     }

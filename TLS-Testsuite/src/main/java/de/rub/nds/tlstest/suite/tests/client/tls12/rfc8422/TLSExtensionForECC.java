@@ -118,7 +118,7 @@ public class TLSExtensionForECC extends Tls12Test {
 
         boolean rfc8422curves = false;
         boolean nonRfc8422curve = false;
-        for (NamedGroup group : context.getFeatureExtractionResult().getSupportedNamedGroups()) {
+        for (NamedGroup group : context.getFeatureExtractionResult().getNamedGroups()) {
             if (isRfc8422Curve(group)) {
                 rfc8422curves = true;
             } else {
@@ -161,7 +161,7 @@ public class TLSExtensionForECC extends Tls12Test {
     public void offeredDeprecatedGroup() {
         boolean deprecated = false;
         List<NamedGroup> deprecatedFound = new LinkedList<>();
-        for (NamedGroup group : context.getFeatureExtractionResult().getSupportedNamedGroups()) {
+        for (NamedGroup group : context.getFeatureExtractionResult().getNamedGroups()) {
             if (group.getIntValue() < NamedGroup.SECP256R1.getIntValue()
                     || group == NamedGroup.EXPLICIT_CHAR2
                     || group == NamedGroup.EXPLICIT_PRIME) {

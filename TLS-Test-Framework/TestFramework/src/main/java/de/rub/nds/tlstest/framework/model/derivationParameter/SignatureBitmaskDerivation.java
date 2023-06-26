@@ -142,7 +142,7 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
     private static int getMaxNamedGroupSize() {
         TestContext context = TestContext.getInstance();
         List<NamedGroup> supportedNamedGroups =
-                context.getFeatureExtractionResult().getSupportedNamedGroups().stream()
+                context.getFeatureExtractionResult().getNamedGroups().stream()
                         .filter(group -> NamedGroup.getImplemented().contains(group))
                         .collect(Collectors.toList());
         NamedGroup biggestNamedGroup = null;

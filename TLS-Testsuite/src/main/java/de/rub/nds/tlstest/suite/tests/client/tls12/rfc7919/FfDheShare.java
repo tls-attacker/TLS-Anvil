@@ -68,7 +68,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class FfDheShare extends Tls12Test {
 
     public ConditionEvaluationResult supportsFfdheAndEcNamedGroups() {
-        if (!context.getFeatureExtractionResult().getSupportedFfdheNamedGroups().isEmpty()
+        if (!context.getFeatureExtractionResult().getFfdheNamedGroups().isEmpty()
                 && context.getFeatureExtractionResult().getCipherSuites().stream()
                         .anyMatch(
                                 cipher ->
@@ -148,7 +148,7 @@ public class FfDheShare extends Tls12Test {
         // we always test for duplicate extensions anyway
         assertFalse(
                 "Client offered EC Cipher Suites and FFDHE groups but no EC Named Groups",
-                context.getFeatureExtractionResult().getSupportedNamedGroups().isEmpty());
+                context.getFeatureExtractionResult().getNamedGroups().isEmpty());
     }
 
     @TlsTest(
@@ -235,7 +235,7 @@ public class FfDheShare extends Tls12Test {
     public List<DerivationParameter> getSupportedFfdheNamedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         context.getFeatureExtractionResult()
-                .getSupportedFfdheNamedGroups()
+                .getFfdheNamedGroups()
                 .forEach(group -> parameterValues.add(new NamedGroupDerivation(group)));
         return parameterValues;
     }

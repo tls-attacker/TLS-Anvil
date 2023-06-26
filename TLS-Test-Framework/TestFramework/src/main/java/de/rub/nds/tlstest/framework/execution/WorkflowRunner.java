@@ -36,6 +36,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
+import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
@@ -322,9 +323,9 @@ public class WorkflowRunner {
                 || context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER
                 || preparedConfig.getHighestProtocolVersion() != ProtocolVersion.TLS13
                 || !context.getFeatureExtractionResult()
-                        .getSupportedNamedGroups()
+                        .getNamedGroups()
                         .contains(preparedConfig.getDefaultSelectedNamedGroup())
-                || context.getFeatureExtractionResult()
+                || ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
                         .getClientHelloKeyShareGroups()
                         .contains(preparedConfig.getDefaultSelectedNamedGroup())) {
             return false;

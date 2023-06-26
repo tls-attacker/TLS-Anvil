@@ -217,7 +217,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void supportsDeprecated(WorkflowRunner runner) {
         List<NamedGroup> deprecatedFound = new LinkedList<>();
-        for (NamedGroup group : context.getFeatureExtractionResult().getSupportedNamedGroups()) {
+        for (NamedGroup group : context.getFeatureExtractionResult().getNamedGroups()) {
             if (group.getIntValue() < NamedGroup.SECP256R1.getIntValue()
                     || group == NamedGroup.EXPLICIT_CHAR2
                     || group == NamedGroup.EXPLICIT_PRIME) {

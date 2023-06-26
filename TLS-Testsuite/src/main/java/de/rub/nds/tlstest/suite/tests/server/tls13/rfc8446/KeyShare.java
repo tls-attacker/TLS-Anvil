@@ -154,8 +154,7 @@ public class KeyShare extends Tls13Test {
     public void serverOnlyOffersOneKeyshare(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        List<NamedGroup> supportedTls13 =
-                context.getFeatureExtractionResult().getSupportedTls13Groups();
+        List<NamedGroup> supportedTls13 = context.getFeatureExtractionResult().getTls13Groups();
 
         // place selected group at the top to avoid (optional) HRR
         NamedGroup selectedGroup =
@@ -182,8 +181,7 @@ public class KeyShare extends Tls13Test {
     public void serverOnlyOffersOneKeyshareAllGroupsAtOnce(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        List<NamedGroup> supportedTls13 =
-                context.getFeatureExtractionResult().getSupportedTls13Groups();
+        List<NamedGroup> supportedTls13 = context.getFeatureExtractionResult().getTls13Groups();
         c.setDefaultClientKeyShareNamedGroups(supportedTls13);
         c.setDefaultClientNamedGroups(supportedTls13);
         performOneKeyshareTest(c, runner);
@@ -459,7 +457,7 @@ public class KeyShare extends Tls13Test {
     public List<DerivationParameter> getFfdheGroups(DerivationScope scope) {
         List<DerivationParameter> derivationParameters = new LinkedList<>();
         context.getFeatureExtractionResult()
-                .getSupportedTls13FfdheNamedGroups()
+                .getTls13FfdheNamedGroups()
                 .forEach(group -> derivationParameters.add(new NamedGroupDerivation(group)));
         return derivationParameters;
     }

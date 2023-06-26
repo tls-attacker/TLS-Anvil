@@ -42,14 +42,14 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     public List<DerivationParameter> getParameterValues(
             TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        List<NamedGroup> groupList = context.getFeatureExtractionResult().getSupportedTls13Groups();
+        List<NamedGroup> groupList = context.getFeatureExtractionResult().getTls13Groups();
         if (!scope.isTls13Test()
                 || scope.getKeyExchangeRequirements().supports(KeyExchangeType.ECDH)) {
-            groupList = context.getFeatureExtractionResult().getSupportedNamedGroups();
+            groupList = context.getFeatureExtractionResult().getNamedGroups();
             parameterValues.add(new NamedGroupDerivation(null));
         } else if (scope.isTls13Test()
                 && context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
-            groupList = context.getFeatureExtractionResult().getSupportedTls13Groups();
+            groupList = context.getFeatureExtractionResult().getTls13Groups();
         }
         groupList =
                 groupList.stream()

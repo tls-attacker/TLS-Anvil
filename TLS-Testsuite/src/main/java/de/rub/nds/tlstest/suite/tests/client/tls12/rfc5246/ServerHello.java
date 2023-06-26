@@ -28,7 +28,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
@@ -129,8 +129,7 @@ public class ServerHello extends Tls12Test {
     public boolean isUnproposedCompressionMethod(CompressionMethod compressionMethod) {
         List<CompressionMethod> proposedCompressionMethods =
                 CompressionMethod.getCompressionMethods(
-                        TestContext.getInstance()
-                                .getFeatureExtractionResult()
+                        ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
                                 .getReceivedClientHello()
                                 .getCompressions()
                                 .getValue());

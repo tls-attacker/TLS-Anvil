@@ -272,7 +272,8 @@ public class TestRunner {
     private void clientTestPreparation() {
         waitForClient();
 
-        FeatureExtractionResult cachedReport = loadFromCache();
+        ClientFeatureExtractionResult cachedReport =
+                (ClientFeatureExtractionResult) loadFromCache();
         if (cachedReport != null) {
             testContext.setFeatureExtractionResult(cachedReport);
             testContext.setReceivedClientHelloMessage(cachedReport.getReceivedClientHello());
@@ -311,6 +312,7 @@ public class TestRunner {
         ClientFeatureExtractionResult extractionResult =
                 ClientFeatureExtractionResult.fromClientScanReport(clientScanner.scan());
 
+        extractionResult.setReceivedClientHello(clientHello);
         saveToCache(extractionResult);
         testContext.setReceivedClientHelloMessage(clientHello);
         testContext.setFeatureExtractionResult(extractionResult);
@@ -495,7 +497,7 @@ public class TestRunner {
                                 .enableTestExecutionListenerAutoRegistration(false)
                                 .addTestExecutionListeners(listener)
                                 .addTestExecutionListeners(reporting)
-                                // .addTestExecutionListeners(listenerLog)
+                                .addTestExecutionListeners(listenerLog)
                                 .build());
 
         TestPlan testplan = launcher.discover(request);
@@ -729,7 +731,7 @@ public class TestRunner {
                 "Supported NamedGroups:  "
                         + TestContext.getInstance()
                                 .getFeatureExtractionResult()
-                                .getSupportedNamedGroups()
+                                .getNamedGroups()
                                 .stream()
                                 .map(NamedGroup::toString)
                                 .collect(Collectors.joining(",")));
@@ -741,13 +743,12 @@ public class TestRunner {
                                 .stream()
                                 .map(CipherSuite::toString)
                                 .collect(Collectors.joining(",")));
-        if (TestContext.getInstance().getFeatureExtractionResult().getSupportedTls13Groups()
-                != null) {
+        if (TestContext.getInstance().getFeatureExtractionResult().getTls13Groups() != null) {
             LOGGER.info(
                     "Supported TLS 1.3 NamedGroups: "
                             + TestContext.getInstance()
                                     .getFeatureExtractionResult()
-                                    .getSupportedTls13Groups()
+                                    .getTls13Groups()
                                     .stream()
                                     .map(NamedGroup::toString)
                                     .collect(Collectors.joining(",")));

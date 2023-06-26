@@ -46,7 +46,7 @@ public class ComplianceRequirements extends Tls13Test {
         assertTrue(
                 "Peer does not support secp256r1",
                 context.getFeatureExtractionResult()
-                        .getSupportedTls13Groups()
+                        .getTls13Groups()
                         .contains(NamedGroup.SECP256R1));
     }
 }

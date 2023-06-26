@@ -36,6 +36,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
@@ -79,7 +80,8 @@ public class HelloRetryRequest extends Tls13Test {
     public List<DerivationParameter> getUnofferedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<NamedGroup> offeredGroups =
-                context.getFeatureExtractionResult().getClientHelloNamedGroups();
+                ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
+                        .getClientHelloNamedGroups();
         NamedGroup.getImplemented().stream()
                 .filter(group -> !offeredGroups.contains(group))
                 .forEach(
@@ -155,7 +157,9 @@ public class HelloRetryRequest extends Tls13Test {
     }
 
     public boolean isKeyShareInInitialHello(NamedGroup group) {
-        return context.getFeatureExtractionResult().getClientHelloKeyShareGroups().contains(group);
+        return ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
+                .getClientHelloKeyShareGroups()
+                .contains(group);
     }
 
     @TlsTest(
@@ -198,11 +202,13 @@ public class HelloRetryRequest extends Tls13Test {
     }
 
     public boolean isNotKeyShareInInitialHello(NamedGroup group) {
-        return !context.getFeatureExtractionResult().getClientHelloKeyShareGroups().contains(group);
+        return !((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
+                .getClientHelloKeyShareGroups()
+                .contains(group);
     }
 
     private NamedGroup getOtherSupportedNamedGroup(NamedGroup givenGroup) {
-        for (NamedGroup group : context.getFeatureExtractionResult().getSupportedTls13Groups()) {
+        for (NamedGroup group : context.getFeatureExtractionResult().getTls13Groups()) {
             if (group != givenGroup) {
                 return group;
             }
@@ -211,7 +217,7 @@ public class HelloRetryRequest extends Tls13Test {
     }
 
     public ConditionEvaluationResult supportsMultipleNamedGroups() {
-        if (context.getFeatureExtractionResult().getSupportedTls13Groups().size() > 1) {
+        if (context.getFeatureExtractionResult().getTls13Groups().size() > 1) {
             return ConditionEvaluationResult.enabled(
                     "More than one NamedGroup supported by target in TLS 1.3");
         }
@@ -361,7 +367,9 @@ public class HelloRetryRequest extends Tls13Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup actualHelloGroup =
-                context.getFeatureExtractionResult().getClientHelloNamedGroups().get(0);
+                ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
+                        .getClientHelloNamedGroups()
+                        .get(0);
         config.setDefaultServerNamedGroups(actualHelloGroup);
         config.setDefaultSelectedNamedGroup(actualHelloGroup);
 

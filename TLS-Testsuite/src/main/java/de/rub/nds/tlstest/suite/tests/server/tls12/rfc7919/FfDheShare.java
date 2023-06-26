@@ -70,7 +70,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class FfDheShare extends Tls12Test {
 
     public ConditionEvaluationResult supportsNamedFfdheGroups() {
-        if (!context.getFeatureExtractionResult().getSupportedFfdheNamedGroups().isEmpty()) {
+        if (!context.getFeatureExtractionResult().getFfdheNamedGroups().isEmpty()) {
             return ConditionEvaluationResult.enabled("");
         }
         return ConditionEvaluationResult.disabled("Target does not support FFDHE Named Groups");
@@ -179,8 +179,7 @@ public class FfDheShare extends Tls12Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         config.setAddEllipticCurveExtension(true);
-        config.setDefaultClientNamedGroups(
-                context.getFeatureExtractionResult().getSupportedNamedGroups());
+        config.setDefaultClientNamedGroups(context.getFeatureExtractionResult().getNamedGroups());
         context.getFeatureExtractionResult()
                 .getCipherSuites()
                 .forEach(
@@ -341,7 +340,7 @@ public class FfDheShare extends Tls12Test {
     public List<DerivationParameter> getSupportedFfdheNamedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         context.getFeatureExtractionResult()
-                .getSupportedFfdheNamedGroups()
+                .getFfdheNamedGroups()
                 .forEach(group -> parameterValues.add(new NamedGroupDerivation(group)));
         return parameterValues;
     }
@@ -354,7 +353,7 @@ public class FfDheShare extends Tls12Test {
         for (NamedGroup group : NamedGroup.getImplemented()) {
             if (group.isDhGroup()
                     && !context.getFeatureExtractionResult()
-                            .getSupportedFfdheNamedGroups()
+                            .getFfdheNamedGroups()
                             .contains(group)) {
                 return group.getValue();
             }

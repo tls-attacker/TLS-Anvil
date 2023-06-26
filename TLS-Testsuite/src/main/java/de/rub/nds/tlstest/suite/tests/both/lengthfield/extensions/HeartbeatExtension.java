@@ -11,6 +11,7 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.HeartbeatExtensionMessage;
+import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
@@ -37,8 +38,7 @@ public class HeartbeatExtension extends TlsGenericTest {
 
     public ConditionEvaluationResult targetCanBeTested() {
         if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER
-                || TestContext.getInstance()
-                        .getFeatureExtractionResult()
+                || ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
                         .getReceivedClientHello()
                         .containsExtension(ExtensionType.HEARTBEAT)) {
             return ConditionEvaluationResult.enabled("The Extension can be tested");

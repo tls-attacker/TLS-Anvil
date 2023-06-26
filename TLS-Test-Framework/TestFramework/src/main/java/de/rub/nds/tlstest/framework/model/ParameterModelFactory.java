@@ -12,6 +12,7 @@ import static de.rwth.swc.coffee4j.model.InputParameterModel.inputParameterModel
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
+import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
@@ -225,16 +226,18 @@ public class ParameterModelFactory {
     private static List<DerivationType> getBasicDerivationsForClient(
             DerivationScope derivationScope) {
         List<DerivationType> derivationTypes = new LinkedList<>();
+        ClientFeatureExtractionResult extractionResult =
+                (ClientFeatureExtractionResult)
+                        TestContext.getInstance().getFeatureExtractionResult();
         if (!derivationScope.isTls13Test()) {
-            if (TestContext.getInstance()
-                    .getFeatureExtractionResult()
+
+            if (extractionResult
                     .getReceivedClientHello()
                     .containsExtension(ExtensionType.ENCRYPT_THEN_MAC)) {
                 derivationTypes.add(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
             }
 
-            if (TestContext.getInstance()
-                    .getFeatureExtractionResult()
+            if (extractionResult
                     .getReceivedClientHello()
                     .containsExtension(ExtensionType.EXTENDED_MASTER_SECRET)) {
                 derivationTypes.add(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);

@@ -127,7 +127,7 @@ public class KeyShare extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
-        List<NamedGroup> groups = context.getFeatureExtractionResult().getSupportedNamedGroups();
+        List<NamedGroup> groups = context.getFeatureExtractionResult().getNamedGroups();
         KeyShareExtensionMessage keyshare = chm.getExtension(KeyShareExtensionMessage.class);
 
         for (KeyShareEntry i : keyshare.getKeyShareList()) {
@@ -337,7 +337,7 @@ public class KeyShare extends Tls13Test {
     public List<DerivationParameter> getFfdheGroups(DerivationScope scope) {
         List<DerivationParameter> derivationParameters = new LinkedList<>();
         context.getFeatureExtractionResult()
-                .getSupportedTls13FfdheNamedGroups()
+                .getTls13FfdheNamedGroups()
                 .forEach(group -> derivationParameters.add(new NamedGroupDerivation(group)));
         return derivationParameters;
     }

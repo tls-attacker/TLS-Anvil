@@ -114,7 +114,7 @@ public class ServerKeyExchange extends Tls12Test {
                 .filter(
                         curve ->
                                 !context.getFeatureExtractionResult()
-                                        .getSupportedNamedGroups()
+                                        .getNamedGroups()
                                         .contains(curve))
                 .forEach(
                         unofferedCurve ->
@@ -174,7 +174,7 @@ public class ServerKeyExchange extends Tls12Test {
                                             || certKeyPair.getCertPublicKeyType()
                                                     == CertificateKeyType.ECDSA)
                                     && !context.getFeatureExtractionResult()
-                                            .getSupportedNamedGroups()
+                                            .getNamedGroups()
                                             .contains(certKeyPair.getPublicKeyGroup());
                         })
                 .forEach(

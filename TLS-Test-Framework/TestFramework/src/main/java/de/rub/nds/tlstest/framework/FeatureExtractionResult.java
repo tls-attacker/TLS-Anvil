@@ -7,18 +7,12 @@
  */
 package de.rub.nds.tlstest.framework;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.rub.nds.scanner.core.constants.TestResult;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
-import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlsscanner.core.probe.closing.ConnectionClosingUtils;
 import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
@@ -33,8 +27,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public abstract class FeatureExtractionResult implements Serializable {
-
-    @JsonIgnore private ClientHelloMessage receivedClientHello;
 
     private final String host;
     private final int port;
@@ -71,65 +63,30 @@ public abstract class FeatureExtractionResult implements Serializable {
         setClosedAfterFinishedDelta(siteReport.getClosedAfterFinishedDelta());
     }
 
-    public ClientHelloMessage getReceivedClientHello() {
-        return receivedClientHello;
+    public List<NamedGroup> getNamedGroups() {
+        // We limit the tests to EC Named Groups for now
+        return getSupportedNamedGroups().stream()
+                .filter(NamedGroup::isCurve)
+                .collect(Collectors.toList());
     }
 
-    public List<NamedGroup> getClientHelloKeyShareGroups() {
-        List<NamedGroup> keyShareGroups = new LinkedList<>();
-        if (receivedClientHello != null
-                && receivedClientHello.containsExtension(ExtensionType.KEY_SHARE)) {
-            KeyShareExtensionMessage keyshare =
-                    receivedClientHello.getExtension(KeyShareExtensionMessage.class);
-            for (KeyShareEntry ksEntry : keyshare.getKeyShareList()) {
-                keyShareGroups.add(ksEntry.getGroupConfig());
-            }
-        }
-        return keyShareGroups;
-    }
-
-    public List<NamedGroup> getSupportedNamedGroups() {
+    public List<NamedGroup> getTls13Groups() {
         // We limit the tests to EC Named Groups for now
         return getSupportedTls13Groups().stream()
                 .filter(NamedGroup::isCurve)
                 .collect(Collectors.toList());
     }
 
-    public List<NamedGroup> getSupportedTls13Groups() {
-        // We limit the tests to EC Named Groups for now
-        return supportedTls13Groups.stream()
-                .filter(NamedGroup::isCurve)
-                .collect(Collectors.toList());
-    }
-
-    public List<NamedGroup> getSupportedFfdheNamedGroups() {
+    public List<NamedGroup> getFfdheNamedGroups() {
         // We only use these for FFDHE RFC tests for now
-        return getSupportedTls13Groups().stream()
+        return getSupportedNamedGroups().stream()
                 .filter(NamedGroup::isDhGroup)
                 .collect(Collectors.toList());
     }
 
-    public List<NamedGroup> getSupportedTls13FfdheNamedGroups() {
+    public List<NamedGroup> getTls13FfdheNamedGroups() {
         // We limit the tests to EC Named Groups for now
-        return getSupportedTls13Groups().stream()
-                .filter(NamedGroup::isDhGroup)
-                .collect(Collectors.toList());
-    }
-
-    public List<NamedGroup> getClientHelloNamedGroups() {
-        if (receivedClientHello != null
-                && receivedClientHello.containsExtension(ExtensionType.ELLIPTIC_CURVES)) {
-            return NamedGroup.namedGroupsFromByteArray(
-                    receivedClientHello
-                            .getExtension(EllipticCurvesExtensionMessage.class)
-                            .getSupportedGroups()
-                            .getValue());
-        }
-        return new LinkedList<>();
-    }
-
-    public void setReceivedClientHello(ClientHelloMessage receivedClientHelloMessage) {
-        this.receivedClientHello = receivedClientHelloMessage;
+        return getTls13Groups().stream().filter(NamedGroup::isDhGroup).collect(Collectors.toList());
     }
 
     public synchronized Set<CipherSuite> getCipherSuites() {
@@ -225,4 +182,12 @@ public abstract class FeatureExtractionResult implements Serializable {
     }
 
     public abstract Set<SignatureAndHashAlgorithm> getSignatureAndHashAlgorithmsForDerivation();
+
+    public Set<NamedGroup> getSupportedNamedGroups() {
+        return supportedNamedGroups;
+    }
+
+    public Set<NamedGroup> getSupportedTls13Groups() {
+        return supportedTls13Groups;
+    }
 }

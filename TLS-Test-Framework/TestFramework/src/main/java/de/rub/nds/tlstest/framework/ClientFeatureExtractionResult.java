@@ -1,6 +1,7 @@
 package de.rub.nds.tlstest.framework;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import de.rub.nds.scanner.core.constants.NumericResult;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
@@ -9,6 +10,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExte
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
 import de.rub.nds.tlsscanner.clientscanner.report.ClientReport;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,8 +20,6 @@ public class ClientFeatureExtractionResult extends FeatureExtractionResult {
 
     @JsonIgnore private ClientHelloMessage receivedClientHello;
 
-    private int requiredCertificateDSSPublicKeySize;
-    private int requiredCertificateRSAPublicKeySize;
     private List<SignatureAndHashAlgorithm> advertisedSignatureAndHashAlgorithms =
             new LinkedList<>();
     private List<ExtensionType> advertisedExtensions = new LinkedList<>();
@@ -42,32 +42,11 @@ public class ClientFeatureExtractionResult extends FeatureExtractionResult {
         extractionResult
                 .getSupportedCompressionMethods()
                 .addAll(report.getClientAdvertisedCompressions());
-
-        extractionResult.setRequiredCertificateDSSPublicKeySize(
-                report.getMinimumServerCertificateKeySizeDSS());
-        extractionResult.setRequiredCertificateRSAPublicKeySize(
-                report.getMinimumServerCertificateKeySizeRSA());
         extractionResult
                 .getAdvertisedSignatureAndHashAlgorithms()
                 .addAll(report.getClientAdvertisedSignatureAndHashAlgorithms());
         extractionResult.getAdvertisedExtensions().addAll(report.getClientAdvertisedExtensions());
         return extractionResult;
-    }
-
-    public int getRequiredCertificateDSSPublicKeySize() {
-        return requiredCertificateDSSPublicKeySize;
-    }
-
-    public void setRequiredCertificateDSSPublicKeySize(int requiredCertificateDSSPublicKeySize) {
-        this.requiredCertificateDSSPublicKeySize = requiredCertificateDSSPublicKeySize;
-    }
-
-    public int getRequiredCertificateRSAPublicKeySize() {
-        return requiredCertificateRSAPublicKeySize;
-    }
-
-    public void setRequiredCertificateRSAPublicKeySize(int requiredCertificateRSAPublicKeySize) {
-        this.requiredCertificateRSAPublicKeySize = requiredCertificateRSAPublicKeySize;
     }
 
     public List<SignatureAndHashAlgorithm> getAdvertisedSignatureAndHashAlgorithms() {

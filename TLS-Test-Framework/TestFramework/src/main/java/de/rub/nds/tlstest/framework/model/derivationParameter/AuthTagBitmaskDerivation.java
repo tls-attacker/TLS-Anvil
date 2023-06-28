@@ -1,15 +1,13 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
@@ -34,12 +32,13 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getParameterValues(
+            TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         int maxTagLen = 0;
-        Set<CipherSuite> cipherSuiteList = context.getSiteReport().getCipherSuites();
+        Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
         if (scope.isTls13Test()) {
-            cipherSuiteList = context.getSiteReport().getSupportedTls13CipherSuites();
+            cipherSuiteList = context.getFeatureExtractionResult().getSupportedTls13CipherSuites();
         }
         for (CipherSuite cipherSuite : cipherSuiteList) {
             if (cipherSuite.isAEAD()) {
@@ -57,8 +56,7 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-    }
+    public void applyToConfig(Config config, TestContext context) {}
 
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
@@ -74,20 +72,27 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((AuthTagBitmaskDerivation authTagBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
-            int selectedBitmaskBytePosition = authTagBitmaskDerivation.getSelectedValue();
-            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
-            
-            return getAuthTagLen(selectedCipherSuite) > selectedBitmaskBytePosition;
-        }));
+        return new ConditionalConstraint(
+                requiredDerivations,
+                ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name())
+                        .by(
+                                (AuthTagBitmaskDerivation authTagBitmaskDerivation,
+                                        CipherSuiteDerivation cipherSuiteDerivation) -> {
+                                    int selectedBitmaskBytePosition =
+                                            authTagBitmaskDerivation.getSelectedValue();
+                                    CipherSuite selectedCipherSuite =
+                                            cipherSuiteDerivation.getSelectedValue();
+
+                                    return getAuthTagLen(selectedCipherSuite)
+                                            > selectedBitmaskBytePosition;
+                                }));
     }
 
-    //TODO: integrate into AlgorithmResolver?
+    // TODO: integrate into AlgorithmResolver?
     private int getAuthTagLen(CipherSuite cipherSuite) {
         if (cipherSuite.name().contains("CCM_8")) {
             return 8;
         }
         return 16;
     }
-
 }

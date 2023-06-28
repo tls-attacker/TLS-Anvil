@@ -36,6 +36,10 @@
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls.scanner</groupId>
+            <artifactId>tls-client-scanner</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds.tls.scanner</groupId>
             <artifactId>tls-server-scanner</artifactId>
         </dependency>
         <dependency>

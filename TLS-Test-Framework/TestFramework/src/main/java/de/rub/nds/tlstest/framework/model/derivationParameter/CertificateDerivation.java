@@ -7,12 +7,15 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
+import de.rub.nds.scanner.core.constants.NumericResult;
+import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
@@ -28,14 +31,63 @@ import java.util.StringJoiner;
 /** Selects CertificateKeyPairs for the IPM */
 public class CertificateDerivation extends DerivationParameter<CertificateKeyPair> {
 
-    private final int MIN_RSA_KEY_LEN =
-            TestContext.getInstance().getSiteReport().getMinimumRsaCertKeySize();
-    private final int MIN_DSS_KEY_LEN =
-            TestContext.getInstance().getSiteReport().getMinimumDssCertKeySize();
+    private final int MIN_RSA_SIG_KEY_LEN;
+    private final int MIN_RSA_KEY_LEN;
+    private final int MIN_DSS_KEY_LEN;
     private final boolean ALLOW_DSS = true;
 
     public CertificateDerivation() {
         super(DerivationType.CERTIFICATE, CertificateKeyPair.class);
+        if (TestContext.getInstance()
+                        .getFeatureExtractionResult()
+                        .getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_RSA_SIG)
+                == TestResults.TRUE) {
+            MIN_RSA_SIG_KEY_LEN =
+                    ((NumericResult)
+                                    TestContext.getInstance()
+                                            .getFeatureExtractionResult()
+                                            .getResult(
+                                                    TlsAnalyzedProperty
+                                                            .SERVER_CERT_MIN_KEY_SIZE_RSA_SIG))
+                            .getValue()
+                            .intValue();
+        } else {
+            MIN_RSA_SIG_KEY_LEN = 0;
+        }
+
+        if (TestContext.getInstance()
+                        .getFeatureExtractionResult()
+                        .getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_RSA)
+                == TestResults.TRUE) {
+            MIN_RSA_KEY_LEN =
+                    ((NumericResult)
+                                    TestContext.getInstance()
+                                            .getFeatureExtractionResult()
+                                            .getResult(
+                                                    TlsAnalyzedProperty
+                                                            .SERVER_CERT_MIN_KEY_SIZE_RSA))
+                            .getValue()
+                            .intValue();
+        } else {
+            MIN_RSA_KEY_LEN = 0;
+        }
+
+        if (TestContext.getInstance()
+                        .getFeatureExtractionResult()
+                        .getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_DSS)
+                == TestResults.TRUE) {
+            MIN_DSS_KEY_LEN =
+                    ((NumericResult)
+                                    TestContext.getInstance()
+                                            .getFeatureExtractionResult()
+                                            .getResult(
+                                                    TlsAnalyzedProperty
+                                                            .SERVER_CERT_MIN_KEY_SIZE_DSS))
+                            .getValue()
+                            .intValue();
+        } else {
+            MIN_DSS_KEY_LEN = 0;
+        }
     }
 
     public CertificateDerivation(CertificateKeyPair certKeyPair) {
@@ -65,7 +117,8 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
 
     private boolean filterRsaKeySize(CertificateKeyPair cert) {
         return cert.getCertPublicKeyType() != CertificateKeyType.RSA
-                || cert.getPublicKey().keySize() >= MIN_RSA_KEY_LEN;
+                || (cert.getPublicKey().keySize() >= MIN_RSA_KEY_LEN
+                        && cert.getPublicKey().keySize() >= MIN_RSA_SIG_KEY_LEN);
     }
 
     private boolean filterDssSignedCerts(CertificateKeyPair cert) {
@@ -80,8 +133,8 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
     private boolean filterEcdsaPublicKeyGroups(
             CertificateKeyPair cert, TestContext context, boolean allowUnsupportedPkGroups) {
         return (cert.getPublicKeyGroup() == null
-                        || context.getSiteReport()
-                                .getSupportedNamedGroups()
+                        || context.getFeatureExtractionResult()
+                                .getNamedGroups()
                                 .contains(cert.getPublicKeyGroup()))
                 || allowUnsupportedPkGroups;
     }
@@ -96,7 +149,7 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
             CertificateKeyPair cert, DerivationScope scope) {
         Set<CipherSuite> cipherSuites;
         if (!scope.isTls13Test()) {
-            cipherSuites = TestContext.getInstance().getSiteReport().getCipherSuites();
+            cipherSuites = TestContext.getInstance().getFeatureExtractionResult().getCipherSuites();
             return cipherSuites.stream()
                     .anyMatch(
                             cipherSuite ->

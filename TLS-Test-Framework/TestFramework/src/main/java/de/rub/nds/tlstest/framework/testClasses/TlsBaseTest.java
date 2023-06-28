@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.testClasses;
 
@@ -34,50 +33,57 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ExtendWith({
-        TestWatcher.class,
-        EndpointCondition.class,
-        TlsVersionCondition.class,
-        KexCondition.class,
-        MethodConditionExtension.class,
-        EnforcedSenderRestrictionConditionExtension.class,
-        ValueConstraintsConditionExtension.class,
-        ExtensionContextResolver.class,
-        WorkflowRunnerResolver.class
+    TestWatcher.class,
+    EndpointCondition.class,
+    TlsVersionCondition.class,
+    KexCondition.class,
+    MethodConditionExtension.class,
+    EnforcedSenderRestrictionConditionExtension.class,
+    ValueConstraintsConditionExtension.class,
+    ExtensionContextResolver.class,
+    WorkflowRunnerResolver.class
 })
 public abstract class TlsBaseTest {
     protected static final Logger LOGGER = LogManager.getLogger();
 
     protected TestContext context;
-    
+
     protected DerivationContainer derivationContainer;
-    
+
     protected ExtensionContext extensionContext;
-    
+
     @BeforeEach
     public void setExtensionContext(ExtensionContext extensionContext) {
         this.extensionContext = extensionContext;
     }
-    
+
     public Config getPreparedConfig(ArgumentsAccessor argAccessor, WorkflowRunner runner) {
         Config toPrepare = getConfig();
         return prepareConfig(toPrepare, argAccessor, runner);
     }
-    
-    public Config prepareConfig(Config config, ArgumentsAccessor argAccessor, WorkflowRunner runner) {
-        derivationContainer = new DerivationContainer(argAccessor.toList(), new DerivationScope(extensionContext));
+
+    public Config prepareConfig(
+            Config config, ArgumentsAccessor argAccessor, WorkflowRunner runner) {
+        derivationContainer =
+                new DerivationContainer(
+                        argAccessor.toList(), new DerivationScope(extensionContext));
         derivationContainer.applyToConfig(config, context);
         runner.setPreparedConfig(config);
         runner.setDerivationContainer(derivationContainer);
         return config;
     }
-    
+
     public void adjustPreSharedKeyModes(Config config) {
-        if(context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK_DHE) == TestResults.TRUE &&
-                context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK) == TestResults.FALSE) {
+        if (context.getFeatureExtractionResult()
+                                .getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK_DHE)
+                        == TestResults.TRUE
+                && context.getFeatureExtractionResult()
+                                .getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK)
+                        == TestResults.FALSE) {
             config.setPSKKeyExchangeModes(Arrays.asList(PskKeyExchangeMode.PSK_DHE_KE));
         }
     }
-    
+
     public TlsBaseTest() {
         this.context = TestContext.getInstance();
     }
@@ -89,7 +95,6 @@ public abstract class TlsBaseTest {
     public TestContext getTestContext() {
         return context;
     }
-    
+
     public abstract Config getConfig();
 }
-

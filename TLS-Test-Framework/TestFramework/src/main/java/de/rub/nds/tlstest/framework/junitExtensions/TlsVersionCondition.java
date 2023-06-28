@@ -1,29 +1,26 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.junitExtensions;
 
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsscanner.serverscanner.report.ServerReport;
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
+import java.lang.reflect.Method;
+import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.lang.reflect.Method;
-import java.util.List;
-
-
 /**
- * Evaluates the TlsVersion annotation.
- * A test is disabled if the target does not support the TlsVersion the test is written for.
+ * Evaluates the TlsVersion annotation. A test is disabled if the target does not support the
+ * TlsVersion the test is written for.
  */
 public class TlsVersionCondition extends BaseCondition {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -38,8 +35,8 @@ public class TlsVersionCondition extends BaseCondition {
         Class<?> testC = extensionContext.getRequiredTestClass();
 
         TestContext context = TestContext.getInstance();
-        ServerReport report = context.getSiteReport();
-        List<ProtocolVersion> protocolVersionList = report.getVersions();
+        FeatureExtractionResult report = context.getFeatureExtractionResult();
+        Set<ProtocolVersion> protocolVersionList = report.getSupportedVersions();
         ProtocolVersion testSupportedVersion;
 
         if (testM.isAnnotationPresent(TlsVersion.class)) {
@@ -47,14 +44,17 @@ public class TlsVersionCondition extends BaseCondition {
         } else if (testC.isAnnotationPresent(TlsVersion.class)) {
             testSupportedVersion = testC.getAnnotation(TlsVersion.class).supported();
         } else {
-            LOGGER.error("No TlsVersion annotation available. Use Tls12Test or Tls13Test class as superclass for your test class or annotate the test method/class with the TlsVersion annotation.");
+            LOGGER.error(
+                    "No TlsVersion annotation available. Use Tls12Test or Tls13Test class as superclass for your test class or annotate the test method/class with the TlsVersion annotation.");
             return ConditionEvaluationResult.disabled("No TlsVersion annotation present");
         }
 
         if (protocolVersionList.contains(testSupportedVersion)) {
-            return ConditionEvaluationResult.enabled("ProtocolVersion of the test is supported by the target");
+            return ConditionEvaluationResult.enabled(
+                    "ProtocolVersion of the test is supported by the target");
         }
 
-        return ConditionEvaluationResult.disabled("ProtocolVersion of the test is not supported by the target");
+        return ConditionEvaluationResult.disabled(
+                "ProtocolVersion of the test is not supported by the target");
     }
 }

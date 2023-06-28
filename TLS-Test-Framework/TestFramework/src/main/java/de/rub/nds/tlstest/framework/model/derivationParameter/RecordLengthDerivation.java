@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
@@ -17,22 +16,25 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import java.util.LinkedList;
 import java.util.List;
 
-public class RecordLengthDerivation extends DerivationParameter<Integer>  {
+public class RecordLengthDerivation extends DerivationParameter<Integer> {
 
     public RecordLengthDerivation() {
         super(DerivationType.RECORD_LENGTH, Integer.class);
     }
-    
+
     public RecordLengthDerivation(Integer selectedValue) {
         this();
         setSelectedValue(selectedValue);
     }
-    
+
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getParameterValues(
+            TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
 
-        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION) == TestResults.TRUE) {
+        if (context.getFeatureExtractionResult()
+                        .getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION)
+                == TestResults.TRUE) {
             parameterValues.add(new RecordLengthDerivation(50));
             parameterValues.add(new RecordLengthDerivation(111));
             parameterValues.add(new RecordLengthDerivation(1));
@@ -45,5 +47,4 @@ public class RecordLengthDerivation extends DerivationParameter<Integer>  {
     public void applyToConfig(Config config, TestContext context) {
         config.setDefaultMaxRecordData(getSelectedValue());
     }
-    
 }

@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework;
 
@@ -14,18 +13,17 @@ import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.TestRunner;
 import de.rub.nds.tlstest.framework.reporting.ScoreContainer;
-import me.tongfei.progressbar.ProgressBar;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import me.tongfei.progressbar.ProgressBar;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
- * Shared global Singleton object that stores information
- * that are used by the JUnit extensions and the test cases.
+ * Shared global Singleton object that stores information that are used by the JUnit extensions and
+ * the test cases.
  */
 public class TestContext {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -37,9 +35,8 @@ public class TestContext {
 
     private final Map<String, AnnotatedStateContainer> testResults = new HashMap<>();
     private final Map<String, Boolean> finishedTests = new HashMap<>();
-    private boolean initializationFailed = false;
 
-    private ServerTestSiteReport siteReport = null;
+    private FeatureExtractionResult featureExtractionResult = null;
     private ClientHelloMessage receivedClientHelloMessage;
 
     private long totalTests = 0;
@@ -53,10 +50,10 @@ public class TestContext {
 
     private ProgressBar proggressBar = null;
     private final Date startTime = new Date();
-    
+
     private int serverHandshakesSinceRestart = 0;
 
-    synchronized public static TestContext getInstance() {
+    public static synchronized TestContext getInstance() {
         if (TestContext.instance == null) {
             TestContext.instance = new TestContext();
         }
@@ -69,31 +66,31 @@ public class TestContext {
         this.testRunner = new TestRunner(this.config, this);
     }
 
-    synchronized public TestConfig getConfig() {
+    public synchronized TestConfig getConfig() {
         return config;
     }
 
-    synchronized public void setConfig(TestConfig config) {
+    public synchronized void setConfig(TestConfig config) {
         this.config = config;
     }
 
-    synchronized public TestRunner getTestRunner() {
+    public synchronized TestRunner getTestRunner() {
         return testRunner;
     }
 
-    synchronized public void setTestRunner(TestRunner testRunner) {
+    public synchronized void setTestRunner(TestRunner testRunner) {
         this.testRunner = testRunner;
     }
 
-    synchronized public Map<String, AnnotatedStateContainer> getTestResults() {
+    public synchronized Map<String, AnnotatedStateContainer> getTestResults() {
         return testResults;
     }
 
-    synchronized public AnnotatedStateContainer getTestResult(String uniqueId) {
+    public synchronized AnnotatedStateContainer getTestResult(String uniqueId) {
         return testResults.get(uniqueId);
     }
 
-    synchronized public void addTestResult(AnnotatedStateContainer result) {
+    public synchronized void addTestResult(AnnotatedStateContainer result) {
         testResults.put(result.getUniqueId(), result);
     }
 
@@ -113,7 +110,7 @@ public class TestContext {
         return System.getenv("DOCKER") != null;
     }
 
-    synchronized public void setTotalTests(long totalTests) {
+    public synchronized void setTotalTests(long totalTests) {
         if (!isDocker()) {
             proggressBar = new ProgressBar("Progress", totalTests);
         }
@@ -125,7 +122,7 @@ public class TestContext {
         return testsDone;
     }
 
-    synchronized public void testFinished(String uniqueId) {
+    public synchronized void testFinished(String uniqueId) {
         finishedTests.put(uniqueId, true);
         this.scoreContainer.mergeWithContainer(testResults.get(uniqueId).getScoreContainer());
 
@@ -139,19 +136,22 @@ public class TestContext {
             long minutes = TimeUnit.MILLISECONDS.toMinutes(timediff);
             long remainingSecondsInMillis = timediff - TimeUnit.MINUTES.toMillis(minutes);
             long seconds = TimeUnit.MILLISECONDS.toSeconds(remainingSecondsInMillis);
-            LOGGER.info(String.format("%d/%d Tests finished (in %02d:%02d)", testsDone, totalTests, minutes, seconds));
+            LOGGER.info(
+                    String.format(
+                            "%d/%d Tests finished (in %02d:%02d)",
+                            testsDone, totalTests, minutes, seconds));
         }
     }
 
-    synchronized public void testDisabled() {
+    public synchronized void testDisabled() {
         testsDisabled++;
     }
 
-    synchronized public void testSucceeded() {
+    public synchronized void testSucceeded() {
         testsSucceeded++;
     }
 
-    synchronized public void testFailed() {
+    public synchronized void testFailed() {
         testsFailed++;
     }
 
@@ -174,13 +174,13 @@ public class TestContext {
     public Date getStartTime() {
         return startTime;
     }
-    
-    public ServerTestSiteReport getSiteReport() {
-        return (ServerTestSiteReport) siteReport;
+
+    public FeatureExtractionResult getFeatureExtractionResult() {
+        return featureExtractionResult;
     }
 
-    public void setSiteReport(ServerTestSiteReport siteReport) {
-        this.siteReport = siteReport;
+    public void setFeatureExtractionResult(FeatureExtractionResult featureExtractionResult) {
+        this.featureExtractionResult = featureExtractionResult;
     }
 
     public ParallelExecutor getStateExecutor() {
@@ -198,7 +198,7 @@ public class TestContext {
     public synchronized void resetServerHandshakesSinceRestart() {
         this.serverHandshakesSinceRestart = 0;
     }
-    
+
     public synchronized void increaseServerHandshakesSinceRestart() {
         this.serverHandshakesSinceRestart += 1;
     }

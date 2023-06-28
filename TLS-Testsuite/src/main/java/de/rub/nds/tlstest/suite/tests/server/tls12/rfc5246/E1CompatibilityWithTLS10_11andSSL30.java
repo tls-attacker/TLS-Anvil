@@ -1,12 +1,13 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
+
+import static org.junit.Assert.assertArrayEquals;
 
 import de.rub.nds.modifiablevariable.bytearray.ModifiableByteArray;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -23,10 +24,8 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
@@ -42,29 +41,28 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParamete
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-
 import java.util.List;
-
-import static org.junit.Assert.assertArrayEquals;
-import org.junit.jupiter.api.Tag;
+import java.util.Set;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-
 
 @RFC(number = 5246, section = "E.1. Compatibility with TLS 1.0/1.1 and SSL 3.0")
 @ServerTest
 public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
-    @TlsTest(description = "If a TLS server receives a ClientHello containing a version number " +
-            "greater than the highest version supported by the server, it MUST " +
-            "reply according to the highest version supported by the server.")
+    @TlsTest(
+            description =
+                    "If a TLS server receives a ClientHello containing a version number "
+                            + "greater than the highest version supported by the server, it MUST "
+                            + "reply according to the highest version supported by the server.")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    public void versionGreaterThanSupportedByServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void versionGreaterThanSupportedByServer(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        ModifiableByteArray protocolVersionSend = Modifiable.explicit(new byte[]{0x03, 0x0F});
+        ModifiableByteArray protocolVersionSend = Modifiable.explicit(new byte[] {0x03, 0x0F});
 
         ClientHelloMessage chm = new ClientHelloMessage(c);
         chm.setProtocolVersion(protocolVersionSend);
@@ -72,41 +70,47 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
-                sendAction,
-                new ReceiveTillAction(new ServerHelloDoneMessage())
-        );
+                sendAction, new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            Validator.executedAsPlanned(i);
+        runner.execute(workflowTrace, c)
+                .validateFinal(
+                        i -> {
+                            WorkflowTrace trace = i.getWorkflowTrace();
+                            Validator.executedAsPlanned(i);
 
-            ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
-            assertArrayEquals("Invalid ProtocolVersion negotiated",
-                    ProtocolVersion.TLS12.getValue(),
-                    msg.getProtocolVersion().getValue()
-            );
-        });
+                            ServerHelloMessage msg =
+                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
+                            assertArrayEquals(
+                                    "Invalid ProtocolVersion negotiated",
+                                    ProtocolVersion.TLS12.getValue(),
+                                    msg.getProtocolVersion().getValue());
+                        });
     }
 
     public ConditionEvaluationResult doesSupportLegacyVersions() {
-        List<ProtocolVersion> versions = context.getSiteReport().getVersions();
-        if (!versions.contains(ProtocolVersion.SSL3) || !versions.contains(ProtocolVersion.TLS10) || !versions.contains(ProtocolVersion.TLS11)) {
+        Set<ProtocolVersion> versions = context.getFeatureExtractionResult().getSupportedVersions();
+        if (!versions.contains(ProtocolVersion.SSL3)
+                || !versions.contains(ProtocolVersion.TLS10)
+                || !versions.contains(ProtocolVersion.TLS11)) {
             return ConditionEvaluationResult.enabled("");
         }
         return ConditionEvaluationResult.disabled("Does not support legacy versions");
     }
 
-    @TlsTest(description = "If server supports (or is willing to use) only " +
-            "versions greater than client_version, it MUST send a " +
-            "\"protocol_version\" alert message and close the connection.")
+    @TlsTest(
+            description =
+                    "If server supports (or is willing to use) only "
+                            + "versions greater than client_version, it MUST send a "
+                            + "\"protocol_version\" alert message and close the connection.")
     @MethodCondition(method = "doesSupportLegacyVersions")
     @ComplianceCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
-    public void versionLowerThanSupportedByServer(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void versionLowerThanSupportedByServer(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         ProtocolVersion version = ProtocolVersion.SSL3;
-        List<ProtocolVersion> versions = context.getSiteReport().getVersions();
+        Set<ProtocolVersion> versions = context.getFeatureExtractionResult().getSupportedVersions();
         if (!versions.contains(ProtocolVersion.TLS11)) {
             version = ProtocolVersion.TLS11;
         } else if (!versions.contains(ProtocolVersion.TLS10)) {
@@ -122,42 +126,44 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         cha.setRecords(record);
 
         WorkflowTrace trace = new WorkflowTrace();
-        trace.addTlsActions(
-                cha,
-                new ReceiveAction(new AlertMessage())
-        );
+        trace.addTlsActions(cha, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, c).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
+        runner.execute(trace, c)
+                .validateFinal(
+                        i -> {
+                            Validator.receivedFatalAlert(i);
 
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.PROTOCOL_VERSION, alert);
-        });
-
+                            AlertMessage alert =
+                                    i.getWorkflowTrace()
+                                            .getFirstReceivedMessage(AlertMessage.class);
+                            Validator.testAlertDescription(
+                                    i, AlertDescription.PROTOCOL_VERSION, alert);
+                        });
     }
 
-    @TlsTest(description = "Thus, TLS servers compliant with this specification MUST accept any value {03,XX} as the " +
-            "record layer version number for ClientHello.")
+    @TlsTest(
+            description =
+                    "Thus, TLS servers compliant with this specification MUST accept any value {03,XX} as the "
+                            + "record layer version number for ClientHello.")
     @ScopeLimitations(DerivationType.RECORD_LENGTH)
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
-    public void acceptAnyRecordVersionNumber(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void acceptAnyRecordVersionNumber(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         Record record = new Record();
-        record.setProtocolVersion(Modifiable.explicit(new byte[]{0x03, 0x05}));
+        record.setProtocolVersion(Modifiable.explicit(new byte[] {0x03, 0x05}));
         SendAction sendAction = new SendAction(new ClientHelloMessage(c));
         sendAction.setRecords(record);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
-                sendAction,
-                new ReceiveTillAction(new ServerHelloDoneMessage())
-        );
+                sendAction, new ReceiveTillAction(new ServerHelloDoneMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
-    
+
     public List<DerivationParameter> getInvalidHighRecordVersion(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x00}));

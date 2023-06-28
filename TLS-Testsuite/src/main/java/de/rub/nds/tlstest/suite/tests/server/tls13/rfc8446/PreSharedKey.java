@@ -69,9 +69,10 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class PreSharedKey extends Tls13Test {
 
     public ConditionEvaluationResult supportsPsk() {
-        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK)
+        if (context.getFeatureExtractionResult().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK)
                         == TestResults.TRUE
-                || context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK_DHE)
+                || context.getFeatureExtractionResult()
+                                .getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK_DHE)
                         == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
@@ -82,7 +83,7 @@ public class PreSharedKey extends Tls13Test {
     public ConditionEvaluationResult supportsMultipleHdkfHashesAndPsk() {
         Set<HKDFAlgorithm> hkdfAlgorithms = new HashSet<>();
         Set<CipherSuite> tls13CipherSuites =
-                context.getSiteReport().getSupportedTls13CipherSuites();
+                context.getFeatureExtractionResult().getSupportedTls13CipherSuites();
         if (tls13CipherSuites != null && !tls13CipherSuites.isEmpty()) {
             tls13CipherSuites.forEach(
                     cipher -> {
@@ -98,7 +99,7 @@ public class PreSharedKey extends Tls13Test {
     }
 
     public ConditionEvaluationResult supportsPskOnlyHandshake() {
-        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK)
+        if (context.getFeatureExtractionResult().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK)
                 == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
@@ -107,7 +108,8 @@ public class PreSharedKey extends Tls13Test {
     }
 
     public ConditionEvaluationResult supportsPskDheHandshake() {
-        if (context.getSiteReport().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK_DHE)
+        if (context.getFeatureExtractionResult()
+                        .getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK_DHE)
                 == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
@@ -435,7 +437,8 @@ public class PreSharedKey extends Tls13Test {
         CipherSuite selectedCipher =
                 derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
         CipherSuite otherHkdfHashCipher = null;
-        for (CipherSuite cipher : context.getSiteReport().getSupportedTls13CipherSuites()) {
+        for (CipherSuite cipher :
+                context.getFeatureExtractionResult().getSupportedTls13CipherSuites()) {
             if (AlgorithmResolver.getHKDFAlgorithm(cipher)
                     != AlgorithmResolver.getHKDFAlgorithm(selectedCipher)) {
                 otherHkdfHashCipher = cipher;

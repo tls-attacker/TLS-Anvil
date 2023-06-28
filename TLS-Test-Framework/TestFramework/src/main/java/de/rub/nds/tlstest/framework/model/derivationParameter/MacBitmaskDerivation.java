@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
@@ -18,7 +17,6 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,12 +34,16 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getParameterValues(
+            TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         int maxMacLenght = 0;
-        for (CipherSuite cipherSuite : context.getSiteReport().getCipherSuites()) {
-            MacAlgorithm macAlg = AlgorithmResolver.getMacAlgorithm(scope.getTargetVersion(), cipherSuite);
-            if (macAlg != MacAlgorithm.AEAD && macAlg != MacAlgorithm.NULL && maxMacLenght < macAlg.getSize()) {
+        for (CipherSuite cipherSuite : context.getFeatureExtractionResult().getCipherSuites()) {
+            MacAlgorithm macAlg =
+                    AlgorithmResolver.getMacAlgorithm(scope.getTargetVersion(), cipherSuite);
+            if (macAlg != MacAlgorithm.AEAD
+                    && macAlg != MacAlgorithm.NULL
+                    && maxMacLenght < macAlg.getSize()) {
                 maxMacLenght = macAlg.getSize();
             }
         }
@@ -53,8 +55,7 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-    }
+    public void applyToConfig(Config config, TestContext context) {}
 
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
@@ -70,12 +71,22 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(DerivationType.CIPHERSUITE);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name()).by((MacBitmaskDerivation macBitmaskDerivation, CipherSuiteDerivation cipherSuiteDerivation) -> {
-            int selectedBitmaskBytePosition = macBitmaskDerivation.getSelectedValue();
-            CipherSuite selectedCipherSuite = cipherSuiteDerivation.getSelectedValue();
-            
-            return AlgorithmResolver.getMacAlgorithm(scope.getTargetVersion(), selectedCipherSuite).getSize() > selectedBitmaskBytePosition;
-        }));
-    }
+        return new ConditionalConstraint(
+                requiredDerivations,
+                ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name())
+                        .by(
+                                (MacBitmaskDerivation macBitmaskDerivation,
+                                        CipherSuiteDerivation cipherSuiteDerivation) -> {
+                                    int selectedBitmaskBytePosition =
+                                            macBitmaskDerivation.getSelectedValue();
+                                    CipherSuite selectedCipherSuite =
+                                            cipherSuiteDerivation.getSelectedValue();
 
+                                    return AlgorithmResolver.getMacAlgorithm(
+                                                            scope.getTargetVersion(),
+                                                            selectedCipherSuite)
+                                                    .getSize()
+                                            > selectedBitmaskBytePosition;
+                                }));
+    }
 }

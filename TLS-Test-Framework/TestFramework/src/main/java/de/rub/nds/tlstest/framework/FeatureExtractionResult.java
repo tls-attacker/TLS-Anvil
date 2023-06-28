@@ -7,6 +7,7 @@
  */
 package de.rub.nds.tlstest.framework;
 
+import de.rub.nds.scanner.core.constants.CollectionResult;
 import de.rub.nds.scanner.core.constants.TestResult;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
@@ -17,6 +18,7 @@ import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlsscanner.core.probe.closing.ConnectionClosingUtils;
 import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
 import de.rub.nds.tlsscanner.core.report.TlsScanReport;
+import de.rub.nds.tlstest.framework.exceptions.FeatureExtractionFailedException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,10 +56,19 @@ public abstract class FeatureExtractionResult implements Serializable {
     }
 
     protected void setSharedFieldsFromReport(TlsScanReport siteReport) {
+        checkCrucialCollections(
+                siteReport,
+                TlsAnalyzedProperty.SUPPORTED_CIPHERSUITES,
+                TlsAnalyzedProperty.SUPPORTED_PROTOCOL_VERSIONS,
+                TlsAnalyzedProperty.VERSION_SUITE_PAIRS,
+                TlsAnalyzedProperty.SUPPORTED_NAMED_GROUPS,
+                TlsAnalyzedProperty.SUPPORTED_TLS13_GROUPS);
         setResultMap(siteReport.getResultMap());
         getSupportedCipherSuites().addAll(siteReport.getSupportedCipherSuites());
         getSupportedVersions().addAll(siteReport.getSupportedProtocolVersions());
         getVersionSuitePairs().addAll(siteReport.getVersionSuitePairs());
+        getSupportedNamedGroups().addAll(siteReport.getSupportedNamedGroups());
+        getSupportedTls13Groups().addAll(siteReport.getSupportedTls13Groups());
 
         setClosedAfterAppDataDelta(siteReport.getClosedAfterAppDataDelta());
         setClosedAfterFinishedDelta(siteReport.getClosedAfterFinishedDelta());
@@ -189,5 +200,28 @@ public abstract class FeatureExtractionResult implements Serializable {
 
     public Set<NamedGroup> getSupportedTls13Groups() {
         return supportedTls13Groups;
+    }
+
+    protected static void checkCrucialCollections(
+            TlsScanReport report, TlsAnalyzedProperty... properties) {
+        List<TlsAnalyzedProperty> malformedProperties = new LinkedList<>();
+        for (TlsAnalyzedProperty property : properties) {
+            if (report.getResult(property) == null
+                    || !(report.getResult(property) instanceof CollectionResult)) {
+                malformedProperties.add(property);
+            }
+        }
+
+        if (!malformedProperties.isEmpty()) {
+            throw new FeatureExtractionFailedException(
+                    "Preparation was unable to determine the following features: "
+                            + malformedProperties.stream()
+                                    .map(TlsAnalyzedProperty::getName)
+                                    .collect(Collectors.joining(", ")));
+        }
+    }
+
+    protected static void reportFailedFeatureExtraction(String reason) {
+        throw new FeatureExtractionFailedException(reason);
     }
 }

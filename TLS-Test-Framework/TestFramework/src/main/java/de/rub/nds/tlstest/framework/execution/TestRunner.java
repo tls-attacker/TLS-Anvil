@@ -254,7 +254,8 @@ public class TestRunner {
                         TlsProbeType.RECORD_FRAGMENTATION,
                         TlsProbeType.HELLO_RETRY,
                         TlsProbeType.HTTP_HEADER,
-                        TlsProbeType.CONNECTION_CLOSING_DELTA);
+                        TlsProbeType.CONNECTION_CLOSING_DELTA,
+                        TlsProbeType.SIGNATURE_AND_HASH);
         scannerConfig.getExecutorConfig().setOverallThreads(1);
         scannerConfig.getExecutorConfig().setParallelProbes(1);
         scannerConfig.setConfigSearchCooldown(true);
@@ -303,14 +304,19 @@ public class TestRunner {
         clientScannerConfig
                 .getServerDelegate()
                 .setPort(testConfig.getDelegate(TestClientDelegate.class).getPort());
+        clientScannerConfig.setTimeout(testConfig.getConnectionTimeout());
         clientScannerConfig.getExecutorConfig().setProbes(probes);
         clientScannerConfig.setExternalRunCallback(
                 testConfig.getTestClientDelegate().getTriggerScript());
 
         TlsClientScanner clientScanner =
                 new TlsClientScanner(clientScannerConfig, preparedExecutor);
+
+        String identifier =
+                testConfig.getIdentifier() == null ? "client" : testConfig.getIdentifier();
         ClientFeatureExtractionResult extractionResult =
-                ClientFeatureExtractionResult.fromClientScanReport(clientScanner.scan());
+                ClientFeatureExtractionResult.fromClientScanReport(
+                        clientScanner.scan(), identifier);
 
         extractionResult.setReceivedClientHello(clientHello);
         saveToCache(extractionResult);

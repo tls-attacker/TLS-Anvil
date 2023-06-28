@@ -1,8 +1,10 @@
 package de.rub.nds.tlstest.framework;
 
+import de.rub.nds.scanner.core.constants.NotApplicableResult;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlsscanner.serverscanner.probe.namedgroup.NamedGroupWitness;
 import de.rub.nds.tlsscanner.serverscanner.report.ServerReport;
 import java.util.HashMap;
@@ -12,7 +14,7 @@ import java.util.Set;
 
 public class ServerFeatureExtractionResult extends FeatureExtractionResult {
 
-    private Set<ExtensionType> negotiableExtensions;
+    private Set<ExtensionType> negotiableExtensions = new HashSet<>();
     private Map<NamedGroup, NamedGroupWitness> namedGroupWitnesses = new HashMap<>();
     private Map<NamedGroup, NamedGroupWitness> namedGroupWitnessesTls13 = new HashMap<>();
     private Set<SignatureAndHashAlgorithm> supportedSignatureAndHashAlgorithmsSke = new HashSet<>();
@@ -26,11 +28,15 @@ public class ServerFeatureExtractionResult extends FeatureExtractionResult {
     public static ServerFeatureExtractionResult fromServerScanReport(ServerReport serverReport) {
         ServerFeatureExtractionResult extractionResult =
                 new ServerFeatureExtractionResult(serverReport.getHost(), serverReport.getPort());
+        serverReport.putResult(
+                TlsAnalyzedProperty.CERTIFICATE_CHAINS,
+                new NotApplicableResult(TlsAnalyzedProperty.CERTIFICATE_CHAINS, ""));
+        serverReport.putResult(
+                TlsAnalyzedProperty.RACCOON_ATTACK_PROBABILITIES,
+                new NotApplicableResult(TlsAnalyzedProperty.RACCOON_ATTACK_PROBABILITIES, ""));
         extractionResult.setSharedFieldsFromReport(serverReport);
 
         // move to shared fields when scanner is updated
-        extractionResult.getSupportedNamedGroups().addAll(serverReport.getSupportedNamedGroups());
-        extractionResult.getSupportedTls13Groups().addAll(serverReport.getSupportedTls13Groups());
         extractionResult
                 .getSupportedCompressionMethods()
                 .addAll(serverReport.getSupportedCompressionMethods());

@@ -26,17 +26,10 @@ public class ClientFeatureExtractionResult extends FeatureExtractionResult {
         super(host);
     }
 
-    public static ClientFeatureExtractionResult fromClientScanReport(ClientReport report) {
-        ClientFeatureExtractionResult extractionResult =
-                new ClientFeatureExtractionResult("client");
+    public static ClientFeatureExtractionResult fromClientScanReport(
+            ClientReport report, String name) {
+        ClientFeatureExtractionResult extractionResult = new ClientFeatureExtractionResult(name);
         extractionResult.setSharedFieldsFromReport(report);
-
-        extractionResult
-                .getSupportedNamedGroups()
-                .addAll(report.getClientAdvertisedNamedGroupsList());
-        extractionResult
-                .getSupportedTls13Groups()
-                .addAll(report.getClientAdvertisedKeyShareNamedGroupsList());
         extractionResult
                 .getSupportedCompressionMethods()
                 .addAll(report.getClientAdvertisedCompressions());

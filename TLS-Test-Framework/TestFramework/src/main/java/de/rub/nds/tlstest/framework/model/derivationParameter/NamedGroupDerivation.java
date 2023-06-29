@@ -72,6 +72,7 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
             config.setDefaultSelectedNamedGroup(getSelectedValue());
         } else {
             config.setAddEllipticCurveExtension(false);
+            config.setAddECPointFormatExtension(false);
         }
     }
 

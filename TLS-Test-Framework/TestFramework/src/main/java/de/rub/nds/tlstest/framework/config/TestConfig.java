@@ -15,10 +15,12 @@ import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
 import de.rub.nds.tlsattacker.core.constants.ChooserType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
+import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
@@ -289,6 +291,7 @@ public class TestConfig extends TLSDelegateConfig {
                             .contains(config.getDefaultSelectedCipherSuite())) {
                         supported.addAll(report.getCipherSuites());
                     }
+                    config.setAddRenegotiationInfoExtension(checkRenegotiationInfoOffer());
                 } else {
                     Optional<VersionSuiteListPair> suitePair =
                             report.getVersionSuitePairs().stream()
@@ -348,6 +351,7 @@ public class TestConfig extends TLSDelegateConfig {
         }
 
         Config config = super.createConfig();
+        config.setAddRenegotiationInfoExtension(checkRenegotiationInfoOffer());
         config.setChooserType(ChooserType.SMART_RECORD_SIZE);
 
         // Server test -> TLS-Attacker acts as Client
@@ -386,6 +390,24 @@ public class TestConfig extends TLSDelegateConfig {
 
         cachedConfig = config;
         return config;
+    }
+
+    public boolean checkRenegotiationInfoOffer() {
+        if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.CLIENT
+                && TestContext.getInstance().getFeatureExtractionResult() != null) {
+            ClientFeatureExtractionResult extractionResult =
+                    (ClientFeatureExtractionResult)
+                            TestContext.getInstance().getFeatureExtractionResult();
+            if (!extractionResult
+                            .getCipherSuites()
+                            .contains(CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
+                    && !extractionResult
+                            .getAdvertisedExtensions()
+                            .contains(ExtensionType.RENEGOTIATION_INFO)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public synchronized Config createTls13Config() {

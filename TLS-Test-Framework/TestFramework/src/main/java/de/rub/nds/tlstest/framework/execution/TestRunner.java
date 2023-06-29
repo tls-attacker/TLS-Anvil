@@ -11,34 +11,21 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPacka
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.ProbeType;
-import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
-import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
-import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
-import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
-import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
-import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
-import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
-import de.rub.nds.tlsattacker.core.workflow.task.TlsTask;
 import de.rub.nds.tlsattacker.transport.Connection;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlsscanner.clientscanner.config.ClientScannerConfig;
@@ -68,14 +55,11 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -92,7 +76,6 @@ import org.junit.platform.launcher.TestPlan;
 import org.junit.platform.launcher.core.LauncherConfig;
 import org.junit.platform.launcher.core.LauncherDiscoveryRequestBuilder;
 import org.junit.platform.launcher.core.LauncherFactory;
-import org.junit.platform.launcher.listeners.LoggingListener;
 import org.junit.platform.launcher.listeners.SummaryGeneratingListener;
 import org.junit.platform.launcher.listeners.TestExecutionSummary;
 
@@ -260,7 +243,8 @@ public class TestRunner {
         scannerConfig.getExecutorConfig().setParallelProbes(1);
         scannerConfig.setConfigSearchCooldown(true);
 
-        TlsServerScanner scanner = new TlsServerScanner(scannerConfig);
+        TlsServerScanner scanner =
+                new TlsServerScanner(scannerConfig, testContext.getStateExecutor());
 
         FeatureExtractionResult report =
                 ServerFeatureExtractionResult.fromServerScanReport(scanner.scan());
@@ -322,7 +306,6 @@ public class TestRunner {
         saveToCache(extractionResult);
         testContext.setReceivedClientHelloMessage(clientHello);
         testContext.setFeatureExtractionResult(extractionResult);
-        preparedExecutor.shutdown();
     }
 
     public StateExecutionTask buildStateExecutionServerTask(State state) throws RuntimeException {
@@ -405,7 +388,8 @@ public class TestRunner {
         } else throw new RuntimeException("Invalid TestEndpointMode");
 
         if (testContext.getFeatureExtractionResult() == null) {
-            throw new RuntimeException("SiteReport is null after preparation phase");
+            throw new RuntimeException(
+                    "Feature extraction result was not set after test preparation");
         }
 
         boolean startTestSuite = false;
@@ -458,11 +442,7 @@ public class TestRunner {
         return version && mode;
     }
 
-    public void runTests(Class<?> mainClass) {
-        String packageName = mainClass.getPackage().getName();
-        if (testConfig.getTestPackage() != null) {
-            packageName = testConfig.getTestPackage();
-        }
+    public void runTests(String packageName) {
 
         if (testConfig.getParsedCommand() == ConfigDelegates.EXTRACT_TESTS) {
             TestCaseExtractor extractor = new TestCaseExtractor(packageName);
@@ -494,7 +474,6 @@ public class TestRunner {
         LauncherDiscoveryRequest request = builder.build();
 
         SummaryGeneratingListener listener = new SummaryGeneratingListener();
-        LoggingListener listenerLog = LoggingListener.forJavaUtilLogging(Level.INFO);
         ExecutionListener reporting = new ExecutionListener();
 
         Launcher launcher =
@@ -503,7 +482,6 @@ public class TestRunner {
                                 .enableTestExecutionListenerAutoRegistration(false)
                                 .addTestExecutionListeners(listener)
                                 .addTestExecutionListeners(reporting)
-                                .addTestExecutionListeners(listenerLog)
                                 .build());
 
         TestPlan testplan = launcher.discover(request);
@@ -579,159 +557,6 @@ public class TestRunner {
         }
     }
 
-    private List<State> buildClientKeyShareProbeStates(ClientHelloMessage clientHello) {
-        List<State> states = new ArrayList<>();
-        EllipticCurvesExtensionMessage ecExtension =
-                clientHello.getExtension(EllipticCurvesExtensionMessage.class);
-        KeyShareExtensionMessage ksExtension =
-                clientHello.getExtension(KeyShareExtensionMessage.class);
-        List<NamedGroup> nonKeyShareCurves =
-                NamedGroup.namedGroupsFromByteArray(ecExtension.getSupportedGroups().getValue());
-        ksExtension
-                .getKeyShareList()
-                .forEach(offeredKs -> nonKeyShareCurves.remove(offeredKs.getGroupConfig()));
-        for (NamedGroup group : nonKeyShareCurves) {
-            if (NamedGroup.getImplemented().contains(group)) {
-                Config config = this.testConfig.createTls13Config();
-                config.setDefaultServerNamedGroups(group);
-                config.setDefaultSelectedNamedGroup(group);
-                try {
-                    WorkflowConfigurationFactory configurationFactory =
-                            new WorkflowConfigurationFactory(config);
-                    WorkflowTrace trace =
-                            configurationFactory.createWorkflowTrace(
-                                    WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER);
-
-                    ClientHelloMessage failingClientHello = new ClientHelloMessage();
-                    ServerHelloMessage helloRetryRequest = new ServerHelloMessage(config);
-                    helloRetryRequest.setRandom(
-                            Modifiable.explicit(ServerHelloMessage.getHelloRetryRequestRandom()));
-
-                    trace.getTlsActions().add(0, new SendAction(helloRetryRequest));
-                    trace.getTlsActions().add(0, new ReceiveAction(failingClientHello));
-
-                    State s = new State(config, trace);
-                    states.add(s);
-                } catch (Exception ignored) {
-
-                }
-            }
-        }
-        return states;
-    }
-
-    private boolean clientSupportsRecordFragmentation(
-            ParallelExecutor executor,
-            Set<CipherSuite> tls12CipherSuites,
-            Set<CipherSuite> tls13CipherSuites) {
-        Config config = getServerConfigBasedOnCipherSuites(tls12CipherSuites, tls13CipherSuites);
-        config.setDefaultMaxRecordData(50);
-
-        State state =
-                new State(
-                        config,
-                        new WorkflowConfigurationFactory(config)
-                                .createWorkflowTrace(
-                                        WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER));
-        prepareStateForConnection(state);
-        StateExecutionTask task = new StateExecutionTask(state, 2);
-        task.setBeforeTransportInitCallback(testConfig.getTestClientDelegate().getTriggerScript());
-        executor.bulkExecuteTasks(task);
-        return state.getWorkflowTrace().executedAsPlanned();
-    }
-
-    private Config getServerConfigBasedOnCipherSuites(
-            Set<CipherSuite> tls12CipherSuites, Set<CipherSuite> tls13CipherSuites) {
-        Config config;
-        CipherSuite suite;
-        if (!tls12CipherSuites.isEmpty()) {
-            config = this.testConfig.createConfig();
-            suite = tls12CipherSuites.iterator().next();
-        } else if (!tls13CipherSuites.isEmpty()) {
-            config = this.testConfig.createTls13Config();
-            suite = tls13CipherSuites.iterator().next();
-        } else {
-            throw new RuntimeException("No cipher suites detected");
-        }
-        config.setDefaultServerSupportedCipherSuites(suite);
-        config.setDefaultSelectedCipherSuite(suite);
-        return config;
-    }
-
-    private int getCertMinimumKeySize(
-            ParallelExecutor executor, Set<CipherSuite> cipherSuites, CertificateKeyType keyType) {
-        List<CipherSuite> matchingCipherSuites =
-                cipherSuites.stream()
-                        .filter(
-                                cipherSuite ->
-                                        AlgorithmResolver.getCertificateKeyType(cipherSuite)
-                                                == keyType)
-                        .collect(Collectors.toList());
-        int minimumKeySize = 0;
-        if (matchingCipherSuites.size() > 0) {
-            List<State> certStates =
-                    getClientCertMinimumKeyLengthStates(matchingCipherSuites, keyType);
-            List<TlsTask> certTasks = buildStateExecutionServerTasksFromStates(certStates);
-            executor.bulkExecuteTasks(certTasks);
-            for (State executedState : certStates) {
-                int certKeySize =
-                        executedState
-                                .getConfig()
-                                .getDefaultExplicitCertificateKeyPair()
-                                .getPublicKey()
-                                .keySize();
-                if (executedState.getWorkflowTrace().executedAsPlanned()
-                        && (certKeySize < minimumKeySize || minimumKeySize == 0)) {
-                    minimumKeySize = certKeySize;
-                }
-            }
-        }
-        return minimumKeySize;
-    }
-
-    private List<State> getClientCertMinimumKeyLengthStates(
-            List<CipherSuite> supportedCipherSuites, CertificateKeyType keyType) {
-        Set<CertificateKeyPair> availableCerts = new HashSet<>();
-        CertificateByteChooser.getInstance()
-                .getCertificateKeyPairList()
-                .forEach(
-                        certKeyPair -> {
-                            if (certKeyPair.getCertPublicKeyType() == keyType) {
-                                availableCerts.add(certKeyPair);
-                            }
-                        });
-
-        List<State> testStates = new LinkedList<>();
-        for (CertificateKeyPair certKeyPair : availableCerts) {
-            Config config = this.testConfig.createConfig();
-            config.setAutoSelectCertificate(false);
-            config.setDefaultExplicitCertificateKeyPair(certKeyPair);
-            config.setDefaultServerSupportedCipherSuites(supportedCipherSuites);
-            config.setDefaultSelectedCipherSuite(supportedCipherSuites.get(0));
-            State state =
-                    new State(
-                            config,
-                            new WorkflowConfigurationFactory(config)
-                                    .createWorkflowTrace(
-                                            WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER));
-            testStates.add(state);
-        }
-        return testStates;
-    }
-
-    private List<TlsTask> buildStateExecutionServerTasksFromStates(List<State> states) {
-        List<TlsTask> testTasks = new LinkedList<>();
-        states.forEach(
-                state -> {
-                    prepareStateForConnection(state);
-                    StateExecutionTask task = new StateExecutionTask(state, 2);
-                    task.setBeforeTransportInitCallback(
-                            testConfig.getTestClientDelegate().getTriggerScript());
-                    testTasks.add(task);
-                });
-        return testTasks;
-    }
-
     private void logCommonDerivationValues() {
         LOGGER.info(
                 "Supported NamedGroups:  "
@@ -769,19 +594,6 @@ public class TestRunner {
                                     .stream()
                                     .map(CipherSuite::toString)
                                     .collect(Collectors.joining(",")));
-        }
-    }
-
-    private void prepareStateForConnection(State state) {
-        try {
-            state.getTlsContext()
-                    .setTransportHandler(
-                            new ServerTcpTransportHandler(
-                                    testConfig.getConnectionTimeout(),
-                                    testConfig.getConnectionTimeout(),
-                                    testConfig.getTestClientDelegate().getServerSocket()));
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to set TransportHandlers");
         }
     }
 

@@ -1,13 +1,11 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite;
-
 
 import com.beust.jcommander.ParameterException;
 import de.rub.nds.tlstest.framework.TestContext;
@@ -26,21 +24,33 @@ public class Main {
 
         TestContext testContext = TestContext.getInstance();
 
-        new Thread(() -> {
-           while (!finished) {
-               LOGGER.debug("RAM: {}/{}",(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())/1000000, Runtime.getRuntime().totalMemory()/1000000);
-               try {
-                   Thread.sleep(2000);
-               } catch (Exception ignored){}
-           }
-        }).start();
+        new Thread(
+                        () -> {
+                            while (!finished) {
+                                LOGGER.debug(
+                                        "RAM: {}/{}",
+                                        (Runtime.getRuntime().totalMemory()
+                                                        - Runtime.getRuntime().freeMemory())
+                                                / 1000000,
+                                        Runtime.getRuntime().totalMemory() / 1000000);
+                                try {
+                                    Thread.sleep(2000);
+                                } catch (Exception ignored) {
+                                }
+                            }
+                        })
+                .start();
 
         try {
             testContext.getConfig().parse(args);
 
-            testContext.getTestRunner().runTests(Main.class);
-        }
-        catch (ParameterException E) {
+            String packageName = Main.class.getPackageName();
+            if (testContext.getConfig().getTestPackage() != null) {
+                packageName = testContext.getConfig().getTestPackage();
+                LOGGER.info("Limiting test to those of package {}", packageName);
+            }
+            testContext.getTestRunner().runTests(packageName);
+        } catch (ParameterException E) {
             LOGGER.error("Could not parse provided parameters", E);
             LOGGER.error(String.join(" ", args));
             System.exit(2);

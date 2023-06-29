@@ -32,17 +32,17 @@
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls</groupId>
-            <artifactId>coffee4j-tls-engine</artifactId>
+            <artifactId>coffee4j-anvil-engine</artifactId>
             <version>1.0.6</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls</groupId>
-            <artifactId>coffee4j-tls-junit-jupiter</artifactId>
+            <artifactId>coffee4j-anvil-junit-jupiter</artifactId>
             <version>1.0.6</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls</groupId>
-            <artifactId>coffee4j-tls-model</artifactId>
+            <artifactId>coffee4j-anvil-model</artifactId>
             <version>1.0.6</version>
         </dependency>
         <dependency>

@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.reporting;
 
@@ -13,6 +12,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.config.TestConfig;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.platform.engine.TestExecutionResult;
@@ -21,16 +26,9 @@ import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Contains methods that are called when the complete testplan is finished.
- * Generates the test report.
+ * Contains methods that are called when the complete testplan is finished. Generates the test
+ * report.
  */
 public class ExecutionListener implements TestExecutionListener {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -55,7 +53,6 @@ public class ExecutionListener implements TestExecutionListener {
         }
     }
 
-
     private void realTestPlanExecutionFinished(TestPlan testPlan) {
         LOGGER.trace(testPlan.toString() + " finished");
         long elapsedTime = System.currentTimeMillis() - start;
@@ -76,11 +73,13 @@ public class ExecutionListener implements TestExecutionListener {
 
         try {
             ObjectMapper mapper = new ObjectMapper();
-            mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker()
-                    .withFieldVisibility(JsonAutoDetect.Visibility.NONE)
-                    .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                    .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-                    .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
+            mapper.setVisibility(
+                    mapper.getSerializationConfig()
+                            .getDefaultVisibilityChecker()
+                            .withFieldVisibility(JsonAutoDetect.Visibility.NONE)
+                            .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                            .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                            .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
             if (testConfig.isPrettyPrintJSON()) {
                 mapper.enable(SerializationFeature.INDENT_OUTPUT);
@@ -101,7 +100,6 @@ public class ExecutionListener implements TestExecutionListener {
             LOGGER.error("", e);
             throw new RuntimeException(e);
         }
-
     }
 
     @Override
@@ -118,8 +116,9 @@ public class ExecutionListener implements TestExecutionListener {
     }
 
     @Override
-    public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-        LOGGER.trace(testIdentifier.getDisplayName() + " finished");
+    public void executionFinished(
+            TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
+        reportFinished(testExecutionResult, testIdentifier);
         if (testIdentifier.isContainer()) {
             Long startTime = containerElapsedTimes.get(testIdentifier.getUniqueId());
             if (startTime != null) {
@@ -127,11 +126,20 @@ public class ExecutionListener implements TestExecutionListener {
                 containerElapsedTimes.put(testIdentifier.getUniqueId(), elapsedTime);
             }
         }
+    }
 
+    public void reportFinished(
+            TestExecutionResult testExecutionResult, TestIdentifier testIdentifier) {
+        if (testExecutionResult.getThrowable().isPresent() && testIdentifier.isContainer()) {
+            LOGGER.error(
+                    "Internal exception during execution of test container created for test {}. Exception: ",
+                    testIdentifier.getDisplayName(),
+                    testExecutionResult.getThrowable().get());
+        } else {
+            LOGGER.trace(testIdentifier.getDisplayName() + " finished");
+        }
     }
 
     @Override
-    public void reportingEntryPublished(TestIdentifier testIdentifier, ReportEntry entry) {
-
-    }
+    public void reportingEntryPublished(TestIdentifier testIdentifier, ReportEntry entry) {}
 }

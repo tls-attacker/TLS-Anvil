@@ -18,9 +18,8 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>de.rub.nds.tls.anvil</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>tls-test-framework</artifactId>
-            <version>1.1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

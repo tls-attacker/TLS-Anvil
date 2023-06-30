@@ -7,7 +7,7 @@
         <version>3.2.8</version>
     </parent>
 
-    <groupId>de.rub.nds.tls</groupId>
+    <groupId>de.rub.nds.tls.anvil</groupId>
     <artifactId>tls-anvil</artifactId>
     <version>1.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -36,7 +36,21 @@
         <skip.surefire.tests>${skipTests}</skip.surefire.tests>
         <skip.failsafe.tests>${skipTests}</skip.failsafe.tests>
     </properties>
-
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>de.rub.nds.tls.anvil</groupId>
+                <artifactId>tls-test-framework</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>de.rub.nds.tls.anvil</groupId>
+                <artifactId>tls-testsuite</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <build>
         <pluginManagement>
             <plugins>

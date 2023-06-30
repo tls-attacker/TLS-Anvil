@@ -4,25 +4,179 @@
     <parent>
         <groupId>de.rub.nds.tls</groupId>
         <artifactId>tls-anvil</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1-SNAPSHOT</version>
     </parent>
-
     <groupId>de.rub.nds.tls.anvil</groupId>
-    <artifactId>tls-test-framework-aggregator</artifactId>
-    <version>1.1.0</version>
-    <packaging>pom</packaging>
-    <name>TLS-Test-Framework-Aggregator</name>
-    <modules>
-        <module>TestFramework</module>
-    </modules>
-
+    <artifactId>tls-test-framework</artifactId>
+    <version>1.1.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>TLS-Test-Framework</name>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <junit.minor-version>7.0</junit.minor-version>
+        <junit.jupiter.version>5.${junit.minor-version}</junit.jupiter.version>
+        <junit.platform.version>1.${junit.minor-version}</junit.platform.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds.tls</groupId>
+            <artifactId>coffee4j-anvil-engine</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds.tls</groupId>
+            <artifactId>coffee4j-anvil-junit-jupiter</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds.tls</groupId>
+            <artifactId>coffee4j-anvil-model</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds.tls.attacker</groupId>
+            <artifactId>tls-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds.tls.scanner</groupId>
+            <artifactId>tls-client-scanner</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds.tls.scanner</groupId>
+            <artifactId>tls-server-scanner</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.1</version>
+        </dependency>
+        <dependency>
+            <groupId>me.tongfei</groupId>
+            <artifactId>progressbar</artifactId>
+            <version>0.8.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jul</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.14.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+        </dependency>
+    </dependencies>
     <build>
+        <finalName>TLS-Test-Framework</finalName>
         <plugins>
             <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>${project.packaging}</type>
+                                    <destFileName>${project.build.finalName}.${project.packaging}</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${basedir}/apps</outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <outputDirectory>${basedir}/apps/lib</outputDirectory>
+                            <!--Ensures only runnable dependencies are included-->
+                            <includeScope>compile</includeScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- Build an executable JAR -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <mainClass>de.rub.nds.tlstest.framework.Main</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <header>${basedir}/license_header_plain.txt</header>
+                    <strictCheck>true</strictCheck>
+                    <includes>
+                        <include>src/**/*.java</include>
+                    </includes>
+                    <properties>
+                        <year>${project.inceptionYear}</year>
+                        <owner>Ruhr University Bochum</owner>
+                    </properties>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.19.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <threadCount>2</threadCount>
+                    <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
+                </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>

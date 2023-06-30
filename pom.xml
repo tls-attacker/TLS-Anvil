@@ -40,9 +40,14 @@
         <dependencies>
             <dependency>
                 <groupId>de.rub.nds.tls.anvil</groupId>
-                <artifactId>tls-test-framework</artifactId>
+                <artifactId>tls-anvil</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>de.rub.nds.tls.anvil</groupId>
+                <artifactId>tls-test-framework</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>de.rub.nds.tls.anvil</groupId>

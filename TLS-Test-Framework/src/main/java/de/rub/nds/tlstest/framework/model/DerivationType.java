@@ -1,17 +1,13 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model;
 
-/**
- *
- * Represents the properties affected by the test derivation models.
- */
+/** Represents the properties affected by the test derivation models. */
 public enum DerivationType {
     CIPHERSUITE,
     NAMED_GROUP,
@@ -56,8 +52,7 @@ public enum DerivationType {
     FFDHE_SHARE_OUT_OF_BOUNDS,
     MAX_FRAGMENT_LENGTH,
     HELLO_RETRY_COOKIE;
-   
-    
+
     public boolean isBitmaskDerivation() {
         return this.name().contains("BITMASK");
     }

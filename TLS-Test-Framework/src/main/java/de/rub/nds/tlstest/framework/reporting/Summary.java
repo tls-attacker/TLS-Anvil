@@ -1,41 +1,43 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.reporting;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-
 import java.util.Date;
-
-
 
 public class Summary {
     @JsonProperty("ElapsedTime")
     private long elapsedTime;
+
     @JsonProperty("Identifier")
     private String identifier;
+
     @JsonProperty("StatesCount")
     private long handshakes;
+
     @JsonProperty("Date")
     private Date date;
+
     @JsonProperty("TestEndpointType")
     private TestEndpointType testEndpointType;
 
     @JsonProperty("SucceededTests")
     private long testsSucceeded;
+
     @JsonProperty("DisabledTests")
     private long testsDisabled;
+
     @JsonProperty("FailedTests")
     private long testsFailed;
-    @JsonUnwrapped
-    private ScoreContainer scoreContainer;
+
+    @JsonUnwrapped private ScoreContainer scoreContainer;
 
     public long getElapsedTime() {
         return elapsedTime;

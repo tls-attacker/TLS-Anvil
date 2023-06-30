@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -32,10 +31,12 @@ public class ConditionalConstraint {
     public Constraint getConstraint() {
         return constraint;
     }
-    
+
     public boolean isApplicableTo(List<DerivationType> modeledDerivations, DerivationScope scope) {
-        for(DerivationType required: requiredDerivations) {
-            if(!modeledDerivations.contains(required) || !DerivationFactory.getInstance(required).canBeModeled(TestContext.getInstance(), scope)) {
+        for (DerivationType required : requiredDerivations) {
+            if (!modeledDerivations.contains(required)
+                    || !DerivationFactory.getInstance(required)
+                            .canBeModeled(TestContext.getInstance(), scope)) {
                 return false;
             }
         }
@@ -46,6 +47,4 @@ public class ConditionalConstraint {
         this.requiredDerivations = requiredDerivations;
         this.constraint = constraint;
     }
-    
-    
 }

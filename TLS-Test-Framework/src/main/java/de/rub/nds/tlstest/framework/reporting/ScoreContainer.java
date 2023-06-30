@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.reporting;
 
@@ -22,13 +21,12 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.TestCategory;
 import de.rub.nds.tlstest.framework.constants.TestResult;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.extension.ExtensionContext;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class ScoreContainer {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -36,10 +34,7 @@ public class ScoreContainer {
     @JsonProperty("Score")
     Map<TestCategory, Score> scoreMap = new HashMap<>();
 
-
-    public ScoreContainer() {
-
-    }
+    public ScoreContainer() {}
 
     public ScoreContainer(ExtensionContext context) {
         Method m = context.getRequiredTestMethod();
@@ -47,29 +42,77 @@ public class ScoreContainer {
         for (TestCategory i : TestCategory.values()) {
             if (m.isAnnotationPresent(i.getAnnoationClass())) {
                 if (i.getAnnoationClass().equals(ComplianceCategory.class)) {
-                    scoreMap.put(i, new Score(((ComplianceCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                    scoreMap.put(
+                            i,
+                            new Score(
+                                    ((ComplianceCategory) m.getAnnotation(i.getAnnoationClass()))
+                                            .value()));
                 } else if (i.getAnnoationClass().equals(InteroperabilityCategory.class)) {
-                    scoreMap.put(i, new Score(((InteroperabilityCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                    scoreMap.put(
+                            i,
+                            new Score(
+                                    ((InteroperabilityCategory)
+                                                    m.getAnnotation(i.getAnnoationClass()))
+                                            .value()));
                 } else if (i.getAnnoationClass().equals(SecurityCategory.class)) {
-                    scoreMap.put(i, new Score(((SecurityCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                    scoreMap.put(
+                            i,
+                            new Score(
+                                    ((SecurityCategory) m.getAnnotation(i.getAnnoationClass()))
+                                            .value()));
                 } else if (i.getAnnoationClass().equals(AlertCategory.class)) {
-                    scoreMap.put(i, new Score(((AlertCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                    scoreMap.put(
+                            i,
+                            new Score(
+                                    ((AlertCategory) m.getAnnotation(i.getAnnoationClass()))
+                                            .value()));
                 } else if (i.getAnnoationClass().equals(CVECategory.class)) {
-                    scoreMap.put(i, new Score(((CVECategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                    scoreMap.put(
+                            i,
+                            new Score(
+                                    ((CVECategory) m.getAnnotation(i.getAnnoationClass()))
+                                            .value()));
                 } else if (i.getAnnoationClass().equals(CertificateCategory.class)) {
-                    scoreMap.put(i, new Score(((CertificateCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                    scoreMap.put(
+                            i,
+                            new Score(
+                                    ((CertificateCategory) m.getAnnotation(i.getAnnoationClass()))
+                                            .value()));
                 } else if (i.getAnnoationClass().equals(RecordLayerCategory.class)) {
-                    scoreMap.put(i, new Score(((RecordLayerCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                    scoreMap.put(
+                            i,
+                            new Score(
+                                    ((RecordLayerCategory) m.getAnnotation(i.getAnnoationClass()))
+                                            .value()));
                 } else if (i.getAnnoationClass().equals(CryptoCategory.class)) {
-                    scoreMap.put(i, new Score(((CryptoCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                    scoreMap.put(
+                            i,
+                            new Score(
+                                    ((CryptoCategory) m.getAnnotation(i.getAnnoationClass()))
+                                            .value()));
                 } else if (i.getAnnoationClass().equals(DeprecatedFeatureCategory.class)) {
-                    scoreMap.put(i, new Score(((DeprecatedFeatureCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                    scoreMap.put(
+                            i,
+                            new Score(
+                                    ((DeprecatedFeatureCategory)
+                                                    m.getAnnotation(i.getAnnoationClass()))
+                                            .value()));
                 } else if (i.getAnnoationClass().equals(HandshakeCategory.class)) {
-                    scoreMap.put(i, new Score(((HandshakeCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                    scoreMap.put(
+                            i,
+                            new Score(
+                                    ((HandshakeCategory) m.getAnnotation(i.getAnnoationClass()))
+                                            .value()));
                 } else if (i.getAnnoationClass().equals(MessageStructureCategory.class)) {
-                    scoreMap.put(i, new Score(((MessageStructureCategory)m.getAnnotation(i.getAnnoationClass())).value()));
+                    scoreMap.put(
+                            i,
+                            new Score(
+                                    ((MessageStructureCategory)
+                                                    m.getAnnotation(i.getAnnoationClass()))
+                                            .value()));
                 } else {
-                    throw new RuntimeException("Unknown TestCategory, cannot create ScoreContainer");
+                    throw new RuntimeException(
+                            "Unknown TestCategory, cannot create ScoreContainer");
                 }
             }
         }
@@ -82,7 +125,6 @@ public class ScoreContainer {
         }
         return container;
     }
-
 
     public void updateMaxScoreMultiplier(TestCategory category, int max) {
         if (scoreMap.containsKey(category)) {
@@ -98,8 +140,16 @@ public class ScoreContainer {
 
     public void mergeWithContainer(ScoreContainer container) {
         for (TestCategory i : container.getScoreMap().keySet()) {
-            this.getScoreMap().get(i).setReached(this.getScoreMap().get(i).getReached() + container.getScoreMap().get(i).getReached());
-            this.getScoreMap().get(i).setTotal(this.getScoreMap().get(i).getTotal() + container.getScoreMap().get(i).getTotal());
+            this.getScoreMap()
+                    .get(i)
+                    .setReached(
+                            this.getScoreMap().get(i).getReached()
+                                    + container.getScoreMap().get(i).getReached());
+            this.getScoreMap()
+                    .get(i)
+                    .setTotal(
+                            this.getScoreMap().get(i).getTotal()
+                                    + container.getScoreMap().get(i).getTotal());
         }
     }
 

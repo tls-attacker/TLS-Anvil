@@ -1,12 +1,13 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.annotations.methodCondition;
+
+import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.MethodConditionExtension;
@@ -16,14 +17,10 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.Assert.assertTrue;
-
-
 @MethodCondition(method = "classCondition")
 public class MethodConditionAnnotationClassEnabled {
 
-    @RegisterExtension
-    static ConditionTest ext = new ConditionTest(MethodConditionExtension.class);
+    @RegisterExtension static ConditionTest ext = new ConditionTest(MethodConditionExtension.class);
 
     private boolean methodConditionExecuted = false;
     private boolean classConditionExecuted = false;
@@ -48,11 +45,11 @@ public class MethodConditionAnnotationClassEnabled {
         return ConditionEvaluationResult.disabled("disabled");
     }
 
-    static private ConditionEvaluationResult staticPrivateEnabled(ExtensionContext context) {
+    private static ConditionEvaluationResult staticPrivateEnabled(ExtensionContext context) {
         return ConditionEvaluationResult.enabled("");
     }
 
-    static public ConditionEvaluationResult staticPublicEnabled(ExtensionContext context) {
+    public static ConditionEvaluationResult staticPublicEnabled(ExtensionContext context) {
         return ConditionEvaluationResult.enabled("");
     }
 
@@ -60,35 +57,33 @@ public class MethodConditionAnnotationClassEnabled {
         return ConditionEvaluationResult.enabled("");
     }
 
-
     @Test
-    @MethodCondition(method="test2")
+    @MethodCondition(method = "test2")
     public void execute_validMethod() {
         assertTrue("Class ConditionMethod executed", classConditionExecuted);
         assertTrue("Method ConditionMethod executed", methodConditionExecuted);
     }
 
     @Test
-    @MethodCondition(method="staticPrivateEnabled")
-    public void execute_staticPrivateEnabled() { }
+    @MethodCondition(method = "staticPrivateEnabled")
+    public void execute_staticPrivateEnabled() {}
 
     @Test
-    @MethodCondition(method="staticPublicEnabled")
-    public void execute_staticPublicEnabled() { }
+    @MethodCondition(method = "staticPublicEnabled")
+    public void execute_staticPublicEnabled() {}
 
     @Test
-    @MethodCondition(method="privateEnabled")
+    @MethodCondition(method = "privateEnabled")
     public void execute_PrivateEnabled() {
         assertTrue("Class ConditionMethod executed", classConditionExecuted);
         assertTrue("Method ConditionMethod executed", methodConditionExecuted);
     }
 
     @Test
-    @MethodCondition(method="noParameter")
-    public void execute_noParameter() { }
+    @MethodCondition(method = "noParameter")
+    public void execute_noParameter() {}
 
     @Test
-    @MethodCondition(method="disableC")
-    public void not_execute_validMethod_disabled() { }
-
+    @MethodCondition(method = "disableC")
+    public void not_execute_validMethod_disabled() {}
 }

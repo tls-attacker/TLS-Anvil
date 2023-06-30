@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -25,15 +24,17 @@ public class EnforcedSenderRestrictionConditionExtension extends BaseCondition {
         if (!extensionContext.getTestMethod().isPresent()) {
             return ConditionEvaluationResult.enabled("Class annotations are not relevant.");
         }
-        
+
         Method testMethod = extensionContext.getRequiredTestMethod();
         Class<?> testClass = extensionContext.getRequiredTestClass();
-        
-        if((testMethod.isAnnotationPresent(EnforcedSenderRestriction.class) || testClass.isAnnotationPresent(EnforcedSenderRestriction.class))
+
+        if ((testMethod.isAnnotationPresent(EnforcedSenderRestriction.class)
+                        || testClass.isAnnotationPresent(EnforcedSenderRestriction.class))
                 && !TestContext.getInstance().getConfig().isEnforceSenderRestrictions()) {
-            return ConditionEvaluationResult.disabled("Sender restrictions are not expected to be enforced");
+            return ConditionEvaluationResult.disabled(
+                    "Sender restrictions are not expected to be enforced");
         }
-        
+
         return ConditionEvaluationResult.enabled("Sender restrictions are expected to be enforced");
     }
 }

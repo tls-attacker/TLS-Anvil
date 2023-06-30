@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.extractor;
 
@@ -27,21 +26,25 @@ public enum HtmlRFCAnnotation {
     BLACKBOX_UNTESTABLE("blue", "untestable"),
     DEPRECATED("blue", "deprecated"),
     CONTRADICTORY("blue", "contradictory");
-    
+
     private static final Logger LOGGER = LogManager.getLogger();
-    
+
     private final String color;
     private final String directory;
+
     private HtmlRFCAnnotation(String color, String directory) {
         this.color = color;
         this.directory = directory;
     }
 
-    public static LinkedHashMap<HtmlRFCAnnotation, List<String>> getAnnotations(int rfcNumber, String path) {
+    public static LinkedHashMap<HtmlRFCAnnotation, List<String>> getAnnotations(
+            int rfcNumber, String path) {
         LinkedHashMap<HtmlRFCAnnotation, List<String>> annotationMap = new LinkedHashMap<>();
-        for(HtmlRFCAnnotation annotationType : HtmlRFCAnnotation.values()) {
-            if(annotationType.isPredefinedAnnotation()) {
-                annotationMap.put(annotationType, getAnnotations(path + annotationType.getDirectory(), rfcNumber));
+        for (HtmlRFCAnnotation annotationType : HtmlRFCAnnotation.values()) {
+            if (annotationType.isPredefinedAnnotation()) {
+                annotationMap.put(
+                        annotationType,
+                        getAnnotations(path + annotationType.getDirectory(), rfcNumber));
             }
         }
         return annotationMap;
@@ -49,10 +52,11 @@ public enum HtmlRFCAnnotation {
 
     private static List<String> getAnnotations(String annotationPath, int rfcNumber) {
         List<String> annotatedPassages = new LinkedList<>();
-        try(BufferedReader reader = new BufferedReader(new FileReader(annotationPath + "/" + rfcNumber + ".txt")))  {                       
+        try (BufferedReader reader =
+                new BufferedReader(new FileReader(annotationPath + "/" + rfcNumber + ".txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if(line.length() > 1) {
+                if (line.length() > 1) {
                     annotatedPassages.add(line);
                 }
             }
@@ -68,7 +72,7 @@ public enum HtmlRFCAnnotation {
     public String getDirectory() {
         return directory;
     }
-    
+
     public boolean isPredefinedAnnotation() {
         return !(this == MUST || this == MUST_NOT || this == COVERED);
     }

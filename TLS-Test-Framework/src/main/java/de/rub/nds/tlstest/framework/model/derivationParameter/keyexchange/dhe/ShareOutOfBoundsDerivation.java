@@ -1,34 +1,33 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe;
-
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import java.math.BigInteger;
+import java.util.LinkedList;
+import java.util.List;
 
-public class ShareOutOfBoundsDerivation extends DerivationParameter<ShareOutOfBoundsDerivation.OutOfBoundsType> {
+public class ShareOutOfBoundsDerivation
+        extends DerivationParameter<ShareOutOfBoundsDerivation.OutOfBoundsType> {
 
     // share minus p wasn't useful
     // numbers in TLS are unsigned - negative numbers do not exist
     // therefore this would not test bound validation but errors in
     // (de)serialisation
     public enum OutOfBoundsType {
-        SHARE_PLUS_P, SHARE_IS_ONE, SHARE_IS_ZERO
+        SHARE_PLUS_P,
+        SHARE_IS_ONE,
+        SHARE_IS_ZERO
     }
 
     public ShareOutOfBoundsDerivation() {
@@ -41,7 +40,8 @@ public class ShareOutOfBoundsDerivation extends DerivationParameter<ShareOutOfBo
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getParameterValues(
+            TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         for (OutOfBoundsType type : OutOfBoundsType.values()) {
             parameterValues.add(new ShareOutOfBoundsDerivation(type));
@@ -73,5 +73,4 @@ public class ShareOutOfBoundsDerivation extends DerivationParameter<ShareOutOfBo
             }
         }
     }
-
 }

@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.execution;
 
@@ -16,10 +15,6 @@ import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import jakarta.xml.bind.DatatypeConverter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.extension.ExtensionContext;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
@@ -28,6 +23,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.function.Consumer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class AnnotatedState {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -61,7 +59,6 @@ public class AnnotatedState {
         this.derivationContainer = container;
     }
 
-
     public State getState() {
         return state;
     }
@@ -69,7 +66,6 @@ public class AnnotatedState {
     public void setState(State state) {
         this.state = state;
     }
-
 
     public TestResult getResult() {
         return result;
@@ -85,7 +81,8 @@ public class AnnotatedState {
 
     public void setFailedReason(Throwable failedReason) {
         this.failedReason = failedReason;
-        this.result = this.failedReason != null ? TestResult.FULLY_FAILED : TestResult.NOT_SPECIFIED;
+        this.result =
+                this.failedReason != null ? TestResult.FULLY_FAILED : TestResult.NOT_SPECIFIED;
     }
 
     public void validateFinal(Consumer<AnnotatedState> validateFunction) {
@@ -107,7 +104,7 @@ public class AnnotatedState {
             associatedContainer.stateFinished(result);
             throw err;
         }
-        
+
         associatedContainer.stateFinished(result);
     }
 
@@ -192,15 +189,14 @@ public class AnnotatedState {
     @JsonProperty("SrcPort")
     public Integer getSrcPort() {
         if (state == null) return null;
-        return ((TcpTransportHandler)state.getTlsContext().getTransportHandler()).getSrcPort();
+        return ((TcpTransportHandler) state.getTlsContext().getTransportHandler()).getSrcPort();
     }
 
     @JsonProperty("DstPort")
     public Integer getDstPort() {
         if (state == null) return null;
-        return ((TcpTransportHandler)state.getTlsContext().getTransportHandler()).getDstPort();
+        return ((TcpTransportHandler) state.getTlsContext().getTransportHandler()).getDstPort();
     }
-
 
     public AnnotatedStateContainer getAssociatedContainer() {
         return associatedContainer;

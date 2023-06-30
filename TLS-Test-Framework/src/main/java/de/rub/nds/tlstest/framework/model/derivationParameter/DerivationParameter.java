@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
@@ -17,20 +16,16 @@ import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ValueConstraint;
 import de.rwth.swc.coffee4j.model.Parameter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-/**
- * Provides functions to obtain all possible parameter values under a given
- * scope
- */
+/** Provides functions to obtain all possible parameter values under a given scope */
 public abstract class DerivationParameter<T> {
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -47,16 +42,23 @@ public abstract class DerivationParameter<T> {
         this.valueClass = valueClass;
     }
 
-    public abstract List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope);
+    public abstract List<DerivationParameter> getParameterValues(
+            TestContext context, DerivationScope scope);
 
-    public List<DerivationParameter> getConstrainedParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getConstrainedParameterValues(
+            TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        if (scope.hasExplicitValues(type)) { 
+        if (scope.hasExplicitValues(type)) {
             parameterValues = getExplicitValues(scope);
         } else {
-            parameterValues = getParameterValues(context, scope).stream().filter(val
-                    -> valueApplicableUnderAllConstraints(scope.getValueConstraints(), (T) val.getSelectedValue())
-            ).collect(Collectors.toList());
+            parameterValues =
+                    getParameterValues(context, scope).stream()
+                            .filter(
+                                    val ->
+                                            valueApplicableUnderAllConstraints(
+                                                    scope.getValueConstraints(),
+                                                    (T) val.getSelectedValue()))
+                            .collect(Collectors.toList());
         }
         return parameterValues;
     }
@@ -64,23 +66,23 @@ public abstract class DerivationParameter<T> {
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         return new LinkedList<>();
     }
-    
+
     public List<ConditionalConstraint> getConditionalConstraints(DerivationScope scope) {
-        if(scope.hasExplicitModelingConstraints(type)) {
+        if (scope.hasExplicitModelingConstraints(type)) {
             return getExplicitModelingConstraints(scope);
         } else {
             return getDefaultConditionalConstraints(scope);
         }
     }
-    
+
     public boolean canBeModeled(TestContext context, DerivationScope scope) {
         return getConstrainedParameterValues(context, scope).size() > 1;
     }
-    
+
     public boolean hasNoApplicableValues(TestContext context, DerivationScope scope) {
         return getConstrainedParameterValues(context, scope).isEmpty();
     }
-    
+
     public Parameter.Builder getParameterBuilder(TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = getConstrainedParameterValues(context, scope);
         return Parameter.parameter(type.name()).values(parameterValues.toArray());
@@ -88,8 +90,7 @@ public abstract class DerivationParameter<T> {
 
     public abstract void applyToConfig(Config config, TestContext context);
 
-    public void postProcessConfig(Config config, TestContext context) {
-    }
+    public void postProcessConfig(Config config, TestContext context) {}
 
     public final T getSelectedValue() {
         return selectedValue;
@@ -103,7 +104,8 @@ public abstract class DerivationParameter<T> {
         return type;
     }
 
-    public boolean valueApplicableUnderAllConstraints(List<ValueConstraint> valueConstraints, T valueInQuestion) {
+    public boolean valueApplicableUnderAllConstraints(
+            List<ValueConstraint> valueConstraints, T valueInQuestion) {
         for (ValueConstraint constraint : valueConstraints) {
             if (constraint.getAffectedType() == type) {
                 if (!valueApplicableUnderConstraint(constraint, valueInQuestion)) {
@@ -114,19 +116,28 @@ public abstract class DerivationParameter<T> {
         return true;
     }
 
-    public boolean valueApplicableUnderConstraint(ValueConstraint valueConstraint, T valueInQuestion) {
+    public boolean valueApplicableUnderConstraint(
+            ValueConstraint valueConstraint, T valueInQuestion) {
         try {
             Method method;
             Constructor constructor;
             if (valueConstraint.isDynamic()) {
-                method = valueConstraint.getClazz().getMethod(valueConstraint.getEvaluationMethod(), valueClass);
+                method =
+                        valueConstraint
+                                .getClazz()
+                                .getMethod(valueConstraint.getEvaluationMethod(), valueClass);
                 constructor = valueConstraint.getClazz().getConstructor();
                 return (Boolean) method.invoke(constructor.newInstance(), valueInQuestion);
             } else {
                 method = valueClass.getMethod(valueConstraint.getEvaluationMethod());
                 return (Boolean) method.invoke(valueInQuestion);
             }
-        } catch (InstantiationException | SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (InstantiationException
+                | SecurityException
+                | NoSuchMethodException
+                | IllegalAccessException
+                | IllegalArgumentException
+                | InvocationTargetException ex) {
             LOGGER.error("Was unable to invoke constraint method for type " + type, ex);
             return true;
         }
@@ -135,24 +146,40 @@ public abstract class DerivationParameter<T> {
     public List<DerivationParameter> getExplicitValues(DerivationScope scope) {
         try {
             String methodName = scope.getExplicitValueMethod(type);
-            Method method = scope.getExtensionContext().getRequiredTestClass().getMethod(methodName, DerivationScope.class);
-            Constructor constructor = scope.getExtensionContext().getRequiredTestClass().getConstructor();
+            Method method =
+                    scope.getExtensionContext()
+                            .getRequiredTestClass()
+                            .getMethod(methodName, DerivationScope.class);
+            Constructor constructor =
+                    scope.getExtensionContext().getRequiredTestClass().getConstructor();
 
             return (List<DerivationParameter>) method.invoke(constructor.newInstance(), scope);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException ex) {
-            LOGGER.error("Was unable to fetch explicit values for type " + type, ex); 
+        } catch (NoSuchMethodException
+                | InvocationTargetException
+                | IllegalArgumentException
+                | IllegalAccessException
+                | InstantiationException ex) {
+            LOGGER.error("Was unable to fetch explicit values for type " + type, ex);
             return new LinkedList<>();
         }
     }
-    
+
     public List<ConditionalConstraint> getExplicitModelingConstraints(DerivationScope scope) {
         try {
             String methodName = scope.getExplicitModelingConstraintMethod(type);
-            Method method = scope.getExtensionContext().getRequiredTestClass().getMethod(methodName, DerivationScope.class);
-            Constructor constructor = scope.getExtensionContext().getRequiredTestClass().getConstructor();
+            Method method =
+                    scope.getExtensionContext()
+                            .getRequiredTestClass()
+                            .getMethod(methodName, DerivationScope.class);
+            Constructor constructor =
+                    scope.getExtensionContext().getRequiredTestClass().getConstructor();
 
             return (List<ConditionalConstraint>) method.invoke(constructor.newInstance(), scope);
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException ex) {
+        } catch (NoSuchMethodException
+                | InvocationTargetException
+                | IllegalArgumentException
+                | IllegalAccessException
+                | InstantiationException ex) {
             LOGGER.error("Was unable to fetch explicit constraints for type " + type, ex);
             return new LinkedList<>();
         }

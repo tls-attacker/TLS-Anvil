@@ -1,21 +1,18 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework;
 
 import de.rub.nds.tlsattacker.core.config.Config;
-import org.junit.Test;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
-
+import org.junit.Test;
 
 public class TestRunnerTest {
 
@@ -25,7 +22,8 @@ public class TestRunnerTest {
         config.setDefaultClientSupportedCipherSuites(new ArrayList<>());
 
         Config copy = config.createCopy();
-        assert copy.getDefaultClientSupportedCipherSuites().size() == config.getDefaultClientSupportedCipherSuites().size();
+        assert copy.getDefaultClientSupportedCipherSuites().size()
+                == config.getDefaultClientSupportedCipherSuites().size();
     }
 
     @Test
@@ -35,5 +33,4 @@ public class TestRunnerTest {
         format.setTimeZone(TimeZone.getTimeZone("UTC"));
         System.out.println(format.format(d));
     }
-
 }

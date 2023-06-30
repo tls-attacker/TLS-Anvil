@@ -1,20 +1,18 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.constants;
 
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.KeyExchangeAlgorithm;
+import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import javax.annotation.Nonnull;
 
 public enum KeyExchangeType {
     RSA,
@@ -25,7 +23,6 @@ public enum KeyExchangeType {
     NOT_SPECIFIED;
 
     private static final Logger LOGGER = LogManager.getLogger();
-
 
     public boolean compatibleWithCiphersuite(CipherSuite i) {
         try {
@@ -68,6 +65,4 @@ public enum KeyExchangeType {
 
         return KeyExchangeType.NOT_SPECIFIED;
     }
-
-
 }

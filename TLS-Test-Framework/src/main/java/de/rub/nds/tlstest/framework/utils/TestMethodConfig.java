@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.utils;
 
@@ -17,10 +16,9 @@ import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyX;
-import org.junit.jupiter.api.extension.ExtensionContext;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class TestMethodConfig {
     private KeyX keyExchange = null;
@@ -30,8 +28,7 @@ public class TestMethodConfig {
     @JsonProperty("RFC")
     private RFC rfc = null;
 
-    @JsonUnwrapped
-    private TlsTest tlsTest = null;
+    @JsonUnwrapped private TlsTest tlsTest = null;
 
     @JsonProperty("MethodName")
     private String methodName = null;
@@ -42,22 +39,20 @@ public class TestMethodConfig {
     @JsonProperty("ClassName")
     private String className = null;
 
-    @JsonUnwrapped
-    private TlsVersion tlsVersion = null;
+    @JsonUnwrapped private TlsVersion tlsVersion = null;
 
     @JsonUnwrapped
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private TestDescription testDescription;
 
-    public TestMethodConfig() {
-
-    }
+    public TestMethodConfig() {}
 
     public TestMethodConfig(ExtensionContext extensionContext) {
         testMethod = extensionContext.getRequiredTestMethod();
         testClass = extensionContext.getRequiredTestClass();
 
-        if (testMethod.isAnnotationPresent(KeyExchange.class) || testClass.isAnnotationPresent(KeyExchange.class)) {
+        if (testMethod.isAnnotationPresent(KeyExchange.class)
+                || testClass.isAnnotationPresent(KeyExchange.class)) {
             KeyExchange annotation = KeyX.resolveKexAnnotation(extensionContext);
             this.keyExchange = new KeyX(annotation);
         }
@@ -80,14 +75,12 @@ public class TestMethodConfig {
     private <T extends Annotation> T resolveAnnotation(Class<T> clazz) {
         if (testMethod.isAnnotationPresent(clazz)) {
             return testMethod.getAnnotation(clazz);
-        }
-        else if (testClass.isAnnotationPresent(clazz)) {
+        } else if (testClass.isAnnotationPresent(clazz)) {
             return testClass.getAnnotation(clazz);
         }
 
         return null;
     }
-
 
     public KeyX getKeyExchange() {
         return keyExchange;
@@ -112,7 +105,6 @@ public class TestMethodConfig {
     public void setRfc(RFC rfc) {
         this.rfc = rfc;
     }
-
 
     public String getMethodName() {
         return methodName;

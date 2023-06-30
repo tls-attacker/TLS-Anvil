@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
@@ -21,17 +20,18 @@ public class GreaseCipherSuiteDerivation extends DerivationParameter<CipherSuite
     public GreaseCipherSuiteDerivation() {
         super(DerivationType.GREASE_CIPHERSUITE, CipherSuite.class);
     }
-    
+
     public GreaseCipherSuiteDerivation(CipherSuite selectedValue) {
         this();
         setSelectedValue(selectedValue);
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getParameterValues(
+            TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        for(CipherSuite cipherSuite: CipherSuite.values()) {
-            if(cipherSuite.isGrease()) {
+        for (CipherSuite cipherSuite : CipherSuite.values()) {
+            if (cipherSuite.isGrease()) {
                 parameterValues.add(new GreaseCipherSuiteDerivation(cipherSuite));
             }
         }
@@ -39,7 +39,5 @@ public class GreaseCipherSuiteDerivation extends DerivationParameter<CipherSuite
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-    }
-    
+    public void applyToConfig(Config config, TestContext context) {}
 }

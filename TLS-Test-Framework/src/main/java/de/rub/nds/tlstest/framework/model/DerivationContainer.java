@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model;
 
@@ -13,33 +12,30 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rwth.swc.coffee4j.model.Combination;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-/**
- *
- * Holds parameters that represent one set of test derivation.
- */
+/** Holds parameters that represent one set of test derivation. */
 public class DerivationContainer {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<DerivationParameter> derivations;
     private DerivationScope underlyingScope;
-    
+
     public DerivationContainer(List<Object> objects) {
         derivations = new LinkedList<>();
         for (Object derivation : objects) {
             if (derivation instanceof DerivationParameter) {
                 derivations.add((DerivationParameter) derivation);
             } else {
-                LOGGER.warn("Found a Test Parameter that is not a DerivationParameter - will be ignored");
+                LOGGER.warn(
+                        "Found a Test Parameter that is not a DerivationParameter - will be ignored");
             }
         }
     }
@@ -47,22 +43,28 @@ public class DerivationContainer {
     public DerivationContainer(List<Object> objects, DerivationScope underlyingScope) {
         this(objects);
         this.underlyingScope = underlyingScope;
-        derivations.addAll(ParameterModelFactory.getStaticParameters(TestContext.getInstance(), underlyingScope));
+        derivations.addAll(
+                ParameterModelFactory.getStaticParameters(
+                        TestContext.getInstance(), underlyingScope));
     }
 
     public static DerivationContainer fromCombination(Combination combination) {
         List<Object> res = new ArrayList<>();
-        combination.getParameterValueMap().keySet().forEach(key -> {
-            Object value = combination.getParameterValueMap().get(key).get();
-            res.add(value);
-        });
+        combination
+                .getParameterValueMap()
+                .keySet()
+                .forEach(
+                        key -> {
+                            Object value = combination.getParameterValueMap().get(key).get();
+                            res.add(value);
+                        });
         return new DerivationContainer(res);
     }
-    
+
     public <T extends DerivationParameter<?>> T getDerivation(Class<T> clazz) {
-        for(DerivationParameter listed : derivations) {
-            if(clazz.equals(listed.getClass())) {
-                return (T)listed;
+        for (DerivationParameter listed : derivations) {
+            if (clazz.equals(listed.getClass())) {
+                return (T) listed;
             }
         }
         return null;
@@ -90,15 +92,14 @@ public class DerivationContainer {
 
     public void applyToConfig(Config baseConfig, TestContext context) {
         for (DerivationParameter listed : derivations) {
-            if(underlyingScope.isAutoApplyToConfig(listed.getType())) {
+            if (underlyingScope.isAutoApplyToConfig(listed.getType())) {
                 listed.applyToConfig(baseConfig, context);
-            } 
+            }
         }
         for (DerivationParameter listed : derivations) {
-            if(underlyingScope.isAutoApplyToConfig(listed.getType())) {
+            if (underlyingScope.isAutoApplyToConfig(listed.getType())) {
                 listed.postProcessConfig(baseConfig, context);
-            } 
-            
+            }
         }
         LOGGER.debug("Applied " + toString());
     }
@@ -110,7 +111,7 @@ public class DerivationContainer {
         }
         return joiner.toString();
     }
-    
+
     public byte[] buildBitmask() {
         for (DerivationParameter listed : derivations) {
             if (listed.getType().isBitmaskDerivation()) {
@@ -123,9 +124,10 @@ public class DerivationContainer {
     public byte[] buildBitmask(DerivationType type) {
         DerivationParameter byteParameter = getDerivation(type);
         DerivationParameter bitParameter = getChildParameter(type);
-        
-        byte[] constructed = new byte[(Integer)byteParameter.getSelectedValue() + 1];
-        constructed[(Integer)byteParameter.getSelectedValue()] = (byte)(1 << (Integer)bitParameter.getSelectedValue());
+
+        byte[] constructed = new byte[(Integer) byteParameter.getSelectedValue() + 1];
+        constructed[(Integer) byteParameter.getSelectedValue()] =
+                (byte) (1 << (Integer) bitParameter.getSelectedValue());
         return constructed;
     }
 
@@ -141,5 +143,4 @@ public class DerivationContainer {
     public DerivationScope getUnderlyingScope() {
         return underlyingScope;
     }
-    
 }

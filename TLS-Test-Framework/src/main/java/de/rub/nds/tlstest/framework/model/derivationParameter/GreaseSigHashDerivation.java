@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
@@ -17,21 +16,22 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class GreaseSigHashDerivation extends DerivationParameter<SignatureAndHashAlgorithm> {
-    
+
     public GreaseSigHashDerivation() {
         super(DerivationType.GREASE_SIG_HASH, SignatureAndHashAlgorithm.class);
     }
-    
+
     public GreaseSigHashDerivation(SignatureAndHashAlgorithm selectedValue) {
         this();
         setSelectedValue(selectedValue);
     }
-    
+
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getParameterValues(
+            TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        for(SignatureAndHashAlgorithm sigHashAlg: SignatureAndHashAlgorithm.values()) {
-            if(sigHashAlg.isGrease()) {
+        for (SignatureAndHashAlgorithm sigHashAlg : SignatureAndHashAlgorithm.values()) {
+            if (sigHashAlg.isGrease()) {
                 parameterValues.add(new GreaseSigHashDerivation(sigHashAlg));
             }
         }
@@ -39,7 +39,5 @@ public class GreaseSigHashDerivation extends DerivationParameter<SignatureAndHas
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-    }
-    
+    public void applyToConfig(Config config, TestContext context) {}
 }

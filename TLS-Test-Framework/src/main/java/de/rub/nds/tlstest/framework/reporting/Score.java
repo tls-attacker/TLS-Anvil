@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.reporting;
 
@@ -47,7 +46,6 @@ public class Score {
         this.total = total;
     }
 
-
     public double getTotal() {
         return total;
     }
@@ -84,7 +82,8 @@ public class Score {
 
     public void setMax(int max) {
         if (max > 100) {
-            LOGGER.error("max is given in percentage, a value larger than 100 does not make sense.");
+            LOGGER.error(
+                    "max is given in percentage, a value larger than 100 does not make sense.");
             return;
         }
         this.max = max;
@@ -97,12 +96,18 @@ public class Score {
             setTotal(0);
             return;
         }
-        setReached((result.getScorePercentage() / 100.0) * severityLevel.getMaxScore() * (max / 100.0));
+        setReached(
+                (result.getScorePercentage() / 100.0)
+                        * severityLevel.getMaxScore()
+                        * (max / 100.0));
     }
 
     public void overwiteTestResult(TestResult status) {
         overwritten = true;
-        setReached((status.getScorePercentage() / 100.0) * severityLevel.getMaxScore() * (max / 100.0));
+        setReached(
+                (status.getScorePercentage() / 100.0)
+                        * severityLevel.getMaxScore()
+                        * (max / 100.0));
     }
 
     public boolean isOverwritten() {

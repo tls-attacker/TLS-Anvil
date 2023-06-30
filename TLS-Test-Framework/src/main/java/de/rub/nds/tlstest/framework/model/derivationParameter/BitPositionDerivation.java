@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
@@ -26,18 +25,17 @@ public class BitPositionDerivation extends DerivationParameter<Integer> {
         setParent(parent);
         setSelectedValue(selectedValue);
     }
-    
+
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getParameterValues(
+            TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        for(int i = 0; i < 8; i++) {
+        for (int i = 0; i < 8; i++) {
             parameterValues.add(new BitPositionDerivation(i, this.getParent()));
         }
         return parameterValues;
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-    }
-    
+    public void applyToConfig(Config config, TestContext context) {}
 }

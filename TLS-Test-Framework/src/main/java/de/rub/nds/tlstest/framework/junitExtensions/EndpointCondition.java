@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.junitExtensions;
 
@@ -14,14 +13,13 @@ import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TestEndpoint;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
+import java.lang.reflect.Method;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.lang.reflect.Method;
-
 /**
- * Evaluates the ClientTest, ServerTest, TestEndpoint annotations
- * The test is disabled when a client is tested but the test is written for servers.
+ * Evaluates the ClientTest, ServerTest, TestEndpoint annotations The test is disabled when a client
+ * is tested but the test is written for servers.
  */
 public class EndpointCondition extends BaseCondition {
 
@@ -31,7 +29,7 @@ public class EndpointCondition extends BaseCondition {
 
         return endpointOfMethod(testMethod, testClass);
     }
-    
+
     public static TestEndpointType endpointOfMethod(Method testMethod, Class<?> testClass) {
         if (testMethod.isAnnotationPresent(ClientTest.class)) {
             return TestEndpointType.CLIENT;

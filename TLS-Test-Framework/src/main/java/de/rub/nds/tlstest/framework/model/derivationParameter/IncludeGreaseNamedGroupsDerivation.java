@@ -1,10 +1,9 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
@@ -17,21 +16,21 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class IncludeGreaseNamedGroupsDerivation extends DerivationParameter<Boolean> {
 
     public IncludeGreaseNamedGroupsDerivation() {
         super(DerivationType.INCLUDE_GREASE_NAMED_GROUPS, Boolean.class);
     }
+
     public IncludeGreaseNamedGroupsDerivation(Boolean selectedValue) {
         this();
         setSelectedValue(selectedValue);
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(TestContext context, DerivationScope scope) {
+    public List<DerivationParameter> getParameterValues(
+            TestContext context, DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new IncludeGreaseNamedGroupsDerivation(true));
         parameterValues.add(new IncludeGreaseNamedGroupsDerivation(false));
@@ -39,15 +38,14 @@ public class IncludeGreaseNamedGroupsDerivation extends DerivationParameter<Bool
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-    }
+    public void applyToConfig(Config config, TestContext context) {}
 
     @Override
     public void postProcessConfig(Config config, TestContext context) {
-        if(getSelectedValue()) {
+        if (getSelectedValue()) {
             Arrays.asList(NamedGroup.values()).stream()
-                .filter(group -> group.isGrease())
-                .forEach(greaseGroup -> config.getDefaultClientNamedGroups().add(greaseGroup));
-        }  
-    } 
+                    .filter(group -> group.isGrease())
+                    .forEach(greaseGroup -> config.getDefaultClientNamedGroups().add(greaseGroup));
+        }
+    }
 }

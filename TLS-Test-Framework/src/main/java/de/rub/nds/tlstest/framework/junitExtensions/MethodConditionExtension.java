@@ -1,58 +1,61 @@
 /**
  * TLS-Test-Framework - A framework for modeling TLS tests
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.framework.junitExtensions;
 
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Optional;
-
 /**
- * Evaluates the MethodCondition extension and calls the specified method using reflection
- * that returns an ConditionEvaluationResult.
+ * Evaluates the MethodCondition extension and calls the specified method using reflection that
+ * returns an ConditionEvaluationResult.
  */
 public class MethodConditionExtension extends BaseCondition {
     private static final Logger LOGGER = LogManager.getLogger();
-
 
     private Method getMethodForAnnoation(MethodCondition annotation, Class<?> testClass) {
         Method result = null;
         if (!annotation.clazz().equals(Object.class)) {
             try {
-                Arrays.asList(annotation.clazz().getDeclaredMethods()).forEach((Method i) -> {
-                    i.setAccessible(true);
-                });
+                Arrays.asList(annotation.clazz().getDeclaredMethods())
+                        .forEach(
+                                (Method i) -> {
+                                    i.setAccessible(true);
+                                });
                 try {
-                    result = annotation.clazz().getDeclaredMethod(annotation.method(), ExtensionContext.class);
-                }
-                catch (NoSuchMethodException e) {
+                    result =
+                            annotation
+                                    .clazz()
+                                    .getDeclaredMethod(annotation.method(), ExtensionContext.class);
+                } catch (NoSuchMethodException e) {
                     result = annotation.clazz().getDeclaredMethod(annotation.method());
                 }
             } catch (Exception ignored) {
 
             }
-        }
-        else {
+        } else {
             try {
-                Arrays.asList(testClass.getDeclaredMethods()).forEach((Method i) -> {
-                    i.setAccessible(true);
-                });
+                Arrays.asList(testClass.getDeclaredMethods())
+                        .forEach(
+                                (Method i) -> {
+                                    i.setAccessible(true);
+                                });
                 try {
-                    result = testClass.getDeclaredMethod(annotation.method(), ExtensionContext.class);
-                }
-                catch (NoSuchMethodException e) {
+                    result =
+                            testClass.getDeclaredMethod(
+                                    annotation.method(), ExtensionContext.class);
+                } catch (NoSuchMethodException e) {
                     result = testClass.getDeclaredMethod(annotation.method());
                 }
             } catch (Exception ignored) {
@@ -70,7 +73,8 @@ public class MethodConditionExtension extends BaseCondition {
             m.setAccessible(true);
             Optional<Object> testInstanceOpt = context.getTestInstance();
             Object testInstance;
-            if (testInstanceOpt.isPresent() && m.getDeclaringClass().equals(testInstanceOpt.get().getClass())) {
+            if (testInstanceOpt.isPresent()
+                    && m.getDeclaringClass().equals(testInstanceOpt.get().getClass())) {
                 testInstance = testInstanceOpt.get();
             } else {
                 Class<?> clzz = m.getDeclaringClass();
@@ -82,22 +86,23 @@ public class MethodConditionExtension extends BaseCondition {
             Object result;
             if (m.getParameterCount() > 0) {
                 result = m.invoke(testInstance, context);
-            }
-            else {
+            } else {
                 result = m.invoke(testInstance);
             }
 
             if (result.getClass().equals(ConditionEvaluationResult.class)) {
-                return (ConditionEvaluationResult)result;
+                return (ConditionEvaluationResult) result;
             }
-            LOGGER.error(identifier + " should return a " + "ConditionEvaluationResult" + " object");
+            LOGGER.error(
+                    identifier + " should return a " + "ConditionEvaluationResult" + " object");
             return ConditionEvaluationResult.disabled("Invalid return type of " + m.getName());
-        }
-        catch (IllegalAccessException e) {
-            LOGGER.error("Couldn't execute " + identifier + ", make sure, that class, constructor and method is public.");
+        } catch (IllegalAccessException e) {
+            LOGGER.error(
+                    "Couldn't execute "
+                            + identifier
+                            + ", make sure, that class, constructor and method is public.");
             LOGGER.error("", e);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.error("", e);
         }
         return ConditionEvaluationResult.disabled("Could not invoke method " + identifier);
@@ -119,7 +124,10 @@ public class MethodConditionExtension extends BaseCondition {
             MethodCondition clzzAnnotation = clzz.getAnnotation(MethodCondition.class);
             clzzCondMethod = getMethodForAnnoation(clzzAnnotation, clzz);
             if (clzzCondMethod == null) {
-                throw new RuntimeException("Method of class (" + identifier + ") MethodCondition annotation could not be found");
+                throw new RuntimeException(
+                        "Method of class ("
+                                + identifier
+                                + ") MethodCondition annotation could not be found");
             }
         }
 
@@ -128,7 +136,10 @@ public class MethodConditionExtension extends BaseCondition {
             MethodCondition methAnotation = testM.get().getAnnotation(MethodCondition.class);
             methCondMethod = getMethodForAnnoation(methAnotation, clzz);
             if (methCondMethod == null) {
-                throw new RuntimeException("Method of MethodCondition (" + identifier + ") annotation could not be found");
+                throw new RuntimeException(
+                        "Method of MethodCondition ("
+                                + identifier
+                                + ") annotation could not be found");
             }
         }
 
@@ -138,11 +149,9 @@ public class MethodConditionExtension extends BaseCondition {
                 result = executeMethod(clzzCondMethod, context);
             }
             return result;
-        }
-        else if (clzzCondMethod != null) {
+        } else if (clzzCondMethod != null) {
             return executeMethod(clzzCondMethod, context);
-        }
-        else {
+        } else {
             return ConditionEvaluationResult.enabled("MethodCondition not present");
         }
     }

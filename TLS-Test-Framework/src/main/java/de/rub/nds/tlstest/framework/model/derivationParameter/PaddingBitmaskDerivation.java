@@ -13,10 +13,10 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,7 +35,7 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public PaddingBitmaskDerivation() {
-        super(DerivationType.PADDING_BITMASK, Integer.class);
+        super(TlsParameterType.PADDING_BITMASK, Integer.class);
     }
 
     public PaddingBitmaskDerivation(Integer selectedValue) {
@@ -45,7 +45,7 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         if (scope.isTls13Test()) {
             throw new RuntimeException(
                     "Padding bitmask is not configured for optional TLS 1.3 record padding");
@@ -72,34 +72,33 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
     public void applyToConfig(Config config, TestContext context) {}
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
-        List<ConditionalConstraint> condConstraints = new LinkedList<>();
+    public List<LegacyConditionalConstraint> getDefaultConditionalConstraints(LegacyDerivationScope scope) {
+        List<LegacyConditionalConstraint> condConstraints = new LinkedList<>();
 
         condConstraints.add(getMustNotExceedPaddingLengthConstraint(scope, false));
         if (ParameterModelFactory.getDerivationsForScope(scope)
-                .contains(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)) {
+                .contains(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)) {
             condConstraints.add(getMustNotResultInPlausiblePadding(scope, false));
         }
         return condConstraints;
     }
 
-    public ConditionalConstraint getMustNotExceedPaddingLengthConstraint(
-            DerivationScope scope, boolean enforceEncryptThenMacMode) {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
-        requiredDerivations.add(DerivationType.APP_MSG_LENGHT);
+    public LegacyConditionalConstraint getMustNotExceedPaddingLengthConstraint(
+            LegacyDerivationScope scope, boolean enforceEncryptThenMacMode) {
+        Set<TlsParameterType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
+        requiredDerivations.add(TlsParameterType.APP_MSG_LENGHT);
 
         if (ParameterModelFactory.getDerivationsForScope(scope)
-                .contains(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)) {
+                .contains(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)) {
 
-            requiredDerivations.add(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
-            return new ConditionalConstraint(
+            requiredDerivations.add(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
+            return new LegacyConditionalConstraint(
                     requiredDerivations,
-                    ConstraintBuilder.constrain(
-                                    getType().name(),
-                                    DerivationType.CIPHERSUITE.name(),
-                                    DerivationType.APP_MSG_LENGHT.name(),
-                                    DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION.name())
+                    ConstraintBuilder.constrain(getType().name(),
+                                    TlsParameterType.CIPHER_SUITE.name(),
+                                    TlsParameterType.APP_MSG_LENGHT.name(),
+                                    TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION.name())
                             .by(
                                     (PaddingBitmaskDerivation paddingBitmaskDerivation,
                                             CipherSuiteDerivation cipherSuiteDerivation,
@@ -119,12 +118,11 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
 
         } else {
 
-            return new ConditionalConstraint(
+            return new LegacyConditionalConstraint(
                     requiredDerivations,
-                    ConstraintBuilder.constrain(
-                                    getType().name(),
-                                    DerivationType.CIPHERSUITE.name(),
-                                    DerivationType.APP_MSG_LENGHT.name())
+                    ConstraintBuilder.constrain(getType().name(),
+                                    TlsParameterType.CIPHER_SUITE.name(),
+                                    TlsParameterType.APP_MSG_LENGHT.name())
                             .by(
                                     (PaddingBitmaskDerivation paddingBitmaskDerivation,
                                             CipherSuiteDerivation cipherSuiteDerivation,
@@ -153,21 +151,20 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
         }
     }
 
-    public ConditionalConstraint getMustNotResultInPlausiblePadding(
-            DerivationScope scope, boolean enforceEncryptThenMacMode) {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
-        requiredDerivations.add(DerivationType.APP_MSG_LENGHT);
-        requiredDerivations.add(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
+    public LegacyConditionalConstraint getMustNotResultInPlausiblePadding(
+            LegacyDerivationScope scope, boolean enforceEncryptThenMacMode) {
+        Set<TlsParameterType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
+        requiredDerivations.add(TlsParameterType.APP_MSG_LENGHT);
+        requiredDerivations.add(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
 
-        return new ConditionalConstraint(
+        return new LegacyConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(
-                                getType().name(),
-                                DerivationType.CIPHERSUITE.name(),
-                                DerivationType.APP_MSG_LENGHT.name(),
-                                DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION.name(),
-                                DerivationType.BIT_POSITION.name())
+                ConstraintBuilder.constrain(getType().name(),
+                                TlsParameterType.CIPHER_SUITE.name(),
+                                TlsParameterType.APP_MSG_LENGHT.name(),
+                                TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION.name(),
+                                TlsParameterType.BIT_POSITION.name())
                         .by(
                                 (PaddingBitmaskDerivation paddingBitmaskDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation,
@@ -196,7 +193,7 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     private boolean resultsInPlausiblePadding(
-            DerivationScope scope,
+            LegacyDerivationScope scope,
             PaddingBitmaskDerivation paddingBitmaskDerivation,
             CipherSuiteDerivation cipherSuiteDerivation,
             AppMsgLengthDerivation appMsgLengthDerivation,
@@ -226,7 +223,7 @@ public class PaddingBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     private boolean chosenByteIsWithinPadding(
-            DerivationScope scope,
+            LegacyDerivationScope scope,
             int selectedPaddingBitmaskBytePosition,
             CipherSuite selectedCipherSuite,
             int selectedAppMsgLength,

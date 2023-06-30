@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.annotations;
 
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 public @interface ExplicitModelingConstraints {
     Class<?> clazz() default Object.class;
 
-    DerivationType[] affectedTypes();
+    TlsParameterType[] affectedTypes();
 
     String[] methods();
 }

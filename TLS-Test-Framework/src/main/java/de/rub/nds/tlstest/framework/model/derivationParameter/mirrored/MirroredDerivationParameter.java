@@ -9,8 +9,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter.mirrored;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 
@@ -21,10 +21,10 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParamete
  */
 public abstract class MirroredDerivationParameter<T> extends DerivationParameter<T> {
 
-    private final DerivationType mirroredType;
+    private final TlsParameterType mirroredType;
 
     public MirroredDerivationParameter(
-            DerivationType type, DerivationType mirroredType, Class<T> valueClass) {
+            TlsParameterType type, TlsParameterType mirroredType, Class<T> valueClass) {
         super(type, valueClass);
         this.mirroredType = mirroredType;
     }
@@ -33,17 +33,17 @@ public abstract class MirroredDerivationParameter<T> extends DerivationParameter
     public void applyToConfig(Config config, TestContext context) {}
 
     @Override
-    public boolean hasNoApplicableValues(TestContext context, DerivationScope scope) {
+    public boolean hasNoApplicableValues(TestContext context, LegacyDerivationScope scope) {
         return DerivationFactory.getInstance(getMirroredType())
                 .hasNoApplicableValues(context, scope);
     }
 
     @Override
-    public boolean canBeModeled(TestContext context, DerivationScope scope) {
+    public boolean canBeModeled(TestContext context, LegacyDerivationScope scope) {
         return DerivationFactory.getInstance(getMirroredType()).canBeModeled(context, scope);
     }
 
-    public DerivationType getMirroredType() {
+    public TlsParameterType getMirroredType() {
         return mirroredType;
     }
 }

@@ -41,7 +41,7 @@ import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
@@ -97,7 +97,7 @@ public class ServerHello extends Tls13Test {
             + "not offered MUST abort the handshake with "
             + "an \"illegal_parameter\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations(DerivationType.CIPHERSUITE)
+    @ScopeLimitations(TlsParameterType.CIPHER_SUITE)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

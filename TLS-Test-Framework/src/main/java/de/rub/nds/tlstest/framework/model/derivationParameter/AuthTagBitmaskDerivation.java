@@ -10,9 +10,9 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
@@ -23,7 +23,7 @@ import java.util.Set;
 public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
 
     public AuthTagBitmaskDerivation() {
-        super(DerivationType.AUTH_TAG_BITMASK, Integer.class);
+        super(TlsParameterType.AUTH_TAG_BITMASK, Integer.class);
     }
 
     public AuthTagBitmaskDerivation(Integer selectedValue) {
@@ -33,7 +33,7 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         int maxTagLen = 0;
         Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
@@ -59,8 +59,8 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
     public void applyToConfig(Config config, TestContext context) {}
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
-        List<ConditionalConstraint> condConstraints = new LinkedList<>();
+    public List<LegacyConditionalConstraint> getDefaultConditionalConstraints(LegacyDerivationScope scope) {
+        List<LegacyConditionalConstraint> condConstraints = new LinkedList<>();
 
         if (ConstraintHelper.multipleTagSizesModeled(scope)) {
             condConstraints.add(getMustBeWithinTagSizeConstraint());
@@ -68,13 +68,13 @@ public class AuthTagBitmaskDerivation extends DerivationParameter<Integer> {
         return condConstraints;
     }
 
-    private ConditionalConstraint getMustBeWithinTagSizeConstraint() {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+    private LegacyConditionalConstraint getMustBeWithinTagSizeConstraint() {
+        Set<TlsParameterType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
 
-        return new ConditionalConstraint(
+        return new LegacyConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name())
+                ConstraintBuilder.constrain(getType().name(), TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (AuthTagBitmaskDerivation authTagBitmaskDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {

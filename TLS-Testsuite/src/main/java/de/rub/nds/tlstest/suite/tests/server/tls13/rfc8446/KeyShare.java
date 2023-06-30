@@ -61,8 +61,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe.ShareOutOfBoundsDerivation;
@@ -85,7 +85,7 @@ public class KeyShare extends Tls13Test {
                     "Each KeyShareEntry value MUST correspond "
                             + "to a group offered in the \"supported_groups\" extension "
                             + "and MUST appear in the same order.")
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     /*
@@ -174,7 +174,7 @@ public class KeyShare extends Tls13Test {
                             + "Servers "
                             + "MUST NOT send a KeyShareEntry for any group not indicated in the "
                             + "client's \"supported_groups\" extension")
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -227,7 +227,7 @@ public class KeyShare extends Tls13Test {
                         });
     }
 
-    public List<DerivationParameter> getLegacyGroups(DerivationScope scope) {
+    public List<DerivationParameter> getLegacyGroups(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<NamedGroup> groups = NamedGroup.getImplemented();
         groups.removeIf(i -> i.isTls13());
@@ -240,7 +240,7 @@ public class KeyShare extends Tls13Test {
                     "secp256r1(0x0017), secp384r1(0x0018), secp521r1(0x0019),"
                             + " x25519(0x001D), x448(0x001E),")
     @RFC(number = 8446, section = "4.2.7. Supported Groups")
-    @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getLegacyGroups")
+    @ExplicitValues(affectedTypes = TlsParameterType.NAMED_GROUP, methods = "getLegacyGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)
@@ -259,7 +259,7 @@ public class KeyShare extends Tls13Test {
                     "secp256r1(0x0017), secp384r1(0x0018), secp521r1(0x0019),"
                             + " x25519(0x001D), x448(0x001E),")
     @RFC(number = 8446, section = "4.2.7. Supported Groups")
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)
@@ -350,7 +350,7 @@ public class KeyShare extends Tls13Test {
                     "For the curves secp256r1, secp384r1, and secp521r1, peers MUST "
                             + "validate each other's public value Q by ensuring that the point is a "
                             + "valid point on the elliptic curve.")
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isSecpCurve")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.NAMED_GROUP, methods = "isSecpCurve")
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.CRITICAL)
@@ -406,9 +406,9 @@ public class KeyShare extends Tls13Test {
                     "Peers MUST validate each other's public key Y by ensuring that 1 < Y "
                             + "< p-1.")
     @RFC(number = 8446, section = "4.2.8.1.  Diffie-Hellman Parameters")
-    @ScopeExtensions(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
-    @ManualConfig(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
-    @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getFfdheGroups")
+    @ScopeExtensions(TlsParameterType.FFDHE_SHARE_OUT_OF_BOUNDS)
+    @ManualConfig(TlsParameterType.FFDHE_SHARE_OUT_OF_BOUNDS)
+    @ExplicitValues(affectedTypes = TlsParameterType.NAMED_GROUP, methods = "getFfdheGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
@@ -454,7 +454,7 @@ public class KeyShare extends Tls13Test {
         runner.execute(worklfowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    public List<DerivationParameter> getFfdheGroups(DerivationScope scope) {
+    public List<DerivationParameter> getFfdheGroups(LegacyDerivationScope scope) {
         List<DerivationParameter> derivationParameters = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getTls13FfdheNamedGroups()
@@ -470,7 +470,7 @@ public class KeyShare extends Tls13Test {
                             + "Implementations MUST check whether the computed Diffie-Hellman shared "
                             + "secret is the all-zero value and abort if so")
     @RFC(number = 8446, section = "7.4.2.  Elliptic Curve Diffie-Hellman")
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isXCurve")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.NAMED_GROUP, methods = "isXCurve")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")

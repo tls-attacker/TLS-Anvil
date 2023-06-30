@@ -11,8 +11,8 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -20,7 +20,7 @@ import java.util.Set;
 public class CipherSuiteDerivation extends DerivationParameter<CipherSuite> {
 
     public CipherSuiteDerivation() {
-        super(DerivationType.CIPHERSUITE, CipherSuite.class);
+        super(TlsParameterType.CIPHER_SUITE, CipherSuite.class);
     }
 
     public CipherSuiteDerivation(CipherSuite selectedValue) {
@@ -40,7 +40,7 @@ public class CipherSuiteDerivation extends DerivationParameter<CipherSuite> {
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
         cipherSuiteList.addAll(

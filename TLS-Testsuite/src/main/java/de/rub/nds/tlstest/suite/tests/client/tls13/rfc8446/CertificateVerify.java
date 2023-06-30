@@ -37,8 +37,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
@@ -69,7 +69,7 @@ public class CertificateVerify extends Tls13Test {
                 "Client does not support legacy rsa signature and hash algorithms");
     }
 
-    public List<DerivationParameter> getLegacyRSASAHAlgorithms(DerivationScope scope) {
+    public List<DerivationParameter> getLegacyRSASAHAlgorithms(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         for (SignatureAndHashAlgorithm algo :
                 ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
@@ -96,11 +96,11 @@ public class CertificateVerify extends Tls13Test {
     @CertificateCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
-    @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
+    @ScopeExtensions(TlsParameterType.SIG_HASH_ALGORIHTM)
     @ExplicitValues(
-            affectedTypes = DerivationType.SIG_HASH_ALGORIHTM,
+            affectedTypes = TlsParameterType.SIG_HASH_ALGORIHTM,
             methods = "getLegacyRSASAHAlgorithms")
-    @ManualConfig(DerivationType.SIG_HASH_ALGORIHTM)
+    @ManualConfig(TlsParameterType.SIG_HASH_ALGORIHTM)
     @MethodCondition(method = "supportsLegacyRSASHAlgorithms")
     public void selectLegacyRSASignatureAlgorithm(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -165,7 +165,7 @@ public class CertificateVerify extends Tls13Test {
     @CryptoCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
     @CertificateCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)
+    @ScopeExtensions(TlsParameterType.SIGNATURE_BITMASK)
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] bitmask = derivationContainer.buildBitmask();
@@ -197,7 +197,7 @@ public class CertificateVerify extends Tls13Test {
     }
 
     public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(
-            DerivationScope scope) {
+            LegacyDerivationScope scope) {
         List<DerivationParameter> unsupportedAlgorithms = new LinkedList<>();
         SignatureAndHashAlgorithm.getImplemented().stream()
                 .filter(
@@ -228,7 +228,7 @@ public class CertificateVerify extends Tls13Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
     @ExplicitValues(
-            affectedTypes = DerivationType.SIG_HASH_ALGORIHTM,
+            affectedTypes = TlsParameterType.SIG_HASH_ALGORIHTM,
             methods = "getUnproposedSignatureAndHashAlgorithms")
     public void acceptsUnproposedSignatureAndHash(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

@@ -31,7 +31,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -55,7 +55,7 @@ public class AlertProtocol extends Tls12Test {
             + "of the connection. The other party MUST respond with a close_notify "
             + "alert of its own and close down the connection immediately, "
             + "discarding any pending writes.")
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @InteroperabilityCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.LOW)
@@ -93,8 +93,8 @@ public class AlertProtocol extends Tls12Test {
     @TlsTest(description = "Upon transmission or receipt of a fatal alert message, both " +
         "parties immediately close the connection.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    @ScopeExtensions(DerivationType.ALERT)
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions(TlsParameterType.ALERT)
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @SecurityCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -125,8 +125,8 @@ public class AlertProtocol extends Tls12Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(DerivationType.ALERT)
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions(TlsParameterType.ALERT)
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void abortAfterFatalAlertServerHelloDone(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

@@ -45,8 +45,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
@@ -142,8 +142,8 @@ public class RecordLayer extends Tls13Test {
                     "Handshake messages MUST NOT be interleaved "
                             + "with other record types. That is, if a handshake message is split over two or more\n"
                             + "records, there MUST NOT be any other records between them.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @ScopeExtensions(DerivationType.ALERT)
+    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ScopeExtensions(TlsParameterType.ALERT)
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -186,9 +186,9 @@ public class RecordLayer extends Tls13Test {
     @RFC(number = 8446, section = "D.2.  Negotiating with an Older Client")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
     @ExplicitValues(
-            affectedTypes = DerivationType.PROTOCOL_VERSION,
+            affectedTypes = TlsParameterType.PROTOCOL_VERSION,
             methods = "getRecordProtocolVersions")
     @Tag("new")
     public void ignoresInitialRecordVersion(
@@ -214,7 +214,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    public List<DerivationParameter> getRecordProtocolVersions(DerivationScope scope) {
+    public List<DerivationParameter> getRecordProtocolVersions(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x00}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x01}));

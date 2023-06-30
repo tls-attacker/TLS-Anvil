@@ -10,15 +10,15 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
 public class GreaseProtocolVersionDerivation extends DerivationParameter<ProtocolVersion> {
 
     public GreaseProtocolVersionDerivation() {
-        super(DerivationType.GREASE_PROTOCOL_VERSION, ProtocolVersion.class);
+        super(TlsParameterType.GREASE_PROTOCOL_VERSION, ProtocolVersion.class);
     }
 
     public GreaseProtocolVersionDerivation(ProtocolVersion selectedValue) {
@@ -28,7 +28,7 @@ public class GreaseProtocolVersionDerivation extends DerivationParameter<Protoco
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         for (ProtocolVersion version : ProtocolVersion.values()) {
             if (version.isGrease()) {

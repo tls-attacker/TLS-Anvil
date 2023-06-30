@@ -9,18 +9,18 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
 public class BitPositionDerivation extends DerivationParameter<Integer> {
 
     public BitPositionDerivation() {
-        super(DerivationType.BIT_POSITION, Integer.class);
+        super(TlsParameterType.BIT_POSITION, Integer.class);
     }
 
-    public BitPositionDerivation(Integer selectedValue, DerivationType parent) {
+    public BitPositionDerivation(Integer selectedValue, TlsParameterType parent) {
         this();
         setParent(parent);
         setSelectedValue(selectedValue);
@@ -28,7 +28,7 @@ public class BitPositionDerivation extends DerivationParameter<Integer> {
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         for (int i = 0; i < 8; i++) {
             parameterValues.add(new BitPositionDerivation(i, this.getParent()));

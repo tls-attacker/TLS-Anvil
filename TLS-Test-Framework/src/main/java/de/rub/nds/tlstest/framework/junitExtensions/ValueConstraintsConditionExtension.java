@@ -8,8 +8,8 @@
 package de.rub.nds.tlstest.framework.junitExtensions;
 
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ValueConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
@@ -23,7 +23,7 @@ public class ValueConstraintsConditionExtension extends BaseCondition {
             return ConditionEvaluationResult.enabled("Class annotations are not relevant.");
         }
 
-        DerivationScope derivationScope = new DerivationScope(extensionContext);
+        LegacyDerivationScope derivationScope = new LegacyDerivationScope(extensionContext);
         for (ValueConstraint valContraint : derivationScope.getValueConstraints()) {
             DerivationParameter derivationParam =
                     DerivationFactory.getInstance(valContraint.getAffectedType());
@@ -34,7 +34,7 @@ public class ValueConstraintsConditionExtension extends BaseCondition {
             }
         }
 
-        for (DerivationType explicitType : derivationScope.getExplicitTypeValues().keySet()) {
+        for (TlsParameterType explicitType : derivationScope.getExplicitTypeValues().keySet()) {
             DerivationParameter derivationParam = DerivationFactory.getInstance(explicitType);
             if (derivationParam.hasNoApplicableValues(TestContext.getInstance(), derivationScope)) {
                 return ConditionEvaluationResult.disabled(

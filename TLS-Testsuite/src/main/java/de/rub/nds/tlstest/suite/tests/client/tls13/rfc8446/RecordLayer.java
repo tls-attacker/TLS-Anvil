@@ -45,8 +45,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ChosenHandshakeMessageDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
@@ -136,8 +136,8 @@ public class RecordLayer extends Tls13Test {
                     "Handshake messages MUST NOT be interleaved "
                             + "with other record types. That is, if a handshake message is split over two or more "
                             + "records, there MUST NOT be any other records between them.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @ScopeExtensions(DerivationType.ALERT)
+    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ScopeExtensions(TlsParameterType.ALERT)
     @RecordLayerCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -177,7 +177,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    public List<DerivationParameter> getModifiableHandshakeMessages(DerivationScope scope) {
+    public List<DerivationParameter> getModifiableHandshakeMessages(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(
                 new ChosenHandshakeMessageDerivation(HandshakeMessageType.ENCRYPTED_EXTENSIONS));
@@ -189,12 +189,12 @@ public class RecordLayer extends Tls13Test {
     }
 
     @TlsTest(description = "Send a record without any content to increase the sequencenumber.")
-    @ScopeExtensions(DerivationType.CHOSEN_HANDSHAKE_MSG)
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeExtensions(TlsParameterType.CHOSEN_HANDSHAKE_MSG)
+    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
     @ExplicitValues(
-            affectedTypes = DerivationType.CHOSEN_HANDSHAKE_MSG,
+            affectedTypes = TlsParameterType.CHOSEN_HANDSHAKE_MSG,
             methods = "getModifiableHandshakeMessages")
-    @ManualConfig(DerivationType.CHOSEN_HANDSHAKE_MSG)
+    @ManualConfig(TlsParameterType.CHOSEN_HANDSHAKE_MSG)
     @Tag("emptyRecord")
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
@@ -250,7 +250,7 @@ public class RecordLayer extends Tls13Test {
                             + "MUST verify that all messages immediately preceding a key change "
                             + "align with a record boundary; if not, then they MUST terminate the "
                             + "connection with an \"unexpected_message\" alert.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")

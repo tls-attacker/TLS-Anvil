@@ -49,7 +49,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -239,9 +239,9 @@ public class EarlyData extends Tls13Test {
                             + "\"bad_record_mac\" alert as per Section 5.2.")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "supports0rtt")
-    @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.CIPHERTEXT_BITMASK})
+    @ScopeExtensions({TlsParameterType.APP_MSG_LENGHT, TlsParameterType.CIPHERTEXT_BITMASK})
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.RECORD_LENGTH,
+            affectedTypes = TlsParameterType.RECORD_LENGTH,
             methods = "recordLengthAllowsModification")
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -318,7 +318,7 @@ public class EarlyData extends Tls13Test {
                             + "\"early_data\" extension, it MUST terminate the connection with a "
                             + "\"bad_record_mac\" alert as per Section 5.2.")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
-    @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
+    @ScopeExtensions(TlsParameterType.AUTH_TAG_BITMASK)
     @MethodCondition(method = "supports0rtt")
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

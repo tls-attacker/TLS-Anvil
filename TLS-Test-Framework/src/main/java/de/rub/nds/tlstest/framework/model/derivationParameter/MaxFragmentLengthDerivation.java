@@ -10,8 +10,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.MaxFragmentLength;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -23,7 +23,7 @@ import java.util.List;
 public class MaxFragmentLengthDerivation extends DerivationParameter<MaxFragmentLength> {
 
     public MaxFragmentLengthDerivation() {
-        super(DerivationType.MAX_FRAGMENT_LENGTH, MaxFragmentLength.class);
+        super(TlsParameterType.MAX_FRAGMENT_LENGTH, MaxFragmentLength.class);
     }
 
     public MaxFragmentLengthDerivation(MaxFragmentLength selectedValue) {
@@ -32,7 +32,7 @@ public class MaxFragmentLengthDerivation extends DerivationParameter<MaxFragment
     }
 
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
 
         // TODO The layer system fails to process messages when max length was set

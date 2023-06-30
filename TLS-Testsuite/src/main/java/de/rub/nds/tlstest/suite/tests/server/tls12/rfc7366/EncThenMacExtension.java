@@ -33,7 +33,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -78,8 +78,8 @@ public class EncThenMacExtension extends Tls12Test {
                             + "encrypt-then-MAC rather than the default MAC-then-encrypt.  If the "
                             + "server is capable of meeting this requirement, it responds with an "
                             + "encrypt_then_mac in its server_hello.")
-    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isBlockCipher")
-    @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isBlockCipher")
+    @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @HandshakeCategory(SeverityLevel.INFORMATIONAL)
     @ComplianceCategory(SeverityLevel.INFORMATIONAL)
     @CryptoCategory(SeverityLevel.INFORMATIONAL)
@@ -110,9 +110,9 @@ public class EncThenMacExtension extends Tls12Test {
                             + "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, "
                             + "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.CIPHERSUITE,
+            affectedTypes = TlsParameterType.CIPHER_SUITE,
             methods = "isNotBlockCipher")
-    @ScopeLimitations(DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

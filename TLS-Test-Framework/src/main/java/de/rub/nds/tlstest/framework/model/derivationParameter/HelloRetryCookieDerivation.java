@@ -9,15 +9,15 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
 public class HelloRetryCookieDerivation extends DerivationParameter<byte[]> {
 
     public HelloRetryCookieDerivation() {
-        super(DerivationType.HELLO_RETRY_COOKIE, byte[].class);
+        super(TlsParameterType.HELLO_RETRY_COOKIE, byte[].class);
     }
 
     public HelloRetryCookieDerivation(byte[] selectedValue) {
@@ -27,7 +27,7 @@ public class HelloRetryCookieDerivation extends DerivationParameter<byte[]> {
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> derivationParameters = new LinkedList<>();
         derivationParameters.add(new HelloRetryCookieDerivation(new byte[] {0x55}));
         derivationParameters.add(

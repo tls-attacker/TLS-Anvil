@@ -53,7 +53,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.HashSet;
@@ -289,7 +289,7 @@ public class PreSharedKey extends Tls13Test {
                             + "the corresponding binder value (see Section 4.2.11.2 below).  If this "
                             + "value is not present or does not validate, the server MUST abort the "
                             + "handshake.")
-    @ScopeExtensions(DerivationType.PRF_BITMASK)
+    @ScopeExtensions(TlsParameterType.PRF_BITMASK)
     @MethodCondition(method = "supportsPsk")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

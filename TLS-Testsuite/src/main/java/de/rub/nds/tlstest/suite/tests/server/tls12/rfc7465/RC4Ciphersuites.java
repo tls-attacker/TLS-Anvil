@@ -36,7 +36,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
@@ -71,9 +71,9 @@ public class RC4Ciphersuites extends Tls12Test {
             description =
                     "TLS servers MUST NOT select an RC4 cipher suite when a TLS client "
                             + "sends such a cipher suite in the ClientHello message.")
-    @ManualConfig(DerivationType.CIPHERSUITE)
+    @ManualConfig(TlsParameterType.CIPHER_SUITE)
     @MethodCondition(method = "supportsRC4")
-    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNonRC4")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isNonRC4")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.MEDIUM)
@@ -116,7 +116,7 @@ public class RC4Ciphersuites extends Tls12Test {
                     "If the TLS client only offers RC4 cipher suites, the TLS server "
                             + "MUST terminate the handshake. The TLS server MAY send the "
                             + "insufficient_security fatal alert in this case.")
-    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isRC4")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isRC4")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.MEDIUM)

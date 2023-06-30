@@ -37,7 +37,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseExtensionDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseSigHashDerivation;
@@ -62,7 +62,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
             + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello. Servers MUST correctly " 
             + "ignore unknown values in a ClientHello and attempt to negotiate with " 
             + "one of the remaining parameters.")
-    @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
+    @ScopeLimitations({TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES, TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS, TlsParameterType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -87,8 +87,8 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
             + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello. Servers MUST correctly " 
             + "ignore unknown values in a ClientHello and attempt to negotiate with " 
             + "one of the remaining parameters.")
-    @ScopeExtensions(DerivationType.GREASE_EXTENSION)
-    @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
+    @ScopeExtensions(TlsParameterType.GREASE_EXTENSION)
+    @ScopeLimitations({TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES, TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS, TlsParameterType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -117,7 +117,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
         "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello. Servers MUST correctly " 
             + "ignore unknown values in a ClientHello and attempt to negotiate with " 
             + "one of the remaining parameters.")
-    @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
+    @ScopeLimitations({TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES, TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS, TlsParameterType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -139,8 +139,8 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
             + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello. Servers MUST correctly " 
             + "ignore unknown values in a ClientHello and attempt to negotiate with " 
             + "one of the remaining parameters.")
-    @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
-    @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
+    @ScopeExtensions(TlsParameterType.GREASE_SIG_HASH)
+    @ScopeLimitations({TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES, TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS, TlsParameterType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -169,7 +169,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
         "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello. Servers MUST correctly " 
             + "ignore unknown values in a ClientHello and attempt to negotiate with " 
             + "one of the remaining parameters.")
-    @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
+    @ScopeLimitations({TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES, TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS, TlsParameterType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

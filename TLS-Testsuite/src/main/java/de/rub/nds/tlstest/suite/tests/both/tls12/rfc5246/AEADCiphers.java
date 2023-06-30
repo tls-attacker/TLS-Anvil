@@ -29,7 +29,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -48,8 +48,8 @@ public class AEADCiphers extends Tls12Test {
     @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions({DerivationType.AUTH_TAG_BITMASK})
-    @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isAEAD")
+    @ScopeExtensions({TlsParameterType.AUTH_TAG_BITMASK})
+    @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods="isAEAD")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -87,9 +87,9 @@ public class AEADCiphers extends Tls12Test {
     @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions({DerivationType.CIPHERTEXT_BITMASK, DerivationType.APP_MSG_LENGHT})
-    @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods="isAEAD")
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions({TlsParameterType.CIPHERTEXT_BITMASK, TlsParameterType.APP_MSG_LENGHT})
+    @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods="isAEAD")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)

@@ -34,7 +34,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -74,7 +74,7 @@ public class MaxFragmentLengthExtension extends Tls12Test {
     @HandshakeCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
-    @ScopeLimitations(DerivationType.MAX_FRAGMENT_LENGTH)
+    @ScopeLimitations(TlsParameterType.MAX_FRAGMENT_LENGTH)
     @MethodCondition(method = "supportsMaxFragmentLength")
     @Tag("new")
     public void enforcesRecordLimit(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

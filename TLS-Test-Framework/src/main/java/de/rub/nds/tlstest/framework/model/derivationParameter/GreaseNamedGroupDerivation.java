@@ -10,15 +10,15 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
 public class GreaseNamedGroupDerivation extends DerivationParameter<NamedGroup> {
 
     public GreaseNamedGroupDerivation() {
-        super(DerivationType.GREASE_NAMED_GROUP, NamedGroup.class);
+        super(TlsParameterType.GREASE_NAMED_GROUP, NamedGroup.class);
     }
 
     public GreaseNamedGroupDerivation(NamedGroup selectedValue) {
@@ -28,7 +28,7 @@ public class GreaseNamedGroupDerivation extends DerivationParameter<NamedGroup> 
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         for (NamedGroup group : NamedGroup.values()) {
             if (group.isGrease()) {

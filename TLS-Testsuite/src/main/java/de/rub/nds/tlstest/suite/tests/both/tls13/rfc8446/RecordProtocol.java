@@ -42,7 +42,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AdditionalPaddingLengthDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolMessageTypeDerivation;
@@ -135,7 +135,7 @@ public class RecordProtocol extends Tls13Test {
                             + "terminate the connection with a \"bad_record_mac\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
+    @ScopeExtensions(TlsParameterType.AUTH_TAG_BITMASK)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -177,7 +177,7 @@ public class RecordProtocol extends Tls13Test {
     // Note that the additional byte is the encoded content type, which we also add
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @RFC(number = 8446, section = "5.1. Record Layer and 5.4 Reccord Padding")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -221,9 +221,9 @@ public class RecordProtocol extends Tls13Test {
                             + "terminate the connection with a \"bad_record_mac\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions({DerivationType.CIPHERTEXT_BITMASK, DerivationType.APP_MSG_LENGHT})
+    @ScopeExtensions({TlsParameterType.CIPHERTEXT_BITMASK, TlsParameterType.APP_MSG_LENGHT})
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.RECORD_LENGTH,
+            affectedTypes = TlsParameterType.RECORD_LENGTH,
             methods = "recordLengthAllowsModification")
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -262,9 +262,9 @@ public class RecordProtocol extends Tls13Test {
                             + "TLSCiphertext.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.RECORD_LENGTH,
+            affectedTypes = TlsParameterType.RECORD_LENGTH,
             methods = "isReasonableRecordSize")
-    @ScopeExtensions(DerivationType.ADDITIONAL_PADDING_LENGTH)
+    @ScopeExtensions(TlsParameterType.ADDITIONAL_PADDING_LENGTH)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -306,7 +306,7 @@ public class RecordProtocol extends Tls13Test {
                             + "peer with TLSCiphertext.length larger than 2^14 + 256 octets MUST "
                             + "terminate the connection with a \"record_overflow\" alert.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -343,7 +343,7 @@ public class RecordProtocol extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.PROTOCOL_MESSAGE_TYPE)
+    @ScopeExtensions(TlsParameterType.PROTOCOL_MESSAGE_TYPE)
     @AlertCategory(SeverityLevel.LOW)
     @Tag("emptyRecord")
     public void sendEmptyRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

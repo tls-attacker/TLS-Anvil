@@ -16,9 +16,9 @@ import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.crypto.keys.CustomDSAPrivateKey;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
 
     public SignatureBitmaskDerivation() {
-        super(DerivationType.SIGNATURE_BITMASK, Integer.class);
+        super(TlsParameterType.SIGNATURE_BITMASK, Integer.class);
     }
 
     public SignatureBitmaskDerivation(Integer selectedValue) {
@@ -41,12 +41,12 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         return getFirstAndLastByteOfEachSignature(context, scope);
     }
 
     private List<DerivationParameter> getAllPossibleBytePositions(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         int maxSignatureLength = getMaxSignatureByteLength(context, scope);
 
@@ -57,12 +57,12 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     private List<DerivationParameter> getFirstAndLastByteOfEachSignature(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         Set<Integer> listedValues = new HashSet<>();
         listedValues.add(0);
 
         List<DerivationParameter> applicableCertificates =
-                DerivationFactory.getInstance(DerivationType.CERTIFICATE)
+                DerivationFactory.getInstance(TlsParameterType.CERTIFICATE)
                         .getConstrainedParameterValues(context, scope);
         applicableCertificates.forEach(
                 selectableCert ->
@@ -78,7 +78,7 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
         return parameterValues;
     }
 
-    private int getMaxSignatureByteLength(TestContext context, DerivationScope scope) {
+    private int getMaxSignatureByteLength(TestContext context, LegacyDerivationScope scope) {
         List<SignatureAndHashAlgorithm> signatureAndHashAlgorithms;
         if (!context.getFeatureExtractionResult()
                 .getSignatureAndHashAlgorithmsForDerivation()
@@ -227,25 +227,24 @@ public class SignatureBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
-        List<ConditionalConstraint> conditionalConstraints = new LinkedList<>();
+    public List<LegacyConditionalConstraint> getDefaultConditionalConstraints(LegacyDerivationScope scope) {
+        List<LegacyConditionalConstraint> conditionalConstraints = new LinkedList<>();
         if (ConstraintHelper.signatureLengthConstraintApplicable(scope)) {
             conditionalConstraints.add(getMustBeWithinSignatureSizeConstraint());
         }
         return conditionalConstraints;
     }
 
-    private ConditionalConstraint getMustBeWithinSignatureSizeConstraint() {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CERTIFICATE);
-        requiredDerivations.add(DerivationType.SIG_HASH_ALGORIHTM);
+    private LegacyConditionalConstraint getMustBeWithinSignatureSizeConstraint() {
+        Set<TlsParameterType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(TlsParameterType.CERTIFICATE);
+        requiredDerivations.add(TlsParameterType.SIG_HASH_ALGORIHTM);
 
-        return new ConditionalConstraint(
+        return new LegacyConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(
-                                getType().name(),
-                                DerivationType.CERTIFICATE.name(),
-                                DerivationType.SIG_HASH_ALGORIHTM.name())
+                ConstraintBuilder.constrain(getType().name(),
+                                TlsParameterType.CERTIFICATE.name(),
+                                TlsParameterType.SIG_HASH_ALGORIHTM.name())
                         .by(
                                 (SignatureBitmaskDerivation signatureBitmaskDerivation,
                                         CertificateDerivation certificateDerivation,

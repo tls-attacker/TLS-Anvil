@@ -13,18 +13,18 @@
 package de.rub.nds.tlstest.framework.model.constraint;
 
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rwth.swc.coffee4j.model.constraints.Constraint;
 import java.util.List;
 import java.util.Set;
 
-public class ConditionalConstraint {
-    private final Set<DerivationType> requiredDerivations;
+public class LegacyConditionalConstraint {
+    private final Set<TlsParameterType> requiredDerivations;
     private final Constraint constraint;
 
-    public Set<DerivationType> getRequiredDerivations() {
+    public Set<TlsParameterType> getRequiredDerivations() {
         return requiredDerivations;
     }
 
@@ -32,8 +32,8 @@ public class ConditionalConstraint {
         return constraint;
     }
 
-    public boolean isApplicableTo(List<DerivationType> modeledDerivations, DerivationScope scope) {
-        for (DerivationType required : requiredDerivations) {
+    public boolean isApplicableTo(List<TlsParameterType> modeledDerivations, LegacyDerivationScope scope) {
+        for (TlsParameterType required : requiredDerivations) {
             if (!modeledDerivations.contains(required)
                     || !DerivationFactory.getInstance(required)
                             .canBeModeled(TestContext.getInstance(), scope)) {
@@ -43,7 +43,7 @@ public class ConditionalConstraint {
         return true;
     }
 
-    public ConditionalConstraint(Set<DerivationType> requiredDerivations, Constraint constraint) {
+    public LegacyConditionalConstraint(Set<TlsParameterType> requiredDerivations, Constraint constraint) {
         this.requiredDerivations = requiredDerivations;
         this.constraint = constraint;
     }

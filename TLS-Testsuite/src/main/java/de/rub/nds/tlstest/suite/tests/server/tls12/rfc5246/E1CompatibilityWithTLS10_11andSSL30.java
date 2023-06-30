@@ -35,8 +35,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -145,7 +145,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             description =
                     "Thus, TLS servers compliant with this specification MUST accept any value {03,XX} as the "
                             + "record layer version number for ClientHello.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     public void acceptAnyRecordVersionNumber(
@@ -164,7 +164,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    public List<DerivationParameter> getInvalidHighRecordVersion(DerivationScope scope) {
+    public List<DerivationParameter> getInvalidHighRecordVersion(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x00}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x03}));

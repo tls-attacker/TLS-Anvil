@@ -44,8 +44,8 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
@@ -71,7 +71,7 @@ public class ServerKeyExchange extends Tls12Test {
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
-    @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)
+    @ScopeExtensions(TlsParameterType.SIGNATURE_BITMASK)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -107,7 +107,7 @@ public class ServerKeyExchange extends Tls12Test {
                         });
     }
 
-    public List<DerivationParameter> getUnproposedNamedGroups(DerivationScope scope) {
+    public List<DerivationParameter> getUnproposedNamedGroups(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         NamedGroup.getImplemented().stream()
                 .filter(group -> group.isCurve())
@@ -122,9 +122,9 @@ public class ServerKeyExchange extends Tls12Test {
         return parameterValues;
     }
 
-    public List<DerivationParameter> getCertsIncludingUnsupportedPkGroups(DerivationScope scope) {
+    public List<DerivationParameter> getCertsIncludingUnsupportedPkGroups(LegacyDerivationScope scope) {
         CertificateDerivation certDerivation =
-                (CertificateDerivation) DerivationFactory.getInstance(DerivationType.CERTIFICATE);
+                (CertificateDerivation) DerivationFactory.getInstance(TlsParameterType.CERTIFICATE);
         return certDerivation.getApplicableCertificates(context, scope, true);
     }
 
@@ -138,7 +138,7 @@ public class ServerKeyExchange extends Tls12Test {
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
     @ExplicitValues(
-            affectedTypes = {DerivationType.NAMED_GROUP, DerivationType.CERTIFICATE},
+            affectedTypes = {TlsParameterType.NAMED_GROUP, TlsParameterType.CERTIFICATE},
             methods = {"getUnproposedNamedGroups", "getCertsIncludingUnsupportedPkGroups"})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
@@ -165,7 +165,7 @@ public class ServerKeyExchange extends Tls12Test {
                 && !cipherSuite.isEphemeral();
     }
 
-    public List<DerivationParameter> getEcdhCertsForUnproposedGroups(DerivationScope scope) {
+    public List<DerivationParameter> getEcdhCertsForUnproposedGroups(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         CertificateByteChooser.getInstance().getCertificateKeyPairList().stream()
                 .filter(
@@ -188,17 +188,17 @@ public class ServerKeyExchange extends Tls12Test {
                             + "fatal handshake failure is that the client's capabilities for "
                             + "handling elliptic curves and point formats are exceeded")
     @ModelFromScope(baseModel = ModelType.GENERIC)
-    @ScopeExtensions(DerivationType.CERTIFICATE)
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ScopeExtensions(TlsParameterType.CERTIFICATE)
+    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
     @ExplicitValues(
-            affectedTypes = DerivationType.CERTIFICATE,
+            affectedTypes = TlsParameterType.CERTIFICATE,
             methods = "getEcdhCertsForUnproposedGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.CIPHERSUITE,
+            affectedTypes = TlsParameterType.CIPHER_SUITE,
             methods = "isStaticEcdhCipherSuite")
     public void acceptsUnproposedNamedGroupStatic(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -260,12 +260,12 @@ public class ServerKeyExchange extends Tls12Test {
                             + "server's elliptic curve domain parameters and ephemeral ECDH public "
                             + "key from the ServerKeyExchange message.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations(DerivationType.SIG_HASH_ALGORIHTM)
+    @ScopeLimitations(TlsParameterType.SIG_HASH_ALGORIHTM)
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.CIPHERSUITE,
+            affectedTypes = TlsParameterType.CIPHER_SUITE,
             methods = "isNotAnonCipherSuite")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
@@ -306,7 +306,7 @@ public class ServerKeyExchange extends Tls12Test {
     }
 
     public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(
-            DerivationScope scope) {
+            LegacyDerivationScope scope) {
         List<DerivationParameter> unsupportedAlgorithms = new LinkedList<>();
         ClientFeatureExtractionResult extractionResult =
                 (ClientFeatureExtractionResult) context.getFeatureExtractionResult();
@@ -336,7 +336,7 @@ public class ServerKeyExchange extends Tls12Test {
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
     @ExplicitValues(
-            affectedTypes = DerivationType.SIG_HASH_ALGORIHTM,
+            affectedTypes = TlsParameterType.SIG_HASH_ALGORIHTM,
             methods = "getUnproposedSignatureAndHashAlgorithms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

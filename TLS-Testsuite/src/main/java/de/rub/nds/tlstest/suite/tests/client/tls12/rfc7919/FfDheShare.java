@@ -47,10 +47,10 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -90,7 +90,7 @@ public class FfDheShare extends Tls12Test {
                             + "Peers MUST validate each other's public key Y (dh_Ys offered by the "
                             + "server or dh_Yc offered by the client) by ensuring that 1 < Y < p-1.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
+    @ScopeExtensions(TlsParameterType.FFDHE_SHARE_OUT_OF_BOUNDS)
     @HandshakeCategory(SeverityLevel.INFORMATIONAL)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -157,11 +157,11 @@ public class FfDheShare extends Tls12Test {
                             + "key exchange using that group.")
     @RFC(number = 7919, section = "3. Client Behavior")
     @ExplicitValues(
-            affectedTypes = DerivationType.NAMED_GROUP,
+            affectedTypes = TlsParameterType.NAMED_GROUP,
             methods = "getSupportedFfdheNamedGroups")
-    @ManualConfig(DerivationType.NAMED_GROUP)
+    @ManualConfig(TlsParameterType.NAMED_GROUP)
     @ExplicitModelingConstraints(
-            affectedTypes = DerivationType.NAMED_GROUP,
+            affectedTypes = TlsParameterType.NAMED_GROUP,
             methods = "getEmptyConstraintsList")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
@@ -204,7 +204,7 @@ public class FfDheShare extends Tls12Test {
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
     @Tag("new")
     public void performsRequiredSecurityCheck(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -232,7 +232,7 @@ public class FfDheShare extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    public List<DerivationParameter> getSupportedFfdheNamedGroups(DerivationScope scope) {
+    public List<DerivationParameter> getSupportedFfdheNamedGroups(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getFfdheNamedGroups()
@@ -240,7 +240,7 @@ public class FfDheShare extends Tls12Test {
         return parameterValues;
     }
 
-    public List<ConditionalConstraint> getEmptyConstraintsList(DerivationScope scope) {
+    public List<LegacyConditionalConstraint> getEmptyConstraintsList(LegacyDerivationScope scope) {
         return new LinkedList<>();
     }
 }

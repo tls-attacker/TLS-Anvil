@@ -42,8 +42,8 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
@@ -69,7 +69,7 @@ public class SupportedVersions extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
 
-    public List<DerivationParameter> getInvalidLegacyVersions(DerivationScope scope) {
+    public List<DerivationParameter> getInvalidLegacyVersions(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x05, 0x05}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x04}));
@@ -82,10 +82,10 @@ public class SupportedVersions extends Tls13Test {
                             + "ServerHello.legacy_version value and MUST use "
                             + "only the \"supported_versions\" extension to determine the selected version.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
-    @ManualConfig(DerivationType.PROTOCOL_VERSION)
+    @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
+    @ManualConfig(TlsParameterType.PROTOCOL_VERSION)
     @ExplicitValues(
-            affectedTypes = DerivationType.PROTOCOL_VERSION,
+            affectedTypes = TlsParameterType.PROTOCOL_VERSION,
             methods = "getInvalidLegacyVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -205,7 +205,7 @@ public class SupportedVersions extends Tls13Test {
                 versions.contains(ProtocolVersion.TLS13));
     }
 
-    public List<DerivationParameter> getUnsupportedProtocolVersions(DerivationScope scope) {
+    public List<DerivationParameter> getUnsupportedProtocolVersions(LegacyDerivationScope scope) {
         SupportedVersionsExtensionMessage clientSupportedVersions =
                 TestContext.getInstance()
                         .getReceivedClientHelloMessage()
@@ -252,9 +252,9 @@ public class SupportedVersions extends Tls13Test {
     @RFC(
             number = 8446,
             section = "4.2.1 Supported Versions and D.1. Negotiating with an Older Server")
-    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
     @ExplicitValues(
-            affectedTypes = DerivationType.PROTOCOL_VERSION,
+            affectedTypes = TlsParameterType.PROTOCOL_VERSION,
             methods = "getUnsupportedProtocolVersions")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -298,9 +298,9 @@ public class SupportedVersions extends Tls13Test {
     @RFC(
             number = 8446,
             section = "4.2.1 Supported Versions and D.1. Negotiating with an Older Server")
-    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
     @ExplicitValues(
-            affectedTypes = DerivationType.PROTOCOL_VERSION,
+            affectedTypes = TlsParameterType.PROTOCOL_VERSION,
             methods = "getUndefinedProtocolVersions")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -327,7 +327,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    public List<DerivationParameter> getUndefinedProtocolVersions(DerivationScope scope) {
+    public List<DerivationParameter> getUndefinedProtocolVersions(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         // 03 04 is a separate test
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x05}));

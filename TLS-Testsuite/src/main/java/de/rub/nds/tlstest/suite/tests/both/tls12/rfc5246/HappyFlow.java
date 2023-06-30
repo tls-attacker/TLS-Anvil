@@ -7,6 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -18,7 +19,6 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
@@ -34,7 +34,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 5246, section = "7.3.  Handshake Protocol Overview")
 public class HappyFlow extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A benign handshake executed with all parameter combinations "
                             + " that affect a regular handshake")

@@ -39,8 +39,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -83,7 +83,7 @@ public class SignatureAlgorithms extends Tls13Test {
         });
     }
 
-    public List<DerivationParameter> getLegacySigHashAlgoritms(DerivationScope scope) {
+    public List<DerivationParameter> getLegacySigHashAlgoritms(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<SignatureAndHashAlgorithm> algos = SignatureAndHashAlgorithm.getImplemented().stream()
                 .filter(i -> !i.suitedForSigningTls13Messages())
@@ -101,9 +101,9 @@ public class SignatureAlgorithms extends Tls13Test {
         "Clients " +
         "offering these values MUST list them as the lowest priority " +
         "(listed after all other algorithms in SignatureSchemeList).")
-    @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
-    @ManualConfig(DerivationType.SIG_HASH_ALGORIHTM)
-    @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
+    @ScopeExtensions(TlsParameterType.SIG_HASH_ALGORIHTM)
+    @ManualConfig(TlsParameterType.SIG_HASH_ALGORIHTM)
+    @ExplicitValues(affectedTypes = TlsParameterType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -144,8 +144,8 @@ public class SignatureAlgorithms extends Tls13Test {
         "TLS 1.3.  They MUST NOT be offered or negotiated by any " +
         "implementation.  In particular, MD5 [SLOTH], SHA-224, and DSA " +
         "MUST NOT be used.")
-    @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
-    @ExplicitValues(affectedTypes = DerivationType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
+    @ScopeExtensions(TlsParameterType.SIG_HASH_ALGORIHTM)
+    @ExplicitValues(affectedTypes = TlsParameterType.SIG_HASH_ALGORIHTM, methods = "getLegacySigHashAlgoritms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)

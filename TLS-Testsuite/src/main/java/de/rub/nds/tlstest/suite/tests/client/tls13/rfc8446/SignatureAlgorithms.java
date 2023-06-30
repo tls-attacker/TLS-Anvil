@@ -37,10 +37,10 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -85,13 +85,13 @@ public class SignatureAlgorithms extends Tls13Test {
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ExplicitModelingConstraints(
-            affectedTypes = DerivationType.SIG_HASH_ALGORIHTM,
+            affectedTypes = TlsParameterType.SIG_HASH_ALGORIHTM,
             methods = "getMixedEccHashLengthPairs")
     @DynamicValueConstraints(
             affectedTypes = {
-                DerivationType.CIPHERSUITE,
-                DerivationType.CERTIFICATE,
-                DerivationType.SIG_HASH_ALGORIHTM
+                TlsParameterType.CIPHER_SUITE,
+                TlsParameterType.CERTIFICATE,
+                TlsParameterType.SIG_HASH_ALGORIHTM
             },
             methods = {"isEcdsaCipherSuite", "isApplicableEcdsaCert", "isTls13SigHash"})
     @Tag("new")
@@ -119,7 +119,7 @@ public class SignatureAlgorithms extends Tls13Test {
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @DynamicValueConstraints(
-            affectedTypes = {DerivationType.CIPHERSUITE, DerivationType.SIG_HASH_ALGORIHTM},
+            affectedTypes = {TlsParameterType.CIPHER_SUITE, TlsParameterType.SIG_HASH_ALGORIHTM},
             methods = {"isRsaSignatureCipherSuite", "isRsaPssAlgorithm"})
     @Tag("new")
     public void supportsRsaPssInTls12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -196,25 +196,24 @@ public class SignatureAlgorithms extends Tls13Test {
                 && algorithmPair.getSignatureAlgorithm().name().contains("PSS");
     }
 
-    public List<ConditionalConstraint> getMixedEccHashLengthPairs(DerivationScope scope) {
-        List<ConditionalConstraint> condConstraints = new LinkedList<>();
+    public List<LegacyConditionalConstraint> getMixedEccHashLengthPairs(LegacyDerivationScope scope) {
+        List<LegacyConditionalConstraint> condConstraints = new LinkedList<>();
         condConstraints.addAll(SigAndHashDerivation.getSharedDefaultConditionalConstraints(scope));
         condConstraints.addAll(SigAndHashDerivation.getDefaultPreTls13Constraints(scope));
         condConstraints.add(getHashSizeMustNotMatchEcdsaPkSizeConstraint());
         return condConstraints;
     }
 
-    private ConditionalConstraint getHashSizeMustNotMatchEcdsaPkSizeConstraint() {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CERTIFICATE);
+    private LegacyConditionalConstraint getHashSizeMustNotMatchEcdsaPkSizeConstraint() {
+        Set<TlsParameterType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(TlsParameterType.CERTIFICATE);
 
         // TLS 1.3 specifies explicit curves for hash functions in ECDSA
         // e.g ecdsa_secp256r1_sha256
-        return new ConditionalConstraint(
+        return new LegacyConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(
-                                DerivationType.SIG_HASH_ALGORIHTM.name(),
-                                DerivationType.CERTIFICATE.name())
+                ConstraintBuilder.constrain(TlsParameterType.SIG_HASH_ALGORIHTM.name(),
+                                TlsParameterType.CERTIFICATE.name())
                         .by(
                                 (SigAndHashDerivation sigAndHashDerivation,
                                         CertificateDerivation certificateDerivation) -> {

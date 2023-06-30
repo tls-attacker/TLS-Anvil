@@ -30,7 +30,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -76,7 +76,7 @@ public class Fragmentation extends Tls12Test {
                             + "multiple client messages of the same ContentType MAY be coalesced "
                             + "into a single TLSPlaintext record, or a single message MAY be "
                             + "fragmented across several records).")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

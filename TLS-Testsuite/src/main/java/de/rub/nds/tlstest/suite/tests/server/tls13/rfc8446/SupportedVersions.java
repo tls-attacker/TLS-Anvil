@@ -38,8 +38,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
@@ -126,9 +126,9 @@ public class SupportedVersions extends Tls13Test {
             description =
                     "If the \"supported_versions\" extension is absent and the server only supports versions greater than ClientHello.legacy_version, the server MUST abort the handshake with a \"protocol_version\" alert.")
     @RFC(number = 8446, section = "D.2.  Negotiating with an Older Client")
-    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
     @ExplicitValues(
-            affectedTypes = DerivationType.PROTOCOL_VERSION,
+            affectedTypes = TlsParameterType.PROTOCOL_VERSION,
             methods = "getUnsupportedProtocolVersions")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
@@ -159,7 +159,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    public List<DerivationParameter> getUnsupportedProtocolVersions(DerivationScope scope) {
+    public List<DerivationParameter> getUnsupportedProtocolVersions(LegacyDerivationScope scope) {
         List<ProtocolVersion> consideredVersions = new LinkedList<>();
         consideredVersions.add(ProtocolVersion.SSL2);
         consideredVersions.add(ProtocolVersion.SSL3);
@@ -182,7 +182,7 @@ public class SupportedVersions extends Tls13Test {
                             + "for version negotiation and MUST use only the \"supported_versions\" "
                             + "extension to determine client preferences.")
     @MethodCondition(method = "supportsTls12")
-    @ManualConfig(DerivationType.CIPHERSUITE)
+    @ManualConfig(TlsParameterType.CIPHER_SUITE)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

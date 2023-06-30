@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe.ShareOutOfBoundsDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.mirrored.MirroredCipherSuiteDerivation;
 import org.apache.logging.log4j.LogManager;
@@ -17,9 +17,9 @@ public class DerivationFactory {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static DerivationParameter getInstance(DerivationType type) {
+    public static DerivationParameter getInstance(TlsParameterType type) {
         switch (type) {
-            case CIPHERSUITE:
+            case CIPHER_SUITE:
                 return new CipherSuiteDerivation();
             case MAC_BITMASK:
                 return new MacBitmaskDerivation();

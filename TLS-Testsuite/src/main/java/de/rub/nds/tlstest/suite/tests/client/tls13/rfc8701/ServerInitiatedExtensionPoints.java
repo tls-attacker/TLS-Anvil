@@ -41,7 +41,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseCipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseExtensionDerivation;
@@ -61,7 +61,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "When processing a CertificateRequest or NewSessionTicket, "
             + "clients MUST NOT treat GREASE values differently from any unknown value.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions(DerivationType.GREASE_EXTENSION)
+    @ScopeExtensions(TlsParameterType.GREASE_EXTENSION)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void advertiseGreaseExtensionsInSessionTicket(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -81,7 +81,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "if a GREASE value appears in any of the following: "
             + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions(DerivationType.GREASE_PROTOCOL_VERSION)
+    @ScopeExtensions(TlsParameterType.GREASE_PROTOCOL_VERSION)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -107,8 +107,8 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "if a GREASE value appears in any of the following: "
             + "[...] The \"cipher_suite\" value in a ServerHello")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions(DerivationType.GREASE_CIPHERSUITE)
-    @ScopeLimitations(DerivationType.CIPHERSUITE)
+    @ScopeExtensions(TlsParameterType.GREASE_CIPHERSUITE)
+    @ScopeLimitations(TlsParameterType.CIPHER_SUITE)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -135,7 +135,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ScopeExtensions(DerivationType.GREASE_EXTENSION)
+    @ScopeExtensions(TlsParameterType.GREASE_EXTENSION)
     @AlertCategory(SeverityLevel.MEDIUM)
     public void sendServerHelloGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -159,7 +159,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "[...] Any HelloRetryRequest, EncryptedExtensions, or Certificate " 
             + "extension in TLS 1.3")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions(DerivationType.GREASE_EXTENSION)
+    @ScopeExtensions(TlsParameterType.GREASE_EXTENSION)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -179,7 +179,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             + "In particular, the client MUST fail the connection "
             + "if a GREASE value appears in any of the following: "
             + "[...] The signature algorithm in a server CertificateVerify signature in TLS 1.3")
-    @ScopeExtensions(DerivationType.GREASE_SIG_HASH)
+    @ScopeExtensions(TlsParameterType.GREASE_SIG_HASH)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)

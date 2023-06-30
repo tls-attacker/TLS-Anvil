@@ -9,9 +9,9 @@ package de.rub.nds.tlstest.framework.model.derivationParameter.mirrored;
 
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
@@ -25,7 +25,7 @@ import java.util.Set;
 public class MirroredCipherSuiteDerivation extends MirroredDerivationParameter<CipherSuite> {
 
     public MirroredCipherSuiteDerivation() {
-        super(DerivationType.MIRRORED_CIPHERSUITE, DerivationType.CIPHERSUITE, CipherSuite.class);
+        super(TlsParameterType.MIRRORED_CIPHERSUITE, TlsParameterType.CIPHER_SUITE, CipherSuite.class);
     }
 
     public MirroredCipherSuiteDerivation(CipherSuite selectedValue) {
@@ -35,7 +35,7 @@ public class MirroredCipherSuiteDerivation extends MirroredDerivationParameter<C
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         DerivationFactory.getInstance(getMirroredType())
                 .getParameterValues(context, scope)
@@ -49,15 +49,13 @@ public class MirroredCipherSuiteDerivation extends MirroredDerivationParameter<C
     }
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
-        List<ConditionalConstraint> condConstraints = new LinkedList<>();
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
-        condConstraints.add(
-                new ConditionalConstraint(
+    public List<LegacyConditionalConstraint> getDefaultConditionalConstraints(LegacyDerivationScope scope) {
+        List<LegacyConditionalConstraint> condConstraints = new LinkedList<>();
+        Set<TlsParameterType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
+        condConstraints.add(new LegacyConditionalConstraint(
                         requiredDerivations,
-                        ConstraintBuilder.constrain(
-                                        getType().name(), DerivationType.CIPHERSUITE.name())
+                        ConstraintBuilder.constrain(getType().name(), TlsParameterType.CIPHER_SUITE.name())
                                 .by(
                                         (DerivationParameter mirroredCipherSuite,
                                                 DerivationParameter cipherSuite) -> {

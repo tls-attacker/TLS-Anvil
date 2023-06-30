@@ -38,8 +38,8 @@ import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -160,7 +160,7 @@ public class ServerHello extends Tls13Test {
                             + "value to the bytes: 44 4F 57 4E 47 52 44 00")
     @MethodCondition(method = "supportsTls11")
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.CIPHERSUITE,
+            affectedTypes = TlsParameterType.CIPHER_SUITE,
             methods = "isTls11CipherSuite")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @InteroperabilityCategory(SeverityLevel.HIGH)
@@ -205,7 +205,7 @@ public class ServerHello extends Tls13Test {
     @MethodCondition(method = "supportsTls10")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.CIPHERSUITE,
+            affectedTypes = TlsParameterType.CIPHER_SUITE,
             methods = "isTls10CipherSuite")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -451,7 +451,7 @@ public class ServerHello extends Tls13Test {
         }
     }
 
-    public List<DerivationParameter> getTlsVersionsBelow12(DerivationScope scope) {
+    public List<DerivationParameter> getTlsVersionsBelow12(LegacyDerivationScope scope) {
         List<DerivationParameter> derivationParameters = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getSupportedVersions()

@@ -7,11 +7,11 @@
  */
 package de.rub.nds.tlstest.framework.model.constraint;
 
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 
 public class ValueConstraint {
 
-    private final DerivationType affectedType;
+    private final TlsParameterType affectedType;
 
     private final String evaluationMethod;
 
@@ -20,7 +20,7 @@ public class ValueConstraint {
     private final boolean dynamic;
 
     public ValueConstraint(
-            DerivationType affectedType, String evaluationMethod, Class<?> clazz, boolean dynamic) {
+            TlsParameterType affectedType, String evaluationMethod, Class<?> clazz, boolean dynamic) {
         this.affectedType = affectedType;
         this.evaluationMethod = evaluationMethod;
         this.clazz = clazz;
@@ -31,7 +31,7 @@ public class ValueConstraint {
         return clazz;
     }
 
-    public DerivationType getAffectedType() {
+    public TlsParameterType getAffectedType() {
         return affectedType;
     }
 

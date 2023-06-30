@@ -12,9 +12,9 @@ import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
@@ -25,7 +25,7 @@ import java.util.Set;
 public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
 
     public CipherTextBitmaskDerivation() {
-        super(DerivationType.CIPHERTEXT_BITMASK, Integer.class);
+        super(TlsParameterType.CIPHERTEXT_BITMASK, Integer.class);
     }
 
     public CipherTextBitmaskDerivation(Integer selectedValue) {
@@ -35,7 +35,7 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         int maxCipherTextByteLen = 0;
         Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
         if (scope.isTls13Test()) {
@@ -58,8 +58,8 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
     public void applyToConfig(Config config, TestContext context) {}
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
-        List<ConditionalConstraint> condConstraints = new LinkedList<>();
+    public List<LegacyConditionalConstraint> getDefaultConditionalConstraints(LegacyDerivationScope scope) {
+        List<LegacyConditionalConstraint> condConstraints = new LinkedList<>();
 
         if (ConstraintHelper.multipleBlocksizesModeled(scope)) {
             condConstraints.add(getMustBeWithinBlocksizeConstraint());
@@ -71,15 +71,14 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
         return condConstraints;
     }
 
-    private ConditionalConstraint getMustBeWithinBlocksizeConstraint() {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+    private LegacyConditionalConstraint getMustBeWithinBlocksizeConstraint() {
+        Set<TlsParameterType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
 
-        return new ConditionalConstraint(
+        return new LegacyConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(
-                                DerivationType.CIPHERTEXT_BITMASK.name(),
-                                DerivationType.CIPHERSUITE.name())
+                ConstraintBuilder.constrain(TlsParameterType.CIPHERTEXT_BITMASK.name(),
+                                TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (DerivationParameter bytePos, DerivationParameter cipherSuite) -> {
                                     int chosenBytePos = (Integer) bytePos.getSelectedValue();
@@ -91,18 +90,17 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
                                 }));
     }
 
-    private ConditionalConstraint getMustBeWithinCiphertextSizeConstraint(DerivationScope scope) {
-        Set<DerivationType> requiredDerivationsCiphertext = new HashSet<>();
-        requiredDerivationsCiphertext.add(DerivationType.CIPHERSUITE);
-        requiredDerivationsCiphertext.add(DerivationType.APP_MSG_LENGHT);
+    private LegacyConditionalConstraint getMustBeWithinCiphertextSizeConstraint(LegacyDerivationScope scope) {
+        Set<TlsParameterType> requiredDerivationsCiphertext = new HashSet<>();
+        requiredDerivationsCiphertext.add(TlsParameterType.CIPHER_SUITE);
+        requiredDerivationsCiphertext.add(TlsParameterType.APP_MSG_LENGHT);
 
         // ensure that the selected byte is within ciphertext size (for non-padded)
-        return new ConditionalConstraint(
+        return new LegacyConditionalConstraint(
                 requiredDerivationsCiphertext,
-                ConstraintBuilder.constrain(
-                                DerivationType.CIPHERTEXT_BITMASK.name(),
-                                DerivationType.CIPHERSUITE.name(),
-                                DerivationType.APP_MSG_LENGHT.name())
+                ConstraintBuilder.constrain(TlsParameterType.CIPHERTEXT_BITMASK.name(),
+                                TlsParameterType.CIPHER_SUITE.name(),
+                                TlsParameterType.APP_MSG_LENGHT.name())
                         .by(
                                 (CipherTextBitmaskDerivation cipherTextBitmaskDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation,

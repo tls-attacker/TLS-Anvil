@@ -29,7 +29,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -55,7 +55,7 @@ public class ServerKeyExchange extends TlsGenericTest {
     
     @TlsTest(description = "Send a Server Key Exchange Message with a modified signature length value (-1)")
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
-    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNotAnonymousCipherSuite")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isNotAnonymousCipherSuite")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

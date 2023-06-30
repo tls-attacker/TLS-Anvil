@@ -10,8 +10,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.List;
 public class IncludeGreaseCipherSuitesDerivation extends DerivationParameter<Boolean> {
 
     public IncludeGreaseCipherSuitesDerivation() {
-        super(DerivationType.INCLUDE_GREASE_CIPHER_SUITES, Boolean.class);
+        super(TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES, Boolean.class);
     }
 
     public IncludeGreaseCipherSuitesDerivation(Boolean selectedValue) {
@@ -29,7 +29,7 @@ public class IncludeGreaseCipherSuitesDerivation extends DerivationParameter<Boo
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new IncludeGreaseCipherSuitesDerivation(true));
         parameterValues.add(new IncludeGreaseCipherSuitesDerivation(false));

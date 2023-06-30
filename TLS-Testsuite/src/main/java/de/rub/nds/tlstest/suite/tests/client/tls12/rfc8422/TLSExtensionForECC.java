@@ -57,7 +57,7 @@ import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -209,7 +209,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isSecpCurve")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.NAMED_GROUP, methods = "isSecpCurve")
     @CryptoCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -258,7 +258,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isXCurve")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.NAMED_GROUP, methods = "isXCurve")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
@@ -298,7 +298,7 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "formats during the handshake (cf.  Sections 5.6 and 5.7).")
     @RFC(number = 8422, section = "5.2. Server Hello Extension")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isSecpCurve")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.NAMED_GROUP, methods = "isSecpCurve")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)

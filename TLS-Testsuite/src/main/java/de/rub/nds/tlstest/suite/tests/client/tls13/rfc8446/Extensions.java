@@ -36,8 +36,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ExtensionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -54,7 +54,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class Extensions extends Tls13Test {
 
-    public List<DerivationParameter> getUnrequestedExtensions(DerivationScope scope) {
+    public List<DerivationParameter> getUnrequestedExtensions(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<ExtensionType> extensions = new LinkedList<>();
         extensions.add(ExtensionType.SERVER_NAME_INDICATION);
@@ -77,9 +77,9 @@ public class Extensions extends Tls13Test {
             + "with the exception of the \"cookie\" extension in the HelloRetryRequest. "
             + "Upon receiving such an extension, an endpoint MUST abort "
             + "the handshake with an \"unsupported_extension\" alert.")
-    @ScopeExtensions(DerivationType.EXTENSION)
-    @ManualConfig(DerivationType.EXTENSION)
-    @ExplicitValues(affectedTypes = DerivationType.EXTENSION, methods = "getUnrequestedExtensions")
+    @ScopeExtensions(TlsParameterType.EXTENSION)
+    @ManualConfig(TlsParameterType.EXTENSION)
+    @ExplicitValues(affectedTypes = TlsParameterType.EXTENSION, methods = "getUnrequestedExtensions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)

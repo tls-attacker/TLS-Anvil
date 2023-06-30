@@ -31,10 +31,10 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.PaddingBitmaskDerivation;
@@ -65,9 +65,9 @@ public class CBCBlockCipher extends Tls12Test {
             "indicate padding errors.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
-    @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.PADDING_BITMASK})
-    @ValueConstraints(affectedTypes = {DerivationType.CIPHERSUITE}, methods = "isCBC")
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions({TlsParameterType.APP_MSG_LENGHT, TlsParameterType.PADDING_BITMASK})
+    @ValueConstraints(affectedTypes = {TlsParameterType.CIPHER_SUITE}, methods = "isCBC")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.HIGH)
@@ -109,9 +109,9 @@ public class CBCBlockCipher extends Tls12Test {
     @RFC(number = 5246, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(DerivationType.CIPHERTEXT_BITMASK)
-    @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions(TlsParameterType.CIPHERTEXT_BITMASK)
+    @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isCBC")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.HIGH)
@@ -164,9 +164,9 @@ public class CBCBlockCipher extends Tls12Test {
     @RFC(number = 5246, section = "7.2.2. Error Alerts")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(DerivationType.MAC_BITMASK)
-    @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions(TlsParameterType.MAC_BITMASK)
+    @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isCBC")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
     @CryptoCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.HIGH)
@@ -204,7 +204,7 @@ public class CBCBlockCipher extends Tls12Test {
         "particular connection state MUST use sequence number 0.")
     @RFC(number = 5246, section = "6.1. Connection States")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isCBC")
+    @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isCBC")
     @CryptoCategory(SeverityLevel.MEDIUM)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @InteroperabilityCategory(SeverityLevel.CRITICAL)

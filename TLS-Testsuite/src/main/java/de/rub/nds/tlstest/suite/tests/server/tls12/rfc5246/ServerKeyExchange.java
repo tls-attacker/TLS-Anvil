@@ -38,7 +38,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.util.SignatureValidation;
 import java.io.IOException;
@@ -59,7 +59,7 @@ public class ServerKeyExchange extends Tls12Test {
     @TlsTest(description = "Test if the Server sends Key Exchange Messages with valid signatures")
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.CIPHERSUITE,
+            affectedTypes = TlsParameterType.CIPHER_SUITE,
             methods = "isSupportedCipherSuite")
     @CryptoCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.CRITICAL)

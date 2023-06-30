@@ -9,8 +9,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,7 +21,7 @@ import java.util.List;
 public class IncludeChangeCipherSpecDerivation extends DerivationParameter<Boolean> {
 
     public IncludeChangeCipherSpecDerivation() {
-        super(DerivationType.INCLUDE_CHANGE_CIPHER_SPEC, Boolean.class);
+        super(TlsParameterType.INCLUDE_CHANGE_CIPHER_SPEC, Boolean.class);
     }
 
     public IncludeChangeCipherSpecDerivation(Boolean selectedValue) {
@@ -31,7 +31,7 @@ public class IncludeChangeCipherSpecDerivation extends DerivationParameter<Boole
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new IncludeChangeCipherSpecDerivation(true));
         parameterValues.add(new IncludeChangeCipherSpecDerivation(false));

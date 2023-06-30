@@ -34,7 +34,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.List;
@@ -186,7 +186,7 @@ public class SignatureAlgorithms extends Tls12Test {
     }
 
     @TlsTest(description = "Send a ClientHello that offers many SignatureAndHash algorithms")
-    @ScopeLimitations(DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS)
+    @ScopeLimitations(TlsParameterType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

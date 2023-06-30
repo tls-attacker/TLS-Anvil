@@ -10,8 +10,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import java.math.BigInteger;
 import java.util.LinkedList;
@@ -31,7 +31,7 @@ public class ShareOutOfBoundsDerivation
     }
 
     public ShareOutOfBoundsDerivation() {
-        super(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS, OutOfBoundsType.class);
+        super(TlsParameterType.FFDHE_SHARE_OUT_OF_BOUNDS, OutOfBoundsType.class);
     }
 
     public ShareOutOfBoundsDerivation(OutOfBoundsType selectedValue) {
@@ -41,7 +41,7 @@ public class ShareOutOfBoundsDerivation
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         for (OutOfBoundsType type : OutOfBoundsType.values()) {
             parameterValues.add(new ShareOutOfBoundsDerivation(type));

@@ -25,7 +25,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -38,7 +38,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @TlsTest(description = "Send a Renegotiation Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION)
+    @ScopeLimitations(TlsParameterType.INCLUDE_RENEGOTIATION_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -53,7 +53,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @TlsTest(description = "Send a Renegotiation Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION)
+    @ScopeLimitations(TlsParameterType.INCLUDE_RENEGOTIATION_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -68,7 +68,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @TlsTest(description = "Send a Renegotiation Extension in the Hello Message with a modified Extension Info length value (+1)")
-    @ScopeLimitations(DerivationType.INCLUDE_RENEGOTIATION_EXTENSION)
+    @ScopeLimitations(TlsParameterType.INCLUDE_RENEGOTIATION_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)

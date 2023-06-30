@@ -7,9 +7,11 @@
  */
 package de.rub.nds.tlstest.framework.model;
 
+import de.rub.nds.anvilcore.model.parameter.ParameterType;
+
 /** Represents the properties affected by the test derivation models. */
-public enum DerivationType {
-    CIPHERSUITE,
+public enum TlsParameterType implements ParameterType {
+    CIPHER_SUITE,
     NAMED_GROUP,
     MAC_BITMASK,
     ALERT,

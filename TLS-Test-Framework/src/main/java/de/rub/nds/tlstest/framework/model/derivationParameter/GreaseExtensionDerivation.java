@@ -10,15 +10,15 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
 public class GreaseExtensionDerivation extends DerivationParameter<ExtensionType> {
 
     public GreaseExtensionDerivation() {
-        super(DerivationType.GREASE_EXTENSION, ExtensionType.class);
+        super(TlsParameterType.GREASE_EXTENSION, ExtensionType.class);
     }
 
     public GreaseExtensionDerivation(ExtensionType selectedValue) {
@@ -28,7 +28,7 @@ public class GreaseExtensionDerivation extends DerivationParameter<ExtensionType
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         for (ExtensionType extType : ExtensionType.values()) {
             if (extType.isGrease()) {

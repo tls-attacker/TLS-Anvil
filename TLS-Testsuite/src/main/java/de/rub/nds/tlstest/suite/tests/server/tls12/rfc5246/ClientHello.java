@@ -36,7 +36,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Arrays;
@@ -119,7 +119,7 @@ public class ClientHello extends Tls12Test {
     }
     
     @TlsTest(description = "Send a ClientHello that offers many cipher suites")
-    @ScopeLimitations(DerivationType.INCLUDE_GREASE_CIPHER_SUITES)
+    @ScopeLimitations(TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -158,7 +158,7 @@ public class ClientHello extends Tls12Test {
     
     @TlsTest(description = "A server MUST accept ClientHello " +
         "messages both with and without the extensions field")
-    @ScopeLimitations({DerivationType.INCLUDE_ALPN_EXTENSION, DerivationType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION, DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION, DerivationType.INCLUDE_HEARTBEAT_EXTENSION, DerivationType.INCLUDE_PADDING_EXTENSION, DerivationType.INCLUDE_RENEGOTIATION_EXTENSION, DerivationType.INCLUDE_SESSION_TICKET_EXTENSION, DerivationType.MAX_FRAGMENT_LENGTH, DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS, DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION})
+    @ScopeLimitations({TlsParameterType.INCLUDE_ALPN_EXTENSION, TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION, TlsParameterType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION, TlsParameterType.INCLUDE_HEARTBEAT_EXTENSION, TlsParameterType.INCLUDE_PADDING_EXTENSION, TlsParameterType.INCLUDE_RENEGOTIATION_EXTENSION, TlsParameterType.INCLUDE_SESSION_TICKET_EXTENSION, TlsParameterType.MAX_FRAGMENT_LENGTH, TlsParameterType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS, TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS, TlsParameterType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION})
     @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.RSA})
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

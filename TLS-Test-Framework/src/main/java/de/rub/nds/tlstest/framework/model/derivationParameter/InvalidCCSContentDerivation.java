@@ -9,15 +9,15 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
 public class InvalidCCSContentDerivation extends DerivationParameter<byte[]> {
 
     public InvalidCCSContentDerivation() {
-        super(DerivationType.INVALID_CCS_CONTENT, byte[].class);
+        super(TlsParameterType.INVALID_CCS_CONTENT, byte[].class);
     }
 
     public InvalidCCSContentDerivation(byte[] selectedValue) {
@@ -27,7 +27,7 @@ public class InvalidCCSContentDerivation extends DerivationParameter<byte[]> {
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new InvalidCCSContentDerivation(new byte[] {125}));
         parameterValues.add(new InvalidCCSContentDerivation(new byte[] {1, 1}));

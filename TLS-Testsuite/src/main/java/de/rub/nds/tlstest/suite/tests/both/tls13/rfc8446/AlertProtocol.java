@@ -33,7 +33,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -46,9 +46,9 @@ public class AlertProtocol extends Tls13Test {
     @TlsTest(
             description =
                     "All the alerts listed in Section 6.2 MUST be sent with AlertLevel=fatal and MUST be treated as error alerts when received regardless of the AlertLevel in the message.")
-    @ScopeExtensions(DerivationType.ALERT)
+    @ScopeExtensions(TlsParameterType.ALERT)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.ALERT,
+            affectedTypes = TlsParameterType.ALERT,
             methods = "isMeantToBeFatalLevel")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -66,9 +66,9 @@ public class AlertProtocol extends Tls13Test {
             description =
                     "All the alerts listed in Section 6.2 MUST be sent with AlertLevel=fatal and MUST be treated as error alerts when received regardless of the AlertLevel in the message.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions(DerivationType.ALERT)
+    @ScopeExtensions(TlsParameterType.ALERT)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.ALERT,
+            affectedTypes = TlsParameterType.ALERT,
             methods = "isMeantToBeFatalLevel")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

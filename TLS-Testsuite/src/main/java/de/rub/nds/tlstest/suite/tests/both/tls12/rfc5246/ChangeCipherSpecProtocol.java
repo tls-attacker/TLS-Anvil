@@ -31,7 +31,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.InvalidCCSContentDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -53,8 +53,8 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
     
     @TlsTest(description = "The message consists of a single byte of value 1.")
     @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
-    @ScopeExtensions(DerivationType.INVALID_CCS_CONTENT)
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
+    @ScopeExtensions(TlsParameterType.INVALID_CCS_CONTENT)
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.MEDIUM)

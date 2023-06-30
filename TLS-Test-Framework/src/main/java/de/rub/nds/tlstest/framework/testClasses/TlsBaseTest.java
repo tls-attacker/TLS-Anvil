@@ -23,7 +23,7 @@ import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.ValueConstraintsConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.WorkflowRunnerResolver;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -66,7 +66,7 @@ public abstract class TlsBaseTest {
             Config config, ArgumentsAccessor argAccessor, WorkflowRunner runner) {
         derivationContainer =
                 new DerivationContainer(
-                        argAccessor.toList(), new DerivationScope(extensionContext));
+                        argAccessor.toList(), new LegacyDerivationScope(extensionContext));
         derivationContainer.applyToConfig(config, context);
         runner.setPreparedConfig(config);
         runner.setDerivationContainer(derivationContainer);

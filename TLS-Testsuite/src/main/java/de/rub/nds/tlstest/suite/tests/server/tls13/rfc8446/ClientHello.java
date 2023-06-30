@@ -39,7 +39,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Arrays;
 import static org.junit.Assert.assertFalse;
@@ -216,7 +216,7 @@ public class ClientHello extends Tls13Test {
         "requirements MUST abort the handshake with a \"missing_extension\" " +
         "alert.")
     @RFC(number = 8446, section = "9.2.  Mandatory-to-Implement Extensions")
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -253,7 +253,7 @@ public class ClientHello extends Tls13Test {
         "requirements MUST abort the handshake with a \"missing_extension\" " +
         "alert.")
     @RFC(number = 8446, section = "9.2.  Mandatory-to-Implement Extensions")
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

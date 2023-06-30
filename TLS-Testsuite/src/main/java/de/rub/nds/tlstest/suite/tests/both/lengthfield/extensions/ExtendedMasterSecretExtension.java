@@ -27,7 +27,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -52,7 +52,7 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
     @TlsTest(
             description =
                     "Send an Extended Master Secret Extension in the Hello Message with a modified length value (+1)")
-    @ScopeLimitations(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION)
+    @ScopeLimitations(TlsParameterType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "targetCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -73,7 +73,7 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
     @TlsTest(
             description =
                     "Send an Extended Master Secret Extension in the Hello Message with a modified length value (+1)")
-    @ScopeLimitations(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION)
+    @ScopeLimitations(TlsParameterType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)

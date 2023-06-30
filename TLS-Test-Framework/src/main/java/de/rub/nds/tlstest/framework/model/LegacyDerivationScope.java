@@ -35,19 +35,19 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * Defines which TLS parameters are used for the test derivation and how they are applied to the
  * session.
  */
-public class DerivationScope {
+public class LegacyDerivationScope {
     private ModelType baseModel = ModelType.GENERIC;
-    private final List<DerivationType> scopeLimits;
-    private final List<DerivationType> scopeExtensions;
+    private final List<TlsParameterType> scopeLimits;
+    private final List<TlsParameterType> scopeExtensions;
     private final KeyX keyExchangeRequirements;
     private final List<ValueConstraint> valueConstraints;
-    private final Map<DerivationType, String> explicitValues;
-    private final Map<DerivationType, String> explicitModelingConstraints;
+    private final Map<TlsParameterType, String> explicitValues;
+    private final Map<TlsParameterType, String> explicitModelingConstraints;
     private final ExtensionContext extensionContext;
-    private final Set<DerivationType> manualConfigTypes;
+    private final Set<TlsParameterType> manualConfigTypes;
     private final int testStrength;
 
-    public DerivationScope(ExtensionContext context) {
+    public LegacyDerivationScope(ExtensionContext context) {
         this.keyExchangeRequirements = (KeyX) KeyX.resolveKexAnnotation(context);
         this.scopeLimits = resolveScopeLimits(context);
         this.scopeExtensions = resolveScopeExtensions(context);
@@ -59,7 +59,7 @@ public class DerivationScope {
         this.testStrength = resolveTestStrength(context);
     }
 
-    public DerivationScope(ExtensionContext context, ModelFromScope modelFromScope) {
+    public LegacyDerivationScope(ExtensionContext context, ModelFromScope modelFromScope) {
         this(context);
         this.baseModel = modelFromScope.baseModel();
     }
@@ -68,19 +68,19 @@ public class DerivationScope {
         return baseModel;
     }
 
-    public List<DerivationType> getScopeLimits() {
+    public List<TlsParameterType> getScopeLimits() {
         return scopeLimits;
     }
 
-    public List<DerivationType> getScopeExtensions() {
+    public List<TlsParameterType> getScopeExtensions() {
         return scopeExtensions;
     }
 
-    public void addScopeLimit(DerivationType type) {
+    public void addScopeLimit(TlsParameterType type) {
         scopeLimits.add(type);
     }
 
-    public void addExtension(DerivationType type) {
+    public void addExtension(TlsParameterType type) {
         scopeExtensions.add(type);
     }
 
@@ -88,8 +88,8 @@ public class DerivationScope {
         return keyExchangeRequirements;
     }
 
-    private List<DerivationType> resolveScopeLimits(ExtensionContext context) {
-        List<DerivationType> limitations = new LinkedList<>();
+    private List<TlsParameterType> resolveScopeLimits(ExtensionContext context) {
+        List<TlsParameterType> limitations = new LinkedList<>();
         Method testMethod = context.getRequiredTestMethod();
         if (testMethod.isAnnotationPresent(ScopeLimitations.class)) {
             ScopeLimitations scopeLimitations = testMethod.getAnnotation(ScopeLimitations.class);
@@ -99,8 +99,8 @@ public class DerivationScope {
         return limitations;
     }
 
-    private List<DerivationType> resolveScopeExtensions(ExtensionContext context) {
-        List<DerivationType> extensions = new LinkedList<>();
+    private List<TlsParameterType> resolveScopeExtensions(ExtensionContext context) {
+        List<TlsParameterType> extensions = new LinkedList<>();
         Method testMethod = context.getRequiredTestMethod();
         if (testMethod.isAnnotationPresent(ScopeExtensions.class)) {
             ScopeExtensions scopeExtensions = testMethod.getAnnotation(ScopeExtensions.class);
@@ -115,7 +115,7 @@ public class DerivationScope {
         Method testMethod = context.getRequiredTestMethod();
         if (testMethod.isAnnotationPresent(ValueConstraints.class)) {
             ValueConstraints valConstraints = testMethod.getAnnotation(ValueConstraints.class);
-            DerivationType[] affectedTypes = valConstraints.affectedTypes();
+            TlsParameterType[] affectedTypes = valConstraints.affectedTypes();
             String[] methods = valConstraints.methods();
             if (methods.length != affectedTypes.length) {
                 throw new RuntimeException(
@@ -133,7 +133,7 @@ public class DerivationScope {
         if (testMethod.isAnnotationPresent(DynamicValueConstraints.class)) {
             DynamicValueConstraints valConstraints =
                     testMethod.getAnnotation(DynamicValueConstraints.class);
-            DerivationType[] affectedTypes = valConstraints.affectedTypes();
+            TlsParameterType[] affectedTypes = valConstraints.affectedTypes();
             String[] methods = valConstraints.methods();
             if (methods.length != affectedTypes.length) {
                 throw new RuntimeException(
@@ -152,12 +152,12 @@ public class DerivationScope {
         return constraints;
     }
 
-    private Map<DerivationType, String> resolveExplicitValues(ExtensionContext context) {
-        Map<DerivationType, String> valueMap = new HashMap<>();
+    private Map<TlsParameterType, String> resolveExplicitValues(ExtensionContext context) {
+        Map<TlsParameterType, String> valueMap = new HashMap<>();
         Method testMethod = context.getRequiredTestMethod();
         if (testMethod.isAnnotationPresent(ExplicitValues.class)) {
             ExplicitValues explicitValues = testMethod.getAnnotation(ExplicitValues.class);
-            DerivationType[] affectedTypes = explicitValues.affectedTypes();
+            TlsParameterType[] affectedTypes = explicitValues.affectedTypes();
             String[] methods = explicitValues.methods();
             if (methods.length != affectedTypes.length) {
                 throw new RuntimeException(
@@ -175,14 +175,14 @@ public class DerivationScope {
         return valueMap;
     }
 
-    private Map<DerivationType, String> resolveExplicitModelingConstraints(
+    private Map<TlsParameterType, String> resolveExplicitModelingConstraints(
             ExtensionContext context) {
-        Map<DerivationType, String> valueMap = new HashMap<>();
+        Map<TlsParameterType, String> valueMap = new HashMap<>();
         Method testMethod = context.getRequiredTestMethod();
         if (testMethod.isAnnotationPresent(ExplicitModelingConstraints.class)) {
             ExplicitModelingConstraints explicitConstraints =
                     testMethod.getAnnotation(ExplicitModelingConstraints.class);
-            DerivationType[] affectedTypes = explicitConstraints.affectedTypes();
+            TlsParameterType[] affectedTypes = explicitConstraints.affectedTypes();
             String[] methods = explicitConstraints.methods();
             if (methods.length != affectedTypes.length) {
                 throw new RuntimeException(
@@ -200,12 +200,12 @@ public class DerivationScope {
         return valueMap;
     }
 
-    private Set<DerivationType> resolveManualConfigTypes(ExtensionContext context) {
-        Set<DerivationType> manualConfigTypes = new HashSet<>();
+    private Set<TlsParameterType> resolveManualConfigTypes(ExtensionContext context) {
+        Set<TlsParameterType> manualConfigTypes = new HashSet<>();
         Method testMethod = context.getRequiredTestMethod();
         if (testMethod.isAnnotationPresent(ManualConfig.class)) {
             ManualConfig manualConfig = testMethod.getAnnotation(ManualConfig.class);
-            DerivationType[] types = manualConfig.value();
+            TlsParameterType[] types = manualConfig.value();
             manualConfigTypes.addAll(Arrays.asList(types));
         }
         return manualConfigTypes;
@@ -220,11 +220,11 @@ public class DerivationScope {
         return TestContext.getInstance().getConfig().getStrength();
     }
 
-    public boolean hasExplicitValues(DerivationType type) {
+    public boolean hasExplicitValues(TlsParameterType type) {
         return explicitValues.containsKey(type);
     }
 
-    public boolean hasExplicitModelingConstraints(DerivationType type) {
+    public boolean hasExplicitModelingConstraints(TlsParameterType type) {
         return explicitModelingConstraints.containsKey(type);
     }
 
@@ -240,11 +240,11 @@ public class DerivationScope {
         }
     }
 
-    public String getExplicitValueMethod(DerivationType type) {
+    public String getExplicitValueMethod(TlsParameterType type) {
         return explicitValues.get(type);
     }
 
-    public String getExplicitModelingConstraintMethod(DerivationType type) {
+    public String getExplicitModelingConstraintMethod(TlsParameterType type) {
         return explicitModelingConstraints.get(type);
     }
 
@@ -261,11 +261,11 @@ public class DerivationScope {
         return keyExchangeRequirements.supports(KeyExchangeType.ALL13);
     }
 
-    public boolean isAutoApplyToConfig(DerivationType type) {
+    public boolean isAutoApplyToConfig(TlsParameterType type) {
         return !manualConfigTypes.contains(type);
     }
 
-    public Map<DerivationType, String> getExplicitTypeValues() {
+    public Map<TlsParameterType, String> getExplicitTypeValues() {
         return explicitValues;
     }
 

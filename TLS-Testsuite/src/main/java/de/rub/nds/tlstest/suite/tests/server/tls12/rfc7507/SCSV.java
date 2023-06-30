@@ -30,8 +30,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -55,7 +55,7 @@ public class SCSV extends Tls12Test {
         return ConditionEvaluationResult.disabled("No other TLS versions are supported");
     }
 
-    public List<DerivationParameter> getOldCiphersuites(DerivationScope scope) {
+    public List<DerivationParameter> getOldCiphersuites(LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         Set<CipherSuite> olderCipherSuites = new HashSet<>();
 
@@ -100,7 +100,7 @@ public class SCSV extends Tls12Test {
                             + "The record layer version number for this alert MUST be set to either ClientHello.client_version "
                             + "(as it would for the Server Hello message if the server was continuing the handshake) "
                             + "or to the record layer version number used by the client.")
-    @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getOldCiphersuites")
+    @ExplicitValues(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -144,7 +144,7 @@ public class SCSV extends Tls12Test {
                             + "The record layer version number for this alert MUST be set to either ClientHello.client_version "
                             + "(as it would for the Server Hello message if the server was continuing the handshake) "
                             + "or to the record layer version number used by the client.")
-    @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getOldCiphersuites")
+    @ExplicitValues(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

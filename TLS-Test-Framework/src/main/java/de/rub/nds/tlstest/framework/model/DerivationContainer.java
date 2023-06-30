@@ -26,7 +26,7 @@ public class DerivationContainer {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<DerivationParameter> derivations;
-    private DerivationScope underlyingScope;
+    private LegacyDerivationScope underlyingScope;
 
     public DerivationContainer(List<Object> objects) {
         derivations = new LinkedList<>();
@@ -40,7 +40,7 @@ public class DerivationContainer {
         }
     }
 
-    public DerivationContainer(List<Object> objects, DerivationScope underlyingScope) {
+    public DerivationContainer(List<Object> objects, LegacyDerivationScope underlyingScope) {
         this(objects);
         this.underlyingScope = underlyingScope;
         derivations.addAll(
@@ -70,7 +70,7 @@ public class DerivationContainer {
         return null;
     }
 
-    public DerivationParameter getDerivation(DerivationType type) {
+    public DerivationParameter getDerivation(TlsParameterType type) {
         for (DerivationParameter listed : derivations) {
             if (listed.getType() == type) {
                 return listed;
@@ -80,7 +80,7 @@ public class DerivationContainer {
         return null;
     }
 
-    public DerivationParameter getChildParameter(DerivationType type) {
+    public DerivationParameter getChildParameter(TlsParameterType type) {
         for (DerivationParameter listed : derivations) {
             if (listed.getParent() == type) {
                 return listed;
@@ -121,7 +121,7 @@ public class DerivationContainer {
         return null;
     }
 
-    public byte[] buildBitmask(DerivationType type) {
+    public byte[] buildBitmask(TlsParameterType type) {
         DerivationParameter byteParameter = getDerivation(type);
         DerivationParameter bitParameter = getChildParameter(type);
 
@@ -140,7 +140,7 @@ public class DerivationContainer {
         return res;
     }
 
-    public DerivationScope getUnderlyingScope() {
+    public LegacyDerivationScope getUnderlyingScope() {
         return underlyingScope;
     }
 }

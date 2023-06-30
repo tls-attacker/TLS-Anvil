@@ -27,7 +27,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -53,7 +53,7 @@ public class HeartbeatExtension extends TlsGenericTest {
     @TlsTest(
             description =
                     "Send a Heartbeat Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations(DerivationType.INCLUDE_HEARTBEAT_EXTENSION)
+    @ScopeLimitations(TlsParameterType.INCLUDE_HEARTBEAT_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MethodCondition(method = "targetCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -74,7 +74,7 @@ public class HeartbeatExtension extends TlsGenericTest {
     @TlsTest(
             description =
                     "Send a Heartbeat Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations(DerivationType.INCLUDE_HEARTBEAT_EXTENSION)
+    @ScopeLimitations(TlsParameterType.INCLUDE_HEARTBEAT_EXTENSION)
     @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)

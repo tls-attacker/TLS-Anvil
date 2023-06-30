@@ -10,15 +10,15 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
 public class GreaseCipherSuiteDerivation extends DerivationParameter<CipherSuite> {
 
     public GreaseCipherSuiteDerivation() {
-        super(DerivationType.GREASE_CIPHERSUITE, CipherSuite.class);
+        super(TlsParameterType.GREASE_CIPHERSUITE, CipherSuite.class);
     }
 
     public GreaseCipherSuiteDerivation(CipherSuite selectedValue) {
@@ -28,7 +28,7 @@ public class GreaseCipherSuiteDerivation extends DerivationParameter<CipherSuite
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         for (CipherSuite cipherSuite : CipherSuite.values()) {
             if (cipherSuite.isGrease()) {

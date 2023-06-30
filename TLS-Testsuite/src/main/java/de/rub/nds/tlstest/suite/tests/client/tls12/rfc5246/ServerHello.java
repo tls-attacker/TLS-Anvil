@@ -41,7 +41,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CompressionMethodDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -141,9 +141,9 @@ public class ServerHello extends Tls12Test {
                     "The single compression algorithm selected by the server from the "
                             + "list in ClientHello.compression_methods.")
     @RFC(number = 5246, section = "7.4.1.3.  Server Hello")
-    @ScopeExtensions(DerivationType.COMPRESSION_METHOD)
+    @ScopeExtensions(TlsParameterType.COMPRESSION_METHOD)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.COMPRESSION_METHOD,
+            affectedTypes = TlsParameterType.COMPRESSION_METHOD,
             methods = "isUnproposedCompressionMethod")
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)

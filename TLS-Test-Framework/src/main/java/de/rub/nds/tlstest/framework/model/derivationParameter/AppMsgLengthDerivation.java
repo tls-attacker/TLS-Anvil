@@ -7,14 +7,20 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
@@ -22,13 +28,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
+public class AppMsgLengthDerivation extends TlsDerivationParameter<Integer> {
 
     private static final char ASCII_LETTER = 'A';
     private static final int UNPADDED_MIN_LENGTH = 16;
 
     public AppMsgLengthDerivation() {
-        super(DerivationType.APP_MSG_LENGHT, Integer.class);
+        super(TlsParameterType.APP_MSG_LENGHT, Integer.class);
     }
 
     public AppMsgLengthDerivation(Integer selectedValue) {
@@ -42,7 +48,7 @@ public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         int maxCipherTextByteLen = 0;
         Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
         if (scope.isTls13Test()) {
@@ -85,14 +91,13 @@ public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
     }
 
     private ConditionalConstraint getMustBeWithinBlocksizeConstraint() {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
 
         return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(
-                                DerivationType.APP_MSG_LENGHT.name(),
-                                DerivationType.CIPHERSUITE.name())
+                ConstraintBuilder.constrain(TlsParameterType.APP_MSG_LENGHT.name(),
+                                TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (AppMsgLengthDerivation appMsgLengthDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {
@@ -109,5 +114,26 @@ public class AppMsgLengthDerivation extends DerivationParameter<Integer> {
                                     }
                                     return true;
                                 }));
+    }
+
+    @Override
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < getSelectedValue(); i++) {
+            builder.append(ASCII_LETTER);
+        }
+        config.setDefaultApplicationMessageData(builder.toString());
+    }
+
+    
+    
+    @Override
+    public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(DerivationScope derivationScope) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    protected DerivationParameter<TlsAnvilConfig, Integer> generateValue(Integer selectedValue) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

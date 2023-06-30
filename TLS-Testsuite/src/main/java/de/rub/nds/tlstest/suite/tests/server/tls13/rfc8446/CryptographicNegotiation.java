@@ -34,7 +34,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
 import org.junit.jupiter.api.Tag;
@@ -53,7 +53,7 @@ public class CryptographicNegotiation extends Tls13Test {
         "server MUST abort the handshake with a \"handshake_failure\" or an " +
         "\"insufficient_security\" alert.")
     @RFC(number = 8446, section = "2.1.  Incorrect DHE Share and 4.1.1 Cryptographic Negotiation")
-    @ScopeLimitations({DerivationType.INCLUDE_GREASE_NAMED_GROUPS, DerivationType.NAMED_GROUP})
+    @ScopeLimitations({TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS, TlsParameterType.NAMED_GROUP})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -79,7 +79,7 @@ public class CryptographicNegotiation extends Tls13Test {
     @TlsTest(description = "If the server is unable to negotiate a supported set of parameters " +
             "(i.e., there is no overlap between the client and server parameters), it MUST abort " +
             "the handshake with either a \"handshake_failure\" or \"insufficient_security\" fatal alert (see Section 6).")
-    @ScopeLimitations({DerivationType.INCLUDE_GREASE_CIPHER_SUITES, DerivationType.CIPHERSUITE})
+    @ScopeLimitations({TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES, TlsParameterType.CIPHER_SUITE})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

@@ -29,7 +29,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -41,7 +41,7 @@ public class Finished extends Tls13Test {
             + "that the contents are correct and if incorrect MUST terminate "
             + "the connection with a \"decrypt_error\" alert.")
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.PRF_BITMASK)
+    @ScopeExtensions(TlsParameterType.PRF_BITMASK)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)

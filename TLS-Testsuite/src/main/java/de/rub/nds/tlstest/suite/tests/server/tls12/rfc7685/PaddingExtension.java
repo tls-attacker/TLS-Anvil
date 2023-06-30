@@ -28,7 +28,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,7 +47,7 @@ public class PaddingExtension extends Tls12Test {
     @ComplianceCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.LOW) 
     @AlertCategory(SeverityLevel.LOW)
-    @ScopeLimitations(DerivationType.INCLUDE_PADDING_EXTENSION)
+    @ScopeLimitations(TlsParameterType.INCLUDE_PADDING_EXTENSION)
     @EnforcedSenderRestriction
     public void paddingWithNonZero(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -67,7 +67,7 @@ public class PaddingExtension extends Tls12Test {
     @TlsTest(description = "The server MUST NOT echo the extension.")
     @ComplianceCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.LOW) 
-    @ScopeLimitations(DerivationType.INCLUDE_PADDING_EXTENSION)
+    @ScopeLimitations(TlsParameterType.INCLUDE_PADDING_EXTENSION)
     @Tag("new")
     public void serverDoesNotEcho(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

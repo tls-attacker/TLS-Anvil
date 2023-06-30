@@ -62,7 +62,7 @@ import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
@@ -116,7 +116,7 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake "
                             + "while restricting itself to the enumerated curves and point formats, "
                             + "it MUST NOT negotiate the use of an ECC cipher suite.")
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -151,8 +151,8 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake "
                             + "while restricting itself to the enumerated curves and point formats, "
                             + "it MUST NOT negotiate the use of an ECC cipher suite.")
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
-    @ManualConfig(DerivationType.CIPHERSUITE)
+    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
+    @ManualConfig(TlsParameterType.CIPHER_SUITE)
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -234,7 +234,7 @@ public class TLSExtensionForECC extends Tls12Test {
 
     @TlsTest(description = "NamedCurve named_curve_list<2..2^16-1>")
     @RFC(number = 8422, section = "5.1.1.  Supported Elliptic Curves Extension")
-    @ScopeLimitations(DerivationType.INCLUDE_GREASE_NAMED_GROUPS)
+    @ScopeLimitations(TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS)
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -281,7 +281,7 @@ public class TLSExtensionForECC extends Tls12Test {
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.NAMED_GROUP,
+            affectedTypes = TlsParameterType.NAMED_GROUP,
             methods = "isInvalidCurveApplicableNamedGroup")
     @CryptoCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
@@ -330,7 +330,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @RFC(
             number = 8422,
             section = "5.10. ECDH, ECDSA, and RSA Computations and 5.11. Public Key Validation")
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isXCurve")
+    @DynamicValueConstraints(affectedTypes = TlsParameterType.NAMED_GROUP, methods = "isXCurve")
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -371,7 +371,7 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "parameters MUST NOT be signed.")
     @RFC(number = 8422, section = "2.3.  ECDH_anon")
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.CIPHERSUITE,
+            affectedTypes = TlsParameterType.CIPHER_SUITE,
             methods = "isEcdheAnonCipherSuite")
     @HandshakeCategory(SeverityLevel.LOW)
     @InteroperabilityCategory(SeverityLevel.LOW)

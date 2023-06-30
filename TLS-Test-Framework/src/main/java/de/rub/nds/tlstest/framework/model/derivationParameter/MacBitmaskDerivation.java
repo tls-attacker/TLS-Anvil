@@ -12,9 +12,9 @@ import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.MacAlgorithm;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
@@ -25,7 +25,7 @@ import java.util.Set;
 public class MacBitmaskDerivation extends DerivationParameter<Integer> {
 
     public MacBitmaskDerivation() {
-        super(DerivationType.MAC_BITMASK, Integer.class);
+        super(TlsParameterType.MAC_BITMASK, Integer.class);
     }
 
     public MacBitmaskDerivation(Integer selectedValue) {
@@ -35,7 +35,7 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
 
     @Override
     public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
+            TestContext context, LegacyDerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         int maxMacLenght = 0;
         for (CipherSuite cipherSuite : context.getFeatureExtractionResult().getCipherSuites()) {
@@ -58,8 +58,8 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
     public void applyToConfig(Config config, TestContext context) {}
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
-        List<ConditionalConstraint> condConstraints = new LinkedList<>();
+    public List<LegacyConditionalConstraint> getDefaultConditionalConstraints(LegacyDerivationScope scope) {
+        List<LegacyConditionalConstraint> condConstraints = new LinkedList<>();
 
         if (ConstraintHelper.multipleMacSizesModeled(scope)) {
             condConstraints.add(getMustBeWithinMacSizeConstraint(scope));
@@ -67,13 +67,13 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
         return condConstraints;
     }
 
-    private ConditionalConstraint getMustBeWithinMacSizeConstraint(DerivationScope scope) {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+    private LegacyConditionalConstraint getMustBeWithinMacSizeConstraint(LegacyDerivationScope scope) {
+        Set<TlsParameterType> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
 
-        return new ConditionalConstraint(
+        return new LegacyConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name())
+                ConstraintBuilder.constrain(getType().name(), TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (MacBitmaskDerivation macBitmaskDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {

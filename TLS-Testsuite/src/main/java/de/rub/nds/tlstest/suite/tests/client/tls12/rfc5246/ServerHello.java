@@ -42,7 +42,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CompressionMethodDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class ServerHello extends Tls12Test {
                     "If a client receives an extension type in ServerHello that it did "
                             + "not request in the associated ClientHello, it MUST abort the handshake with an "
                             + "unsupported_extension fatal alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

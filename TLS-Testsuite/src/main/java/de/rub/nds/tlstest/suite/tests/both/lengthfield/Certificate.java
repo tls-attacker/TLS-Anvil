@@ -25,7 +25,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -37,7 +37,7 @@ public class Certificate extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @TlsTest(description = "Send a Certificate Message with a modified length value (-1)")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -50,7 +50,7 @@ public class Certificate extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @TlsTest(description = "Send a Certificate Message with a modified certificate list length value (-1)")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -63,7 +63,7 @@ public class Certificate extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @TlsTest(description = "Send a Certificate Message with a modified length value (-1)")
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -76,7 +76,7 @@ public class Certificate extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS13) 
     @TlsTest(description = "Send a Certificate Message with a modified certificate list length value (-1)")
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -89,7 +89,7 @@ public class Certificate extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @TlsTest(description = "Send a Certificate Message with a modified request context length value (+1)")
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

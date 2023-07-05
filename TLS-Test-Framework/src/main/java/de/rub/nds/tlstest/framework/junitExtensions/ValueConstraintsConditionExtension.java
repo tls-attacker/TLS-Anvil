@@ -7,12 +7,12 @@
  */
 package de.rub.nds.tlstest.framework.junitExtensions;
 
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.constraint.ValueConstraint;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.ValueConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -23,20 +23,24 @@ public class ValueConstraintsConditionExtension extends BaseCondition {
             return ConditionEvaluationResult.enabled("Class annotations are not relevant.");
         }
 
-        LegacyDerivationScope derivationScope = new LegacyDerivationScope(extensionContext);
+        DerivationScope derivationScope = new DerivationScope(extensionContext);
         for (ValueConstraint valContraint : derivationScope.getValueConstraints()) {
             DerivationParameter derivationParam =
-                    DerivationFactory.getInstance(valContraint.getAffectedType());
-            if (derivationParam.hasNoApplicableValues(TestContext.getInstance(), derivationScope)) {
+                    DerivationFactory.getInstance(
+                            (TlsParameterType)
+                                    valContraint.getAffectedParameter().getParameterType());
+            if (derivationParam.hasNoApplicableValues(derivationScope)) {
                 return ConditionEvaluationResult.disabled(
                         "Host does not support required value for parameter "
-                                + derivationParam.getType());
+                                + derivationParam.getParameterIdentifier().name());
             }
         }
 
-        for (TlsParameterType explicitType : derivationScope.getExplicitTypeValues().keySet()) {
-            DerivationParameter derivationParam = DerivationFactory.getInstance(explicitType);
-            if (derivationParam.hasNoApplicableValues(TestContext.getInstance(), derivationScope)) {
+        for (ParameterIdentifier explicitType : derivationScope.getExplicitValues().keySet()) {
+            DerivationParameter derivationParam =
+                    DerivationFactory.getInstance(
+                            (TlsParameterType) explicitType.getParameterType());
+            if (derivationParam.hasNoApplicableValues(derivationScope)) {
                 return ConditionEvaluationResult.disabled(
                         "Host does not support required value for parameter " + explicitType);
             }

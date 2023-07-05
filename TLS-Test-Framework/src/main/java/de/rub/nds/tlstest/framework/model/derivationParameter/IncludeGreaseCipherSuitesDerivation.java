@@ -7,16 +7,17 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class IncludeGreaseCipherSuitesDerivation extends DerivationParameter<Boolean> {
+public class IncludeGreaseCipherSuitesDerivation extends TlsDerivationParameter<Boolean> {
 
     public IncludeGreaseCipherSuitesDerivation() {
         super(TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES, Boolean.class);
@@ -28,26 +29,29 @@ public class IncludeGreaseCipherSuitesDerivation extends DerivationParameter<Boo
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, LegacyDerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, Boolean>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, Boolean>> parameterValues = new LinkedList<>();
         parameterValues.add(new IncludeGreaseCipherSuitesDerivation(true));
         parameterValues.add(new IncludeGreaseCipherSuitesDerivation(false));
         return parameterValues;
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {}
-
-    @Override
-    public void postProcessConfig(Config config, TestContext context) {
+    public void postProcessConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
         if (getSelectedValue()) {
             Arrays.asList(CipherSuite.values()).stream()
                     .filter(cipherSuite -> cipherSuite.isGrease())
                     .forEach(
                             greaseCipher ->
-                                    config.getDefaultClientSupportedCipherSuites()
+                                    config.getTlsConfig()
+                                            .getDefaultClientSupportedCipherSuites()
                                             .add(greaseCipher));
         }
+    }
+
+    @Override
+    protected TlsDerivationParameter<Boolean> generateValue(Boolean selectedValue) {
+        return new IncludeGreaseCipherSuitesDerivation(selectedValue);
     }
 }

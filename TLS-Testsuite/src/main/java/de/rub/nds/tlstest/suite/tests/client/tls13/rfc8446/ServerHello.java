@@ -42,7 +42,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
 import static org.junit.Assert.*;
@@ -57,7 +57,7 @@ public class ServerHello extends Tls13Test {
     @TlsTest(description = "A client which receives a legacy_session_id_echo "
             + "field that does not match what it sent in the ClientHello MUST "
             + "abort the handshake with an \"illegal_parameter\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -96,7 +96,7 @@ public class ServerHello extends Tls13Test {
     @TlsTest(description = "A client which receives a cipher suite that was "
             + "not offered MUST abort the handshake with "
             + "an \"illegal_parameter\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @ScopeLimitations(TlsParameterType.CIPHER_SUITE)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -120,7 +120,7 @@ public class ServerHello extends Tls13Test {
 
     @TlsTest(description = "legacy_compression_method: A single byte which "
             + "MUST have the value 0.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @DeprecatedFeatureCategory(SeverityLevel.HIGH)
@@ -150,7 +150,7 @@ public class ServerHello extends Tls13Test {
         "MUST check that the last 8 bytes are not equal to either of these " +
         "values. [...] If a match is found, the client MUST abort the handshake with " +
         "an \"illegal_parameter\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

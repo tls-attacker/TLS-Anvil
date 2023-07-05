@@ -25,7 +25,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -37,7 +37,7 @@ public class ClientServerStateMachine extends Tls12Test {
     @RFC(number = 5246, section = "7.4.9 Finished")
     @TlsTest(description = "It is a fatal error if a Finished message is not preceded by a ChangeCipherSpec " +
             "message at the appropriate point in the handshake.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.LOW)

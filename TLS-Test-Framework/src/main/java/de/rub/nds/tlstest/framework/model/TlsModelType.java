@@ -7,7 +7,9 @@
  */
 package de.rub.nds.tlstest.framework.model;
 
-public enum ModelType {
+import de.rub.nds.anvilcore.model.ModelType;
+
+public enum TlsModelType implements ModelType {
     EMPTY,
     GENERIC,
     CERTIFICATE,

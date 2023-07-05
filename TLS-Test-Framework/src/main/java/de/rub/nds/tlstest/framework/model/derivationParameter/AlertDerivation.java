@@ -29,15 +29,18 @@ public class AlertDerivation extends TlsDerivationParameter<AlertDescription> {
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, AlertDescription>> getParameterValues(DerivationScope derivationScope) {
-        List<DerivationParameter<TlsAnvilConfig, AlertDescription>> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, AlertDescription>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, AlertDescription>> parameterValues =
+                new LinkedList<>();
         Arrays.stream(AlertDescription.values())
                 .forEach(descr -> parameterValues.add(new AlertDerivation(descr)));
         return parameterValues;
     }
 
     @Override
-    protected DerivationParameter<TlsAnvilConfig, AlertDescription> generateValue(AlertDescription selectedValue) {
+    protected TlsDerivationParameter<AlertDescription> generateValue(
+            AlertDescription selectedValue) {
         return new AlertDerivation(selectedValue);
     }
 }

@@ -58,7 +58,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
@@ -496,7 +496,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "if a GREASE value appears in any of the following: "
                             + "[...] Any ServerHello extension")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @ScopeExtensions(TlsParameterType.GREASE_EXTENSION)
     @DynamicValueConstraints(
             affectedTypes = TlsParameterType.NAMED_GROUP,
@@ -517,7 +517,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "if a GREASE value appears in any of the following: "
                             + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @ScopeExtensions(TlsParameterType.GREASE_PROTOCOL_VERSION)
     @DynamicValueConstraints(
             affectedTypes = TlsParameterType.NAMED_GROUP,

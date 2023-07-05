@@ -9,10 +9,10 @@ package de.rub.nds.tlstest.framework.simpleTest;
 
 import static org.junit.platform.commons.util.AnnotationUtils.isAnnotated;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.TestChooser;
 import de.rub.nds.tlstest.framework.coffee4j.junit.CombinatorialTlsTestExtension;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
@@ -34,7 +34,7 @@ public class TestChooserExtension implements TestTemplateInvocationContextProvid
             return false;
         }
 
-        LegacyDerivationScope scope = new LegacyDerivationScope(extensionContext);
+        DerivationScope scope = new DerivationScope(extensionContext);
         if (ParameterModelFactory.mustUseSimpleModel(TestContext.getInstance(), scope)) {
             return new SimpleTestExtension().supportsTestTemplate(extensionContext);
         } else {
@@ -45,7 +45,7 @@ public class TestChooserExtension implements TestTemplateInvocationContextProvid
     @Override
     public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(
             ExtensionContext extensionContext) {
-        LegacyDerivationScope scope = new LegacyDerivationScope(extensionContext);
+        DerivationScope scope = new DerivationScope(extensionContext);
         if (ParameterModelFactory.mustUseSimpleModel(TestContext.getInstance(), scope)) {
             return new SimpleTestExtension()
                     .provideTestTemplateInvocationContexts(extensionContext);

@@ -39,7 +39,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
@@ -79,7 +79,7 @@ public class SignatureAlgorithms extends Tls13Test {
                             + "curve.  If TLS 1.2 is negotiated, implementations MUST be prepared "
                             + "to accept a signature that uses any curve that they advertised in "
                             + "the \"supported_groups\" extension.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "supportsTls12")
@@ -113,7 +113,7 @@ public class SignatureAlgorithms extends Tls13Test {
                             + "mandatory in TLS 1.3) MUST be prepared to accept a signature using "
                             + "that scheme even when TLS 1.2 is negotiated.  In TLS 1.2, "
                             + "RSASSA-PSS is used with RSA cipher suites.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "supportsTls12")

@@ -48,7 +48,7 @@ import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -148,7 +148,7 @@ public class Fragmentation extends Tls12Test {
             description =
                     "Send a record without any content with Content Type Application Data. "
                             + " The former record increases the sequencenumber, which should not be allowed")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @Tag("emptyRecord")
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
@@ -203,7 +203,7 @@ public class Fragmentation extends Tls12Test {
             description =
                     "The length (in bytes) of the following TLSPlaintext.fragment. "
                             + "The length MUST NOT exceed 2^14.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

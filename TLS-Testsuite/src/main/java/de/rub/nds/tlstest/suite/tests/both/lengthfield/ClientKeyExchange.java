@@ -30,7 +30,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -42,7 +42,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class ClientKeyExchange extends TlsGenericTest {
     
     @TlsTest(description = "Send a Client Key Exchange Message with a modified length value (-1)")
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -54,7 +54,7 @@ public class ClientKeyExchange extends TlsGenericTest {
     }
     
     @TlsTest(description = "Send a Client Key Exchange Message with a modified public key length value (-1)")
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

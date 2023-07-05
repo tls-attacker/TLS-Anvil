@@ -43,7 +43,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AdditionalPaddingLengthDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolMessageTypeDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -98,7 +98,7 @@ public class RecordProtocol extends Tls13Test {
                             + "defined in this document unless negotiated by some extension. "
                             + "If a TLS implementation receives an unexpected record type, "
                             + "it MUST terminate the connection with an \"unexpected_message\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @RecordLayerCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.LOW)
@@ -133,7 +133,7 @@ public class RecordProtocol extends Tls13Test {
             description =
                     "If the decryption fails, the receiver MUST "
                             + "terminate the connection with a \"bad_record_mac\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions(TlsParameterType.AUTH_TAG_BITMASK)
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -175,7 +175,7 @@ public class RecordProtocol extends Tls13Test {
                             + "the full encoded TLSInnerPlaintext MUST NOT exceed 2^14 "
                             + "+ 1 octets.")
     // Note that the additional byte is the encoded content type, which we also add
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @RFC(number = 8446, section = "5.1. Record Layer and 5.4 Reccord Padding")
     @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
     @RecordLayerCategory(SeverityLevel.HIGH)
@@ -219,7 +219,7 @@ public class RecordProtocol extends Tls13Test {
             description =
                     "If the decryption fails, the receiver MUST "
                             + "terminate the connection with a \"bad_record_mac\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions({TlsParameterType.CIPHERTEXT_BITMASK, TlsParameterType.APP_MSG_LENGHT})
     @DynamicValueConstraints(
@@ -260,7 +260,7 @@ public class RecordProtocol extends Tls13Test {
             description =
                     "All encrypted TLS records can be padded to inflate the size of the "
                             + "TLSCiphertext.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @DynamicValueConstraints(
             affectedTypes = TlsParameterType.RECORD_LENGTH,
             methods = "isReasonableRecordSize")
@@ -305,7 +305,7 @@ public class RecordProtocol extends Tls13Test {
                             + "An endpoint that receives a record from its "
                             + "peer with TLSCiphertext.length larger than 2^14 + 256 octets MUST "
                             + "terminate the connection with a \"record_overflow\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @RecordLayerCategory(SeverityLevel.HIGH)
@@ -340,7 +340,7 @@ public class RecordProtocol extends Tls13Test {
     }
 
     @TlsTest(description = "Send a record without any content to increase the sequencenumber.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions(TlsParameterType.PROTOCOL_MESSAGE_TYPE)
@@ -372,7 +372,7 @@ public class RecordProtocol extends Tls13Test {
                     "Zero-length "
                             + "fragments of Application Data MAY be sent, as they are potentially "
                             + "useful as a traffic analysis countermeasure.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @InteroperabilityCategory(SeverityLevel.HIGH)
@@ -462,7 +462,7 @@ public class RecordProtocol extends Tls13Test {
                             + "from the AEAD decryption.  If a receiving implementation does not "
                             + "find a non-zero octet in the cleartext, it MUST terminate the "
                             + "connection with an \"unexpected_message\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @RFC(number = 8446, section = "5.4.  Record Padding")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

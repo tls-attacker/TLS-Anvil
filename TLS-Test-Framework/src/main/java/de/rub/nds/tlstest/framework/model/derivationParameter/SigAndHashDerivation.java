@@ -7,8 +7,11 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
-import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
@@ -17,10 +20,10 @@ import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
@@ -29,7 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 /** */
-public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAlgorithm> {
+public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHashAlgorithm> {
 
     public SigAndHashDerivation() {
         super(TlsParameterType.SIG_HASH_ALGORIHTM, SignatureAndHashAlgorithm.class);
@@ -41,9 +44,10 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, LegacyDerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
+                new LinkedList<>();
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
             ClientFeatureExtractionResult extractionResult =
                     (ClientFeatureExtractionResult) context.getFeatureExtractionResult();
@@ -51,19 +55,21 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
                     || extractionResult.getAdvertisedSignatureAndHashAlgorithms().isEmpty()) {
                 parameterValues = getClientTestDefaultAlgorithms();
             } else {
-                parameterValues = getClientTestAlgorithms(extractionResult, scope);
+                parameterValues = getClientTestAlgorithms(extractionResult, derivationScope);
             }
         } else {
             parameterValues = getServerTestAlgorithms();
         }
-        if (!scope.isTls13Test()) {
+        if (!ConstraintHelper.isTls13Test(derivationScope)) {
             parameterValues.add(new SigAndHashDerivation(null));
         }
         return parameterValues;
     }
 
-    private List<DerivationParameter> getClientTestDefaultAlgorithms() {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    private List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>>
+            getClientTestDefaultAlgorithms() {
+        List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
+                new LinkedList<>();
         // the applied algorithm depends on the chosen ciphersuite - see constraints
         // TLS 1.3 clients must send the extension if they expect a server cert
         if (supportsAnyRSA()) {
@@ -97,51 +103,60 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
                 .anyMatch(cipherSuite -> cipherSuite.isDSS());
     }
 
-    private List<DerivationParameter> getClientTestAlgorithms(
-            ClientFeatureExtractionResult extractionResult, LegacyDerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    private List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>>
+            getClientTestAlgorithms(
+                    ClientFeatureExtractionResult extractionResult, DerivationScope scope) {
+        List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
+                new LinkedList<>();
         extractionResult.getAdvertisedSignatureAndHashAlgorithms().stream()
-                .filter(algo -> algo.suitedForSigningTls13Messages() || !scope.isTls13Test())
+                .filter(
+                        algo ->
+                                algo.suitedForSigningTls13Messages()
+                                        || !ConstraintHelper.isTls13Test(scope))
                 .filter(algo -> SignatureAndHashAlgorithm.getImplemented().contains(algo))
                 .forEach(algo -> parameterValues.add(new SigAndHashDerivation(algo)));
         return parameterValues;
     }
 
-    private List<DerivationParameter> getServerTestAlgorithms() {
+    private List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>>
+            getServerTestAlgorithms() {
         // TLS-Scanner has no probe for this yet
         throw new UnsupportedOperationException(
                 "SigAndHash derivation is currently not supported for server tests");
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
         if (getSelectedValue() != null) {
-            config.setAutoAdjustSignatureAndHashAlgorithm(false);
-            config.setDefaultSelectedSignatureAndHashAlgorithm(getSelectedValue());
+            config.getTlsConfig().setAutoAdjustSignatureAndHashAlgorithm(false);
+            config.getTlsConfig().setDefaultSelectedSignatureAndHashAlgorithm(getSelectedValue());
             if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-                config.setDefaultClientSupportedSignatureAndHashAlgorithms(getSelectedValue());
+                config.getTlsConfig()
+                        .setDefaultClientSupportedSignatureAndHashAlgorithms(getSelectedValue());
             } else {
-                config.setDefaultServerSupportedSignatureAndHashAlgorithms(getSelectedValue());
+                config.getTlsConfig()
+                        .setDefaultServerSupportedSignatureAndHashAlgorithms(getSelectedValue());
             }
         }
     }
 
     @Override
-    public List<LegacyConditionalConstraint> getDefaultConditionalConstraints(LegacyDerivationScope scope) {
-        List<LegacyConditionalConstraint> condConstraints = new LinkedList<>();
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(
+            DerivationScope derivationScope) {
+        List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
-        condConstraints.addAll(getSharedDefaultConditionalConstraints(scope));
+        condConstraints.addAll(getSharedDefaultConditionalConstraints(derivationScope));
 
-        if (!scope.isTls13Test()) {
-            condConstraints.addAll(getDefaultPreTls13Constraints(scope));
+        if (!ConstraintHelper.isTls13Test(derivationScope)) {
+            condConstraints.addAll(getDefaultPreTls13Constraints(derivationScope));
         } else {
             condConstraints.add(getHashSizeMustMatchEcdsaPkSizeConstraint());
         }
         return condConstraints;
     }
 
-    public static List<LegacyConditionalConstraint> getDefaultPreTls13Constraints(LegacyDerivationScope scope) {
-        List<LegacyConditionalConstraint> condConstraints = new LinkedList<>();
+    public static List<ConditionalConstraint> getDefaultPreTls13Constraints(DerivationScope scope) {
+        List<ConditionalConstraint> condConstraints = new LinkedList<>();
         TestContext context = TestContext.getInstance();
 
         if ((context.getFeatureExtractionResult().getSignatureAndHashAlgorithmsForDerivation()
@@ -165,9 +180,9 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
         return condConstraints;
     }
 
-    public static List<LegacyConditionalConstraint> getSharedDefaultConditionalConstraints(
-            LegacyDerivationScope scope) {
-        List<LegacyConditionalConstraint> condConstraints = new LinkedList<>();
+    public static List<ConditionalConstraint> getSharedDefaultConditionalConstraints(
+            DerivationScope scope) {
+        List<ConditionalConstraint> condConstraints = new LinkedList<>();
         if (ConstraintHelper.pssSigAlgoModeled(scope)
                 && ConstraintHelper.rsaPkMightNotSufficeForPss(scope)) {
             condConstraints.add(getMustNotBePSSWithShortRSAKeyConstraint());
@@ -185,15 +200,17 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
         return condConstraints;
     }
 
-    private LegacyConditionalConstraint getHashSizeMustMatchEcdsaPkSizeConstraint() {
-        Set<TlsParameterType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(TlsParameterType.CERTIFICATE);
+    private ConditionalConstraint getHashSizeMustMatchEcdsaPkSizeConstraint() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CERTIFICATE));
 
         // TLS 1.3 specifies explicit curves for hash functions in ECDSA
         // e.g ecdsa_secp256r1_sha256
-        return new LegacyConditionalConstraint(
+        return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(getType().name(), TlsParameterType.CERTIFICATE.name())
+                ConstraintBuilder.constrain(
+                                getParameterIdentifier().name(),
+                                TlsParameterType.CERTIFICATE.name())
                         .by(
                                 (SigAndHashDerivation sigAndHashDerivation,
                                         CertificateDerivation certificateDerivation) -> {
@@ -220,14 +237,15 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
                                 }));
     }
 
-    private static LegacyConditionalConstraint getDefaultAlgorithmMustMatchCipherSuite() {
-        Set<TlsParameterType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
+    private static ConditionalConstraint getDefaultAlgorithmMustMatchCipherSuite() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
 
         // see RFC 5246 - Section 7.4.1.4.1
-        return new LegacyConditionalConstraint(
+        return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(TlsParameterType.SIG_HASH_ALGORIHTM.name(),
+                ConstraintBuilder.constrain(
+                                TlsParameterType.SIG_HASH_ALGORIHTM.name(),
                                 TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (SigAndHashDerivation sigAndHashDerivation,
@@ -262,14 +280,15 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
                                 }));
     }
 
-    private static LegacyConditionalConstraint getMustBeNullForStaticCipherSuite() {
-        Set<TlsParameterType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
+    private static ConditionalConstraint getMustBeNullForStaticCipherSuite() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
 
         // see RFC 5246 - Section 7.4.1.4.1
-        return new LegacyConditionalConstraint(
+        return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(TlsParameterType.SIG_HASH_ALGORIHTM.name(),
+                ConstraintBuilder.constrain(
+                                TlsParameterType.SIG_HASH_ALGORIHTM.name(),
                                 TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (SigAndHashDerivation sigAndHashDerivation,
@@ -284,14 +303,15 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
                                 }));
     }
 
-    private static LegacyConditionalConstraint getMustNotBeNullForEphemeralCipherSuite() {
-        Set<TlsParameterType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
+    private static ConditionalConstraint getMustNotBeNullForEphemeralCipherSuite() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
 
         // see RFC 5246 - Section 7.4.1.4.1
-        return new LegacyConditionalConstraint(
+        return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(TlsParameterType.SIG_HASH_ALGORIHTM.name(),
+                ConstraintBuilder.constrain(
+                                TlsParameterType.SIG_HASH_ALGORIHTM.name(),
                                 TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (SigAndHashDerivation sigAndHashDerivation,
@@ -306,13 +326,14 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
                                 }));
     }
 
-    private static LegacyConditionalConstraint getMustMatchPkOfCertificateConstraint() {
-        Set<TlsParameterType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(TlsParameterType.CERTIFICATE);
+    private static ConditionalConstraint getMustMatchPkOfCertificateConstraint() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CERTIFICATE));
 
-        return new LegacyConditionalConstraint(
+        return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(TlsParameterType.SIG_HASH_ALGORIHTM.name(),
+                ConstraintBuilder.constrain(
+                                TlsParameterType.SIG_HASH_ALGORIHTM.name(),
                                 TlsParameterType.CERTIFICATE.name())
                         .by(
                                 (SigAndHashDerivation sigAndHashDerivation,
@@ -360,14 +381,15 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
                                 }));
     }
 
-    private static LegacyConditionalConstraint getMustNotBePSSWithShortRSAKeyConstraint() {
-        Set<TlsParameterType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(TlsParameterType.CERTIFICATE);
+    private static ConditionalConstraint getMustNotBePSSWithShortRSAKeyConstraint() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CERTIFICATE));
 
         // RSA 512 bit key does not suffice for PSS signature
-        return new LegacyConditionalConstraint(
+        return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(TlsParameterType.SIG_HASH_ALGORIHTM.name(),
+                ConstraintBuilder.constrain(
+                                TlsParameterType.SIG_HASH_ALGORIHTM.name(),
                                 TlsParameterType.CERTIFICATE.name())
                         .by(
                                 (SigAndHashDerivation sigAndHashDerivation,
@@ -399,14 +421,15 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
                                 }));
     }
 
-    private static LegacyConditionalConstraint getMustNotBeRSA512withHashAbove256BitsConstraint() {
-        Set<TlsParameterType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(TlsParameterType.CERTIFICATE);
+    private static ConditionalConstraint getMustNotBeRSA512withHashAbove256BitsConstraint() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CERTIFICATE));
 
         // RSA 512 bit key does not work with RSA_SHA[> 256]
-        return new LegacyConditionalConstraint(
+        return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(TlsParameterType.SIG_HASH_ALGORIHTM.name(),
+                ConstraintBuilder.constrain(
+                                TlsParameterType.SIG_HASH_ALGORIHTM.name(),
                                 TlsParameterType.CERTIFICATE.name())
                         .by(
                                 (SigAndHashDerivation sigAndHashDerivation,
@@ -441,5 +464,11 @@ public class SigAndHashDerivation extends DerivationParameter<SignatureAndHashAl
             default:
                 return false;
         }
+    }
+
+    @Override
+    protected TlsDerivationParameter<SignatureAndHashAlgorithm> generateValue(
+            SignatureAndHashAlgorithm selectedValue) {
+        return new SigAndHashDerivation(selectedValue);
     }
 }

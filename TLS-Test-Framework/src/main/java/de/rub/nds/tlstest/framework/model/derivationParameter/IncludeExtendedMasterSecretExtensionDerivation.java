@@ -7,15 +7,17 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
 /** */
-public class IncludeExtendedMasterSecretExtensionDerivation extends DerivationParameter<Boolean> {
+public class IncludeExtendedMasterSecretExtensionDerivation
+        extends TlsDerivationParameter<Boolean> {
 
     public IncludeExtendedMasterSecretExtensionDerivation() {
         super(TlsParameterType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION, Boolean.class);
@@ -27,16 +29,21 @@ public class IncludeExtendedMasterSecretExtensionDerivation extends DerivationPa
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, LegacyDerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, Boolean>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, Boolean>> parameterValues = new LinkedList<>();
         parameterValues.add(new IncludeExtendedMasterSecretExtensionDerivation(true));
         parameterValues.add(new IncludeExtendedMasterSecretExtensionDerivation(false));
         return parameterValues;
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-        config.setAddExtendedMasterSecretExtension(getSelectedValue());
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+        config.getTlsConfig().setAddExtendedMasterSecretExtension(getSelectedValue());
+    }
+
+    @Override
+    protected TlsDerivationParameter<Boolean> generateValue(Boolean selectedValue) {
+        return new IncludeExtendedMasterSecretExtensionDerivation(selectedValue);
     }
 }

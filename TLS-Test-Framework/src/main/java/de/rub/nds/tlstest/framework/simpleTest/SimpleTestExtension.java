@@ -9,11 +9,11 @@ package de.rub.nds.tlstest.framework.simpleTest;
 
 import static org.junit.platform.commons.util.AnnotationUtils.isAnnotated;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.TestChooser;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Stream;
@@ -38,7 +38,7 @@ public class SimpleTestExtension implements TestTemplateInvocationContextProvide
             return false;
         }
 
-        LegacyDerivationScope scope = new LegacyDerivationScope(extensionContext);
+        DerivationScope scope = new DerivationScope(extensionContext);
         if (!ParameterModelFactory.mustUseSimpleModel(TestContext.getInstance(), scope)) {
             return false;
         }
@@ -49,7 +49,7 @@ public class SimpleTestExtension implements TestTemplateInvocationContextProvide
     @Override
     public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(
             ExtensionContext extensionContext) {
-        LegacyDerivationScope scope = new LegacyDerivationScope(extensionContext);
+        DerivationScope scope = new DerivationScope(extensionContext);
         List<DerivationParameter> singleVariatingParameter =
                 ParameterModelFactory.getSimpleModelVariations(TestContext.getInstance(), scope);
         SimpleTestManagerContainer managerContainer = SimpleTestManagerContainer.getInstance();

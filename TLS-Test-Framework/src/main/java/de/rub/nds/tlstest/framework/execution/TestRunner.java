@@ -44,7 +44,6 @@ import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.extractor.TestCaseExtractor;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.reporting.ExecutionListener;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -456,7 +455,8 @@ public class TestRunner {
         prepareTestExecution();
         AnvilFactoryRegistry.get()
                 .setParameterIdentifierProvider(new TlsParameterIdentifierProvider());
-        AnvilFactoryRegistry.get().addParameterTypes(TlsParameterType.values(), associatedFactory);
+        // AnvilFactoryRegistry.get().addParameterTypes(TlsParameterType.values(),
+        // associatedFactory);
 
         LauncherDiscoveryRequestBuilder builder =
                 LauncherDiscoveryRequestBuilder.request()

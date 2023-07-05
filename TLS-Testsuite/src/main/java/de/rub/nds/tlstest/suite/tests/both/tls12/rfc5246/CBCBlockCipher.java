@@ -33,7 +33,7 @@ import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
@@ -63,7 +63,7 @@ public class CBCBlockCipher extends Tls12Test {
             "vector MUST be filled with the padding length value. The receiver " +
             "MUST check this padding and MUST use the bad_record_mac alert to " +
             "indicate padding errors.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions({TlsParameterType.APP_MSG_LENGHT, TlsParameterType.PADDING_BITMASK})
     @ValueConstraints(affectedTypes = {TlsParameterType.CIPHER_SUITE}, methods = "isCBC")
@@ -107,7 +107,7 @@ public class CBCBlockCipher extends Tls12Test {
             "even multiple of the block length, or its padding values, when " +
             "checked, weren’t correct.")
     @RFC(number = 5246, section = "7.2.2. Error Alerts")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(TlsParameterType.CIPHERTEXT_BITMASK)
     @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isCBC")
@@ -162,7 +162,7 @@ public class CBCBlockCipher extends Tls12Test {
     @TlsTest(description = "bad_record_mac[...]This alert is returned if a record is received with an incorrect " +
             "MAC.")
     @RFC(number = 5246, section = "7.2.2. Error Alerts")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(TlsParameterType.MAC_BITMASK)
     @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isCBC")
@@ -203,7 +203,7 @@ public class CBCBlockCipher extends Tls12Test {
         "record: specifically, the first record transmitted under a " +
         "particular connection state MUST use sequence number 0.")
     @RFC(number = 5246, section = "6.1. Connection States")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isCBC")
     @CryptoCategory(SeverityLevel.MEDIUM)
     @RecordLayerCategory(SeverityLevel.CRITICAL)

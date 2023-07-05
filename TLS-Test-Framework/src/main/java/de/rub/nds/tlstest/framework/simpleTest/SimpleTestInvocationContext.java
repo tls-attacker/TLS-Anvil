@@ -7,8 +7,8 @@
  */
 package de.rub.nds.tlstest.framework.simpleTest;
 
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.coffee4j.junit.TlsTestCombinatorialTestNameFormatter;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;

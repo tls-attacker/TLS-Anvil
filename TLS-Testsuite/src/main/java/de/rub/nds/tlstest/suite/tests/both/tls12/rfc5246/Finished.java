@@ -36,7 +36,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -45,7 +45,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class Finished extends Tls12Test {
 
     @TlsTest( description = "Recipients of Finished messages MUST verify that the contents are correct.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions(TlsParameterType.PRF_BITMASK)
     @HandshakeCategory(SeverityLevel.CRITICAL)

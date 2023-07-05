@@ -7,19 +7,22 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.scanner.core.constants.NumericResult;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
-import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
@@ -29,7 +32,7 @@ import java.util.Set;
 import java.util.StringJoiner;
 
 /** Selects CertificateKeyPairs for the IPM */
-public class CertificateDerivation extends DerivationParameter<CertificateKeyPair> {
+public class CertificateDerivation extends TlsDerivationParameter<CertificateKeyPair> {
 
     private final int MIN_RSA_SIG_KEY_LEN;
     private final int MIN_RSA_KEY_LEN;
@@ -95,15 +98,10 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
         setSelectedValue(certKeyPair);
     }
 
-    @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, LegacyDerivationScope scope) {
-        return getApplicableCertificates(context, scope, false);
-    }
-
-    public List<DerivationParameter> getApplicableCertificates(
-            TestContext context, LegacyDerivationScope scope, boolean allowUnsupportedPkGroups) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>> getApplicableCertificates(
+            TestContext context, DerivationScope scope, boolean allowUnsupportedPkGroups) {
+        List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>> parameterValues =
+                new LinkedList<>();
         CertificateByteChooser.getInstance().getCertificateKeyPairList().stream()
                 .filter(cert -> certMatchesAnySupportedCipherSuite(cert, scope))
                 .filter(cert -> filterRsaKeySize(cert))
@@ -139,16 +137,16 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
                 || allowUnsupportedPkGroups;
     }
 
-    private boolean filterTls13Groups(CertificateKeyPair cert, LegacyDerivationScope scope) {
+    private boolean filterTls13Groups(CertificateKeyPair cert, DerivationScope scope) {
         return cert.getPublicKeyGroup() == null
-                || !scope.isTls13Test()
+                || !ConstraintHelper.isTls13Test(scope)
                 || cert.getPublicKeyGroup().isTls13();
     }
 
     private boolean certMatchesAnySupportedCipherSuite(
-            CertificateKeyPair cert, LegacyDerivationScope scope) {
+            CertificateKeyPair cert, DerivationScope scope) {
         Set<CipherSuite> cipherSuites;
-        if (!scope.isTls13Test()) {
+        if (!ConstraintHelper.isTls13Test(scope)) {
             cipherSuites = TestContext.getInstance().getFeatureExtractionResult().getCipherSuites();
             return cipherSuites.stream()
                     .anyMatch(
@@ -174,16 +172,16 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-        config.setAutoSelectCertificate(false);
-        config.setDefaultExplicitCertificateKeyPair(getSelectedValue());
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+        config.getTlsConfig().setAutoSelectCertificate(false);
+        config.getTlsConfig().setDefaultExplicitCertificateKeyPair(getSelectedValue());
     }
 
     @Override
-    public List<LegacyConditionalConstraint> getDefaultConditionalConstraints(LegacyDerivationScope scope) {
-        List<LegacyConditionalConstraint> condConstraints = new LinkedList<>();
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
+        List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
-        if (!scope.isTls13Test()) {
+        if (!ConstraintHelper.isTls13Test(scope)) {
             if (ConstraintHelper.multipleCertPublicKeyTypesModeled(scope)
                     || ConstraintHelper.cipherSuitesWithDifferentCertPublicKeyRequirementsModeled(
                             scope)) {
@@ -193,12 +191,14 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
         return condConstraints;
     }
 
-    private LegacyConditionalConstraint getCertPkTypeMustMatchCipherSuiteConstraint() {
-        Set<TlsParameterType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
-        return new LegacyConditionalConstraint(
+    private ConditionalConstraint getCertPkTypeMustMatchCipherSuiteConstraint() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
+        return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(this.getType().name(), TlsParameterType.CIPHER_SUITE.name())
+                ConstraintBuilder.constrain(
+                                getParameterIdentifier().name(),
+                                TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (CertificateDerivation certificateDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {
@@ -216,7 +216,7 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
     }
 
     @Override
-    public String jsonValue() {
+    public String toString() {
         CertificateKeyPair certKeyPair = getSelectedValue();
         StringJoiner joiner = new StringJoiner(",");
         joiner.add("Public Key Type: " + certKeyPair.getCertPublicKeyType().name());
@@ -229,5 +229,17 @@ public class CertificateDerivation extends DerivationParameter<CertificateKeyPai
             joiner.add("Signature Key Group: " + certKeyPair.getSignatureGroup());
         }
         return joiner.toString();
+    }
+
+    @Override
+    public List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>> getParameterValues(
+            DerivationScope derivationScope) {
+        return getApplicableCertificates(context, derivationScope, false);
+    }
+
+    @Override
+    protected TlsDerivationParameter<CertificateKeyPair> generateValue(
+            CertificateKeyPair selectedValue) {
+        return new CertificateDerivation(selectedValue);
     }
 }

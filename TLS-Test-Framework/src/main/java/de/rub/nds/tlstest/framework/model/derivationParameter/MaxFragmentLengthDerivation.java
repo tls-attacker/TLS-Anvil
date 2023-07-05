@@ -7,10 +7,11 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.constants.MaxFragmentLength;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.List;
  *
  * <p>If the parameter is null no extension is included
  */
-public class MaxFragmentLengthDerivation extends DerivationParameter<MaxFragmentLength> {
+public class MaxFragmentLengthDerivation extends TlsDerivationParameter<MaxFragmentLength> {
 
     public MaxFragmentLengthDerivation() {
         super(TlsParameterType.MAX_FRAGMENT_LENGTH, MaxFragmentLength.class);
@@ -31,9 +32,10 @@ public class MaxFragmentLengthDerivation extends DerivationParameter<MaxFragment
         setSelectedValue(selectedValue);
     }
 
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, LegacyDerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, MaxFragmentLength>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, MaxFragmentLength>> parameterValues =
+                new LinkedList<>();
 
         // TODO The layer system fails to process messages when max length was set
         for (MaxFragmentLength maxFragmentLength : MaxFragmentLength.values()) {
@@ -47,12 +49,18 @@ public class MaxFragmentLengthDerivation extends DerivationParameter<MaxFragment
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
         MaxFragmentLength selectedValue = getSelectedValue();
 
         if (selectedValue != null) {
-            config.setDefaultMaxFragmentLength(selectedValue);
-            config.setAddMaxFragmentLengthExtension(true);
+            config.getTlsConfig().setDefaultMaxFragmentLength(selectedValue);
+            config.getTlsConfig().setAddMaxFragmentLengthExtension(true);
         }
+    }
+
+    @Override
+    protected TlsDerivationParameter<MaxFragmentLength> generateValue(
+            MaxFragmentLength selectedValue) {
+        return new MaxFragmentLengthDerivation(selectedValue);
     }
 }

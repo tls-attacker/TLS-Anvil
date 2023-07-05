@@ -7,14 +7,15 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
-public class IncludeEncryptThenMacExtensionDerivation extends DerivationParameter<Boolean> {
+public class IncludeEncryptThenMacExtensionDerivation extends TlsDerivationParameter<Boolean> {
 
     public IncludeEncryptThenMacExtensionDerivation() {
         super(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION, Boolean.class);
@@ -26,16 +27,22 @@ public class IncludeEncryptThenMacExtensionDerivation extends DerivationParamete
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, LegacyDerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new IncludeEncryptThenMacExtensionDerivation(true));
-        parameterValues.add(new IncludeEncryptThenMacExtensionDerivation(false));
-        return parameterValues;
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+        super.applyToConfig(config, derivationScope); // Generated from
+        // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-        config.setAddEncryptThenMacExtension(getSelectedValue());
+    protected TlsDerivationParameter<Boolean> generateValue(Boolean selectedValue) {
+        return new IncludeEncryptThenMacExtensionDerivation(selectedValue);
+    }
+
+    @Override
+    public List<DerivationParameter<TlsAnvilConfig, Boolean>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, Boolean>> parameterValues = new LinkedList<>();
+        parameterValues.add(new IncludeEncryptThenMacExtensionDerivation(true));
+        parameterValues.add(new IncludeEncryptThenMacExtensionDerivation(false));
+        return parameterValues;
     }
 }

@@ -34,7 +34,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
@@ -98,7 +98,7 @@ public class EncThenMacExtension extends Tls12Test {
     "[...]encrypt( data || pad ) || MAC")
     @RFC(number = 7366, section = "3.  Applying Encrypt-then-MAC")
     @MethodCondition(method = "supportsExtension")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @DynamicValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isBlockCipher")
     @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @InteroperabilityCategory(SeverityLevel.HIGH)

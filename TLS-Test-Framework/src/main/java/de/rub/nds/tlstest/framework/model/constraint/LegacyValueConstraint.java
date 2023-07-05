@@ -9,7 +9,7 @@ package de.rub.nds.tlstest.framework.model.constraint;
 
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 
-public class ValueConstraint {
+public class LegacyValueConstraint {
 
     private final TlsParameterType affectedType;
 
@@ -19,8 +19,11 @@ public class ValueConstraint {
 
     private final boolean dynamic;
 
-    public ValueConstraint(
-            TlsParameterType affectedType, String evaluationMethod, Class<?> clazz, boolean dynamic) {
+    public LegacyValueConstraint(
+            TlsParameterType affectedType,
+            String evaluationMethod,
+            Class<?> clazz,
+            boolean dynamic) {
         this.affectedType = affectedType;
         this.evaluationMethod = evaluationMethod;
         this.clazz = clazz;

@@ -1,7 +1,7 @@
 package de.rub.nds.tlstest.framework.coffee4j.model;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
 import de.rwth.swc.coffee4j.junit.provider.model.ModelProvider;
 import de.rwth.swc.coffee4j.model.InputParameterModel;
@@ -21,7 +21,8 @@ public class ScopeBasedProvider implements ModelProvider, AnnotationConsumer<Mod
 
     @Override
     public InputParameterModel provide(ExtensionContext extensionContext) {
-        LegacyDerivationScope derivationScope = new LegacyDerivationScope(extensionContext, modelFromScope);
+        DerivationScope derivationScope =
+                new DerivationScope(extensionContext, modelFromScope.baseModel());
         final Object providedObject =
                 ParameterModelFactory.generateModel(derivationScope, TestContext.getInstance());
         return toInputParameterModel(providedObject);

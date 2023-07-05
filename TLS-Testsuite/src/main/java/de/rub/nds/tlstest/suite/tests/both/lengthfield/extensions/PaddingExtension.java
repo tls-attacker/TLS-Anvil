@@ -24,7 +24,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -37,7 +37,7 @@ public class PaddingExtension extends TlsGenericTest {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @TlsTest(description = "Send a Padding Extension in the Hello Message with a modified length value (-1)")
     @ScopeLimitations(TlsParameterType.INCLUDE_PADDING_EXTENSION)
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -52,7 +52,7 @@ public class PaddingExtension extends TlsGenericTest {
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @TlsTest(description = "Send a Padding Extension in the Hello Message with a modified length value (-1)")
     @ScopeLimitations(TlsParameterType.INCLUDE_PADDING_EXTENSION)
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

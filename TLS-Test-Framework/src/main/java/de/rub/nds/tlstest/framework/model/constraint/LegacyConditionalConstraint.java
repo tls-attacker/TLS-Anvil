@@ -12,8 +12,7 @@
  */
 package de.rub.nds.tlstest.framework.model.constraint;
 
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rwth.swc.coffee4j.model.constraints.Constraint;
@@ -32,18 +31,19 @@ public class LegacyConditionalConstraint {
         return constraint;
     }
 
-    public boolean isApplicableTo(List<TlsParameterType> modeledDerivations, LegacyDerivationScope scope) {
+    public boolean isApplicableTo(
+            List<TlsParameterType> modeledDerivations, DerivationScope scope) {
         for (TlsParameterType required : requiredDerivations) {
             if (!modeledDerivations.contains(required)
-                    || !DerivationFactory.getInstance(required)
-                            .canBeModeled(TestContext.getInstance(), scope)) {
+                    || !DerivationFactory.getInstance(required).canBeModeled(scope)) {
                 return false;
             }
         }
         return true;
     }
 
-    public LegacyConditionalConstraint(Set<TlsParameterType> requiredDerivations, Constraint constraint) {
+    public LegacyConditionalConstraint(
+            Set<TlsParameterType> requiredDerivations, Constraint constraint) {
         this.requiredDerivations = requiredDerivations;
         this.constraint = constraint;
     }

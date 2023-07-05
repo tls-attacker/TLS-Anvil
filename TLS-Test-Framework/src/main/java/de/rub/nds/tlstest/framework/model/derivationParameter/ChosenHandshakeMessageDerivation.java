@@ -7,15 +7,16 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.List;
 
 /** Used to select a handshake message to apply modifications to. */
-public class ChosenHandshakeMessageDerivation extends DerivationParameter<HandshakeMessageType> {
+public class ChosenHandshakeMessageDerivation extends TlsDerivationParameter<HandshakeMessageType> {
 
     public ChosenHandshakeMessageDerivation() {
         super(TlsParameterType.CHOSEN_HANDSHAKE_MSG, HandshakeMessageType.class);
@@ -27,16 +28,14 @@ public class ChosenHandshakeMessageDerivation extends DerivationParameter<Handsh
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, LegacyDerivationScope scope) {
-        // currently, automatic value selection does not make sense here
-        throw new UnsupportedOperationException(
-                "Not supported yet."); // To change body of generated methods, choose Tools |
-        // Templates.
+    public List<DerivationParameter<TlsAnvilConfig, HandshakeMessageType>> getParameterValues(
+            DerivationScope derivationScope) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-        // currently, automatic value selection does not make sense here
+    protected TlsDerivationParameter<HandshakeMessageType> generateValue(
+            HandshakeMessageType selectedValue) {
+        return new ChosenHandshakeMessageDerivation(selectedValue);
     }
 }

@@ -46,7 +46,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
@@ -67,7 +67,7 @@ public class ServerKeyExchange extends Tls12Test {
                     "The client verifies the signature (when present) and retrieves the "
                             + "server's elliptic curve domain parameters and ephemeral ECDH public "
                             + "key from the ServerKeyExchange message.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
@@ -133,7 +133,7 @@ public class ServerKeyExchange extends Tls12Test {
                     "A possible reason for a "
                             + "fatal handshake failure is that the client's capabilities for "
                             + "handling elliptic curves and point formats are exceeded")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
@@ -187,7 +187,7 @@ public class ServerKeyExchange extends Tls12Test {
                     "A possible reason for a "
                             + "fatal handshake failure is that the client's capabilities for "
                             + "handling elliptic curves and point formats are exceeded")
-    @ModelFromScope(baseModel = ModelType.GENERIC)
+    @ModelFromScope(baseModel = TlsModelType.GENERIC)
     @ScopeExtensions(TlsParameterType.CERTIFICATE)
     @ScopeLimitations(TlsParameterType.NAMED_GROUP)
     @ExplicitValues(
@@ -221,7 +221,7 @@ public class ServerKeyExchange extends Tls12Test {
                     "The client verifies the signature (when present) and retrieves the "
                             + "server's elliptic curve domain parameters and ephemeral ECDH public "
                             + "key from the ServerKeyExchange message.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
@@ -259,7 +259,7 @@ public class ServerKeyExchange extends Tls12Test {
                     "The client verifies the signature (when present) and retrieves the "
                             + "server's elliptic curve domain parameters and ephemeral ECDH public "
                             + "key from the ServerKeyExchange message.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @ScopeLimitations(TlsParameterType.SIG_HASH_ALGORIHTM)
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
@@ -331,7 +331,7 @@ public class ServerKeyExchange extends Tls12Test {
                             + "signature algorithm and hash algorithm MUST be a pair listed in that "
                             + "extension. ")
     @RFC(number = 5246, section = "7.4.3.  Server Key Exchange Message")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)

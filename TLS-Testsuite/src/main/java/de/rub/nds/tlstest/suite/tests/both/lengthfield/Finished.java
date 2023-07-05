@@ -31,7 +31,7 @@ import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -42,7 +42,7 @@ public class Finished extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @TlsTest(description = "Send a Finished Message with a modified length value (-1)")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -55,7 +55,7 @@ public class Finished extends TlsGenericTest {
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @TlsTest(description = "Send a Finished Message with a modified length value (-1)")
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

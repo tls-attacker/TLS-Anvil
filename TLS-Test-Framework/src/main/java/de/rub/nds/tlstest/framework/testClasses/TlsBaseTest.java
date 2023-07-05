@@ -7,11 +7,13 @@
  */
 package de.rub.nds.tlstest.framework.testClasses;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.EnforcedSenderRestrictionConditionExtension;
@@ -23,7 +25,6 @@ import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.ValueConstraintsConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.WorkflowRunnerResolver;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -66,8 +67,8 @@ public abstract class TlsBaseTest {
             Config config, ArgumentsAccessor argAccessor, WorkflowRunner runner) {
         derivationContainer =
                 new DerivationContainer(
-                        argAccessor.toList(), new LegacyDerivationScope(extensionContext));
-        derivationContainer.applyToConfig(config, context);
+                        argAccessor.toList(), new DerivationScope(extensionContext));
+        derivationContainer.applyToConfig(new TlsAnvilConfig(config));
         runner.setPreparedConfig(config);
         runner.setDerivationContainer(derivationContainer);
         return config;

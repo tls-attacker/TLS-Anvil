@@ -30,7 +30,7 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
@@ -46,7 +46,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 public class AEADCiphers extends Tls12Test {
 
     @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions({TlsParameterType.AUTH_TAG_BITMASK})
     @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods="isAEAD")
@@ -85,7 +85,7 @@ public class AEADCiphers extends Tls12Test {
     }
 
     @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions({TlsParameterType.CIPHERTEXT_BITMASK, TlsParameterType.APP_MSG_LENGHT})
     @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods="isAEAD")

@@ -63,7 +63,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -276,7 +276,7 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "peer's public value satisfy the curve equation, y^2 = x^3 + ax + b "
                             + "mod p.")
     @RFC(number = 8422, section = "5.11. Public Key Validation")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)

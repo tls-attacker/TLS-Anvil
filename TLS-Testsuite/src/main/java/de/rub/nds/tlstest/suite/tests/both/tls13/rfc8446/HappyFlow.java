@@ -23,7 +23,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -38,7 +38,7 @@ public class HappyFlow extends Tls13Test {
     
     @TlsTest(description = "A benign handshake executed with all parameter combinations "
             + " that affect a regular handshake")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.HIGH)
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     public void happyFlow(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

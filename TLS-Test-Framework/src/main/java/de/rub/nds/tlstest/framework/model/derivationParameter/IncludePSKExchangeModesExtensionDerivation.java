@@ -7,14 +7,15 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
-public class IncludePSKExchangeModesExtensionDerivation extends DerivationParameter<Boolean> {
+public class IncludePSKExchangeModesExtensionDerivation extends TlsDerivationParameter<Boolean> {
 
     public IncludePSKExchangeModesExtensionDerivation() {
         super(TlsParameterType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION, Boolean.class);
@@ -26,16 +27,21 @@ public class IncludePSKExchangeModesExtensionDerivation extends DerivationParame
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, LegacyDerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, Boolean>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, Boolean>> parameterValues = new LinkedList<>();
         parameterValues.add(new IncludePSKExchangeModesExtensionDerivation(true));
         parameterValues.add(new IncludePSKExchangeModesExtensionDerivation(false));
         return parameterValues;
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-        config.setAddPSKKeyExchangeModesExtension(getSelectedValue());
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+        config.getTlsConfig().setAddPSKKeyExchangeModesExtension(getSelectedValue());
+    }
+
+    @Override
+    protected TlsDerivationParameter<Boolean> generateValue(Boolean selectedValue) {
+        return new IncludePSKExchangeModesExtensionDerivation(selectedValue);
     }
 }

@@ -7,18 +7,20 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsscanner.serverscanner.probe.namedgroup.NamedGroupWitness;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
-import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
@@ -27,7 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
+public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
 
     public NamedGroupDerivation() {
         super(TlsParameterType.NAMED_GROUP, NamedGroup.class);
@@ -39,15 +41,16 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, LegacyDerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, NamedGroup>> parameterValues = new LinkedList<>();
         List<NamedGroup> groupList = context.getFeatureExtractionResult().getTls13Groups();
-        if (!scope.isTls13Test()
-                || scope.getKeyExchangeRequirements().supports(KeyExchangeType.ECDH)) {
+        if (!ConstraintHelper.isTls13Test(derivationScope)
+                || ConstraintHelper.getKeyExchangeRequirements(derivationScope)
+                        .supports(KeyExchangeType.ECDH)) {
             groupList = context.getFeatureExtractionResult().getNamedGroups();
             parameterValues.add(new NamedGroupDerivation(null));
-        } else if (scope.isTls13Test()
+        } else if (ConstraintHelper.isTls13Test(derivationScope)
                 && context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
             groupList = context.getFeatureExtractionResult().getTls13Groups();
         }
@@ -61,23 +64,23 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
         if (getSelectedValue() != null) {
             if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-                config.setDefaultClientNamedGroups(getSelectedValue());
-                config.setDefaultClientKeyShareNamedGroups(getSelectedValue());
+                config.getTlsConfig().setDefaultClientNamedGroups(getSelectedValue());
+                config.getTlsConfig().setDefaultClientKeyShareNamedGroups(getSelectedValue());
             } else {
-                config.setDefaultServerNamedGroups(getSelectedValue());
+                config.getTlsConfig().setDefaultServerNamedGroups(getSelectedValue());
             }
-            config.setDefaultSelectedNamedGroup(getSelectedValue());
+            config.getTlsConfig().setDefaultSelectedNamedGroup(getSelectedValue());
         } else {
-            config.setAddEllipticCurveExtension(false);
-            config.setAddECPointFormatExtension(false);
+            config.getTlsConfig().setAddEllipticCurveExtension(false);
+            config.getTlsConfig().setAddECPointFormatExtension(false);
         }
     }
 
     @Override
-    public void postProcessConfig(Config config, TestContext context) {
+    public void postProcessConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
         if (getSelectedValue() != null
                 && context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             Set<NamedGroup> groups = new HashSet<NamedGroup>();
@@ -88,7 +91,7 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
                     extractionResult.getNamedGroupWitnesses().get(selectedGroup);
             groups.add(selectedGroup);
             if (witness != null) {
-                if (config.getDefaultSelectedCipherSuite().isEphemeral()) {
+                if (config.getTlsConfig().getDefaultSelectedCipherSuite().isEphemeral()) {
                     groups.add(witness.getEcdsaPkGroupEphemeral());
                     groups.add(witness.getEcdsaSigGroupEphemeral());
                 } else {
@@ -96,16 +99,18 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
                 }
             }
             groups.remove(null);
-            config.setDefaultClientNamedGroups(new LinkedList<>(groups));
+            config.getTlsConfig().setDefaultClientNamedGroups(new LinkedList<>(groups));
         }
     }
 
     @Override
-    public List<LegacyConditionalConstraint> getDefaultConditionalConstraints(LegacyDerivationScope scope) {
-        List<LegacyConditionalConstraint> condConstraints = new LinkedList<>();
-        if (!scope.isTls13Test()) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
+        List<ConditionalConstraint> condConstraints = new LinkedList<>();
+        if (!ConstraintHelper.isTls13Test(scope)) {
             if (ConstraintHelper.ecdhCipherSuiteModeled(scope)
-                    && ConstraintHelper.nullModeled(scope, getType())) {
+                    && ConstraintHelper.nullModeled(
+                            scope,
+                            (TlsParameterType) getParameterIdentifier().getParameterType())) {
                 condConstraints.add(getMustNotBeNullForECDHConstraint());
             }
 
@@ -121,12 +126,14 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
         return condConstraints;
     }
 
-    private LegacyConditionalConstraint getMustNotBeNullForECDHConstraint() {
-        Set<TlsParameterType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
-        return new LegacyConditionalConstraint(
+    private ConditionalConstraint getMustNotBeNullForECDHConstraint() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
+        return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(getType().name(), TlsParameterType.CIPHER_SUITE.name())
+                ConstraintBuilder.constrain(
+                                getParameterIdentifier().name(),
+                                TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (NamedGroupDerivation namedGroupDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {
@@ -145,12 +152,14 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
                                 }));
     }
 
-    private LegacyConditionalConstraint getMustBeNullForNonECDHConstraint() {
-        Set<TlsParameterType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
-        return new LegacyConditionalConstraint(
+    private ConditionalConstraint getMustBeNullForNonECDHConstraint() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
+        return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(getType().name(), TlsParameterType.CIPHER_SUITE.name())
+                ConstraintBuilder.constrain(
+                                getParameterIdentifier().name(),
+                                TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (NamedGroupDerivation namedGroupDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {
@@ -169,12 +178,14 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
                                 }));
     }
 
-    private LegacyConditionalConstraint getMustBeNullForStaticECDH() {
-        Set<TlsParameterType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(TlsParameterType.CIPHER_SUITE);
-        return new LegacyConditionalConstraint(
+    private ConditionalConstraint getMustBeNullForStaticECDH() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
+        return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(getType().name(), TlsParameterType.CIPHER_SUITE.name())
+                ConstraintBuilder.constrain(
+                                getParameterIdentifier().name(),
+                                TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (NamedGroupDerivation namedGroupDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {
@@ -192,5 +203,10 @@ public class NamedGroupDerivation extends DerivationParameter<NamedGroup> {
                                     }
                                     return true;
                                 }));
+    }
+
+    @Override
+    protected TlsDerivationParameter<NamedGroup> generateValue(NamedGroup selectedValue) {
+        return new NamedGroupDerivation(selectedValue);
     }
 }

@@ -44,7 +44,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -81,7 +81,7 @@ public class SupportedVersions extends Tls13Test {
                     "If this extension is present, clients MUST ignore the "
                             + "ServerHello.legacy_version value and MUST use "
                             + "only the \"supported_versions\" extension to determine the selected version.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
     @ManualConfig(TlsParameterType.PROTOCOL_VERSION)
     @ExplicitValues(

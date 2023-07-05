@@ -20,7 +20,7 @@ import de.rub.nds.tlstest.framework.annotations.ValueConstraints;
 import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.KeyX;
-import de.rub.nds.tlstest.framework.model.constraint.ValueConstraint;
+import de.rub.nds.tlstest.framework.model.constraint.LegacyValueConstraint;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,11 +36,11 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  * session.
  */
 public class LegacyDerivationScope {
-    private ModelType baseModel = ModelType.GENERIC;
+    private TlsModelType baseModel = TlsModelType.GENERIC;
     private final List<TlsParameterType> scopeLimits;
     private final List<TlsParameterType> scopeExtensions;
     private final KeyX keyExchangeRequirements;
-    private final List<ValueConstraint> valueConstraints;
+    private final List<LegacyValueConstraint> valueConstraints;
     private final Map<TlsParameterType, String> explicitValues;
     private final Map<TlsParameterType, String> explicitModelingConstraints;
     private final ExtensionContext extensionContext;
@@ -64,7 +64,7 @@ public class LegacyDerivationScope {
         this.baseModel = modelFromScope.baseModel();
     }
 
-    public ModelType getBaseModel() {
+    public TlsModelType getBaseModel() {
         return baseModel;
     }
 
@@ -110,8 +110,8 @@ public class LegacyDerivationScope {
         return extensions;
     }
 
-    private List<ValueConstraint> resolveValueConstraints(ExtensionContext context) {
-        List<ValueConstraint> constraints = new LinkedList<>();
+    private List<LegacyValueConstraint> resolveValueConstraints(ExtensionContext context) {
+        List<LegacyValueConstraint> constraints = new LinkedList<>();
         Method testMethod = context.getRequiredTestMethod();
         if (testMethod.isAnnotationPresent(ValueConstraints.class)) {
             ValueConstraints valConstraints = testMethod.getAnnotation(ValueConstraints.class);
@@ -123,7 +123,7 @@ public class LegacyDerivationScope {
             }
             for (int i = 0; i < affectedTypes.length; i++) {
                 constraints.add(
-                        new ValueConstraint(
+                        new LegacyValueConstraint(
                                 affectedTypes[i],
                                 methods[i],
                                 context.getRequiredTestClass(),
@@ -141,7 +141,7 @@ public class LegacyDerivationScope {
             }
             for (int i = 0; i < affectedTypes.length; i++) {
                 constraints.add(
-                        new ValueConstraint(
+                        new LegacyValueConstraint(
                                 affectedTypes[i],
                                 methods[i],
                                 context.getRequiredTestClass(),
@@ -228,7 +228,7 @@ public class LegacyDerivationScope {
         return explicitModelingConstraints.containsKey(type);
     }
 
-    public List<ValueConstraint> getValueConstraints() {
+    public List<LegacyValueConstraint> getValueConstraints() {
         return valueConstraints;
     }
 

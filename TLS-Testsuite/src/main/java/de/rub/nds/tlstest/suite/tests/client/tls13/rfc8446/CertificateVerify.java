@@ -39,7 +39,7 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -160,7 +160,7 @@ public class CertificateVerify extends Tls13Test {
                     "The receiver of a CertificateVerify message MUST verify "
                             + "the signature field. [...] If the verification fails, "
                             + "the receiver MUST terminate the handshake with a \"decrypt_error\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -221,7 +221,7 @@ public class CertificateVerify extends Tls13Test {
                             + "algorithm MUST be one offered in the client's \"signature_algorithms\" "
                             + "extension unless no valid certificate chain can be produced without "
                             + "unsupported algorithms")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)
     @CertificateCategory(SeverityLevel.HIGH)

@@ -1,6 +1,6 @@
 package de.rub.nds.tlstest.framework.coffee4j.model;
 
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rwth.swc.coffee4j.junit.provider.model.ModelSource;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -16,5 +16,5 @@ import java.lang.annotation.Target;
 public @interface ModelFromScope {
     String name() default "TlsTest";
 
-    ModelType baseModel() default ModelType.GENERIC;
+    TlsModelType baseModel() default TlsModelType.GENERIC;
 }

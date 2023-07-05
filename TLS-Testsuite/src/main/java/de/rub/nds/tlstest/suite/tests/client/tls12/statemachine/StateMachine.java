@@ -36,7 +36,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.tests.client.both.statemachine.SharedStateMachineTest;
 import org.junit.jupiter.api.Tag;
@@ -58,7 +58,7 @@ public class StateMachine extends Tls12Test {
     
     @TlsTest(description = "Omit the Certificate Message for non-anonymous Cipher Suite")
     @DynamicValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isNotAnonCipherSuite")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @ScopeLimitations({TlsParameterType.CERTIFICATE})
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
@@ -77,7 +77,7 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Omit the Change Cipher Spec Message and send Finished encrypted")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.LOW)
@@ -105,7 +105,7 @@ public class StateMachine extends Tls12Test {
     }
     
     @TlsTest(description = "Send a second ServerHello after the client's Finished has been received")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.LOW)

@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.simpleTest;
 
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import java.util.List;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;

@@ -8,9 +8,11 @@
 package de.rub.nds.tlstest.framework.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rwth.swc.coffee4j.model.Combination;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +28,7 @@ public class DerivationContainer {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private final List<DerivationParameter> derivations;
-    private LegacyDerivationScope underlyingScope;
+    private DerivationScope underlyingScope;
 
     public DerivationContainer(List<Object> objects) {
         derivations = new LinkedList<>();
@@ -40,7 +42,7 @@ public class DerivationContainer {
         }
     }
 
-    public DerivationContainer(List<Object> objects, LegacyDerivationScope underlyingScope) {
+    public DerivationContainer(List<Object> objects, DerivationScope underlyingScope) {
         this(objects);
         this.underlyingScope = underlyingScope;
         derivations.addAll(
@@ -61,7 +63,7 @@ public class DerivationContainer {
         return new DerivationContainer(res);
     }
 
-    public <T extends DerivationParameter<?>> T getDerivation(Class<T> clazz) {
+    public <T extends DerivationParameter<?, ?>> T getDerivation(Class<T> clazz) {
         for (DerivationParameter listed : derivations) {
             if (clazz.equals(listed.getClass())) {
                 return (T) listed;
@@ -72,7 +74,7 @@ public class DerivationContainer {
 
     public DerivationParameter getDerivation(TlsParameterType type) {
         for (DerivationParameter listed : derivations) {
-            if (listed.getType() == type) {
+            if (listed.getParameterIdentifier().getParameterType() == type) {
                 return listed;
             }
         }
@@ -80,9 +82,9 @@ public class DerivationContainer {
         return null;
     }
 
-    public DerivationParameter getChildParameter(TlsParameterType type) {
+    public DerivationParameter getChildParameter(ParameterIdentifier type) {
         for (DerivationParameter listed : derivations) {
-            if (listed.getParent() == type) {
+            if (listed.getParameterIdentifier().getParameterScope() == type.getParameterScope()) {
                 return listed;
             }
         }
@@ -90,15 +92,15 @@ public class DerivationContainer {
         return null;
     }
 
-    public void applyToConfig(Config baseConfig, TestContext context) {
+    public void applyToConfig(TlsAnvilConfig baseConfig) {
         for (DerivationParameter listed : derivations) {
-            if (underlyingScope.isAutoApplyToConfig(listed.getType())) {
-                listed.applyToConfig(baseConfig, context);
+            if (!underlyingScope.parameterListedForManualConfig(listed.getParameterIdentifier())) {
+                listed.applyToConfig(baseConfig, underlyingScope);
             }
         }
         for (DerivationParameter listed : derivations) {
-            if (underlyingScope.isAutoApplyToConfig(listed.getType())) {
-                listed.postProcessConfig(baseConfig, context);
+            if (underlyingScope.parameterListedForManualConfig(listed.getParameterIdentifier())) {
+                listed.postProcessConfig(baseConfig, underlyingScope);
             }
         }
         LOGGER.debug("Applied " + toString());
@@ -114,8 +116,10 @@ public class DerivationContainer {
 
     public byte[] buildBitmask() {
         for (DerivationParameter listed : derivations) {
-            if (listed.getType().isBitmaskDerivation()) {
-                return buildBitmask(listed.getType());
+            if (((TlsParameterType) listed.getParameterIdentifier().getParameterType())
+                    .isBitmaskDerivation()) {
+                return buildBitmask(
+                        (TlsParameterType) listed.getParameterIdentifier().getParameterType());
             }
         }
         return null;
@@ -123,7 +127,7 @@ public class DerivationContainer {
 
     public byte[] buildBitmask(TlsParameterType type) {
         DerivationParameter byteParameter = getDerivation(type);
-        DerivationParameter bitParameter = getChildParameter(type);
+        DerivationParameter bitParameter = getChildParameter(new ParameterIdentifier(type));
 
         byte[] constructed = new byte[(Integer) byteParameter.getSelectedValue() + 1];
         constructed[(Integer) byteParameter.getSelectedValue()] =
@@ -135,12 +139,12 @@ public class DerivationContainer {
     private Map<String, DerivationParameter> jsonObject() {
         Map<String, DerivationParameter> res = new HashMap<>();
         for (DerivationParameter i : derivations) {
-            res.put(i.getType().name(), i);
+            res.put(i.getParameterIdentifier().name(), i);
         }
         return res;
     }
 
-    public LegacyDerivationScope getUnderlyingScope() {
+    public DerivationScope getUnderlyingScope() {
         return underlyingScope;
     }
 }

@@ -7,9 +7,10 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.List;
  * This is only applied to legay Change Cipher Specs used for backwardscompatibility in a TLS 1.3
  * handshake
  */
-public class IncludeChangeCipherSpecDerivation extends DerivationParameter<Boolean> {
+public class IncludeChangeCipherSpecDerivation extends TlsDerivationParameter<Boolean> {
 
     public IncludeChangeCipherSpecDerivation() {
         super(TlsParameterType.INCLUDE_CHANGE_CIPHER_SPEC, Boolean.class);
@@ -30,16 +31,21 @@ public class IncludeChangeCipherSpecDerivation extends DerivationParameter<Boole
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, LegacyDerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new IncludeChangeCipherSpecDerivation(true));
-        parameterValues.add(new IncludeChangeCipherSpecDerivation(false));
-        return parameterValues;
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+        config.getTlsConfig().setTls13BackwardsCompatibilityMode(getSelectedValue());
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-        config.setTls13BackwardsCompatibilityMode(getSelectedValue());
+    protected TlsDerivationParameter<Boolean> generateValue(Boolean selectedValue) {
+        return new IncludeChangeCipherSpecDerivation(selectedValue);
+    }
+
+    @Override
+    public List<DerivationParameter<TlsAnvilConfig, Boolean>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, Boolean>> parameterValues = new LinkedList<>();
+        parameterValues.add(new IncludeChangeCipherSpecDerivation(true));
+        parameterValues.add(new IncludeChangeCipherSpecDerivation(false));
+        return parameterValues;
     }
 }

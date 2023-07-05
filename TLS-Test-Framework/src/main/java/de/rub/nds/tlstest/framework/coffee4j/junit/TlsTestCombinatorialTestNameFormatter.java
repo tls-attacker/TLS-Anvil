@@ -1,7 +1,7 @@
 package de.rub.nds.tlstest.framework.coffee4j.junit;
 
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rwth.swc.coffee4j.junit.CombinatorialTest;
 import de.rwth.swc.coffee4j.junit.CombinatorialTestNameFormatter;
 import de.rwth.swc.coffee4j.model.Combination;

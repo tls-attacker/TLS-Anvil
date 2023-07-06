@@ -1,10 +1,9 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 
@@ -33,27 +32,36 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @TlsVersion(supported = ProtocolVersion.TLS13)
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class SupportedVersionsExtension extends TlsGenericTest {
-    
-    @TlsTest(description = "Send a Supported Versions Extension in the Hello Message with a modified algorithm list length value (-1)")
+
+    @TlsTest(
+            description =
+                    "Send a Supported Versions Extension in the Hello Message with a modified algorithm list length value (-1)")
     @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
-    public void supportedVersionsExtensionLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void supportedVersionsExtensionLength(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
-        genericExtensionLengthTest(runner, argumentAccessor, config, SupportedVersionsExtensionMessage.class);
+        genericExtensionLengthTest(
+                runner, argumentAccessor, config, SupportedVersionsExtensionMessage.class);
     }
-    
+
     @ServerTest
-    @TlsTest(description = "Send a Supported Versions Extension in the Hello Message with a modified algorithm list length value (-1)")
+    @TlsTest(
+            description =
+                    "Send a Supported Versions Extension in the Hello Message with a modified algorithm list length value (-1)")
     @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
-    public void supportedVersionsListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void supportedVersionsListLength(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
-        SupportedVersionsExtensionMessage supportedVersions = getTargetedExtension(SupportedVersionsExtensionMessage.class, workflowTrace);
+        SupportedVersionsExtensionMessage supportedVersions =
+                getTargetedExtension(SupportedVersionsExtensionMessage.class, workflowTrace);
         supportedVersions.setSupportedVersionsLength(Modifiable.sub(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(this::validateLengthTest);
+        runner.execute(workflowTrace, runner.getPreparedConfig())
+                .validateFinal(this::validateLengthTest);
     }
 }

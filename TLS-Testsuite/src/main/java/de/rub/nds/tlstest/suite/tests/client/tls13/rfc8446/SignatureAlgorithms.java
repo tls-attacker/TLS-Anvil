@@ -9,6 +9,9 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
@@ -37,10 +40,8 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.TlsModelType;
-import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -196,23 +197,24 @@ public class SignatureAlgorithms extends Tls13Test {
                 && algorithmPair.getSignatureAlgorithm().name().contains("PSS");
     }
 
-    public List<LegacyConditionalConstraint> getMixedEccHashLengthPairs(LegacyDerivationScope scope) {
-        List<LegacyConditionalConstraint> condConstraints = new LinkedList<>();
+    public List<ConditionalConstraint> getMixedEccHashLengthPairs(DerivationScope scope) {
+        List<ConditionalConstraint> condConstraints = new LinkedList<>();
         condConstraints.addAll(SigAndHashDerivation.getSharedDefaultConditionalConstraints(scope));
         condConstraints.addAll(SigAndHashDerivation.getDefaultPreTls13Constraints(scope));
         condConstraints.add(getHashSizeMustNotMatchEcdsaPkSizeConstraint());
         return condConstraints;
     }
 
-    private LegacyConditionalConstraint getHashSizeMustNotMatchEcdsaPkSizeConstraint() {
-        Set<TlsParameterType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(TlsParameterType.CERTIFICATE);
+    private ConditionalConstraint getHashSizeMustNotMatchEcdsaPkSizeConstraint() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CERTIFICATE));
 
         // TLS 1.3 specifies explicit curves for hash functions in ECDSA
         // e.g ecdsa_secp256r1_sha256
-        return new LegacyConditionalConstraint(
+        return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(TlsParameterType.SIG_HASH_ALGORIHTM.name(),
+                ConstraintBuilder.constrain(
+                                TlsParameterType.SIG_HASH_ALGORIHTM.name(),
                                 TlsParameterType.CERTIFICATE.name())
                         .by(
                                 (SigAndHashDerivation sigAndHashDerivation,

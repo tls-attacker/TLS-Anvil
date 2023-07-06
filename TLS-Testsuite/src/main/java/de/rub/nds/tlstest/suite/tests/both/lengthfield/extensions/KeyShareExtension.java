@@ -1,10 +1,9 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 
@@ -33,27 +32,34 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @TlsVersion(supported = ProtocolVersion.TLS13)
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class KeyShareExtension extends TlsGenericTest {
-    
-    @TlsTest(description = "Send a Key Share Extension in the Hello Message with a modified length value (-1)")
+
+    @TlsTest(
+            description =
+                    "Send a Key Share Extension in the Hello Message with a modified length value (-1)")
     @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void keyShareExtensionLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
-        genericExtensionLengthTest(runner, argumentAccessor, config, KeyShareExtensionMessage.class);
+        genericExtensionLengthTest(
+                runner, argumentAccessor, config, KeyShareExtensionMessage.class);
     }
-    
+
     @ServerTest
-    @TlsTest(description = "Send a Key Share Extension in the Hello Message with a modified entry list length value (-1)")
+    @TlsTest(
+            description =
+                    "Send a Key Share Extension in the Hello Message with a modified entry list length value (-1)")
     @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void keyShareEntryListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
-        KeyShareExtensionMessage keyShareExtension = getTargetedExtension(KeyShareExtensionMessage.class, workflowTrace);
+        KeyShareExtensionMessage keyShareExtension =
+                getTargetedExtension(KeyShareExtensionMessage.class, workflowTrace);
         keyShareExtension.setKeyShareListLength(Modifiable.sub(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
+        runner.execute(workflowTrace, runner.getPreparedConfig())
+                .validateFinal(super::validateLengthTest);
     }
 }

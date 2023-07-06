@@ -78,7 +78,9 @@ public class EncThenMacExtension extends Tls12Test {
                             + "encrypt-then-MAC rather than the default MAC-then-encrypt.  If the "
                             + "server is capable of meeting this requirement, it responds with an "
                             + "encrypt_then_mac in its server_hello.")
-    @DynamicValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isBlockCipher")
+    @DynamicValueConstraints(
+            affectedTypes = TlsParameterType.CIPHER_SUITE,
+            methods = "isBlockCipher")
     @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @HandshakeCategory(SeverityLevel.INFORMATIONAL)
     @ComplianceCategory(SeverityLevel.INFORMATIONAL)

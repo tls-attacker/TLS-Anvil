@@ -1,10 +1,9 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.both.lengthfield;
 
@@ -16,7 +15,6 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -26,40 +24,50 @@ import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-
 
 @ClientTest
 @Tag("tls13")
 @TlsVersion(supported = ProtocolVersion.TLS13)
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class EncryptedExtensions extends TlsGenericTest {
-    
+
     @TlsTest(description = "Send an Encrypted Extensions Message with a modified length value (-1)")
     @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
-    public void encryptedExtensionsLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void encryptedExtensionsLength(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
-        EncryptedExtensionsMessage encryptedExtensions = (EncryptedExtensionsMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);
+        EncryptedExtensionsMessage encryptedExtensions =
+                (EncryptedExtensionsMessage)
+                        WorkflowTraceUtil.getFirstSendMessage(
+                                HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);
         encryptedExtensions.setLength(Modifiable.sub(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
+        runner.execute(workflowTrace, runner.getPreparedConfig())
+                .validateFinal(super::validateLengthTest);
     }
-    
-    @TlsTest(description = "Send an Encrypted Extensions Message with a modified Extensions list length value (+1)")
+
+    @TlsTest(
+            description =
+                    "Send an Encrypted Extensions Message with a modified Extensions list length value (+1)")
     @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
-    public void encryptedExtensionsExtensionsLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void encryptedExtensionsExtensionsLength(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
-        EncryptedExtensionsMessage encryptedExtensions = (EncryptedExtensionsMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);
+        EncryptedExtensionsMessage encryptedExtensions =
+                (EncryptedExtensionsMessage)
+                        WorkflowTraceUtil.getFirstSendMessage(
+                                HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);
         encryptedExtensions.setExtensionsLength(Modifiable.add(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(super::validateLengthTest);
+        runner.execute(workflowTrace, runner.getPreparedConfig())
+                .validateFinal(super::validateLengthTest);
     }
 }

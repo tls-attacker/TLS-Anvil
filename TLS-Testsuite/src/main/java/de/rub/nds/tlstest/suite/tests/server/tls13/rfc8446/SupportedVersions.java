@@ -9,6 +9,8 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import static org.junit.Assert.*;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -35,13 +37,12 @@ import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.LinkedList;
@@ -159,7 +160,8 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    public List<DerivationParameter> getUnsupportedProtocolVersions(LegacyDerivationScope scope) {
+    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getUnsupportedProtocolVersions(
+            DerivationScope scope) {
         List<ProtocolVersion> consideredVersions = new LinkedList<>();
         consideredVersions.add(ProtocolVersion.SSL2);
         consideredVersions.add(ProtocolVersion.SSL3);
@@ -169,7 +171,7 @@ public class SupportedVersions extends Tls13Test {
         context.getFeatureExtractionResult()
                 .getSupportedVersions()
                 .forEach(version -> consideredVersions.remove(version));
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+        List<DerivationParameter<TlsAnvilConfig, byte[]>> parameterValues = new LinkedList<>();
         consideredVersions.forEach(
                 version -> parameterValues.add(new ProtocolVersionDerivation(version.getValue())));
         return parameterValues;

@@ -1,12 +1,13 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
+
+import static org.junit.Assert.assertFalse;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -40,7 +41,6 @@ import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Arrays;
-import static org.junit.Assert.assertFalse;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -48,8 +48,10 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class ClientHello extends Tls12Test {
 
-    @TlsTest(description = "If the list contains cipher suites the server does not recognize, support, " +
-            "or wish to use, the server MUST ignore those cipher suites, and process the remaining ones as usual.")
+    @TlsTest(
+            description =
+                    "If the list contains cipher suites the server does not recognize, support, "
+                            + "or wish to use, the server MUST ignore those cipher suites, and process the remaining ones as usual.")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -57,67 +59,85 @@ public class ClientHello extends Tls12Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
-        clientHelloMessage.setCipherSuites(Modifiable.insert(new byte[]{(byte)0xfe, 0x00}, 0));
+        clientHelloMessage.setCipherSuites(Modifiable.insert(new byte[] {(byte) 0xfe, 0x00}, 0));
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(clientHelloMessage),
-                new ReceiveTillAction(new ServerHelloDoneMessage())
-        );
+                new ReceiveTillAction(new ServerHelloDoneMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(description = "This vector MUST contain, and all implementations MUST support, CompressionMethod.null. " +
-            "Thus, a client and server will always be able to agree on a compression method.")
+    @TlsTest(
+            description =
+                    "This vector MUST contain, and all implementations MUST support, CompressionMethod.null. "
+                            + "Thus, a client and server will always be able to agree on a compression method.")
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
-    public void unknownCompressionMethod(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void unknownCompressionMethod(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
-        clientHelloMessage.setCompressions(Modifiable.explicit(new byte[]{0x00, 0x04}));
+        clientHelloMessage.setCompressions(Modifiable.explicit(new byte[] {0x00, 0x04}));
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(clientHelloMessage),
-                new ReceiveTillAction(new ServerHelloDoneMessage())
-        );
+                new ReceiveTillAction(new ServerHelloDoneMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
-    
+
     @RFC(number = 5246, section = "7.4.1.4.1 Signature Algorithms")
-    @TlsTest(description = "The rules specified in [TLSEXT] " +
-            "require servers to ignore extensions they do not understand.")
+    @TlsTest(
+            description =
+                    "The rules specified in [TLSEXT] "
+                            + "require servers to ignore extensions they do not understand.")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void includeUnknownExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        
-        //we use a Grease Extension for which we modify the type
-        GreaseExtensionMessage greaseHelperExtension = new GreaseExtensionMessage(ExtensionType.GREASE_00, 32);
-        greaseHelperExtension.setExtensionType(Modifiable.explicit(new byte[]{(byte) 0xBA, (byte) 0x9F}));
-        
-        ClientHelloMessage clientHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+
+        // we use a Grease Extension for which we modify the type
+        GreaseExtensionMessage greaseHelperExtension =
+                new GreaseExtensionMessage(ExtensionType.GREASE_00, 32);
+        greaseHelperExtension.setExtensionType(
+                Modifiable.explicit(new byte[] {(byte) 0xBA, (byte) 0x9F}));
+
+        ClientHelloMessage clientHello =
+                (ClientHelloMessage)
+                        WorkflowTraceUtil.getFirstSendMessage(
+                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
         clientHello.addExtension(greaseHelperExtension);
-        
-        runner.execute(workflowTrace, config).validateFinal(i -> {
-            Validator.executedAsPlanned(i);
-            
-            ServerHelloMessage serverHello = (ServerHelloMessage) WorkflowTraceUtil.getFirstReceivedMessage(HandshakeMessageType.SERVER_HELLO, workflowTrace);
-            if(serverHello.getExtensions() != null) {
-                for(ExtensionMessage extension : serverHello.getExtensions()) {
-                    assertFalse("Server negotiated the undefined Extension", Arrays.equals(extension.getExtensionType().getValue(), greaseHelperExtension.getType().getValue()));
-                }
-            }
-        });
+
+        runner.execute(workflowTrace, config)
+                .validateFinal(
+                        i -> {
+                            Validator.executedAsPlanned(i);
+
+                            ServerHelloMessage serverHello =
+                                    (ServerHelloMessage)
+                                            WorkflowTraceUtil.getFirstReceivedMessage(
+                                                    HandshakeMessageType.SERVER_HELLO,
+                                                    workflowTrace);
+                            if (serverHello.getExtensions() != null) {
+                                for (ExtensionMessage extension : serverHello.getExtensions()) {
+                                    assertFalse(
+                                            "Server negotiated the undefined Extension",
+                                            Arrays.equals(
+                                                    extension.getExtensionType().getValue(),
+                                                    greaseHelperExtension.getType().getValue()));
+                                }
+                            }
+                        });
     }
-    
+
     @TlsTest(description = "Send a ClientHello that offers many cipher suites")
     @ScopeLimitations(TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES)
     @InteroperabilityCategory(SeverityLevel.HIGH)
@@ -125,40 +145,53 @@ public class ClientHello extends Tls12Test {
     @HandshakeCategory(SeverityLevel.MEDIUM)
     public void offerManyCipherSuites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        
-        //add pseudo cipher suites to reach 408, which is the sum of all
-        //defined values and GREASE values
-        CipherSuite selectedCipherSuite = derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+
+        // add pseudo cipher suites to reach 408, which is the sum of all
+        // defined values and GREASE values
+        CipherSuite selectedCipherSuite =
+                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
         byte[] explicitCipherSuites = new byte[408 * 2];
         byte firstByte = 0x0A;
         byte secondByte = 0;
-        for(int i = 0; i < 407 * 2; i = i + 2) {
+        for (int i = 0; i < 407 * 2; i = i + 2) {
             explicitCipherSuites[i] = firstByte;
             explicitCipherSuites[i + 1] = secondByte;
-            if(secondByte == (byte) 0xFF) {
+            if (secondByte == (byte) 0xFF) {
                 firstByte++;
             }
             secondByte++;
         }
         explicitCipherSuites[814] = selectedCipherSuite.getByteValue()[0];
         explicitCipherSuites[815] = selectedCipherSuite.getByteValue()[1];
-        
+
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
         clientHelloMessage.setCipherSuites(Modifiable.explicit(explicitCipherSuites));
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(clientHelloMessage),
-                new ReceiveTillAction(new ServerHelloDoneMessage())
-        );
+                new ReceiveTillAction(new ServerHelloDoneMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
-        
     }
-    
-    @TlsTest(description = "A server MUST accept ClientHello " +
-        "messages both with and without the extensions field")
-    @ScopeLimitations({TlsParameterType.INCLUDE_ALPN_EXTENSION, TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION, TlsParameterType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION, TlsParameterType.INCLUDE_HEARTBEAT_EXTENSION, TlsParameterType.INCLUDE_PADDING_EXTENSION, TlsParameterType.INCLUDE_RENEGOTIATION_EXTENSION, TlsParameterType.INCLUDE_SESSION_TICKET_EXTENSION, TlsParameterType.MAX_FRAGMENT_LENGTH, TlsParameterType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS, TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS, TlsParameterType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION})
+
+    @TlsTest(
+            description =
+                    "A server MUST accept ClientHello "
+                            + "messages both with and without the extensions field")
+    @ScopeLimitations({
+        TlsParameterType.INCLUDE_ALPN_EXTENSION,
+        TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION,
+        TlsParameterType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION,
+        TlsParameterType.INCLUDE_HEARTBEAT_EXTENSION,
+        TlsParameterType.INCLUDE_PADDING_EXTENSION,
+        TlsParameterType.INCLUDE_RENEGOTIATION_EXTENSION,
+        TlsParameterType.INCLUDE_SESSION_TICKET_EXTENSION,
+        TlsParameterType.MAX_FRAGMENT_LENGTH,
+        TlsParameterType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS,
+        TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS,
+        TlsParameterType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION
+    })
     @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.RSA})
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -167,8 +200,9 @@ public class ClientHello extends Tls12Test {
     public void leaveOutExtensions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        ClientHelloMessage clientHello = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
-        clientHello.setExtensionBytes(Modifiable.explicit(new byte [0]));
+        ClientHelloMessage clientHello =
+                workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+        clientHello.setExtensionBytes(Modifiable.explicit(new byte[0]));
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 }

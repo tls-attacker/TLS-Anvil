@@ -1,10 +1,9 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 
@@ -28,16 +27,15 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-/**
- * Runs a benign handshake with all default derivations to identify
- * parameter-related bugs.
- */
+/** Runs a benign handshake with all default derivations to identify parameter-related bugs. */
 @Tag("happyflow13")
 @RFC(number = 8446, section = "2.  Protocol Overview")
 public class HappyFlow extends Tls13Test {
-    
-    @TlsTest(description = "A benign handshake executed with all parameter combinations "
-            + " that affect a regular handshake")
+
+    @TlsTest(
+            description =
+                    "A benign handshake executed with all parameter combinations "
+                            + " that affect a regular handshake")
     @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @HandshakeCategory(SeverityLevel.HIGH)
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
@@ -45,13 +43,28 @@ public class HappyFlow extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            boolean receivedAlert = WorkflowTraceUtil.didReceiveMessage(ProtocolMessageType.ALERT, i.getWorkflowTrace());
-            if (receivedAlert) {
-                AlertMessage alert = (AlertMessage) WorkflowTraceUtil.getFirstReceivedMessage(ProtocolMessageType.ALERT, i.getWorkflowTrace());
-                LOGGER.error("Received Alert " + AlertDescription.getAlertDescription(alert.getDescription().getValue()) + " for Happy Flow using derivations:\n" + derivationContainer.toString() + "\nWorkflowTrace:\n" + i.getWorkflowTrace().toString());
-            }
-            Validator.executedAsPlanned(i);
-        });
+        runner.execute(workflowTrace, c)
+                .validateFinal(
+                        i -> {
+                            boolean receivedAlert =
+                                    WorkflowTraceUtil.didReceiveMessage(
+                                            ProtocolMessageType.ALERT, i.getWorkflowTrace());
+                            if (receivedAlert) {
+                                AlertMessage alert =
+                                        (AlertMessage)
+                                                WorkflowTraceUtil.getFirstReceivedMessage(
+                                                        ProtocolMessageType.ALERT,
+                                                        i.getWorkflowTrace());
+                                LOGGER.error(
+                                        "Received Alert "
+                                                + AlertDescription.getAlertDescription(
+                                                        alert.getDescription().getValue())
+                                                + " for Happy Flow using derivations:\n"
+                                                + derivationContainer.toString()
+                                                + "\nWorkflowTrace:\n"
+                                                + i.getWorkflowTrace().toString());
+                            }
+                            Validator.executedAsPlanned(i);
+                        });
     }
 }

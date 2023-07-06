@@ -1,12 +1,13 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7685;
+
+import static org.junit.Assert.assertFalse;
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -32,7 +33,6 @@ import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import static org.junit.Assert.assertFalse;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -41,11 +41,12 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class PaddingExtension extends Tls12Test {
     private static final Logger LOGGER = LogManager.getLogger();
 
-
-    @TlsTest(description = "The client MUST fill the padding extension completely with zero " +
-            "bytes, although the padding extension_data field may be empty.")
+    @TlsTest(
+            description =
+                    "The client MUST fill the padding extension completely with zero "
+                            + "bytes, although the padding extension_data field may be empty.")
     @ComplianceCategory(SeverityLevel.LOW)
-    @HandshakeCategory(SeverityLevel.LOW) 
+    @HandshakeCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.LOW)
     @ScopeLimitations(TlsParameterType.INCLUDE_PADDING_EXTENSION)
     @EnforcedSenderRestriction
@@ -53,20 +54,19 @@ public class PaddingExtension extends Tls12Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
         config.setAddPaddingExtension(true);
-        config.setDefaultPaddingExtensionBytes(new byte[]{(byte) 0xBA, (byte) 0xBE});
+        config.setDefaultPaddingExtensionBytes(new byte[] {(byte) 0xBA, (byte) 0xBE});
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(config)),
-                new ReceiveAction(new AlertMessage())
-        );
+                new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
-    
+
     @TlsTest(description = "The server MUST NOT echo the extension.")
     @ComplianceCategory(SeverityLevel.LOW)
-    @HandshakeCategory(SeverityLevel.LOW) 
+    @HandshakeCategory(SeverityLevel.LOW)
     @ScopeLimitations(TlsParameterType.INCLUDE_PADDING_EXTENSION)
     @Tag("new")
     public void serverDoesNotEcho(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -76,12 +76,18 @@ public class PaddingExtension extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
-        runner.execute(workflowTrace, config).validateFinal(i -> {
-            Validator.executedAsPlanned(i);
-            ServerHelloMessage serverHello = i.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
-            if(serverHello.getExtensions() != null) {
-                assertFalse("Server responded with Padding Extension", serverHello.containsExtension(ExtensionType.PADDING));
-            }
-        });
+        runner.execute(workflowTrace, config)
+                .validateFinal(
+                        i -> {
+                            Validator.executedAsPlanned(i);
+                            ServerHelloMessage serverHello =
+                                    i.getWorkflowTrace()
+                                            .getFirstReceivedMessage(ServerHelloMessage.class);
+                            if (serverHello.getExtensions() != null) {
+                                assertFalse(
+                                        "Server responded with Padding Extension",
+                                        serverHello.containsExtension(ExtensionType.PADDING));
+                            }
+                        });
     }
 }

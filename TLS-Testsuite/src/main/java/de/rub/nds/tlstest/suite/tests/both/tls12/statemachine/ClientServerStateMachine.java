@@ -1,10 +1,9 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.statemachine;
 
@@ -29,14 +28,14 @@ import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-/**
- * Statemachine tests used both for TLS 1.2 clients and servers.
- */
+/** Statemachine tests used both for TLS 1.2 clients and servers. */
 public class ClientServerStateMachine extends Tls12Test {
-    
+
     @RFC(number = 5246, section = "7.4.9 Finished")
-    @TlsTest(description = "It is a fatal error if a Finished message is not preceded by a ChangeCipherSpec " +
-            "message at the appropriate point in the handshake.")
+    @TlsTest(
+            description =
+                    "It is a fatal error if a Finished message is not preceded by a ChangeCipherSpec "
+                            + "message at the appropriate point in the handshake.")
     @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
@@ -44,11 +43,11 @@ public class ClientServerStateMachine extends Tls12Test {
     public void omitCCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilSendingMessage(
+                        WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         workflowTrace.addTlsActions(
-                new SendAction(new FinishedMessage()),
-                new ReceiveAction(new AlertMessage())
-        );
+                new SendAction(new FinishedMessage()), new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }

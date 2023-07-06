@@ -1,10 +1,9 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 
@@ -31,39 +30,46 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 8446, section = "4.4.4. Finished")
 public class Finished extends Tls13Test {
 
-    @TlsTest(description = "Recipients of Finished messages MUST verify "
-            + "that the contents are correct and if incorrect MUST terminate "
-            + "the connection with a \"decrypt_error\" alert.")
+    @TlsTest(
+            description =
+                    "Recipients of Finished messages MUST verify "
+                            + "that the contents are correct and if incorrect MUST terminate "
+                            + "the connection with a \"decrypt_error\" alert.")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions(TlsParameterType.PRF_BITMASK)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
-    public void verifyFinishedMessageCorrect(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void verifyFinishedMessageCorrect(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilSendingMessage(
+                        WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
         workflowTrace.addTlsActions(
-                new SendAction(new FinishedMessage()),
-                new ReceiveAction(new AlertMessage())
-        );
+                new SendAction(new FinishedMessage()), new ReceiveAction(new AlertMessage()));
 
         byte[] modificationBitmask = derivationContainer.buildBitmask();
-        workflowTrace.getFirstSendMessage(FinishedMessage.class)
+        workflowTrace
+                .getFirstSendMessage(FinishedMessage.class)
                 .setVerifyData(Modifiable.xor(modificationBitmask, 0));
 
-        runner.execute(workflowTrace, config).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
+        runner.execute(workflowTrace, config)
+                .validateFinal(
+                        i -> {
+                            Validator.receivedFatalAlert(i);
 
-            AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.DECRYPT_ERROR, msg);
-        });
+                            AlertMessage msg =
+                                    i.getWorkflowTrace()
+                                            .getFirstReceivedMessage(AlertMessage.class);
+                            Validator.testAlertDescription(i, AlertDescription.DECRYPT_ERROR, msg);
+                        });
     }
 }

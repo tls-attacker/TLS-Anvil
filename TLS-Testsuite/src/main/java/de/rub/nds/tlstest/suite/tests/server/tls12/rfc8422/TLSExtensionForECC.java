@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -44,7 +45,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.InvalidCurvePoint;
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.TwistedCurvePoint;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -280,7 +281,7 @@ public class TLSExtensionForECC extends Tls12Test {
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isInvalidCurveApplicableNamedGroup")
     @CryptoCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
@@ -329,7 +330,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @RFC(
             number = 8422,
             section = "5.10. ECDH, ECDSA, and RSA Computations and 5.11. Public Key Validation")
-    @DynamicValueConstraints(affectedTypes = TlsParameterType.NAMED_GROUP, methods = "isXCurve")
+    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -370,7 +371,7 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "parameters MUST NOT be signed.")
     @RFC(number = 8422, section = "2.3.  ECDH_anon")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.CIPHER_SUITE,
+            affectedIdentifiers = "CIPHER_SUITE",
             methods = "isEcdheAnonCipherSuite")
     @HandshakeCategory(SeverityLevel.LOW)
     @InteroperabilityCategory(SeverityLevel.LOW)

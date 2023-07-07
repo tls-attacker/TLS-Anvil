@@ -14,6 +14,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -42,8 +43,9 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
+
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -58,7 +60,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
@@ -78,7 +80,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class HelloRetryRequest extends Tls13Test {
 
     public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getUnofferedGroups(
-            LegacyDerivationScope scope) {
+            DerivationScope scope) {
         List<DerivationParameter<TlsAnvilConfig, NamedGroup>> parameterValues = new LinkedList<>();
         List<NamedGroup> offeredGroups =
                 ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
@@ -100,7 +102,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "the client MUST abort the handshake with an \"illegal_parameter\" "
                             + "alert.")
     @RFC(number = 8446, section = "4.2.8 Key Share")
-    @ExplicitValues(affectedTypes = TlsParameterType.NAMED_GROUP, methods = "getUnofferedGroups")
+    @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getUnofferedGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -109,7 +111,7 @@ public class HelloRetryRequest extends Tls13Test {
         performHelloRetryRequestTest(argumentAccessor, runner);
     }
 
-    public List<DerivationParameter> getUnofferedTls13CipherSuites(LegacyDerivationScope scope) {
+    public List<DerivationParameter> getUnofferedTls13CipherSuites(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<CipherSuite> offeredTls13 =
                 CipherSuite.getCipherSuites(
@@ -126,7 +128,7 @@ public class HelloRetryRequest extends Tls13Test {
                     "A client which receives a cipher suite that was not offered MUST "
                             + "abort the handshake.")
     @ExplicitValues(
-            affectedTypes = TlsParameterType.CIPHER_SUITE,
+            affectedIdentifiers = "CIPHER_SUITE",
             methods = "getUnofferedTls13CipherSuites")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -169,7 +171,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "\"illegal_parameter\" alert if the HelloRetryRequest would not result "
                             + "in any change in the ClientHello.")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isKeyShareInInitialHello")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -233,7 +235,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "was itself in response to a HelloRetryRequest), it MUST abort the "
                             + "handshake with an \"unexpected_message\" alert.")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @MethodCondition(method = "supportsMultipleNamedGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -305,7 +307,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "otherwise abort the handshake with an \"illegal_parameter\" alert.")
     @ScopeExtensions(TlsParameterType.MIRRORED_CIPHERSUITE)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @MethodCondition(method = "supportsMultipleCipherSuites")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -357,7 +359,7 @@ public class HelloRetryRequest extends Tls13Test {
     @RFC(number = 8446, section = "4.2.8.  Key Share")
     @ScopeExtensions(TlsParameterType.MIRRORED_CIPHERSUITE)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @ManualConfig(TlsParameterType.NAMED_GROUP)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -400,7 +402,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "alert if the value changes.")
     @ScopeExtensions(TlsParameterType.MIRRORED_CIPHERSUITE)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -442,7 +444,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "field that does not match what it sent in the ClientHello MUST "
                             + "abort the handshake with an \"illegal_parameter\" alert.")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -457,7 +459,7 @@ public class HelloRetryRequest extends Tls13Test {
             description =
                     "legacy_compression_method: A single byte which " + "MUST have the value 0.")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -479,7 +481,7 @@ public class HelloRetryRequest extends Tls13Test {
     @ScopeExtensions(TlsParameterType.GREASE_CIPHERSUITE)
     @ScopeLimitations(TlsParameterType.CIPHER_SUITE)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -500,7 +502,7 @@ public class HelloRetryRequest extends Tls13Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.GREASE_EXTENSION)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -521,7 +523,7 @@ public class HelloRetryRequest extends Tls13Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.GREASE_PROTOCOL_VERSION)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -572,7 +574,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "ClientHello or a ServerHello MUST have version 0x0303 (reflecting "
                             + "TLS 1.2).")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -732,7 +734,7 @@ public class HelloRetryRequest extends Tls13Test {
                         retryClientHello.getSessionId().getValue()));
     }
 
-    public List<DerivationParameter> getTls12CipherSuites(LegacyDerivationScope scope) {
+    public List<DerivationParameter> getTls12CipherSuites(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getCipherSuites()
@@ -747,9 +749,9 @@ public class HelloRetryRequest extends Tls13Test {
                             + "TLS 1.3.")
     @RFC(number = 8446, section = "B.4.  Cipher Suites")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
-    @ExplicitValues(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "getTls12CipherSuites")
+    @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getTls12CipherSuites")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -767,7 +769,7 @@ public class HelloRetryRequest extends Tls13Test {
     @RFC(number = 8446, section = "4.2.2.  Cookie")
     @ScopeExtensions(TlsParameterType.HELLO_RETRY_COOKIE)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

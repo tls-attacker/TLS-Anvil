@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -26,7 +27,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -161,7 +162,7 @@ public class ServerHello extends Tls13Test {
                             + "value to the bytes: 44 4F 57 4E 47 52 44 00")
     @MethodCondition(method = "supportsTls11")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.CIPHER_SUITE,
+            affectedIdentifiers = "CIPHER_SUITE",
             methods = "isTls11CipherSuite")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @InteroperabilityCategory(SeverityLevel.HIGH)
@@ -206,7 +207,7 @@ public class ServerHello extends Tls13Test {
     @MethodCondition(method = "supportsTls10")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.CIPHER_SUITE,
+            affectedIdentifiers = "CIPHER_SUITE",
             methods = "isTls10CipherSuite")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

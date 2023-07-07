@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -242,7 +243,7 @@ public class EarlyData extends Tls13Test {
     @MethodCondition(method = "supports0rtt")
     @ScopeExtensions({TlsParameterType.APP_MSG_LENGHT, TlsParameterType.CIPHERTEXT_BITMASK})
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -223,7 +224,7 @@ public class RecordProtocol extends Tls13Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions({TlsParameterType.CIPHERTEXT_BITMASK, TlsParameterType.APP_MSG_LENGHT})
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -262,7 +263,7 @@ public class RecordProtocol extends Tls13Test {
                             + "TLSCiphertext.")
     @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "isReasonableRecordSize")
     @ScopeExtensions(TlsParameterType.ADDITIONAL_PADDING_LENGTH)
     @InteroperabilityCategory(SeverityLevel.HIGH)

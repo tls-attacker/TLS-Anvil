@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 import static org.junit.Assert.assertEquals;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -23,7 +24,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -48,7 +48,7 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
     @AnvilTest(description = "The message consists of a single byte of value 1.")
     @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     @ScopeExtensions(TlsParameterType.INVALID_CCS_CONTENT)
     @InteroperabilityCategory(SeverityLevel.MEDIUM)

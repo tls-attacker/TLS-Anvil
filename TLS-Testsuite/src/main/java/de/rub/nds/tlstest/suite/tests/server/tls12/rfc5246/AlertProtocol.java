@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -65,7 +66,7 @@ public class AlertProtocol extends Tls12Test {
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.LOW)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     public void closeNotify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -110,7 +111,7 @@ public class AlertProtocol extends Tls12Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @ScopeExtensions(TlsParameterType.ALERT)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     public void abortAfterFatalAlert_sendBeforeCCS(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -152,7 +153,7 @@ public class AlertProtocol extends Tls12Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @ScopeExtensions(TlsParameterType.ALERT)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     public void abortAfterFatalAlert_sendAfterServerHelloDone(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

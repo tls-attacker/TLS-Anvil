@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7507;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -22,7 +23,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
@@ -102,7 +103,7 @@ public class SCSV extends Tls12Test {
                             + "The record layer version number for this alert MUST be set to either ClientHello.client_version "
                             + "(as it would for the Server Hello message if the server was continuing the handshake) "
                             + "or to the record layer version number used by the client.")
-    @ExplicitValues(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "getOldCiphersuites")
+    @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -146,7 +147,7 @@ public class SCSV extends Tls12Test {
                             + "The record layer version number for this alert MUST be set to either ClientHello.client_version "
                             + "(as it would for the Server Hello message if the server was continuing the handshake) "
                             + "or to the record layer version number used by the client.")
-    @ExplicitValues(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "getOldCiphersuites")
+    @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

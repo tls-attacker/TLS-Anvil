@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
@@ -36,8 +37,8 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ExplicitModelingConstraints;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
@@ -264,11 +265,11 @@ public class FfDheShare extends Tls12Test {
     @RFC(number = 7919, section = "4. Server Behavior")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     @ExplicitValues(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "getSupportedFfdheNamedGroups")
     @ManualConfig(TlsParameterType.NAMED_GROUP)
     @ExplicitModelingConstraints(
-            affectedTypes = TlsParameterType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "getEmptyConstraintsList")
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)

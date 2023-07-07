@@ -10,6 +10,9 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ValueConstraint;
+import de.rub.nds.anvilcore.annotation.ValueConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -57,11 +60,11 @@ public class CBCBlockCipher extends Tls12Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions({TlsParameterType.APP_MSG_LENGHT, TlsParameterType.PADDING_BITMASK})
-    @ValueConstraints(
-            affectedTypes = {TlsParameterType.CIPHER_SUITE},
-            methods = "isCBC")
+    @ValueConstraints({
+        @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC")
+    })
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
@@ -105,9 +108,11 @@ public class CBCBlockCipher extends Tls12Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(TlsParameterType.CIPHERTEXT_BITMASK)
-    @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isCBC")
+    @ValueConstraints({
+    @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
+})
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
@@ -165,9 +170,11 @@ public class CBCBlockCipher extends Tls12Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(TlsParameterType.MAC_BITMASK)
-    @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isCBC")
+    @ValueConstraints({
+    @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
+})
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     @CryptoCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
@@ -207,7 +214,9 @@ public class CBCBlockCipher extends Tls12Test {
                             + "particular connection state MUST use sequence number 0.")
     @RFC(number = 5246, section = "6.1. Connection States")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isCBC")
+    @ValueConstraints({
+    @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
+})
     @CryptoCategory(SeverityLevel.MEDIUM)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @InteroperabilityCategory(SeverityLevel.CRITICAL)

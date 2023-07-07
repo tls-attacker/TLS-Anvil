@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7465;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -16,7 +17,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
@@ -62,7 +63,7 @@ public class RC4Ciphersuites extends Tls12Test {
                     "TLS servers MUST NOT select an RC4 cipher suite when a TLS client sends such "
                             + "a cipher suite in the ClientHello message.")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.CIPHER_SUITE,
+            affectedIdentifiers = "CIPHER_SUITE",
             methods = "isRC4CipherSuite")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)

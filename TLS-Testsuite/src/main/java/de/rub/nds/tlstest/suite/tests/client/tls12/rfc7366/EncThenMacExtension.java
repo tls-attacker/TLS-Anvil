@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7366;
 import static org.junit.Assert.assertFalse;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
@@ -20,7 +21,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -71,7 +72,7 @@ public class EncThenMacExtension extends Tls12Test {
                             + "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
     @MethodCondition(method = "supportsExtension")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.CIPHER_SUITE,
+            affectedIdentifiers = "CIPHER_SUITE",
             methods = "isNotBlockCipher")
     @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -106,7 +107,7 @@ public class EncThenMacExtension extends Tls12Test {
     @MethodCondition(method = "supportsExtension")
     @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.CIPHER_SUITE,
+            affectedIdentifiers = "CIPHER_SUITE",
             methods = "isBlockCipher")
     @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @InteroperabilityCategory(SeverityLevel.HIGH)

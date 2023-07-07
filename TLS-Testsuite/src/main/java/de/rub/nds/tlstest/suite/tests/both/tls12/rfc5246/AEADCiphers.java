@@ -8,6 +8,9 @@
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ValueConstraint;
+import de.rub.nds.anvilcore.annotation.ValueConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -42,7 +45,9 @@ public class AEADCiphers extends Tls12Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions({TlsParameterType.AUTH_TAG_BITMASK})
-    @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isAEAD")
+    @ValueConstraints({
+    @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
+})
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -82,9 +87,11 @@ public class AEADCiphers extends Tls12Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions({TlsParameterType.CIPHERTEXT_BITMASK, TlsParameterType.APP_MSG_LENGHT})
-    @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isAEAD")
+    @ValueConstraints({
+    @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
+})
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)

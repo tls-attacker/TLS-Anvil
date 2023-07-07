@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7465;
 import static org.junit.Assert.assertArrayEquals;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -22,7 +23,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
+
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -73,7 +74,7 @@ public class RC4Ciphersuites extends Tls12Test {
                             + "sends such a cipher suite in the ClientHello message.")
     @ManualConfig(TlsParameterType.CIPHER_SUITE)
     @MethodCondition(method = "supportsRC4")
-    @DynamicValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isNonRC4")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNonRC4")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.MEDIUM)
@@ -116,7 +117,7 @@ public class RC4Ciphersuites extends Tls12Test {
                     "If the TLS client only offers RC4 cipher suites, the TLS server "
                             + "MUST terminate the handshake. The TLS server MAY send the "
                             + "insufficient_security fatal alert in this case.")
-    @DynamicValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isRC4")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isRC4")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.MEDIUM)

@@ -10,6 +10,8 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
@@ -29,8 +31,8 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.ExplicitModelingConstraints;
+
+import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -85,13 +87,13 @@ public class SignatureAlgorithms extends Tls13Test {
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ExplicitModelingConstraints(
-            affectedTypes = TlsParameterType.SIG_HASH_ALGORIHTM,
+            affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getMixedEccHashLengthPairs")
     @DynamicValueConstraints(
-            affectedTypes = {
-                TlsParameterType.CIPHER_SUITE,
-                TlsParameterType.CERTIFICATE,
-                TlsParameterType.SIG_HASH_ALGORIHTM
+            affectedIdentifiers = {
+                "CIPHER_SUITE",
+                "CERTIFICATE",
+                "SIG_HASH_ALGORIHTM"
             },
             methods = {"isEcdsaCipherSuite", "isApplicableEcdsaCert", "isTls13SigHash"})
     @Tag("new")
@@ -119,7 +121,7 @@ public class SignatureAlgorithms extends Tls13Test {
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @DynamicValueConstraints(
-            affectedTypes = {TlsParameterType.CIPHER_SUITE, TlsParameterType.SIG_HASH_ALGORIHTM},
+            affectedIdentifiers = {"CIPHER_SUITE", "SIG_HASH_ALGORIHTM"},
             methods = {"isRsaSignatureCipherSuite", "isRsaPssAlgorithm"})
     @Tag("new")
     public void supportsRsaPssInTls12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

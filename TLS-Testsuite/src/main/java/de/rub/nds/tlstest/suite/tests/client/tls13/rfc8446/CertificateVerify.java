@@ -8,6 +8,8 @@
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -25,7 +27,8 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -39,7 +42,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -70,7 +73,7 @@ public class CertificateVerify extends Tls13Test {
     }
 
     public List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>>
-            getLegacyRSASAHAlgorithms(LegacyDerivationScope scope) {
+            getLegacyRSASAHAlgorithms(DerivationScope scope) {
         List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         for (SignatureAndHashAlgorithm algo :
@@ -100,7 +103,7 @@ public class CertificateVerify extends Tls13Test {
     @AlertCategory(SeverityLevel.LOW)
     @ScopeExtensions(TlsParameterType.SIG_HASH_ALGORIHTM)
     @ExplicitValues(
-            affectedTypes = TlsParameterType.SIG_HASH_ALGORIHTM,
+            affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getLegacyRSASAHAlgorithms")
     @ManualConfig(TlsParameterType.SIG_HASH_ALGORIHTM)
     @MethodCondition(method = "supportsLegacyRSASHAlgorithms")
@@ -199,7 +202,7 @@ public class CertificateVerify extends Tls13Test {
     }
 
     public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(
-            LegacyDerivationScope scope) {
+            DerivationScope scope) {
         List<DerivationParameter> unsupportedAlgorithms = new LinkedList<>();
         SignatureAndHashAlgorithm.getImplemented().stream()
                 .filter(
@@ -230,7 +233,7 @@ public class CertificateVerify extends Tls13Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
     @ExplicitValues(
-            affectedTypes = TlsParameterType.SIG_HASH_ALGORIHTM,
+            affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getUnproposedSignatureAndHashAlgorithms")
     public void acceptsUnproposedSignatureAndHash(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

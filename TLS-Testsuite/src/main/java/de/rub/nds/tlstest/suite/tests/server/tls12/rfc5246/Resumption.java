@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -200,7 +201,7 @@ public class Resumption extends Tls12Test {
     @SecurityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     public void rejectResumptionAfterFatalPostHandshake(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -269,7 +270,7 @@ public class Resumption extends Tls12Test {
     @ScopeExtensions(TlsParameterType.ALERT)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     public void rejectResumptionAfterInvalidFinished(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

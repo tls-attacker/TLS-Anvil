@@ -8,6 +8,8 @@
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -33,7 +35,6 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -140,9 +141,9 @@ public class ServerHello extends Tls12Test {
                     "The single compression algorithm selected by the server from the "
                             + "list in ClientHello.compression_methods.")
     @RFC(number = 5246, section = "7.4.1.3.  Server Hello")
-    @ScopeExtensions(TlsParameterType.COMPRESSION_METHOD)
+    @IncludeParameter("COMPRESSION_METHOD")
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.COMPRESSION_METHOD,
+            affectedIdentifiers = "COMPRESSION_METHOD",
             methods = "isUnproposedCompressionMethod")
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)

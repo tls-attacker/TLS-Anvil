@@ -21,7 +21,6 @@ import de.rub.nds.tlsattacker.core.crypto.keys.CustomDSAPrivateKey;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
@@ -50,7 +49,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
     }
 
     private List<DerivationParameter<TlsAnvilConfig, Integer>> getAllPossibleBytePositions(
-            TestContext context, LegacyDerivationScope scope) {
+            TestContext context, DerivationScope scope) {
         List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
         int maxSignatureLength = getMaxSignatureByteLength(context, scope);
 
@@ -82,7 +81,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         return parameterValues;
     }
 
-    private int getMaxSignatureByteLength(TestContext context, LegacyDerivationScope scope) {
+    private int getMaxSignatureByteLength(TestContext context, DerivationScope scope) {
         List<SignatureAndHashAlgorithm> signatureAndHashAlgorithms;
         if (!context.getFeatureExtractionResult()
                 .getSignatureAndHashAlgorithmsForDerivation()

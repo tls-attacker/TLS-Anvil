@@ -11,6 +11,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
@@ -29,7 +30,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
@@ -45,7 +46,7 @@ import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -87,7 +88,7 @@ public class SupportedVersions extends Tls13Test {
     @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
     @ManualConfig(TlsParameterType.PROTOCOL_VERSION)
     @ExplicitValues(
-            affectedTypes = TlsParameterType.PROTOCOL_VERSION,
+            affectedIdentifiers = "PROTOCOL_VERSION",
             methods = "getInvalidLegacyVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -207,7 +208,7 @@ public class SupportedVersions extends Tls13Test {
                 versions.contains(ProtocolVersion.TLS13));
     }
 
-    public List<DerivationParameter> getUnsupportedProtocolVersions(LegacyDerivationScope scope) {
+    public List<DerivationParameter> getUnsupportedProtocolVersions(DerivationScope scope) {
         SupportedVersionsExtensionMessage clientSupportedVersions =
                 TestContext.getInstance()
                         .getReceivedClientHelloMessage()
@@ -256,7 +257,7 @@ public class SupportedVersions extends Tls13Test {
             section = "4.2.1 Supported Versions and D.1. Negotiating with an Older Server")
     @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
     @ExplicitValues(
-            affectedTypes = TlsParameterType.PROTOCOL_VERSION,
+            affectedIdentifiers = "PROTOCOL_VERSION",
             methods = "getUnsupportedProtocolVersions")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -302,7 +303,7 @@ public class SupportedVersions extends Tls13Test {
             section = "4.2.1 Supported Versions and D.1. Negotiating with an Older Server")
     @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
     @ExplicitValues(
-            affectedTypes = TlsParameterType.PROTOCOL_VERSION,
+            affectedIdentifiers = "PROTOCOL_VERSION",
             methods = "getUndefinedProtocolVersions")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -329,7 +330,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    public List<DerivationParameter> getUndefinedProtocolVersions(LegacyDerivationScope scope) {
+    public List<DerivationParameter> getUndefinedProtocolVersions(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         // 03 04 is a separate test
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x05}));

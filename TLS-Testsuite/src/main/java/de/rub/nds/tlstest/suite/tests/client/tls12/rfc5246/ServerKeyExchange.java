@@ -8,6 +8,8 @@
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
@@ -33,8 +35,6 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
@@ -48,7 +48,6 @@ import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
@@ -109,7 +108,7 @@ public class ServerKeyExchange extends Tls12Test {
                         });
     }
 
-    public List<DerivationParameter> getUnproposedNamedGroups(LegacyDerivationScope scope) {
+    public List<DerivationParameter> getUnproposedNamedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         NamedGroup.getImplemented().stream()
                 .filter(group -> group.isCurve())
@@ -141,7 +140,7 @@ public class ServerKeyExchange extends Tls12Test {
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
     @ExplicitValues(
-            affectedTypes = {TlsParameterType.NAMED_GROUP, TlsParameterType.CERTIFICATE},
+            affectedIdentifiers = {"NAMED_GROUP", "CERTIFICATE"},
             methods = {"getUnproposedNamedGroups", "getCertsIncludingUnsupportedPkGroups"})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
@@ -168,7 +167,7 @@ public class ServerKeyExchange extends Tls12Test {
                 && !cipherSuite.isEphemeral();
     }
 
-    public List<DerivationParameter> getEcdhCertsForUnproposedGroups(LegacyDerivationScope scope) {
+    public List<DerivationParameter> getEcdhCertsForUnproposedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         CertificateByteChooser.getInstance().getCertificateKeyPairList().stream()
                 .filter(
@@ -194,14 +193,14 @@ public class ServerKeyExchange extends Tls12Test {
     @ScopeExtensions(TlsParameterType.CERTIFICATE)
     @ScopeLimitations(TlsParameterType.NAMED_GROUP)
     @ExplicitValues(
-            affectedTypes = TlsParameterType.CERTIFICATE,
+            affectedIdentifiers = "CERTIFICATE",
             methods = "getEcdhCertsForUnproposedGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.CIPHER_SUITE,
+            affectedIdentifiers = "CIPHER_SUITE",
             methods = "isStaticEcdhCipherSuite")
     public void acceptsUnproposedNamedGroupStatic(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -268,7 +267,7 @@ public class ServerKeyExchange extends Tls12Test {
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(
-            affectedTypes = TlsParameterType.CIPHER_SUITE,
+            affectedIdentifiers = "CIPHER_SUITE",
             methods = "isNotAnonCipherSuite")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
@@ -309,7 +308,7 @@ public class ServerKeyExchange extends Tls12Test {
     }
 
     public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(
-            LegacyDerivationScope scope) {
+            DerivationScope scope) {
         List<DerivationParameter> unsupportedAlgorithms = new LinkedList<>();
         ClientFeatureExtractionResult extractionResult =
                 (ClientFeatureExtractionResult) context.getFeatureExtractionResult();
@@ -339,7 +338,7 @@ public class ServerKeyExchange extends Tls12Test {
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
     @ExplicitValues(
-            affectedTypes = TlsParameterType.SIG_HASH_ALGORIHTM,
+            affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getUnproposedSignatureAndHashAlgorithms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

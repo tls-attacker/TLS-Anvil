@@ -26,7 +26,8 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
@@ -37,7 +38,7 @@ import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
+
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ExtensionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -53,7 +54,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class Extensions extends Tls13Test {
 
     public List<DerivationParameter<TlsAnvilConfig, ExtensionType>> getUnrequestedExtensions(
-            LegacyDerivationScope scope) {
+            DerivationScope scope) {
         List<DerivationParameter<TlsAnvilConfig, ExtensionType>> parameterValues =
                 new LinkedList<>();
         List<ExtensionType> extensions = new LinkedList<>();
@@ -83,7 +84,7 @@ public class Extensions extends Tls13Test {
     @ScopeExtensions(TlsParameterType.EXTENSION)
     @ManualConfig(TlsParameterType.EXTENSION)
     @ExplicitValues(
-            affectedTypes = TlsParameterType.EXTENSION,
+            affectedIdentifiers = "EXTENSION",
             methods = "getUnrequestedExtensions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

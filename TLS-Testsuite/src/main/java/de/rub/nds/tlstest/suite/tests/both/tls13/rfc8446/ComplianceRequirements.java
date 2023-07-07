@@ -9,10 +9,10 @@ package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;

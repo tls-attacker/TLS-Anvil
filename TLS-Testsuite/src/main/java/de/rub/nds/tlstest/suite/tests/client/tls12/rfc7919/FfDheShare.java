@@ -15,8 +15,10 @@ import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.bytearray.ByteArrayExplicitValueModification;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -39,7 +41,6 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
@@ -51,7 +52,6 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.math.BigInteger;
@@ -239,7 +239,7 @@ public class FfDheShare extends Tls12Test {
         return parameterValues;
     }
 
-    public List<LegacyConditionalConstraint> getEmptyConstraintsList(DerivationScope scope) {
+    public List<ConditionalConstraint> getEmptyConstraintsList(DerivationScope scope) {
         return new LinkedList<>();
     }
 }

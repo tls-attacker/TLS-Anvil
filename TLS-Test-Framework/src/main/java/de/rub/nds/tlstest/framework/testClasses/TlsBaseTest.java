@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.framework.testClasses;
 
 import de.rub.nds.anvilcore.junit.CombinatorialAnvilTest;
+import de.rub.nds.anvilcore.junit.extension.MethodConditionExtension;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -19,7 +20,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.EnforcedSenderRestrictionConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
-import de.rub.nds.tlstest.framework.junitExtensions.MethodConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.TestWatcher;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.WorkflowRunnerResolver;

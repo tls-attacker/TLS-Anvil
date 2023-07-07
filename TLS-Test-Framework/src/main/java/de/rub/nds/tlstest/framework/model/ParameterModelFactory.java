@@ -11,6 +11,7 @@ import static de.rwth.swc.coffee4j.model.InputParameterModel.inputParameterModel
 
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.ModelType;
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.scanner.core.constants.TestResults;
@@ -19,9 +20,9 @@ import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.anvil.TlsModelType;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
-import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rwth.swc.coffee4j.model.InputParameterModel;
 import de.rwth.swc.coffee4j.model.Parameter;
@@ -117,14 +118,10 @@ public class ParameterModelFactory {
         List<Constraint> applicableConstraints = new LinkedList<>();
         for (TlsParameterType derivationType : derivationTypes) {
             if (DerivationFactory.getInstance(derivationType).canBeModeled(scope)) {
-                List<LegacyConditionalConstraint> condConstraints =
+                List<ConditionalConstraint> condConstraints =
                         DerivationFactory.getInstance(derivationType)
                                 .getConditionalConstraints(scope);
-                for (LegacyConditionalConstraint condConstraint : condConstraints) {
-                    if (condConstraint.isApplicableTo(derivationTypes, scope)) {
-                        applicableConstraints.add(condConstraint.getConstraint());
-                    }
-                }
+                for (ConditionalConstraint condConstraint : condConstraints) {}
             }
         }
 

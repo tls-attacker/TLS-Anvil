@@ -7,8 +7,8 @@
  */
 package de.rub.nds.tlstest.framework.annotations.methodCondition;
 
+import de.rub.nds.anvilcore.junit.extension.MethodConditionExtension;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
-import de.rub.nds.tlstest.framework.junitExtensions.MethodConditionExtension;
 import de.rub.nds.tlstest.framework.utils.ConditionTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;

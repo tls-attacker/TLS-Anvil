@@ -7,10 +7,10 @@
  */
 package de.rub.nds.tlstest.framework.extractor;
 
+import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;

@@ -11,6 +11,8 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.IncludeParameters;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -241,7 +243,10 @@ public class EarlyData extends Tls13Test {
                             + "\"bad_record_mac\" alert as per Section 5.2.")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "supports0rtt")
-    @ScopeExtensions({TlsParameterType.APP_MSG_LENGHT, TlsParameterType.CIPHERTEXT_BITMASK})
+    @IncludeParameters({
+@IncludeParameter("APP_MSG_LENGHT"),
+@IncludeParameter("CIPHERTEXT_BITMASK")
+})
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")

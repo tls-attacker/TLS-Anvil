@@ -9,6 +9,8 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.IncludeParameters;
 import de.rub.nds.anvilcore.annotation.ValueConstraint;
 import de.rub.nds.anvilcore.annotation.ValueConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -44,7 +46,7 @@ public class AEADCiphers extends Tls12Test {
                     "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions({TlsParameterType.AUTH_TAG_BITMASK})
+    @IncludeParameter("AUTH_TAG_BITMASK")
     @ValueConstraints({
         @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
     })
@@ -86,7 +88,10 @@ public class AEADCiphers extends Tls12Test {
                     "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions({TlsParameterType.CIPHERTEXT_BITMASK, TlsParameterType.APP_MSG_LENGHT})
+    @IncludeParameters({
+@IncludeParameter("CIPHERTEXT_BITMASK"),
+@IncludeParameter("APP_MSG_LENGHT")
+})
     @ValueConstraints({
         @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
     })

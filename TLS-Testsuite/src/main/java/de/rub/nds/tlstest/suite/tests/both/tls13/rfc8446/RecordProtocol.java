@@ -13,6 +13,8 @@ import static org.junit.Assert.assertNull;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.IncludeParameters;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -222,7 +224,10 @@ public class RecordProtocol extends Tls13Test {
                             + "terminate the connection with a \"bad_record_mac\" alert.")
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions({TlsParameterType.CIPHERTEXT_BITMASK, TlsParameterType.APP_MSG_LENGHT})
+    @IncludeParameters({
+@IncludeParameter("CIPHERTEXT_BITMASK"),
+@IncludeParameter("APP_MSG_LENGHT")
+})
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")

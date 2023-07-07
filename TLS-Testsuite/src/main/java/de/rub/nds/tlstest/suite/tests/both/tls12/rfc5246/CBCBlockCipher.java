@@ -11,6 +11,8 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.IncludeParameters;
 import de.rub.nds.anvilcore.annotation.ValueConstraint;
 import de.rub.nds.anvilcore.annotation.ValueConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -59,7 +61,10 @@ public class CBCBlockCipher extends Tls12Test {
                             + "indicate padding errors.")
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.HIGH)
-    @ScopeExtensions({TlsParameterType.APP_MSG_LENGHT, TlsParameterType.PADDING_BITMASK})
+    @IncludeParameters({
+@IncludeParameter("APP_MSG_LENGHT"),
+@IncludeParameter("PADDING_BITMASK")
+})
     @ValueConstraints({@ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC")})
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",

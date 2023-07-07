@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -29,7 +30,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
@@ -98,7 +99,7 @@ public class ServerHello extends Tls13Test {
                             + "not offered MUST abort the handshake with "
                             + "an \"illegal_parameter\" alert.")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ScopeLimitations(TlsParameterType.CIPHER_SUITE)
+    @ExcludeParameter("CIPHER_SUITE")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

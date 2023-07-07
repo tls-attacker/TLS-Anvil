@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -27,7 +28,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -45,7 +46,7 @@ public class AlertProtocol extends Tls13Test {
     @AnvilTest(
             description =
                     "All the alerts listed in Section 6.2 MUST be sent with AlertLevel=fatal and MUST be treated as error alerts when received regardless of the AlertLevel in the message.")
-    @ScopeExtensions(TlsParameterType.ALERT)
+    @IncludeParameter("ALERT")
     @DynamicValueConstraints(affectedIdentifiers = "ALERT", methods = "isMeantToBeFatalLevel")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -63,7 +64,7 @@ public class AlertProtocol extends Tls13Test {
             description =
                     "All the alerts listed in Section 6.2 MUST be sent with AlertLevel=fatal and MUST be treated as error alerts when received regardless of the AlertLevel in the message.")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ScopeExtensions(TlsParameterType.ALERT)
+    @IncludeParameter("ALERT")
     @DynamicValueConstraints(affectedIdentifiers = "ALERT", methods = "isMeantToBeFatalLevel")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

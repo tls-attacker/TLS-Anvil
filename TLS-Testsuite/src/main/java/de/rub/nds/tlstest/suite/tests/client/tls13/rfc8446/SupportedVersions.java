@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
@@ -34,7 +35,7 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -83,7 +84,7 @@ public class SupportedVersions extends Tls13Test {
                             + "ServerHello.legacy_version value and MUST use "
                             + "only the \"supported_versions\" extension to determine the selected version.")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
+    @IncludeParameter("PROTOCOL_VERSION")
     @ManualConfig(TlsParameterType.PROTOCOL_VERSION)
     @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "getInvalidLegacyVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -251,7 +252,7 @@ public class SupportedVersions extends Tls13Test {
     @RFC(
             number = 8446,
             section = "4.2.1 Supported Versions and D.1. Negotiating with an Older Server")
-    @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
+    @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(
             affectedIdentifiers = "PROTOCOL_VERSION",
             methods = "getUnsupportedProtocolVersions")
@@ -297,7 +298,7 @@ public class SupportedVersions extends Tls13Test {
     @RFC(
             number = 8446,
             section = "4.2.1 Supported Versions and D.1. Negotiating with an Older Server")
-    @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
+    @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(
             affectedIdentifiers = "PROTOCOL_VERSION",
             methods = "getUndefinedProtocolVersions")

@@ -12,8 +12,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
@@ -42,8 +44,8 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -98,7 +100,7 @@ public class FfDheShare extends Tls12Test {
                             + "Peers MUST validate each other's public key Y (dh_Ys offered by the "
                             + "server or dh_Yc offered by the client) by ensuring that 1 < Y < p-1.")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ScopeExtensions(TlsParameterType.FFDHE_SHARE_OUT_OF_BOUNDS)
+    @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
     @ManualConfig(TlsParameterType.FFDHE_SHARE_OUT_OF_BOUNDS)
     @HandshakeCategory(SeverityLevel.INFORMATIONAL)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -226,7 +228,7 @@ public class FfDheShare extends Tls12Test {
                             + "connection with a fatal TLS alert of type insufficient_security(71).")
     @RFC(number = 7919, section = "4. Server Behavior")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
-    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
+    @ExcludeParameter("NAMED_GROUP")
     @MethodCondition(method = "supportsNamedFfdheGroups")
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)

@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -31,7 +32,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -107,7 +108,7 @@ public class SignatureAlgorithms extends Tls13Test {
                             + "Clients "
                             + "offering these values MUST list them as the lowest priority "
                             + "(listed after all other algorithms in SignatureSchemeList).")
-    @ScopeExtensions(TlsParameterType.SIG_HASH_ALGORIHTM)
+    @IncludeParameter("SIG_HASH_ALGORIHTM")
     @ManualConfig(TlsParameterType.SIG_HASH_ALGORIHTM)
     @ExplicitValues(
             affectedIdentifiers = "SIG_HASH_ALGORIHTM",
@@ -166,7 +167,7 @@ public class SignatureAlgorithms extends Tls13Test {
                             + "TLS 1.3.  They MUST NOT be offered or negotiated by any "
                             + "implementation.  In particular, MD5 [SLOTH], SHA-224, and DSA "
                             + "MUST NOT be used.")
-    @ScopeExtensions(TlsParameterType.SIG_HASH_ALGORIHTM)
+    @IncludeParameter("SIG_HASH_ALGORIHTM")
     @ExplicitValues(
             affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getLegacySigHashAlgoritms")

@@ -110,7 +110,7 @@ public class CBCBlockCipher extends Tls12Test {
     @RFC(number = 5246, section = "7.2.2. Error Alerts")
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(TlsParameterType.CIPHERTEXT_BITMASK)
+    @IncludeParameter("CIPHERTEXT_BITMASK")
     @ValueConstraints({
         @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
     })
@@ -172,7 +172,7 @@ public class CBCBlockCipher extends Tls12Test {
     @RFC(number = 5246, section = "7.2.2. Error Alerts")
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(TlsParameterType.MAC_BITMASK)
+    @IncludeParameter("MAC_BITMASK")
     @ValueConstraints({
         @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
     })

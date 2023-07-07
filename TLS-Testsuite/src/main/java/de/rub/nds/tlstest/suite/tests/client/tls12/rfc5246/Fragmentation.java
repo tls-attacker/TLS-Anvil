@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
@@ -22,7 +23,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -76,7 +77,7 @@ public class Fragmentation extends Tls12Test {
                             + "multiple client messages of the same ContentType MAY be coalesced "
                             + "into a single TLSPlaintext record, or a single message MAY be "
                             + "fragmented across several records).")
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

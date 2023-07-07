@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 import static org.junit.Assert.assertArrayEquals;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.bytearray.ModifiableByteArray;
@@ -29,7 +30,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -146,7 +147,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
             description =
                     "Thus, TLS servers compliant with this specification MUST accept any value {03,XX} as the "
                             + "record layer version number for ClientHello.")
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     public void acceptAnyRecordVersionNumber(

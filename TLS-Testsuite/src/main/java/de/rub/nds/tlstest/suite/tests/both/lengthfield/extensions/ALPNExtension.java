@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -18,7 +19,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -64,7 +65,7 @@ public class ALPNExtension extends TlsGenericTest {
     @AnvilTest(
             description =
                     "Send an ALPN Extension in the Hello Message with a modified length value")
-    @ScopeLimitations(TlsParameterType.INCLUDE_ALPN_EXTENSION)
+    @ExcludeParameter("INCLUDE_ALPN_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -83,7 +84,7 @@ public class ALPNExtension extends TlsGenericTest {
     @AnvilTest(
             description =
                     "Send an ALPN Extension in the Hello Message with a modified protocols list length value")
-    @ScopeLimitations(TlsParameterType.INCLUDE_ALPN_EXTENSION)
+    @ExcludeParameter("INCLUDE_ALPN_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "contentCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -101,7 +102,7 @@ public class ALPNExtension extends TlsGenericTest {
     @AnvilTest(
             description =
                     "Send an ALPN Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations(TlsParameterType.INCLUDE_ALPN_EXTENSION)
+    @ExcludeParameter("INCLUDE_ALPN_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -120,7 +121,7 @@ public class ALPNExtension extends TlsGenericTest {
     @AnvilTest(
             description =
                     "Send an ALPN Extension in the Hello Message with a modified protocols list length value (-1)")
-    @ScopeLimitations(TlsParameterType.INCLUDE_ALPN_EXTENSION)
+    @ExcludeParameter("INCLUDE_ALPN_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "contentCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)

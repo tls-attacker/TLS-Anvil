@@ -9,6 +9,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
@@ -30,7 +31,7 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -98,7 +99,7 @@ public class CertificateVerify extends Tls13Test {
     @CertificateCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
-    @ScopeExtensions(TlsParameterType.SIG_HASH_ALGORIHTM)
+    @IncludeParameter("SIG_HASH_ALGORIHTM")
     @ExplicitValues(
             affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getLegacyRSASAHAlgorithms")
@@ -167,7 +168,7 @@ public class CertificateVerify extends Tls13Test {
     @CryptoCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
     @CertificateCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(TlsParameterType.SIGNATURE_BITMASK)
+    @IncludeParameter("SIGNATURE_BITMASK")
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] bitmask = derivationContainer.buildBitmask();

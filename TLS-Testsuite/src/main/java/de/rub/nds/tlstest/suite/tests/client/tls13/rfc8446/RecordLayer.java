@@ -8,7 +8,9 @@
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -39,8 +41,8 @@ import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
+
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
@@ -136,8 +138,8 @@ public class RecordLayer extends Tls13Test {
                     "Handshake messages MUST NOT be interleaved "
                             + "with other record types. That is, if a handshake message is split over two or more "
                             + "records, there MUST NOT be any other records between them.")
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
-    @ScopeExtensions(TlsParameterType.ALERT)
+    @ExcludeParameter("RECORD_LENGTH")
+    @IncludeParameter("ALERT")
     @RecordLayerCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -189,8 +191,8 @@ public class RecordLayer extends Tls13Test {
     }
 
     @AnvilTest(description = "Send a record without any content to increase the sequencenumber.")
-    @ScopeExtensions(TlsParameterType.CHOSEN_HANDSHAKE_MSG)
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @IncludeParameter("CHOSEN_HANDSHAKE_MSG")
+    @ExcludeParameter("RECORD_LENGTH")
     @ExplicitValues(
             affectedIdentifiers = "CHOSEN_HANDSHAKE_MSG",
             methods = "getModifiableHandshakeMessages")
@@ -250,7 +252,7 @@ public class RecordLayer extends Tls13Test {
                             + "MUST verify that all messages immediately preceding a key change "
                             + "align with a record boundary; if not, then they MUST terminate the "
                             + "connection with an \"unexpected_message\" alert.")
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")

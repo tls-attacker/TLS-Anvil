@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -20,7 +21,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -39,7 +40,7 @@ public class Finished extends Tls12Test {
                     "Recipients of Finished messages MUST verify that the contents are correct.")
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(TlsParameterType.PRF_BITMASK)
+    @IncludeParameter("PRF_BITMASK")
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)

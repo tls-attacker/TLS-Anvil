@@ -8,6 +8,8 @@
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.ExcludeParameters;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -31,7 +33,7 @@ import de.rub.nds.tlsattacker.transport.TransportHandlerType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -53,7 +55,7 @@ public class Fragmentation extends Tls12Test {
                             + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
                             + "Application data MAY be sent as they are potentially useful as a "
                             + "traffic analysis countermeasure.")
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -82,7 +84,7 @@ public class Fragmentation extends Tls12Test {
                             + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
                             + "Application data MAY be sent as they are potentially useful as a "
                             + "traffic analysis countermeasure.")
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -117,7 +119,10 @@ public class Fragmentation extends Tls12Test {
                             + "multiple client messages of the same ContentType MAY be coalesced "
                             + "into a single TLSPlaintext record, or a single message MAY be "
                             + "fragmented across several records).")
-    @ScopeLimitations({TlsParameterType.RECORD_LENGTH, TlsParameterType.TCP_FRAGMENTATION})
+    @ExcludeParameters({
+@ExcludeParameter("RECORD_LENGTH"),
+@ExcludeParameter("TCP_FRAGMENTATION")
+})
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -150,7 +155,10 @@ public class Fragmentation extends Tls12Test {
                             + "multiple client messages of the same ContentType MAY be coalesced "
                             + "into a single TLSPlaintext record, or a single message MAY be "
                             + "fragmented across several records).")
-    @ScopeLimitations({TlsParameterType.RECORD_LENGTH, TlsParameterType.TCP_FRAGMENTATION})
+    @ExcludeParameters({
+@ExcludeParameter("RECORD_LENGTH"),
+@ExcludeParameter("TCP_FRAGMENTATION")
+})
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

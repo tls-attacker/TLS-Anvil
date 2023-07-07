@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -27,7 +28,7 @@ import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -145,7 +146,7 @@ public class HelloRetryRequest extends Tls13Test {
                     "Servers MUST ensure that they negotiate the "
                             + "same cipher suite when receiving a conformant updated ClientHello")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
-    @ScopeLimitations(TlsParameterType.CIPHER_SUITE)
+    @ExcludeParameter("CIPHER_SUITE")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

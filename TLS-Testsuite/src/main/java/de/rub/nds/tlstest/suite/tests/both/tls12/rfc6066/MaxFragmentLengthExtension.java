@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc6066;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -27,7 +28,7 @@ import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -74,7 +75,7 @@ public class MaxFragmentLengthExtension extends Tls12Test {
     @HandshakeCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
-    @ScopeLimitations(TlsParameterType.MAX_FRAGMENT_LENGTH)
+    @ExcludeParameter("MAX_FRAGMENT_LENGTH")
     @MethodCondition(method = "supportsMaxFragmentLength")
     @Tag("new")
     public void enforcesRecordLimit(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

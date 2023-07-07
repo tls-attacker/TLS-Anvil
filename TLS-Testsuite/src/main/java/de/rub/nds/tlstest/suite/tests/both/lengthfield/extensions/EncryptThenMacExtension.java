@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -17,7 +18,7 @@ import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -52,7 +53,7 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     @AnvilTest(
             description =
                     "Send an Encrypt-Then-Mac Extension in the Hello Message with a modified length value (+1)")
-    @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -73,7 +74,7 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     @AnvilTest(
             description =
                     "Send an Encrypt-Then-Mac Extension in the Hello Message with a modified length value (+1)")
-    @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)

@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -31,7 +32,7 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -127,7 +128,7 @@ public class SupportedVersions extends Tls13Test {
             description =
                     "If the \"supported_versions\" extension is absent and the server only supports versions greater than ClientHello.legacy_version, the server MUST abort the handshake with a \"protocol_version\" alert.")
     @RFC(number = 8446, section = "D.2.  Negotiating with an Older Client")
-    @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
+    @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(
             affectedIdentifiers = "PROTOCOL_VERSION",
             methods = "getUnsupportedProtocolVersions")

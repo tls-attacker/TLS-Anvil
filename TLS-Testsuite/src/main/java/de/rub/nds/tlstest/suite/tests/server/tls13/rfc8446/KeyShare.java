@@ -13,7 +13,9 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
@@ -51,8 +53,8 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
@@ -86,7 +88,7 @@ public class KeyShare extends Tls13Test {
                     "Each KeyShareEntry value MUST correspond "
                             + "to a group offered in the \"supported_groups\" extension "
                             + "and MUST appear in the same order.")
-    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
+    @ExcludeParameter("NAMED_GROUP")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     /*
@@ -175,7 +177,7 @@ public class KeyShare extends Tls13Test {
                             + "Servers "
                             + "MUST NOT send a KeyShareEntry for any group not indicated in the "
                             + "client's \"supported_groups\" extension")
-    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
+    @ExcludeParameter("NAMED_GROUP")
     @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -261,7 +263,7 @@ public class KeyShare extends Tls13Test {
                     "secp256r1(0x0017), secp384r1(0x0018), secp521r1(0x0019),"
                             + " x25519(0x001D), x448(0x001E),")
     @RFC(number = 8446, section = "4.2.7. Supported Groups")
-    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
+    @ExcludeParameter("NAMED_GROUP")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)
@@ -408,7 +410,7 @@ public class KeyShare extends Tls13Test {
                     "Peers MUST validate each other's public key Y by ensuring that 1 < Y "
                             + "< p-1.")
     @RFC(number = 8446, section = "4.2.8.1.  Diffie-Hellman Parameters")
-    @ScopeExtensions(TlsParameterType.FFDHE_SHARE_OUT_OF_BOUNDS)
+    @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
     @ManualConfig(TlsParameterType.FFDHE_SHARE_OUT_OF_BOUNDS)
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getFfdheGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)

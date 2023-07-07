@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -15,7 +16,7 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.RenegotiationInfoExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -38,7 +39,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @AnvilTest(
             description =
                     "Send a Renegotiation Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations(TlsParameterType.INCLUDE_RENEGOTIATION_EXTENSION)
+    @ExcludeParameter("INCLUDE_RENEGOTIATION_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -57,7 +58,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @AnvilTest(
             description =
                     "Send a Renegotiation Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations(TlsParameterType.INCLUDE_RENEGOTIATION_EXTENSION)
+    @ExcludeParameter("INCLUDE_RENEGOTIATION_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -76,7 +77,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @AnvilTest(
             description =
                     "Send a Renegotiation Extension in the Hello Message with a modified Extension Info length value (+1)")
-    @ScopeLimitations(TlsParameterType.INCLUDE_RENEGOTIATION_EXTENSION)
+    @ExcludeParameter("INCLUDE_RENEGOTIATION_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)

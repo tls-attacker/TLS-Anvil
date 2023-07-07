@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 import static org.junit.Assert.assertFalse;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -30,7 +31,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -241,7 +242,7 @@ public class ClientHello extends Tls13Test {
                             + "requirements MUST abort the handshake with a \"missing_extension\" "
                             + "alert.")
     @RFC(number = 8446, section = "9.2.  Mandatory-to-Implement Extensions")
-    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
+    @ExcludeParameter("NAMED_GROUP")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -283,7 +284,7 @@ public class ClientHello extends Tls13Test {
                             + "requirements MUST abort the handshake with a \"missing_extension\" "
                             + "alert.")
     @RFC(number = 8446, section = "9.2.  Mandatory-to-Implement Extensions")
-    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
+    @ExcludeParameter("NAMED_GROUP")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)

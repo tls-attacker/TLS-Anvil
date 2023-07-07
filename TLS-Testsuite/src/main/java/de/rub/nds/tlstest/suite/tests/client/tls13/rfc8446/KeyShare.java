@@ -12,7 +12,9 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
@@ -44,8 +46,8 @@ import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.TwistedCurve
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
+
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -118,7 +120,7 @@ public class KeyShare extends Tls13Test {
                     "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
                             + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
                             + "that the server has selected for the negotiated key exchange.")
-    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
+    @ExcludeParameter("NAMED_GROUP")
     @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -287,7 +289,7 @@ public class KeyShare extends Tls13Test {
                     "Peers MUST validate each other's public key Y by ensuring that 1 < Y "
                             + "< p-1.")
     @RFC(number = 8446, section = "4.2.8.1.  Diffie-Hellman Parameters")
-    @ScopeExtensions(TlsParameterType.FFDHE_SHARE_OUT_OF_BOUNDS)
+    @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getFfdheGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

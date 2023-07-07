@@ -14,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -48,7 +49,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -115,7 +116,7 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake "
                             + "while restricting itself to the enumerated curves and point formats, "
                             + "it MUST NOT negotiate the use of an ECC cipher suite.")
-    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
+    @ExcludeParameter("NAMED_GROUP")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -150,7 +151,7 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake "
                             + "while restricting itself to the enumerated curves and point formats, "
                             + "it MUST NOT negotiate the use of an ECC cipher suite.")
-    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
+    @ExcludeParameter("NAMED_GROUP")
     @ManualConfig(TlsParameterType.CIPHER_SUITE)
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
@@ -233,7 +234,7 @@ public class TLSExtensionForECC extends Tls12Test {
 
     @AnvilTest(description = "NamedCurve named_curve_list<2..2^16-1>")
     @RFC(number = 8422, section = "5.1.1.  Supported Elliptic Curves Extension")
-    @ScopeLimitations(TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS)
+    @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

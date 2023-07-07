@@ -11,6 +11,7 @@ import static org.junit.Assert.assertFalse;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
@@ -24,7 +25,7 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -71,7 +72,7 @@ public class EncThenMacExtension extends Tls12Test {
                             + "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
     @MethodCondition(method = "supportsExtension")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNotBlockCipher")
-    @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -104,7 +105,7 @@ public class EncThenMacExtension extends Tls12Test {
     @MethodCondition(method = "supportsExtension")
     @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isBlockCipher")
-    @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

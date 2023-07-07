@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -109,7 +110,7 @@ public class AlertProtocol extends Tls12Test {
     @SecurityCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(TlsParameterType.ALERT)
+    @IncludeParameter("ALERT")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
@@ -151,7 +152,7 @@ public class AlertProtocol extends Tls12Test {
     @SecurityCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(TlsParameterType.ALERT)
+    @IncludeParameter("ALERT")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")

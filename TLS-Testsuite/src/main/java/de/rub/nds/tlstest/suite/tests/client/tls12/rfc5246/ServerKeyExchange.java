@@ -9,7 +9,9 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
@@ -37,8 +39,8 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
+
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
@@ -72,7 +74,7 @@ public class ServerKeyExchange extends Tls12Test {
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
-    @ScopeExtensions(TlsParameterType.SIGNATURE_BITMASK)
+    @IncludeParameter("SIGNATURE_BITMASK")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -190,8 +192,8 @@ public class ServerKeyExchange extends Tls12Test {
                             + "fatal handshake failure is that the client's capabilities for "
                             + "handling elliptic curves and point formats are exceeded")
     @ModelFromScope(modelType = "GENERIC")
-    @ScopeExtensions(TlsParameterType.CERTIFICATE)
-    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
+    @IncludeParameter("CERTIFICATE")
+    @ExcludeParameter("NAMED_GROUP")
     @ExplicitValues(
             affectedIdentifiers = "CERTIFICATE",
             methods = "getEcdhCertsForUnproposedGroups")
@@ -262,7 +264,7 @@ public class ServerKeyExchange extends Tls12Test {
                             + "server's elliptic curve domain parameters and ephemeral ECDH public "
                             + "key from the ServerKeyExchange message.")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ScopeLimitations(TlsParameterType.SIG_HASH_ALGORIHTM)
+    @ExcludeParameter("SIG_HASH_ALGORIHTM")
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)

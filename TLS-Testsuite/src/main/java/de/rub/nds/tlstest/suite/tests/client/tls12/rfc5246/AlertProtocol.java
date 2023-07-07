@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -98,7 +99,7 @@ public class AlertProtocol extends Tls12Test {
                     "Upon transmission or receipt of a fatal alert message, both "
                             + "parties immediately close the connection.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    @ScopeExtensions(TlsParameterType.ALERT)
+    @IncludeParameter("ALERT")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
@@ -137,7 +138,7 @@ public class AlertProtocol extends Tls12Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
-    @ScopeExtensions(TlsParameterType.ALERT)
+    @IncludeParameter("ALERT")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")

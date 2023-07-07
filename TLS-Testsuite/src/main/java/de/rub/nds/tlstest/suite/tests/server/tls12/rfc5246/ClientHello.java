@@ -10,6 +10,8 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 import static org.junit.Assert.assertFalse;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.ExcludeParameters;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -28,7 +30,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -139,7 +141,7 @@ public class ClientHello extends Tls12Test {
     }
 
     @AnvilTest(description = "Send a ClientHello that offers many cipher suites")
-    @ScopeLimitations(TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES)
+    @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -179,19 +181,18 @@ public class ClientHello extends Tls12Test {
             description =
                     "A server MUST accept ClientHello "
                             + "messages both with and without the extensions field")
-    @ScopeLimitations({
-        TlsParameterType.INCLUDE_ALPN_EXTENSION,
-        TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION,
-        TlsParameterType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION,
-        TlsParameterType.INCLUDE_HEARTBEAT_EXTENSION,
-        TlsParameterType.INCLUDE_PADDING_EXTENSION,
-        TlsParameterType.INCLUDE_RENEGOTIATION_EXTENSION,
-        TlsParameterType.INCLUDE_SESSION_TICKET_EXTENSION,
-        TlsParameterType.MAX_FRAGMENT_LENGTH,
-        TlsParameterType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS,
-        TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS,
-        TlsParameterType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION
-    })
+    @ExcludeParameters({
+@ExcludeParameter("INCLUDE_ALPN_EXTENSION"),
+@ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION"),
+@ExcludeParameter("INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION"),
+@ExcludeParameter("INCLUDE_HEARTBEAT_EXTENSION"),
+@ExcludeParameter("INCLUDE_PADDING_EXTENSION"),
+@ExcludeParameter("INCLUDE_RENEGOTIATION_EXTENSION"),
+@ExcludeParameter("INCLUDE_SESSION_TICKET_EXTENSION"),
+@ExcludeParameter("MAX_FRAGMENT_LENGTH"),
+@ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS"),
+@ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
+@ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")})
     @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.RSA})
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

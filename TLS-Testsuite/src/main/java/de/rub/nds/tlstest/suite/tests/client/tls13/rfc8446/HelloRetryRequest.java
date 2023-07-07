@@ -15,7 +15,9 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
@@ -48,8 +50,8 @@ import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
+
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
@@ -301,7 +303,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "the ServerHello, clients MUST check that the cipher suite supplied in "
                             + "the ServerHello is the same as that in the HelloRetryRequest and "
                             + "otherwise abort the handshake with an \"illegal_parameter\" alert.")
-    @ScopeExtensions(TlsParameterType.MIRRORED_CIPHERSUITE)
+    @IncludeParameter("MIRRORED_CIPHERSUITE")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
@@ -353,7 +355,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "that in the HelloRetryRequest.  If this check fails, the client MUST "
                             + "abort the handshake with an \"illegal_parameter\" alert.")
     @RFC(number = 8446, section = "4.2.8.  Key Share")
-    @ScopeExtensions(TlsParameterType.MIRRORED_CIPHERSUITE)
+    @IncludeParameter("MIRRORED_CIPHERSUITE")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
@@ -396,7 +398,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "\"supported_versions\" extension MUST be retained in the ServerHello, "
                             + "and a client MUST abort the handshake with an \"illegal_parameter\" "
                             + "alert if the value changes.")
-    @ScopeExtensions(TlsParameterType.MIRRORED_CIPHERSUITE)
+    @IncludeParameter("MIRRORED_CIPHERSUITE")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
@@ -474,8 +476,8 @@ public class HelloRetryRequest extends Tls13Test {
                             + "if a GREASE value appears in any of the following: "
                             + "[...] The \"cipher_suite\" value in a ServerHello")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
-    @ScopeExtensions(TlsParameterType.GREASE_CIPHERSUITE)
-    @ScopeLimitations(TlsParameterType.CIPHER_SUITE)
+    @IncludeParameter("GREASE_CIPHERSUITE")
+    @ExcludeParameter("CIPHER_SUITE")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
@@ -496,7 +498,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "[...] Any ServerHello extension")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ScopeExtensions(TlsParameterType.GREASE_EXTENSION)
+    @IncludeParameter("GREASE_EXTENSION")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
@@ -517,7 +519,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ScopeExtensions(TlsParameterType.GREASE_PROTOCOL_VERSION)
+    @IncludeParameter("GREASE_PROTOCOL_VERSION")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
@@ -763,7 +765,7 @@ public class HelloRetryRequest extends Tls13Test {
                             + "the contents of the extension received in the HelloRetryRequest into "
                             + "a \"cookie\" extension in the new ClientHello.")
     @RFC(number = 8446, section = "4.2.2.  Cookie")
-    @ScopeExtensions(TlsParameterType.HELLO_RETRY_COOKIE)
+    @IncludeParameter("HELLO_RETRY_COOKIE")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")

@@ -10,7 +10,9 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7568;
 import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -28,8 +30,8 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -102,10 +104,10 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
                     "TLS servers MUST accept any value "
                             + "{03,XX} (including {03,00}) as the record layer version number for "
                             + "ClientHello, but they MUST NOT negotiate SSLv3.")
-    @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
+    @IncludeParameter("PROTOCOL_VERSION")
     // we can't retain the version across all records if we don't know how
     // many are required
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "get03ProtocolVersions")
     @ManualConfig(TlsParameterType.PROTOCOL_VERSION)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -146,10 +148,10 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
                     "TLS servers MUST accept any value "
                             + "{03,XX} (including {03,00}) as the record layer version number for "
                             + "ClientHello, but they MUST NOT negotiate SSLv3.")
-    @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
+    @IncludeParameter("PROTOCOL_VERSION")
     // we can't retain the version across all records if we don't know how
     // many are required
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "get03ProtocolVersions")
     @ManualConfig(TlsParameterType.PROTOCOL_VERSION)
     @HandshakeCategory(SeverityLevel.MEDIUM)

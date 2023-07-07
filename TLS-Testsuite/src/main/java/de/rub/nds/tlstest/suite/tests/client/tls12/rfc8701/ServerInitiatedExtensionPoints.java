@@ -10,6 +10,8 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8701;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -31,8 +33,8 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
+
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -58,7 +60,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
                             + "In particular, the client MUST fail the connection "
                             + "if a GREASE value appears in any of the following: "
                             + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
-    @ScopeExtensions(TlsParameterType.GREASE_PROTOCOL_VERSION)
+    @IncludeParameter("GREASE_PROTOCOL_VERSION")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -94,8 +96,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
                             + "In particular, the client MUST fail the connection "
                             + "if a GREASE value appears in any of the following: "
                             + "[...] The \"cipher_suite\" value in a ServerHello")
-    @ScopeLimitations(TlsParameterType.CIPHER_SUITE)
-    @ScopeExtensions(TlsParameterType.GREASE_CIPHERSUITE)
+    @ExcludeParameter("CIPHER_SUITE")
+    @IncludeParameter("GREASE_CIPHERSUITE")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -120,7 +122,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
                             + "In particular, the client MUST fail the connection "
                             + "if a GREASE value appears in any of the following: "
                             + "[...] Any ServerHello extension")
-    @ScopeExtensions(TlsParameterType.GREASE_EXTENSION)
+    @IncludeParameter("GREASE_EXTENSION")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     public void sendServerHelloGreaseExtension(
@@ -149,8 +151,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
                             + "Elliptic Curve Diffie-Hellman (ECDHE) cipher in TLS 1.2 [RFC5246] "
                             + "or earlier")
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
-    @ScopeLimitations(TlsParameterType.NAMED_GROUP)
-    @ScopeExtensions(TlsParameterType.GREASE_NAMED_GROUP)
+    @ExcludeParameter("NAMED_GROUP")
+    @IncludeParameter("GREASE_NAMED_GROUP")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -177,7 +179,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
                             + "if a GREASE value appears in any of the following: "
                             + "[...] The signature algorithm in a ServerKeyExchange signature in TLS 1.2 or earlier")
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
-    @ScopeExtensions(TlsParameterType.GREASE_SIG_HASH)
+    @IncludeParameter("GREASE_SIG_HASH")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)

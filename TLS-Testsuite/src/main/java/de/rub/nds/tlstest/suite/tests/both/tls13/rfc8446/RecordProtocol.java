@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNull;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.annotation.IncludeParameters;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -138,7 +139,7 @@ public class RecordProtocol extends Tls13Test {
                             + "terminate the connection with a \"bad_record_mac\" alert.")
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(TlsParameterType.AUTH_TAG_BITMASK)
+    @IncludeParameter("AUTH_TAG_BITMASK")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -180,7 +181,7 @@ public class RecordProtocol extends Tls13Test {
     // Note that the additional byte is the encoded content type, which we also add
     @ModelFromScope(modelType = "CERTIFICATE")
     @RFC(number = 8446, section = "5.1. Record Layer and 5.4 Reccord Padding")
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -270,7 +271,7 @@ public class RecordProtocol extends Tls13Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "isReasonableRecordSize")
-    @ScopeExtensions(TlsParameterType.ADDITIONAL_PADDING_LENGTH)
+    @IncludeParameter("ADDITIONAL_PADDING_LENGTH")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -312,7 +313,7 @@ public class RecordProtocol extends Tls13Test {
                             + "peer with TLSCiphertext.length larger than 2^14 + 256 octets MUST "
                             + "terminate the connection with a \"record_overflow\" alert.")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -349,7 +350,7 @@ public class RecordProtocol extends Tls13Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(TlsParameterType.PROTOCOL_MESSAGE_TYPE)
+    @IncludeParameter("PROTOCOL_MESSAGE_TYPE")
     @AlertCategory(SeverityLevel.LOW)
     @Tag("emptyRecord")
     public void sendEmptyRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

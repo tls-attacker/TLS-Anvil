@@ -325,7 +325,7 @@ public class EarlyData extends Tls13Test {
                             + "\"early_data\" extension, it MUST terminate the connection with a "
                             + "\"bad_record_mac\" alert as per Section 5.2.")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
-    @ScopeExtensions(TlsParameterType.AUTH_TAG_BITMASK)
+    @IncludeParameter("AUTH_TAG_BITMASK")
     @MethodCondition(method = "supports0rtt")
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

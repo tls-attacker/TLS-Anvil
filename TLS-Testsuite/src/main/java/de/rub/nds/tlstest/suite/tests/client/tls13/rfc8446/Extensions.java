@@ -9,6 +9,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -30,7 +31,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
+
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -80,7 +81,7 @@ public class Extensions extends Tls13Test {
                             + "with the exception of the \"cookie\" extension in the HelloRetryRequest. "
                             + "Upon receiving such an extension, an endpoint MUST abort "
                             + "the handshake with an \"unsupported_extension\" alert.")
-    @ScopeExtensions(TlsParameterType.EXTENSION)
+    @IncludeParameter("EXTENSION")
     @ManualConfig(TlsParameterType.EXTENSION)
     @ExplicitValues(affectedIdentifiers = "EXTENSION", methods = "getUnrequestedExtensions")
     @HandshakeCategory(SeverityLevel.MEDIUM)

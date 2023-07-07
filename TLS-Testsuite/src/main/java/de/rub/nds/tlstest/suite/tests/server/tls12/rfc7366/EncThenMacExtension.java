@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -22,7 +23,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -79,7 +80,7 @@ public class EncThenMacExtension extends Tls12Test {
                             + "server is capable of meeting this requirement, it responds with an "
                             + "encrypt_then_mac in its server_hello.")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isBlockCipher")
-    @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @HandshakeCategory(SeverityLevel.INFORMATIONAL)
     @ComplianceCategory(SeverityLevel.INFORMATIONAL)
     @CryptoCategory(SeverityLevel.INFORMATIONAL)
@@ -110,7 +111,7 @@ public class EncThenMacExtension extends Tls12Test {
                             + "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, "
                             + "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNotBlockCipher")
-    @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
+    @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

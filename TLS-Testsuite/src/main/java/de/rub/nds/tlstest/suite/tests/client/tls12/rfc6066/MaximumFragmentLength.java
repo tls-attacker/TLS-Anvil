@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc6066;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -28,7 +29,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -68,7 +69,7 @@ public class MaximumFragmentLength extends Tls12Test {
                     "Similarly, if a client receives a maximum fragment length negotiation "
                             + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @HandshakeCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -103,7 +104,7 @@ public class MaximumFragmentLength extends Tls12Test {
                     "Similarly, if a client receives a maximum fragment length negotiation "
                             + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @HandshakeCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)

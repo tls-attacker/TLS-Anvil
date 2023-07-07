@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.suite.tests.client.tls13.statemachine;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -31,7 +32,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CVECategory;
@@ -82,7 +83,7 @@ public class StateMachine extends Tls13Test {
                             + "which receives a protected change_cipher_spec record MUST abort the "
                             + "handshake with an \"unexpected_message\" alert.")
     @RFC(number = 8446, section = "5. Record Protocol")
-    @ScopeLimitations(TlsParameterType.INCLUDE_CHANGE_CIPHER_SPEC)
+    @ExcludeParameter("INCLUDE_CHANGE_CIPHER_SPEC")
     @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

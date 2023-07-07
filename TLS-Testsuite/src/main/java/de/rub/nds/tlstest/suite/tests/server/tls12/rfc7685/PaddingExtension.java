@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7685;
 import static org.junit.Assert.assertFalse;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -22,7 +23,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -48,7 +49,7 @@ public class PaddingExtension extends Tls12Test {
     @ComplianceCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.LOW)
-    @ScopeLimitations(TlsParameterType.INCLUDE_PADDING_EXTENSION)
+    @ExcludeParameter("INCLUDE_PADDING_EXTENSION")
     @EnforcedSenderRestriction
     public void paddingWithNonZero(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -67,7 +68,7 @@ public class PaddingExtension extends Tls12Test {
     @AnvilTest(description = "The server MUST NOT echo the extension.")
     @ComplianceCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.LOW)
-    @ScopeLimitations(TlsParameterType.INCLUDE_PADDING_EXTENSION)
+    @ExcludeParameter("INCLUDE_PADDING_EXTENSION")
     @Tag("new")
     public void serverDoesNotEcho(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

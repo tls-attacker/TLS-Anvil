@@ -10,7 +10,9 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 import static org.junit.Assert.assertArrayEquals;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -37,8 +39,6 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -48,7 +48,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -143,8 +142,8 @@ public class RecordLayer extends Tls13Test {
                     "Handshake messages MUST NOT be interleaved "
                             + "with other record types. That is, if a handshake message is split over two or more\n"
                             + "records, there MUST NOT be any other records between them.")
-    @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
-    @ScopeExtensions(TlsParameterType.ALERT)
+    @ExcludeParameter("RECORD_LENGTH")
+    @IncludeParameter("ALERT")
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -187,7 +186,7 @@ public class RecordLayer extends Tls13Test {
     @RFC(number = 8446, section = "D.2.  Negotiating with an Older Client")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
+    @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "getRecordProtocolVersions")
     @Tag("new")
     public void ignoresInitialRecordVersion(

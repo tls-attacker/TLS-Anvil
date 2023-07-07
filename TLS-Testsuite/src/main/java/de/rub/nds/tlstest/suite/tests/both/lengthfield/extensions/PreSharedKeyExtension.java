@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
@@ -22,7 +23,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -58,7 +59,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     @AnvilTest(
             description =
                     "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations(TlsParameterType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
+    @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "supportsPsk")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -76,7 +77,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     @AnvilTest(
             description =
                     "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations(TlsParameterType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
+    @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "supportsPsk")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
@@ -94,7 +95,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
     @AnvilTest(
             description =
                     "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
-    @ScopeLimitations(TlsParameterType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION)
+    @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "supportsPsk")
     @MessageStructureCategory(SeverityLevel.MEDIUM)

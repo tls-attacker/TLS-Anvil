@@ -8,6 +8,8 @@
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.ExcludeParameters;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -22,7 +24,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
+
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -50,7 +52,10 @@ public class CryptographicNegotiation extends Tls13Test {
                             + "server MUST abort the handshake with a \"handshake_failure\" or an "
                             + "\"insufficient_security\" alert.")
     @RFC(number = 8446, section = "2.1.  Incorrect DHE Share and 4.1.1 Cryptographic Negotiation")
-    @ScopeLimitations({TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS, TlsParameterType.NAMED_GROUP})
+    @ExcludeParameters({
+@ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
+@ExcludeParameter("NAMED_GROUP")
+})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -83,10 +88,10 @@ public class CryptographicNegotiation extends Tls13Test {
                     "If the server is unable to negotiate a supported set of parameters "
                             + "(i.e., there is no overlap between the client and server parameters), it MUST abort "
                             + "the handshake with either a \"handshake_failure\" or \"insufficient_security\" fatal alert (see Section 6).")
-    @ScopeLimitations({
-        TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES,
-        TlsParameterType.CIPHER_SUITE
-    })
+    @ExcludeParameters({
+@ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
+@ExcludeParameter("CIPHER_SUITE")
+})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

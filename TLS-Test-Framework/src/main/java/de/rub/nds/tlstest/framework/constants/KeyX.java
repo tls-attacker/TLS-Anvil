@@ -19,7 +19,9 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;
@@ -28,6 +30,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class KeyX implements KeyExchange {
     private static final Logger LOGGER = LogManager.getLogger();
+    private static Map<CipherSuite, ServerKeyExchangeMessage> cipherSuiteSkeCache;
 
     private KeyExchangeType[] supportedKxs = new KeyExchangeType[0];
     private boolean mergeSupportedWithClassSupported = true;
@@ -42,15 +45,6 @@ public class KeyX implements KeyExchange {
         this.supportedKxs = exchange.supported();
         this.mergeSupportedWithClassSupported = exchange.mergeSupportedWithClassSupported();
         this.requiresServerKeyExchMsg = exchange.requiresServerKeyExchMsg();
-    }
-
-    public KeyX(
-            KeyExchangeType[] supportedKxs,
-            boolean mergeSupportedWithClassSupported,
-            boolean requiresServerKeyExchMsg) {
-        this.supportedKxs = supportedKxs;
-        this.mergeSupportedWithClassSupported = mergeSupportedWithClassSupported;
-        this.requiresServerKeyExchMsg = requiresServerKeyExchMsg;
     }
 
     @Override
@@ -84,6 +78,10 @@ public class KeyX implements KeyExchange {
     public void filterSupportedKexs() {
         TestContext context = TestContext.getInstance();
         FeatureExtractionResult report = context.getFeatureExtractionResult();
+        if (cipherSuiteSkeCache == null) {
+            buildCache();
+        }
+
         Set<CipherSuite> ciphers = report.getCipherSuites();
         if (ciphers == null) {
             ciphers = new HashSet<>();
@@ -91,25 +89,21 @@ public class KeyX implements KeyExchange {
 
         Set<KeyExchangeType> filtered = new HashSet<>();
 
-        for (CipherSuite i : ciphers) {
-            KeyExchangeAlgorithm kexalg = AlgorithmResolver.getKeyExchangeAlgorithm(i);
-            ServerKeyExchangeMessage serverKeyExchangeMessage = null;
-            if (i.isEphemeral() || i.isSrp()) {
-                serverKeyExchangeMessage =
-                        new WorkflowConfigurationFactory(Config.createConfig())
-                                .createServerKeyExchangeMessage(kexalg);
-            }
-            for (KeyExchangeType t : this.supported()) {
+        for (CipherSuite cipherSuite : ciphers) {
+            KeyExchangeAlgorithm kexalg = AlgorithmResolver.getKeyExchangeAlgorithm(cipherSuite);
+            ServerKeyExchangeMessage serverKeyExchangeMessage =
+                    cipherSuiteSkeCache.get(cipherSuite);
+            for (KeyExchangeType type : this.supported()) {
                 if (kexalg == null
                         || (requiresServerKeyExchMsg && serverKeyExchangeMessage == null)) {
                     continue;
                 }
-                if (kexalg.isKeyExchangeEcdh() && t == KeyExchangeType.ECDH) {
-                    filtered.add(t);
-                } else if (kexalg.isKeyExchangeRsa() && t == KeyExchangeType.RSA) {
-                    filtered.add(t);
-                } else if (kexalg.isKeyExchangeDh() && t == KeyExchangeType.DH) {
-                    filtered.add(t);
+                if (kexalg.isKeyExchangeEcdh() && type == KeyExchangeType.ECDH) {
+                    filtered.add(type);
+                } else if (kexalg.isKeyExchangeRsa() && type == KeyExchangeType.RSA) {
+                    filtered.add(type);
+                } else if (kexalg.isKeyExchangeDh() && type == KeyExchangeType.DH) {
+                    filtered.add(type);
                 }
             }
         }
@@ -182,25 +176,23 @@ public class KeyX implements KeyExchange {
         return resolvedKeyExchange;
     }
 
-    public boolean compatibleWithCiphersuite(CipherSuite i) {
-        if (i.isTLS13()) {
+    public boolean compatibleWithCiphersuite(CipherSuite cipherSuite) {
+        if (cipherSuite.isTLS13()) {
             return Arrays.asList(this.supported()).contains(KeyExchangeType.ALL13);
         }
+        if (cipherSuiteSkeCache == null) {
+            buildCache();
+        }
 
-        KeyExchangeAlgorithm alg = AlgorithmResolver.getKeyExchangeAlgorithm(i);
+        KeyExchangeAlgorithm alg = AlgorithmResolver.getKeyExchangeAlgorithm(cipherSuite);
         // TLS 1.3 is handled above
         assert alg != null;
 
-        ServerKeyExchangeMessage serverKeyExchangeMessage = null;
-        if (i.isEphemeral() || i.isSrp()) {
-            serverKeyExchangeMessage =
-                    new WorkflowConfigurationFactory(Config.createConfig())
-                            .createServerKeyExchangeMessage(alg);
-        }
+        ServerKeyExchangeMessage serverKeyExchangeMessage = cipherSuiteSkeCache.get(cipherSuite);
 
         boolean compatible = false;
-        for (KeyExchangeType kext : this.supported()) {
-            switch (kext) {
+        for (KeyExchangeType type : this.supported()) {
+            switch (type) {
                 case RSA:
                     compatible |= alg.isKeyExchangeRsa() && !this.requiresServerKeyExchMsg;
                     break;
@@ -220,7 +212,7 @@ public class KeyX implements KeyExchange {
                     break;
                 case ALL12:
                     compatible |=
-                            AlgorithmResolver.getKeyExchangeAlgorithm(i) != null
+                            AlgorithmResolver.getKeyExchangeAlgorithm(cipherSuite) != null
                                     && (!this.requiresServerKeyExchMsg
                                             || serverKeyExchangeMessage != null);
                     break;
@@ -238,6 +230,22 @@ public class KeyX implements KeyExchange {
         } else {
             return Arrays.stream(supported())
                     .anyMatch(supportedType -> keyExType.equals(supportedType));
+        }
+    }
+
+    private void buildCache() {
+        cipherSuiteSkeCache = new HashMap<>();
+        Config helperConfig = Config.createConfig();
+        for (CipherSuite cipherSuite : CipherSuite.values()) {
+            KeyExchangeAlgorithm kexalg = AlgorithmResolver.getKeyExchangeAlgorithm(cipherSuite);
+            if (cipherSuite.isEphemeral() || cipherSuite.isSrp()) {
+                cipherSuiteSkeCache.put(
+                        cipherSuite,
+                        new WorkflowConfigurationFactory(helperConfig)
+                                .createServerKeyExchangeMessage(kexalg));
+            } else {
+                cipherSuiteSkeCache.put(cipherSuite, null);
+            }
         }
     }
 }

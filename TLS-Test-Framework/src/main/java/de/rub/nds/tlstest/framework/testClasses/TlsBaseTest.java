@@ -7,6 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.testClasses;
 
+import de.rub.nds.anvilcore.junit.CombinatorialAnvilTest;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -17,12 +18,10 @@ import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.EnforcedSenderRestrictionConditionExtension;
-import de.rub.nds.tlstest.framework.junitExtensions.ExtensionContextResolver;
 import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.MethodConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.TestWatcher;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
-import de.rub.nds.tlstest.framework.junitExtensions.ValueConstraintsConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.WorkflowRunnerResolver;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import java.util.Arrays;
@@ -40,11 +39,11 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
     KexCondition.class,
     MethodConditionExtension.class,
     EnforcedSenderRestrictionConditionExtension.class,
-    ValueConstraintsConditionExtension.class,
-    ExtensionContextResolver.class,
     WorkflowRunnerResolver.class
 })
-public abstract class TlsBaseTest {
+
+// todo remove code already present in anvil core
+public abstract class TlsBaseTest extends CombinatorialAnvilTest {
     protected static final Logger LOGGER = LogManager.getLogger();
 
     protected TestContext context;

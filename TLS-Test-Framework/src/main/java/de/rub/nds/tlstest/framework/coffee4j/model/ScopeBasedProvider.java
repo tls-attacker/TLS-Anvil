@@ -21,8 +21,7 @@ public class ScopeBasedProvider implements ModelProvider, AnnotationConsumer<Mod
 
     @Override
     public InputParameterModel provide(ExtensionContext extensionContext) {
-        DerivationScope derivationScope =
-                new DerivationScope(extensionContext, modelFromScope.baseModel());
+        DerivationScope derivationScope = new DerivationScope(extensionContext);
         final Object providedObject =
                 ParameterModelFactory.generateModel(derivationScope, TestContext.getInstance());
         return toInputParameterModel(providedObject);

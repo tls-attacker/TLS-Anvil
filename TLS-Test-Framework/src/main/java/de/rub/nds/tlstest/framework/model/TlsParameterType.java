@@ -7,7 +7,11 @@
  */
 package de.rub.nds.tlstest.framework.model;
 
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.anvilcore.model.parameter.ParameterType;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterScope;
+import java.util.LinkedList;
+import java.util.List;
 
 /** Represents the properties affected by the test derivation models. */
 public enum TlsParameterType implements ParameterType {
@@ -57,5 +61,25 @@ public enum TlsParameterType implements ParameterType {
 
     public boolean isBitmaskDerivation() {
         return this.name().contains("BITMASK");
+    }
+
+    /**
+     * Lists the known ParameterIdentifiers. Known scopes will be combined here, too.
+     *
+     * @return An array containing the known ParameterIdentifier[]
+     */
+    public static ParameterIdentifier[] getAllIdentifiers() {
+        List<ParameterIdentifier> identifiers = new LinkedList<>();
+        for (TlsParameterType listed : TlsParameterType.values()) {
+            if (listed != BIT_POSITION) {
+                identifiers.add(new ParameterIdentifier(listed));
+                if (listed.isBitmaskDerivation()) {
+                    identifiers.add(
+                            new ParameterIdentifier(
+                                    BIT_POSITION, TlsParameterScope.resolveScope(listed.name())));
+                }
+            }
+        }
+        return identifiers.toArray(ParameterIdentifier[]::new);
     }
 }

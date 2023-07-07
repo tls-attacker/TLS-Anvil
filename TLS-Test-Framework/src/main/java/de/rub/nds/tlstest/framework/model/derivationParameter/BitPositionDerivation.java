@@ -9,6 +9,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
@@ -17,12 +18,12 @@ import java.util.List;
 
 public class BitPositionDerivation extends TlsDerivationParameter<Integer> {
 
-    public BitPositionDerivation() {
-        super(TlsParameterType.BIT_POSITION, Integer.class);
+    public BitPositionDerivation(ParameterIdentifier identifier) {
+        super(TlsParameterType.BIT_POSITION, Integer.class, identifier);
     }
 
-    public BitPositionDerivation(Integer selectedValue) {
-        this();
+    public BitPositionDerivation(Integer selectedValue, ParameterIdentifier identifier) {
+        this(identifier);
         setSelectedValue(selectedValue);
     }
 
@@ -31,13 +32,13 @@ public class BitPositionDerivation extends TlsDerivationParameter<Integer> {
             DerivationScope derivationScope) {
         List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
         for (int i = 0; i < 8; i++) {
-            parameterValues.add(new BitPositionDerivation(i));
+            parameterValues.add(new BitPositionDerivation(i, getParameterIdentifier()));
         }
         return parameterValues;
     }
 
     @Override
     protected TlsDerivationParameter<Integer> generateValue(Integer selectedValue) {
-        return new BitPositionDerivation(selectedValue);
+        return new BitPositionDerivation(selectedValue, getParameterIdentifier());
     }
 }

@@ -38,8 +38,6 @@ public class DerivationFactory {
                 return new AuthTagBitmaskDerivation();
             case APP_MSG_LENGHT:
                 return new AppMsgLengthDerivation();
-            case BIT_POSITION:
-                return new BitPositionDerivation();
             case PADDING_BITMASK:
                 return new PaddingBitmaskDerivation();
             case INVALID_CCS_CONTENT:

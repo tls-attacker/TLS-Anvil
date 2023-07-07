@@ -11,6 +11,7 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPacka
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.anvilcore.context.AnvilFactoryRegistry;
 import de.rub.nds.scanner.core.constants.ProbeType;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -38,12 +39,15 @@ import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterFactory;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.extractor.TestCaseExtractor;
+import de.rub.nds.tlstest.framework.model.TlsModelType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.reporting.ExecutionListener;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -453,10 +457,13 @@ public class TestRunner {
         }
 
         prepareTestExecution();
+        // todo - seems like this should be one method instead of two but the first does not add
+        // them as knownParameters
+        TlsParameterIdentifierProvider identifierProvider = new TlsParameterIdentifierProvider();
+        AnvilFactoryRegistry.get().setParameterIdentifierProvider(identifierProvider);
         AnvilFactoryRegistry.get()
-                .setParameterIdentifierProvider(new TlsParameterIdentifierProvider());
-        // AnvilFactoryRegistry.get().addParameterTypes(TlsParameterType.values(),
-        // associatedFactory);
+                .addParameterTypes(TlsParameterType.values(), new TlsParameterFactory());
+        AnvilContext.getInstance().getKnownModelTypes().add(TlsModelType.CERTIFICATE);
 
         LauncherDiscoveryRequestBuilder builder =
                 LauncherDiscoveryRequestBuilder.request()

@@ -53,7 +53,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -244,9 +243,9 @@ public class EarlyData extends Tls13Test {
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "supports0rtt")
     @IncludeParameters({
-@IncludeParameter("APP_MSG_LENGHT"),
-@IncludeParameter("CIPHERTEXT_BITMASK")
-})
+        @IncludeParameter("APP_MSG_LENGHT"),
+        @IncludeParameter("CIPHERTEXT_BITMASK")
+    })
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")

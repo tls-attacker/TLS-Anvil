@@ -30,7 +30,6 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -39,7 +38,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Arrays;
@@ -182,17 +180,18 @@ public class ClientHello extends Tls12Test {
                     "A server MUST accept ClientHello "
                             + "messages both with and without the extensions field")
     @ExcludeParameters({
-@ExcludeParameter("INCLUDE_ALPN_EXTENSION"),
-@ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION"),
-@ExcludeParameter("INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION"),
-@ExcludeParameter("INCLUDE_HEARTBEAT_EXTENSION"),
-@ExcludeParameter("INCLUDE_PADDING_EXTENSION"),
-@ExcludeParameter("INCLUDE_RENEGOTIATION_EXTENSION"),
-@ExcludeParameter("INCLUDE_SESSION_TICKET_EXTENSION"),
-@ExcludeParameter("MAX_FRAGMENT_LENGTH"),
-@ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS"),
-@ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
-@ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")})
+        @ExcludeParameter("INCLUDE_ALPN_EXTENSION"),
+        @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION"),
+        @ExcludeParameter("INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION"),
+        @ExcludeParameter("INCLUDE_HEARTBEAT_EXTENSION"),
+        @ExcludeParameter("INCLUDE_PADDING_EXTENSION"),
+        @ExcludeParameter("INCLUDE_RENEGOTIATION_EXTENSION"),
+        @ExcludeParameter("INCLUDE_SESSION_TICKET_EXTENSION"),
+        @ExcludeParameter("MAX_FRAGMENT_LENGTH"),
+        @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS"),
+        @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
+        @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
+    })
     @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.RSA})
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

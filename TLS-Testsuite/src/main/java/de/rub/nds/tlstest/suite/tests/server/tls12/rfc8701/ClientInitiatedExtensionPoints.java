@@ -29,15 +29,12 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-
-
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseExtensionDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseSigHashDerivation;
@@ -61,10 +58,10 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                             + "ignore unknown values in a ClientHello and attempt to negotiate with "
                             + "one of the remaining parameters.")
     @ExcludeParameters({
-@ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
-@ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
-@ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
-})
+        @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
+        @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
+        @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
+    })
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -103,10 +100,10 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                             + "one of the remaining parameters.")
     @IncludeParameter("GREASE_EXTENSION")
     @ExcludeParameters({
-@ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
-@ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
-@ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
-})
+        @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
+        @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
+        @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
+    })
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -150,10 +147,10 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                             + "ignore unknown values in a ClientHello and attempt to negotiate with "
                             + "one of the remaining parameters.")
     @ExcludeParameters({
-@ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
-@ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
-@ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
-})
+        @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
+        @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
+        @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
+    })
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -184,10 +181,10 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                             + "one of the remaining parameters.")
     @IncludeParameter("GREASE_SIG_HASH")
     @ExcludeParameters({
-@ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
-@ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
-@ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
-})
+        @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
+        @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
+        @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
+    })
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -230,10 +227,10 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                             + "ignore unknown values in a ClientHello and attempt to negotiate with "
                             + "one of the remaining parameters.")
     @ExcludeParameters({
-@ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
-@ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
-@ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
-})
+        @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
+        @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
+        @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
+    })
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

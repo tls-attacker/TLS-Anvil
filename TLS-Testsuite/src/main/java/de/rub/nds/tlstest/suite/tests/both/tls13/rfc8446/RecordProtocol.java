@@ -47,7 +47,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AdditionalPaddingLengthDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolMessageTypeDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -226,9 +225,9 @@ public class RecordProtocol extends Tls13Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @IncludeParameters({
-@IncludeParameter("CIPHERTEXT_BITMASK"),
-@IncludeParameter("APP_MSG_LENGHT")
-})
+        @IncludeParameter("CIPHERTEXT_BITMASK"),
+        @IncludeParameter("APP_MSG_LENGHT")
+    })
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")

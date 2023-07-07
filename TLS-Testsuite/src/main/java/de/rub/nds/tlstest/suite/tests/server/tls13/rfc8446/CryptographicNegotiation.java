@@ -24,7 +24,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
@@ -33,7 +32,6 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -53,9 +51,9 @@ public class CryptographicNegotiation extends Tls13Test {
                             + "\"insufficient_security\" alert.")
     @RFC(number = 8446, section = "2.1.  Incorrect DHE Share and 4.1.1 Cryptographic Negotiation")
     @ExcludeParameters({
-@ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
-@ExcludeParameter("NAMED_GROUP")
-})
+        @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
+        @ExcludeParameter("NAMED_GROUP")
+    })
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -89,9 +87,9 @@ public class CryptographicNegotiation extends Tls13Test {
                             + "(i.e., there is no overlap between the client and server parameters), it MUST abort "
                             + "the handshake with either a \"handshake_failure\" or \"insufficient_security\" fatal alert (see Section 6).")
     @ExcludeParameters({
-@ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
-@ExcludeParameter("CIPHER_SUITE")
-})
+        @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
+        @ExcludeParameter("CIPHER_SUITE")
+    })
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

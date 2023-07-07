@@ -34,7 +34,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -89,9 +88,9 @@ public class AEADCiphers extends Tls12Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @IncludeParameters({
-@IncludeParameter("CIPHERTEXT_BITMASK"),
-@IncludeParameter("APP_MSG_LENGHT")
-})
+        @IncludeParameter("CIPHERTEXT_BITMASK"),
+        @IncludeParameter("APP_MSG_LENGHT")
+    })
     @ValueConstraints({
         @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
     })

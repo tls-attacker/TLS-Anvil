@@ -39,7 +39,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -61,10 +60,7 @@ public class CBCBlockCipher extends Tls12Test {
                             + "indicate padding errors.")
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.HIGH)
-    @IncludeParameters({
-@IncludeParameter("APP_MSG_LENGHT"),
-@IncludeParameter("PADDING_BITMASK")
-})
+    @IncludeParameters({@IncludeParameter("APP_MSG_LENGHT"), @IncludeParameter("PADDING_BITMASK")})
     @ValueConstraints({@ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC")})
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",

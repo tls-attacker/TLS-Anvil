@@ -17,7 +17,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
@@ -28,7 +27,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,9 +60,7 @@ public class RC4Ciphersuites extends Tls12Test {
             description =
                     "TLS servers MUST NOT select an RC4 cipher suite when a TLS client sends such "
                             + "a cipher suite in the ClientHello message.")
-    @DynamicValueConstraints(
-            affectedIdentifiers = "CIPHER_SUITE",
-            methods = "isRC4CipherSuite")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isRC4CipherSuite")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @DeprecatedFeatureCategory(SeverityLevel.HIGH)

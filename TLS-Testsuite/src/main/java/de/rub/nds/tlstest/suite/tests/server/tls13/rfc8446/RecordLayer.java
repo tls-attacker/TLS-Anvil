@@ -10,7 +10,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 import static org.junit.Assert.assertArrayEquals;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -35,7 +35,6 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
@@ -189,9 +188,7 @@ public class RecordLayer extends Tls13Test {
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
-    @ExplicitValues(
-            affectedIdentifiers = "PROTOCOL_VERSION",
-            methods = "getRecordProtocolVersions")
+    @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "getRecordProtocolVersions")
     @Tag("new")
     public void ignoresInitialRecordVersion(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

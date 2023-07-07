@@ -266,9 +266,7 @@ public class ServerKeyExchange extends Tls12Test {
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(
-            affectedIdentifiers = "CIPHER_SUITE",
-            methods = "isNotAnonCipherSuite")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNotAnonCipherSuite")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)

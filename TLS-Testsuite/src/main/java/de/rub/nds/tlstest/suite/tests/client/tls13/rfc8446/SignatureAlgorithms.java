@@ -31,8 +31,6 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-
-import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -90,11 +88,7 @@ public class SignatureAlgorithms extends Tls13Test {
             affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getMixedEccHashLengthPairs")
     @DynamicValueConstraints(
-            affectedIdentifiers = {
-                "CIPHER_SUITE",
-                "CERTIFICATE",
-                "SIG_HASH_ALGORIHTM"
-            },
+            affectedIdentifiers = {"CIPHER_SUITE", "CERTIFICATE", "SIG_HASH_ALGORIHTM"},
             methods = {"isEcdsaCipherSuite", "isApplicableEcdsaCert", "isTls13SigHash"})
     @Tag("new")
     public void acceptsMixedCurveHashLengthInTls12(

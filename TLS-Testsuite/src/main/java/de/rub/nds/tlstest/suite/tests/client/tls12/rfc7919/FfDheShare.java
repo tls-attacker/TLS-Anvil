@@ -11,7 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -51,7 +50,6 @@ import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.LegacyConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
@@ -158,9 +156,7 @@ public class FfDheShare extends Tls12Test {
                     "A client that offers a group MUST be able and willing to perform a DH "
                             + "key exchange using that group.")
     @RFC(number = 7919, section = "3. Client Behavior")
-    @ExplicitValues(
-            affectedIdentifiers = "NAMED_GROUP",
-            methods = "getSupportedFfdheNamedGroups")
+    @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getSupportedFfdheNamedGroups")
     @ManualConfig(TlsParameterType.NAMED_GROUP)
     @ExplicitModelingConstraints(
             affectedIdentifiers = "NAMED_GROUP",

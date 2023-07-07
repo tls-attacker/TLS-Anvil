@@ -46,8 +46,8 @@ public class AEADCiphers extends Tls12Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions({TlsParameterType.AUTH_TAG_BITMASK})
     @ValueConstraints({
-    @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
-})
+        @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
+    })
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -88,8 +88,8 @@ public class AEADCiphers extends Tls12Test {
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions({TlsParameterType.CIPHERTEXT_BITMASK, TlsParameterType.APP_MSG_LENGHT})
     @ValueConstraints({
-    @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
-})
+        @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
+    })
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")

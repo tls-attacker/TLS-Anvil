@@ -21,7 +21,6 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -71,9 +70,7 @@ public class EncThenMacExtension extends Tls12Test {
                             + "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, "
                             + "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
     @MethodCondition(method = "supportsExtension")
-    @DynamicValueConstraints(
-            affectedIdentifiers = "CIPHER_SUITE",
-            methods = "isNotBlockCipher")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNotBlockCipher")
     @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -106,9 +103,7 @@ public class EncThenMacExtension extends Tls12Test {
     @RFC(number = 7366, section = "3.  Applying Encrypt-then-MAC")
     @MethodCondition(method = "supportsExtension")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @DynamicValueConstraints(
-            affectedIdentifiers = "CIPHER_SUITE",
-            methods = "isBlockCipher")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isBlockCipher")
     @ScopeLimitations(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)

@@ -46,9 +46,7 @@ public class AlertProtocol extends Tls13Test {
             description =
                     "All the alerts listed in Section 6.2 MUST be sent with AlertLevel=fatal and MUST be treated as error alerts when received regardless of the AlertLevel in the message.")
     @ScopeExtensions(TlsParameterType.ALERT)
-    @DynamicValueConstraints(
-            affectedIdentifiers = "ALERT",
-            methods = "isMeantToBeFatalLevel")
+    @DynamicValueConstraints(affectedIdentifiers = "ALERT", methods = "isMeantToBeFatalLevel")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
@@ -66,9 +64,7 @@ public class AlertProtocol extends Tls13Test {
                     "All the alerts listed in Section 6.2 MUST be sent with AlertLevel=fatal and MUST be treated as error alerts when received regardless of the AlertLevel in the message.")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.ALERT)
-    @DynamicValueConstraints(
-            affectedIdentifiers = "ALERT",
-            methods = "isMeantToBeFatalLevel")
+    @DynamicValueConstraints(affectedIdentifiers = "ALERT", methods = "isMeantToBeFatalLevel")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")

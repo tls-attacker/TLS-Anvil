@@ -27,7 +27,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
@@ -42,7 +41,6 @@ import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests;
@@ -161,9 +159,7 @@ public class ServerHello extends Tls13Test {
                             + "servers SHOULD, set the last 8 bytes of their ServerHello.Random "
                             + "value to the bytes: 44 4F 57 4E 47 52 44 00")
     @MethodCondition(method = "supportsTls11")
-    @DynamicValueConstraints(
-            affectedIdentifiers = "CIPHER_SUITE",
-            methods = "isTls11CipherSuite")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isTls11CipherSuite")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -206,9 +202,7 @@ public class ServerHello extends Tls13Test {
                             + "value to the bytes: 44 4F 57 4E 47 52 44 00")
     @MethodCondition(method = "supportsTls10")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @DynamicValueConstraints(
-            affectedIdentifiers = "CIPHER_SUITE",
-            methods = "isTls10CipherSuite")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isTls10CipherSuite")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

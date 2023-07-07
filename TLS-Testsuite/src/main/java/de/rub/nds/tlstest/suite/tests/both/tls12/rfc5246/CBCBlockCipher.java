@@ -60,9 +60,7 @@ public class CBCBlockCipher extends Tls12Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions({TlsParameterType.APP_MSG_LENGHT, TlsParameterType.PADDING_BITMASK})
-    @ValueConstraints({
-        @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC")
-    })
+    @ValueConstraints({@ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC")})
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
@@ -109,8 +107,8 @@ public class CBCBlockCipher extends Tls12Test {
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(TlsParameterType.CIPHERTEXT_BITMASK)
     @ValueConstraints({
-    @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
-})
+        @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
+    })
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
@@ -171,8 +169,8 @@ public class CBCBlockCipher extends Tls12Test {
     @SecurityCategory(SeverityLevel.HIGH)
     @ScopeExtensions(TlsParameterType.MAC_BITMASK)
     @ValueConstraints({
-    @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
-})
+        @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
+    })
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
@@ -215,8 +213,8 @@ public class CBCBlockCipher extends Tls12Test {
     @RFC(number = 5246, section = "6.1. Connection States")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ValueConstraints({
-    @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
-})
+        @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
+    })
     @CryptoCategory(SeverityLevel.MEDIUM)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @InteroperabilityCategory(SeverityLevel.CRITICAL)

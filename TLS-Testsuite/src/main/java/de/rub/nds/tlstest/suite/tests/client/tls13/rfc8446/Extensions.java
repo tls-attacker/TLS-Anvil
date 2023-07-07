@@ -8,6 +8,8 @@
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -26,8 +28,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.anvilcore.annotation.ExplicitValues;
-import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
@@ -38,7 +38,6 @@ import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ExtensionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -83,9 +82,7 @@ public class Extensions extends Tls13Test {
                             + "the handshake with an \"unsupported_extension\" alert.")
     @ScopeExtensions(TlsParameterType.EXTENSION)
     @ManualConfig(TlsParameterType.EXTENSION)
-    @ExplicitValues(
-            affectedIdentifiers = "EXTENSION",
-            methods = "getUnrequestedExtensions")
+    @ExplicitValues(affectedIdentifiers = "EXTENSION", methods = "getUnrequestedExtensions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)

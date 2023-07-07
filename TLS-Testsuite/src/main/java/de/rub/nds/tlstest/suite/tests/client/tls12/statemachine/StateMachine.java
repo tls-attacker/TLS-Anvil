@@ -26,7 +26,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
-
 import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
 import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
@@ -55,9 +54,7 @@ public class StateMachine extends Tls12Test {
     }
 
     @AnvilTest(description = "Omit the Certificate Message for non-anonymous Cipher Suite")
-    @DynamicValueConstraints(
-            affectedIdentifiers = "CIPHER_SUITE",
-            methods = "isNotAnonCipherSuite")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNotAnonCipherSuite")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeLimitations({TlsParameterType.CERTIFICATE})
     @HandshakeCategory(SeverityLevel.CRITICAL)

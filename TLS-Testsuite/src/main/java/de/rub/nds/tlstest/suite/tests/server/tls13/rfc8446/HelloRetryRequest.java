@@ -46,6 +46,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @RFC(number = 8446, section = "4.1.4 Hello Retry Request")
@@ -60,7 +61,7 @@ public class HelloRetryRequest extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not send a Hello Retry Request");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The server will send this message in response to a ClientHello "
                             + "message if it is able to find an acceptable set of parameters but the "
@@ -140,7 +141,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Servers MUST ensure that they negotiate the "
                             + "same cipher suite when receiving a conformant updated ClientHello")
@@ -197,7 +198,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Servers MUST ensure that they negotiate the "
                             + "same cipher suite when receiving a conformant updated ClientHello")
@@ -249,7 +250,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The value of selected_version in the HelloRetryRequest "
                             + "\"supported_versions\" extension MUST be retained in the ServerHello")

@@ -37,6 +37,7 @@ import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @RFC(number = 8446, section = "D.4.  Middlebox Compatibility Mode")
@@ -51,7 +52,7 @@ public class MiddleboxCompatibility extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not send a Hello Retry Request");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Either side can send change_cipher_spec at any time during "
                             + "the handshake, as they must be ignored by the peer, but if "
@@ -94,7 +95,7 @@ public class MiddleboxCompatibility extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Either side can send change_cipher_spec at any time during "
                             + "the handshake, as they must be ignored by the peer, but if "

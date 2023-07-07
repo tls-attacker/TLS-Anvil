@@ -32,6 +32,7 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @RFC(number = 8446, section = "4.6.1.  New Session Ticket Message")
@@ -47,7 +48,7 @@ public class NewSessionTicket extends Tls13Test {
         }
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Indicates the lifetime in seconds as a 32-bit unsigned integer in network byte order from the time of "
                             + "ticket issuance. Servers MUST NOT use any value greater than 604800 seconds (7 days). [...]"

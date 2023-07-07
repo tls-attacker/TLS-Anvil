@@ -27,12 +27,13 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 5246, section = "E.1. Compatibility with TLS 1.0/1.1 and SSL 3.0")
 @ClientTest
 public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the version chosen by the server is not supported by the client "
                             + "(or not acceptable), the client MUST send a \"protocol_version\" alert "

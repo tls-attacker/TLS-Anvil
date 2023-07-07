@@ -51,6 +51,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 @ServerTest
@@ -59,7 +60,7 @@ public class PointFormatExtension extends Tls12Test {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @RFC(number = 8422, section = "5.2. Server Hello Extensions")
-    @TlsTest(description = "The Supported "
+    @AnvilTest(description = "The Supported "
             + "Point Formats Extension, when used, MUST contain the value 0 " 
             + "(uncompressed) as one of the items in the list of point formats. [...]"
             + "Implementations of this document MUST support the "
@@ -115,7 +116,7 @@ public class PointFormatExtension extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(description = "If the client sends the extension and the extension does not contain "
+    @AnvilTest(description = "If the client sends the extension and the extension does not contain "
             + "the uncompressed point format, and the client has used the Supported "
             + "Groups extension to indicate support for any of the curves defined in "
             + "this specification, then the server MUST abort the handshake and "
@@ -150,7 +151,7 @@ public class PointFormatExtension extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(description = "If the client sends the extension and the extension does not contain "
+    @AnvilTest(description = "If the client sends the extension and the extension does not contain "
             + "the uncompressed point format, and the client has used the Supported "
             + "Groups extension to indicate support for any of the curves defined in "
             + "this specification, then the server MUST abort the handshake and "

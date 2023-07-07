@@ -35,7 +35,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.DerivationContainer;
@@ -47,19 +47,20 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseProtocolVers
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseSigHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
 public class ServerInitiatedExtensionPoints extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "When sending a NewSessionTicket message in TLS 1.3, a server "
                             + "MAY select one or more GREASE extension values and advertise them as extensions "
                             + "with varying length and contents. [...]"
                             + "When processing a CertificateRequest or NewSessionTicket, "
                             + "clients MUST NOT treat GREASE values differently from any unknown value.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.GREASE_EXTENSION)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -80,13 +81,13 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "
                             + "if a GREASE value appears in any of the following: "
                             + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.GREASE_PROTOCOL_VERSION)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -116,13 +117,13 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 .validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "
                             + "if a GREASE value appears in any of the following: "
                             + "[...] The \"cipher_suite\" value in a ServerHello")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.GREASE_CIPHERSUITE)
     @ScopeLimitations(TlsParameterType.CIPHER_SUITE)
     @ComplianceCategory(SeverityLevel.CRITICAL)
@@ -151,13 +152,13 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 .validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "
                             + "if a GREASE value appears in any of the following: "
                             + "[...] Any ServerHello extension")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ScopeExtensions(TlsParameterType.GREASE_EXTENSION)
@@ -186,14 +187,14 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 .validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "
                             + "if a GREASE value appears in any of the following: "
                             + "[...] Any HelloRetryRequest, EncryptedExtensions, or Certificate "
                             + "extension in TLS 1.3")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.GREASE_EXTENSION)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -215,7 +216,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "

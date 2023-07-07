@@ -52,6 +52,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 8446, section = "4.1.3 Server Hello")
 @ServerTest
@@ -78,7 +79,7 @@ public class ServerHello extends Tls13Test {
         return ConditionEvaluationResult.disabled("No TLS 1.0 support");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "In TLS 1.3, the TLS server indicates its version using the \"supported_versions\" "
                             + "extension (Section 4.2.1), and the legacy_version field MUST be "
@@ -110,7 +111,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The last 8 bytes MUST be overwritten as described "
                             + "below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random. [...]"
@@ -149,7 +150,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The last 8 bytes MUST be overwritten as described "
                             + "below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random. [...]"
@@ -193,7 +194,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The last 8 bytes MUST be overwritten as described "
                             + "below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random. [...]"
@@ -245,7 +246,7 @@ public class ServerHello extends Tls13Test {
         return cipherSuite.isSupportedInProtocol(ProtocolVersion.TLS11);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client which receives a legacy_session_id_echo "
                             + "field that does not match what it sent in the ClientHello MUST "
@@ -284,7 +285,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client which receives a legacy_session_id_echo "
                             + "field that does not match what it sent in the ClientHello MUST "
@@ -324,7 +325,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "legacy_compression_method: A single byte which " + "MUST have the value 0.")
     @InteroperabilityCategory(SeverityLevel.HIGH)
@@ -353,7 +354,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "As "
                             + "with the ServerHello, a HelloRetryRequest MUST NOT contain any "

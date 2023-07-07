@@ -49,6 +49,7 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 /** */
 @Tag("signature")
@@ -56,7 +57,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 5246, section = "7.4.3. Server Key Exchange Message")
 public class ServerKeyExchange extends Tls12Test {
 
-    @TlsTest(description = "Test if the Server sends Key Exchange Messages with valid signatures")
+    @AnvilTest(description = "Test if the Server sends Key Exchange Messages with valid signatures")
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(
             affectedTypes = TlsParameterType.CIPHER_SUITE,

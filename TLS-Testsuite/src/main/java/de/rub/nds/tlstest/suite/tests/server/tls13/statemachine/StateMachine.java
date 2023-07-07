@@ -36,6 +36,7 @@ import de.rub.nds.tlstest.suite.tests.server.both.statemachine.SharedStateMachin
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 /**
  * Contains tests to evaluate the target's state machine. Some test flows are based on results found
@@ -45,7 +46,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class StateMachine extends Tls13Test {
 
-    @TlsTest(description = "Send two Client Hello Messages at the beginning of the Handshake")
+    @AnvilTest(description = "Send two Client Hello Messages at the beginning of the Handshake")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -75,7 +76,7 @@ public class StateMachine extends Tls13Test {
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If an implementation "
                             + "detects a change_cipher_spec record received before the first "
@@ -96,7 +97,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "An "
                             + "implementation which receives any other change_cipher_spec value or "
@@ -119,7 +120,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a legacy ECDH Client Key Exchange Message instead of just a Finished")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -135,7 +136,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description = "Send a legacy DH Client Key Exchange Message instead of just a Finished")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -150,7 +151,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a legacy RSA Client Key Exchange Message instead of just a Finished")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -167,7 +168,7 @@ public class StateMachine extends Tls13Test {
     }
 
     @RFC(number = 8446, section = "4.1.2 Client Hello")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Because TLS 1.3 forbids renegotiation, if a server has negotiated "
                             + "TLS 1.3 and receives a ClientHello at any other time, it MUST terminate the "

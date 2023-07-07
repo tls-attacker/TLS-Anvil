@@ -24,21 +24,22 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 5246, section = "7.4.9 Finished")
 public class Finished extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Recipients of Finished messages MUST verify that the contents are correct.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions(TlsParameterType.PRF_BITMASK)
     @HandshakeCategory(SeverityLevel.CRITICAL)

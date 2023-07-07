@@ -19,7 +19,7 @@ import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -27,16 +27,17 @@ import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @Tag("tls13")
 @TlsVersion(supported = ProtocolVersion.TLS13)
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class KeyShareExtension extends TlsGenericTest {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a Key Share Extension in the Hello Message with a modified length value (-1)")
-    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
+    @ModelFromScope(modelType = "LENGTHFIELD")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -47,10 +48,10 @@ public class KeyShareExtension extends TlsGenericTest {
     }
 
     @ServerTest
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a Key Share Extension in the Hello Message with a modified entry list length value (-1)")
-    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
+    @ModelFromScope(modelType = "LENGTHFIELD")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

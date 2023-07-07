@@ -28,7 +28,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsModelType;
@@ -36,6 +36,7 @@ import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 public class EncThenMacExtension extends Tls12Test {
@@ -65,7 +66,7 @@ public class EncThenMacExtension extends Tls12Test {
     }
 
     @RFC(number = 7366, section = "3.  Applying Encrypt-then-MAC")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a server receives an encrypt-then-MAC request extension from a client and then "
                             + "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, "
@@ -96,7 +97,7 @@ public class EncThenMacExtension extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Once the use of encrypt-then-MAC has been negotiated, processing of "
                             + "TLS/DTLS packets switches from the standard: "
@@ -105,7 +106,7 @@ public class EncThenMacExtension extends Tls12Test {
                             + "[...]encrypt( data || pad ) || MAC")
     @RFC(number = 7366, section = "3.  Applying Encrypt-then-MAC")
     @MethodCondition(method = "supportsExtension")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(
             affectedTypes = TlsParameterType.CIPHER_SUITE,
             methods = "isBlockCipher")

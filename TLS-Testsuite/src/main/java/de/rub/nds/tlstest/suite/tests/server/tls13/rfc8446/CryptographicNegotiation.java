@@ -35,12 +35,13 @@ import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @RFC(number = 8446, section = "4.1.1 Cryptographic Negotiation")
 public class CryptographicNegotiation extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If no "
                             + "common cryptographic parameters can be negotiated, the server MUST "
@@ -78,7 +79,7 @@ public class CryptographicNegotiation extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server is unable to negotiate a supported set of parameters "
                             + "(i.e., there is no overlap between the client and server parameters), it MUST abort "

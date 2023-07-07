@@ -41,7 +41,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -57,6 +57,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 8446, section = "4.2.1 Supported Versions")
 @ClientTest
@@ -79,12 +80,12 @@ public class SupportedVersions extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If this extension is present, clients MUST ignore the "
                             + "ServerHello.legacy_version value and MUST use "
                             + "only the \"supported_versions\" extension to determine the selected version.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.PROTOCOL_VERSION)
     @ManualConfig(TlsParameterType.PROTOCOL_VERSION)
     @ExplicitValues(
@@ -108,7 +109,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the \"supported_versions\" extension in the ServerHello "
                             + "contains a version not offered by the client or contains a version "
@@ -146,7 +147,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the \"supported_versions\" extension in the ServerHello "
                             + "contains a version not offered by the client or contains a version "
@@ -179,7 +180,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    /*@TlsTest(description = "Implementations of this specification MUST send this " +
+    /*@AnvilTest(description = "Implementations of this specification MUST send this " +
     "extension in the ClientHello containing all versions of TLS which they " +
     "are prepared to negotiate (for this specification, that means minimally " +
     "0x0304, but if previous versions of TLS are allowed to be " +
@@ -243,7 +244,7 @@ public class SupportedVersions extends Tls13Test {
         return versions;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The \"supported_versions\" extension is used by the client to indicate "
                             + "which versions of TLS it supports and by the server to indicate which "
@@ -289,7 +290,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The \"supported_versions\" extension is used by the client to indicate "
                             + "which versions of TLS it supports and by the server to indicate which "

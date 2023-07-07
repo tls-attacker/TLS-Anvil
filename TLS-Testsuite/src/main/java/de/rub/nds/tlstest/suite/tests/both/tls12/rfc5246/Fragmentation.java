@@ -43,7 +43,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -53,11 +53,12 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 5246, section = "6.2.1 Fragmentation")
 public class Fragmentation extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send zero-length fragments of Handshake, "
                             + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
@@ -89,7 +90,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send zero-length fragments of Handshake, "
                             + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
@@ -144,11 +145,11 @@ public class Fragmentation extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a record without any content with Content Type Application Data. "
                             + " The former record increases the sequencenumber, which should not be allowed")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("emptyRecord")
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
@@ -172,7 +173,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a record without any content with Content Type Handshake followed by an encrypted record. "
                             + " The former record increases the sequencenumber, which should not be allowed")
@@ -199,11 +200,11 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The length (in bytes) of the following TLSPlaintext.fragment. "
                             + "The length MUST NOT exceed 2^14.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -240,7 +241,7 @@ public class Fragmentation extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The length (in bytes) of the following TLSCiphertext.fragment. "
                             + "The length MUST NOT exceed 2^14 + 2048") // .

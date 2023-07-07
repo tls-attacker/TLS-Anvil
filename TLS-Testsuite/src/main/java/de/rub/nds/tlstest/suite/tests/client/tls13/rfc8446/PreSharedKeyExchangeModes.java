@@ -34,6 +34,7 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 @RFC(number = 8446, section = "4.2.9 Pre-Shared Key Exchane Modes")
@@ -46,7 +47,7 @@ public class PreSharedKeyExchangeModes extends Tls13Test {
         return ConditionEvaluationResult.disabled("PSKModeExtension is not supported");
     }
 
-    @TlsTest(description = "The server MUST NOT send a \"psk_key_exchange_modes\" extension.")
+    @AnvilTest(description = "The server MUST NOT send a \"psk_key_exchange_modes\" extension.")
     @MethodCondition(method = "supportsPSKModeExtension")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

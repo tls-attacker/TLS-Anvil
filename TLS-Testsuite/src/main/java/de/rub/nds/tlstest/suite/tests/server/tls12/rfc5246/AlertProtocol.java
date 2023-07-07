@@ -41,6 +41,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @Tag("alert")
@@ -52,7 +53,7 @@ public class AlertProtocol extends Tls12Test {
         return lengthCandidate >= 50;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Unless some other fatal alert has been transmitted, each party is "
                             + "required to send a close_notify alert before closing the write side "
@@ -99,7 +100,7 @@ public class AlertProtocol extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Upon transmission or receipt of a fatal alert message, both"
                             + " parties immediately close the connection.")
@@ -141,7 +142,7 @@ public class AlertProtocol extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Upon transmission or receipt of a fatal alert message, both"
                             + " parties immediately close the connection.")

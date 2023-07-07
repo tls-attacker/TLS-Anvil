@@ -40,6 +40,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 6066, section = "4. Maximum Fragment Length Negotiation")
 @ClientTest
@@ -63,7 +64,7 @@ public class MaximumFragmentLength extends Tls12Test {
         return MaxFragmentLength.TWO_11;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Similarly, if a client receives a maximum fragment length negotiation "
                             + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
@@ -98,7 +99,7 @@ public class MaximumFragmentLength extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Similarly, if a client receives a maximum fragment length negotiation "
                             + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
@@ -138,7 +139,7 @@ public class MaximumFragmentLength extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Once a maximum fragment length other than 2^14 has been successfully "
                             + "negotiated, the client and server MUST immediately begin fragmenting "

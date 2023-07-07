@@ -56,6 +56,7 @@ import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @RFC(number = 8446, section = "4.2.10 Early Data Indication")
@@ -93,7 +94,7 @@ public class EarlyData extends Tls13Test {
         return null;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server supplies an \"early_data\" extension, the client MUST "
                             + "verify that the server's selected_identity is 0.")
@@ -139,7 +140,7 @@ public class EarlyData extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "[The server] MUST verify that the "
                             + "following values are the same as those associated with the "
@@ -184,7 +185,7 @@ public class EarlyData extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "[The server] MUST verify that the "
                             + "following values are the same as those associated with the "
@@ -229,7 +230,7 @@ public class EarlyData extends Tls13Test {
         return lengthCandidate >= 50;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server chooses to accept the \"early_data\" extension, then it "
                             + "MUST comply with the same error-handling requirements specified for "
@@ -309,7 +310,7 @@ public class EarlyData extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server chooses to accept the \"early_data\" extension, then it "
                             + "MUST comply with the same error-handling requirements specified for "

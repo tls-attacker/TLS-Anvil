@@ -44,6 +44,7 @@ import java.util.List;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 7465, section = "2")
 @ServerTest
@@ -67,7 +68,7 @@ public class RC4Ciphersuites extends Tls12Test {
         return !isRC4(cipherSuite);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "TLS servers MUST NOT select an RC4 cipher suite when a TLS client "
                             + "sends such a cipher suite in the ClientHello message.")
@@ -111,7 +112,7 @@ public class RC4Ciphersuites extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the TLS client only offers RC4 cipher suites, the TLS server "
                             + "MUST terminate the handshake. The TLS server MAY send the "

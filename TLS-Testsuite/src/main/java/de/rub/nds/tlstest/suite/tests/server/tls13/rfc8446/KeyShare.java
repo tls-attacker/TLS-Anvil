@@ -76,12 +76,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @RFC(number = 8446, section = "4.2.8. Key Share")
 public class KeyShare extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Each KeyShareEntry value MUST correspond "
                             + "to a group offered in the \"supported_groups\" extension "
@@ -139,7 +140,7 @@ public class KeyShare extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If (EC)DHE key establishment "
                             + "is in use, then the ServerHello contains a \"key_share\" extension with "
@@ -167,7 +168,7 @@ public class KeyShare extends Tls13Test {
         performOneKeyshareTest(c, runner);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
                             + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
@@ -237,7 +238,7 @@ public class KeyShare extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "secp256r1(0x0017), secp384r1(0x0018), secp521r1(0x0019),"
                             + " x25519(0x001D), x448(0x001E),")
@@ -256,7 +257,7 @@ public class KeyShare extends Tls13Test {
         performDeprecatedGroupsTest(c, runner);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "secp256r1(0x0017), secp384r1(0x0018), secp521r1(0x0019),"
                             + " x25519(0x001D), x448(0x001E),")
@@ -312,7 +313,7 @@ public class KeyShare extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A server receiving a ClientHello MUST correctly ignore all "
                             + "unrecognized cipher suites, extensions, and other parameters. "
@@ -347,7 +348,7 @@ public class KeyShare extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "For the curves secp256r1, secp384r1, and secp521r1, peers MUST "
                             + "validate each other's public value Q by ensuring that the point is a "
@@ -403,7 +404,7 @@ public class KeyShare extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Peers MUST validate each other's public key Y by ensuring that 1 < Y "
                             + "< p-1.")
@@ -466,7 +467,7 @@ public class KeyShare extends Tls13Test {
         return derivationParameters;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "For X25519 and X448, [...]"
                             + "For these curves, implementations SHOULD use the approach specified "

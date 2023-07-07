@@ -46,12 +46,13 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 7568, section = "3. Do Not Use SSL Version 3.0")
 @ServerTest
 public class DoNotUseSSLVersion30 extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "SSLv3 MUST NOT be used. Negotiation of SSLv3 from any version of TLS "
                             + "MUST NOT be permitted. [...]"
@@ -97,7 +98,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "TLS servers MUST accept any value "
                             + "{03,XX} (including {03,00}) as the record layer version number for "
@@ -143,7 +144,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "TLS servers MUST accept any value "
                             + "{03,XX} (including {03,00}) as the record layer version number for "

@@ -40,6 +40,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 6066, section = "4. Maximum Fragment Length Negotiation")
 @ServerTest
@@ -58,7 +59,7 @@ public class MaximumFragmentLength extends Tls12Test {
         return ConditionEvaluationResult.disabled("Target does not support the Extension");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a server receives a maximum fragment length negotiation request for "
                             + "a value other than the allowed values, it MUST abort the handshake with an \"illegal_parameter\" alert.")
@@ -92,7 +93,7 @@ public class MaximumFragmentLength extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Once a maximum fragment length other than 2^14 has been successfully "
                             + "negotiated, the client and server MUST immediately begin fragmenting "

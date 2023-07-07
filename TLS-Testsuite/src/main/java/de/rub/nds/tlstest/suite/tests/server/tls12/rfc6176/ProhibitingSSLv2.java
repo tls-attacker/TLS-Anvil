@@ -31,12 +31,13 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 6176, section = "3")
 @ServerTest
 public class ProhibitingSSLv2 extends Tls12Test {
 
-    @TlsTest(description = "TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT- "
+    @AnvilTest(description = "TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT- "
             + "HELLO message format.")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.CRITICAL)
@@ -56,7 +57,7 @@ public class ProhibitingSSLv2 extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "TLS servers MUST NOT reply with an SSL 2.0 SERVER-HELLO with a "
+    @AnvilTest(description = "TLS servers MUST NOT reply with an SSL 2.0 SERVER-HELLO with a "
             + "protocol version that is less than { 0x03, 0x00 } and instead MUST "
             + "abort the connection")
     @HandshakeCategory(SeverityLevel.MEDIUM)

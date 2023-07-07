@@ -31,11 +31,12 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 8446, section = "4.4.4. Finished")
 public class Finished extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Recipients of Finished messages MUST verify "
                             + "that the contents are correct and if incorrect MUST terminate "

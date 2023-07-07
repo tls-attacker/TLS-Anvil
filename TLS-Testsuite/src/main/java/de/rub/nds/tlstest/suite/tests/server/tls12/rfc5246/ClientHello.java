@@ -43,12 +43,13 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 5246, section = "7.4.1.2. Client Hello")
 @ServerTest
 public class ClientHello extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the list contains cipher suites the server does not recognize, support, "
                             + "or wish to use, the server MUST ignore those cipher suites, and process the remaining ones as usual.")
@@ -69,7 +70,7 @@ public class ClientHello extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "This vector MUST contain, and all implementations MUST support, CompressionMethod.null. "
                             + "Thus, a client and server will always be able to agree on a compression method.")
@@ -93,7 +94,7 @@ public class ClientHello extends Tls12Test {
     }
 
     @RFC(number = 5246, section = "7.4.1.4.1 Signature Algorithms")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The rules specified in [TLSEXT] "
                             + "require servers to ignore extensions they do not understand.")
@@ -138,7 +139,7 @@ public class ClientHello extends Tls12Test {
                         });
     }
 
-    @TlsTest(description = "Send a ClientHello that offers many cipher suites")
+    @AnvilTest(description = "Send a ClientHello that offers many cipher suites")
     @ScopeLimitations(TlsParameterType.INCLUDE_GREASE_CIPHER_SUITES)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -175,7 +176,7 @@ public class ClientHello extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A server MUST accept ClientHello "
                             + "messages both with and without the extensions field")

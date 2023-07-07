@@ -25,21 +25,22 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 5246, section = "6.2.3.3 AEAD Ciphers")
 public class AEADCiphers extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions({TlsParameterType.AUTH_TAG_BITMASK})
     @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isAEAD")
@@ -76,10 +77,10 @@ public class AEADCiphers extends Tls12Test {
         return lengthCandidate >= 50;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ScopeExtensions({TlsParameterType.CIPHERTEXT_BITMASK, TlsParameterType.APP_MSG_LENGHT})
     @ValueConstraints(affectedTypes = TlsParameterType.CIPHER_SUITE, methods = "isAEAD")

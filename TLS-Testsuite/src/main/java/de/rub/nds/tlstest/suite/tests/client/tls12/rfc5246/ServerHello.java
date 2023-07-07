@@ -38,7 +38,7 @@ import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsModelType;
@@ -48,17 +48,18 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 public class ServerHello extends Tls12Test {
 
     @RFC(number = 5246, section = "7.4.1.4. Hello Extensions")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a client receives an extension type in ServerHello that it did "
                             + "not request in the associated ClientHello, it MUST abort the handshake with an "
                             + "unsupported_extension fatal alert.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -136,7 +137,7 @@ public class ServerHello extends Tls12Test {
         return !proposedCompressionMethods.contains(compressionMethod);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The single compression algorithm selected by the server from the "
                             + "list in ClientHello.compression_methods.")

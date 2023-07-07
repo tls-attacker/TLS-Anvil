@@ -39,7 +39,7 @@ public class A5CipherSuite extends Tls12Test {
         }
     }
 
-    /*@TlsTest(description = "These cipher suites MUST NOT be used by TLS 1.2 implementations unless the application " +
+    /*@AnvilTest(description = "These cipher suites MUST NOT be used by TLS 1.2 implementations unless the application " +
     "layer has specifically requested to allow anonymous key exchange", securitySeverity = SeverityLevel.HIGH)*/
     @Test
     @SecurityCategory(SeverityLevel.CRITICAL)

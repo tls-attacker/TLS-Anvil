@@ -33,12 +33,13 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 5246, section = "6.2.1 Fragmentation")
 @ClientTest
 public class Fragmentation extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send zero-length fragments of Handshake, "
                             + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
@@ -69,7 +70,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Client "
                             + "message boundaries are not preserved in the record layer (i.e., "

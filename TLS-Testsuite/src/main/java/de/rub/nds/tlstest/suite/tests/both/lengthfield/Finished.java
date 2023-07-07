@@ -22,7 +22,7 @@ import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
@@ -31,14 +31,15 @@ import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 public class Finished extends TlsGenericTest {
 
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @TlsTest(description = "Send a Finished Message with a modified length value (-1)")
+    @AnvilTest(description = "Send a Finished Message with a modified length value (-1)")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
+    @ModelFromScope(modelType = "LENGTHFIELD")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -49,9 +50,9 @@ public class Finished extends TlsGenericTest {
 
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @TlsTest(description = "Send a Finished Message with a modified length value (-1)")
+    @AnvilTest(description = "Send a Finished Message with a modified length value (-1)")
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @ModelFromScope(baseModel = TlsModelType.LENGTHFIELD)
+    @ModelFromScope(modelType = "LENGTHFIELD")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

@@ -45,12 +45,13 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @RFC(number = 8446, section = "4.1.2 Client Hello")
 public class ClientHello extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the list contains cipher suites that the server "
                             + "does not recognize, support, or wish to use, the server MUST "
@@ -75,7 +76,7 @@ public class ClientHello extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "In TLS 1.3, the client indicates its version preferences "
                             + "in the \"supported_versions\" extension (Section 4.2.1) and the legacy_version "
@@ -97,7 +98,7 @@ public class ClientHello extends Tls13Test {
         runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "In TLS 1.3, the client indicates its version preferences "
                             + "in the \"supported_versions\" extension (Section 4.2.1) and the legacy_version "
@@ -119,7 +120,7 @@ public class ClientHello extends Tls13Test {
         runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send a "
                             + "ClientHello.legacy_version or ServerHello.legacy_version "
@@ -144,7 +145,7 @@ public class ClientHello extends Tls13Test {
         runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "For every TLS 1.3 ClientHello, this vector MUST contain "
                             + "exactly one byte, set to zero, which corresponds to the \"null\" compression method in prior "
@@ -177,7 +178,7 @@ public class ClientHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Servers MUST ignore unrecognized extensions. [...]"
                             + "A server receiving a ClientHello MUST correctly ignore all "
@@ -226,7 +227,7 @@ public class ClientHello extends Tls13Test {
 
     // there is an omitSignatureAlgorithms test in SignatureAlgorithms
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client is considered to be attempting to negotiate using this "
                             + "specification if the ClientHello contains a \"supported_versions\" "
@@ -268,7 +269,7 @@ public class ClientHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client is considered to be attempting to negotiate using this "
                             + "specification if the ClientHello contains a \"supported_versions\" "
@@ -295,7 +296,7 @@ public class ClientHello extends Tls13Test {
         performMissingExtensionTest(config, runner);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client is considered to be attempting to negotiate using this "
                             + "specification if the ClientHello contains a \"supported_versions\" "
@@ -321,7 +322,7 @@ public class ClientHello extends Tls13Test {
         performMissingExtensionTest(config, runner);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Note that TLS 1.3 servers might receive TLS 1.2 or prior ClientHellos which contain other compression methods and (if negotiating such a prior version) MUST follow the procedures for the appropriate prior version of TLS.")
     @KeyExchange(supported = KeyExchangeType.ALL12)

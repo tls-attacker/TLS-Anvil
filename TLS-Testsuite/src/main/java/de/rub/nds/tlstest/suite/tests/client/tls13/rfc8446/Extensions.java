@@ -47,6 +47,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 8446, section = "4.2 Extensions")
 @ClientTest
@@ -73,7 +74,7 @@ public class Extensions extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send extension responses if "
                             + "the remote endpoint did not send the corresponding extension requests, "
@@ -148,7 +149,7 @@ public class Extensions extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If an implementation receives an extension which it "
                             + "recognizes and which is not specified for the message in "

@@ -63,6 +63,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @RFC(number = 8446, section = "4.2.11 Pre-Shared Key Extension")
@@ -117,7 +118,7 @@ public class PreSharedKey extends Tls13Test {
         }
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The \"pre_shared_key\" extension MUST be the last extension "
                             + "in the ClientHello (this facilitates implementation as described below). "
@@ -158,7 +159,7 @@ public class PreSharedKey extends Tls13Test {
         return workflowTrace;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The \"pre_shared_key\" extension MUST be the last extension "
                             + "in the ClientHello (this facilitates implementation as described below). "
@@ -184,7 +185,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server selects a PSK, then it MUST also select a key "
                             + "establishment mode from the set indicated by the client's "
@@ -234,7 +235,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server selects a PSK, then it MUST also select a key "
                             + "establishment mode from the set indicated by the client's "
@@ -283,7 +284,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Prior to accepting PSK key establishment, the server MUST validate "
                             + "the corresponding binder value (see Section 4.2.11.2 below).  If this "
@@ -320,7 +321,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Prior to accepting PSK key establishment, the server MUST validate "
                             + "the corresponding binder value")
@@ -354,7 +355,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST verify that the server’s selected_identity is within the "
                             + "range supplied by the client")
@@ -416,7 +417,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Any ticket MUST only be resumed with a cipher suite that has the same KDF hash algorithm as that used to establish the original connection.")
     @RFC(number = 8446, section = "4.6.1.  New Session Ticket Message")
@@ -464,7 +465,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If clients offer "
                             + "\"pre_shared_key\" without a \"psk_key_exchange_modes\" extension, "

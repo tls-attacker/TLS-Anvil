@@ -27,7 +27,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -36,6 +36,7 @@ import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 5246, section = "7.2.1 Closure Alerts")
 @ClientTest
@@ -46,7 +47,7 @@ public class AlertProtocol extends Tls12Test {
         return lengthCandidate >= 50;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Unless some other fatal alert has been transmitted, each party is "
                             + "required to send a close_notify alert before closing the write side "
@@ -92,7 +93,7 @@ public class AlertProtocol extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Upon transmission or receipt of a fatal alert message, both "
                             + "parties immediately close the connection.")
@@ -127,11 +128,11 @@ public class AlertProtocol extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::socketClosed);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Upon transmission or receipt of a fatal alert message, both "
                             + "parties immediately close the connection.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)

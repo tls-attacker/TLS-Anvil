@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 5246, section = "F.1.4  Resuming Sessions")
 @ServerTest
@@ -83,7 +84,7 @@ public class Resumption extends Tls12Test {
         return ConditionEvaluationResult.disabled("SNI is disabled");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A server that implements this extension MUST NOT accept the request "
                             + "to resume the session if the server_name extension contains a "
@@ -143,7 +144,7 @@ public class Resumption extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "When resuming a session, the server MUST "
                             + "NOT include a server_name extension in the server hello.")
@@ -183,7 +184,7 @@ public class Resumption extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "In this case, other connections corresponding to the "
                             + "session may continue, but the session identifier MUST be invalidated, "
@@ -258,7 +259,7 @@ public class Resumption extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")

@@ -44,7 +44,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -60,17 +60,18 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 8422, section = "5.4 Server Key Exchange")
 @ClientTest
 public class ServerKeyExchange extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The client verifies the signature (when present) and retrieves the "
                             + "server's elliptic curve domain parameters and ephemeral ECDH public "
                             + "key from the ServerKeyExchange message.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
@@ -132,12 +133,12 @@ public class ServerKeyExchange extends Tls12Test {
         return certDerivation.getApplicableCertificates(context, scope, true);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A possible reason for a "
                             + "fatal handshake failure is that the client's capabilities for "
                             + "handling elliptic curves and point formats are exceeded")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
@@ -186,12 +187,12 @@ public class ServerKeyExchange extends Tls12Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A possible reason for a "
                             + "fatal handshake failure is that the client's capabilities for "
                             + "handling elliptic curves and point formats are exceeded")
-    @ModelFromScope(baseModel = TlsModelType.GENERIC)
+    @ModelFromScope(modelType = "GENERIC")
     @ScopeExtensions(TlsParameterType.CERTIFICATE)
     @ScopeLimitations(TlsParameterType.NAMED_GROUP)
     @ExplicitValues(
@@ -220,12 +221,12 @@ public class ServerKeyExchange extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The client verifies the signature (when present) and retrieves the "
                             + "server's elliptic curve domain parameters and ephemeral ECDH public "
                             + "key from the ServerKeyExchange message.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
@@ -258,12 +259,12 @@ public class ServerKeyExchange extends Tls12Test {
         return !cipherSuite.isAnon();
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The client verifies the signature (when present) and retrieves the "
                             + "server's elliptic curve domain parameters and ephemeral ECDH public "
                             + "key from the ServerKeyExchange message.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeLimitations(TlsParameterType.SIG_HASH_ALGORIHTM)
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
@@ -329,13 +330,13 @@ public class ServerKeyExchange extends Tls12Test {
         return unsupportedAlgorithms;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the client has offered the \"signature_algorithms\" extension, the "
                             + "signature algorithm and hash algorithm MUST be a pair listed in that "
                             + "extension. ")
     @RFC(number = 5246, section = "7.4.3.  Server Key Exchange Message")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)

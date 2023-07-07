@@ -46,12 +46,13 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 5246, section = "E.1. Compatibility with TLS 1.0/1.1 and SSL 3.0")
 @ServerTest
 public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a TLS server receives a ClientHello containing a version number "
                             + "greater than the highest version supported by the server, it MUST "
@@ -98,7 +99,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         return ConditionEvaluationResult.disabled("Does not support legacy versions");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If server supports (or is willing to use) only "
                             + "versions greater than client_version, it MUST send a "
@@ -142,7 +143,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Thus, TLS servers compliant with this specification MUST accept any value {03,XX} as the "
                             + "record layer version number for ClientHello.")

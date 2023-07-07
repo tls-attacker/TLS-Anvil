@@ -29,12 +29,13 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 @RFC(number = 8446, section = "4.4.2.4. Receiving a Certificate Message")
 public class Certificate extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server supplies an empty Certificate message, "
                             + "the client MUST abort the handshake with a \"decode_error\" alert.")
@@ -65,7 +66,7 @@ public class Certificate extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server supplies an empty Certificate message, "
                             + "the client MUST abort the handshake with a \"decode_error\" alert.")

@@ -35,12 +35,13 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 5246, section = "6. The TLS Record Protocol")
 @ClientTest
 public class TLSRecordProtocol extends Tls12Test {
 
-    @TlsTest(description = "Implementations MUST NOT send record types not defined in this document "
+    @AnvilTest(description = "Implementations MUST NOT send record types not defined in this document "
             + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
             + "record type, it MUST send an unexpected_message alert.")
     @RecordLayerCategory(SeverityLevel.LOW)
@@ -69,7 +70,7 @@ public class TLSRecordProtocol extends Tls12Test {
         });
     }
 
-    @TlsTest(description = "Implementations MUST NOT send record types not defined in this document "
+    @AnvilTest(description = "Implementations MUST NOT send record types not defined in this document "
             + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
             + "record type, it MUST send an unexpected_message alert.")
     @RecordLayerCategory(SeverityLevel.LOW)

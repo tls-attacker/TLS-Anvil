@@ -31,7 +31,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsModelType;
@@ -41,6 +41,7 @@ import de.rub.nds.tlstest.suite.tests.client.both.statemachine.SharedStateMachin
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 /**
  * Contains tests to evaluate the target's state machine. Some test flows are based on results found
@@ -54,11 +55,11 @@ public class StateMachine extends Tls12Test {
         return !cipherSuite.isAnon();
     }
 
-    @TlsTest(description = "Omit the Certificate Message for non-anonymous Cipher Suite")
+    @AnvilTest(description = "Omit the Certificate Message for non-anonymous Cipher Suite")
     @DynamicValueConstraints(
             affectedTypes = TlsParameterType.CIPHER_SUITE,
             methods = "isNotAnonCipherSuite")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeLimitations({TlsParameterType.CERTIFICATE})
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
@@ -76,8 +77,8 @@ public class StateMachine extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Omit the Change Cipher Spec Message and send Finished encrypted")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @AnvilTest(description = "Omit the Change Cipher Spec Message and send Finished encrypted")
+    @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.LOW)
@@ -98,7 +99,7 @@ public class StateMachine extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Send two Server Hellos as the first server messages")
+    @AnvilTest(description = "Send two Server Hellos as the first server messages")
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.LOW)
@@ -107,9 +108,9 @@ public class StateMachine extends Tls12Test {
         SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description = "Send a second ServerHello after the client's Finished has been received")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.LOW)
@@ -129,7 +130,7 @@ public class StateMachine extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Send ServerHello, Change CipherSpec")
+    @AnvilTest(description = "Send ServerHello, Change CipherSpec")
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.LOW)

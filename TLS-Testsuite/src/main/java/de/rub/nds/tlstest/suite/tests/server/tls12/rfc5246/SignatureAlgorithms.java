@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @RFC(number = 5246, section = "7.4.1.4.1. Signature Algorithms")
@@ -82,7 +83,7 @@ public class SignatureAlgorithms extends Tls12Test {
         return ConditionEvaluationResult.disabled("No ECDSA signature ciphersuites supported");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the client does not send the signature_algorithms extension, the server MUST do the following:"
                             + "[...]If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), "
@@ -118,7 +119,7 @@ public class SignatureAlgorithms extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the client does not send the signature_algorithms extension, the server MUST do the following:"
                             + "[...]If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), "
@@ -154,7 +155,7 @@ public class SignatureAlgorithms extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Each SignatureAndHashAlgorithm value lists a single hash/signature "
                             + "pair that the client is willing to verify.  The values are indicated "
@@ -185,7 +186,7 @@ public class SignatureAlgorithms extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(description = "Send a ClientHello that offers many SignatureAndHash algorithms")
+    @AnvilTest(description = "Send a ClientHello that offers many SignatureAndHash algorithms")
     @ScopeLimitations(TlsParameterType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

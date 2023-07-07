@@ -57,7 +57,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCate
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -75,6 +75,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 public class TLSExtensionForECC extends Tls12Test {
@@ -82,7 +83,7 @@ public class TLSExtensionForECC extends Tls12Test {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A server that receives a ClientHello containing one or both of these "
                             + "extensions MUST use the client's enumerated capabilities to guide its "
@@ -110,7 +111,7 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a server does not understand the Supported Elliptic Curves Extension, "
                             + "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake "
@@ -140,7 +141,7 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "4. TLS Extensions for ECC and 5.1. Client Hello Extensions")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Servers implementing ECC "
                             + "cipher suites MUST support these extensions, and when a client uses "
@@ -201,7 +202,7 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "5.1.1 Supported Elliptic Curves Extension")
-    /*@TlsTest(description = " RFC 4492 defined 25 different curves in the NamedCurve registry (now\n" +
+    /*@AnvilTest(description = " RFC 4492 defined 25 different curves in the NamedCurve registry (now\n" +
     "renamed the \"TLS Supported Groups\" registry, although the enumeration\n" +
     "below is still named NamedCurve) for use in TLS.  Only three have\n" +
     "seen much use.  This specification is deprecating the rest (with\n" +
@@ -232,7 +233,7 @@ public class TLSExtensionForECC extends Tls12Test {
                 deprecatedFound.isEmpty());
     }
 
-    @TlsTest(description = "NamedCurve named_curve_list<2..2^16-1>")
+    @AnvilTest(description = "NamedCurve named_curve_list<2..2^16-1>")
     @RFC(number = 8422, section = "5.1.1.  Supported Elliptic Curves Extension")
     @ScopeLimitations(TlsParameterType.INCLUDE_GREASE_NAMED_GROUPS)
     @KeyExchange(supported = KeyExchangeType.ECDH)
@@ -268,7 +269,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "With the NIST curves, each party MUST validate the public key sent by "
                             + "its peer in the ClientKeyExchange and ServerKeyExchange messages.  A "
@@ -276,7 +277,7 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "peer's public value satisfy the curve equation, y^2 = x^3 + ax + b "
                             + "mod p.")
     @RFC(number = 8422, section = "5.11. Public Key Validation")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
@@ -320,7 +321,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "if either party obtains all-zeroes x_S, it MUST "
                             + "abort the handshake (as required by definition of X25519 and X448). [...]"
@@ -364,7 +365,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The server MUST send an ephemeral ECDH public key and a specification "
                             + "of the corresponding curve in the ServerKeyExchange message.  These "

@@ -27,13 +27,14 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import static org.junit.Assert.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 
 @ServerTest
 @RFC(number = 8446, section = "4.4.2.  Certificate")
 public class Certificate extends Tls13Test {
     
-    @TlsTest(description = "The server's certificate_list MUST always be non-empty.")
+    @AnvilTest(description = "The server's certificate_list MUST always be non-empty.")
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.CRITICAL)

@@ -52,7 +52,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
@@ -69,6 +69,7 @@ import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 @RFC(number = 8446, section = "4.2.8. Key Share")
@@ -114,13 +115,13 @@ public class KeyShare extends Tls13Test {
         }
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
                             + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
                             + "that the server has selected for the negotiated key exchange.")
     @ScopeLimitations(TlsParameterType.NAMED_GROUP)
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -167,7 +168,7 @@ public class KeyShare extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "For the curves secp256r1, secp384r1, and secp521r1, peers MUST "
                             + "validate each other's public value Q by ensuring that the point is a "
@@ -215,7 +216,7 @@ public class KeyShare extends Tls13Test {
         return group.isCurve() && group.name().contains("SECP");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "For X25519 and X448, [...]"
                             + "For these curves, implementations SHOULD use the approach specified "
@@ -283,7 +284,7 @@ public class KeyShare extends Tls13Test {
         assertFalse("Deprecated or invalid group used for key share", foundDeprecated);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Peers MUST validate each other's public key Y by ensuring that 1 < Y "
                             + "< p-1.")

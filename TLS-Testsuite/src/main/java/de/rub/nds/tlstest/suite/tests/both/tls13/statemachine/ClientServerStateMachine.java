@@ -29,13 +29,14 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 /**
  * Statemachine tests used both for TLS 1.3 clients and servers.
  */
 public class ClientServerStateMachine extends Tls13Test {
     
-    @TlsTest(description = "Send a record without any content")
+    @AnvilTest(description = "Send a record without any content")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)

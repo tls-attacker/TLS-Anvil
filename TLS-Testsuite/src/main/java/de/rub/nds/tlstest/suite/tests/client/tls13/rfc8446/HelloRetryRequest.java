@@ -55,7 +55,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
@@ -73,6 +73,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 @RFC(number = 8446, section = "4.1.4 Hello Retry Request")
@@ -92,7 +93,7 @@ public class HelloRetryRequest extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Upon receipt of this extension in a HelloRetryRequest, the client "
                             + "MUST verify that (1) the selected_group field corresponds to a group "
@@ -122,7 +123,7 @@ public class HelloRetryRequest extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client which receives a cipher suite that was not offered MUST "
                             + "abort the handshake.")
@@ -164,7 +165,7 @@ public class HelloRetryRequest extends Tls13Test {
                 .contains(group);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST abort the handshake with an "
                             + "\"illegal_parameter\" alert if the HelloRetryRequest would not result "
@@ -227,7 +228,7 @@ public class HelloRetryRequest extends Tls13Test {
                 "Target does not support more than one NamedGroup in TLS 1.3");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a client receives a second "
                             + "HelloRetryRequest in the same connection (i.e., where the ClientHello "
@@ -298,7 +299,7 @@ public class HelloRetryRequest extends Tls13Test {
                 "Target does not support more than one CipherSuite in TLS 1.3");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Upon receiving "
                             + "the ServerHello, clients MUST check that the cipher suite supplied in "
@@ -347,7 +348,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If using "
                             + "(EC)DHE key establishment and a HelloRetryRequest containing a "
@@ -393,7 +394,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The value of selected_version in the HelloRetryRequest "
                             + "\"supported_versions\" extension MUST be retained in the ServerHello, "
@@ -437,7 +438,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client which receives a legacy_session_id_echo "
                             + "field that does not match what it sent in the ClientHello MUST "
@@ -454,7 +455,7 @@ public class HelloRetryRequest extends Tls13Test {
         ServerHello.sharedSessionIdTest(workflowTrace, runner);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "legacy_compression_method: A single byte which " + "MUST have the value 0.")
     @DynamicValueConstraints(
@@ -470,7 +471,7 @@ public class HelloRetryRequest extends Tls13Test {
         ServerHello.sharedCompressionValueTest(workflowTrace, runner);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "
@@ -491,14 +492,14 @@ public class HelloRetryRequest extends Tls13Test {
                 workflowTrace, runner, derivationContainer);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "
                             + "if a GREASE value appears in any of the following: "
                             + "[...] Any ServerHello extension")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.GREASE_EXTENSION)
     @DynamicValueConstraints(
             affectedTypes = TlsParameterType.NAMED_GROUP,
@@ -512,14 +513,14 @@ public class HelloRetryRequest extends Tls13Test {
                 workflowTrace, runner, derivationContainer);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "
                             + "if a GREASE value appears in any of the following: "
                             + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
     @RFC(number = 8701, section = "4. Server-Initiated Extension Points")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.GREASE_PROTOCOL_VERSION)
     @DynamicValueConstraints(
             affectedTypes = TlsParameterType.NAMED_GROUP,
@@ -550,7 +551,7 @@ public class HelloRetryRequest extends Tls13Test {
             number = 8446,
             section =
                     "4.1.2 Client Hello, 4.1.3.  Server Hello, 4.1.4. Hello Retry Request, 4.2.8 Key Share, and 5.1. Record Layer")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The client will also send a "
                             + "ClientHello when the server has responded to its ClientHello with a "
@@ -742,7 +743,7 @@ public class HelloRetryRequest extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Similarly, cipher suites for TLS 1.2 and lower cannot be used with "
                             + "TLS 1.3.")
@@ -760,7 +761,7 @@ public class HelloRetryRequest extends Tls13Test {
         performHelloRetryRequestTest(argumentAccessor, runner);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "When sending the new ClientHello, the client MUST copy "
                             + "the contents of the extension received in the HelloRetryRequest into "

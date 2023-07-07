@@ -36,6 +36,7 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 @RFC(number = 8446, section = "4.3.1. Encrypted Extensions")
@@ -57,7 +58,7 @@ public class EncryptedExtensions extends Tls13Test {
         return MaxFragmentLength.TWO_11;
     }
 
-    @TlsTest(description = "The client MUST check EncryptedExtensions "
+    @AnvilTest(description = "The client MUST check EncryptedExtensions "
             + "for the presence of any forbidden extensions and if "
             + "any are found MUST abort the handshake "
             + "with an \"illegal_parameter\" alert.")
@@ -80,7 +81,7 @@ public class EncryptedExtensions extends Tls13Test {
         });
     }
 
-    @TlsTest(description = "The client MUST check EncryptedExtensions "
+    @AnvilTest(description = "The client MUST check EncryptedExtensions "
             + "for the presence of any forbidden extensions and if "
             + "any are found MUST abort the handshake "
             + "with an \"illegal_parameter\" alert.")
@@ -104,7 +105,7 @@ public class EncryptedExtensions extends Tls13Test {
     }
 
     @RFC(number = 6066, section = "4. Maximum Fragment Length Negotiation")
-    @TlsTest(description = "Similarly, if a client receives a maximum fragment length negotiation "
+    @AnvilTest(description = "Similarly, if a client receives a maximum fragment length negotiation "
             + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -133,7 +134,7 @@ public class EncryptedExtensions extends Tls13Test {
     }
 
     @RFC(number = 6066, section = "4. Maximum Fragment Length Negotiation")
-    @TlsTest(description = "Similarly, if a client receives a maximum fragment length negotiation "
+    @AnvilTest(description = "Similarly, if a client receives a maximum fragment length negotiation "
             + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
     @MethodCondition(method = "sentMaximumFragmentLength")
     @HandshakeCategory(SeverityLevel.MEDIUM)

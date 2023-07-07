@@ -27,12 +27,13 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 @RFC(number = 8446, section = "4.4.2. Certificate")
 public class ClientAuthentication extends Tls13Test {
 
-    @TlsTest(description = "The client MUST send a Certificate message if and only if the server " +
+    @AnvilTest(description = "The client MUST send a Certificate message if and only if the server " +
             "has requested client authentication via a CertificateRequest message " +
             "(Section 4.3.2).[...] " +
             "If the server requests client authentication but no " +

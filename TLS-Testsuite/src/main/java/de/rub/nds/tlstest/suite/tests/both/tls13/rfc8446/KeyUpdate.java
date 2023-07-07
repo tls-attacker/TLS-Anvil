@@ -36,24 +36,25 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 8446, section = "4.6.3.  Key and Initialization Vector Update")
 public class KeyUpdate extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations "
                             + "that receive a KeyUpdate message prior to receiving a Finished "
                             + "message MUST terminate the connection with an \"unexpected_message\" "
                             + "alert.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -77,7 +78,7 @@ public class KeyUpdate extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "request_update:  Indicates whether the recipient of the KeyUpdate "
                             + "should respond with its own KeyUpdate.  If an implementation "
@@ -103,7 +104,7 @@ public class KeyUpdate extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the request_update field is set to \"update_requested\", then the receiver MUST send a KeyUpdate of its own with request_update set to \"update_not_requested\" prior to sending its next Application Data record. [...]"
                             + "Both sender and receiver MUST encrypt their KeyUpdate messages with "
@@ -149,7 +150,7 @@ public class KeyUpdate extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Upon receiving a KeyUpdate, the receiver MUST update " + "its receiving keys.")
     @InteroperabilityCategory(SeverityLevel.HIGH)

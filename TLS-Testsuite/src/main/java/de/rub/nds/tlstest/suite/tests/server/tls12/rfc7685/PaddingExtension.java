@@ -35,13 +35,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 7685, section = "3")
 @ServerTest
 public class PaddingExtension extends Tls12Test {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The client MUST fill the padding extension completely with zero "
                             + "bytes, although the padding extension_data field may be empty.")
@@ -64,7 +65,7 @@ public class PaddingExtension extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "The server MUST NOT echo the extension.")
+    @AnvilTest(description = "The server MUST NOT echo the extension.")
     @ComplianceCategory(SeverityLevel.LOW)
     @HandshakeCategory(SeverityLevel.LOW)
     @ScopeLimitations(TlsParameterType.INCLUDE_PADDING_EXTENSION)

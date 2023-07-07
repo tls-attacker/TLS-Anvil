@@ -47,12 +47,13 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseProtocolVers
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseSigHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 @RFC(number = 8701, section = "3.1 Client Behavior")
 public class ServerInitiatedExtensionPoints extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "
@@ -88,7 +89,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "
@@ -114,7 +115,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "
@@ -140,7 +141,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "
@@ -170,7 +171,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST reject GREASE values when negotiated by the server. "
                             + "In particular, the client MUST fail the connection "

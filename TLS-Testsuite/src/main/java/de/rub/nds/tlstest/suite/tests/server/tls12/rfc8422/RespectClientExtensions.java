@@ -39,12 +39,13 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 public class RespectClientExtensions extends Tls12Test {
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A server that receives a ClientHello containing one or both of these "
                             + "extensions MUST use the client's enumerated capabilities to guide its "
@@ -65,7 +66,7 @@ public class RespectClientExtensions extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A server that receives a ClientHello containing one or both of these "
                             + "extensions MUST use the client's enumerated capabilities to guide its "

@@ -46,7 +46,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -63,6 +63,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 @Tag("dheshare")
@@ -84,14 +85,14 @@ public class FfDheShare extends Tls12Test {
     }
 
     @RFC(number = 7919, section = "3. Client Behavior and 5.1. Checking the Peer's Public Key")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "[...] the client MUST verify that dh_Ys is in the range 1 < "
                             + "dh_Ys < dh_p - 1.  If dh_Ys is not in this range, the client MUST "
                             + "terminate the connection with a fatal handshake_failure(40) alert. [...]"
                             + "Peers MUST validate each other's public key Y (dh_Ys offered by the "
                             + "server or dh_Yc offered by the client) by ensuring that 1 < Y < p-1.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.FFDHE_SHARE_OUT_OF_BOUNDS)
     @HandshakeCategory(SeverityLevel.INFORMATIONAL)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -153,7 +154,7 @@ public class FfDheShare extends Tls12Test {
                 context.getFeatureExtractionResult().getNamedGroups().isEmpty());
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client that offers a group MUST be able and willing to perform a DH "
                             + "key exchange using that group.")
@@ -191,7 +192,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "This document cannot enumerate all possible safe local policy (the "
                             + "safest may be to simply reject all custom groups), but compatible "

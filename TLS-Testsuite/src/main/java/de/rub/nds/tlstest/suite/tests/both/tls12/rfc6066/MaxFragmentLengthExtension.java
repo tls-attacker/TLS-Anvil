@@ -39,6 +39,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 6066, section = "4.  Maximum Fragment Length Negotiation")
 public class MaxFragmentLengthExtension extends Tls12Test {
@@ -59,7 +60,7 @@ public class MaxFragmentLengthExtension extends Tls12Test {
                 "Client does not support maximum fragment length");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Note that the "
                             + "output of the record layer may be larger.  For example, if the "

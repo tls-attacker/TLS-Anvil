@@ -46,12 +46,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @RFC(number = 8701, section = "3. Client-Initiated Extension Points")
 public class ClientInitiatedExtensionPoints extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client MAY select one or more GREASE cipher suite values and advertise them in the \"cipher_suites\" field. [...]"
                             + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello. Servers MUST correctly "
@@ -92,7 +93,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client MAY select one or more GREASE extension values and advertise them as extensions with varying length and contents. [...]"
                             + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello. Servers MUST correctly "
@@ -136,7 +137,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client MAY select one or more GREASE named group values and "
                             + "advertise them in the \"supported_groups\" extension, if sent.  It "
@@ -171,7 +172,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client MAY select one or more GREASE signature algorithm values "
                             + "and advertise them in the \"signature_algorithms\" or "
@@ -218,7 +219,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client MAY select one or more GREASE ALPN identifiers and "
                             + "advertise them in the \"application_layer_protocol_negotiation\" "

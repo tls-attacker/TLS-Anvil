@@ -36,7 +36,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.LegacyDerivationScope;
@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 @RFC(number = 8446, section = "4.4.3. Certificate Verify")
@@ -84,7 +85,7 @@ public class CertificateVerify extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "RSA signatures MUST use an RSASSA-PSS algorithm, "
                             + "regardless of whether RSASSA-PKCS1-v1_5 algorithms "
@@ -131,7 +132,7 @@ public class CertificateVerify extends Tls13Test {
                 "Client does not support legacy rsa signature and hash algorithms");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The SHA-1 algorithm "
                             + "MUST NOT be used in any signatures of CertificateVerify messages. "
@@ -158,12 +159,12 @@ public class CertificateVerify extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The receiver of a CertificateVerify message MUST verify "
                             + "the signature field. [...] If the verification fails, "
                             + "the receiver MUST terminate the handshake with a \"decrypt_error\" alert.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -218,13 +219,13 @@ public class CertificateVerify extends Tls13Test {
         return unsupportedAlgorithms;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the CertificateVerify message is sent by a server, the signature "
                             + "algorithm MUST be one offered in the client's \"signature_algorithms\" "
                             + "extension unless no valid certificate chain can be produced without "
                             + "unsupported algorithms")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)
     @CertificateCategory(SeverityLevel.HIGH)
@@ -249,7 +250,7 @@ public class CertificateVerify extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The receiver of a CertificateVerify message MUST verify the signature "
                             + "field.  [...] If the verification fails, the receiver MUST terminate the handshake "
@@ -280,7 +281,7 @@ public class CertificateVerify extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The receiver of a CertificateVerify message MUST verify the signature "
                             + "field.")
@@ -301,7 +302,7 @@ public class CertificateVerify extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The receiver of a CertificateVerify message MUST verify the signature "
                             + "field.")

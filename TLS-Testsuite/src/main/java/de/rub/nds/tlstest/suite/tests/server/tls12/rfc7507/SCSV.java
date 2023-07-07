@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 7507, section = "3. Server Behavior")
 @ServerTest
@@ -93,7 +94,7 @@ public class SCSV extends Tls12Test {
         return null;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If TLS_FALLBACK_SCSV appears in ClientHello.cipher_suites and the highest protocol version "
                             + "supported by the server is higher than the version indicated in ClientHello.client_version, "
@@ -137,7 +138,7 @@ public class SCSV extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If TLS_FALLBACK_SCSV appears in ClientHello.cipher_suites and the highest protocol version "
                             + "supported by the server is higher than the version indicated in ClientHello.client_version, "

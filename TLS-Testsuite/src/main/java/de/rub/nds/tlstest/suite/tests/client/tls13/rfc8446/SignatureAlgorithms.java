@@ -36,7 +36,7 @@ import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -55,6 +55,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 8446, section = "4.2.3. Signature Algorithms")
 @ClientTest
@@ -69,7 +70,7 @@ public class SignatureAlgorithms extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Note that TLS 1.2 defines this extension differently.  TLS 1.3 "
                             + "implementations willing to negotiate TLS 1.2 MUST behave in "
@@ -80,7 +81,7 @@ public class SignatureAlgorithms extends Tls13Test {
                             + "curve.  If TLS 1.2 is negotiated, implementations MUST be prepared "
                             + "to accept a signature that uses any curve that they advertised in "
                             + "the \"supported_groups\" extension.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "supportsTls12")
@@ -104,7 +105,7 @@ public class SignatureAlgorithms extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Note that TLS 1.2 defines this extension differently.  TLS 1.3 "
                             + "implementations willing to negotiate TLS 1.2 MUST behave in "
@@ -114,7 +115,7 @@ public class SignatureAlgorithms extends Tls13Test {
                             + "mandatory in TLS 1.3) MUST be prepared to accept a signature using "
                             + "that scheme even when TLS 1.2 is negotiated.  In TLS 1.2, "
                             + "RSASSA-PSS is used with RSA cipher suites.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "supportsTls12")

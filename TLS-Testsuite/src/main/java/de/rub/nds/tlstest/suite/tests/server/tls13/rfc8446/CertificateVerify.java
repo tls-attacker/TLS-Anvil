@@ -44,6 +44,7 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 /** */
 @Tag("signature")
@@ -51,7 +52,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "4.4.3.  Certificate Verify")
 public class CertificateVerify extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Test if the Server sends Certificate Verify Messages with valid signatures")
     @InteroperabilityCategory(SeverityLevel.CRITICAL)

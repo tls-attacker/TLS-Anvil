@@ -33,6 +33,7 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 6066, section = "3. Server Name Indication")
 @ServerTest
@@ -46,7 +47,7 @@ public class ServerNameIndication extends Tls12Test {
         return ConditionEvaluationResult.disabled("SNI is disabled");
     }
 
-    @TlsTest(description = "The ServerNameList MUST NOT contain more than one name of the same " +
+    @AnvilTest(description = "The ServerNameList MUST NOT contain more than one name of the same " +
             "name_type.")
     @MethodCondition(method = "sniActive")
     @HandshakeCategory(SeverityLevel.LOW)

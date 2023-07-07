@@ -35,13 +35,14 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 
 @RFC(number = 5246, section = "7.4.7.1")
 @ServerTest
 public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
 
-    @TlsTest(description = "Client implementations MUST always send the correct version number in PreMasterSecret. " +
+    @AnvilTest(description = "Client implementations MUST always send the correct version number in PreMasterSecret. " +
             "If ClientHello.client_version is TLS 1.1 or higher, server implementations MUST check " +
             "the version number as described in the note below. [...]" +
             "In any case, a TLS server MUST NOT generate an alert if processing an " +
@@ -72,7 +73,7 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "In any case, a TLS server MUST NOT generate an alert if processing an " +
+    @AnvilTest(description = "In any case, a TLS server MUST NOT generate an alert if processing an " +
             "RSA-encrypted premaster secret message fails, or the version number " +
             "is not as expected.  Instead, it MUST continue the handshake with a " +
             "randomly generated premaster secret.")

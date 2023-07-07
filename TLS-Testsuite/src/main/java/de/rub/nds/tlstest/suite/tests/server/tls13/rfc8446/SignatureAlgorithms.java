@@ -48,12 +48,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 8446, section = "4.2.3 Signature Algorithms")
 @ServerTest
 public class SignatureAlgorithms extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a server is authenticating via a certificate "
                             + "and the client has not sent a \"signature_algorithms\" extension, "
@@ -96,7 +97,7 @@ public class SignatureAlgorithms extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "These values refer solely to signatures "
                             + "which appear in certificates (see Section 4.4.2.2) and are not "
@@ -151,7 +152,7 @@ public class SignatureAlgorithms extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "These values refer solely to signatures "
                             + "which appear in certificates (see Section 4.4.2.2) and are not "
@@ -185,7 +186,7 @@ public class SignatureAlgorithms extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A server receiving a ClientHello MUST correctly ignore all "
                             + "unrecognized cipher suites, extensions, and other parameters.")

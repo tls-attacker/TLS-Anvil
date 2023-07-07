@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 7465, section = "2")
 @ClientTest
@@ -57,7 +58,7 @@ public class RC4Ciphersuites extends Tls12Test {
         }
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "TLS servers MUST NOT select an RC4 cipher suite when a TLS client sends such "
                             + "a cipher suite in the ClientHello message.")

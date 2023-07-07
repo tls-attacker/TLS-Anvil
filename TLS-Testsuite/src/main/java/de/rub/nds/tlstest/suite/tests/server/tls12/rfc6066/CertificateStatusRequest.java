@@ -29,12 +29,13 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 import static org.junit.Assert.assertNull;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 6066, section = "8. Certificate Status Request")
 @ServerTest
 public class CertificateStatusRequest extends Tls12Test {
 
-    @TlsTest(description = "Note in addition that a server MUST NOT send the \"CertificateStatus\" message unless it "+
+    @AnvilTest(description = "Note in addition that a server MUST NOT send the \"CertificateStatus\" message unless it "+
             "received a \"status_request\" extension in the client hello message and sent a \"status_request\" extension in the server hello message.")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)

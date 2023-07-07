@@ -28,12 +28,13 @@ import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @RFC(number = 8446, section = "4.2.2 Cookie")
 public class Cookie extends Tls13Test {
 
-    @TlsTest(description = "Clients MUST NOT use cookies in their initial ClientHello in subsequent connections.")
+    @AnvilTest(description = "Clients MUST NOT use cookies in their initial ClientHello in subsequent connections.")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)

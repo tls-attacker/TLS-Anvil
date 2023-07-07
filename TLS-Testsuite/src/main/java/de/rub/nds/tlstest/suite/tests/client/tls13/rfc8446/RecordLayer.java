@@ -56,12 +56,13 @@ import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ClientTest
 @RFC(number = 8446, section = "5.1. Record Layer")
 public class RecordLayer extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send "
                             + "zero-length fragments of Handshake types, even "
@@ -91,7 +92,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations "
                             + "MUST NOT send Handshake and Alert records that have a zero-length "
@@ -131,7 +132,7 @@ public class RecordLayer extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not support Record fragmentation");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Handshake messages MUST NOT be interleaved "
                             + "with other record types. That is, if a handshake message is split over two or more "
@@ -188,7 +189,7 @@ public class RecordLayer extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(description = "Send a record without any content to increase the sequencenumber.")
+    @AnvilTest(description = "Send a record without any content to increase the sequencenumber.")
     @ScopeExtensions(TlsParameterType.CHOSEN_HANDSHAKE_MSG)
     @ScopeLimitations(TlsParameterType.RECORD_LENGTH)
     @ExplicitValues(
@@ -244,7 +245,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Handshake messages MUST NOT span key changes. Implementations "
                             + "MUST verify that all messages immediately preceding a key change "

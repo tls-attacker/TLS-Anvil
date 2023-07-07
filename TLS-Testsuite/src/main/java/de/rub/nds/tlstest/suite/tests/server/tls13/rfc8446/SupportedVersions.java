@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 8446, section = "4.2.1 Supported Versions")
 @ServerTest
@@ -65,7 +66,7 @@ public class SupportedVersions extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The extension contains a list of supported versions in "
                             + "preference order, with the most preferred version first. [...]"
@@ -93,7 +94,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If this extension is not present, servers which are compliant "
                             + "with this specification and which also support TLS 1.2 MUST "
@@ -123,7 +124,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the \"supported_versions\" extension is absent and the server only supports versions greater than ClientHello.legacy_version, the server MUST abort the handshake with a \"protocol_version\" alert.")
     @RFC(number = 8446, section = "D.2.  Negotiating with an Older Client")
@@ -177,7 +178,7 @@ public class SupportedVersions extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If this extension is present in the ClientHello, "
                             + "servers MUST NOT use the ClientHello.legacy_version value "
@@ -214,7 +215,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Servers MUST only select a version of TLS present in "
                             + "that extension and MUST ignore any unknown versions that are present in that extension.")
@@ -234,7 +235,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Servers MUST be prepared to receive ClientHellos that "
                             + "include this extension but do not include 0x0304 in the list of versions. "
@@ -271,7 +272,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "All TLS 1.3 "
                             + "ServerHello messages MUST contain the \"supported_versions\" "
@@ -317,7 +318,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If this extension is present in the ClientHello, "
                             + "servers MUST NOT use the ClientHello.legacy_version value for "
@@ -341,7 +342,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If this extension is not present, servers which are compliant with "
                             + "this specification and which also support TLS 1.2 MUST negotiate "

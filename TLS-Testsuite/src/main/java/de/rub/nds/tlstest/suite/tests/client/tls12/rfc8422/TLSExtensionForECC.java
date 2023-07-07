@@ -52,7 +52,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCate
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -68,6 +68,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 8422, section = "4. TLS Extensions for ECC")
 @ClientTest
@@ -197,7 +198,7 @@ public class TLSExtensionForECC extends Tls12Test {
         return false;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "With the NIST curves, each party MUST validate the public key sent by "
                             + "its peer in the ClientKeyExchange and ServerKeyExchange messages.  A "
@@ -205,7 +206,7 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "peer's public value satisfy the curve equation, y^2 = x^3 + ax + b "
                             + "mod p.")
     @RFC(number = 8422, section = "5.11. Public Key Validation")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
@@ -244,7 +245,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "if either party obtains all-zeroes x_S, it MUST "
                             + "abort the handshake (as required by definition of X25519 and X448). [...]"
@@ -254,7 +255,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @RFC(
             number = 8422,
             section = "5.10. ECDH, ECDSA, and RSA Computations and 5.11. Public Key Validation")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
@@ -291,13 +292,13 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client that receives a ServerHello message containing a Supported "
                             + "Point Formats Extension MUST respect the server's choice of point "
                             + "formats during the handshake (cf.  Sections 5.6 and 5.7).")
     @RFC(number = 8422, section = "5.2. Server Hello Extension")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(affectedTypes = TlsParameterType.NAMED_GROUP, methods = "isSecpCurve")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},

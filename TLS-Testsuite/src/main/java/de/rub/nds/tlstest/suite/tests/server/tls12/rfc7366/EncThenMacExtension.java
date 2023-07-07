@@ -37,6 +37,7 @@ import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 public class EncThenMacExtension extends Tls12Test {
@@ -70,7 +71,7 @@ public class EncThenMacExtension extends Tls12Test {
     }
 
     @RFC(number = 7366, section = "2.  Negotiating Encrypt-then-MAC")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The use of encrypt-then-MAC is negotiated via TLS/DTLS extensions as "
                             + "defined in TLS [2].  On connecting, the client includes the "
@@ -106,7 +107,7 @@ public class EncThenMacExtension extends Tls12Test {
     }
 
     @RFC(number = 7366, section = "3.  Applying Encrypt-then-MAC")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a server receives an encrypt-then-MAC request extension from a client and then "
                             + "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, "

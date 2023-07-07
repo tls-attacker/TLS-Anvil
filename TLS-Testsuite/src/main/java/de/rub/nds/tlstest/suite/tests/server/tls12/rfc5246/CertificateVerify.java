@@ -34,6 +34,7 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import org.junit.jupiter.api.Disabled;
 
@@ -47,7 +48,7 @@ public class CertificateVerify extends Tls12Test {
         return ConditionEvaluationResult.disabled("No client auth required");
     }
 
-    @TlsTest(description = "Here handshake_messages refers to all handshake messages sent or received, " +
+    @AnvilTest(description = "Here handshake_messages refers to all handshake messages sent or received, " +
             "starting at client hello and up to, but not including, this message, including the " +
             "type and length fields of the handshake messages. This is the concatenation of all " +
             "the Handshake structures (as defined in Section 7.4) exchanged thus far.")

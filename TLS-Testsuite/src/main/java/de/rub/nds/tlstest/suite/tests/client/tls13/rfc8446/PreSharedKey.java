@@ -39,7 +39,7 @@ public class PreSharedKey extends Tls13Test {
         return ConditionEvaluationResult.disabled("Client does not support PreSharedKeyExtension");
     }
 
-    /*@TlsTest(description = "The \"pre_shared_key\" extension MUST be the last extension " +
+    /*@AnvilTest(description = "The \"pre_shared_key\" extension MUST be the last extension " +
             "in the ClientHello (this facilitates implementation as described below). " +
             "Servers MUST check that it is the last extension and otherwise fail " +
             "the handshake with an \"illegal_parameter\" alert.")*/

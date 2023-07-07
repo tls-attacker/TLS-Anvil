@@ -49,7 +49,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -65,6 +65,7 @@ import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @ServerTest
 @Tag("dheshare")
@@ -91,14 +92,14 @@ public class FfDheShare extends Tls12Test {
     }
 
     @RFC(number = 7919, section = "4. Server Behavior and 5.1. Checking the Peer's Public Key")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "[...] the server MUST verify that 1 < dh_Yc < dh_p - 1. "
                             + "If dh_Yc is out of range, the server MUST terminate the connection "
                             + "with a fatal handshake_failure(40) alert. [...]"
                             + "Peers MUST validate each other's public key Y (dh_Ys offered by the "
                             + "server or dh_Yc offered by the client) by ensuring that 1 < Y < p-1.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.FFDHE_SHARE_OUT_OF_BOUNDS)
     @ManualConfig(TlsParameterType.FFDHE_SHARE_OUT_OF_BOUNDS)
     @HandshakeCategory(SeverityLevel.INFORMATIONAL)
@@ -163,7 +164,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a compatible TLS server receives a Supported Groups extension from "
                             + "a client that includes any FFDHE group (i.e., any codepoint between "
@@ -213,7 +214,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a compatible TLS server receives a Supported Groups extension from "
                             + "a client that includes any FFDHE group (i.e., any codepoint between "
@@ -255,7 +256,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A compatible TLS server that receives the Supported Groups extension "
                             + "with FFDHE codepoints in it and that selects an FFDHE cipher suite "
@@ -295,7 +296,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A TLS server MUST NOT select an FFDHE cipher suite if the client did "
                             + "not offer one, even if the client offered an FFDHE group in the "

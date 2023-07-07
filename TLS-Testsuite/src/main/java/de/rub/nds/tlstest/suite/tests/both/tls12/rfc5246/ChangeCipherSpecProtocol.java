@@ -29,7 +29,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsModelType;
@@ -37,6 +37,7 @@ import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.InvalidCCSContentDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 5246, section = "7.1 Change Cipher Spec Protocol")
 public class ChangeCipherSpecProtocol extends Tls12Test {
@@ -46,8 +47,8 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
         return lengthCandidate >= 2;
     }
 
-    @TlsTest(description = "The message consists of a single byte of value 1.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @AnvilTest(description = "The message consists of a single byte of value 1.")
+    @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(
             affectedTypes = TlsParameterType.RECORD_LENGTH,
             methods = "recordLengthAllowsModification")

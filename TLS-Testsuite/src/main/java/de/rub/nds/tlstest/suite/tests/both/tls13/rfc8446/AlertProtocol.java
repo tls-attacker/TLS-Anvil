@@ -29,7 +29,7 @@ import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
 import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -39,11 +39,12 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 
 @RFC(number = 8446, section = "6. Alert Protocol")
 public class AlertProtocol extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "All the alerts listed in Section 6.2 MUST be sent with AlertLevel=fatal and MUST be treated as error alerts when received regardless of the AlertLevel in the message.")
     @ScopeExtensions(TlsParameterType.ALERT)
@@ -62,10 +63,10 @@ public class AlertProtocol extends Tls13Test {
         performFatalAlertWithWarningLevelTest(trace, runner, config);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "All the alerts listed in Section 6.2 MUST be sent with AlertLevel=fatal and MUST be treated as error alerts when received regardless of the AlertLevel in the message.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ScopeExtensions(TlsParameterType.ALERT)
     @DynamicValueConstraints(
             affectedTypes = TlsParameterType.ALERT,
@@ -80,8 +81,8 @@ public class AlertProtocol extends Tls13Test {
         performFatalAlertWithWarningLevelTest(trace, runner, config);
     }
 
-    @TlsTest(description = "Unknown Alert types MUST be treated as error alerts.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @AnvilTest(description = "Unknown Alert types MUST be treated as error alerts.")
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
@@ -94,8 +95,8 @@ public class AlertProtocol extends Tls13Test {
         peformUnknownWarningAlertTest(trace, runner, config);
     }
 
-    @TlsTest(description = "Unknown Alert types MUST be treated as error alerts.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @AnvilTest(description = "Unknown Alert types MUST be treated as error alerts.")
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
@@ -106,8 +107,8 @@ public class AlertProtocol extends Tls13Test {
         peformUnknownWarningAlertTest(trace, runner, config);
     }
 
-    @TlsTest(description = "Unknown Alert types MUST be treated as error alerts.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @AnvilTest(description = "Unknown Alert types MUST be treated as error alerts.")
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
@@ -120,8 +121,8 @@ public class AlertProtocol extends Tls13Test {
         peformUnknownFatalAlertTest(trace, runner, config);
     }
 
-    @TlsTest(description = "Unknown Alert types MUST be treated as error alerts.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @AnvilTest(description = "Unknown Alert types MUST be treated as error alerts.")
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
@@ -132,10 +133,10 @@ public class AlertProtocol extends Tls13Test {
         peformUnknownFatalAlertTest(trace, runner, config);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Each party MUST send a \"close_notify\" alert before closing its write side of the connection, unless it has already sent some error alert.")
-    @ModelFromScope(baseModel = TlsModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")

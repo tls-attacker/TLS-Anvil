@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.framework.config;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import de.rub.nds.scanner.core.constants.CollectionResult;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
@@ -19,6 +20,7 @@ import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
@@ -398,8 +400,10 @@ public class TestConfig extends TLSDelegateConfig {
             ClientFeatureExtractionResult extractionResult =
                     (ClientFeatureExtractionResult)
                             TestContext.getInstance().getFeatureExtractionResult();
-            if (!extractionResult
-                            .getCipherSuites()
+            if (!((CollectionResult)
+                                    extractionResult.getResult(
+                                            TlsAnalyzedProperty.CLIENT_ADVERTISED_CIPHERSUITES))
+                            .getCollection()
                             .contains(CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
                     && !extractionResult
                             .getAdvertisedExtensions()

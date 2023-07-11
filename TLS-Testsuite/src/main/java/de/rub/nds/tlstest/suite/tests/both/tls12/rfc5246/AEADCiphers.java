@@ -55,7 +55,7 @@ public class AEADCiphers extends Tls12Test {
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
@@ -103,7 +103,7 @@ public class AEADCiphers extends Tls12Test {
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());

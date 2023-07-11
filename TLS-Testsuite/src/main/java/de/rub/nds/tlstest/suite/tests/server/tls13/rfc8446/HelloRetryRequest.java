@@ -78,7 +78,7 @@ public class HelloRetryRequest extends Tls13Test {
     public void helloRetryRequestValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipher =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
 
         // 4.2.8 Key Share: "This vector MAY be empty if the client is requesting a
         // HelloRetryRequest."
@@ -208,7 +208,7 @@ public class HelloRetryRequest extends Tls13Test {
     public void selectsSameCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipherSuite =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = getHelloRetryWorkflowTrace(runner);
 

@@ -117,8 +117,8 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         byte[] protocolVersionBytes =
-                derivationContainer
-                        .getDerivation(ProtocolVersionDerivation.class)
+                parameterCombination
+                        .getParameter(ProtocolVersionDerivation.class)
                         .getSelectedValue();
 
         Record record = new Record();
@@ -161,8 +161,8 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         byte[] protocolVersionBytes =
-                derivationContainer
-                        .getDerivation(ProtocolVersionDerivation.class)
+                parameterCombination
+                        .getParameter(ProtocolVersionDerivation.class)
                         .getSelectedValue();
 
         Record record = new Record();

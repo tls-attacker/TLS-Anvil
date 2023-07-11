@@ -120,7 +120,7 @@ public class AlertProtocol extends Tls12Test {
                 runner.generateWorkflowTraceUntilSendingMessage(
                         WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         AlertDescription alertDescr =
-                derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(AlertDerivation.class).getSelectedValue();
 
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
@@ -160,7 +160,7 @@ public class AlertProtocol extends Tls12Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         AlertDescription alertDescr =
-                derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(AlertDerivation.class).getSelectedValue();
 
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));

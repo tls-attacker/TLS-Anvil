@@ -134,7 +134,7 @@ public class HelloRetryRequest extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -182,7 +182,7 @@ public class HelloRetryRequest extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -242,7 +242,7 @@ public class HelloRetryRequest extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         // re-requesting the same group is covered by another testcase
         NamedGroup otherRequestableGroup = getOtherSupportedNamedGroup(selectedGroup);
 
@@ -313,10 +313,10 @@ public class HelloRetryRequest extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         CipherSuite helloRetryCipherSuite =
-                derivationContainer
-                        .getDerivation(MirroredCipherSuiteDerivation.class)
+                parameterCombination
+                        .getParameter(MirroredCipherSuiteDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace =
@@ -373,7 +373,7 @@ public class HelloRetryRequest extends Tls13Test {
         config.setDefaultSelectedNamedGroup(actualHelloGroup);
 
         NamedGroup hrrNamedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
         runner.insertHelloRetryRequest(workflowTrace, hrrNamedGroup);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -408,7 +408,7 @@ public class HelloRetryRequest extends Tls13Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(
@@ -485,7 +485,7 @@ public class HelloRetryRequest extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
         ServerInitiatedExtensionPoints.sharedGreaseCipherSuiteTest(
-                workflowTrace, runner, derivationContainer);
+                workflowTrace, runner, parameterCombination);
     }
 
     @AnvilTest(
@@ -506,7 +506,7 @@ public class HelloRetryRequest extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
         ServerInitiatedExtensionPoints.sharedServerHelloGreaseExtensionTest(
-                workflowTrace, runner, derivationContainer);
+                workflowTrace, runner, parameterCombination);
     }
 
     @AnvilTest(
@@ -527,7 +527,7 @@ public class HelloRetryRequest extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
         ServerInitiatedExtensionPoints.sharedGreaseVersionTest(
-                workflowTrace, runner, derivationContainer);
+                workflowTrace, runner, parameterCombination);
     }
 
     private WorkflowTrace getSharedTestWorkflowTrace(
@@ -535,7 +535,7 @@ public class HelloRetryRequest extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
@@ -634,7 +634,7 @@ public class HelloRetryRequest extends Tls13Test {
         assertEquals(
                 "Updated ClientHello offered a different group then demanded by server",
                 keyShareEntries.get(0).getGroupConfig(),
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue());
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue());
     }
 
     private void testIfExtensionsAreEqual(
@@ -775,7 +775,7 @@ public class HelloRetryRequest extends Tls13Test {
         config.setAddCookieExtension(true);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsAction(new ReceiveAction(new ClientHelloMessage()));

@@ -110,7 +110,7 @@ public class SCSV extends Tls12Test {
     public void includeFallbackSCSV(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite cipherSuite =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         c.setDefaultSelectedProtocolVersion(getVersionForCipherSuite(cipherSuite));
 
         c.setDefaultSelectedCipherSuite(cipherSuite);
@@ -155,7 +155,7 @@ public class SCSV extends Tls12Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite cipherSuite =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         c.setDefaultSelectedProtocolVersion(getVersionForCipherSuite(cipherSuite));
 
         c.setDefaultSelectedCipherSuite(cipherSuite);

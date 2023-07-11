@@ -261,7 +261,7 @@ public class EarlyData extends Tls13Test {
         c.setAddPreSharedKeyExtension(true);
         c.setAddEarlyDataExtension(true);
         c.setPreserveMessageRecordRelation(true);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
@@ -338,7 +338,7 @@ public class EarlyData extends Tls13Test {
         c.setAddPreSharedKeyExtension(true);
         c.setAddEarlyDataExtension(true);
         c.setPreserveMessageRecordRelation(true);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(

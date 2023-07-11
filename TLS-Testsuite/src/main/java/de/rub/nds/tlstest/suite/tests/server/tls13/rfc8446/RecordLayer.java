@@ -157,7 +157,7 @@ public class RecordLayer extends Tls13Test {
                         WorkflowTraceUtil.getFirstSendingActionForMessage(
                                 HandshakeMessageType.FINISHED, trace);
         AlertDescription selectedAlert =
-                derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(AlertDerivation.class).getSelectedValue();
 
         Record finishedFragmentRecord = new Record();
         finishedFragmentRecord.setMaxRecordLengthConfig(10);
@@ -193,8 +193,8 @@ public class RecordLayer extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         byte[] selectedRecordVersion =
-                derivationContainer
-                        .getDerivation(ProtocolVersionDerivation.class)
+                parameterCombination
+                        .getParameter(ProtocolVersionDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

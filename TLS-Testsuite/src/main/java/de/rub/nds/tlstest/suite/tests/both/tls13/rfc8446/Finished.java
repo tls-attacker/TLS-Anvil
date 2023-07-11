@@ -55,7 +55,7 @@ public class Finished extends Tls13Test {
         workflowTrace.addTlsActions(
                 new SendAction(new FinishedMessage()), new ReceiveAction(new AlertMessage()));
 
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
         workflowTrace
                 .getFirstSendMessage(FinishedMessage.class)
                 .setVerifyData(Modifiable.xor(modificationBitmask, 0));

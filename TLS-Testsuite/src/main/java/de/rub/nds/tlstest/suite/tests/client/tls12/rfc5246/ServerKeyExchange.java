@@ -80,7 +80,7 @@ public class ServerKeyExchange extends Tls12Test {
     public void invalidServerKeyExchangeSignature(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] bitmask = derivationContainer.buildBitmask();
+        byte[] bitmask = parameterCombination.buildBitmask();
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilReceivingMessage(
@@ -281,7 +281,7 @@ public class ServerKeyExchange extends Tls12Test {
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         CipherSuite selectedCipherSuite =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         DigestAlgorithm digest =
                 AlgorithmResolver.getDigestAlgorithm(ProtocolVersion.TLS12, selectedCipherSuite);
         String digestName = "NONE";

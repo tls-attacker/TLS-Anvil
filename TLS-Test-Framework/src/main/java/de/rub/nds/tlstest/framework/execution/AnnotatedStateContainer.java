@@ -14,8 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceSerializer;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rub.nds.tlstest.framework.constants.TestResult;
-import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.reporting.ScoreContainer;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
@@ -75,7 +75,7 @@ public class AnnotatedStateContainer {
     private int statesCount;
 
     @JsonProperty("FailureInducingCombinations")
-    List<DerivationContainer> failureInducingCombinations;
+    List<TlsParameterCombination> failureInducingCombinations;
 
     @JsonProperty("States")
     private List<AnnotatedState> states = new ArrayList<>();
@@ -173,7 +173,7 @@ public class AnnotatedStateContainer {
             if (failureInducingCombinations != null) {
                 String tmp =
                         failureInducingCombinations.stream()
-                                .map(DerivationContainer::toString)
+                                .map(TlsParameterCombination::toString)
                                 .collect(Collectors.joining("\n\t"));
                 LOGGER.info("The following parameters resulted in test failures:\n\t{}", tmp);
             } else {
@@ -228,7 +228,7 @@ public class AnnotatedStateContainer {
                         + ":\n");
         states.stream()
                 .filter(state -> state.getResult() != TestResult.STRICTLY_SUCCEEDED)
-                .forEach(state -> LOGGER.info(state.getDerivationContainer().toString()));
+                .forEach(state -> LOGGER.info(state.getTlsParameterCombination().toString()));
     }
 
     public List<AnnotatedState> getStates() {
@@ -285,16 +285,16 @@ public class AnnotatedStateContainer {
                                         || state.getResult() == TestResult.CONCEPTUALLY_SUCCEEDED);
     }
 
-    public List<DerivationContainer> getFailureInducingCombinations() {
+    public List<TlsParameterCombination> getFailureInducingCombinations() {
         return failureInducingCombinations;
     }
 
     public void setFailureInducingCombinations(List<Combination> failureInducingCombinations) {
         if (failureInducingCombinations == null || failureInducingCombinations.isEmpty()) return;
 
-        List<DerivationContainer> parameters = new ArrayList<>();
+        List<TlsParameterCombination> parameters = new ArrayList<>();
         for (Combination i : failureInducingCombinations) {
-            DerivationContainer container = DerivationContainer.fromCombination(i);
+            TlsParameterCombination container = TlsParameterCombination.fromCombination(i);
             parameters.add(container);
         }
 

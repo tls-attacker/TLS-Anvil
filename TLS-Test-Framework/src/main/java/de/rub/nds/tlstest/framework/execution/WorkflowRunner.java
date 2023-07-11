@@ -38,8 +38,8 @@ import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;
@@ -57,7 +57,7 @@ public class WorkflowRunner {
 
     private Config preparedConfig;
 
-    private DerivationContainer derivationContainer;
+    private TlsParameterCombination derivationContainer;
     private HandshakeMessageType untilHandshakeMessage;
     private ProtocolMessageType untilProtocolMessage;
     private Boolean untilSendingMessage = null;
@@ -310,11 +310,11 @@ public class WorkflowRunner {
         this.preparedConfig = preparedConfig;
     }
 
-    public DerivationContainer getDerivationContainer() {
+    public TlsParameterCombination getTlsParameterCombination() {
         return derivationContainer;
     }
 
-    public void setDerivationContainer(DerivationContainer derivationContainer) {
+    public void setTlsParameterCombination(TlsParameterCombination derivationContainer) {
         this.derivationContainer = derivationContainer;
     }
 

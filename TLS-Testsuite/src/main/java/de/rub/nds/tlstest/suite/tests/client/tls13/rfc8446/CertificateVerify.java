@@ -108,7 +108,7 @@ public class CertificateVerify extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         SignatureAndHashAlgorithm selsectedLegacySigHash =
-                derivationContainer.getDerivation(SigAndHashDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(SigAndHashDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -170,7 +170,7 @@ public class CertificateVerify extends Tls13Test {
     @IncludeParameter("SIGNATURE_BITMASK")
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] bitmask = derivationContainer.buildBitmask();
+        byte[] bitmask = parameterCombination.buildBitmask();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));

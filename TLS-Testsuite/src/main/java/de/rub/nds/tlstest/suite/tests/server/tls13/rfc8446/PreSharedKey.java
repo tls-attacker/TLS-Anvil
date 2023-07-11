@@ -303,7 +303,7 @@ public class PreSharedKey extends Tls13Test {
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction());
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         ClientHelloMessage cHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
         PreSharedKeyExtensionMessage pskExt =
@@ -434,7 +434,7 @@ public class PreSharedKey extends Tls13Test {
                 workflowTrace.getLastSendMessage(ClientHelloMessage.class);
 
         CipherSuite selectedCipher =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         CipherSuite otherHkdfHashCipher = null;
         for (CipherSuite cipher :
                 context.getFeatureExtractionResult().getSupportedTls13CipherSuites()) {

@@ -36,9 +36,9 @@ import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseCipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseExtensionDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseProtocolVersionDerivation;
@@ -65,8 +65,8 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ExtensionType selectedGreaseExt =
-                derivationContainer
-                        .getDerivation(GreaseExtensionDerivation.class)
+                parameterCombination
+                        .getParameter(GreaseExtensionDerivation.class)
                         .getSelectedValue();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(new SendAction(new NewSessionTicketMessage()));
@@ -93,16 +93,16 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        sharedGreaseVersionTest(workflowTrace, runner, derivationContainer);
+        sharedGreaseVersionTest(workflowTrace, runner, parameterCombination);
     }
 
     public static void sharedGreaseVersionTest(
             WorkflowTrace workflowTrace,
             WorkflowRunner runner,
-            DerivationContainer externalDerivationContainer) {
+            TlsParameterCombination externalTlsParameterCombination) {
         ProtocolVersion selectedGreaseVersion =
-                externalDerivationContainer
-                        .getDerivation(GreaseProtocolVersionDerivation.class)
+                externalTlsParameterCombination
+                        .getParameter(GreaseProtocolVersionDerivation.class)
                         .getSelectedValue();
 
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
@@ -130,16 +130,16 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        sharedGreaseCipherSuiteTest(workflowTrace, runner, derivationContainer);
+        sharedGreaseCipherSuiteTest(workflowTrace, runner, parameterCombination);
     }
 
     public static void sharedGreaseCipherSuiteTest(
             WorkflowTrace workflowTrace,
             WorkflowRunner runner,
-            DerivationContainer externalDerivationContainer) {
+            TlsParameterCombination externalTlsParameterCombination) {
         CipherSuite selectedGreaseCipherSuite =
-                externalDerivationContainer
-                        .getDerivation(GreaseCipherSuiteDerivation.class)
+                externalTlsParameterCombination
+                        .getParameter(GreaseCipherSuiteDerivation.class)
                         .getSelectedValue();
 
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
@@ -165,16 +165,16 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        sharedServerHelloGreaseExtensionTest(workflowTrace, runner, derivationContainer);
+        sharedServerHelloGreaseExtensionTest(workflowTrace, runner, parameterCombination);
     }
 
     public static void sharedServerHelloGreaseExtensionTest(
             WorkflowTrace workflowTrace,
             WorkflowRunner runner,
-            DerivationContainer externalDerivationContainer) {
+            TlsParameterCombination externalTlsParameterCombination) {
         ExtensionType selectedGreaseExt =
-                externalDerivationContainer
-                        .getDerivation(GreaseExtensionDerivation.class)
+                externalTlsParameterCombination
+                        .getParameter(GreaseExtensionDerivation.class)
                         .getSelectedValue();
 
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
@@ -202,8 +202,8 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         ExtensionType selectedGreaseExt =
-                derivationContainer
-                        .getDerivation(GreaseExtensionDerivation.class)
+                parameterCombination
+                        .getParameter(GreaseExtensionDerivation.class)
                         .getSelectedValue();
 
         EncryptedExtensionsMessage sh =
@@ -231,7 +231,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         SignatureAndHashAlgorithm selectedGreaseSigHash =
-                derivationContainer.getDerivation(GreaseSigHashDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(GreaseSigHashDerivation.class).getSelectedValue();
 
         CertificateVerifyMessage sh =
                 workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class);

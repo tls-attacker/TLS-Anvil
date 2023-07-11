@@ -89,7 +89,7 @@ public class Extensions extends Tls13Test {
     public void sendAdditionalExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ExtensionType selectedExtension =
-                derivationContainer.getDerivation(ExtensionDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(ExtensionDerivation.class).getSelectedValue();
 
         List<ExtensionType> extensions = new ArrayList<>(Arrays.asList(ExtensionType.values()));
         List<ExtensionType> clientExtensions =

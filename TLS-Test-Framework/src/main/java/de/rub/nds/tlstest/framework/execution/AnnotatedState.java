@@ -11,8 +11,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rub.nds.tlstest.framework.constants.TestResult;
-import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import jakarta.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
@@ -40,8 +40,8 @@ public class AnnotatedState {
     @JsonProperty("DisplayName")
     private String displayName;
 
-    @JsonProperty("DerivationContainer")
-    private DerivationContainer derivationContainer;
+    @JsonProperty("TlsParameterCombination")
+    private TlsParameterCombination derivationContainer;
 
     private List<String> additionalResultInformation = null;
     private List<String> additionalTestInformation = null;
@@ -50,7 +50,8 @@ public class AnnotatedState {
 
     private AnnotatedState() {}
 
-    public AnnotatedState(ExtensionContext context, State state, DerivationContainer container) {
+    public AnnotatedState(
+            ExtensionContext context, State state, TlsParameterCombination container) {
         this.state = state;
         this.extensionContext = context;
         this.displayName = context.getDisplayName();
@@ -210,7 +211,7 @@ public class AnnotatedState {
         return extensionContext;
     }
 
-    public DerivationContainer getDerivationContainer() {
+    public TlsParameterCombination getTlsParameterCombination() {
         return derivationContainer;
     }
 }

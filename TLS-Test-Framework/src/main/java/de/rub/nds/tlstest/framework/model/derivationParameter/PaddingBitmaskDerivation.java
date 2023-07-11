@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.IpmProvider;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
@@ -17,7 +18,6 @@ import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
-import de.rub.nds.tlstest.framework.model.ParameterModelFactory;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
@@ -80,11 +80,16 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         condConstraints.add(getMustNotExceedPaddingLengthConstraint(derivationScope, false));
-        if (ParameterModelFactory.getDerivationsForScope(derivationScope)
-                .contains(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)) {
+        if (encThenMacDerivationModeled(derivationScope)) {
             condConstraints.add(getMustNotResultInPlausiblePadding(derivationScope, false));
         }
         return condConstraints;
+    }
+
+    private static boolean encThenMacDerivationModeled(DerivationScope derivationScope) {
+        return IpmProvider.getParameterIdentifiersForScope(derivationScope).stream()
+                .map(ParameterIdentifier::getParameterType)
+                .anyMatch(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION::equals);
     }
 
     public ConditionalConstraint getMustNotExceedPaddingLengthConstraint(
@@ -93,9 +98,7 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
         requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
         requiredDerivations.add(new ParameterIdentifier(TlsParameterType.APP_MSG_LENGHT));
 
-        if (ParameterModelFactory.getDerivationsForScope(scope)
-                .contains(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION)) {
-
+        if (encThenMacDerivationModeled(scope)) {
             requiredDerivations.add(
                     new ParameterIdentifier(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION));
             return new ConditionalConstraint(

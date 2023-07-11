@@ -217,7 +217,7 @@ public class TLSExtensionForECC extends Tls12Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
         InvalidCurvePoint invalidCurvePoint = InvalidCurvePoint.smallOrder(selectedGroup);
         Point serializablePoint =
@@ -267,7 +267,7 @@ public class TLSExtensionForECC extends Tls12Test {
                 runner.generateWorkflowTraceUntilSendingMessage(
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         TwistedCurvePoint groupSpecificPoint = TwistedCurvePoint.smallOrder(selectedGroup);
         RFC7748Curve curve = (RFC7748Curve) CurveFactory.getCurve(selectedGroup);

@@ -159,7 +159,7 @@ public class KeyShare extends Tls13Test {
 
         // place selected group at the top to avoid (optional) HRR
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         supportedTls13.remove(selectedGroup);
         supportedTls13.add(0, selectedGroup);
 
@@ -361,7 +361,7 @@ public class KeyShare extends Tls13Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         InvalidCurvePoint groupSpecificPoint = InvalidCurvePoint.largeOrder(selectedGroup);
         EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
@@ -417,11 +417,11 @@ public class KeyShare extends Tls13Test {
     public void ffdheShareOutOfBounds(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         FFDHEGroup ffdheGroup = GroupFactory.getGroup(selectedGroup);
         ShareOutOfBoundsDerivation.OutOfBoundsType type =
-                derivationContainer
-                        .getDerivation(ShareOutOfBoundsDerivation.class)
+                parameterCombination
+                        .getParameter(ShareOutOfBoundsDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace worklfowTrace = new WorkflowTrace();
@@ -483,7 +483,7 @@ public class KeyShare extends Tls13Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         TwistedCurvePoint groupSpecificPoint = TwistedCurvePoint.smallOrder(selectedGroup);
         RFC7748Curve curve = (RFC7748Curve) CurveFactory.getCurve(selectedGroup);

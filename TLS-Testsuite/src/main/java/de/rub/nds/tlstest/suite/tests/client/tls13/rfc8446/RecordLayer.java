@@ -151,7 +151,7 @@ public class RecordLayer extends Tls13Test {
                         WorkflowTraceUtil.getFirstSendingActionForMessage(
                                 HandshakeMessageType.SERVER_HELLO, trace);
         AlertDescription selectedAlert =
-                derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(AlertDerivation.class).getSelectedValue();
 
         Record unmodifiedServerHelloRecord = new Record();
         Record unmodifiedEncryptedExtensionsRecord = new Record();
@@ -204,8 +204,8 @@ public class RecordLayer extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         HandshakeMessageType affectedMessage =
-                derivationContainer
-                        .getDerivation(ChosenHandshakeMessageDerivation.class)
+                parameterCombination
+                        .getParameter(ChosenHandshakeMessageDerivation.class)
                         .getSelectedValue();
 
         Record r = new Record();

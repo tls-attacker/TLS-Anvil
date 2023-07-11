@@ -16,6 +16,7 @@ import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.EnforcedSenderRestrictionConditionExtension;
@@ -23,7 +24,6 @@ import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.TestWatcher;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.WorkflowRunnerResolver;
-import de.rub.nds.tlstest.framework.model.DerivationContainer;
 import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,7 +48,7 @@ public abstract class TlsBaseTest extends CombinatorialAnvilTest {
 
     protected TestContext context;
 
-    protected DerivationContainer derivationContainer;
+    protected TlsParameterCombination parameterCombination;
 
     protected ExtensionContext extensionContext;
 
@@ -64,12 +64,12 @@ public abstract class TlsBaseTest extends CombinatorialAnvilTest {
 
     public Config prepareConfig(
             Config config, ArgumentsAccessor argAccessor, WorkflowRunner runner) {
-        derivationContainer =
-                new DerivationContainer(
-                        argAccessor.toList(), new DerivationScope(extensionContext));
-        derivationContainer.applyToConfig(new TlsAnvilConfig(config));
+        parameterCombination =
+                TlsParameterCombination.fromArgumentsAccessor(
+                        argAccessor, new DerivationScope(extensionContext));
+        parameterCombination.applyToConfig(new TlsAnvilConfig(config));
         runner.setPreparedConfig(config);
-        runner.setDerivationContainer(derivationContainer);
+        runner.setTlsParameterCombination(parameterCombination);
         return config;
     }
 

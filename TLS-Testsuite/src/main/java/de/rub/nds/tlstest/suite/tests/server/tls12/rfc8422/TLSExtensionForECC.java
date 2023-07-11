@@ -167,7 +167,7 @@ public class TLSExtensionForECC extends Tls12Test {
                         .filter(i -> KeyExchangeType.forCipherSuite(i) == KeyExchangeType.ECDH)
                         .collect(Collectors.toList());
         cipherSuiteList.add(
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue());
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue());
 
         c.setDefaultClientSupportedCipherSuites(cipherSuiteList);
 
@@ -191,8 +191,8 @@ public class TLSExtensionForECC extends Tls12Test {
                             assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, message);
                             assertArrayEquals(
                                     AssertMsgs.UNEXPECTED_CIPHER_SUITE,
-                                    derivationContainer
-                                            .getDerivation(CipherSuiteDerivation.class)
+                                    parameterCombination
+                                            .getParameter(CipherSuiteDerivation.class)
                                             .getSelectedValue()
                                             .getByteValue(),
                                     message.getSelectedCipherSuite().getValue());
@@ -246,7 +246,7 @@ public class TLSExtensionForECC extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         // add 52 additional groups to reach 53, which is the sum of all
         // named groups, explicit curves, and grease values
         byte[] allExplicitGroups = new byte[53 * 2];
@@ -292,7 +292,7 @@ public class TLSExtensionForECC extends Tls12Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
         InvalidCurvePoint invalidCurvePoint = InvalidCurvePoint.largeOrder(selectedGroup);
         Point serializablePoint =
@@ -338,7 +338,7 @@ public class TLSExtensionForECC extends Tls12Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         TwistedCurvePoint groupSpecificPoint = TwistedCurvePoint.smallOrder(selectedGroup);
         RFC7748Curve curve = (RFC7748Curve) CurveFactory.getCurve(selectedGroup);

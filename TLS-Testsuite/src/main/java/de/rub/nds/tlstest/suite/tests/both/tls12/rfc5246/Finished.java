@@ -45,7 +45,7 @@ public class Finished extends Tls12Test {
     public void verifyFinishedMessageCorrect(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
         FinishedMessage finishedMessage = new FinishedMessage();
         finishedMessage.setVerifyData(Modifiable.xor(modificationBitmask, 0));
 

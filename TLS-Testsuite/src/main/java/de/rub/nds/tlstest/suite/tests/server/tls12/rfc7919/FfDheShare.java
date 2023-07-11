@@ -112,7 +112,7 @@ public class FfDheShare extends Tls12Test {
         DHClientComputations computations = cke.getComputations();
 
         ShareOutOfBoundsDerivation share =
-                derivationContainer.getDerivation(ShareOutOfBoundsDerivation.class);
+                parameterCombination.getParameter(ShareOutOfBoundsDerivation.class);
         switch (share.getSelectedValue()) {
             case SHARE_IS_ZERO:
                 c.setDefaultClientDhPrivateKey(BigInteger.ZERO);
@@ -205,8 +205,8 @@ public class FfDheShare extends Tls12Test {
                             Validator.executedAsPlanned(i);
                             assertNotEquals(
                                     "Server negotiated DHE cipher suite",
-                                    derivationContainer
-                                            .getDerivation(CipherSuiteDerivation.class)
+                                    parameterCombination
+                                            .getParameter(CipherSuiteDerivation.class)
                                             .getSelectedValue(),
                                     i.getState().getTlsContext().getSelectedCipherSuite());
                         });
@@ -275,7 +275,7 @@ public class FfDheShare extends Tls12Test {
     public void respectsOfferedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         NamedGroup ffdheGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         config.setDefaultClientNamedGroups(ffdheGroup);
         config.setAddEllipticCurveExtension(true);
 

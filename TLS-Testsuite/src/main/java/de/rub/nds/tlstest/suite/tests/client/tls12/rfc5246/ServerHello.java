@@ -150,8 +150,8 @@ public class ServerHello extends Tls12Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CompressionMethod selectedCompressionMethod =
-                derivationContainer
-                        .getDerivation(CompressionMethodDerivation.class)
+                parameterCombination
+                        .getParameter(CompressionMethodDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

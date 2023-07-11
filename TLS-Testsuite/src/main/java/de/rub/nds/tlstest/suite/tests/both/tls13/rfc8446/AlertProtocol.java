@@ -215,8 +215,8 @@ public class AlertProtocol extends Tls13Test {
         alert.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));
         alert.setDescription(
                 Modifiable.explicit(
-                        derivationContainer
-                                .getDerivation(AlertDerivation.class)
+                        parameterCombination
+                                .getParameter(AlertDerivation.class)
                                 .getSelectedValue()
                                 .getValue()));
         trace.addTlsAction(new SendAction(alert));

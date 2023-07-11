@@ -71,7 +71,7 @@ public class CBCBlockCipher extends Tls12Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     public void invalidCBCPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
@@ -119,7 +119,7 @@ public class CBCBlockCipher extends Tls12Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     public void invalidCipherText(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
@@ -181,7 +181,7 @@ public class CBCBlockCipher extends Tls12Test {
     @ComplianceCategory(SeverityLevel.HIGH)
     public void invalidMAC(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] bitmask = derivationContainer.buildBitmask();
+        byte[] bitmask = parameterCombination.buildBitmask();
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
         record.getComputations().setMac(Modifiable.xor(bitmask, 0));

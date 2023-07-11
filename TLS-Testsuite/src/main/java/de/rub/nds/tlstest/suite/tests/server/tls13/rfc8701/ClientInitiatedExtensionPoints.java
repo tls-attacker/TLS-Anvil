@@ -74,8 +74,8 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedGrease =
-                derivationContainer
-                        .getDerivation(GreaseCipherSuiteDerivation.class)
+                parameterCombination
+                        .getParameter(GreaseCipherSuiteDerivation.class)
                         .getSelectedValue();
 
         c.getDefaultClientSupportedCipherSuites().add(0, selectedGrease);
@@ -112,8 +112,8 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ExtensionType selectedGrease =
-                derivationContainer
-                        .getDerivation(GreaseExtensionDerivation.class)
+                parameterCombination
+                        .getParameter(GreaseExtensionDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -164,8 +164,8 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         NamedGroup selectedGrease =
-                derivationContainer
-                        .getDerivation(GreaseNamedGroupDerivation.class)
+                parameterCombination
+                        .getParameter(GreaseNamedGroupDerivation.class)
                         .getSelectedValue();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
@@ -227,7 +227,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         SignatureAndHashAlgorithm selectedGrease =
-                derivationContainer.getDerivation(GreaseSigHashDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(GreaseSigHashDerivation.class).getSelectedValue();
         c.getDefaultClientSupportedSignatureAndHashAlgorithms().add(0, selectedGrease);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

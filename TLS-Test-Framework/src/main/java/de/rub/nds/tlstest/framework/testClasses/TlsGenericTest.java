@@ -62,7 +62,7 @@ public class TlsGenericTest extends TlsBaseTest {
     public void validateLengthTest(AnnotatedState i) {
         Validator.checkForUnknownMessage(i);
         assertFalse(
-                "Workflow could be executed as planned for " + derivationContainer.toString(),
+                "Workflow could be executed as planned for " + parameterCombination.toString(),
                 i.getWorkflowTrace().executedAsPlanned());
         if (!i.getState().getTlsContext().isReceivedTransportHandlerException()) {
             Validator.receivedFatalAlert(i, false);

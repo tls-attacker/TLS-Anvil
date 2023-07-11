@@ -58,8 +58,8 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         byte[] content =
-                derivationContainer
-                        .getDerivation(InvalidCCSContentDerivation.class)
+                parameterCombination
+                        .getParameter(InvalidCCSContentDerivation.class)
                         .getSelectedValue();
         ChangeCipherSpecMessage changeCipherSpecMessage = new ChangeCipherSpecMessage();
         changeCipherSpecMessage.setCcsProtocolType(Modifiable.explicit(content));

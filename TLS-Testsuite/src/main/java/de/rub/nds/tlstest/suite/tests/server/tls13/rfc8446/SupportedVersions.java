@@ -143,8 +143,8 @@ public class SupportedVersions extends Tls13Test {
         c.setAddSupportedVersionsExtension(false);
         c.setHighestProtocolVersion(ProtocolVersion.TLS12);
         byte[] chosenUnsupportedVersion =
-                derivationContainer
-                        .getDerivation(ProtocolVersionDerivation.class)
+                parameterCombination
+                        .getParameter(ProtocolVersionDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -191,7 +191,7 @@ public class SupportedVersions extends Tls13Test {
     public void oldLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite tls13CipherSuite =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         c.setDefaultClientSupportedCipherSuites(
                 context.getFeatureExtractionResult().getCipherSuites().stream()
                         .filter(i -> !i.isTLS13())

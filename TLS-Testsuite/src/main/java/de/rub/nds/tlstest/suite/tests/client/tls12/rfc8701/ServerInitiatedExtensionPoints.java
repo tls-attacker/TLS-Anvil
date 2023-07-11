@@ -66,8 +66,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         ProtocolVersion greaseVersion =
-                derivationContainer
-                        .getDerivation(GreaseProtocolVersionDerivation.class)
+                parameterCombination
+                        .getParameter(GreaseProtocolVersionDerivation.class)
                         .getSelectedValue();
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.setProtocolVersion(Modifiable.explicit(greaseVersion.getValue()));
@@ -100,8 +100,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite greaseCipher =
-                derivationContainer
-                        .getDerivation(GreaseCipherSuiteDerivation.class)
+                parameterCombination
+                        .getParameter(GreaseCipherSuiteDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -126,8 +126,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ExtensionType greaseExtension =
-                derivationContainer
-                        .getDerivation(GreaseExtensionDerivation.class)
+                parameterCombination
+                        .getParameter(GreaseExtensionDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -159,8 +159,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         NamedGroup greaseGroup =
-                derivationContainer
-                        .getDerivation(GreaseNamedGroupDerivation.class)
+                parameterCombination
+                        .getParameter(GreaseNamedGroupDerivation.class)
                         .getSelectedValue();
         ECDHEServerKeyExchangeMessage skx =
                 workflowTrace.getFirstSendMessage(ECDHEServerKeyExchangeMessage.class);
@@ -187,7 +187,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         SignatureAndHashAlgorithm greaseSigHash =
-                derivationContainer.getDerivation(GreaseSigHashDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(GreaseSigHashDerivation.class).getSelectedValue();
         ServerKeyExchangeMessage skx =
                 workflowTrace.getFirstSendMessage(ServerKeyExchangeMessage.class);
         skx.setSignatureAndHashAlgorithm(Modifiable.explicit(greaseSigHash.getByteValue()));

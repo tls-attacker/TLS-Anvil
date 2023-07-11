@@ -4,7 +4,7 @@ import { ITestResultContainer } from './testResultContainer';
 export interface IState extends Document {
   TestResultId: ITestResult['_id']
   ContainerId: ITestResultContainer['_id']
-  DerivationContainer: {[identifier: string] : string}
+  TlsParameterCombination: {[identifier: string] : string}
   DisplayName: string
   Result: string
   AdditionalResultInformation: string
@@ -28,7 +28,7 @@ export const StateSchema = new Schema({
     ref: 'TestContainer',
     required: true,
   },
-  DerivationContainer: {
+  TlsParameterCombination: {
     type: Schema.Types.Map,
     of: String,
     default: new Map()

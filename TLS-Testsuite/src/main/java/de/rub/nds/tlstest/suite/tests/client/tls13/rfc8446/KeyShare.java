@@ -179,7 +179,7 @@ public class KeyShare extends Tls13Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         InvalidCurvePoint groupSpecificPoint = InvalidCurvePoint.largeOrder(selectedGroup);
         EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
@@ -230,7 +230,7 @@ public class KeyShare extends Tls13Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         TwistedCurvePoint groupSpecificPoint = TwistedCurvePoint.smallOrder(selectedGroup);
         RFC7748Curve curve = (RFC7748Curve) CurveFactory.getCurve(selectedGroup);
@@ -294,11 +294,11 @@ public class KeyShare extends Tls13Test {
     public void ffdheShareOutOfBounds(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         FFDHEGroup ffdheGroup = GroupFactory.getGroup(selectedGroup);
         ShareOutOfBoundsDerivation.OutOfBoundsType type =
-                derivationContainer
-                        .getDerivation(ShareOutOfBoundsDerivation.class)
+                parameterCombination
+                        .getParameter(ShareOutOfBoundsDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace worklfowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);

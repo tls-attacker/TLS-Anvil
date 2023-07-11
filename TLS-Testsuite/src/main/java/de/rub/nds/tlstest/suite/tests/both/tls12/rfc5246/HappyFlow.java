@@ -59,7 +59,7 @@ public class HappyFlow extends Tls12Test {
                                                 + AlertDescription.getAlertDescription(
                                                         alert.getDescription().getValue())
                                                 + " for Happy Flow using derivations:\n"
-                                                + derivationContainer.toString()
+                                                + parameterCombination.toString()
                                                 + "\nWorkflowTrace:\n"
                                                 + i.getWorkflowTrace().toString());
                             }

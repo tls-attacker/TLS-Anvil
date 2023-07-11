@@ -145,7 +145,7 @@ public class RecordProtocol extends Tls13Test {
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
@@ -238,7 +238,7 @@ public class RecordProtocol extends Tls13Test {
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
@@ -277,8 +277,8 @@ public class RecordProtocol extends Tls13Test {
     public void acceptsOptionalPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         int selectedPaddingLength =
-                derivationContainer
-                        .getDerivation(AdditionalPaddingLengthDerivation.class)
+                parameterCombination
+                        .getParameter(AdditionalPaddingLengthDerivation.class)
                         .getSelectedValue();
         if (selectedPaddingLength >= 100) {
             applyTimeoutMultiplier(c, 1.5);
@@ -355,8 +355,8 @@ public class RecordProtocol extends Tls13Test {
     public void sendEmptyRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ProtocolMessageType selectedRecordContentType =
-                derivationContainer
-                        .getDerivation(ProtocolMessageTypeDerivation.class)
+                parameterCombination
+                        .getParameter(ProtocolMessageTypeDerivation.class)
                         .getSelectedValue();
         ApplicationMessage appMsg = new ApplicationMessage();
 

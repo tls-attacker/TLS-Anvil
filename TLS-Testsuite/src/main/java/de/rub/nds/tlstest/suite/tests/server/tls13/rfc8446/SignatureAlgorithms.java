@@ -120,7 +120,7 @@ public class SignatureAlgorithms extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         SignatureAndHashAlgorithm selectedSigHash =
-                derivationContainer.getDerivation(SigAndHashDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(SigAndHashDerivation.class).getSelectedValue();
 
         List<SignatureAndHashAlgorithm> algos =
                 SignatureAndHashAlgorithm.getImplemented().stream()

@@ -149,7 +149,7 @@ public class ClientHello extends Tls12Test {
         // add pseudo cipher suites to reach 408, which is the sum of all
         // defined values and GREASE values
         CipherSuite selectedCipherSuite =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         byte[] explicitCipherSuites = new byte[408 * 2];
         byte firstByte = 0x0A;
         byte secondByte = 0;

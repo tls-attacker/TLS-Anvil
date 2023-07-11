@@ -75,7 +75,7 @@ public class Validator {
                 Validator.smartExecutedAsPlanned(i);
             } catch (Throwable e) {
                 if (traceFailedBeforeAlertAction(trace)) {
-                    i.addAdditionalResultInfo(AssertMsgs.WorkflowNotExecutedBeforeAlert);
+                    i.addAdditionalResultInfo(AssertMsgs.WORKFLOW_NOT_EXECUTED_BEFORE_ALERT);
                     throw e;
                 }
                 lastActionFailed = true;
@@ -205,7 +205,7 @@ public class Validator {
 
     public static void executedAsPlanned(AnnotatedState i) {
         checkForUnknownMessage(i);
-        assertTrue(AssertMsgs.WorkflowNotExecuted, i.getWorkflowTrace().executedAsPlanned());
+        assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, i.getWorkflowTrace().executedAsPlanned());
     }
 
     public static void receivedWarningAlert(AnnotatedState i) {
@@ -214,9 +214,9 @@ public class Validator {
         Validator.smartExecutedAsPlanned(i);
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        assertNotNull(AssertMsgs.NoWarningAlert, msg);
+        assertNotNull(AssertMsgs.NO_WARNING_ALERT, msg);
         assertEquals(
-                AssertMsgs.NoWarningAlert,
+                AssertMsgs.NO_WARNING_ALERT,
                 AlertLevel.WARNING.getValue(),
                 msg.getLevel().getValue().byteValue());
     }

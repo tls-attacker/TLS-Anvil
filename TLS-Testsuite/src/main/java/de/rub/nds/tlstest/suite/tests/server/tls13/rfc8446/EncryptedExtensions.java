@@ -66,7 +66,7 @@ public class EncryptedExtensions extends Tls13Test {
                             WorkflowTrace trace = i.getWorkflowTrace();
                             EncryptedExtensionsMessage encExt =
                                     trace.getFirstReceivedMessage(EncryptedExtensionsMessage.class);
-                            assertNotNull(AssertMsgs.EncExtensionsNotReceived, encExt);
+                            assertNotNull(AssertMsgs.ENCRYPTED_EXTENSIONS_NOT_RECEIVED, encExt);
 
                             for (ExtensionMessage ext : encExt.getExtensions()) {
                                 assertTrue(

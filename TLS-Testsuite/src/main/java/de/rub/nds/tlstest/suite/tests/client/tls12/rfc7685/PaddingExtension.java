@@ -46,7 +46,7 @@ public class PaddingExtension extends Tls12Test {
     @MethodCondition(method = "offeredExtension")
     public void paddingWithNonZero() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
-        assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
+        assertNotNull(AssertMsgs.CLIENT_HELLO_NOT_RECEIVED, msg);
 
         PaddingExtensionMessage paddingExt = msg.getExtension(PaddingExtensionMessage.class);
 

@@ -188,9 +188,9 @@ public class TLSExtensionForECC extends Tls12Test {
                             WorkflowTrace trace = i.getWorkflowTrace();
                             ServerHelloMessage message =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, message);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, message);
                             assertArrayEquals(
-                                    AssertMsgs.UnexpectedCipherSuite,
+                                    AssertMsgs.UNEXPECTED_CIPHER_SUITE,
                                     derivationContainer
                                             .getDerivation(CipherSuiteDerivation.class)
                                             .getSelectedValue()

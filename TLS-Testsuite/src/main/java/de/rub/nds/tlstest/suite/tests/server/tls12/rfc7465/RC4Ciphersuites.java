@@ -105,7 +105,7 @@ public class RC4Ciphersuites extends Tls12Test {
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
                             assertArrayEquals(
-                                    AssertMsgs.UnexpectedCipherSuite,
+                                    AssertMsgs.UNEXPECTED_CIPHER_SUITE,
                                     selectedCipherSuite.getByteValue(),
                                     msg.getSelectedCipherSuite().getValue());
                         });

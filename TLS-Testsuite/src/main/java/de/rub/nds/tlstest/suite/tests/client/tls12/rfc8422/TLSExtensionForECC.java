@@ -110,7 +110,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @Tag("adjusted")
     public void invalidPointFormat() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
-        assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
+        assertNotNull(AssertMsgs.CLIENT_HELLO_NOT_RECEIVED, msg);
         ECPointFormatExtensionMessage poinfmtExt =
                 msg.getExtension(ECPointFormatExtensionMessage.class);
 

@@ -133,7 +133,7 @@ public class KeyShare extends Tls13Test {
                             }
 
                             assertTrue(
-                                    AssertMsgs.WorkflowNotExecuted
+                                    AssertMsgs.WORKFLOW_NOT_EXECUTED
                                             + ", server likely selected the wrong key share",
                                     i.getWorkflowTrace().executedAsPlanned());
                         });

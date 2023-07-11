@@ -121,7 +121,7 @@ public class RespectClientExtensions extends Tls12Test {
                             ECDHEServerKeyExchangeMessage message =
                                     trace.getFirstReceivedMessage(
                                             ECDHEServerKeyExchangeMessage.class);
-                            assertNotNull(AssertMsgs.ServerKxNotReceived, message);
+                            assertNotNull(AssertMsgs.SERVER_KEY_EXCHANGE_NOT_RECEIVED, message);
 
                             ClientHelloMessage sentChm =
                                     trace.getFirstSendMessage(ClientHelloMessage.class);

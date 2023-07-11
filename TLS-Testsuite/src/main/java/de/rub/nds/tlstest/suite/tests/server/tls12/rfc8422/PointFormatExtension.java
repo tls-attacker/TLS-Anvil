@@ -90,7 +90,7 @@ public class PointFormatExtension extends Tls12Test {
 
                             ServerHelloMessage message =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, message);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, message);
 
                             ECPointFormatExtensionMessage ext =
                                     message.getExtension(ECPointFormatExtensionMessage.class);

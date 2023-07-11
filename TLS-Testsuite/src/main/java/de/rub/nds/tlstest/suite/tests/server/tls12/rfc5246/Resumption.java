@@ -129,7 +129,7 @@ public class Resumption extends Tls12Test {
                                     executedTrace.getLastReceivedMessage(ServerHelloMessage.class);
                             ClientHelloMessage cHello2 =
                                     executedTrace.getLastSendMessage(ClientHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, sHello);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
 
                             // only test if we can assume that the server accepted the SNI in
                             // the initial handshake
@@ -172,7 +172,7 @@ public class Resumption extends Tls12Test {
                                     trace.getLastReceivedMessage(ServerHelloMessage.class);
                             ClientHelloMessage cHello2 =
                                     trace.getLastSendMessage(ClientHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, sHello);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
 
                             if (sHello2 != null
                                     && Arrays.equals(

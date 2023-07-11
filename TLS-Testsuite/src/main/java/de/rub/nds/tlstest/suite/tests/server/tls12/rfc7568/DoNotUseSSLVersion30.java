@@ -184,7 +184,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
 
                             ServerHelloMessage shm =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, shm);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, shm);
 
                             assertArrayEquals(
                                     "Invalid TLS version negotiated",

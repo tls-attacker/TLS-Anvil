@@ -101,7 +101,7 @@ public class ServerHello extends Tls13Test {
 
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
                             assertArrayEquals(
                                     "Invalid legacy version",
                                     new byte[] {0x03, 0x03},
@@ -139,7 +139,7 @@ public class ServerHello extends Tls13Test {
 
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
                             byte[] random = msg.getRandom().getValue();
                             assertArrayEquals(
                                     "Invalid random",
@@ -181,7 +181,7 @@ public class ServerHello extends Tls13Test {
 
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
                             byte[] random = msg.getRandom().getValue();
                             assertArrayEquals(
                                     "Invalid random",
@@ -223,7 +223,7 @@ public class ServerHello extends Tls13Test {
 
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
                             byte[] random = msg.getRandom().getValue();
                             assertArrayEquals(
                                     "Invalid random",
@@ -271,7 +271,7 @@ public class ServerHello extends Tls13Test {
 
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
                             assertArrayEquals(
                                     "Session ID not echoed",
                                     sessionId,
@@ -311,7 +311,7 @@ public class ServerHello extends Tls13Test {
 
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
                             assertArrayEquals(
                                     "Session ID not echoed",
                                     sessionId,

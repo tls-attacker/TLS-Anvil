@@ -123,7 +123,7 @@ public class Fragmentation extends Tls12Test {
                 .validateFinal(
                         i -> {
                             WorkflowTrace trace = i.getWorkflowTrace();
-                            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
+                            assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, trace.executedAsPlanned());
 
                             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
                             i.addAdditionalResultInfo("Evaluated with timeout " + reducedTimeout);

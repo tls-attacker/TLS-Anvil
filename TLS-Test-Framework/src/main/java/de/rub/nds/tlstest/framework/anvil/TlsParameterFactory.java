@@ -100,7 +100,6 @@ public class TlsParameterFactory extends ParameterFactory {
 
     @Override
     public DerivationParameter getInstance(ParameterIdentifier parameterIdentifier) {
-        // todo core - replace separate factory
         ParameterScope parameterScope = parameterIdentifier.getParameterScope();
         TlsParameterType type = (TlsParameterType) parameterIdentifier.getParameterType();
         if (parameterScope == ParameterScope.NO_SCOPE) {

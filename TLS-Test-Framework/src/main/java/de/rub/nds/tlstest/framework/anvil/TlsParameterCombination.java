@@ -8,6 +8,7 @@ import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rwth.swc.coffee4j.model.Combination;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -26,7 +27,8 @@ public class TlsParameterCombination extends ParameterCombination {
     public static TlsParameterCombination fromCombination(Combination combination) {
         ParameterCombination parameterCombination =
                 ParameterCombination.fromCombination(combination);
-        return new TlsParameterCombination(parameterCombination.getParameterValues());
+        return new TlsParameterCombination(
+                new LinkedList<>(parameterCombination.getParameterValues()));
     }
 
     public static TlsParameterCombination fromArgumentsAccessor(
@@ -34,7 +36,7 @@ public class TlsParameterCombination extends ParameterCombination {
         ParameterCombination parameterCombination =
                 ParameterCombination.fromArgumentsAccessor(argumentsAccessor, derivationScope);
         return new TlsParameterCombination(
-                parameterCombination.getParameterValues(),
+                new LinkedList<>(parameterCombination.getParameterValues()),
                 parameterCombination.getDerivationScope());
     }
 

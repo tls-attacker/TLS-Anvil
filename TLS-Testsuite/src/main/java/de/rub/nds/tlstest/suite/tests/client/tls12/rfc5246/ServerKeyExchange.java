@@ -15,6 +15,8 @@ import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterFactory;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
@@ -51,7 +53,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -126,7 +127,9 @@ public class ServerKeyExchange extends Tls12Test {
     public List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>>
             getCertsIncludingUnsupportedPkGroups(DerivationScope scope) {
         CertificateDerivation certDerivation =
-                (CertificateDerivation) DerivationFactory.getInstance(TlsParameterType.CERTIFICATE);
+                (CertificateDerivation)
+                        ParameterFactory.getInstanceFromIdentifier(
+                                new ParameterIdentifier(TlsParameterType.CERTIFICATE));
         return certDerivation.getApplicableCertificates(context, scope, true);
     }
 

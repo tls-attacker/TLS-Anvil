@@ -10,13 +10,13 @@ package de.rub.nds.tlstest.framework.model.derivationParameter.mirrored;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterFactory;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -42,7 +42,7 @@ public class MirroredCipherSuiteDerivation extends MirroredDerivationParameter<C
     public List<DerivationParameter<TlsAnvilConfig, CipherSuite>> getParameterValues(
             DerivationScope scope) {
         List<DerivationParameter<TlsAnvilConfig, CipherSuite>> parameterValues = new LinkedList<>();
-        DerivationFactory.getInstance(getMirroredType())
+        ParameterFactory.getInstanceFromIdentifier(new ParameterIdentifier(getMirroredType()))
                 .getParameterValues(scope)
                 .forEach(
                         derivation ->

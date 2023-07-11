@@ -8,9 +8,10 @@
 package de.rub.nds.tlstest.framework.model.derivationParameter.mirrored;
 
 import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.ParameterFactory;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 
 /**
  * Provides the same values overall as its mirrored type. This should be used when tests require
@@ -29,12 +30,16 @@ public abstract class MirroredDerivationParameter<T> extends TlsDerivationParame
 
     @Override
     public boolean hasNoApplicableValues(DerivationScope scope) {
-        return DerivationFactory.getInstance(getMirroredType()).hasNoApplicableValues(scope);
+        return ParameterFactory.getInstanceFromIdentifier(
+                        new ParameterIdentifier(getMirroredType()))
+                .hasNoApplicableValues(scope);
     }
 
     @Override
     public boolean canBeModeled(DerivationScope scope) {
-        return DerivationFactory.getInstance(getMirroredType()).canBeModeled(scope);
+        return ParameterFactory.getInstanceFromIdentifier(
+                        new ParameterIdentifier(getMirroredType()))
+                .canBeModeled(scope);
     }
 
     public TlsParameterType getMirroredType() {

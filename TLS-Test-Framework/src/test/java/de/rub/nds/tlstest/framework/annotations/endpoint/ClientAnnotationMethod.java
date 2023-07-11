@@ -7,10 +7,10 @@
  */
 package de.rub.nds.tlstest.framework.annotations.endpoint;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
 import de.rub.nds.tlstest.framework.utils.ConditionTest;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,7 +29,7 @@ public class ClientAnnotationMethod {
     @ClientTest
     public void execute_supported() {}
 
-    @TlsTest
+    @AnvilTest
     public void execute_generic_supportsBothEndpointModes() {}
 
     @ServerTest

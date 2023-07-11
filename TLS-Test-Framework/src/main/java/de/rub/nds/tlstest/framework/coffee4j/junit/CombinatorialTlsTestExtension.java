@@ -10,7 +10,7 @@ package de.rub.nds.tlstest.framework.coffee4j.junit;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotation;
 import static org.junit.platform.commons.util.AnnotationUtils.isAnnotated;
 
-import de.rub.nds.tlstest.framework.annotations.TestChooser;
+import de.rub.nds.anvilcore.annotation.TestChooser;
 import de.rwth.swc.coffee4j.junit.CombinatorialTest;
 import de.rwth.swc.coffee4j.junit.CombinatorialTestExecutionCallback;
 import de.rwth.swc.coffee4j.junit.CombinatorialTestExtension;

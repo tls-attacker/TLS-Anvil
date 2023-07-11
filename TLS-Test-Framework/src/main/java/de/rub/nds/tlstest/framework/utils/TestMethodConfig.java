@@ -10,10 +10,10 @@ package de.rub.nds.tlstest.framework.utils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyX;
 import java.lang.annotation.Annotation;
@@ -28,7 +28,7 @@ public class TestMethodConfig {
     @JsonProperty("RFC")
     private RFC rfc = null;
 
-    @JsonUnwrapped private TlsTest tlsTest = null;
+    @JsonUnwrapped private AnvilTest tlsTest = null;
 
     @JsonProperty("MethodName")
     private String methodName = null;
@@ -57,8 +57,8 @@ public class TestMethodConfig {
             this.keyExchange = new KeyX(annotation);
         }
 
-        if (testMethod.isAnnotationPresent(TlsTest.class)) {
-            this.tlsTest = testMethod.getAnnotation(TlsTest.class);
+        if (testMethod.isAnnotationPresent(AnvilTest.class)) {
+            this.tlsTest = testMethod.getAnnotation(AnvilTest.class);
         }
         if (testMethod.isAnnotationPresent(TestDescription.class)) {
             this.testDescription = testMethod.getAnnotation(TestDescription.class);
@@ -90,11 +90,11 @@ public class TestMethodConfig {
         this.keyExchange = keyExchange;
     }
 
-    public TlsTest getTlsTest() {
+    public AnvilTest getTlsTest() {
         return tlsTest;
     }
 
-    public void setTlsTest(TlsTest tlsTest) {
+    public void setTlsTest(AnvilTest tlsTest) {
         this.tlsTest = tlsTest;
     }
 

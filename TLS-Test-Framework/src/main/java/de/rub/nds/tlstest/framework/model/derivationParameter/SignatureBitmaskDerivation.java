@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterFactory;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
@@ -65,7 +66,8 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         listedValues.add(0);
 
         List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>> applicableCertificates =
-                DerivationFactory.getInstance(TlsParameterType.CERTIFICATE)
+                ParameterFactory.getInstanceFromIdentifier(
+                                new ParameterIdentifier(TlsParameterType.CERTIFICATE))
                         .getConstrainedParameterValues(scope);
         applicableCertificates.forEach(
                 selectableCert ->

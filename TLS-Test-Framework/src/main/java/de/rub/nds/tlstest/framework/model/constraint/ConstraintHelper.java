@@ -9,6 +9,8 @@ package de.rub.nds.tlstest.framework.model.constraint;
 
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterFactory;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
@@ -26,7 +28,6 @@ import de.rub.nds.tlstest.framework.constants.KeyX;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SignatureBitmaskDerivation;
 import java.util.HashSet;
@@ -49,8 +50,7 @@ public class ConstraintHelper {
 
     public static boolean staticEcdhCipherSuiteModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
-                (CipherSuiteDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.CIPHER_SUITE);
+                (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<TlsAnvilConfig, CipherSuite>> values =
                 cipherSuiteDeriv.getConstrainedParameterValues(scope);
         for (DerivationParameter param : values) {
@@ -65,8 +65,7 @@ public class ConstraintHelper {
 
     public static boolean staticCipherSuiteModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
-                (CipherSuiteDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.CIPHER_SUITE);
+                (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<TlsAnvilConfig, CipherSuite>> values =
                 cipherSuiteDeriv.getConstrainedParameterValues(scope);
         for (DerivationParameter param : values) {
@@ -80,8 +79,7 @@ public class ConstraintHelper {
 
     public static boolean ephemeralCipherSuiteModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
-                (CipherSuiteDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.CIPHER_SUITE);
+                (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<TlsAnvilConfig, CipherSuite>> values =
                 cipherSuiteDeriv.getConstrainedParameterValues(scope);
         for (DerivationParameter param : values) {
@@ -95,8 +93,7 @@ public class ConstraintHelper {
 
     public static boolean nullSigHashModeled(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv =
-                (SigAndHashDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
+                (SigAndHashDerivation) getParameterInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> values =
                 sigHashDeriv.getConstrainedParameterValues(scope);
         return values.stream().anyMatch(parameter -> parameter.getSelectedValue() == null);
@@ -104,8 +101,7 @@ public class ConstraintHelper {
 
     public static boolean multipleBlocksizesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
-                (CipherSuiteDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.CIPHER_SUITE);
+                (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<TlsAnvilConfig, CipherSuite>> values =
                 cipherSuiteDeriv.getConstrainedParameterValues(scope);
         Set<Integer> blockLengths = new HashSet<>();
@@ -121,8 +117,7 @@ public class ConstraintHelper {
 
     public static boolean unpaddedCipherSuitesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
-                (CipherSuiteDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.CIPHER_SUITE);
+                (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<TlsAnvilConfig, CipherSuite>> values =
                 cipherSuiteDeriv.getConstrainedParameterValues(scope);
         for (DerivationParameter param : values) {
@@ -138,8 +133,7 @@ public class ConstraintHelper {
 
     public static boolean multipleMacSizesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
-                (CipherSuiteDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.CIPHER_SUITE);
+                (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<TlsAnvilConfig, CipherSuite>> values =
                 cipherSuiteDeriv.getConstrainedParameterValues(scope);
         Set<Integer> macLengths = new HashSet<>();
@@ -158,8 +152,7 @@ public class ConstraintHelper {
 
     public static boolean ecdhCipherSuiteModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
-                (CipherSuiteDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.CIPHER_SUITE);
+                (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<TlsAnvilConfig, CipherSuite>> values =
                 cipherSuiteDeriv.getConstrainedParameterValues(scope);
         for (DerivationParameter param : values) {
@@ -177,8 +170,7 @@ public class ConstraintHelper {
 
     public static boolean nonEcdhCipherSuiteModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
-                (CipherSuiteDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.CIPHER_SUITE);
+                (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<TlsAnvilConfig, CipherSuite>> values =
                 cipherSuiteDeriv.getConstrainedParameterValues(scope);
         for (DerivationParameter param : values) {
@@ -193,8 +185,7 @@ public class ConstraintHelper {
 
     public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
-                (CipherSuiteDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.CIPHER_SUITE);
+                (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<TlsAnvilConfig, CipherSuite>> values =
                 cipherSuiteDeriv.getConstrainedParameterValues(scope);
         Set<HKDFAlgorithm> hkdfAlgos = new HashSet<>();
@@ -208,8 +199,7 @@ public class ConstraintHelper {
 
     public static boolean multipleTagSizesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
-                (CipherSuiteDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.CIPHER_SUITE);
+                (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<TlsAnvilConfig, CipherSuite>> values =
                 cipherSuiteDeriv.getConstrainedParameterValues(scope);
         Set<Integer> tagLengths = new HashSet<>();
@@ -222,7 +212,7 @@ public class ConstraintHelper {
     }
 
     public static boolean nullModeled(DerivationScope scope, TlsParameterType type) {
-        return DerivationFactory.getInstance(type).getConstrainedParameterValues(scope).stream()
+        return getParameterInstance(type).getConstrainedParameterValues(scope).stream()
                 .anyMatch(
                         parameterValue ->
                                 ((DerivationParameter) parameterValue).getSelectedValue() == null);
@@ -230,8 +220,7 @@ public class ConstraintHelper {
 
     public static boolean multipleSigAlgorithmRequiredKeyTypesModeled(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv =
-                (SigAndHashDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
+                (SigAndHashDerivation) getParameterInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> values =
                 sigHashDeriv.getConstrainedParameterValues(scope);
         values = removeNull(values);
@@ -264,7 +253,7 @@ public class ConstraintHelper {
 
     public static boolean multipleCertPublicKeyTypesModeled(DerivationScope scope) {
         CertificateDerivation certDeriv =
-                (CertificateDerivation) DerivationFactory.getInstance(TlsParameterType.CERTIFICATE);
+                (CertificateDerivation) getParameterInstance(TlsParameterType.CERTIFICATE);
         List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>> values =
                 certDeriv.getConstrainedParameterValues(scope);
         Set<CertificateKeyType> certKeyTypes = new HashSet<>();
@@ -278,8 +267,7 @@ public class ConstraintHelper {
     public static boolean cipherSuitesWithDifferentCertPublicKeyRequirementsModeled(
             DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
-                (CipherSuiteDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.CIPHER_SUITE);
+                (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<TlsAnvilConfig, CipherSuite>> values =
                 cipherSuiteDeriv.getConstrainedParameterValues(scope);
         Set<CertificateKeyType> certKeyTypes = new HashSet<>();
@@ -297,8 +285,7 @@ public class ConstraintHelper {
 
     public static boolean pssSigAlgoModeled(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv =
-                (SigAndHashDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
+                (SigAndHashDerivation) getParameterInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> algorithms =
                 sigHashDeriv.getConstrainedParameterValues(scope);
         algorithms = removeNull(algorithms);
@@ -313,13 +300,12 @@ public class ConstraintHelper {
 
     public static boolean rsaPkMightNotSufficeForPss(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv =
-                (SigAndHashDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
+                (SigAndHashDerivation) getParameterInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> algorithms =
                 sigHashDeriv.getConstrainedParameterValues(scope);
         algorithms = removeNull(algorithms);
         CertificateDerivation certDerivation =
-                (CertificateDerivation) DerivationFactory.getInstance(TlsParameterType.CERTIFICATE);
+                (CertificateDerivation) getParameterInstance(TlsParameterType.CERTIFICATE);
         List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>> certificates =
                 certDerivation.getConstrainedParameterValues(scope);
         boolean pssWithSha512modeled =
@@ -374,7 +360,7 @@ public class ConstraintHelper {
 
     public static boolean rsaPkBelow1024BitsModeled(DerivationScope scope) {
         CertificateDerivation certDerivation =
-                (CertificateDerivation) DerivationFactory.getInstance(TlsParameterType.CERTIFICATE);
+                (CertificateDerivation) getParameterInstance(TlsParameterType.CERTIFICATE);
         List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>> certificates =
                 certDerivation.getConstrainedParameterValues(scope);
         return certificates.stream()
@@ -394,8 +380,7 @@ public class ConstraintHelper {
 
     public static boolean rsaShaAlgLongerThan256BitsModeled(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv =
-                (SigAndHashDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
+                (SigAndHashDerivation) getParameterInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> algorithms =
                 sigHashDeriv.getConstrainedParameterValues(scope);
         return algorithms.stream()
@@ -422,10 +407,10 @@ public class ConstraintHelper {
 
     public static boolean signatureLengthConstraintApplicable(DerivationScope scope) {
         CertificateDerivation certDeriv =
-                (CertificateDerivation) DerivationFactory.getInstance(TlsParameterType.CERTIFICATE);
+                (CertificateDerivation) getParameterInstance(TlsParameterType.CERTIFICATE);
         SignatureBitmaskDerivation sigBitmaskDeriv =
                 (SignatureBitmaskDerivation)
-                        DerivationFactory.getInstance(TlsParameterType.SIGNATURE_BITMASK);
+                        getParameterInstance(TlsParameterType.SIGNATURE_BITMASK);
         List<DerivationParameter<TlsAnvilConfig, Integer>> bytePositions =
                 sigBitmaskDeriv.getConstrainedParameterValues(scope);
         int maxBytePosition = 0;
@@ -508,5 +493,9 @@ public class ConstraintHelper {
         return parameterValues.stream()
                 .filter(value -> value.getSelectedValue() != null)
                 .collect(Collectors.toList());
+    }
+
+    private static DerivationParameter getParameterInstance(TlsParameterType parameterType) {
+        return ParameterFactory.getInstanceFromIdentifier(new ParameterIdentifier(parameterType));
     }
 }

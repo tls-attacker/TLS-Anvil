@@ -7,10 +7,10 @@
  */
 package de.rub.nds.tlstest.framework.junitExtensions;
 
+import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.constants.TestResult;
-import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
+import de.rub.nds.tlstest.framework.execution.TlsTestState;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import de.rub.nds.tlstest.framework.utils.Utils;
 import java.util.Optional;
@@ -80,7 +80,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
                     "This should not happen... AnnotatedStateContainer is null but Test is not finished yet");
         }
 
-        AnnotatedState state =
+        TlsTestState state =
                 container.getStates().stream()
                         .filter(
                                 i ->
@@ -92,7 +92,7 @@ public class TestWatcher implements org.junit.jupiter.api.extension.TestWatcher 
 
         if (state == null) {
             if (Utils.extensionContextIsBasedOnCombinatorialTesting(context.getParent().get())) {
-                state = new AnnotatedState(context, null, null);
+                state = new TlsTestState(context, null, null);
                 state.setFailedReason(cause);
             } else {
                 // test does not belong to a test case performing handshakes

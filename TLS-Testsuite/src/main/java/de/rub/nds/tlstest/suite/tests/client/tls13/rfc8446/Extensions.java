@@ -12,6 +12,7 @@ import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -36,7 +37,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ExtensionDerivation;
@@ -179,8 +179,8 @@ public class Extensions extends Tls13Test {
                                             == AlertDescription.UNSUPPORTED_EXTENSION.getValue()
                                     && !context.getReceivedClientHelloMessage()
                                             .containsExtension(ExtensionType.HEARTBEAT)
-                                    && i.getResult() == TestResult.CONCEPTUALLY_SUCCEEDED) {
-                                i.setResult(TestResult.STRICTLY_SUCCEEDED);
+                                    && i.getTestResult() == TestResult.CONCEPTUALLY_SUCCEEDED) {
+                                i.setTestResult(TestResult.STRICTLY_SUCCEEDED);
                                 i.addAdditionalResultInfo(
                                         "Description is acceptable as Heartbeat was not proposed by client");
                             }

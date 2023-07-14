@@ -61,7 +61,7 @@ public class TlsParameterCombination extends ParameterCombination {
     }
 
     @JsonValue
-    private Map<String, DerivationParameter> jsonObject() {
+    public Map<String, DerivationParameter> jsonObject() {
         Map<String, DerivationParameter> res = new HashMap<>();
         for (DerivationParameter i : getParameterValues()) {
             res.put(i.getParameterIdentifier().name(), i);

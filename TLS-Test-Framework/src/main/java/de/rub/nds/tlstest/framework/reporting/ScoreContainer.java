@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.framework.reporting;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CVECategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
@@ -20,7 +21,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCateg
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.TestCategory;
-import de.rub.nds.tlstest.framework.constants.TestResult;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;

@@ -12,10 +12,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceSerializer;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
-import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.reporting.ScoreContainer;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import de.rub.nds.tlstest.framework.utils.TestMethodConfig;
@@ -28,7 +28,6 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +77,7 @@ public class AnnotatedStateContainer {
     List<TlsParameterCombination> failureInducingCombinations;
 
     @JsonProperty("States")
-    private List<AnnotatedState> states = new ArrayList<>();
+    private List<TlsTestState> states = new ArrayList<>();
 
     @JsonUnwrapped private ScoreContainer scoreContainer;
 
@@ -112,20 +111,6 @@ public class AnnotatedStateContainer {
         return container;
     }
 
-    public void addAll(List<AnnotatedState> states) {
-        states.parallelStream().forEach(i -> i.setAssociatedContainer(this));
-        this.states.addAll(states);
-    }
-
-    public void addAll(AnnotatedState... states) {
-        this.addAll(Arrays.asList(states));
-    }
-
-    public void add(AnnotatedState state) {
-        state.setAssociatedContainer(this);
-        this.states.add(state);
-    }
-
     public void finished() {
         TestContext.getInstance().testFinished(this.uniqueId);
         finished = true;
@@ -138,8 +123,8 @@ public class AnnotatedStateContainer {
         String lastAdditionalResultInformation = "";
         TestContext.getInstance().increasePerformedHandshakes(this.getStates().size());
 
-        for (AnnotatedState state : this.getStates()) {
-            if (state.getResult() == TestResult.FULLY_FAILED) {
+        for (TlsTestState state : this.getStates()) {
+            if (state.getTestResult() == TestResult.FULLY_FAILED) {
                 errors.add(state.getFailedReason());
                 failed = true;
             }
@@ -150,7 +135,9 @@ public class AnnotatedStateContainer {
                         && !lastAdditionalResultInformation.isEmpty()) {
                     this.setHasVaryingAdditionalResultInformation((Boolean) true);
                 }
-                lastAdditionalResultInformation = state.getAdditionalResultInformation();
+                lastAdditionalResultInformation =
+                        state.getAdditionalResultInformation().stream()
+                                .collect(Collectors.joining("\n"));
             }
 
             if (uuids.contains(state.getUuid())) {
@@ -227,15 +214,15 @@ public class AnnotatedStateContainer {
                         + testMethodConfig.getMethodName()
                         + ":\n");
         states.stream()
-                .filter(state -> state.getResult() != TestResult.STRICTLY_SUCCEEDED)
-                .forEach(state -> LOGGER.info(state.getTlsParameterCombination().toString()));
+                .filter(state -> state.getTestResult() != TestResult.STRICTLY_SUCCEEDED)
+                .forEach(state -> LOGGER.info(state.getParameterCombination().toString()));
     }
 
-    public List<AnnotatedState> getStates() {
+    public List<TlsTestState> getStates() {
         return states;
     }
 
-    public void setStates(List<AnnotatedState> states) {
+    public void setStates(List<TlsTestState> states) {
         this.states = states;
     }
 
@@ -281,8 +268,9 @@ public class AnnotatedStateContainer {
         return states.stream()
                 .anyMatch(
                         state ->
-                                state.getResult() == TestResult.STRICTLY_SUCCEEDED
-                                        || state.getResult() == TestResult.CONCEPTUALLY_SUCCEEDED);
+                                state.getTestResult() == TestResult.STRICTLY_SUCCEEDED
+                                        || state.getTestResult()
+                                                == TestResult.CONCEPTUALLY_SUCCEEDED);
     }
 
     public List<TlsParameterCombination> getFailureInducingCombinations() {
@@ -385,7 +373,7 @@ public class AnnotatedStateContainer {
                 FileOutputStream fos =
                         new FileOutputStream(Paths.get(targetFolder, "traces.zip").toString());
                 ZipOutputStream zipOut = new ZipOutputStream(fos);
-                for (AnnotatedState s : states) {
+                for (TlsTestState s : states) {
                     ZipEntry zipEntry = new ZipEntry(s.getUuid() + ".xml");
                     zipOut.putNextEntry(zipEntry);
                     try {

@@ -80,7 +80,7 @@ public class WorkflowRunner {
      * @param trace Trace to execute
      * @return
      */
-    public AnnotatedState execute(WorkflowTrace trace, Config config) {
+    public TlsTestState execute(WorkflowTrace trace, Config config) {
         if (preparedConfig == null) {
             LOGGER.warn(
                     "Config was not set before execution - WorkflowTrace may me invalid for Test:"
@@ -106,8 +106,8 @@ public class WorkflowRunner {
 
         allowOptionalClientApplicationMessage(trace);
 
-        AnnotatedState annotatedState =
-                new AnnotatedState(extensionContext, new State(config, trace), derivationContainer);
+        TlsTestState annotatedState =
+                new TlsTestState(extensionContext, new State(config, trace), derivationContainer);
 
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             StateExecutionTask task =

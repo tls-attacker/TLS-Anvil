@@ -32,7 +32,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.execution.AnnotatedState;
+import de.rub.nds.tlstest.framework.execution.TlsTestState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.util.SignatureValidation;
@@ -72,7 +72,7 @@ public class CertificateVerify extends Tls13Test {
                         });
     }
 
-    private boolean signatureValid(AnnotatedState annotatedState) {
+    private boolean signatureValid(TlsTestState annotatedState) {
         CertificateVerifyMessage certificateVerify =
                 (CertificateVerifyMessage)
                         WorkflowTraceUtil.getFirstReceivedMessage(
@@ -97,7 +97,7 @@ public class CertificateVerify extends Tls13Test {
         }
     }
 
-    private byte[] getCompleteSignedData(AnnotatedState annotatedState) {
+    private byte[] getCompleteSignedData(TlsTestState annotatedState) {
         TlsContext postExecutionContext = annotatedState.getState().getTlsContext();
         WorkflowTrace executedTrace = annotatedState.getWorkflowTrace();
 

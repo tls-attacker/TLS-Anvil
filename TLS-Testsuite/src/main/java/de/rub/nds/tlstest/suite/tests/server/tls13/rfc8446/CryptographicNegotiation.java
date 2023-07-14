@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExcludeParameters;
+import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -29,8 +30,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.constants.TestResult;
-import de.rub.nds.tlstest.framework.execution.AnnotatedState;
+import de.rub.nds.tlstest.framework.execution.TlsTestState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
@@ -110,7 +110,7 @@ public class CryptographicNegotiation extends Tls13Test {
                         });
     }
 
-    private void validateResult(AnnotatedState i, WorkflowTrace trace) {
+    private void validateResult(TlsTestState i, WorkflowTrace trace) {
         Validator.receivedFatalAlert(i);
         AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
         if (alert == null) {
@@ -123,7 +123,7 @@ public class CryptographicNegotiation extends Tls13Test {
                 AlertDescription.getAlertDescription(alert.getDescription().getValue());
         if (description != AlertDescription.HANDSHAKE_FAILURE
                 && description != AlertDescription.INSUFFICIENT_SECURITY) {
-            i.setResult(TestResult.CONCEPTUALLY_SUCCEEDED);
+            i.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
             i.addAdditionalResultInfo("Alert was not Handshake Failure or Insufficient Security");
         }
     }

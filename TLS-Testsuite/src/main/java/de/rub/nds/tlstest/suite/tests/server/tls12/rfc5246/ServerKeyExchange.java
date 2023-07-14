@@ -36,7 +36,7 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.execution.AnnotatedState;
+import de.rub.nds.tlstest.framework.execution.TlsTestState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.util.SignatureValidation;
@@ -77,7 +77,7 @@ public class ServerKeyExchange extends Tls12Test {
                         });
     }
 
-    private Boolean signatureValid(AnnotatedState annotatedState) {
+    private Boolean signatureValid(TlsTestState annotatedState) {
         WorkflowTrace executedTrace = annotatedState.getWorkflowTrace();
         ClientHelloMessage clientHello =
                 (ClientHelloMessage)

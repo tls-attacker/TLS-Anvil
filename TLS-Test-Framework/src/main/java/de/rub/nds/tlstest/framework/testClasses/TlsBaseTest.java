@@ -17,7 +17,6 @@ import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
-import de.rub.nds.tlstest.framework.coffee4j.junit.CombinatorialTlsTestExtension;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.EnforcedSenderRestrictionConditionExtension;
@@ -40,10 +39,8 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
     KexCondition.class,
     MethodConditionExtension.class,
     EnforcedSenderRestrictionConditionExtension.class,
-    WorkflowRunnerResolver.class,
-    CombinatorialTlsTestExtension.class
+    WorkflowRunnerResolver.class
 })
-
 // todo remove code already present in anvil core
 public abstract class TlsBaseTest extends CombinatorialAnvilTest {
     protected static final Logger LOGGER = LogManager.getLogger();

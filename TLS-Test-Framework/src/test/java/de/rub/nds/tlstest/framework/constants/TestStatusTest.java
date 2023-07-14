@@ -9,6 +9,7 @@ package de.rub.nds.tlstest.framework.constants;
 
 import static org.junit.Assert.*;
 
+import de.rub.nds.anvilcore.teststate.TestResult;
 import org.junit.Test;
 
 public class TestStatusTest {

@@ -39,6 +39,7 @@ import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
+import de.rub.nds.tlstest.framework.anvil.TlsTestState;
 import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import java.io.IOException;
 import javax.annotation.Nonnull;

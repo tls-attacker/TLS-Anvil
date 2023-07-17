@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.framework.reporting;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import java.io.File;
@@ -59,13 +60,15 @@ public class ExecutionListener implements TestExecutionListener {
         Summary s = new Summary();
 
         TestConfig testConfig = TestContext.getInstance().getConfig();
-        TestContext testContext = TestContext.getInstance();
+        AnvilContext testContext = AnvilContext.getInstance();
 
         s.setElapsedTime(elapsedTime);
         s.setTestEndpointType(testConfig.getTestEndpointMode());
         s.setIdentifier(testConfig.getIdentifier());
         s.setDate(testContext.getStartTime());
-        s.setHandshakes(testContext.getPerformedHandshakes());
+        // TODO handshake have always been counted incorrectly as they
+        // do not account for reexecutions
+        s.setHandshakes(0);
         s.setTestsDisabled(testContext.getTestsDisabled());
         s.setTestsFailed(testContext.getTestsFailed());
         s.setTestsSucceeded(testContext.getTestsSucceeded());

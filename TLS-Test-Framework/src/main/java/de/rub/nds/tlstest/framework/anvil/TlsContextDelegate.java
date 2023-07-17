@@ -3,12 +3,12 @@ package de.rub.nds.tlstest.framework.anvil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.anvilcore.context.ApplicationSpecificContextDelegate;
 import de.rub.nds.anvilcore.teststate.AnvilTestState;
 import de.rub.nds.anvilcore.teststate.AnvilTestStateContainer;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceSerializer;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.execution.TlsTestState;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import de.rub.nds.tlstest.framework.utils.Utils;
 import java.io.File;
@@ -17,8 +17,11 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import me.tongfei.progressbar.ProgressBar;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,6 +31,7 @@ public class TlsContextDelegate implements ApplicationSpecificContextDelegate {
     @Override
     public void onTestFinished(String uniqueId, AnvilTestStateContainer finishedContainer) {
         serialize(finishedContainer);
+        updateProgress();
     }
 
     private String getSerializationPath(AnvilTestStateContainer stateContainer) {
@@ -41,6 +45,26 @@ public class TlsContextDelegate implements ApplicationSpecificContextDelegate {
 
         return Paths.get(TestContext.getInstance().getConfig().getOutputFolder(), folderComponents)
                 .toString();
+    }
+
+    private void updateProgress() {
+        ProgressBar progressBar = TestContext.getInstance().getProggressBar();
+        if (progressBar != null && System.getenv("DOCKER") == null) {
+            progressBar.stepBy(1);
+        } else {
+            long timediff =
+                    new Date().getTime() - AnvilContext.getInstance().getStartTime().getTime();
+            long minutes = TimeUnit.MILLISECONDS.toMinutes(timediff);
+            long remainingSecondsInMillis = timediff - TimeUnit.MINUTES.toMillis(minutes);
+            long seconds = TimeUnit.MILLISECONDS.toSeconds(remainingSecondsInMillis);
+            LOGGER.info(
+                    String.format(
+                            "%d/%d Tests finished (in %02d:%02d)",
+                            AnvilContext.getInstance().getTestsDone(),
+                            AnvilContext.getInstance().getTotalTests(),
+                            minutes,
+                            seconds));
+        }
     }
 
     private void serialize(AnvilTestStateContainer stateContainer) {

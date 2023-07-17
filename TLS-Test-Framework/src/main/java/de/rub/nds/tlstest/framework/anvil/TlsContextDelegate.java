@@ -35,7 +35,10 @@ public class TlsContextDelegate implements ApplicationSpecificContextDelegate {
     }
 
     private String getSerializationPath(AnvilTestStateContainer stateContainer) {
-        String method = stateContainer.getTestMethod().getName();
+        String method =
+                stateContainer.getTestClass().getName()
+                        + "."
+                        + stateContainer.getTestMethod().getName();
         // truncate the class name to shorten the path length
         // basically throw away the common package, i.e. everything before "server" or "client"
         String pName = "de.rub.nds.tlstest.suite.tests.";

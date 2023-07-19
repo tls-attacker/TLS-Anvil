@@ -9,11 +9,11 @@ package de.rub.nds.tlstest.framework.extractor;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.junit.extension.EndpointConditionExtension;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -325,7 +325,7 @@ public class TestCaseExtractor {
         }
 
         public TestEndpointType getEndpointType() {
-            return EndpointCondition.endpointOfMethod(m, m.getDeclaringClass());
+            return EndpointConditionExtension.endpointOfMethod(m, m.getDeclaringClass());
         }
 
         public String getFullTestName() {

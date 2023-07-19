@@ -7,6 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.execution;
 
+import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -40,7 +41,6 @@ import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rub.nds.tlstest.framework.anvil.TlsTestState;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;

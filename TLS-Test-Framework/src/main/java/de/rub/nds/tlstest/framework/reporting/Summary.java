@@ -9,8 +9,8 @@ package de.rub.nds.tlstest.framework.reporting;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.teststate.reporting.ScoreContainer;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import java.util.Date;
 
 public class Summary {

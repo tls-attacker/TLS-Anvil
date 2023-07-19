@@ -11,6 +11,7 @@ import static org.junit.platform.engine.discovery.DiscoverySelectors.selectPacka
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.anvilcore.context.AnvilFactoryRegistry;
 import de.rub.nds.scanner.core.constants.ProbeType;
@@ -46,7 +47,6 @@ import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.config.TestConfig;
 import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.extractor.TestCaseExtractor;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.reporting.ExecutionListener;

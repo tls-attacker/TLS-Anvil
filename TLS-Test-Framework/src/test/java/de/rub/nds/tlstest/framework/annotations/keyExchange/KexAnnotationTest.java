@@ -1,10 +1,10 @@
 package de.rub.nds.tlstest.framework.annotations.keyExchange;
 
+import de.rub.nds.anvilcore.testhelper.ConditionTest;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
-import de.rub.nds.tlstest.framework.utils.ConditionTest;
 import java.util.HashSet;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.extension.RegisterExtension;

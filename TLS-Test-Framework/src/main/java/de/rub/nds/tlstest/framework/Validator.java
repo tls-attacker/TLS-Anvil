@@ -9,6 +9,7 @@ package de.rub.nds.tlstest.framework;
 
 import static org.junit.Assert.*;
 
+import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -40,7 +41,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlstest.framework.anvil.TlsTestState;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.TcpFragmentationDerivation;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;

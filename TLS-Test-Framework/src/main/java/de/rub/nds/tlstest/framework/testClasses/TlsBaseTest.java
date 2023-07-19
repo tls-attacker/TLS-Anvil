@@ -8,6 +8,7 @@
 package de.rub.nds.tlstest.framework.testClasses;
 
 import de.rub.nds.anvilcore.junit.CombinatorialAnvilTest;
+import de.rub.nds.anvilcore.junit.extension.EndpointConditionExtension;
 import de.rub.nds.anvilcore.junit.extension.MethodConditionExtension;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.scanner.core.constants.TestResults;
@@ -18,7 +19,6 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.EnforcedSenderRestrictionConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
@@ -32,7 +32,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ExtendWith({
-    EndpointCondition.class,
+    EndpointConditionExtension.class,
     TlsVersionCondition.class,
     KexCondition.class,
     MethodConditionExtension.class,

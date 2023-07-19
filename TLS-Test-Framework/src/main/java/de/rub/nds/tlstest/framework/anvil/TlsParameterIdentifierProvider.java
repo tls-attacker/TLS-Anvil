@@ -5,6 +5,7 @@ import static de.rub.nds.tlstest.framework.anvil.TlsModelType.EMPTY;
 import static de.rub.nds.tlstest.framework.anvil.TlsModelType.GENERIC;
 import static de.rub.nds.tlstest.framework.anvil.TlsModelType.LENGTHFIELD;
 
+import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.ModelType;
 import de.rub.nds.anvilcore.model.ParameterIdentifierProvider;
@@ -15,7 +16,6 @@ import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import java.util.Arrays;

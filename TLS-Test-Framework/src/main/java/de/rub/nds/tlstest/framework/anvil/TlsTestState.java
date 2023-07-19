@@ -5,7 +5,7 @@
  *
  * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
-package de.rub.nds.tlstest.framework.execution;
+package de.rub.nds.tlstest.framework.anvil;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import de.rub.nds.anvilcore.teststate.AnvilTestState;
@@ -13,7 +13,6 @@ import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
-import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import jakarta.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;

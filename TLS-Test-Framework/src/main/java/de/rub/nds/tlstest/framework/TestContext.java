@@ -10,13 +10,8 @@ package de.rub.nds.tlstest.framework;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlstest.framework.config.TestConfig;
-import de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer;
 import de.rub.nds.tlstest.framework.execution.TestRunner;
-import de.rub.nds.tlstest.framework.reporting.ScoreContainer;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import me.tongfei.progressbar.ProgressBar;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,20 +28,10 @@ public class TestContext {
     private TestRunner testRunner = null;
     private ParallelExecutor stateExecutor;
 
-    private final Map<String, AnnotatedStateContainer> testResults = new HashMap<>();
-    private final Map<String, Boolean> finishedTests = new HashMap<>();
-
     private FeatureExtractionResult featureExtractionResult = null;
     private ClientHelloMessage receivedClientHelloMessage;
 
-    private long totalTests = 0;
-    private long testsDone = 0;
-    private long testsDisabled = 0;
-    private long testsFailed = 0;
-    private long testsSucceeded = 0;
     private long performedHandshakes = 0;
-
-    private ScoreContainer scoreContainer = ScoreContainer.forEveryCategory();
 
     private ProgressBar proggressBar = null;
     private final Date startTime = new Date();
@@ -82,18 +67,6 @@ public class TestContext {
         this.testRunner = testRunner;
     }
 
-    public synchronized Map<String, AnnotatedStateContainer> getTestResults() {
-        return testResults;
-    }
-
-    public synchronized AnnotatedStateContainer getTestResult(String uniqueId) {
-        return testResults.get(uniqueId);
-    }
-
-    public synchronized void addTestResult(AnnotatedStateContainer result) {
-        testResults.put(result.getUniqueId(), result);
-    }
-
     public ClientHelloMessage getReceivedClientHelloMessage() {
         return receivedClientHelloMessage;
     }
@@ -102,73 +75,12 @@ public class TestContext {
         this.receivedClientHelloMessage = receivedClientHelloMessage;
     }
 
-    public long getTotalTests() {
-        return totalTests;
-    }
-
     public boolean isDocker() {
         return System.getenv("DOCKER") != null;
     }
 
-    public synchronized void setTotalTests(long totalTests) {
-        if (!isDocker()) {
-            proggressBar = new ProgressBar("Progress", totalTests);
-        }
-
-        this.totalTests = totalTests;
-    }
-
-    public long getTestsDone() {
-        return testsDone;
-    }
-
-    public synchronized void testFinished(String uniqueId) {
-        finishedTests.put(uniqueId, true);
-        this.scoreContainer.mergeWithContainer(testResults.get(uniqueId).getScoreContainer());
-
-        testResults.remove(uniqueId);
-
-        testsDone += 1;
-        if (proggressBar != null && !isDocker()) {
-            proggressBar.stepBy(1);
-        } else if (isDocker()) {
-            long timediff = new Date().getTime() - startTime.getTime();
-            long minutes = TimeUnit.MILLISECONDS.toMinutes(timediff);
-            long remainingSecondsInMillis = timediff - TimeUnit.MINUTES.toMillis(minutes);
-            long seconds = TimeUnit.MILLISECONDS.toSeconds(remainingSecondsInMillis);
-            LOGGER.info(
-                    String.format(
-                            "%d/%d Tests finished (in %02d:%02d)",
-                            testsDone, totalTests, minutes, seconds));
-        }
-    }
-
-    public synchronized void testDisabled() {
-        testsDisabled++;
-    }
-
-    public synchronized void testSucceeded() {
-        testsSucceeded++;
-    }
-
-    public synchronized void testFailed() {
-        testsFailed++;
-    }
-
     public ProgressBar getProggressBar() {
         return proggressBar;
-    }
-
-    public long getTestsDisabled() {
-        return testsDisabled;
-    }
-
-    public long getTestsFailed() {
-        return testsFailed;
-    }
-
-    public long getTestsSucceeded() {
-        return testsSucceeded;
     }
 
     public Date getStartTime() {
@@ -209,13 +121,5 @@ public class TestContext {
 
     public void increasePerformedHandshakes(long performedHandshakes) {
         this.performedHandshakes += performedHandshakes;
-    }
-
-    public boolean testIsFinished(String uniqueId) {
-        return finishedTests.containsKey(uniqueId);
-    }
-
-    public ScoreContainer getScoreContainer() {
-        return scoreContainer;
     }
 }

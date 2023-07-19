@@ -536,7 +536,7 @@ public class TestRunner {
                         + TestContext.getInstance().getConfig().getConnectionTimeout()
                         + " ms");
         logCommonDerivationValues();
-        testContext.setTotalTests(testcases);
+        AnvilContext.getInstance().setTotalTests(testcases);
         long start = System.currentTimeMillis();
 
         launcher.execute(request);

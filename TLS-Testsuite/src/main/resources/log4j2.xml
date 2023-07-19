@@ -51,6 +51,11 @@
             <AppenderRef ref="FileTestsuite_warn" level="warn"/>
             <AppenderRef ref="FileTestsuite"/>
         </Logger>
+        <Logger name="de.rub.nds.anvilcore" level="trace" additivity="false">
+            <AppenderRef ref="Console" level="info"/>
+            <AppenderRef ref="FileTestsuite_warn" level="warn"/>
+            <AppenderRef ref="FileTestsuite"/>
+        </Logger>
 
         <Logger name="org.junit.jupiter" level="warn">
             <AppenderRef ref="FileTestsuite_warn"/>

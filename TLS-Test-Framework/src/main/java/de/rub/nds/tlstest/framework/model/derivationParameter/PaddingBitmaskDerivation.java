@@ -176,7 +176,9 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
                                 TlsParameterType.CIPHER_SUITE.name(),
                                 TlsParameterType.APP_MSG_LENGHT.name(),
                                 TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION.name(),
-                                TlsParameterType.BIT_POSITION.name())
+                                getParameterIdentifier()
+                                        + "."
+                                        + TlsParameterType.BIT_POSITION.name())
                         .by(
                                 (PaddingBitmaskDerivation paddingBitmaskDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation,

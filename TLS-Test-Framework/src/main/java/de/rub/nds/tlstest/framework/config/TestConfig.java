@@ -11,6 +11,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.scanner.core.constants.CollectionResult;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
@@ -226,6 +227,7 @@ public class TestConfig extends TLSDelegateConfig {
         }
 
         this.setTestEndpointMode(argParser.getParsedCommand());
+        AnvilContext.getInstance().setEvaluatedEndpoint(this.getTestEndpointMode());
 
         if (this.identifier == null) {
             if (argParser.getParsedCommand().equals(ConfigDelegates.SERVER.getCommand())) {

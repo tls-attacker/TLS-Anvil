@@ -35,9 +35,11 @@ public class TlsParameterCombination extends ParameterCombination {
             ArgumentsAccessor argumentsAccessor, DerivationScope derivationScope) {
         ParameterCombination parameterCombination =
                 ParameterCombination.fromArgumentsAccessor(argumentsAccessor, derivationScope);
-        return new TlsParameterCombination(
-                new LinkedList<>(parameterCombination.getParameterValues()),
-                parameterCombination.getDerivationScope());
+        TlsParameterCombination tlsParameterCombination =
+                new TlsParameterCombination(parameterCombination.getParameterValues());
+        // set separately so we do not fetch static parameters twice
+        tlsParameterCombination.setDerivationScope(derivationScope);
+        return tlsParameterCombination;
     }
 
     public byte[] buildBitmask() {

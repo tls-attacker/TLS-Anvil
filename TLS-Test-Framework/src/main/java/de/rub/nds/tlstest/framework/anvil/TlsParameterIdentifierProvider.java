@@ -27,8 +27,7 @@ import java.util.stream.Collectors;
 public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider {
 
     @Override
-    protected List<ParameterIdentifier> getAllParameterIdentifiers(
-            DerivationScope derivationScope) {
+    public List<ParameterIdentifier> getAllParameterIdentifiers() {
         List<ParameterIdentifier> parameterIdentifiers = new LinkedList<>();
         parameterIdentifiers.addAll(Arrays.asList(TlsParameterType.getAllIdentifiers()));
         return parameterIdentifiers;

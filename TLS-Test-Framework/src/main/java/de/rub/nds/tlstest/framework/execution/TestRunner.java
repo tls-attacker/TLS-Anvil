@@ -62,6 +62,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -460,13 +462,14 @@ public class TestRunner {
         prepareTestExecution();
         // todo - seems like this should be one method instead of two but the first does not add
         // them as knownParameters
+        AnvilContext anvilContext = AnvilContext.getInstance();
         TlsParameterIdentifierProvider identifierProvider = new TlsParameterIdentifierProvider();
         AnvilFactoryRegistry.get().setParameterIdentifierProvider(identifierProvider);
         AnvilFactoryRegistry.get()
                 .addParameterTypes(TlsParameterType.values(), new TlsParameterFactory());
-        AnvilContext.getInstance().getKnownModelTypes().add(TlsModelType.CERTIFICATE);
-        AnvilContext.getInstance().setApplicationSpecificContextDelegate(new TlsContextDelegate());
-        AnvilContext anvilContext = AnvilContext.getInstance();
+        anvilContext.getKnownModelTypes().addAll(Arrays.asList(TlsModelType.values()));
+        anvilContext.setApplicationSpecificContextDelegate(new TlsContextDelegate());
+        anvilContext.setTestStrength(TestContext.getInstance().getConfig().getStrength());
 
         LauncherDiscoveryRequestBuilder builder =
                 LauncherDiscoveryRequestBuilder.request()
@@ -528,9 +531,7 @@ public class TestRunner {
                 "Client tests, TLS 1.2: {}, TLS 1.3: {}",
                 clientTls12 + bothTls12,
                 clientTls13 + bothTls13);
-        LOGGER.info(
-                "Testing using default strength "
-                        + TestContext.getInstance().getConfig().getStrength());
+        LOGGER.info("Testing using default strength " + anvilContext.getTestStrength());
         LOGGER.info(
                 "Default timeout "
                         + TestContext.getInstance().getConfig().getConnectionTimeout()
@@ -554,6 +555,15 @@ public class TestRunner {
         LOGGER.info("\n" + content);
 
         testContext.getStateExecutor().shutdown();
+        LOGGER.info("High-Level Summary:");
+        LOGGER.info("*******************");
+        LinkedList<String> identifiersListed = new LinkedList<>();
+        identifiersListed.addAll(anvilContext.getAggregatedTestResult().keySet());
+        Collections.sort(identifiersListed);
+        for (String identifier : identifiersListed) {
+            LOGGER.info(
+                    "{} -- {}", identifier, anvilContext.getAggregatedTestResult().get(identifier));
+        }
 
         try {
             testConfig.getTestClientDelegate().getServerSocket().close();

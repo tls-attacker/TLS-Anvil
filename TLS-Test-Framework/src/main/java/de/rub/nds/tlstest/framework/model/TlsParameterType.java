@@ -72,11 +72,14 @@ public enum TlsParameterType implements ParameterType {
         List<ParameterIdentifier> identifiers = new LinkedList<>();
         for (TlsParameterType listed : TlsParameterType.values()) {
             if (listed != BIT_POSITION) {
-                identifiers.add(new ParameterIdentifier(listed));
+                ParameterIdentifier identifierToAdd = new ParameterIdentifier(listed);
+                identifiers.add(identifierToAdd);
                 if (listed.isBitmaskDerivation()) {
-                    identifiers.add(
+                    ParameterIdentifier linkedIdentifier =
                             new ParameterIdentifier(
-                                    BIT_POSITION, TlsParameterScope.resolveScope(listed.name())));
+                                    BIT_POSITION, TlsParameterScope.resolveScope(listed.name()));
+                    identifierToAdd.setLinkedParameterIdentifier(linkedIdentifier);
+                    identifiers.add(linkedIdentifier);
                 }
             }
         }

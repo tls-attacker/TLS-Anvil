@@ -7,6 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.testClasses;
 
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.junit.CombinatorialAnvilTest;
 import de.rub.nds.anvilcore.junit.extension.EndpointConditionExtension;
 import de.rub.nds.anvilcore.junit.extension.MethodConditionExtension;
@@ -40,6 +41,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
     WorkflowRunnerResolver.class
 })
 // todo remove code already present in anvil core
+@ModelFromScope(modelType = "GENERIC")
 public abstract class TlsBaseTest extends CombinatorialAnvilTest {
     protected static final Logger LOGGER = LogManager.getLogger();
 

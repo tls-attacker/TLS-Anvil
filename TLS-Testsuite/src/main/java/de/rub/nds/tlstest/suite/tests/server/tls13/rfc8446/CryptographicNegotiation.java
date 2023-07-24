@@ -29,7 +29,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsTestState;
+import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -110,7 +110,7 @@ public class CryptographicNegotiation extends Tls13Test {
                         });
     }
 
-    private void validateResult(TlsTestState i, WorkflowTrace trace) {
+    private void validateResult(TlsTestCase i, WorkflowTrace trace) {
         Validator.receivedFatalAlert(i);
         AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
         if (alert == null) {

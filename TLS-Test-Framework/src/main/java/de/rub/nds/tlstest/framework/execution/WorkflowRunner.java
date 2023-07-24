@@ -40,7 +40,7 @@ import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
-import de.rub.nds.tlstest.framework.anvil.TlsTestState;
+import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;
@@ -81,7 +81,7 @@ public class WorkflowRunner {
      * @param trace Trace to execute
      * @return
      */
-    public TlsTestState execute(WorkflowTrace trace, Config config) {
+    public TlsTestCase execute(WorkflowTrace trace, Config config) {
         if (preparedConfig == null) {
             LOGGER.warn(
                     "Config was not set before execution - WorkflowTrace may me invalid for Test:"
@@ -107,8 +107,8 @@ public class WorkflowRunner {
 
         allowOptionalClientApplicationMessage(trace);
 
-        TlsTestState annotatedState =
-                new TlsTestState(extensionContext, new State(config, trace), derivationContainer);
+        TlsTestCase annotatedState =
+                new TlsTestCase(extensionContext, new State(config, trace), derivationContainer);
 
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             StateExecutionTask task =

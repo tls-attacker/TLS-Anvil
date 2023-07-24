@@ -39,7 +39,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
-import de.rub.nds.tlstest.framework.anvil.TlsTestState;
+import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.model.derivationParameter.TcpFragmentationDerivation;
 import java.io.ByteArrayInputStream;
@@ -61,12 +61,12 @@ public class Validator {
                 || socketState == SocketState.IO_EXCEPTION);
     }
 
-    public static boolean socketClosed(TlsTestState i) {
+    public static boolean socketClosed(TlsTestCase i) {
         SocketState socketState = getSocketState(i);
         return socketClosed(socketState);
     }
 
-    public static void receivedFatalAlert(TlsTestState i, boolean checkExecutedAsPlanned) {
+    public static void receivedFatalAlert(TlsTestCase i, boolean checkExecutedAsPlanned) {
         WorkflowTrace trace = i.getWorkflowTrace();
         SocketState socketState = getSocketState(i);
         boolean lastActionFailed = false;
@@ -138,18 +138,18 @@ public class Validator {
         }
     }
 
-    private static boolean mayOmitDueToTls13(TlsTestState annotatedState) {
+    private static boolean mayOmitDueToTls13(TlsTestCase annotatedState) {
         return annotatedState.getState().getConfig().getHighestProtocolVersion()
                         == ProtocolVersion.TLS13
                 && !TestContext.getInstance().getConfig().isExpectTls13Alerts();
     }
 
-    private static SocketState getSocketState(TlsTestState i) {
+    private static SocketState getSocketState(TlsTestCase i) {
         SocketState socketState = i.getState().getTcpContext().getFinalSocketState();
         return socketState;
     }
 
-    public static List<ProtocolMessage> getMessagesOfLastReceive(TlsTestState annotatedState) {
+    public static List<ProtocolMessage> getMessagesOfLastReceive(TlsTestCase annotatedState) {
         List<ProtocolMessage> messagesReceived = new LinkedList<>();
         WorkflowTrace trace = annotatedState.getWorkflowTrace();
         ReceivingAction lastReceive = trace.getLastReceivingAction();
@@ -178,7 +178,7 @@ public class Validator {
     }
 
     public static void checkReceivedMultipleAlerts(
-            WorkflowTrace trace, TlsTestState annotatedState) {
+            WorkflowTrace trace, TlsTestCase annotatedState) {
         List<ProtocolMessage> receivedAlerts =
                 WorkflowTraceUtil.getAllReceivedMessages(trace, ProtocolMessageType.ALERT);
         if (receivedAlerts.size() > 1) {
@@ -191,7 +191,7 @@ public class Validator {
         }
     }
 
-    public static void checkForUnknownMessage(TlsTestState i) {
+    public static void checkForUnknownMessage(TlsTestCase i) {
         if (i.getWorkflowTrace().getFirstReceivedMessage(UnknownMessage.class) != null) {
             i.addAdditionalResultInfo("Found unknown message");
         } else if (WorkflowTraceUtil.hasUnreadBytes(i.getWorkflowTrace())) {
@@ -199,16 +199,16 @@ public class Validator {
         }
     }
 
-    public static void receivedFatalAlert(TlsTestState i) {
+    public static void receivedFatalAlert(TlsTestCase i) {
         receivedFatalAlert(i, true);
     }
 
-    public static void executedAsPlanned(TlsTestState i) {
+    public static void executedAsPlanned(TlsTestCase i) {
         checkForUnknownMessage(i);
         assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, i.getWorkflowTrace().executedAsPlanned());
     }
 
-    public static void receivedWarningAlert(TlsTestState i) {
+    public static void receivedWarningAlert(TlsTestCase i) {
         checkForUnknownMessage(i);
         WorkflowTrace trace = i.getWorkflowTrace();
         Validator.smartExecutedAsPlanned(i);
@@ -222,12 +222,12 @@ public class Validator {
     }
 
     public static void testAlertDescription(
-            TlsTestState i, AlertDescription expected, AlertMessage msg) {
+            TlsTestCase i, AlertDescription expected, AlertMessage msg) {
         testAlertDescription(i, new AlertDescription[] {expected}, msg);
     }
 
     public static void testAlertDescription(
-            TlsTestState i, AlertDescription[] expected, AlertMessage msg) {
+            TlsTestCase i, AlertDescription[] expected, AlertMessage msg) {
         if (msg == null) {
             i.addAdditionalResultInfo("No alert received to test description for");
             return;
@@ -257,12 +257,12 @@ public class Validator {
         }
     }
 
-    public static void testAlertDescription(TlsTestState i, AlertDescription... expected) {
+    public static void testAlertDescription(TlsTestCase i, AlertDescription... expected) {
         AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
         testAlertDescription(i, expected, alert);
     }
 
-    public static void smartExecutedAsPlanned(TlsTestState state) {
+    public static void smartExecutedAsPlanned(TlsTestCase state) {
         checkForUnknownMessage(state);
         WorkflowTrace trace = state.getWorkflowTrace();
         if (state.getState().getTlsContext().isReceivedMessageWithWrongTls13KeyType()
@@ -416,7 +416,7 @@ public class Validator {
      * severity after receiving the first Fatal Alert (again to allow a Close Notify mostly)
      */
     private static boolean lastMessagesAreTooEarlyEncryptedAlertsTls13(
-            TlsTestState state, ReceiveAction lastReceiveAction) {
+            TlsTestCase state, ReceiveAction lastReceiveAction) {
         ProtocolMessage lastReceivedMessage =
                 lastReceiveAction
                         .getReceivedMessages()

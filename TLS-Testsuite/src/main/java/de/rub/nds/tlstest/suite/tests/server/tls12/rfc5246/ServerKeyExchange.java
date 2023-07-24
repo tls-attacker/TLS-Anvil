@@ -34,7 +34,7 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsTestState;
+import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -77,7 +77,7 @@ public class ServerKeyExchange extends Tls12Test {
                         });
     }
 
-    private Boolean signatureValid(TlsTestState annotatedState) {
+    private Boolean signatureValid(TlsTestCase annotatedState) {
         WorkflowTrace executedTrace = annotatedState.getWorkflowTrace();
         ClientHelloMessage clientHello =
                 (ClientHelloMessage)

@@ -21,7 +21,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.anvil.TlsTestState;
+import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -59,7 +59,7 @@ public class TlsGenericTest extends TlsBaseTest {
         return runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
     }
 
-    public void validateLengthTest(TlsTestState i) {
+    public void validateLengthTest(TlsTestCase i) {
         Validator.checkForUnknownMessage(i);
         assertFalse(
                 "Workflow could be executed as planned for " + parameterCombination.toString(),

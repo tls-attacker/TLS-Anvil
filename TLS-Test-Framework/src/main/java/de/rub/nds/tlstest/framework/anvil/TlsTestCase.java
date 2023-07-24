@@ -8,7 +8,7 @@
 package de.rub.nds.tlstest.framework.anvil;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.rub.nds.anvilcore.teststate.AnvilTestState;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -25,13 +25,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class TlsTestState extends AnvilTestState {
+public class TlsTestCase extends AnvilTestCase {
     private static final Logger LOGGER = LogManager.getLogger();
     private State state;
 
-    private TlsTestState() {}
+    private TlsTestCase() {}
 
-    public TlsTestState(
+    public TlsTestCase(
             ExtensionContext context, State state, TlsParameterCombination parameterCombination) {
         super(parameterCombination, context);
         this.state = state;
@@ -45,7 +45,7 @@ public class TlsTestState extends AnvilTestState {
         this.state = state;
     }
 
-    public void validateFinal(Consumer<TlsTestState> validateFunction) {
+    public void validateFinal(Consumer<TlsTestCase> validateFunction) {
         // Todo: move to WorkflowRunner?
         try {
             validateFunction.accept(this);
@@ -64,8 +64,6 @@ public class TlsTestState extends AnvilTestState {
             setFailedReason(err);
             throw err;
         }
-        // Todo: determine if we need to track this state finish here
-        // associatedContainer.stateFinished(result);
     }
 
     @JsonProperty("Stacktrace")

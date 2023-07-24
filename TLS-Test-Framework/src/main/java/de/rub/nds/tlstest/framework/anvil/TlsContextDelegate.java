@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.anvilcore.context.ApplicationSpecificContextDelegate;
-import de.rub.nds.anvilcore.teststate.AnvilTestState;
-import de.rub.nds.anvilcore.teststate.AnvilTestStateContainer;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
+import de.rub.nds.anvilcore.teststate.AnvilTestRun;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceSerializer;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
@@ -29,12 +29,12 @@ public class TlsContextDelegate implements ApplicationSpecificContextDelegate {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
-    public void onTestFinished(String uniqueId, AnvilTestStateContainer finishedContainer) {
+    public void onTestFinished(String uniqueId, AnvilTestRun finishedContainer) {
         serialize(finishedContainer);
         updateProgress();
     }
 
-    private String getSerializationPath(AnvilTestStateContainer stateContainer) {
+    private String getSerializationPath(AnvilTestRun stateContainer) {
         String method =
                 stateContainer.getTestClass().getName()
                         + "."
@@ -70,7 +70,7 @@ public class TlsContextDelegate implements ApplicationSpecificContextDelegate {
         }
     }
 
-    private void serialize(AnvilTestStateContainer stateContainer) {
+    private void serialize(AnvilTestRun stateContainer) {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setVisibility(
                 mapper.getSerializationConfig()
@@ -107,8 +107,8 @@ public class TlsContextDelegate implements ApplicationSpecificContextDelegate {
                 FileOutputStream fos =
                         new FileOutputStream(Paths.get(targetFolder, "traces.zip").toString());
                 ZipOutputStream zipOut = new ZipOutputStream(fos);
-                for (AnvilTestState anvilState : stateContainer.getStates()) {
-                    TlsTestState tlsTestState = (TlsTestState) anvilState;
+                for (AnvilTestCase anvilState : stateContainer.getStates()) {
+                    TlsTestCase tlsTestState = (TlsTestCase) anvilState;
                     ZipEntry zipEntry = new ZipEntry(tlsTestState.getUuid() + ".xml");
                     zipOut.putNextEntry(zipEntry);
                     try {

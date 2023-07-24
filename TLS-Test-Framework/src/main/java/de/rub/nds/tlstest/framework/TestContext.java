@@ -9,7 +9,7 @@ package de.rub.nds.tlstest.framework;
 
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
-import de.rub.nds.tlstest.framework.config.TestConfig;
+import de.rub.nds.tlstest.framework.config.TlsTestConfig;
 import de.rub.nds.tlstest.framework.execution.TestRunner;
 import java.util.Date;
 import me.tongfei.progressbar.ProgressBar;
@@ -22,7 +22,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class TestContext {
     private static final Logger LOGGER = LogManager.getLogger();
-    private TestConfig config;
+    private TlsTestConfig config;
 
     private static TestContext instance = null;
     private TestRunner testRunner = null;
@@ -47,15 +47,15 @@ public class TestContext {
 
     private TestContext() {
         super();
-        this.config = new TestConfig();
+        this.config = new TlsTestConfig();
         this.testRunner = new TestRunner(this.config, this);
     }
 
-    public synchronized TestConfig getConfig() {
+    public synchronized TlsTestConfig getConfig() {
         return config;
     }
 
-    public synchronized void setConfig(TestConfig config) {
+    public synchronized void setConfig(TlsTestConfig config) {
         this.config = config;
     }
 

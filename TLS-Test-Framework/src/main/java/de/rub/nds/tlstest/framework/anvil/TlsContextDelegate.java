@@ -46,7 +46,12 @@ public class TlsContextDelegate implements ApplicationSpecificContextDelegate {
 
         String[] folderComponents = method.split("\\.");
 
-        return Paths.get(TestContext.getInstance().getConfig().getOutputFolder(), folderComponents)
+        return Paths.get(
+                        TestContext.getInstance()
+                                .getConfig()
+                                .getAnvilTestConfig()
+                                .getOutputFolder(),
+                        folderComponents)
                 .toString();
     }
 
@@ -80,7 +85,7 @@ public class TlsContextDelegate implements ApplicationSpecificContextDelegate {
                         .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                         .withCreatorVisibility(JsonAutoDetect.Visibility.NONE));
 
-        if (TestContext.getInstance().getConfig().isPrettyPrintJSON()) {
+        if (TestContext.getInstance().getConfig().getAnvilTestConfig().isPrettyPrintJSON()) {
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
         }
 

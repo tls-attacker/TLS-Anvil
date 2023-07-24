@@ -108,10 +108,10 @@ public class Fragmentation extends Tls12Test {
         sendAction.setRecords(r);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        int baseTimeout = context.getConfig().getConnectionTimeout();
+        int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();
         if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta() > 0
                 && context.getFeatureExtractionResult().getClosedAfterAppDataDelta()
-                        < context.getConfig().getConnectionTimeout()) {
+                        < context.getConfig().getAnvilTestConfig().getConnectionTimeout()) {
             baseTimeout = (int) context.getFeatureExtractionResult().getClosedAfterAppDataDelta();
         }
         final int reducedTimeout = baseTimeout / 2;
@@ -222,7 +222,8 @@ public class Fragmentation extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
-                new ChangeConnectionTimeoutAction(context.getConfig().getConnectionTimeout() * 3),
+                new ChangeConnectionTimeoutAction(
+                        context.getConfig().getAnvilTestConfig().getConnectionTimeout() * 3),
                 sendOverflow,
                 new ReceiveAction(new AlertMessage()));
 
@@ -259,7 +260,8 @@ public class Fragmentation extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
-                new ChangeConnectionTimeoutAction(context.getConfig().getConnectionTimeout() * 2),
+                new ChangeConnectionTimeoutAction(
+                        context.getConfig().getAnvilTestConfig().getConnectionTimeout() * 2),
                 sendOverflow,
                 new ReceiveAction(new AlertMessage()));
 

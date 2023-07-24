@@ -198,7 +198,9 @@ public class RecordProtocol extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
                 new ChangeConnectionTimeoutAction(
-                        (long) (context.getConfig().getConnectionTimeout() * 2.5)),
+                        (long)
+                                (context.getConfig().getAnvilTestConfig().getConnectionTimeout()
+                                        * 2.5)),
                 sendOverflow,
                 new ReceiveAction(new AlertMessage()));
 
@@ -298,7 +300,7 @@ public class RecordProtocol extends Tls13Test {
     }
 
     public void applyTimeoutMultiplier(Config c, double multiplier) {
-        int baseTimeout = context.getConfig().getConnectionTimeout();
+        int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();
         c.getDefaultClientConnection().setTimeout((int) (baseTimeout * multiplier));
         c.getDefaultServerConnection().setTimeout((int) (baseTimeout * multiplier));
     }
@@ -394,10 +396,10 @@ public class RecordProtocol extends Tls13Test {
         sendAction.setRecords(r);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        int baseTimeout = context.getConfig().getConnectionTimeout();
+        int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();
         if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta() > 0
                 && context.getFeatureExtractionResult().getClosedAfterAppDataDelta()
-                        < context.getConfig().getConnectionTimeout()) {
+                        < context.getConfig().getAnvilTestConfig().getConnectionTimeout()) {
             baseTimeout = (int) context.getFeatureExtractionResult().getClosedAfterAppDataDelta();
         }
         final int reducedTimeout = baseTimeout / 2;

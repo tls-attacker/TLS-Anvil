@@ -117,7 +117,10 @@ public class WorkflowRunner {
                             context.getStateExecutor().getReexecutions());
             TestContext.getInstance().increaseServerHandshakesSinceRestart();
             if (TestContext.getInstance().getServerHandshakesSinceRestart()
-                            == TestContext.getInstance().getConfig().getRestartServerAfter()
+                            == TestContext.getInstance()
+                                    .getConfig()
+                                    .getAnvilTestConfig()
+                                    .getRestartServerAfter()
                     && TestContext.getInstance().getConfig().getTimeoutActionScript() != null) {
                 LOGGER.info("Scheduling server restart with task");
                 task.setBeforeTransportPreInitCallback(
@@ -142,8 +145,12 @@ public class WorkflowRunner {
                         .getTlsContext()
                         .setTransportHandler(
                                 new ServerTcpTransportHandler(
-                                        context.getConfig().getConnectionTimeout(),
-                                        context.getConfig().getConnectionTimeout(),
+                                        context.getConfig()
+                                                .getAnvilTestConfig()
+                                                .getConnectionTimeout(),
+                                        context.getConfig()
+                                                .getAnvilTestConfig()
+                                                .getConnectionTimeout(),
                                         context.getConfig()
                                                 .getTestClientDelegate()
                                                 .getServerSocket()));

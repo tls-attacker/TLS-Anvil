@@ -45,8 +45,8 @@ public class Main {
             testContext.getConfig().parse(args);
 
             String packageName = Main.class.getPackageName();
-            if (testContext.getConfig().getTestPackage() != null) {
-                packageName = testContext.getConfig().getTestPackage();
+            if (testContext.getConfig().getAnvilTestConfig().getTestPackage() != null) {
+                packageName = testContext.getConfig().getAnvilTestConfig().getTestPackage();
                 LOGGER.info("Limiting test to those of package {}", packageName);
             }
             testContext.getTestRunner().runTests(packageName);

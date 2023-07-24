@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.anvilcore.context.AnvilFactoryRegistry;
+import de.rub.nds.anvilcore.junit.reporting.AnvilTestExecutionListener;
 import de.rub.nds.scanner.core.constants.ProbeType;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
@@ -44,12 +45,11 @@ import de.rub.nds.tlstest.framework.anvil.TlsContextDelegate;
 import de.rub.nds.tlstest.framework.anvil.TlsModelType;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterFactory;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
-import de.rub.nds.tlstest.framework.config.TestConfig;
+import de.rub.nds.tlstest.framework.config.TlsTestConfig;
 import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.extractor.TestCaseExtractor;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.reporting.ExecutionListener;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -95,13 +95,13 @@ import org.junit.platform.launcher.listeners.TestExecutionSummary;
 public class TestRunner {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private final TestConfig testConfig;
+    private final TlsTestConfig testConfig;
     private final TestContext testContext;
     private Process tcpdumpProcess;
 
     private boolean targetIsReady = false;
 
-    public TestRunner(TestConfig testConfig, TestContext testContext) {
+    public TestRunner(TlsTestConfig testConfig, TestContext testContext) {
         this.testConfig = testConfig;
         this.testContext = testContext;
     }
@@ -139,7 +139,7 @@ public class TestRunner {
         }
 
         File f = new File(fileName);
-        if (f.exists() && !testConfig.isIgnoreCache()) {
+        if (f.exists() && !testConfig.getAnvilTestConfig().isIgnoreCache()) {
             try {
                 FileInputStream fis = new FileInputStream(fileName);
                 ObjectInputStream ois = new ObjectInputStream(fis);
@@ -225,7 +225,7 @@ public class TestRunner {
         ServerScannerConfig scannerConfig =
                 new ServerScannerConfig(
                         testConfig.getGeneralDelegate(), testConfig.getTestServerDelegate());
-        scannerConfig.setTimeout(testConfig.getConnectionTimeout());
+        scannerConfig.setTimeout(testConfig.getAnvilTestConfig().getConnectionTimeout());
         Config config = scannerConfig.createConfig();
         config.setAddServerNameIndicationExtension(
                 testConfig.createConfig().isAddServerNameIndicationExtension());
@@ -275,7 +275,7 @@ public class TestRunner {
         }
 
         ParallelExecutor preparedExecutor =
-                new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
+                new ParallelExecutor(testConfig.getAnvilTestConfig().getParallelTestCases(), 2);
         preparedExecutor.setDefaultBeforeTransportPreInitCallback(getSocketManagementCallback());
 
         ClientHelloMessage clientHello = catchClientHello(preparedExecutor);
@@ -297,7 +297,7 @@ public class TestRunner {
         clientScannerConfig
                 .getServerDelegate()
                 .setPort(testConfig.getDelegate(TestClientDelegate.class).getPort());
-        clientScannerConfig.setTimeout(testConfig.getConnectionTimeout());
+        clientScannerConfig.setTimeout(testConfig.getAnvilTestConfig().getConnectionTimeout());
         clientScannerConfig.getExecutorConfig().setProbes(probes);
         clientScannerConfig.setExternalRunCallback(
                 testConfig.getTestClientDelegate().getTriggerScript());
@@ -306,7 +306,9 @@ public class TestRunner {
                 new TlsClientScanner(clientScannerConfig, preparedExecutor);
 
         String identifier =
-                testConfig.getIdentifier() == null ? "client" : testConfig.getIdentifier();
+                testConfig.getAnvilTestConfig().getIdentifier() == null
+                        ? "client"
+                        : testConfig.getAnvilTestConfig().getIdentifier();
         ClientFeatureExtractionResult extractionResult =
                 ClientFeatureExtractionResult.fromClientScanReport(
                         clientScanner.scan(), identifier);
@@ -324,8 +326,8 @@ public class TestRunner {
             state.getTlsContext()
                     .setTransportHandler(
                             new ServerTcpTransportHandler(
-                                    testConfig.getConnectionTimeout(),
-                                    testConfig.getConnectionTimeout(),
+                                    testConfig.getAnvilTestConfig().getConnectionTimeout(),
+                                    testConfig.getAnvilTestConfig().getConnectionTimeout(),
                                     testConfig.getTestClientDelegate().getServerSocket()));
         } catch (IOException ex) {
             throw new RuntimeException("Failed to set TransportHandler");
@@ -340,7 +342,7 @@ public class TestRunner {
             return;
         }
 
-        String networkInterface = testConfig.getNetworkInterface();
+        String networkInterface = testConfig.getAnvilTestConfig().getNetworkInterface();
 
         if (networkInterface.equals("any")) {
             LOGGER.warn(
@@ -353,7 +355,8 @@ public class TestRunner {
                         "-i",
                         networkInterface,
                         "-w",
-                        Paths.get(testConfig.getOutputFolder(), "dump.pcap").toString());
+                        Paths.get(testConfig.getAnvilTestConfig().getOutputFolder(), "dump.pcap")
+                                .toString());
 
         try {
             tcpdumpProcess = tcpdump.start();
@@ -378,11 +381,12 @@ public class TestRunner {
             return;
         }
 
-        if (!testConfig.isDisableTcpDump()) {
+        if (!testConfig.getAnvilTestConfig().isDisableTcpDump()) {
             startTcpDump();
         }
 
-        ParallelExecutor executor = new ParallelExecutor(testConfig.getParallelHandshakes(), 2);
+        ParallelExecutor executor =
+                new ParallelExecutor(testConfig.getAnvilTestConfig().getParallelTestCases(), 2);
         executor.setTimeoutAction(testConfig.getTimeoutActionScript());
         executor.armTimeoutAction(20000);
         testContext.setStateExecutor(executor);
@@ -469,7 +473,8 @@ public class TestRunner {
                 .addParameterTypes(TlsParameterType.values(), new TlsParameterFactory());
         anvilContext.getKnownModelTypes().addAll(Arrays.asList(TlsModelType.values()));
         anvilContext.setApplicationSpecificContextDelegate(new TlsContextDelegate());
-        anvilContext.setTestStrength(TestContext.getInstance().getConfig().getStrength());
+        anvilContext.setTestStrength(
+                TestContext.getInstance().getConfig().getAnvilTestConfig().getStrength());
 
         LauncherDiscoveryRequestBuilder builder =
                 LauncherDiscoveryRequestBuilder.request()
@@ -484,23 +489,23 @@ public class TestRunner {
                                 "junit.jupiter.execution.parallel.config.strategy", "fixed")
                         .configurationParameter(
                                 "junit.jupiter.execution.parallel.config.fixed.parallelism",
-                                String.valueOf(testConfig.getParallelTests()));
+                                String.valueOf(testConfig.getAnvilTestConfig().getParallelTests()));
 
-        if (testConfig.getTags().size() > 0) {
-            builder.filters(TagFilter.includeTags(testConfig.getTags()));
+        if (!testConfig.getAnvilTestConfig().getTags().isEmpty()) {
+            builder.filters(TagFilter.includeTags(testConfig.getAnvilTestConfig().getTags()));
         }
 
         LauncherDiscoveryRequest request = builder.build();
 
-        SummaryGeneratingListener listener = new SummaryGeneratingListener();
-        ExecutionListener reporting = new ExecutionListener();
+        SummaryGeneratingListener summaryListener = new SummaryGeneratingListener();
+        AnvilTestExecutionListener anvilListener = new AnvilTestExecutionListener();
 
         Launcher launcher =
                 LauncherFactory.create(
                         LauncherConfig.builder()
                                 .enableTestExecutionListenerAutoRegistration(false)
-                                .addTestExecutionListeners(listener)
-                                .addTestExecutionListeners(reporting)
+                                .addTestExecutionListeners(summaryListener)
+                                .addTestExecutionListeners(anvilListener)
                                 .build());
 
         TestPlan testplan = launcher.discover(request);
@@ -534,7 +539,10 @@ public class TestRunner {
         LOGGER.info("Testing using default strength " + anvilContext.getTestStrength());
         LOGGER.info(
                 "Default timeout "
-                        + TestContext.getInstance().getConfig().getConnectionTimeout()
+                        + TestContext.getInstance()
+                                .getConfig()
+                                .getAnvilTestConfig()
+                                .getConnectionTimeout()
                         + " ms");
         logCommonDerivationValues();
         AnvilContext.getInstance().setTotalTests(testcases);
@@ -547,7 +555,7 @@ public class TestRunner {
             LOGGER.error("Something seems to be wrong, testsuite executed in " + elapsedTime + "s");
         }
 
-        TestExecutionSummary summary = listener.getSummary();
+        TestExecutionSummary summary = summaryListener.getSummary();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(baos, true);
         summary.printTo(writer);
@@ -651,8 +659,8 @@ public class TestRunner {
                 state.getTlsContext()
                         .setTransportHandler(
                                 new ServerTcpTransportHandler(
-                                        testConfig.getConnectionTimeout(),
-                                        testConfig.getConnectionTimeout(),
+                                        testConfig.getAnvilTestConfig().getConnectionTimeout(),
+                                        testConfig.getAnvilTestConfig().getConnectionTimeout(),
                                         testConfig.getTestClientDelegate().getServerSocket()));
                 return 0;
             } catch (IOException ex) {

@@ -12,6 +12,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.context.AnvilContext;
+import de.rub.nds.anvilcore.context.AnvilTestConfig;
 import de.rub.nds.scanner.core.constants.CollectionResult;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
@@ -46,7 +47,9 @@ import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class TestConfig extends TLSDelegateConfig {
+public class TlsTestConfig extends TLSDelegateConfig {
+
+    private AnvilTestConfig anvilTestConfig;
     private static final Logger LOGGER = LogManager.getLogger();
     private TestClientDelegate testClientDelegate = null;
     private TestServerDelegate testServerDelegate = null;
@@ -62,96 +65,17 @@ public class TestConfig extends TLSDelegateConfig {
 
     private ConfigDelegates parsedCommand = null;
 
-    @Parameter(names = "-tags", description = "Run only tests containing on of the specified tags")
-    private List<String> tags = new ArrayList<>();
-
-    @Parameter(
-            names = "-testPackage",
-            description = "Run only tests included in the specified package")
-    private String testPackage = null;
-
-    @Parameter(
-            names = "-ignoreCache",
-            description =
-                    "Discovering supported TLS-Features takes time, "
-                            + "thus they are cached. Using this flag, the cache is ignored.")
-    private boolean ignoreCache = false;
-
     @Parameter(
             names = "-exportTraces",
             description =
                     "Export executed WorkflowTraces with all values " + "used in the messages")
     private boolean exportTraces = false;
 
-    @Parameter(
-            names = "-outputFolder",
-            description =
-                    "Folder where the test results should be stored inside, defaults to `pwd/TestSuiteResults_$(date)`")
-    private String outputFolder = "";
-
-    @Parameter(
-            names = "-parallelHandshakes",
-            description =
-                    "How many TLS-Handshakes should be executed in parallel? (Default value: 5)")
-    private int parallelHandshakes = 5;
-
-    @Parameter(
-            names = "-parallelTests",
-            description =
-                    "How many tests should be executed in parallel? (Default value: parallelHandshakes * 1.5)")
-    private Integer parallelTests = null;
-
-    @Parameter(
-            names = "-restartServerAfter",
-            description =
-                    "How many handshakes should be executed for a Server before a restart? (Default value: 0 = infinite)")
-    private Integer restartServerAfter = 0;
-
-    @Parameter(
-            names = "-timeoutActionScript",
-            description =
-                    "Script to execute, if the execution of the testsuite "
-                            + "seems to make no progress",
-            variableArity = true)
-    private List<String> timeoutActionCommand = new ArrayList<>();
-
-    @Parameter(
-            names = "-identifier",
-            description =
-                    "Identifier that is visible in the serialized test result. "
-                            + "Defaults to the hostname of the target or the port. The identifier is visible in the test report.")
-    private String identifier = null;
-
-    @Parameter(
-            names = "-strength",
-            description = "Strength of the pairwise test. (Default value: 2)")
-    private int strength = 2;
-
-    @Parameter(
-            names = "-connectionTimeout",
-            description = "The default timeout for TLS sessions in ms. (Default value: 1500)")
-    private int connectionTimeout = 1500;
-
-    @Parameter(names = "-prettyPrintJSON", description = "Pretty print json output")
-    private boolean prettyPrintJSON = false;
-
-    @Parameter(
-            names = "-networkInterface",
-            description =
-                    "Network interface from which packets are recorded using tcpdump. "
-                            + "(Default value: any")
-    private String networkInterface = "any";
-
-    @Parameter(
-            names = "-disableTcpDump",
-            description = "Disables the packet capturing with tcpdump")
-    private boolean disableTcpDump = false;
-
     // we might want to turn these into CLI parameters in the future
     private boolean expectTls13Alerts = false;
     private boolean enforceSenderRestrictions = false;
 
-    public TestConfig() {
+    public TlsTestConfig() {
         super(new GeneralDelegate());
         this.testServerDelegate = new TestServerDelegate();
         this.testClientDelegate = new TestClientDelegate();
@@ -192,7 +116,8 @@ public class TestConfig extends TLSDelegateConfig {
     }
 
     public void parse(@Nullable String[] args) {
-        if (parsedArgs) return;
+        if (isParsedArgs()) return;
+        anvilTestConfig = new AnvilTestConfig();
 
         if (argParser == null) {
             argParser =
@@ -202,7 +127,7 @@ public class TestConfig extends TLSDelegateConfig {
                             .addCommand(
                                     ConfigDelegates.EXTRACT_TESTS.getCommand(),
                                     testExtractorDelegate)
-                            .addObject(this)
+                            .addObject(getAnvilTestConfig())
                             .build();
         }
 
@@ -229,35 +154,37 @@ public class TestConfig extends TLSDelegateConfig {
         this.setTestEndpointMode(argParser.getParsedCommand());
         AnvilContext.getInstance().setEvaluatedEndpoint(this.getTestEndpointMode());
 
-        if (this.identifier == null) {
+        if (getAnvilTestConfig().getIdentifier() == null) {
             if (argParser.getParsedCommand().equals(ConfigDelegates.SERVER.getCommand())) {
-                this.identifier = testServerDelegate.getHost();
+                getAnvilTestConfig().setIdentifier(testServerDelegate.getHost());
             } else {
-                this.identifier = testClientDelegate.getPort().toString();
+                getAnvilTestConfig().setIdentifier(testClientDelegate.getPort().toString());
             }
         }
 
-        if (this.outputFolder.isEmpty()) {
-            this.outputFolder =
-                    Paths.get(
-                                    System.getProperty("user.dir"),
-                                    "TestSuiteResults_" + Utils.DateToISO8601UTC(new Date()))
-                            .toString();
+        if (getAnvilTestConfig().getOutputFolder().isEmpty()) {
+            getAnvilTestConfig()
+                    .setOutputFolder(
+                            Paths.get(
+                                            System.getProperty("user.dir"),
+                                            "TestSuiteResults_"
+                                                    + Utils.DateToISO8601UTC(new Date()))
+                                    .toString());
         }
 
         try {
-            Path outputFolder = Paths.get(this.outputFolder);
+            Path outputFolder = Paths.get(getAnvilTestConfig().getOutputFolder());
             outputFolder = outputFolder.toAbsolutePath();
+            outputFolder.toFile().mkdirs();
+            getAnvilTestConfig().setOutputFolder(outputFolder.toString());
 
-            this.outputFolder = outputFolder.toString();
-            Paths.get(this.outputFolder).toFile().mkdirs();
-
-            if (timeoutActionCommand.size() > 0) {
+            if (!anvilTestConfig.getTimeoutActionCommand().isEmpty()) {
                 timeoutActionScript =
                         () -> {
                             LOGGER.debug("Timeout action executed");
                             ProcessBuilder processBuilder =
-                                    new ProcessBuilder(timeoutActionCommand);
+                                    new ProcessBuilder(
+                                            getAnvilTestConfig().getTimeoutActionCommand());
                             Process p = processBuilder.start();
                             p.waitFor();
                             Thread.sleep(1500);
@@ -267,18 +194,14 @@ public class TestConfig extends TLSDelegateConfig {
 
             if (this.getGeneralDelegate().getKeylogfile() == null) {
                 this.getGeneralDelegate()
-                        .setKeylogfile(Path.of(this.outputFolder, "keyfile.log").toString());
+                        .setKeylogfile(
+                                Path.of(getAnvilTestConfig().getOutputFolder(), "keyfile.log")
+                                        .toString());
             }
         } catch (Exception e) {
             throw new ParameterException(e);
         }
-
-        parallelHandshakes =
-                Math.min(parallelHandshakes, Runtime.getRuntime().availableProcessors());
-        if (parallelTests == null) {
-            parallelTests = (int) Math.ceil(parallelHandshakes * 1.5);
-        }
-
+        getAnvilTestConfig().restrictParallelization();
         parsedArgs = true;
     }
 
@@ -360,13 +283,16 @@ public class TestConfig extends TLSDelegateConfig {
 
         // Server test -> TLS-Attacker acts as Client
         config.getDefaultClientConnection()
-                .setFirstTimeout((parallelHandshakes + 1) * connectionTimeout);
-        config.getDefaultClientConnection().setTimeout(connectionTimeout);
+                .setFirstTimeout(
+                        (getAnvilTestConfig().getParallelTestCases() + 1)
+                                * getAnvilTestConfig().getConnectionTimeout());
+        config.getDefaultClientConnection().setTimeout(getAnvilTestConfig().getConnectionTimeout());
         config.getDefaultClientConnection().setConnectionTimeout(0);
 
         // Client test -> TLS-Attacker acts as Server
-        config.getDefaultServerConnection().setFirstTimeout(connectionTimeout);
-        config.getDefaultServerConnection().setTimeout(connectionTimeout);
+        config.getDefaultServerConnection()
+                .setFirstTimeout(getAnvilTestConfig().getConnectionTimeout());
+        config.getDefaultServerConnection().setTimeout(getAnvilTestConfig().getConnectionTimeout());
 
         config.setWorkflowExecutorShouldClose(true);
         config.setStealthMode(true);
@@ -476,14 +402,6 @@ public class TestConfig extends TLSDelegateConfig {
         }
     }
 
-    public String getTestPackage() {
-        return testPackage;
-    }
-
-    public List<String> getTags() {
-        return tags;
-    }
-
     public TestServerDelegate getTestServerDelegate() {
         return testServerDelegate;
     }
@@ -493,7 +411,7 @@ public class TestConfig extends TLSDelegateConfig {
     }
 
     public void setArgParser(JCommander argParser) {
-        if (parsedArgs) {
+        if (isParsedArgs()) {
             LOGGER.warn(
                     "Args are already parsed, setting the argParse requires calling parse() again.");
         }
@@ -502,90 +420,6 @@ public class TestConfig extends TLSDelegateConfig {
 
     public JCommander getArgParser() {
         return argParser;
-    }
-
-    public boolean isIgnoreCache() {
-        return ignoreCache;
-    }
-
-    public void setIgnoreCache(boolean ignoreCache) {
-        this.ignoreCache = ignoreCache;
-    }
-
-    public String getOutputFolder() {
-        return outputFolder;
-    }
-
-    public void setOutputFolder(String outputFolder) {
-        this.outputFolder = outputFolder;
-    }
-
-    public boolean isParsedArgs() {
-        return parsedArgs;
-    }
-
-    public int getParallelHandshakes() {
-        return parallelHandshakes;
-    }
-
-    public void setParallelHandshakes(int parallelHandshakes) {
-        this.parallelHandshakes = parallelHandshakes;
-    }
-
-    public Callable<Integer> getTimeoutActionScript() {
-        return timeoutActionScript;
-    }
-
-    public void setTimeoutActionScript(Callable<Integer> timeoutActionScript) {
-        this.timeoutActionScript = timeoutActionScript;
-    }
-
-    public List<String> getTimeoutActionCommand() {
-        return timeoutActionCommand;
-    }
-
-    public void setTimeoutActionCommand(List<String> timeoutActionCommand) {
-        this.timeoutActionCommand = timeoutActionCommand;
-    }
-
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
-    public int getParallelTests() {
-        return parallelTests;
-    }
-
-    public void setParallelTests(int parallelTests) {
-        this.parallelTests = parallelTests;
-    }
-
-    public int getStrength() {
-        return strength;
-    }
-
-    public void setStrength(int strength) {
-        this.strength = strength;
-    }
-
-    public Integer getRestartServerAfter() {
-        return restartServerAfter;
-    }
-
-    public void setRestartServerAfter(Integer restartServerAfter) {
-        this.restartServerAfter = restartServerAfter;
-    }
-
-    public int getConnectionTimeout() {
-        return connectionTimeout;
-    }
-
-    public void setConnectionTimeout(int connectionTimeout) {
-        this.connectionTimeout = connectionTimeout;
     }
 
     public boolean isExpectTls13Alerts() {
@@ -608,14 +442,6 @@ public class TestConfig extends TLSDelegateConfig {
         this.exportTraces = exportTraces;
     }
 
-    public boolean isPrettyPrintJSON() {
-        return prettyPrintJSON;
-    }
-
-    public void setPrettyPrintJSON(boolean prettyPrintJSON) {
-        this.prettyPrintJSON = prettyPrintJSON;
-    }
-
     public ConfigDelegates getParsedCommand() {
         return parsedCommand;
     }
@@ -624,19 +450,15 @@ public class TestConfig extends TLSDelegateConfig {
         return testExtractorDelegate;
     }
 
-    public String getNetworkInterface() {
-        return networkInterface;
+    public boolean isParsedArgs() {
+        return parsedArgs;
     }
 
-    public void setNetworkInterface(String networkInterface) {
-        this.networkInterface = networkInterface;
+    public AnvilTestConfig getAnvilTestConfig() {
+        return anvilTestConfig;
     }
 
-    public boolean isDisableTcpDump() {
-        return disableTcpDump;
-    }
-
-    public void setDisableTcpDump(boolean disableTcpDump) {
-        this.disableTcpDump = disableTcpDump;
+    public Callable<Integer> getTimeoutActionScript() {
+        return timeoutActionScript;
     }
 }

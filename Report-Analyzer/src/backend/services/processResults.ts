@@ -92,12 +92,12 @@ export function process(results: ITestResult[], identifiers: {_id: string, Ident
     items[5][identifier] = {isHead: true, data: result.appliedEdit, value: result.edited ? '✅' : ''}
 
     for (const state of result.States) {
-      for (const derivation in state.DerivationContainer) {
+      for (const derivation in state.TlsParameterCombination) {
         derivationsSet.add(derivation)
         if (!derivationValues[derivation]) {
           derivationValues[derivation] = new Set<string>()
         }
-        derivationValues[derivation].add(state.DerivationContainer[derivation])
+        derivationValues[derivation].add(state.TlsParameterCombination[derivation])
       }
 
       state.AdditionalResultInformation.split(/;|\n/).filter(i => i !== "").forEach(i => additionalResultInfformationSet.add(i))

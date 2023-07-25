@@ -7,8 +7,20 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterFactory;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
+import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
@@ -27,30 +39,20 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -62,16 +64,16 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class ServerKeyExchange extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The client verifies the signature (when present) and retrieves the "
                             + "server's elliptic curve domain parameters and ephemeral ECDH public "
                             + "key from the ServerKeyExchange message.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
-    @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)
+    @IncludeParameter("SIGNATURE_BITMASK")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -79,7 +81,7 @@ public class ServerKeyExchange extends Tls12Test {
     public void invalidServerKeyExchangeSignature(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] bitmask = derivationContainer.buildBitmask();
+        byte[] bitmask = parameterCombination.buildBitmask();
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilReceivingMessage(
@@ -122,23 +124,26 @@ public class ServerKeyExchange extends Tls12Test {
         return parameterValues;
     }
 
-    public List<DerivationParameter> getCertsIncludingUnsupportedPkGroups(DerivationScope scope) {
+    public List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>>
+            getCertsIncludingUnsupportedPkGroups(DerivationScope scope) {
         CertificateDerivation certDerivation =
-                (CertificateDerivation) DerivationFactory.getInstance(DerivationType.CERTIFICATE);
+                (CertificateDerivation)
+                        ParameterFactory.getInstanceFromIdentifier(
+                                new ParameterIdentifier(TlsParameterType.CERTIFICATE));
         return certDerivation.getApplicableCertificates(context, scope, true);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A possible reason for a "
                             + "fatal handshake failure is that the client's capabilities for "
                             + "handling elliptic curves and point formats are exceeded")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
     @ExplicitValues(
-            affectedTypes = {DerivationType.NAMED_GROUP, DerivationType.CERTIFICATE},
+            affectedIdentifiers = {"NAMED_GROUP", "CERTIFICATE"},
             methods = {"getUnproposedNamedGroups", "getCertsIncludingUnsupportedPkGroups"})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
@@ -182,23 +187,23 @@ public class ServerKeyExchange extends Tls12Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A possible reason for a "
                             + "fatal handshake failure is that the client's capabilities for "
                             + "handling elliptic curves and point formats are exceeded")
-    @ModelFromScope(baseModel = ModelType.GENERIC)
-    @ScopeExtensions(DerivationType.CERTIFICATE)
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ModelFromScope(modelType = "GENERIC")
+    @IncludeParameter("CERTIFICATE")
+    @ExcludeParameter("NAMED_GROUP")
     @ExplicitValues(
-            affectedTypes = DerivationType.CERTIFICATE,
+            affectedIdentifiers = "CERTIFICATE",
             methods = "getEcdhCertsForUnproposedGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.CIPHERSUITE,
+            affectedIdentifiers = "CIPHER_SUITE",
             methods = "isStaticEcdhCipherSuite")
     public void acceptsUnproposedNamedGroupStatic(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -216,12 +221,12 @@ public class ServerKeyExchange extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The client verifies the signature (when present) and retrieves the "
                             + "server's elliptic curve domain parameters and ephemeral ECDH public "
                             + "key from the ServerKeyExchange message.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
@@ -254,19 +259,17 @@ public class ServerKeyExchange extends Tls12Test {
         return !cipherSuite.isAnon();
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The client verifies the signature (when present) and retrieves the "
                             + "server's elliptic curve domain parameters and ephemeral ECDH public "
                             + "key from the ServerKeyExchange message.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations(DerivationType.SIG_HASH_ALGORIHTM)
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @ExcludeParameter("SIG_HASH_ALGORIHTM")
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(
-            affectedTypes = DerivationType.CIPHERSUITE,
-            methods = "isNotAnonCipherSuite")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNotAnonCipherSuite")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -281,7 +284,7 @@ public class ServerKeyExchange extends Tls12Test {
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         CipherSuite selectedCipherSuite =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         DigestAlgorithm digest =
                 AlgorithmResolver.getDigestAlgorithm(ProtocolVersion.TLS12, selectedCipherSuite);
         String digestName = "NONE";
@@ -325,18 +328,18 @@ public class ServerKeyExchange extends Tls12Test {
         return unsupportedAlgorithms;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the client has offered the \"signature_algorithms\" extension, the "
                             + "signature algorithm and hash algorithm MUST be a pair listed in that "
                             + "extension. ")
     @RFC(number = 5246, section = "7.4.3.  Server Key Exchange Message")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
     @ExplicitValues(
-            affectedTypes = DerivationType.SIG_HASH_ALGORIHTM,
+            affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getUnproposedSignatureAndHashAlgorithms")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

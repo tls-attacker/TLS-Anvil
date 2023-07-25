@@ -199,7 +199,7 @@ export function filter(inputModel: FilterInputModels.ComposedModel, dataModel: F
           }
 
           let result = filterRow<IStateTable>(evalString, i => {
-            return i.DerivationContainer[derivationType]
+            return i.TlsParameterCombination[derivationType]
           }, row).reduce((i, j) => i || j)
           conditionEvalString.push(result.toString())
         }  

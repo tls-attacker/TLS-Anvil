@@ -9,6 +9,11 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -24,19 +29,13 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests;
@@ -60,7 +59,7 @@ public class HelloRetryRequest extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not send a Hello Retry Request");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The server will send this message in response to a ClientHello "
                             + "message if it is able to find an acceptable set of parameters but the "
@@ -79,7 +78,7 @@ public class HelloRetryRequest extends Tls13Test {
     public void helloRetryRequestValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipher =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
 
         // 4.2.8 Key Share: "This vector MAY be empty if the client is requesting a
         // HelloRetryRequest."
@@ -140,12 +139,12 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Servers MUST ensure that they negotiate the "
                             + "same cipher suite when receiving a conformant updated ClientHello")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
-    @ScopeLimitations(DerivationType.CIPHERSUITE)
+    @ExcludeParameter("CIPHER_SUITE")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -197,7 +196,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Servers MUST ensure that they negotiate the "
                             + "same cipher suite when receiving a conformant updated ClientHello")
@@ -209,7 +208,7 @@ public class HelloRetryRequest extends Tls13Test {
     public void selectsSameCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipherSuite =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = getHelloRetryWorkflowTrace(runner);
 
@@ -249,7 +248,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The value of selected_version in the HelloRetryRequest "
                             + "\"supported_versions\" extension MUST be retained in the ServerHello")

@@ -11,6 +11,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -39,7 +45,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.nio.charset.Charset;
@@ -83,7 +88,7 @@ public class Resumption extends Tls12Test {
         return ConditionEvaluationResult.disabled("SNI is disabled");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A server that implements this extension MUST NOT accept the request "
                             + "to resume the session if the server_name extension contains a "
@@ -126,7 +131,7 @@ public class Resumption extends Tls12Test {
                                     executedTrace.getLastReceivedMessage(ServerHelloMessage.class);
                             ClientHelloMessage cHello2 =
                                     executedTrace.getLastSendMessage(ClientHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, sHello);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
 
                             // only test if we can assume that the server accepted the SNI in
                             // the initial handshake
@@ -143,7 +148,7 @@ public class Resumption extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "When resuming a session, the server MUST "
                             + "NOT include a server_name extension in the server hello.")
@@ -169,7 +174,7 @@ public class Resumption extends Tls12Test {
                                     trace.getLastReceivedMessage(ServerHelloMessage.class);
                             ClientHelloMessage cHello2 =
                                     trace.getLastSendMessage(ClientHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, sHello);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
 
                             if (sHello2 != null
                                     && Arrays.equals(
@@ -183,7 +188,7 @@ public class Resumption extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "In this case, other connections corresponding to the "
                             + "session may continue, but the session identifier MUST be invalidated, "
@@ -192,14 +197,14 @@ public class Resumption extends Tls12Test {
                             + "Thus, any connection terminated with a fatal alert MUST NOT be resumed.")
     @RFC(number = 5246, section = "7.2. Alert Protocol and 7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
-    @ScopeExtensions(DerivationType.ALERT)
-    @ScopeLimitations(DerivationType.INCLUDE_SESSION_TICKET_EXTENSION)
+    @IncludeParameter("ALERT")
+    @ExcludeParameter("INCLUDE_SESSION_TICKET_EXTENSION")
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @SecurityCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     public void rejectResumptionAfterFatalPostHandshake(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -208,7 +213,7 @@ public class Resumption extends Tls12Test {
                 runner.generateWorkflowTraceUntilLastMessage(
                         WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
         AlertDescription alertDescr =
-                derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(AlertDerivation.class).getSelectedValue();
 
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.FATAL.getValue()));
@@ -258,17 +263,17 @@ public class Resumption extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description = "Thus, any connection terminated with a fatal alert MUST NOT be resumed.")
     @RFC(number = 5246, section = "7.2.2 Error Alerts")
     @MethodCondition(method = "supportsResumption")
-    @ScopeLimitations(DerivationType.INCLUDE_SESSION_TICKET_EXTENSION)
+    @ExcludeParameter("INCLUDE_SESSION_TICKET_EXTENSION")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.MEDIUM)
-    @ScopeExtensions(DerivationType.ALERT)
+    @IncludeParameter("ALERT")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     public void rejectResumptionAfterInvalidFinished(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

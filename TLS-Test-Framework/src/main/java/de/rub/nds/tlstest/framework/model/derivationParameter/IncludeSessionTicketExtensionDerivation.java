@@ -7,18 +7,19 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
 /** */
-public class IncludeSessionTicketExtensionDerivation extends DerivationParameter<Boolean> {
+public class IncludeSessionTicketExtensionDerivation extends TlsDerivationParameter<Boolean> {
 
     public IncludeSessionTicketExtensionDerivation() {
-        super(DerivationType.INCLUDE_SESSION_TICKET_EXTENSION, Boolean.class);
+        super(TlsParameterType.INCLUDE_SESSION_TICKET_EXTENSION, Boolean.class);
     }
 
     public IncludeSessionTicketExtensionDerivation(Boolean selectedValue) {
@@ -27,16 +28,21 @@ public class IncludeSessionTicketExtensionDerivation extends DerivationParameter
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, Boolean>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, Boolean>> parameterValues = new LinkedList<>();
         parameterValues.add(new IncludeSessionTicketExtensionDerivation(true));
         parameterValues.add(new IncludeSessionTicketExtensionDerivation(false));
         return parameterValues;
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-        config.setAddSessionTicketTLSExtension(getSelectedValue());
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+        config.getTlsConfig().setAddSessionTicketTLSExtension(getSelectedValue());
+    }
+
+    @Override
+    protected TlsDerivationParameter<Boolean> generateValue(Boolean selectedValue) {
+        return new IncludeSessionTicketExtensionDerivation(selectedValue);
     }
 }

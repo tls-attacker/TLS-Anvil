@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.utils;
 
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
@@ -48,7 +48,7 @@ public class Utils {
             ExtensionContext extensionContext) {
         Optional<Method> testMethod = extensionContext.getTestMethod();
         // this will also yield false for all disabled tests
-        return testMethod.isPresent() && testMethod.get().isAnnotationPresent(TlsTest.class);
+        return testMethod.isPresent() && testMethod.get().isAnnotationPresent(AnvilTest.class);
     }
 
     public static String DateToISO8601UTC(Date date) {

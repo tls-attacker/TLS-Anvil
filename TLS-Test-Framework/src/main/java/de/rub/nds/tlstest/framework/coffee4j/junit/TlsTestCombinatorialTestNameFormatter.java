@@ -1,7 +1,7 @@
 package de.rub.nds.tlstest.framework.coffee4j.junit;
 
-import de.rub.nds.tlstest.framework.model.DerivationContainer;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rwth.swc.coffee4j.junit.CombinatorialTest;
 import de.rwth.swc.coffee4j.junit.CombinatorialTestNameFormatter;
 import de.rwth.swc.coffee4j.model.Combination;
@@ -63,11 +63,12 @@ public class TlsTestCombinatorialTestNameFormatter extends CombinatorialTestName
 
     private String replaceCombinations(String pattern, Combination testInput) {
         return pattern.replace(
-                "{combination}", DerivationContainer.fromCombination(testInput).toString());
+                "{combination}", TlsParameterCombination.fromCombination(testInput).toString());
     }
 
     private String replaceCombinations(String pattern, List<DerivationParameter> testInput) {
         return pattern.replace(
-                "{combination}", new DerivationContainer(new LinkedList<>(testInput)).toString());
+                "{combination}",
+                new TlsParameterCombination(new LinkedList<>(testInput)).toString());
     }
 }

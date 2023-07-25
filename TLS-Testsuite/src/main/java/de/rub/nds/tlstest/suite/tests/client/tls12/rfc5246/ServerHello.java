@@ -7,6 +7,11 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -30,19 +35,12 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CompressionMethodDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
@@ -53,12 +51,12 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class ServerHello extends Tls12Test {
 
     @RFC(number = 5246, section = "7.4.1.4. Hello Extensions")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a client receives an extension type in ServerHello that it did "
                             + "not request in the associated ClientHello, it MUST abort the handshake with an "
                             + "unsupported_extension fatal alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -136,14 +134,14 @@ public class ServerHello extends Tls12Test {
         return !proposedCompressionMethods.contains(compressionMethod);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The single compression algorithm selected by the server from the "
                             + "list in ClientHello.compression_methods.")
     @RFC(number = 5246, section = "7.4.1.3.  Server Hello")
-    @ScopeExtensions(DerivationType.COMPRESSION_METHOD)
+    @IncludeParameter("COMPRESSION_METHOD")
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.COMPRESSION_METHOD,
+            affectedIdentifiers = "COMPRESSION_METHOD",
             methods = "isUnproposedCompressionMethod")
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)
@@ -152,8 +150,8 @@ public class ServerHello extends Tls12Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CompressionMethod selectedCompressionMethod =
-                derivationContainer
-                        .getDerivation(CompressionMethodDerivation.class)
+                parameterCombination
+                        .getParameter(CompressionMethodDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

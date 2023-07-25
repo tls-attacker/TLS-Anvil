@@ -9,6 +9,10 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
 import static org.junit.Assert.assertEquals;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -24,17 +28,12 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +81,7 @@ public class SignatureAlgorithms extends Tls12Test {
         return ConditionEvaluationResult.disabled("No ECDSA signature ciphersuites supported");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the client does not send the signature_algorithms extension, the server MUST do the following:"
                             + "[...]If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), "
@@ -118,7 +117,7 @@ public class SignatureAlgorithms extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the client does not send the signature_algorithms extension, the server MUST do the following:"
                             + "[...]If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), "
@@ -154,7 +153,7 @@ public class SignatureAlgorithms extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Each SignatureAndHashAlgorithm value lists a single hash/signature "
                             + "pair that the client is willing to verify.  The values are indicated "
@@ -185,8 +184,8 @@ public class SignatureAlgorithms extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(description = "Send a ClientHello that offers many SignatureAndHash algorithms")
-    @ScopeLimitations(DerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS)
+    @AnvilTest(description = "Send a ClientHello that offers many SignatureAndHash algorithms")
+    @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)

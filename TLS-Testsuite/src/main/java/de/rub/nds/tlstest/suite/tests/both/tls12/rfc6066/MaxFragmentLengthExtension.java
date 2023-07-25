@@ -7,6 +7,10 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc6066;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -24,17 +28,12 @@ import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -59,7 +58,7 @@ public class MaxFragmentLengthExtension extends Tls12Test {
                 "Client does not support maximum fragment length");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Note that the "
                             + "output of the record layer may be larger.  For example, if the "
@@ -74,7 +73,7 @@ public class MaxFragmentLengthExtension extends Tls12Test {
     @HandshakeCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
-    @ScopeLimitations(DerivationType.MAX_FRAGMENT_LENGTH)
+    @ExcludeParameter("MAX_FRAGMENT_LENGTH")
     @MethodCondition(method = "supportsMaxFragmentLength")
     @Tag("new")
     public void enforcesRecordLimit(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

@@ -7,14 +7,16 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CipherType;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
@@ -22,40 +24,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
+public class CipherTextBitmaskDerivation extends TlsDerivationParameter<Integer> {
 
     public CipherTextBitmaskDerivation() {
-        super(DerivationType.CIPHERTEXT_BITMASK, Integer.class);
+        super(TlsParameterType.CIPHERTEXT_BITMASK, Integer.class);
     }
 
     public CipherTextBitmaskDerivation(Integer selectedValue) {
         this();
         setSelectedValue(selectedValue);
     }
-
-    @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        int maxCipherTextByteLen = 0;
-        Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
-        if (scope.isTls13Test()) {
-            cipherSuiteList = context.getFeatureExtractionResult().getSupportedTls13CipherSuites();
-        }
-        for (CipherSuite cipherSuite : cipherSuiteList) {
-            if (AlgorithmResolver.getCipher(cipherSuite).getBlocksize() > maxCipherTextByteLen) {
-                maxCipherTextByteLen = AlgorithmResolver.getCipher(cipherSuite).getBlocksize();
-            }
-        }
-
-        List<DerivationParameter> parameterValues = new LinkedList<>();
-        for (int i = 0; i < maxCipherTextByteLen; i++) {
-            parameterValues.add(new CipherTextBitmaskDerivation(i));
-        }
-        return parameterValues;
-    }
-
-    @Override
-    public void applyToConfig(Config config, TestContext context) {}
 
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
@@ -72,14 +50,14 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     private ConditionalConstraint getMustBeWithinBlocksizeConstraint() {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
 
         return new ConditionalConstraint(
                 requiredDerivations,
                 ConstraintBuilder.constrain(
-                                DerivationType.CIPHERTEXT_BITMASK.name(),
-                                DerivationType.CIPHERSUITE.name())
+                                TlsParameterType.CIPHERTEXT_BITMASK.name(),
+                                TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (DerivationParameter bytePos, DerivationParameter cipherSuite) -> {
                                     int chosenBytePos = (Integer) bytePos.getSelectedValue();
@@ -92,17 +70,17 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     private ConditionalConstraint getMustBeWithinCiphertextSizeConstraint(DerivationScope scope) {
-        Set<DerivationType> requiredDerivationsCiphertext = new HashSet<>();
-        requiredDerivationsCiphertext.add(DerivationType.CIPHERSUITE);
-        requiredDerivationsCiphertext.add(DerivationType.APP_MSG_LENGHT);
+        Set<ParameterIdentifier> requiredDerivationsCiphertext = new HashSet<>();
+        requiredDerivationsCiphertext.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
+        requiredDerivationsCiphertext.add(new ParameterIdentifier(TlsParameterType.APP_MSG_LENGHT));
 
         // ensure that the selected byte is within ciphertext size (for non-padded)
         return new ConditionalConstraint(
                 requiredDerivationsCiphertext,
                 ConstraintBuilder.constrain(
-                                DerivationType.CIPHERTEXT_BITMASK.name(),
-                                DerivationType.CIPHERSUITE.name(),
-                                DerivationType.APP_MSG_LENGHT.name())
+                                TlsParameterType.CIPHERTEXT_BITMASK.name(),
+                                TlsParameterType.CIPHER_SUITE.name(),
+                                TlsParameterType.APP_MSG_LENGHT.name())
                         .by(
                                 (CipherTextBitmaskDerivation cipherTextBitmaskDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation,
@@ -114,12 +92,38 @@ public class CipherTextBitmaskDerivation extends DerivationParameter<Integer> {
                                     int selectedAppMsgLength = appMsgLenParam.getSelectedValue();
 
                                     if (!selectedCipherSuite.isUsingPadding(
-                                                    scope.getTargetVersion())
+                                                    ConstraintHelper.getTargetVersion(scope))
                                             || AlgorithmResolver.getCipherType(selectedCipherSuite)
                                                     == CipherType.AEAD) {
                                         return selectedAppMsgLength > selectedBitmaskBytePosition;
                                     }
                                     return true;
                                 }));
+    }
+
+    @Override
+    protected TlsDerivationParameter<Integer> generateValue(Integer selectedValue) {
+        return new CipherTextBitmaskDerivation(selectedValue);
+    }
+
+    @Override
+    public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
+            DerivationScope derivationScope) {
+        int maxCipherTextByteLen = 0;
+        Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
+        if (ConstraintHelper.isTls13Test(derivationScope)) {
+            cipherSuiteList = context.getFeatureExtractionResult().getSupportedTls13CipherSuites();
+        }
+        for (CipherSuite cipherSuite : cipherSuiteList) {
+            if (AlgorithmResolver.getCipher(cipherSuite).getBlocksize() > maxCipherTextByteLen) {
+                maxCipherTextByteLen = AlgorithmResolver.getCipher(cipherSuite).getBlocksize();
+            }
+        }
+
+        List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
+        for (int i = 0; i < maxCipherTextByteLen; i++) {
+            parameterValues.add(new CipherTextBitmaskDerivation(i));
+        }
+        return parameterValues;
     }
 }

@@ -7,9 +7,9 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
+import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
@@ -39,7 +39,7 @@ public class A5CipherSuite extends Tls12Test {
         }
     }
 
-    /*@TlsTest(description = "These cipher suites MUST NOT be used by TLS 1.2 implementations unless the application " +
+    /*@AnvilTest(description = "These cipher suites MUST NOT be used by TLS 1.2 implementations unless the application " +
     "layer has specifically requested to allow anonymous key exchange", securitySeverity = SeverityLevel.HIGH)*/
     @Test
     @SecurityCategory(SeverityLevel.CRITICAL)

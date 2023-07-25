@@ -7,11 +7,11 @@
  */
 package de.rub.nds.tlstest.framework.annotations.keyExchange;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import java.util.HashSet;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,11 +33,11 @@ public class KexAnnotationTLS13 extends KexAnnotationTest {
         testContext.setFeatureExtractionResult(report);
     }
 
-    @TlsTest
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL13)
     public void execute_supported() {}
 
-    @TlsTest
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void not_execute_unsupported() {}
 }

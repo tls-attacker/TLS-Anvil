@@ -9,6 +9,12 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8422;
 
 import static org.junit.Assert.*;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
@@ -38,13 +44,8 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.InvalidCurvePoint;
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.TwistedCurvePoint;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
@@ -52,13 +53,10 @@ import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCate
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
@@ -112,7 +110,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @Tag("adjusted")
     public void invalidPointFormat() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
-        assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
+        assertNotNull(AssertMsgs.CLIENT_HELLO_NOT_RECEIVED, msg);
         ECPointFormatExtensionMessage poinfmtExt =
                 msg.getExtension(ECPointFormatExtensionMessage.class);
 
@@ -197,7 +195,7 @@ public class TLSExtensionForECC extends Tls12Test {
         return false;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "With the NIST curves, each party MUST validate the public key sent by "
                             + "its peer in the ClientKeyExchange and ServerKeyExchange messages.  A "
@@ -205,11 +203,11 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "peer's public value satisfy the curve equation, y^2 = x^3 + ax + b "
                             + "mod p.")
     @RFC(number = 8422, section = "5.11. Public Key Validation")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isSecpCurve")
+    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
     @CryptoCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -219,7 +217,7 @@ public class TLSExtensionForECC extends Tls12Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
         InvalidCurvePoint invalidCurvePoint = InvalidCurvePoint.smallOrder(selectedGroup);
         Point serializablePoint =
@@ -244,7 +242,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "if either party obtains all-zeroes x_S, it MUST "
                             + "abort the handshake (as required by definition of X25519 and X448). [...]"
@@ -254,11 +252,11 @@ public class TLSExtensionForECC extends Tls12Test {
     @RFC(
             number = 8422,
             section = "5.10. ECDH, ECDSA, and RSA Computations and 5.11. Public Key Validation")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isXCurve")
+    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
@@ -269,7 +267,7 @@ public class TLSExtensionForECC extends Tls12Test {
                 runner.generateWorkflowTraceUntilSendingMessage(
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         TwistedCurvePoint groupSpecificPoint = TwistedCurvePoint.smallOrder(selectedGroup);
         RFC7748Curve curve = (RFC7748Curve) CurveFactory.getCurve(selectedGroup);
@@ -291,14 +289,14 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client that receives a ServerHello message containing a Supported "
                             + "Point Formats Extension MUST respect the server's choice of point "
                             + "formats during the handshake (cf.  Sections 5.6 and 5.7).")
     @RFC(number = 8422, section = "5.2. Server Hello Extension")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isSecpCurve")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)

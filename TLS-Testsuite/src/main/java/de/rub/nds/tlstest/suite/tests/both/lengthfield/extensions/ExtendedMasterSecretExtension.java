@@ -7,6 +7,12 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
@@ -14,21 +20,13 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtendedMasterSecr
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -49,11 +47,11 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
 
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send an Extended Master Secret Extension in the Hello Message with a modified length value (+1)")
-    @ScopeLimitations(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION)
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ExcludeParameter("INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION")
+    @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -70,11 +68,11 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send an Extended Master Secret Extension in the Hello Message with a modified length value (+1)")
-    @ScopeLimitations(DerivationType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION)
-    @ModelFromScope(baseModel = ModelType.LENGTHFIELD)
+    @ExcludeParameter("INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION")
+    @ModelFromScope(modelType = "LENGTHFIELD")
     @MessageStructureCategory(SeverityLevel.MEDIUM)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)

@@ -7,6 +7,10 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.statemachine;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -30,10 +34,6 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -59,7 +59,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class StateMachine extends Tls12Test {
 
     // Figure 2: path 0, 1, 10
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a Heartbeat Request after sending the Client Hello Message and observe the response")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -75,7 +75,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 2: path 0, 1, 10
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a Heartbeat Request after sending the Client Key Exchange Message and observer the response")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -91,7 +91,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 2: path 0, 1, 10 and Figure 4: path 0, 1, 3, 5, 8
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a Heartbeat Request after sending the Change Cipher Spec Message and observer the response")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -107,7 +107,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 2: 0, 1, 3, 5 and Figure 4: path 0, 1, 3, 4
-    @TlsTest(
+    @AnvilTest(
             description = "Send a Client Hello Message after sending a Client Key Exchange Message")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -128,7 +128,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 3: path 0, 1, 3, 5, 6, 2
-    @TlsTest(description = "Send a Finished Message after the ServerHello")
+    @AnvilTest(description = "Send a Finished Message after the ServerHello")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.CRITICAL)
@@ -155,7 +155,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 4: path 0, 1, 3, 2
-    @TlsTest(description = "Send two Client Key Exchange Messages")
+    @AnvilTest(description = "Send two Client Key Exchange Messages")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
@@ -177,7 +177,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 4: path 0, 1, 3, 2
-    @TlsTest(description = "Send two Client Key Exchange Messages with different Send Actions")
+    @AnvilTest(description = "Send two Client Key Exchange Messages with different Send Actions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
@@ -199,7 +199,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 4: path 0, 1, 3, 5, 2
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a second Client Key Exchange Message after sending Change Cipher Spec")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -224,7 +224,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 4: path 0, 1, 3, 5, 2
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a second unencrypted Client Key Exchange Message after sending Change Cipher Spec")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -307,7 +307,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: 0, 1, 5, 6, 7, 8
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a second Change Cipher Spec after receiving the servers Finished Message")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -327,7 +327,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: 0, 1, 5, 6, 7, 8
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a second Change Cipher Spec after receiving the servers Finished Message")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -347,7 +347,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: path 0, 1, 4
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a second Client Hello after receiving the first batch of server messages")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -361,7 +361,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: path 0, 1, 4
-    @TlsTest(description = "Send two Client Hello Messages at the beginning of the Handshake")
+    @AnvilTest(description = "Send two Client Hello Messages at the beginning of the Handshake")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
@@ -372,7 +372,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 8: path 0, 1, 6
-    @TlsTest(description = "Send a Change Cipher Spec before the Client Key Exchange Message")
+    @AnvilTest(description = "Send a Change Cipher Spec before the Client Key Exchange Message")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.CRITICAL)

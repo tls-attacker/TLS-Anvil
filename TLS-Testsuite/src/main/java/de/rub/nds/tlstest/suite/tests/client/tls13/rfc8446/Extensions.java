@@ -1,13 +1,20 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.ManualConfig;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -24,45 +31,38 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
-import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.constants.TestResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ExtensionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @RFC(number = 8446, section = "4.2 Extensions")
 @ClientTest
 public class Extensions extends Tls13Test {
 
-    public List<DerivationParameter> getUnrequestedExtensions(DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, ExtensionType>> getUnrequestedExtensions(
+            DerivationScope scope) {
+        List<DerivationParameter<TlsAnvilConfig, ExtensionType>> parameterValues =
+                new LinkedList<>();
         List<ExtensionType> extensions = new LinkedList<>();
         extensions.add(ExtensionType.SERVER_NAME_INDICATION);
         extensions.add(ExtensionType.MAX_FRAGMENT_LENGTH);
         extensions.add(ExtensionType.ALPN);
-        List<ExtensionType> clientExtensions = context.getReceivedClientHelloMessage().getExtensions().stream()
-                .map(i -> ExtensionType.getExtensionType(i.getExtensionType().getValue()))
-                .collect(Collectors.toList());
+        List<ExtensionType> clientExtensions =
+                context.getReceivedClientHelloMessage().getExtensions().stream()
+                        .map(i -> ExtensionType.getExtensionType(i.getExtensionType().getValue()))
+                        .collect(Collectors.toList());
         extensions.removeAll(clientExtensions);
 
         for (ExtensionType unrequestedType : extensions) {
@@ -72,40 +72,56 @@ public class Extensions extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(description = "Implementations MUST NOT send extension responses if "
-            + "the remote endpoint did not send the corresponding extension requests, "
-            + "with the exception of the \"cookie\" extension in the HelloRetryRequest. "
-            + "Upon receiving such an extension, an endpoint MUST abort "
-            + "the handshake with an \"unsupported_extension\" alert.")
-    @ScopeExtensions(DerivationType.EXTENSION)
-    @ManualConfig(DerivationType.EXTENSION)
-    @ExplicitValues(affectedTypes = DerivationType.EXTENSION, methods = "getUnrequestedExtensions")
+    @AnvilTest(
+            description =
+                    "Implementations MUST NOT send extension responses if "
+                            + "the remote endpoint did not send the corresponding extension requests, "
+                            + "with the exception of the \"cookie\" extension in the HelloRetryRequest. "
+                            + "Upon receiving such an extension, an endpoint MUST abort "
+                            + "the handshake with an \"unsupported_extension\" alert.")
+    @IncludeParameter("EXTENSION")
+    @ManualConfig(identifiers = "EXTENSION")
+    @ExplicitValues(affectedIdentifiers = "EXTENSION", methods = "getUnrequestedExtensions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void sendAdditionalExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        ExtensionType selectedExtension = derivationContainer.getDerivation(ExtensionDerivation.class).getSelectedValue();
+        ExtensionType selectedExtension =
+                parameterCombination.getParameter(ExtensionDerivation.class).getSelectedValue();
 
         List<ExtensionType> extensions = new ArrayList<>(Arrays.asList(ExtensionType.values()));
-        List<ExtensionType> clientExtensions = context.getReceivedClientHelloMessage().getExtensions().stream()
-                .map(i -> ExtensionType.getExtensionType(i.getExtensionType().getValue()))
-                .collect(Collectors.toList());
+        List<ExtensionType> clientExtensions =
+                context.getReceivedClientHelloMessage().getExtensions().stream()
+                        .map(i -> ExtensionType.getExtensionType(i.getExtensionType().getValue()))
+                        .collect(Collectors.toList());
         extensions.removeAll(clientExtensions);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.addTlsActions(
-                new ReceiveAction(new AlertMessage())
-        );
+        workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         if (selectedExtension == ExtensionType.MAX_FRAGMENT_LENGTH) {
             MaxFragmentLengthExtensionMessage ext = new MaxFragmentLengthExtensionMessage();
-            ext.setMaxFragmentLength(Modifiable.explicit(new byte[]{MaxFragmentLength.TWO_11.getValue()}));
+            ext.setMaxFragmentLength(
+                    Modifiable.explicit(new byte[] {MaxFragmentLength.TWO_11.getValue()}));
 
             workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class).addExtension(ext);
         } else if (selectedExtension == ExtensionType.ALPN) {
-            c.setDefaultProposedAlpnProtocols("http/1.1", "spdy/1", "spdy/2", "spdy/3", "stun.turn",
-                    "stun.nat-discovery", "h2", "h2c", "webrtc", "c-webrtc", "ftp", "imap", "pop3", "managesieve");
+            c.setDefaultProposedAlpnProtocols(
+                    "http/1.1",
+                    "spdy/1",
+                    "spdy/2",
+                    "spdy/3",
+                    "stun.turn",
+                    "stun.nat-discovery",
+                    "h2",
+                    "h2c",
+                    "webrtc",
+                    "c-webrtc",
+                    "ftp",
+                    "imap",
+                    "pop3",
+                    "managesieve");
             AlpnExtensionMessage ext = new AlpnExtensionMessage();
             workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class).addExtension(ext);
         } else if (selectedExtension == ExtensionType.SERVER_NAME_INDICATION) {
@@ -116,44 +132,57 @@ public class Extensions extends Tls13Test {
             throw new AssertionError("ClientHello already contains every extension");
         }
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
+        runner.execute(workflowTrace, c)
+                .validateFinal(
+                        i -> {
+                            Validator.receivedFatalAlert(i);
 
-            AlertMessage msg = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.UNSUPPORTED_EXTENSION, msg);
-        });
+                            AlertMessage msg =
+                                    i.getWorkflowTrace()
+                                            .getFirstReceivedMessage(AlertMessage.class);
+                            Validator.testAlertDescription(
+                                    i, AlertDescription.UNSUPPORTED_EXTENSION, msg);
+                        });
     }
 
-    @TlsTest(description = "If an implementation receives an extension which it "
-            + "recognizes and which is not specified for the message in "
-            + "which it appears, it MUST abort the handshake with an \"illegal_parameter\" alert.")
+    @AnvilTest(
+            description =
+                    "If an implementation receives an extension which it "
+                            + "recognizes and which is not specified for the message in "
+                            + "which it appears, it MUST abort the handshake with an \"illegal_parameter\" alert.")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
-    public void sendHeartBeatExtensionInSH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendHeartBeatExtensionInSH(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.addTlsActions(
-                new ReceiveAction(new AlertMessage())
-        );
+        workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        workflowTrace.getFirstSendMessage(ServerHelloMessage.class).addExtension(
-                new HeartbeatExtensionMessage()
-        );
+        workflowTrace
+                .getFirstSendMessage(ServerHelloMessage.class)
+                .addExtension(new HeartbeatExtensionMessage());
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            Validator.receivedFatalAlert(i);
+        runner.execute(workflowTrace, c)
+                .validateFinal(
+                        i -> {
+                            WorkflowTrace trace = i.getWorkflowTrace();
+                            Validator.receivedFatalAlert(i);
 
-            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER, msg);
-            if(msg != null && msg.getDescription().getValue() == AlertDescription.UNSUPPORTED_EXTENSION.getValue()
-                    && !context.getReceivedClientHelloMessage().containsExtension(ExtensionType.HEARTBEAT)
-                    && i.getResult() == TestResult.CONCEPTUALLY_SUCCEEDED) {
-                i.setResult(TestResult.STRICTLY_SUCCEEDED);
-                i.addAdditionalResultInfo("Description is acceptable as Heartbeat was not proposed by client");
-            }
-        });
+                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+                            Validator.testAlertDescription(
+                                    i, AlertDescription.ILLEGAL_PARAMETER, msg);
+                            if (msg != null
+                                    && msg.getDescription().getValue()
+                                            == AlertDescription.UNSUPPORTED_EXTENSION.getValue()
+                                    && !context.getReceivedClientHelloMessage()
+                                            .containsExtension(ExtensionType.HEARTBEAT)
+                                    && i.getTestResult() == TestResult.CONCEPTUALLY_SUCCEEDED) {
+                                i.setTestResult(TestResult.STRICTLY_SUCCEEDED);
+                                i.addAdditionalResultInfo(
+                                        "Description is acceptable as Heartbeat was not proposed by client");
+                            }
+                        });
     }
 }

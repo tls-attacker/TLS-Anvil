@@ -7,35 +7,38 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
-public class BitPositionDerivation extends DerivationParameter<Integer> {
+public class BitPositionDerivation extends TlsDerivationParameter<Integer> {
 
-    public BitPositionDerivation() {
-        super(DerivationType.BIT_POSITION, Integer.class);
+    public BitPositionDerivation(ParameterIdentifier identifier) {
+        super(TlsParameterType.BIT_POSITION, Integer.class, identifier);
     }
 
-    public BitPositionDerivation(Integer selectedValue, DerivationType parent) {
-        this();
-        setParent(parent);
+    public BitPositionDerivation(Integer selectedValue, ParameterIdentifier identifier) {
+        this(identifier);
         setSelectedValue(selectedValue);
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
         for (int i = 0; i < 8; i++) {
-            parameterValues.add(new BitPositionDerivation(i, this.getParent()));
+            parameterValues.add(new BitPositionDerivation(i, getParameterIdentifier()));
         }
         return parameterValues;
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {}
+    protected TlsDerivationParameter<Integer> generateValue(Integer selectedValue) {
+        return new BitPositionDerivation(selectedValue, getParameterIdentifier());
+    }
 }

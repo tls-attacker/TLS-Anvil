@@ -1,13 +1,16 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2022 Ruhr University Bochum
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.ExcludeParameters;
+import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -31,17 +34,12 @@ import de.rub.nds.tlsattacker.transport.TransportHandlerType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -49,11 +47,13 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class Fragmentation extends Tls12Test {
 
-    @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, "
-            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
-            + "Application data MAY be sent as they are potentially useful as a "
-            + "traffic analysis countermeasure.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @AnvilTest(
+            description =
+                    "Implementations MUST NOT send zero-length fragments of Handshake, "
+                            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
+                            + "Application data MAY be sent as they are potentially useful as a "
+                            + "traffic analysis countermeasure.")
+    @ExcludeParameter("RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -71,24 +71,24 @@ public class Fragmentation extends Tls12Test {
         sendAction.setRecords(r);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
-        workflowTrace.addTlsActions(
-                sendAction,
-                new ReceiveAction(new AlertMessage())
-        );
+        workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, "
-            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
-            + "Application data MAY be sent as they are potentially useful as a "
-            + "traffic analysis countermeasure.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @AnvilTest(
+            description =
+                    "Implementations MUST NOT send zero-length fragments of Handshake, "
+                            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
+                            + "Application data MAY be sent as they are potentially useful as a "
+                            + "traffic analysis countermeasure.")
+    @ExcludeParameter("RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
     @EnforcedSenderRestriction
-    public void sendZeroLengthRecord_Alert(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendZeroLengthRecord_Alert(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setUseAllProvidedRecords(true);
 
@@ -102,25 +102,27 @@ public class Fragmentation extends Tls12Test {
         SendAction sendAction = new SendAction(alertMsg);
         sendAction.setRecords(r);
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HELLO, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
-        workflowTrace.addTlsActions(
-                sendAction,
-                new ReceiveAction(new AlertMessage())
-        );
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilSendingMessage(
+                        WorkflowTraceType.HELLO, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
+        workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(description = "Client " +
-        "message boundaries are not preserved in the record layer (i.e., " +
-        "multiple client messages of the same ContentType MAY be coalesced " +
-        "into a single TLSPlaintext record, or a single message MAY be " +
-        "fragmented across several records).")
-    @ScopeLimitations({DerivationType.RECORD_LENGTH, DerivationType.TCP_FRAGMENTATION})
+    @AnvilTest(
+            description =
+                    "Client "
+                            + "message boundaries are not preserved in the record layer (i.e., "
+                            + "multiple client messages of the same ContentType MAY be coalesced "
+                            + "into a single TLSPlaintext record, or a single message MAY be "
+                            + "fragmented across several records).")
+    @ExcludeParameters({@ExcludeParameter("RECORD_LENGTH"), @ExcludeParameter("TCP_FRAGMENTATION")})
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
-    public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCS_F(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCS_F(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -135,21 +137,25 @@ public class Fragmentation extends Tls12Test {
 
         workflowTrace.addTlsActions(new SendAction(new ChangeCipherSpecMessage()));
         workflowTrace.addTlsActions(new SendAction(new FinishedMessage()));
-        workflowTrace.addTlsActions(new ReceiveAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
+        workflowTrace.addTlsActions(
+                new ReceiveAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(description = "Client " +
-        "message boundaries are not preserved in the record layer (i.e., " +
-        "multiple client messages of the same ContentType MAY be coalesced " +
-        "into a single TLSPlaintext record, or a single message MAY be " +
-        "fragmented across several records).")
-    @ScopeLimitations({DerivationType.RECORD_LENGTH, DerivationType.TCP_FRAGMENTATION})
+    @AnvilTest(
+            description =
+                    "Client "
+                            + "message boundaries are not preserved in the record layer (i.e., "
+                            + "multiple client messages of the same ContentType MAY be coalesced "
+                            + "into a single TLSPlaintext record, or a single message MAY be "
+                            + "fragmented across several records).")
+    @ExcludeParameters({@ExcludeParameter("RECORD_LENGTH"), @ExcludeParameter("TCP_FRAGMENTATION")})
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
-    public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCSF(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCSF(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.getDefaultClientConnection().setTransportHandlerType(TransportHandlerType.TCP_NO_DELAY);
 
@@ -163,10 +169,11 @@ public class Fragmentation extends Tls12Test {
             workflowTrace.addTlsActions(new SendAction(new CertificateVerifyMessage()));
         }
 
-        workflowTrace.addTlsActions(new SendAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
-        workflowTrace.addTlsActions(new ReceiveAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
+        workflowTrace.addTlsActions(
+                new SendAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
+        workflowTrace.addTlsActions(
+                new ReceiveAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
 
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
-
 }

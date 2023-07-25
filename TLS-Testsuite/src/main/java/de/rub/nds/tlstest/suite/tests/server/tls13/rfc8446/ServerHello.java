@@ -9,6 +9,12 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import static org.junit.Assert.*;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -23,24 +29,18 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests;
@@ -77,7 +77,7 @@ public class ServerHello extends Tls13Test {
         return ConditionEvaluationResult.disabled("No TLS 1.0 support");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "In TLS 1.3, the TLS server indicates its version using the \"supported_versions\" "
                             + "extension (Section 4.2.1), and the legacy_version field MUST be "
@@ -101,7 +101,7 @@ public class ServerHello extends Tls13Test {
 
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
                             assertArrayEquals(
                                     "Invalid legacy version",
                                     new byte[] {0x03, 0x03},
@@ -109,7 +109,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The last 8 bytes MUST be overwritten as described "
                             + "below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random. [...]"
@@ -139,7 +139,7 @@ public class ServerHello extends Tls13Test {
 
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
                             byte[] random = msg.getRandom().getValue();
                             assertArrayEquals(
                                     "Invalid random",
@@ -148,7 +148,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The last 8 bytes MUST be overwritten as described "
                             + "below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random. [...]"
@@ -159,9 +159,7 @@ public class ServerHello extends Tls13Test {
                             + "servers SHOULD, set the last 8 bytes of their ServerHello.Random "
                             + "value to the bytes: 44 4F 57 4E 47 52 44 00")
     @MethodCondition(method = "supportsTls11")
-    @DynamicValueConstraints(
-            affectedTypes = DerivationType.CIPHERSUITE,
-            methods = "isTls11CipherSuite")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isTls11CipherSuite")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -183,7 +181,7 @@ public class ServerHello extends Tls13Test {
 
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
                             byte[] random = msg.getRandom().getValue();
                             assertArrayEquals(
                                     "Invalid random",
@@ -192,7 +190,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The last 8 bytes MUST be overwritten as described "
                             + "below if negotiating TLS 1.2 or TLS 1.1, but the remaining bytes MUST be random. [...]"
@@ -204,9 +202,7 @@ public class ServerHello extends Tls13Test {
                             + "value to the bytes: 44 4F 57 4E 47 52 44 00")
     @MethodCondition(method = "supportsTls10")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @DynamicValueConstraints(
-            affectedTypes = DerivationType.CIPHERSUITE,
-            methods = "isTls10CipherSuite")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isTls10CipherSuite")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -227,7 +223,7 @@ public class ServerHello extends Tls13Test {
 
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
                             byte[] random = msg.getRandom().getValue();
                             assertArrayEquals(
                                     "Invalid random",
@@ -244,7 +240,7 @@ public class ServerHello extends Tls13Test {
         return cipherSuite.isSupportedInProtocol(ProtocolVersion.TLS11);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client which receives a legacy_session_id_echo "
                             + "field that does not match what it sent in the ClientHello MUST "
@@ -275,7 +271,7 @@ public class ServerHello extends Tls13Test {
 
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
                             assertArrayEquals(
                                     "Session ID not echoed",
                                     sessionId,
@@ -283,7 +279,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A client which receives a legacy_session_id_echo "
                             + "field that does not match what it sent in the ClientHello MUST "
@@ -315,7 +311,7 @@ public class ServerHello extends Tls13Test {
 
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, msg);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
                             assertArrayEquals(
                                     "Session ID not echoed",
                                     sessionId,
@@ -323,7 +319,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "legacy_compression_method: A single byte which " + "MUST have the value 0.")
     @InteroperabilityCategory(SeverityLevel.HIGH)
@@ -352,7 +348,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "As "
                             + "with the ServerHello, a HelloRetryRequest MUST NOT contain any "
@@ -451,8 +447,9 @@ public class ServerHello extends Tls13Test {
         }
     }
 
-    public List<DerivationParameter> getTlsVersionsBelow12(DerivationScope scope) {
-        List<DerivationParameter> derivationParameters = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getTlsVersionsBelow12(
+            DerivationScope scope) {
+        List<DerivationParameter<TlsAnvilConfig, byte[]>> derivationParameters = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getSupportedVersions()
                 .forEach(

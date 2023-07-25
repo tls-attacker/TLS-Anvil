@@ -10,6 +10,16 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.ManualConfig;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -24,28 +34,17 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.ManualConfig;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Arrays;
@@ -69,32 +68,31 @@ public class SupportedVersions extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
 
-    public List<DerivationParameter> getInvalidLegacyVersions(DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getInvalidLegacyVersions(
+            DerivationScope scope) {
+        List<DerivationParameter<TlsAnvilConfig, byte[]>> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x05, 0x05}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x04}));
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If this extension is present, clients MUST ignore the "
                             + "ServerHello.legacy_version value and MUST use "
                             + "only the \"supported_versions\" extension to determine the selected version.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
-    @ManualConfig(DerivationType.PROTOCOL_VERSION)
-    @ExplicitValues(
-            affectedTypes = DerivationType.PROTOCOL_VERSION,
-            methods = "getInvalidLegacyVersions")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @IncludeParameter("PROTOCOL_VERSION")
+    @ManualConfig(identifiers = "PROTOCOL_VERSION")
+    @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "getInvalidLegacyVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.MEDIUM)
     public void invalidLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] chosenInvalidVersion =
-                derivationContainer
-                        .getDerivation(ProtocolVersionDerivation.class)
+                parameterCombination
+                        .getParameter(ProtocolVersionDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -105,7 +103,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the \"supported_versions\" extension in the ServerHello "
                             + "contains a version not offered by the client or contains a version "
@@ -143,7 +141,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the \"supported_versions\" extension in the ServerHello "
                             + "contains a version not offered by the client or contains a version "
@@ -176,7 +174,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    /*@TlsTest(description = "Implementations of this specification MUST send this " +
+    /*@AnvilTest(description = "Implementations of this specification MUST send this " +
     "extension in the ClientHello containing all versions of TLS which they " +
     "are prepared to negotiate (for this specification, that means minimally " +
     "0x0304, but if previous versions of TLS are allowed to be " +
@@ -240,7 +238,7 @@ public class SupportedVersions extends Tls13Test {
         return versions;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The \"supported_versions\" extension is used by the client to indicate "
                             + "which versions of TLS it supports and by the server to indicate which "
@@ -252,9 +250,9 @@ public class SupportedVersions extends Tls13Test {
     @RFC(
             number = 8446,
             section = "4.2.1 Supported Versions and D.1. Negotiating with an Older Server")
-    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(
-            affectedTypes = DerivationType.PROTOCOL_VERSION,
+            affectedIdentifiers = "PROTOCOL_VERSION",
             methods = "getUnsupportedProtocolVersions")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -266,8 +264,8 @@ public class SupportedVersions extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
         byte[] oldProtocolVersion =
-                derivationContainer
-                        .getDerivation(ProtocolVersionDerivation.class)
+                parameterCombination
+                        .getParameter(ProtocolVersionDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace =
@@ -286,7 +284,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The \"supported_versions\" extension is used by the client to indicate "
                             + "which versions of TLS it supports and by the server to indicate which "
@@ -298,9 +296,9 @@ public class SupportedVersions extends Tls13Test {
     @RFC(
             number = 8446,
             section = "4.2.1 Supported Versions and D.1. Negotiating with an Older Server")
-    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(
-            affectedTypes = DerivationType.PROTOCOL_VERSION,
+            affectedIdentifiers = "PROTOCOL_VERSION",
             methods = "getUndefinedProtocolVersions")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -312,8 +310,8 @@ public class SupportedVersions extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
         byte[] oldProtocolVersion =
-                derivationContainer
-                        .getDerivation(ProtocolVersionDerivation.class)
+                parameterCombination
+                        .getParameter(ProtocolVersionDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace =

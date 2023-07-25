@@ -8,20 +8,22 @@
 package de.rub.nds.tlstest.framework.constants;
 
 public class AssertMsgs {
-    public static final String WorkflowNotExecutedBeforeAlert =
+    public static final String WORKFLOW_NOT_EXECUTED_BEFORE_ALERT =
             "The workflow execution failed before reaching the expected alert!";
-    public static final String WorkflowNotExecuted =
+    public static final String WORKFLOW_NOT_EXECUTED =
             "The workflow could not be executed as planned!";
-    public static final String ClientHelloNotReceived = "ClientHello not received!";
-    public static final String ServerHelloNotReceived = "ServerHello not received!";
-    public static final String ServerKxNotReceived = "ServerKeyExchange not received!";
-    public static final String ServerHelloDoneNotReceived = "ServerHelloDone not received!";
-    public static final String EncExtensionsNotReceived = "EncryptedExtensions not received!";
-    public static final String ClientKxNotReceived = "ClientKx not received!";
-    public static final String FinishedNotReceived = "Finished not received!";
-    public static final String AlertNotReceived = "Alert not received!";
-    public static final String NoFatalAlert = "No fatal alert received!";
-    public static final String NoWarningAlert = "No warning alert received!";
-    public static final String UnexpectedCipherSuite = "Received unexpected ciphersuite!";
-    public static final String UnexpectedAlertDescription = "Received unexpected alert description";
+    public static final String CLIENT_HELLO_NOT_RECEIVED = "ClientHello not received!";
+    public static final String SERVER_HELLO_NOT_RECEIVED = "ServerHello not received!";
+    public static final String SERVER_KEY_EXCHANGE_NOT_RECEIVED = "ServerKeyExchange not received!";
+    public static final String SERVER_HELLO_DONE_NOT_RECEIVED = "ServerHelloDone not received!";
+    public static final String ENCRYPTED_EXTENSIONS_NOT_RECEIVED =
+            "EncryptedExtensions not received!";
+    public static final String CLIENT_KEY_EXCHANGE_NOT_RECEIVED = "ClientKx not received!";
+    public static final String FINISHED_NOT_RECEIVED = "Finished not received!";
+    public static final String ALERT_NOT_RECEIVED = "Alert not received!";
+    public static final String NO_FATAL_ALERT = "No fatal alert received!";
+    public static final String NO_WARNING_ALERT = "No warning alert received!";
+    public static final String UNEXPECTED_CIPHER_SUITE = "Received unexpected ciphersuite!";
+    public static final String UNEXPECTED_ALERT_DESCRIPTION =
+            "Received unexpected alert description";
 }

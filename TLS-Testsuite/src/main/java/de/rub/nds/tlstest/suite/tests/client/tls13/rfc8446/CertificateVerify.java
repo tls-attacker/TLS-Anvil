@@ -7,6 +7,15 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.ManualConfig;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -21,26 +30,16 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
-import de.rub.nds.tlstest.framework.annotations.ManualConfig;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.LinkedList;
@@ -69,8 +68,10 @@ public class CertificateVerify extends Tls13Test {
                 "Client does not support legacy rsa signature and hash algorithms");
     }
 
-    public List<DerivationParameter> getLegacyRSASAHAlgorithms(DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>>
+            getLegacyRSASAHAlgorithms(DerivationScope scope) {
+        List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
+                new LinkedList<>();
         for (SignatureAndHashAlgorithm algo :
                 ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
                         .getAdvertisedSignatureAndHashAlgorithms()) {
@@ -81,7 +82,7 @@ public class CertificateVerify extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "RSA signatures MUST use an RSASSA-PSS algorithm, "
                             + "regardless of whether RSASSA-PKCS1-v1_5 algorithms "
@@ -96,17 +97,17 @@ public class CertificateVerify extends Tls13Test {
     @CertificateCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
-    @ScopeExtensions(DerivationType.SIG_HASH_ALGORIHTM)
+    @IncludeParameter("SIG_HASH_ALGORIHTM")
     @ExplicitValues(
-            affectedTypes = DerivationType.SIG_HASH_ALGORIHTM,
+            affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getLegacyRSASAHAlgorithms")
-    @ManualConfig(DerivationType.SIG_HASH_ALGORIHTM)
+    @ManualConfig(identifiers = "SIG_HASH_ALGORIHTM")
     @MethodCondition(method = "supportsLegacyRSASHAlgorithms")
     public void selectLegacyRSASignatureAlgorithm(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         SignatureAndHashAlgorithm selsectedLegacySigHash =
-                derivationContainer.getDerivation(SigAndHashDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(SigAndHashDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -128,7 +129,7 @@ public class CertificateVerify extends Tls13Test {
                 "Client does not support legacy rsa signature and hash algorithms");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The SHA-1 algorithm "
                             + "MUST NOT be used in any signatures of CertificateVerify messages. "
@@ -155,20 +156,20 @@ public class CertificateVerify extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The receiver of a CertificateVerify message MUST verify "
                             + "the signature field. [...] If the verification fails, "
                             + "the receiver MUST terminate the handshake with a \"decrypt_error\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @CryptoCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
     @CertificateCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.SIGNATURE_BITMASK)
+    @IncludeParameter("SIGNATURE_BITMASK")
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] bitmask = derivationContainer.buildBitmask();
+        byte[] bitmask = parameterCombination.buildBitmask();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -215,20 +216,20 @@ public class CertificateVerify extends Tls13Test {
         return unsupportedAlgorithms;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the CertificateVerify message is sent by a server, the signature "
                             + "algorithm MUST be one offered in the client's \"signature_algorithms\" "
                             + "extension unless no valid certificate chain can be produced without "
                             + "unsupported algorithms")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.HIGH)
     @CertificateCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
     @ExplicitValues(
-            affectedTypes = DerivationType.SIG_HASH_ALGORIHTM,
+            affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getUnproposedSignatureAndHashAlgorithms")
     public void acceptsUnproposedSignatureAndHash(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -246,7 +247,7 @@ public class CertificateVerify extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The receiver of a CertificateVerify message MUST verify the signature "
                             + "field.  [...] If the verification fails, the receiver MUST terminate the handshake "
@@ -277,7 +278,7 @@ public class CertificateVerify extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The receiver of a CertificateVerify message MUST verify the signature "
                             + "field.")
@@ -298,7 +299,7 @@ public class CertificateVerify extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The receiver of a CertificateVerify message MUST verify the signature "
                             + "field.")

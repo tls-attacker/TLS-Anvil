@@ -7,6 +7,9 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.statemachine;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -22,9 +25,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.SetEncryptChangeCipherSpecCon
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
@@ -45,7 +45,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class StateMachine extends Tls13Test {
 
-    @TlsTest(description = "Send two Client Hello Messages at the beginning of the Handshake")
+    @AnvilTest(description = "Send two Client Hello Messages at the beginning of the Handshake")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -75,7 +75,7 @@ public class StateMachine extends Tls13Test {
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If an implementation "
                             + "detects a change_cipher_spec record received before the first "
@@ -96,7 +96,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "An "
                             + "implementation which receives any other change_cipher_spec value or "
@@ -119,7 +119,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a legacy ECDH Client Key Exchange Message instead of just a Finished")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -135,7 +135,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description = "Send a legacy DH Client Key Exchange Message instead of just a Finished")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.LOW)
@@ -150,7 +150,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a legacy RSA Client Key Exchange Message instead of just a Finished")
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -167,7 +167,7 @@ public class StateMachine extends Tls13Test {
     }
 
     @RFC(number = 8446, section = "4.1.2 Client Hello")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Because TLS 1.3 forbids renegotiation, if a server has negotiated "
                             + "TLS 1.3 and receives a ClientHello at any other time, it MUST terminate the "

@@ -9,6 +9,14 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import static org.junit.Assert.*;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.ManualConfig;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -23,25 +31,17 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.ManualConfig;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.LinkedList;
@@ -64,7 +64,7 @@ public class SupportedVersions extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The extension contains a list of supported versions in "
                             + "preference order, with the most preferred version first. [...]"
@@ -92,7 +92,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If this extension is not present, servers which are compliant "
                             + "with this specification and which also support TLS 1.2 MUST "
@@ -122,13 +122,13 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the \"supported_versions\" extension is absent and the server only supports versions greater than ClientHello.legacy_version, the server MUST abort the handshake with a \"protocol_version\" alert.")
     @RFC(number = 8446, section = "D.2.  Negotiating with an Older Client")
-    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
+    @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(
-            affectedTypes = DerivationType.PROTOCOL_VERSION,
+            affectedIdentifiers = "PROTOCOL_VERSION",
             methods = "getUnsupportedProtocolVersions")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
@@ -142,8 +142,8 @@ public class SupportedVersions extends Tls13Test {
         c.setAddSupportedVersionsExtension(false);
         c.setHighestProtocolVersion(ProtocolVersion.TLS12);
         byte[] chosenUnsupportedVersion =
-                derivationContainer
-                        .getDerivation(ProtocolVersionDerivation.class)
+                parameterCombination
+                        .getParameter(ProtocolVersionDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -159,7 +159,8 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    public List<DerivationParameter> getUnsupportedProtocolVersions(DerivationScope scope) {
+    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getUnsupportedProtocolVersions(
+            DerivationScope scope) {
         List<ProtocolVersion> consideredVersions = new LinkedList<>();
         consideredVersions.add(ProtocolVersion.SSL2);
         consideredVersions.add(ProtocolVersion.SSL3);
@@ -169,27 +170,27 @@ public class SupportedVersions extends Tls13Test {
         context.getFeatureExtractionResult()
                 .getSupportedVersions()
                 .forEach(version -> consideredVersions.remove(version));
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+        List<DerivationParameter<TlsAnvilConfig, byte[]>> parameterValues = new LinkedList<>();
         consideredVersions.forEach(
                 version -> parameterValues.add(new ProtocolVersionDerivation(version.getValue())));
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If this extension is present in the ClientHello, "
                             + "servers MUST NOT use the ClientHello.legacy_version value "
                             + "for version negotiation and MUST use only the \"supported_versions\" "
                             + "extension to determine client preferences.")
     @MethodCondition(method = "supportsTls12")
-    @ManualConfig(DerivationType.CIPHERSUITE)
+    @ManualConfig(identifiers = "CIPHER_SUITE")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void oldLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite tls13CipherSuite =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         c.setDefaultClientSupportedCipherSuites(
                 context.getFeatureExtractionResult().getCipherSuites().stream()
                         .filter(i -> !i.isTLS13())
@@ -212,7 +213,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Servers MUST only select a version of TLS present in "
                             + "that extension and MUST ignore any unknown versions that are present in that extension.")
@@ -232,7 +233,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Servers MUST be prepared to receive ClientHellos that "
                             + "include this extension but do not include 0x0304 in the list of versions. "
@@ -269,7 +270,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "All TLS 1.3 "
                             + "ServerHello messages MUST contain the \"supported_versions\" "
@@ -315,7 +316,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If this extension is present in the ClientHello, "
                             + "servers MUST NOT use the ClientHello.legacy_version value for "
@@ -339,7 +340,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If this extension is not present, servers which are compliant with "
                             + "this specification and which also support TLS 1.2 MUST negotiate "

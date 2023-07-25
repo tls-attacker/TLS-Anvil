@@ -9,6 +9,11 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7465;
 
 import static org.junit.Assert.assertArrayEquals;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ManualConfig;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -21,12 +26,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.ManualConfig;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
@@ -36,7 +36,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
@@ -67,13 +66,13 @@ public class RC4Ciphersuites extends Tls12Test {
         return !isRC4(cipherSuite);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "TLS servers MUST NOT select an RC4 cipher suite when a TLS client "
                             + "sends such a cipher suite in the ClientHello message.")
-    @ManualConfig(DerivationType.CIPHERSUITE)
+    @ManualConfig(identifiers = "CIPHER_SUITE")
     @MethodCondition(method = "supportsRC4")
-    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isNonRC4")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNonRC4")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.MEDIUM)
@@ -82,7 +81,7 @@ public class RC4Ciphersuites extends Tls12Test {
     public void offerRC4AndOtherCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipherSuite =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
 
         List<CipherSuite> implemented =
                 new ArrayList<>(
@@ -105,18 +104,18 @@ public class RC4Ciphersuites extends Tls12Test {
                             ServerHelloMessage msg =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
                             assertArrayEquals(
-                                    AssertMsgs.UnexpectedCipherSuite,
+                                    AssertMsgs.UNEXPECTED_CIPHER_SUITE,
                                     selectedCipherSuite.getByteValue(),
                                     msg.getSelectedCipherSuite().getValue());
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the TLS client only offers RC4 cipher suites, the TLS server "
                             + "MUST terminate the handshake. The TLS server MAY send the "
                             + "insufficient_security fatal alert in this case.")
-    @DynamicValueConstraints(affectedTypes = DerivationType.CIPHERSUITE, methods = "isRC4")
+    @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isRC4")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @CryptoCategory(SeverityLevel.MEDIUM)

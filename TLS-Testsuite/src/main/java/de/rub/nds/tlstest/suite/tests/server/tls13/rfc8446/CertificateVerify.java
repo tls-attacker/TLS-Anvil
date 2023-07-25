@@ -9,6 +9,8 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CertificateVerifyConstants;
@@ -25,14 +27,12 @@ import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
+import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.execution.AnnotatedState;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.util.SignatureValidation;
@@ -51,7 +51,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "4.4.3.  Certificate Verify")
 public class CertificateVerify extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Test if the Server sends Certificate Verify Messages with valid signatures")
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
@@ -72,7 +72,7 @@ public class CertificateVerify extends Tls13Test {
                         });
     }
 
-    private boolean signatureValid(AnnotatedState annotatedState) {
+    private boolean signatureValid(TlsTestCase annotatedState) {
         CertificateVerifyMessage certificateVerify =
                 (CertificateVerifyMessage)
                         WorkflowTraceUtil.getFirstReceivedMessage(
@@ -97,7 +97,7 @@ public class CertificateVerify extends Tls13Test {
         }
     }
 
-    private byte[] getCompleteSignedData(AnnotatedState annotatedState) {
+    private byte[] getCompleteSignedData(TlsTestCase annotatedState) {
         TlsContext postExecutionContext = annotatedState.getState().getTlsContext();
         WorkflowTrace executedTrace = annotatedState.getWorkflowTrace();
 

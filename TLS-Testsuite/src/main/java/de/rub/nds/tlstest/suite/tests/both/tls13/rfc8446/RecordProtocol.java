@@ -11,6 +11,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.IncludeParameters;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -38,12 +45,8 @@ import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AdditionalPaddingLengthDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolMessageTypeDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -53,7 +56,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "5. Record Protocol")
 public class RecordProtocol extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send record types not "
                             + "defined in this document unless negotiated by some extension. "
@@ -92,13 +95,13 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send record types not "
                             + "defined in this document unless negotiated by some extension. "
                             + "If a TLS implementation receives an unexpected record type, "
                             + "it MUST terminate the connection with an \"unexpected_message\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @RecordLayerCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.LOW)
@@ -129,20 +132,20 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the decryption fails, the receiver MUST "
                             + "terminate the connection with a \"bad_record_mac\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
+    @IncludeParameter("AUTH_TAG_BITMASK")
     @CryptoCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
@@ -166,7 +169,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The length (in bytes) of the following "
                             + "TLSPlaintext.fragment.  The length MUST NOT exceed 2^14 bytes.  An "
@@ -175,9 +178,9 @@ public class RecordProtocol extends Tls13Test {
                             + "the full encoded TLSInnerPlaintext MUST NOT exceed 2^14 "
                             + "+ 1 octets.")
     // Note that the additional byte is the encoded content type, which we also add
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @RFC(number = 8446, section = "5.1. Record Layer and 5.4 Reccord Padding")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -195,7 +198,9 @@ public class RecordProtocol extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
                 new ChangeConnectionTimeoutAction(
-                        (long) (context.getConfig().getConnectionTimeout() * 2.5)),
+                        (long)
+                                (context.getConfig().getAnvilTestConfig().getConnectionTimeout()
+                                        * 2.5)),
                 sendOverflow,
                 new ReceiveAction(new AlertMessage()));
 
@@ -215,15 +220,18 @@ public class RecordProtocol extends Tls13Test {
         return lengthCandidate >= 50;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the decryption fails, the receiver MUST "
                             + "terminate the connection with a \"bad_record_mac\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions({DerivationType.CIPHERTEXT_BITMASK, DerivationType.APP_MSG_LENGHT})
+    @IncludeParameters({
+        @IncludeParameter("CIPHERTEXT_BITMASK"),
+        @IncludeParameter("APP_MSG_LENGHT")
+    })
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @CryptoCategory(SeverityLevel.CRITICAL)
@@ -232,7 +240,7 @@ public class RecordProtocol extends Tls13Test {
     @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
@@ -256,23 +264,23 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "All encrypted TLS records can be padded to inflate the size of the "
                             + "TLSCiphertext.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "isReasonableRecordSize")
-    @ScopeExtensions(DerivationType.ADDITIONAL_PADDING_LENGTH)
+    @IncludeParameter("ADDITIONAL_PADDING_LENGTH")
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @ComplianceCategory(SeverityLevel.HIGH)
     public void acceptsOptionalPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         int selectedPaddingLength =
-                derivationContainer
-                        .getDerivation(AdditionalPaddingLengthDerivation.class)
+                parameterCombination
+                        .getParameter(AdditionalPaddingLengthDerivation.class)
                         .getSelectedValue();
         if (selectedPaddingLength >= 100) {
             applyTimeoutMultiplier(c, 1.5);
@@ -292,12 +300,12 @@ public class RecordProtocol extends Tls13Test {
     }
 
     public void applyTimeoutMultiplier(Config c, double multiplier) {
-        int baseTimeout = context.getConfig().getConnectionTimeout();
+        int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();
         c.getDefaultClientConnection().setTimeout((int) (baseTimeout * multiplier));
         c.getDefaultServerConnection().setTimeout((int) (baseTimeout * multiplier));
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The length MUST NOT exceed 2^14 + 256 bytes. "
                             + "An endpoint that receives a record that exceeds this "
@@ -305,8 +313,8 @@ public class RecordProtocol extends Tls13Test {
                             + "An endpoint that receives a record from its "
                             + "peer with TLSCiphertext.length larger than 2^14 + 256 octets MUST "
                             + "terminate the connection with a \"record_overflow\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @ExcludeParameter("RECORD_LENGTH")
     @RFC(number = 8446, section = "5.2. Record Payload Protection")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -339,18 +347,18 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @TlsTest(description = "Send a record without any content to increase the sequencenumber.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @AnvilTest(description = "Send a record without any content to increase the sequencenumber.")
+    @ModelFromScope(modelType = "CERTIFICATE")
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.PROTOCOL_MESSAGE_TYPE)
+    @IncludeParameter("PROTOCOL_MESSAGE_TYPE")
     @AlertCategory(SeverityLevel.LOW)
     @Tag("emptyRecord")
     public void sendEmptyRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ProtocolMessageType selectedRecordContentType =
-                derivationContainer
-                        .getDerivation(ProtocolMessageTypeDerivation.class)
+                parameterCombination
+                        .getParameter(ProtocolMessageTypeDerivation.class)
                         .getSelectedValue();
         ApplicationMessage appMsg = new ApplicationMessage();
 
@@ -367,12 +375,12 @@ public class RecordProtocol extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Zero-length "
                             + "fragments of Application Data MAY be sent, as they are potentially "
                             + "useful as a traffic analysis countermeasure.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @SecurityCategory(SeverityLevel.CRITICAL)
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @InteroperabilityCategory(SeverityLevel.HIGH)
@@ -388,10 +396,10 @@ public class RecordProtocol extends Tls13Test {
         sendAction.setRecords(r);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        int baseTimeout = context.getConfig().getConnectionTimeout();
+        int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();
         if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta() > 0
                 && context.getFeatureExtractionResult().getClosedAfterAppDataDelta()
-                        < context.getConfig().getConnectionTimeout()) {
+                        < context.getConfig().getAnvilTestConfig().getConnectionTimeout()) {
             baseTimeout = (int) context.getFeatureExtractionResult().getClosedAfterAppDataDelta();
         }
         final int reducedTimeout = baseTimeout / 2;
@@ -423,7 +431,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST limit their scanning to the cleartext returned "
                             + "from the AEAD decryption.  If a receiving implementation does not "
@@ -456,13 +464,13 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST limit their scanning to the cleartext returned "
                             + "from the AEAD decryption.  If a receiving implementation does not "
                             + "find a non-zero octet in the cleartext, it MUST terminate the "
                             + "connection with an \"unexpected_message\" alert.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @RFC(number = 8446, section = "5.4.  Record Padding")
     @ComplianceCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -487,7 +495,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send any records with a version less than 0x0300.")
     @RFC(number = 8446, section = "D.5. Security Restrictions Related to Backward Compatibility")

@@ -7,18 +7,19 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
-public class GreaseNamedGroupDerivation extends DerivationParameter<NamedGroup> {
+public class GreaseNamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
 
     public GreaseNamedGroupDerivation() {
-        super(DerivationType.GREASE_NAMED_GROUP, NamedGroup.class);
+        super(TlsParameterType.GREASE_NAMED_GROUP, NamedGroup.class);
     }
 
     public GreaseNamedGroupDerivation(NamedGroup selectedValue) {
@@ -27,9 +28,14 @@ public class GreaseNamedGroupDerivation extends DerivationParameter<NamedGroup> 
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    protected TlsDerivationParameter<NamedGroup> generateValue(NamedGroup selectedValue) {
+        return new GreaseNamedGroupDerivation(selectedValue);
+    }
+
+    @Override
+    public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, NamedGroup>> parameterValues = new LinkedList<>();
         for (NamedGroup group : NamedGroup.values()) {
             if (group.isGrease()) {
                 parameterValues.add(new GreaseNamedGroupDerivation(group));
@@ -37,7 +43,4 @@ public class GreaseNamedGroupDerivation extends DerivationParameter<NamedGroup> 
         }
         return parameterValues;
     }
-
-    @Override
-    public void applyToConfig(Config config, TestContext context) {}
 }

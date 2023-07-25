@@ -9,6 +9,16 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
@@ -23,24 +33,14 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.ExplicitModelingConstraints;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -68,7 +68,7 @@ public class SignatureAlgorithms extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Note that TLS 1.2 defines this extension differently.  TLS 1.3 "
                             + "implementations willing to negotiate TLS 1.2 MUST behave in "
@@ -79,20 +79,16 @@ public class SignatureAlgorithms extends Tls13Test {
                             + "curve.  If TLS 1.2 is negotiated, implementations MUST be prepared "
                             + "to accept a signature that uses any curve that they advertised in "
                             + "the \"supported_groups\" extension.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ExplicitModelingConstraints(
-            affectedTypes = DerivationType.SIG_HASH_ALGORIHTM,
+            affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getMixedEccHashLengthPairs")
     @DynamicValueConstraints(
-            affectedTypes = {
-                DerivationType.CIPHERSUITE,
-                DerivationType.CERTIFICATE,
-                DerivationType.SIG_HASH_ALGORIHTM
-            },
+            affectedIdentifiers = {"CIPHER_SUITE", "CERTIFICATE", "SIG_HASH_ALGORIHTM"},
             methods = {"isEcdsaCipherSuite", "isApplicableEcdsaCert", "isTls13SigHash"})
     @Tag("new")
     public void acceptsMixedCurveHashLengthInTls12(
@@ -103,7 +99,7 @@ public class SignatureAlgorithms extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Note that TLS 1.2 defines this extension differently.  TLS 1.3 "
                             + "implementations willing to negotiate TLS 1.2 MUST behave in "
@@ -113,13 +109,13 @@ public class SignatureAlgorithms extends Tls13Test {
                             + "mandatory in TLS 1.3) MUST be prepared to accept a signature using "
                             + "that scheme even when TLS 1.2 is negotiated.  In TLS 1.2, "
                             + "RSASSA-PSS is used with RSA cipher suites.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @DynamicValueConstraints(
-            affectedTypes = {DerivationType.CIPHERSUITE, DerivationType.SIG_HASH_ALGORIHTM},
+            affectedIdentifiers = {"CIPHER_SUITE", "SIG_HASH_ALGORIHTM"},
             methods = {"isRsaSignatureCipherSuite", "isRsaPssAlgorithm"})
     @Tag("new")
     public void supportsRsaPssInTls12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -205,16 +201,16 @@ public class SignatureAlgorithms extends Tls13Test {
     }
 
     private ConditionalConstraint getHashSizeMustNotMatchEcdsaPkSizeConstraint() {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CERTIFICATE);
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CERTIFICATE));
 
         // TLS 1.3 specifies explicit curves for hash functions in ECDSA
         // e.g ecdsa_secp256r1_sha256
         return new ConditionalConstraint(
                 requiredDerivations,
                 ConstraintBuilder.constrain(
-                                DerivationType.SIG_HASH_ALGORIHTM.name(),
-                                DerivationType.CERTIFICATE.name())
+                                TlsParameterType.SIG_HASH_ALGORIHTM.name(),
+                                TlsParameterType.CERTIFICATE.name())
                         .by(
                                 (SigAndHashDerivation sigAndHashDerivation,
                                         CertificateDerivation certificateDerivation) -> {

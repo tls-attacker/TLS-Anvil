@@ -7,19 +7,20 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.scanner.core.constants.TestResults;
-import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
-public class RecordLengthDerivation extends DerivationParameter<Integer> {
+public class RecordLengthDerivation extends TlsDerivationParameter<Integer> {
 
     public RecordLengthDerivation() {
-        super(DerivationType.RECORD_LENGTH, Integer.class);
+        super(TlsParameterType.RECORD_LENGTH, Integer.class);
     }
 
     public RecordLengthDerivation(Integer selectedValue) {
@@ -28,9 +29,9 @@ public class RecordLengthDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
 
         if (context.getFeatureExtractionResult()
                         .getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION)
@@ -44,7 +45,12 @@ public class RecordLengthDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
-        config.setDefaultMaxRecordData(getSelectedValue());
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+        config.getTlsConfig().setDefaultMaxRecordData(getSelectedValue());
+    }
+
+    @Override
+    protected TlsDerivationParameter<Integer> generateValue(Integer selectedValue) {
+        return new RecordLengthDerivation(selectedValue);
     }
 }

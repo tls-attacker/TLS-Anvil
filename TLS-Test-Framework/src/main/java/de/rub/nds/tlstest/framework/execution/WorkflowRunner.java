@@ -7,6 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.execution;
 
+import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -38,8 +39,8 @@ import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import de.rub.nds.tlstest.framework.model.DerivationContainer;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
+import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import java.io.IOException;
 import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;
@@ -57,7 +58,7 @@ public class WorkflowRunner {
 
     private Config preparedConfig;
 
-    private DerivationContainer derivationContainer;
+    private TlsParameterCombination derivationContainer;
     private HandshakeMessageType untilHandshakeMessage;
     private ProtocolMessageType untilProtocolMessage;
     private Boolean untilSendingMessage = null;
@@ -80,7 +81,7 @@ public class WorkflowRunner {
      * @param trace Trace to execute
      * @return
      */
-    public AnnotatedState execute(WorkflowTrace trace, Config config) {
+    public TlsTestCase execute(WorkflowTrace trace, Config config) {
         if (preparedConfig == null) {
             LOGGER.warn(
                     "Config was not set before execution - WorkflowTrace may me invalid for Test:"
@@ -106,8 +107,8 @@ public class WorkflowRunner {
 
         allowOptionalClientApplicationMessage(trace);
 
-        AnnotatedState annotatedState =
-                new AnnotatedState(extensionContext, new State(config, trace), derivationContainer);
+        TlsTestCase annotatedState =
+                new TlsTestCase(extensionContext, new State(config, trace), derivationContainer);
 
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             StateExecutionTask task =
@@ -116,7 +117,10 @@ public class WorkflowRunner {
                             context.getStateExecutor().getReexecutions());
             TestContext.getInstance().increaseServerHandshakesSinceRestart();
             if (TestContext.getInstance().getServerHandshakesSinceRestart()
-                            == TestContext.getInstance().getConfig().getRestartServerAfter()
+                            == TestContext.getInstance()
+                                    .getConfig()
+                                    .getAnvilTestConfig()
+                                    .getRestartServerAfter()
                     && TestContext.getInstance().getConfig().getTimeoutActionScript() != null) {
                 LOGGER.info("Scheduling server restart with task");
                 task.setBeforeTransportPreInitCallback(
@@ -141,8 +145,12 @@ public class WorkflowRunner {
                         .getTlsContext()
                         .setTransportHandler(
                                 new ServerTcpTransportHandler(
-                                        context.getConfig().getConnectionTimeout(),
-                                        context.getConfig().getConnectionTimeout(),
+                                        context.getConfig()
+                                                .getAnvilTestConfig()
+                                                .getConnectionTimeout(),
+                                        context.getConfig()
+                                                .getAnvilTestConfig()
+                                                .getConnectionTimeout(),
                                         context.getConfig()
                                                 .getTestClientDelegate()
                                                 .getServerSocket()));
@@ -310,11 +318,11 @@ public class WorkflowRunner {
         this.preparedConfig = preparedConfig;
     }
 
-    public DerivationContainer getDerivationContainer() {
+    public TlsParameterCombination getTlsParameterCombination() {
         return derivationContainer;
     }
 
-    public void setDerivationContainer(DerivationContainer derivationContainer) {
+    public void setTlsParameterCombination(TlsParameterCombination derivationContainer) {
         this.derivationContainer = derivationContainer;
     }
 

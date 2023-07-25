@@ -7,6 +7,15 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.ManualConfig;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -30,26 +39,16 @@ import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
-import de.rub.nds.tlstest.framework.annotations.ManualConfig;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ChosenHandshakeMessageDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +60,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "5.1. Record Layer")
 public class RecordLayer extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send "
                             + "zero-length fragments of Handshake types, even "
@@ -91,7 +90,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations "
                             + "MUST NOT send Handshake and Alert records that have a zero-length "
@@ -131,13 +130,13 @@ public class RecordLayer extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not support Record fragmentation");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Handshake messages MUST NOT be interleaved "
                             + "with other record types. That is, if a handshake message is split over two or more "
                             + "records, there MUST NOT be any other records between them.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @ScopeExtensions(DerivationType.ALERT)
+    @ExcludeParameter("RECORD_LENGTH")
+    @IncludeParameter("ALERT")
     @RecordLayerCategory(SeverityLevel.LOW)
     @AlertCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -151,7 +150,7 @@ public class RecordLayer extends Tls13Test {
                         WorkflowTraceUtil.getFirstSendingActionForMessage(
                                 HandshakeMessageType.SERVER_HELLO, trace);
         AlertDescription selectedAlert =
-                derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(AlertDerivation.class).getSelectedValue();
 
         Record unmodifiedServerHelloRecord = new Record();
         Record unmodifiedEncryptedExtensionsRecord = new Record();
@@ -188,13 +187,13 @@ public class RecordLayer extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(description = "Send a record without any content to increase the sequencenumber.")
-    @ScopeExtensions(DerivationType.CHOSEN_HANDSHAKE_MSG)
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @AnvilTest(description = "Send a record without any content to increase the sequencenumber.")
+    @IncludeParameter("CHOSEN_HANDSHAKE_MSG")
+    @ExcludeParameter("RECORD_LENGTH")
     @ExplicitValues(
-            affectedTypes = DerivationType.CHOSEN_HANDSHAKE_MSG,
+            affectedIdentifiers = "CHOSEN_HANDSHAKE_MSG",
             methods = "getModifiableHandshakeMessages")
-    @ManualConfig(DerivationType.CHOSEN_HANDSHAKE_MSG)
+    @ManualConfig(identifiers = "CHOSEN_HANDSHAKE_MSG")
     @Tag("emptyRecord")
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
@@ -204,8 +203,8 @@ public class RecordLayer extends Tls13Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         HandshakeMessageType affectedMessage =
-                derivationContainer
-                        .getDerivation(ChosenHandshakeMessageDerivation.class)
+                parameterCombination
+                        .getParameter(ChosenHandshakeMessageDerivation.class)
                         .getSelectedValue();
 
         Record r = new Record();
@@ -244,13 +243,13 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Handshake messages MUST NOT span key changes. Implementations "
                             + "MUST verify that all messages immediately preceding a key change "
                             + "align with a record boundary; if not, then they MUST terminate the "
                             + "connection with an \"unexpected_message\" alert.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")

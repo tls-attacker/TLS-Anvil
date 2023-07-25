@@ -11,6 +11,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
@@ -25,9 +28,6 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
@@ -44,7 +44,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class RespectClientExtensions extends Tls12Test {
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A server that receives a ClientHello containing one or both of these "
                             + "extensions MUST use the client's enumerated capabilities to guide its "
@@ -65,7 +65,7 @@ public class RespectClientExtensions extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A server that receives a ClientHello containing one or both of these "
                             + "extensions MUST use the client's enumerated capabilities to guide its "
@@ -121,7 +121,7 @@ public class RespectClientExtensions extends Tls12Test {
                             ECDHEServerKeyExchangeMessage message =
                                     trace.getFirstReceivedMessage(
                                             ECDHEServerKeyExchangeMessage.class);
-                            assertNotNull(AssertMsgs.ServerKxNotReceived, message);
+                            assertNotNull(AssertMsgs.SERVER_KEY_EXCHANGE_NOT_RECEIVED, message);
 
                             ClientHelloMessage sentChm =
                                     trace.getFirstSendMessage(ClientHelloMessage.class);

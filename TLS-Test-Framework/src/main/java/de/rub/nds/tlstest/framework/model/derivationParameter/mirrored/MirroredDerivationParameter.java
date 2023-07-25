@@ -7,43 +7,42 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter.mirrored;
 
-import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationFactory;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.ParameterFactory;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 
 /**
- * Provides the same values overall as it's mirrored type. This should be used when tests require
+ * Provides the same values overall as its mirrored type. This should be used when tests require
  * each possible value of a derivation parameter twice but only as long as they are not identical
  * within a test combination (e.g of a set A,B,C the combination (A,A) (B,B) (C,C) are forbidden)
  */
-public abstract class MirroredDerivationParameter<T> extends DerivationParameter<T> {
+public abstract class MirroredDerivationParameter<T> extends TlsDerivationParameter<T> {
 
-    private final DerivationType mirroredType;
+    private final TlsParameterType mirroredType;
 
     public MirroredDerivationParameter(
-            DerivationType type, DerivationType mirroredType, Class<T> valueClass) {
+            TlsParameterType type, TlsParameterType mirroredType, Class<T> valueClass) {
         super(type, valueClass);
         this.mirroredType = mirroredType;
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {}
-
-    @Override
-    public boolean hasNoApplicableValues(TestContext context, DerivationScope scope) {
-        return DerivationFactory.getInstance(getMirroredType())
-                .hasNoApplicableValues(context, scope);
+    public boolean hasNoApplicableValues(DerivationScope scope) {
+        return ParameterFactory.getInstanceFromIdentifier(
+                        new ParameterIdentifier(getMirroredType()))
+                .hasNoApplicableValues(scope);
     }
 
     @Override
-    public boolean canBeModeled(TestContext context, DerivationScope scope) {
-        return DerivationFactory.getInstance(getMirroredType()).canBeModeled(context, scope);
+    public boolean canBeModeled(DerivationScope scope) {
+        return ParameterFactory.getInstanceFromIdentifier(
+                        new ParameterIdentifier(getMirroredType()))
+                .canBeModeled(scope);
     }
 
-    public DerivationType getMirroredType() {
+    public TlsParameterType getMirroredType() {
         return mirroredType;
     }
 }

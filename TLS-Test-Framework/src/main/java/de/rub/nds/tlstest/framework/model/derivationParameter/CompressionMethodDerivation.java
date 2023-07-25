@@ -7,18 +7,19 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
-public class CompressionMethodDerivation extends DerivationParameter<CompressionMethod> {
+public class CompressionMethodDerivation extends TlsDerivationParameter<CompressionMethod> {
 
     public CompressionMethodDerivation() {
-        super(DerivationType.COMPRESSION_METHOD, CompressionMethod.class);
+        super(TlsParameterType.COMPRESSION_METHOD, CompressionMethod.class);
     }
 
     public CompressionMethodDerivation(CompressionMethod selectedValue) {
@@ -27,18 +28,19 @@ public class CompressionMethodDerivation extends DerivationParameter<Compression
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    protected TlsDerivationParameter<CompressionMethod> generateValue(
+            CompressionMethod selectedValue) {
+        return new CompressionMethodDerivation(selectedValue);
+    }
+
+    @Override
+    public List<DerivationParameter<TlsAnvilConfig, CompressionMethod>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, CompressionMethod>> parameterValues =
+                new LinkedList<>();
         for (CompressionMethod compressionMethod : CompressionMethod.values()) {
             parameterValues.add(new CompressionMethodDerivation(compressionMethod));
         }
         return parameterValues;
-    }
-
-    @Override
-    public void applyToConfig(Config config, TestContext context) {
-        // current tests only apply the compression method explicitly using
-        // modifiable variables
     }
 }

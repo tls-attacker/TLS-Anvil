@@ -7,14 +7,16 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.MacAlgorithm;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
@@ -22,10 +24,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class MacBitmaskDerivation extends DerivationParameter<Integer> {
+public class MacBitmaskDerivation extends TlsDerivationParameter<Integer> {
 
     public MacBitmaskDerivation() {
-        super(DerivationType.MAC_BITMASK, Integer.class);
+        super(TlsParameterType.MAC_BITMASK, Integer.class);
     }
 
     public MacBitmaskDerivation(Integer selectedValue) {
@@ -34,13 +36,14 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
         int maxMacLenght = 0;
         for (CipherSuite cipherSuite : context.getFeatureExtractionResult().getCipherSuites()) {
             MacAlgorithm macAlg =
-                    AlgorithmResolver.getMacAlgorithm(scope.getTargetVersion(), cipherSuite);
+                    AlgorithmResolver.getMacAlgorithm(
+                            ConstraintHelper.getTargetVersion(derivationScope), cipherSuite);
             if (macAlg != MacAlgorithm.AEAD
                     && macAlg != MacAlgorithm.NULL
                     && maxMacLenght < macAlg.getSize()) {
@@ -55,7 +58,7 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {}
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {}
 
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
@@ -68,12 +71,14 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     private ConditionalConstraint getMustBeWithinMacSizeConstraint(DerivationScope scope) {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(DerivationType.CIPHERSUITE);
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
 
         return new ConditionalConstraint(
                 requiredDerivations,
-                ConstraintBuilder.constrain(getType().name(), DerivationType.CIPHERSUITE.name())
+                ConstraintBuilder.constrain(
+                                getParameterIdentifier().name(),
+                                TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (MacBitmaskDerivation macBitmaskDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {
@@ -83,10 +88,16 @@ public class MacBitmaskDerivation extends DerivationParameter<Integer> {
                                             cipherSuiteDerivation.getSelectedValue();
 
                                     return AlgorithmResolver.getMacAlgorithm(
-                                                            scope.getTargetVersion(),
+                                                            ConstraintHelper.getTargetVersion(
+                                                                    scope),
                                                             selectedCipherSuite)
                                                     .getSize()
                                             > selectedBitmaskBytePosition;
                                 }));
+    }
+
+    @Override
+    protected TlsDerivationParameter<Integer> generateValue(Integer selectedValue) {
+        return new MacBitmaskDerivation(selectedValue);
     }
 }

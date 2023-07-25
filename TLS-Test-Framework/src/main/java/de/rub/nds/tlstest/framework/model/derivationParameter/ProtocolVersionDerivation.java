@@ -7,17 +7,18 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.List;
 
 /** This class uses byte[] instead of ProtocolVersion for more flexibility */
-public class ProtocolVersionDerivation extends DerivationParameter<byte[]> {
+public class ProtocolVersionDerivation extends TlsDerivationParameter<byte[]> {
 
     public ProtocolVersionDerivation() {
-        super(DerivationType.PROTOCOL_VERSION, byte[].class);
+        super(TlsParameterType.PROTOCOL_VERSION, byte[].class);
     }
 
     public ProtocolVersionDerivation(byte[] selectedValue) {
@@ -26,13 +27,13 @@ public class ProtocolVersionDerivation extends DerivationParameter<byte[]> {
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        throw new UnsupportedOperationException(
-                "Not supported yet."); // To change body of generated methods, choose Tools |
-        // Templates.
+    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getParameterValues(
+            DerivationScope derivationScope) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {}
+    protected TlsDerivationParameter<byte[]> generateValue(byte[] selectedValue) {
+        return new ProtocolVersionDerivation(selectedValue);
+    }
 }

@@ -9,13 +9,13 @@ package de.rub.nds.tlstest.framework.annotations.keyExchange;
 
 import static org.junit.Assert.assertEquals;
 
+import de.rub.nds.anvilcore.testhelper.ExtensionContextResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.KeyX;
-import de.rub.nds.tlstest.framework.utils.ExtensionContextResolver;
 import java.util.HashSet;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

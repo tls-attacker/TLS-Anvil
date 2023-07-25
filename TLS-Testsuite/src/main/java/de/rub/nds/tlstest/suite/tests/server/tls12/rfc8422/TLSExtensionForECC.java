@@ -12,6 +12,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.ManualConfig;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
@@ -42,14 +49,8 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.InvalidCurvePoint;
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.TwistedCurvePoint;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.ManualConfig;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
@@ -57,13 +58,10 @@ import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCate
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -82,7 +80,7 @@ public class TLSExtensionForECC extends Tls12Test {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A server that receives a ClientHello containing one or both of these "
                             + "extensions MUST use the client's enumerated capabilities to guide its "
@@ -110,13 +108,13 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a server does not understand the Supported Elliptic Curves Extension, "
                             + "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake "
                             + "while restricting itself to the enumerated curves and point formats, "
                             + "it MUST NOT negotiate the use of an ECC cipher suite.")
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ExcludeParameter("NAMED_GROUP")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.MEDIUM)
@@ -140,7 +138,7 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "4. TLS Extensions for ECC and 5.1. Client Hello Extensions")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Servers implementing ECC "
                             + "cipher suites MUST support these extensions, and when a client uses "
@@ -151,8 +149,8 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "does not understand the Supported Point Formats Extension, or is unable to complete the ECC handshake "
                             + "while restricting itself to the enumerated curves and point formats, "
                             + "it MUST NOT negotiate the use of an ECC cipher suite.")
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
-    @ManualConfig(DerivationType.CIPHERSUITE)
+    @ExcludeParameter("NAMED_GROUP")
+    @ManualConfig(identifiers = "CIPHER_SUITE")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     @InteroperabilityCategory(SeverityLevel.CRITICAL)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -168,7 +166,7 @@ public class TLSExtensionForECC extends Tls12Test {
                         .filter(i -> KeyExchangeType.forCipherSuite(i) == KeyExchangeType.ECDH)
                         .collect(Collectors.toList());
         cipherSuiteList.add(
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue());
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue());
 
         c.setDefaultClientSupportedCipherSuites(cipherSuiteList);
 
@@ -189,11 +187,11 @@ public class TLSExtensionForECC extends Tls12Test {
                             WorkflowTrace trace = i.getWorkflowTrace();
                             ServerHelloMessage message =
                                     trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.ServerHelloNotReceived, message);
+                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, message);
                             assertArrayEquals(
-                                    AssertMsgs.UnexpectedCipherSuite,
-                                    derivationContainer
-                                            .getDerivation(CipherSuiteDerivation.class)
+                                    AssertMsgs.UNEXPECTED_CIPHER_SUITE,
+                                    parameterCombination
+                                            .getParameter(CipherSuiteDerivation.class)
                                             .getSelectedValue()
                                             .getByteValue(),
                                     message.getSelectedCipherSuite().getValue());
@@ -201,7 +199,7 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @RFC(number = 8422, section = "5.1.1 Supported Elliptic Curves Extension")
-    /*@TlsTest(description = " RFC 4492 defined 25 different curves in the NamedCurve registry (now\n" +
+    /*@AnvilTest(description = " RFC 4492 defined 25 different curves in the NamedCurve registry (now\n" +
     "renamed the \"TLS Supported Groups\" registry, although the enumeration\n" +
     "below is still named NamedCurve) for use in TLS.  Only three have\n" +
     "seen much use.  This specification is deprecating the rest (with\n" +
@@ -232,9 +230,9 @@ public class TLSExtensionForECC extends Tls12Test {
                 deprecatedFound.isEmpty());
     }
 
-    @TlsTest(description = "NamedCurve named_curve_list<2..2^16-1>")
+    @AnvilTest(description = "NamedCurve named_curve_list<2..2^16-1>")
     @RFC(number = 8422, section = "5.1.1.  Supported Elliptic Curves Extension")
-    @ScopeLimitations(DerivationType.INCLUDE_GREASE_NAMED_GROUPS)
+    @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @InteroperabilityCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.MEDIUM)
@@ -247,7 +245,7 @@ public class TLSExtensionForECC extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         // add 52 additional groups to reach 53, which is the sum of all
         // named groups, explicit curves, and grease values
         byte[] allExplicitGroups = new byte[53 * 2];
@@ -268,7 +266,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "With the NIST curves, each party MUST validate the public key sent by "
                             + "its peer in the ClientKeyExchange and ServerKeyExchange messages.  A "
@@ -276,12 +274,12 @@ public class TLSExtensionForECC extends Tls12Test {
                             + "peer's public value satisfy the curve equation, y^2 = x^3 + ax + b "
                             + "mod p.")
     @RFC(number = 8422, section = "5.11. Public Key Validation")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "isInvalidCurveApplicableNamedGroup")
     @CryptoCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.HIGH)
@@ -293,7 +291,7 @@ public class TLSExtensionForECC extends Tls12Test {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
         InvalidCurvePoint invalidCurvePoint = InvalidCurvePoint.largeOrder(selectedGroup);
         Point serializablePoint =
@@ -320,7 +318,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "if either party obtains all-zeroes x_S, it MUST "
                             + "abort the handshake (as required by definition of X25519 and X448). [...]"
@@ -330,7 +328,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @RFC(
             number = 8422,
             section = "5.10. ECDH, ECDSA, and RSA Computations and 5.11. Public Key Validation")
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isXCurve")
+    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -339,7 +337,7 @@ public class TLSExtensionForECC extends Tls12Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         TwistedCurvePoint groupSpecificPoint = TwistedCurvePoint.smallOrder(selectedGroup);
         RFC7748Curve curve = (RFC7748Curve) CurveFactory.getCurve(selectedGroup);
@@ -364,14 +362,14 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The server MUST send an ephemeral ECDH public key and a specification "
                             + "of the corresponding curve in the ServerKeyExchange message.  These "
                             + "parameters MUST NOT be signed.")
     @RFC(number = 8422, section = "2.3.  ECDH_anon")
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.CIPHERSUITE,
+            affectedIdentifiers = "CIPHER_SUITE",
             methods = "isEcdheAnonCipherSuite")
     @HandshakeCategory(SeverityLevel.LOW)
     @InteroperabilityCategory(SeverityLevel.LOW)

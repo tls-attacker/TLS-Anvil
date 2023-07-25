@@ -16,6 +16,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -40,11 +44,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
@@ -53,7 +53,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCateg
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.HashSet;
@@ -117,7 +116,7 @@ public class PreSharedKey extends Tls13Test {
         }
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The \"pre_shared_key\" extension MUST be the last extension "
                             + "in the ClientHello (this facilitates implementation as described below). "
@@ -158,7 +157,7 @@ public class PreSharedKey extends Tls13Test {
         return workflowTrace;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The \"pre_shared_key\" extension MUST be the last extension "
                             + "in the ClientHello (this facilitates implementation as described below). "
@@ -184,7 +183,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server selects a PSK, then it MUST also select a key "
                             + "establishment mode from the set indicated by the client's "
@@ -234,7 +233,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server selects a PSK, then it MUST also select a key "
                             + "establishment mode from the set indicated by the client's "
@@ -283,13 +282,13 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Prior to accepting PSK key establishment, the server MUST validate "
                             + "the corresponding binder value (see Section 4.2.11.2 below).  If this "
                             + "value is not present or does not validate, the server MUST abort the "
                             + "handshake.")
-    @ScopeExtensions(DerivationType.PRF_BITMASK)
+    @IncludeParameter("PRF_BITMASK")
     @MethodCondition(method = "supportsPsk")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -304,7 +303,7 @@ public class PreSharedKey extends Tls13Test {
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction());
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         ClientHelloMessage cHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
         PreSharedKeyExtensionMessage pskExt =
@@ -320,7 +319,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Prior to accepting PSK key establishment, the server MUST validate "
                             + "the corresponding binder value")
@@ -354,7 +353,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Clients MUST verify that the server’s selected_identity is within the "
                             + "range supplied by the client")
@@ -416,7 +415,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Any ticket MUST only be resumed with a cipher suite that has the same KDF hash algorithm as that used to establish the original connection.")
     @RFC(number = 8446, section = "4.6.1.  New Session Ticket Message")
@@ -435,7 +434,7 @@ public class PreSharedKey extends Tls13Test {
                 workflowTrace.getLastSendMessage(ClientHelloMessage.class);
 
         CipherSuite selectedCipher =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         CipherSuite otherHkdfHashCipher = null;
         for (CipherSuite cipher :
                 context.getFeatureExtractionResult().getSupportedTls13CipherSuites()) {
@@ -464,7 +463,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If clients offer "
                             + "\"pre_shared_key\" without a \"psk_key_exchange_modes\" extension, "

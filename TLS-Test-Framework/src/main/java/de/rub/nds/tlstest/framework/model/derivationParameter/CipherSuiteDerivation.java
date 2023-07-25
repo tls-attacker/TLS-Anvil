@@ -7,20 +7,22 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-public class CipherSuiteDerivation extends DerivationParameter<CipherSuite> {
+public class CipherSuiteDerivation extends TlsDerivationParameter<CipherSuite> {
 
     public CipherSuiteDerivation() {
-        super(DerivationType.CIPHERSUITE, CipherSuite.class);
+        super(TlsParameterType.CIPHER_SUITE, CipherSuite.class);
     }
 
     public CipherSuiteDerivation(CipherSuite selectedValue) {
@@ -29,28 +31,34 @@ public class CipherSuiteDerivation extends DerivationParameter<CipherSuite> {
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {
+    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-            config.setDefaultClientSupportedCipherSuites(getSelectedValue());
+            config.getTlsConfig().setDefaultClientSupportedCipherSuites(getSelectedValue());
         } else {
-            config.setDefaultServerSupportedCipherSuites(getSelectedValue());
+            config.getTlsConfig().setDefaultServerSupportedCipherSuites(getSelectedValue());
         }
-        config.setDefaultSelectedCipherSuite(getSelectedValue());
+        config.getTlsConfig().setDefaultSelectedCipherSuite(getSelectedValue());
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, CipherSuite>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, CipherSuite>> parameterValues = new LinkedList<>();
         Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
         cipherSuiteList.addAll(
                 context.getFeatureExtractionResult().getSupportedTls13CipherSuites());
         for (CipherSuite cipherSuite : cipherSuiteList) {
-            if (scope.getKeyExchangeRequirements().compatibleWithCiphersuite(cipherSuite)) {
+            if (ConstraintHelper.getKeyExchangeRequirements(derivationScope)
+                    .compatibleWithCiphersuite(cipherSuite)) {
                 parameterValues.add(new CipherSuiteDerivation(cipherSuite));
             }
         }
 
         return parameterValues;
+    }
+
+    @Override
+    protected TlsDerivationParameter<CipherSuite> generateValue(CipherSuite selectedValue) {
+        return new CipherSuiteDerivation(selectedValue);
     }
 }

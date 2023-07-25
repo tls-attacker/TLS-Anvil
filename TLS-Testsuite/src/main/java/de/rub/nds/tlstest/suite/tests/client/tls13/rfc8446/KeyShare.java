@@ -10,6 +10,16 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -36,27 +46,16 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.InvalidCurvePoint;
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.TwistedCurvePoint;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe.ShareOutOfBoundsDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -113,13 +112,13 @@ public class KeyShare extends Tls13Test {
         }
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
                             + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
                             + "that the server has selected for the negotiated key exchange.")
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ExcludeParameter("NAMED_GROUP")
+    @ModelFromScope(modelType = "CERTIFICATE")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -166,12 +165,12 @@ public class KeyShare extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "For the curves secp256r1, secp384r1, and secp521r1, peers MUST "
                             + "validate each other's public value Q by ensuring that the point is a "
                             + "valid point on the elliptic curve.")
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isSecpCurve")
+    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
     @HandshakeCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @SecurityCategory(SeverityLevel.CRITICAL)
@@ -180,7 +179,7 @@ public class KeyShare extends Tls13Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         InvalidCurvePoint groupSpecificPoint = InvalidCurvePoint.largeOrder(selectedGroup);
         EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
@@ -214,7 +213,7 @@ public class KeyShare extends Tls13Test {
         return group.isCurve() && group.name().contains("SECP");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "For X25519 and X448, [...]"
                             + "For these curves, implementations SHOULD use the approach specified "
@@ -222,7 +221,7 @@ public class KeyShare extends Tls13Test {
                             + "Implementations MUST check whether the computed Diffie-Hellman shared "
                             + "secret is the all-zero value and abort if so")
     @RFC(number = 8446, section = "7.4.2.  Elliptic Curve Diffie-Hellman")
-    @DynamicValueConstraints(affectedTypes = DerivationType.NAMED_GROUP, methods = "isXCurve")
+    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
@@ -231,7 +230,7 @@ public class KeyShare extends Tls13Test {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         TwistedCurvePoint groupSpecificPoint = TwistedCurvePoint.smallOrder(selectedGroup);
         RFC7748Curve curve = (RFC7748Curve) CurveFactory.getCurve(selectedGroup);
@@ -282,24 +281,24 @@ public class KeyShare extends Tls13Test {
         assertFalse("Deprecated or invalid group used for key share", foundDeprecated);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Peers MUST validate each other's public key Y by ensuring that 1 < Y "
                             + "< p-1.")
     @RFC(number = 8446, section = "4.2.8.1.  Diffie-Hellman Parameters")
-    @ScopeExtensions(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
-    @ExplicitValues(affectedTypes = DerivationType.NAMED_GROUP, methods = "getFfdheGroups")
+    @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
+    @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getFfdheGroups")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
     public void ffdheShareOutOfBounds(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         NamedGroup selectedGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         FFDHEGroup ffdheGroup = GroupFactory.getGroup(selectedGroup);
         ShareOutOfBoundsDerivation.OutOfBoundsType type =
-                derivationContainer
-                        .getDerivation(ShareOutOfBoundsDerivation.class)
+                parameterCombination
+                        .getParameter(ShareOutOfBoundsDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace worklfowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
@@ -334,8 +333,10 @@ public class KeyShare extends Tls13Test {
         runner.execute(worklfowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    public List<DerivationParameter> getFfdheGroups(DerivationScope scope) {
-        List<DerivationParameter> derivationParameters = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getFfdheGroups(
+            DerivationScope scope) {
+        List<DerivationParameter<TlsAnvilConfig, NamedGroup>> derivationParameters =
+                new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getTls13FfdheNamedGroups()
                 .forEach(group -> derivationParameters.add(new NamedGroupDerivation(group)));

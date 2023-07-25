@@ -9,6 +9,7 @@ package de.rub.nds.tlstest.framework.testClasses;
 
 import static org.junit.Assert.assertFalse;
 
+import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
@@ -20,8 +21,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import de.rub.nds.tlstest.framework.execution.AnnotatedState;
+import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -59,10 +59,10 @@ public class TlsGenericTest extends TlsBaseTest {
         return runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
     }
 
-    public void validateLengthTest(AnnotatedState i) {
+    public void validateLengthTest(TlsTestCase i) {
         Validator.checkForUnknownMessage(i);
         assertFalse(
-                "Workflow could be executed as planned for " + derivationContainer.toString(),
+                "Workflow could be executed as planned for " + parameterCombination.toString(),
                 i.getWorkflowTrace().executedAsPlanned());
         if (!i.getState().getTlsContext().isReceivedTransportHandlerException()) {
             Validator.receivedFatalAlert(i, false);

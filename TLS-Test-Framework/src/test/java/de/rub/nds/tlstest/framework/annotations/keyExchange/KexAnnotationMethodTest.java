@@ -7,34 +7,34 @@
  */
 package de.rub.nds.tlstest.framework.annotations.keyExchange;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 
 public class KexAnnotationMethodTest extends KexAnnotationTest {
 
-    @TlsTest
+    @AnvilTest
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     public void execute_SupportedSupported() {}
 
-    @TlsTest
+    @AnvilTest
     @KeyExchange(supported = {KeyExchangeType.ALL12})
     public void execute_allSupported() {}
 
-    @TlsTest
+    @AnvilTest
     @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.ECDH})
     public void execute_multipleSupported() {}
 
-    @TlsTest
+    @AnvilTest
     public void execute_noKexAnnotationSpecified() {}
 
-    @TlsTest
+    @AnvilTest
     @KeyExchange(
             supported = {},
             mergeSupportedWithClassSupported = true)
     public void not_execute_KexNotSupportedByTarget2() {}
 
-    @TlsTest
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.DH)
     public void not_execute_KexNotSupportedByTarget_setSupportedOnly() {}
 }

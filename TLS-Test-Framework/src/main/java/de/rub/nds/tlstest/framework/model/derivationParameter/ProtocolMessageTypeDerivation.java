@@ -7,19 +7,20 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
 /** Can be used when ever ProtocolMessageType is needed - eg. RecordContentType */
-public class ProtocolMessageTypeDerivation extends DerivationParameter<ProtocolMessageType> {
+public class ProtocolMessageTypeDerivation extends TlsDerivationParameter<ProtocolMessageType> {
 
     public ProtocolMessageTypeDerivation() {
-        super(DerivationType.PROTOCOL_MESSAGE_TYPE, ProtocolMessageType.class);
+        super(TlsParameterType.PROTOCOL_MESSAGE_TYPE, ProtocolMessageType.class);
     }
 
     public ProtocolMessageTypeDerivation(ProtocolMessageType selectedValue) {
@@ -28,9 +29,10 @@ public class ProtocolMessageTypeDerivation extends DerivationParameter<ProtocolM
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, ProtocolMessageType>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<TlsAnvilConfig, ProtocolMessageType>> parameterValues =
+                new LinkedList<>();
         for (ProtocolMessageType messageType : ProtocolMessageType.values()) {
             parameterValues.add(new ProtocolMessageTypeDerivation(messageType));
         }
@@ -38,5 +40,8 @@ public class ProtocolMessageTypeDerivation extends DerivationParameter<ProtocolM
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {}
+    protected TlsDerivationParameter<ProtocolMessageType> generateValue(
+            ProtocolMessageType selectedValue) {
+        return new ProtocolMessageTypeDerivation(selectedValue);
+    }
 }

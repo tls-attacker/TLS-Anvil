@@ -12,6 +12,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -34,21 +38,15 @@ import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -57,7 +55,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 5246, section = "6.2.1 Fragmentation")
 public class Fragmentation extends Tls12Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send zero-length fragments of Handshake, "
                             + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
@@ -89,7 +87,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send zero-length fragments of Handshake, "
                             + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
@@ -110,10 +108,10 @@ public class Fragmentation extends Tls12Test {
         sendAction.setRecords(r);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        int baseTimeout = context.getConfig().getConnectionTimeout();
+        int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();
         if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta() > 0
                 && context.getFeatureExtractionResult().getClosedAfterAppDataDelta()
-                        < context.getConfig().getConnectionTimeout()) {
+                        < context.getConfig().getAnvilTestConfig().getConnectionTimeout()) {
             baseTimeout = (int) context.getFeatureExtractionResult().getClosedAfterAppDataDelta();
         }
         final int reducedTimeout = baseTimeout / 2;
@@ -125,7 +123,7 @@ public class Fragmentation extends Tls12Test {
                 .validateFinal(
                         i -> {
                             WorkflowTrace trace = i.getWorkflowTrace();
-                            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
+                            assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, trace.executedAsPlanned());
 
                             AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
                             i.addAdditionalResultInfo("Evaluated with timeout " + reducedTimeout);
@@ -144,11 +142,11 @@ public class Fragmentation extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a record without any content with Content Type Application Data. "
                             + " The former record increases the sequencenumber, which should not be allowed")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("emptyRecord")
     @RecordLayerCategory(SeverityLevel.CRITICAL)
     @SecurityCategory(SeverityLevel.CRITICAL)
@@ -172,7 +170,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Send a record without any content with Content Type Handshake followed by an encrypted record. "
                             + " The former record increases the sequencenumber, which should not be allowed")
@@ -199,12 +197,12 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The length (in bytes) of the following TLSPlaintext.fragment. "
                             + "The length MUST NOT exceed 2^14.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @ExcludeParameter("RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -224,7 +222,8 @@ public class Fragmentation extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
-                new ChangeConnectionTimeoutAction(context.getConfig().getConnectionTimeout() * 3),
+                new ChangeConnectionTimeoutAction(
+                        context.getConfig().getAnvilTestConfig().getConnectionTimeout() * 3),
                 sendOverflow,
                 new ReceiveAction(new AlertMessage()));
 
@@ -240,11 +239,11 @@ public class Fragmentation extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "The length (in bytes) of the following TLSCiphertext.fragment. "
                             + "The length MUST NOT exceed 2^14 + 2048") // .
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
+    @ExcludeParameter("RECORD_LENGTH")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -261,7 +260,8 @@ public class Fragmentation extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
-                new ChangeConnectionTimeoutAction(context.getConfig().getConnectionTimeout() * 2),
+                new ChangeConnectionTimeoutAction(
+                        context.getConfig().getAnvilTestConfig().getConnectionTimeout() * 2),
                 sendOverflow,
                 new ReceiveAction(new AlertMessage()));
 

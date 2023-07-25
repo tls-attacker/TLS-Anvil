@@ -7,13 +7,13 @@
  */
 package de.rub.nds.tlstest.framework.extractor;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.junit.extension.EndpointConditionExtension;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import de.rub.nds.tlstest.framework.junitExtensions.EndpointCondition;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,7 +47,7 @@ public class TestCaseExtractor {
                 TestContext.getInstance().getConfig().getTestExtractorDelegate().isDetailed();
         Reflections reflections = new Reflections(packageName, new MethodAnnotationsScanner());
         Set<Method> testMethodsRaw = reflections.getMethodsAnnotatedWith(TestDescription.class);
-        testMethodsRaw.addAll(reflections.getMethodsAnnotatedWith(TlsTest.class));
+        testMethodsRaw.addAll(reflections.getMethodsAnnotatedWith(AnvilTest.class));
 
         Set<ExtractionMethod> testMethods =
                 testMethodsRaw.stream()
@@ -111,7 +111,7 @@ public class TestCaseExtractor {
                 consideredTestsWithCt.stream()
                         .filter(
                                 extractionMethod ->
-                                        extractionMethod.m.getAnnotation(TlsTest.class) != null)
+                                        extractionMethod.m.getAnnotation(AnvilTest.class) != null)
                         .collect(Collectors.toSet());
 
         LOGGER.info(
@@ -279,7 +279,7 @@ public class TestCaseExtractor {
                 this.description = description.value();
             }
 
-            TlsTest desc = method.getAnnotation(TlsTest.class);
+            AnvilTest desc = method.getAnnotation(AnvilTest.class);
             if (desc != null) {
                 this.description = desc.description();
             }
@@ -325,7 +325,7 @@ public class TestCaseExtractor {
         }
 
         public TestEndpointType getEndpointType() {
-            return EndpointCondition.endpointOfMethod(m, m.getDeclaringClass());
+            return EndpointConditionExtension.endpointOfMethod(m, m.getDeclaringClass());
         }
 
         public String getFullTestName() {

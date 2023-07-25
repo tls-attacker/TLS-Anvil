@@ -81,6 +81,7 @@
                         <!-- Allow parallel execution of unit tests (execution in series within test classes) -->
                         <parallel>classes</parallel>
                         <!-- Can be adjusted depending on the local system, 3 should be a fair default value -->
+                        <threadCount>3</threadCount>
                         <forkCount>3</forkCount>
                         <reuseForks>true</reuseForks>
                         <!-- By default we include all but integration tests during surefire execution -->

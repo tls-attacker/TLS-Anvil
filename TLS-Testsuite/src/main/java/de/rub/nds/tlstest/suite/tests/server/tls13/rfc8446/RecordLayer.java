@@ -9,6 +9,14 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import static org.junit.Assert.assertArrayEquals;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -31,24 +39,16 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.LinkedList;
@@ -61,7 +61,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "5.1. Record Layer")
 public class RecordLayer extends Tls13Test {
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations MUST NOT send "
                             + "zero-length fragments of Handshake types, even "
@@ -85,7 +85,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Implementations "
                             + "MUST NOT send Handshake and Alert records that have a zero-length "
@@ -137,13 +137,13 @@ public class RecordLayer extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not support Record fragmentation");
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Handshake messages MUST NOT be interleaved "
                             + "with other record types. That is, if a handshake message is split over two or more\n"
                             + "records, there MUST NOT be any other records between them.")
-    @ScopeLimitations(DerivationType.RECORD_LENGTH)
-    @ScopeExtensions(DerivationType.ALERT)
+    @ExcludeParameter("RECORD_LENGTH")
+    @IncludeParameter("ALERT")
     @RecordLayerCategory(SeverityLevel.LOW)
     @ComplianceCategory(SeverityLevel.HIGH)
     @AlertCategory(SeverityLevel.LOW)
@@ -157,7 +157,7 @@ public class RecordLayer extends Tls13Test {
                         WorkflowTraceUtil.getFirstSendingActionForMessage(
                                 HandshakeMessageType.FINISHED, trace);
         AlertDescription selectedAlert =
-                derivationContainer.getDerivation(AlertDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(AlertDerivation.class).getSelectedValue();
 
         Record finishedFragmentRecord = new Record();
         finishedFragmentRecord.setMaxRecordLengthConfig(10);
@@ -177,7 +177,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "Note that earlier versions of TLS did not clearly specify the record "
                             + "layer version number value in all cases "
@@ -186,17 +186,15 @@ public class RecordLayer extends Tls13Test {
     @RFC(number = 8446, section = "D.2.  Negotiating with an Older Client")
     @RecordLayerCategory(SeverityLevel.HIGH)
     @ComplianceCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions(DerivationType.PROTOCOL_VERSION)
-    @ExplicitValues(
-            affectedTypes = DerivationType.PROTOCOL_VERSION,
-            methods = "getRecordProtocolVersions")
+    @IncludeParameter("PROTOCOL_VERSION")
+    @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "getRecordProtocolVersions")
     @Tag("new")
     public void ignoresInitialRecordVersion(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         byte[] selectedRecordVersion =
-                derivationContainer
-                        .getDerivation(ProtocolVersionDerivation.class)
+                parameterCombination
+                        .getParameter(ProtocolVersionDerivation.class)
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -214,8 +212,9 @@ public class RecordLayer extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    public List<DerivationParameter> getRecordProtocolVersions(DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getRecordProtocolVersions(
+            DerivationScope scope) {
+        List<DerivationParameter<TlsAnvilConfig, byte[]>> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x00}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x01}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x02}));
@@ -225,7 +224,7 @@ public class RecordLayer extends Tls13Test {
         return parameterValues;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "legacy_record_version:  MUST be set to 0x0303 for all records "
                             + "generated by a TLS 1.3 implementation other than an initial "

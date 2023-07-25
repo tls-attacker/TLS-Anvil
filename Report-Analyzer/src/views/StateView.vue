@@ -268,7 +268,7 @@ export default {
       }
 
       this.detailsMode = 1
-      if (data.DerivationContainer) {
+      if (data.TlsParameterCombination) {
         this.detailsMode = 2
         this.showPcap(this.tableData[rowIndex][identifier].data, null)
       }

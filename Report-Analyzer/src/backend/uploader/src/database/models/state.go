@@ -9,7 +9,7 @@ type State struct {
 	ID                          primitive.ObjectID `bson:"_id"`
 	TestResultId                primitive.ObjectID `bson:"TestResultId"`
 	ContainerId                 primitive.ObjectID `bson:"ContainerId"`
-	DerivationContainer         map[string]string  `bson:"DerivationContainer"`
+	TlsParameterCombination         map[string]string  `bson:"TlsParameterCombination"`
 	DisplayName                 string             `bson:"DisplayName"`
 	Result                      string             `bson:"Result"`
 	AdditionalResultInformation string             `bson:"AdditionalResultInformation"`

@@ -7,6 +7,12 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7507;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -19,21 +25,15 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -55,8 +55,9 @@ public class SCSV extends Tls12Test {
         return ConditionEvaluationResult.disabled("No other TLS versions are supported");
     }
 
-    public List<DerivationParameter> getOldCiphersuites(DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, CipherSuite>> getOldCiphersuites(
+            DerivationScope scope) {
+        List<DerivationParameter<TlsAnvilConfig, CipherSuite>> parameterValues = new LinkedList<>();
         Set<CipherSuite> olderCipherSuites = new HashSet<>();
 
         List<VersionSuiteListPair> olderPairs =
@@ -91,7 +92,7 @@ public class SCSV extends Tls12Test {
         return null;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If TLS_FALLBACK_SCSV appears in ClientHello.cipher_suites and the highest protocol version "
                             + "supported by the server is higher than the version indicated in ClientHello.client_version, "
@@ -100,7 +101,7 @@ public class SCSV extends Tls12Test {
                             + "The record layer version number for this alert MUST be set to either ClientHello.client_version "
                             + "(as it would for the Server Hello message if the server was continuing the handshake) "
                             + "or to the record layer version number used by the client.")
-    @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getOldCiphersuites")
+    @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -109,7 +110,7 @@ public class SCSV extends Tls12Test {
     public void includeFallbackSCSV(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite cipherSuite =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         c.setDefaultSelectedProtocolVersion(getVersionForCipherSuite(cipherSuite));
 
         c.setDefaultSelectedCipherSuite(cipherSuite);
@@ -135,7 +136,7 @@ public class SCSV extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If TLS_FALLBACK_SCSV appears in ClientHello.cipher_suites and the highest protocol version "
                             + "supported by the server is higher than the version indicated in ClientHello.client_version, "
@@ -144,7 +145,7 @@ public class SCSV extends Tls12Test {
                             + "The record layer version number for this alert MUST be set to either ClientHello.client_version "
                             + "(as it would for the Server Hello message if the server was continuing the handshake) "
                             + "or to the record layer version number used by the client.")
-    @ExplicitValues(affectedTypes = DerivationType.CIPHERSUITE, methods = "getOldCiphersuites")
+    @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     @HandshakeCategory(SeverityLevel.MEDIUM)
     @AlertCategory(SeverityLevel.MEDIUM)
@@ -154,7 +155,7 @@ public class SCSV extends Tls12Test {
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite cipherSuite =
-                derivationContainer.getDerivation(CipherSuiteDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         c.setDefaultSelectedProtocolVersion(getVersionForCipherSuite(cipherSuite));
 
         c.setDefaultSelectedCipherSuite(cipherSuite);

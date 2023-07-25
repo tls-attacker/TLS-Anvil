@@ -190,7 +190,7 @@ export function filter(dataModel: FilterDataModels.Container[], row: TableRow) {
           }
 
           let result = filterRow<IState>(evalString, i => {
-            return i.DerivationContainer[derivationType]
+            return i.TlsParameterCombination[derivationType]
           }, row).reduce((i, j) => i || j)
           conditionEvalString.push(result.toString())
         }  

@@ -11,6 +11,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.ManualConfig;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -31,30 +43,17 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ExplicitModelingConstraints;
-import de.rub.nds.tlstest.framework.annotations.ExplicitValues;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.ManualConfig;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
 import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe.ShareOutOfBoundsDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -90,16 +89,16 @@ public class FfDheShare extends Tls12Test {
     }
 
     @RFC(number = 7919, section = "4. Server Behavior and 5.1. Checking the Peer's Public Key")
-    @TlsTest(
+    @AnvilTest(
             description =
                     "[...] the server MUST verify that 1 < dh_Yc < dh_p - 1. "
                             + "If dh_Yc is out of range, the server MUST terminate the connection "
                             + "with a fatal handshake_failure(40) alert. [...]"
                             + "Peers MUST validate each other's public key Y (dh_Ys offered by the "
                             + "server or dh_Yc offered by the client) by ensuring that 1 < Y < p-1.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
-    @ManualConfig(DerivationType.FFDHE_SHARE_OUT_OF_BOUNDS)
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
+    @ManualConfig(identifiers = "FFDHE_SHARE_OUT_OF_BOUNDS")
     @HandshakeCategory(SeverityLevel.INFORMATIONAL)
     @ComplianceCategory(SeverityLevel.HIGH)
     @KeyExchange(supported = KeyExchangeType.DH)
@@ -112,7 +111,7 @@ public class FfDheShare extends Tls12Test {
         DHClientComputations computations = cke.getComputations();
 
         ShareOutOfBoundsDerivation share =
-                derivationContainer.getDerivation(ShareOutOfBoundsDerivation.class);
+                parameterCombination.getParameter(ShareOutOfBoundsDerivation.class);
         switch (share.getSelectedValue()) {
             case SHARE_IS_ZERO:
                 c.setDefaultClientDhPrivateKey(BigInteger.ZERO);
@@ -162,7 +161,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a compatible TLS server receives a Supported Groups extension from "
                             + "a client that includes any FFDHE group (i.e., any codepoint between "
@@ -205,14 +204,14 @@ public class FfDheShare extends Tls12Test {
                             Validator.executedAsPlanned(i);
                             assertNotEquals(
                                     "Server negotiated DHE cipher suite",
-                                    derivationContainer
-                                            .getDerivation(CipherSuiteDerivation.class)
+                                    parameterCombination
+                                            .getParameter(CipherSuiteDerivation.class)
                                             .getSelectedValue(),
                                     i.getState().getTlsContext().getSelectedCipherSuite());
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If a compatible TLS server receives a Supported Groups extension from "
                             + "a client that includes any FFDHE group (i.e., any codepoint between "
@@ -226,7 +225,7 @@ public class FfDheShare extends Tls12Test {
                             + "connection with a fatal TLS alert of type insufficient_security(71).")
     @RFC(number = 7919, section = "4. Server Behavior")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
-    @ScopeLimitations(DerivationType.NAMED_GROUP)
+    @ExcludeParameter("NAMED_GROUP")
     @MethodCondition(method = "supportsNamedFfdheGroups")
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)
@@ -254,7 +253,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A compatible TLS server that receives the Supported Groups extension "
                             + "with FFDHE codepoints in it and that selects an FFDHE cipher suite "
@@ -263,12 +262,10 @@ public class FfDheShare extends Tls12Test {
                             + "by a compatible client.")
     @RFC(number = 7919, section = "4. Server Behavior")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
-    @ExplicitValues(
-            affectedTypes = DerivationType.NAMED_GROUP,
-            methods = "getSupportedFfdheNamedGroups")
-    @ManualConfig(DerivationType.NAMED_GROUP)
+    @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getSupportedFfdheNamedGroups")
+    @ManualConfig(identifiers = "NAMED_GROUP")
     @ExplicitModelingConstraints(
-            affectedTypes = DerivationType.NAMED_GROUP,
+            affectedIdentifiers = "NAMED_GROUP",
             methods = "getEmptyConstraintsList")
     @ComplianceCategory(SeverityLevel.HIGH)
     @HandshakeCategory(SeverityLevel.HIGH)
@@ -277,7 +274,7 @@ public class FfDheShare extends Tls12Test {
     public void respectsOfferedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         NamedGroup ffdheGroup =
-                derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         config.setDefaultClientNamedGroups(ffdheGroup);
         config.setAddEllipticCurveExtension(true);
 
@@ -294,7 +291,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "A TLS server MUST NOT select an FFDHE cipher suite if the client did "
                             + "not offer one, even if the client offered an FFDHE group in the "
@@ -337,8 +334,9 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    public List<DerivationParameter> getSupportedFfdheNamedGroups(DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getSupportedFfdheNamedGroups(
+            DerivationScope scope) {
+        List<DerivationParameter<TlsAnvilConfig, NamedGroup>> parameterValues = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getFfdheNamedGroups()
                 .forEach(group -> parameterValues.add(new NamedGroupDerivation(group)));

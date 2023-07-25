@@ -9,6 +9,12 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.IncludeParameters;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -49,7 +55,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -93,7 +98,7 @@ public class EarlyData extends Tls13Test {
         return null;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server supplies an \"early_data\" extension, the client MUST "
                             + "verify that the server's selected_identity is 0.")
@@ -139,7 +144,7 @@ public class EarlyData extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "[The server] MUST verify that the "
                             + "following values are the same as those associated with the "
@@ -184,7 +189,7 @@ public class EarlyData extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "[The server] MUST verify that the "
                             + "following values are the same as those associated with the "
@@ -229,7 +234,7 @@ public class EarlyData extends Tls13Test {
         return lengthCandidate >= 50;
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server chooses to accept the \"early_data\" extension, then it "
                             + "MUST comply with the same error-handling requirements specified for "
@@ -239,9 +244,12 @@ public class EarlyData extends Tls13Test {
                             + "\"bad_record_mac\" alert as per Section 5.2.")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
     @MethodCondition(method = "supports0rtt")
-    @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.CIPHERTEXT_BITMASK})
+    @IncludeParameters({
+        @IncludeParameter("APP_MSG_LENGHT"),
+        @IncludeParameter("CIPHERTEXT_BITMASK")
+    })
     @DynamicValueConstraints(
-            affectedTypes = DerivationType.RECORD_LENGTH,
+            affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -255,7 +263,7 @@ public class EarlyData extends Tls13Test {
         c.setAddPreSharedKeyExtension(true);
         c.setAddEarlyDataExtension(true);
         c.setPreserveMessageRecordRelation(true);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
@@ -309,7 +317,7 @@ public class EarlyData extends Tls13Test {
                         });
     }
 
-    @TlsTest(
+    @AnvilTest(
             description =
                     "If the server chooses to accept the \"early_data\" extension, then it "
                             + "MUST comply with the same error-handling requirements specified for "
@@ -318,7 +326,7 @@ public class EarlyData extends Tls13Test {
                             + "\"early_data\" extension, it MUST terminate the connection with a "
                             + "\"bad_record_mac\" alert as per Section 5.2.")
     @RFC(number = 8446, section = "4.2.10 Early Data Indication")
-    @ScopeExtensions(DerivationType.AUTH_TAG_BITMASK)
+    @IncludeParameter("AUTH_TAG_BITMASK")
     @MethodCondition(method = "supports0rtt")
     @AlertCategory(SeverityLevel.MEDIUM)
     @ComplianceCategory(SeverityLevel.HIGH)
@@ -332,7 +340,7 @@ public class EarlyData extends Tls13Test {
         c.setAddPreSharedKeyExtension(true);
         c.setAddEarlyDataExtension(true);
         c.setPreserveMessageRecordRelation(true);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(

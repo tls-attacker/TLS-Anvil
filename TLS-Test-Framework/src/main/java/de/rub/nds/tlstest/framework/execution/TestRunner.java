@@ -63,7 +63,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -372,7 +371,7 @@ public class TestRunner {
         } catch (IllegalStateException ignored) {
 
         } catch (Exception e) {
-            LOGGER.error("Starting tcpdump failed", e);
+            LOGGER.error("Starting tcpdump failed", e.getMessage());
         }
     }
 
@@ -498,7 +497,8 @@ public class TestRunner {
         LauncherDiscoveryRequest request = builder.build();
 
         SummaryGeneratingListener summaryListener = new SummaryGeneratingListener();
-        AnvilTestExecutionListener anvilListener = new AnvilTestExecutionListener();
+        AnvilTestExecutionListener anvilListener =
+                new AnvilTestExecutionListener(testConfig.getAnvilTestConfig());
 
         Launcher launcher =
                 LauncherFactory.create(
@@ -563,16 +563,6 @@ public class TestRunner {
         LOGGER.info("\n" + content);
 
         testContext.getStateExecutor().shutdown();
-        LOGGER.info("High-Level Summary:");
-        LOGGER.info("*******************");
-        LinkedList<String> identifiersListed = new LinkedList<>();
-        identifiersListed.addAll(anvilContext.getAggregatedTestResult().keySet());
-        Collections.sort(identifiersListed);
-        for (String identifier : identifiersListed) {
-            LOGGER.info(
-                    "{} -- {}", identifier, anvilContext.getAggregatedTestResult().get(identifier));
-        }
-
         try {
             testConfig.getTestClientDelegate().getServerSocket().close();
         } catch (Exception e) {

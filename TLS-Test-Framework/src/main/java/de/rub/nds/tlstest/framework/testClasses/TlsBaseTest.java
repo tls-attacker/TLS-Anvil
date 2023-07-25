@@ -9,8 +9,6 @@ package de.rub.nds.tlstest.framework.testClasses;
 
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.junit.CombinatorialAnvilTest;
-import de.rub.nds.anvilcore.junit.extension.EndpointConditionExtension;
-import de.rub.nds.anvilcore.junit.extension.MethodConditionExtension;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -33,14 +31,11 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ExtendWith({
-    EndpointConditionExtension.class,
     TlsVersionCondition.class,
     KexCondition.class,
-    MethodConditionExtension.class,
     EnforcedSenderRestrictionConditionExtension.class,
     WorkflowRunnerResolver.class
 })
-// todo remove code already present in anvil core
 @ModelFromScope(modelType = "GENERIC")
 public abstract class TlsBaseTest extends CombinatorialAnvilTest {
     protected static final Logger LOGGER = LogManager.getLogger();

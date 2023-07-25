@@ -28,8 +28,7 @@ public class IncludeEncryptThenMacExtensionDerivation extends TlsDerivationParam
 
     @Override
     public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
-        super.applyToConfig(config, derivationScope); // Generated from
-        // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+        config.getTlsConfig().setAddEncryptThenMacExtension(getSelectedValue());
     }
 
     @Override

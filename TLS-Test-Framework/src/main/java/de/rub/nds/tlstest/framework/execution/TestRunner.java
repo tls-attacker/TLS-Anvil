@@ -30,6 +30,7 @@ import de.rub.nds.tlsattacker.transport.Connection;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlsscanner.clientscanner.config.ClientScannerConfig;
 import de.rub.nds.tlsscanner.clientscanner.execution.TlsClientScanner;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlsscanner.core.constants.TlsProbeType;
 import de.rub.nds.tlsscanner.serverscanner.config.ServerScannerConfig;
 import de.rub.nds.tlsscanner.serverscanner.execution.TlsServerScanner;
@@ -248,6 +249,8 @@ public class TestRunner {
 
         FeatureExtractionResult report =
                 ServerFeatureExtractionResult.fromServerScanReport(scanner.scan());
+        // workaround - remove headers to avoid serialization loop
+        report.getResultMap().remove(TlsAnalyzedProperty.HTTPS_HEADER.name());
         saveToCache(report);
 
         testContext.setFeatureExtractionResult(report);

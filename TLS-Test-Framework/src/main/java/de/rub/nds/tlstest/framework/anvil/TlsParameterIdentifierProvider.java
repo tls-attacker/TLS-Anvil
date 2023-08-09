@@ -1,13 +1,8 @@
 package de.rub.nds.tlstest.framework.anvil;
 
-import static de.rub.nds.tlstest.framework.anvil.TlsModelType.CERTIFICATE;
-import static de.rub.nds.tlstest.framework.anvil.TlsModelType.EMPTY;
-import static de.rub.nds.tlstest.framework.anvil.TlsModelType.GENERIC;
-import static de.rub.nds.tlstest.framework.anvil.TlsModelType.LENGTHFIELD;
-
 import de.rub.nds.anvilcore.constants.TestEndpointType;
-import de.rub.nds.anvilcore.model.DerivationScope;
-import de.rub.nds.anvilcore.model.ModelType;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DefaultModelTypes;
 import de.rub.nds.anvilcore.model.ParameterIdentifierProvider;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.scanner.core.constants.TestResults;
@@ -18,38 +13,57 @@ import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
-import java.util.Arrays;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static de.rub.nds.tlstest.framework.anvil.TlsModelTypes.*;
+import static de.rub.nds.tlstest.framework.model.TlsParameterType.BIT_POSITION;
+
 public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider {
 
+    /**
+     * Creates a list of all possible ParameterIdentifiers.
+     * For every normal DerivationType there will be one Identifier.
+     * For every BITMASK DerivationTypes, a second BIT_POSITION Identifier will be added.
+     * @return all known ParameterIdentifiers
+     */
     @Override
-    public List<ParameterIdentifier> getAllParameterIdentifiers() {
-        List<ParameterIdentifier> parameterIdentifiers = new LinkedList<>();
-        parameterIdentifiers.addAll(Arrays.asList(TlsParameterType.getAllIdentifiers()));
-        return parameterIdentifiers;
+    public List<ParameterIdentifier> generateAllParameterIdentifiers() {
+        List<ParameterIdentifier> identifiers = new LinkedList<>();
+        for (TlsParameterType listed : TlsParameterType.values()) {
+            if (listed != BIT_POSITION) {
+                ParameterIdentifier identifierToAdd = new ParameterIdentifier(listed);
+                identifiers.add(identifierToAdd);
+                if (listed.isBitmaskDerivation()) {
+                    ParameterIdentifier linkedIdentifier =
+                            new ParameterIdentifier(BIT_POSITION, new BitPositionParameterScope(listed));
+                    identifierToAdd.setLinkedParameterIdentifier(linkedIdentifier);
+                    identifiers.add(linkedIdentifier);
+                }
+            }
+        }
+        return identifiers;
     }
 
     @Override
-    public List<ParameterIdentifier> getModelParameterIdentifiers(DerivationScope derivationScope) {
-        ModelType modelType = derivationScope.getModelType();
-        if (modelType instanceof TlsModelType) {
-            TlsModelType tlsModelType = (TlsModelType) modelType;
-            return getDerivationsOfModel(derivationScope, tlsModelType).stream()
+    public List<ParameterIdentifier> getModelParameterIdentifiers(AnvilTestTemplate anvilTestTemplate) {
+        String modelType = anvilTestTemplate.getModelType();
+        if (TlsModelTypes.tlsModelTypes.contains(modelType)) {
+            return getDerivationsOfModel(anvilTestTemplate, modelType).stream()
                     .map(ParameterIdentifier::new)
                     .collect(Collectors.toList());
         }
-        return super.getModelParameterIdentifiers(derivationScope);
+        return super.getModelParameterIdentifiers(anvilTestTemplate);
     }
 
     private static List<TlsParameterType> getDerivationsOfModel(
-            DerivationScope derivationScope, TlsModelType baseModel) {
+            AnvilTestTemplate anvilTestTemplate, String baseModel) {
         LinkedList<TlsParameterType> derivationsOfModel = new LinkedList<>();
         switch (baseModel) {
-            case EMPTY:
+            case DefaultModelTypes.EMPTY:
                 break;
             case LENGTHFIELD:
             case CERTIFICATE:
@@ -60,33 +74,33 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
                 }
             case GENERIC:
             default:
-                derivationsOfModel.addAll(getBasicModelDerivations(derivationScope));
+                derivationsOfModel.addAll(getBasicModelDerivations(anvilTestTemplate));
         }
         return derivationsOfModel;
     }
 
     private static List<TlsParameterType> getBasicModelDerivations(
-            DerivationScope derivationScope) {
-        List<TlsParameterType> derivationTypes = getBasicDerivationsForBoth(derivationScope);
+            AnvilTestTemplate anvilTestTemplate) {
+        List<TlsParameterType> derivationTypes = getBasicDerivationsForBoth(anvilTestTemplate);
 
         if (TestContext.getInstance().getConfig().getTestEndpointMode()
                 == TestEndpointType.SERVER) {
-            derivationTypes.addAll(getBasicDerivationsForServer(derivationScope));
+            derivationTypes.addAll(getBasicDerivationsForServer(anvilTestTemplate));
         } else {
-            derivationTypes.addAll(getBasicDerivationsForClient(derivationScope));
+            derivationTypes.addAll(getBasicDerivationsForClient(anvilTestTemplate));
         }
         return derivationTypes;
     }
 
     private static List<TlsParameterType> getBasicDerivationsForBoth(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<TlsParameterType> derivationTypes = new LinkedList<>();
         derivationTypes.add(TlsParameterType.CIPHER_SUITE);
         derivationTypes.add(TlsParameterType.NAMED_GROUP);
         derivationTypes.add(TlsParameterType.RECORD_LENGTH);
         derivationTypes.add(TlsParameterType.TCP_FRAGMENTATION);
 
-        if (ConstraintHelper.isTls13Test(derivationScope)) {
+        if (ConstraintHelper.isTls13Test(anvilTestTemplate)) {
             derivationTypes.add(TlsParameterType.INCLUDE_CHANGE_CIPHER_SPEC);
         }
 
@@ -94,7 +108,7 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
     }
 
     private static List<TlsParameterType> getBasicDerivationsForServer(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<TlsParameterType> derivationTypes = new LinkedList<>();
         Set<ExtensionType> supportedExtensions =
                 ((ServerFeatureExtractionResult)
@@ -116,7 +130,7 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
                 derivationTypes.add(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
             }
 
-            if (ConstraintHelper.isTls13Test(derivationScope)) {
+            if (ConstraintHelper.isTls13Test(anvilTestTemplate)) {
                 derivationTypes.add(TlsParameterType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION);
             }
         }
@@ -147,12 +161,12 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
     }
 
     private static List<TlsParameterType> getBasicDerivationsForClient(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<TlsParameterType> derivationTypes = new LinkedList<>();
         ClientFeatureExtractionResult extractionResult =
                 (ClientFeatureExtractionResult)
                         TestContext.getInstance().getFeatureExtractionResult();
-        if (!ConstraintHelper.isTls13Test(derivationScope)) {
+        if (!ConstraintHelper.isTls13Test(anvilTestTemplate)) {
 
             if (extractionResult
                     .getReceivedClientHello()

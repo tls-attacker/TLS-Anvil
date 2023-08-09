@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
@@ -37,13 +37,13 @@ public class MacBitmaskDerivation extends TlsDerivationParameter<Integer> {
 
     @Override
     public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
         int maxMacLenght = 0;
         for (CipherSuite cipherSuite : context.getFeatureExtractionResult().getCipherSuites()) {
             MacAlgorithm macAlg =
                     AlgorithmResolver.getMacAlgorithm(
-                            ConstraintHelper.getTargetVersion(derivationScope), cipherSuite);
+                            ConstraintHelper.getTargetVersion(anvilTestTemplate), cipherSuite);
             if (macAlg != MacAlgorithm.AEAD
                     && macAlg != MacAlgorithm.NULL
                     && maxMacLenght < macAlg.getSize()) {
@@ -58,10 +58,10 @@ public class MacBitmaskDerivation extends TlsDerivationParameter<Integer> {
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {}
+    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {}
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(AnvilTestTemplate scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         if (ConstraintHelper.multipleMacSizesModeled(scope)) {
@@ -70,7 +70,7 @@ public class MacBitmaskDerivation extends TlsDerivationParameter<Integer> {
         return condConstraints;
     }
 
-    private ConditionalConstraint getMustBeWithinMacSizeConstraint(DerivationScope scope) {
+    private ConditionalConstraint getMustBeWithinMacSizeConstraint(AnvilTestTemplate scope) {
         Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
         requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
 

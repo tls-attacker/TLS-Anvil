@@ -8,7 +8,7 @@
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.constants.TestEndpointType;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
@@ -45,7 +45,7 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
 
     @Override
     public List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> getParameterValues(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
@@ -55,12 +55,12 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                     || extractionResult.getAdvertisedSignatureAndHashAlgorithms().isEmpty()) {
                 parameterValues = getClientTestDefaultAlgorithms();
             } else {
-                parameterValues = getClientTestAlgorithms(extractionResult, derivationScope);
+                parameterValues = getClientTestAlgorithms(extractionResult, anvilTestTemplate);
             }
         } else {
             parameterValues = getServerTestAlgorithms();
         }
-        if (!ConstraintHelper.isTls13Test(derivationScope)) {
+        if (!ConstraintHelper.isTls13Test(anvilTestTemplate)) {
             parameterValues.add(new SigAndHashDerivation(null));
         }
         return parameterValues;
@@ -105,7 +105,7 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
 
     private List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>>
             getClientTestAlgorithms(
-                    ClientFeatureExtractionResult extractionResult, DerivationScope scope) {
+                    ClientFeatureExtractionResult extractionResult, AnvilTestTemplate scope) {
         List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         extractionResult.getAdvertisedSignatureAndHashAlgorithms().stream()
@@ -126,7 +126,7 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
         if (getSelectedValue() != null) {
             config.getTlsConfig().setAutoAdjustSignatureAndHashAlgorithm(false);
             config.getTlsConfig().setDefaultSelectedSignatureAndHashAlgorithm(getSelectedValue());
@@ -142,20 +142,20 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
 
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
-        condConstraints.addAll(getSharedDefaultConditionalConstraints(derivationScope));
+        condConstraints.addAll(getSharedDefaultConditionalConstraints(anvilTestTemplate));
 
-        if (!ConstraintHelper.isTls13Test(derivationScope)) {
-            condConstraints.addAll(getDefaultPreTls13Constraints(derivationScope));
+        if (!ConstraintHelper.isTls13Test(anvilTestTemplate)) {
+            condConstraints.addAll(getDefaultPreTls13Constraints(anvilTestTemplate));
         } else {
             condConstraints.add(getHashSizeMustMatchEcdsaPkSizeConstraint());
         }
         return condConstraints;
     }
 
-    public static List<ConditionalConstraint> getDefaultPreTls13Constraints(DerivationScope scope) {
+    public static List<ConditionalConstraint> getDefaultPreTls13Constraints(AnvilTestTemplate scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
         TestContext context = TestContext.getInstance();
 
@@ -181,7 +181,7 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
     }
 
     public static List<ConditionalConstraint> getSharedDefaultConditionalConstraints(
-            DerivationScope scope) {
+            AnvilTestTemplate scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
         if (ConstraintHelper.pssSigAlgoModeled(scope)
                 && ConstraintHelper.rsaPkMightNotSufficeForPss(scope)) {

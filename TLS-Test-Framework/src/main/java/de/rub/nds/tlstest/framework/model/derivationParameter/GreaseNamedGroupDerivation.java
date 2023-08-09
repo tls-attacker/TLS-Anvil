@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
@@ -34,7 +34,7 @@ public class GreaseNamedGroupDerivation extends TlsDerivationParameter<NamedGrou
 
     @Override
     public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getParameterValues(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<DerivationParameter<TlsAnvilConfig, NamedGroup>> parameterValues = new LinkedList<>();
         for (NamedGroup group : NamedGroup.values()) {
             if (group.isGrease()) {

@@ -15,7 +15,7 @@ import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
@@ -213,7 +213,7 @@ public class RecordLayer extends Tls13Test {
     }
 
     public List<DerivationParameter<TlsAnvilConfig, byte[]>> getRecordProtocolVersions(
-            DerivationScope scope) {
+            AnvilTestTemplate scope) {
         List<DerivationParameter<TlsAnvilConfig, byte[]>> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x00}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x01}));

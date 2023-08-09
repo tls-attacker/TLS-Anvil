@@ -18,7 +18,7 @@ import de.rub.nds.anvilcore.annotation.ManualConfig;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -69,7 +69,7 @@ public class SupportedVersions extends Tls13Test {
     }
 
     public List<DerivationParameter<TlsAnvilConfig, byte[]>> getInvalidLegacyVersions(
-            DerivationScope scope) {
+            AnvilTestTemplate scope) {
         List<DerivationParameter<TlsAnvilConfig, byte[]>> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x05, 0x05}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x04}));
@@ -203,7 +203,7 @@ public class SupportedVersions extends Tls13Test {
                 versions.contains(ProtocolVersion.TLS13));
     }
 
-    public List<DerivationParameter> getUnsupportedProtocolVersions(DerivationScope scope) {
+    public List<DerivationParameter> getUnsupportedProtocolVersions(AnvilTestTemplate scope) {
         SupportedVersionsExtensionMessage clientSupportedVersions =
                 TestContext.getInstance()
                         .getReceivedClientHelloMessage()
@@ -325,7 +325,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    public List<DerivationParameter> getUndefinedProtocolVersions(DerivationScope scope) {
+    public List<DerivationParameter> getUndefinedProtocolVersions(AnvilTestTemplate scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         // 03 04 is a separate test
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x05}));

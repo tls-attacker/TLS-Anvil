@@ -15,7 +15,7 @@ import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.annotation.ManualConfig;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -160,7 +160,7 @@ public class SupportedVersions extends Tls13Test {
     }
 
     public List<DerivationParameter<TlsAnvilConfig, byte[]>> getUnsupportedProtocolVersions(
-            DerivationScope scope) {
+            AnvilTestTemplate scope) {
         List<ProtocolVersion> consideredVersions = new LinkedList<>();
         consideredVersions.add(ProtocolVersion.SSL2);
         consideredVersions.add(ProtocolVersion.SSL3);

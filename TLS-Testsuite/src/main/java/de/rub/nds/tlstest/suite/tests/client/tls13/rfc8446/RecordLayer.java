@@ -14,7 +14,7 @@ import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.annotation.ManualConfig;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
@@ -176,7 +176,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    public List<DerivationParameter> getModifiableHandshakeMessages(DerivationScope scope) {
+    public List<DerivationParameter> getModifiableHandshakeMessages(AnvilTestTemplate scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(
                 new ChosenHandshakeMessageDerivation(HandshakeMessageType.ENCRYPTED_EXTENSIONS));

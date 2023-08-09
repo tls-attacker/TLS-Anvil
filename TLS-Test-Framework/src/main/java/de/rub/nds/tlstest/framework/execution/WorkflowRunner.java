@@ -58,7 +58,7 @@ public class WorkflowRunner {
 
     private Config preparedConfig;
 
-    private TlsParameterCombination derivationContainer;
+    private TlsParameterCombination parameterCombination;
     private HandshakeMessageType untilHandshakeMessage;
     private ProtocolMessageType untilProtocolMessage;
     private Boolean untilSendingMessage = null;
@@ -82,6 +82,11 @@ public class WorkflowRunner {
      * @return
      */
     public TlsTestCase execute(WorkflowTrace trace, Config config) {
+        // don't run if testrun is already aborted
+        if (context.isAborted()) {
+            return new TlsTestCase(extensionContext, new State(), parameterCombination);
+        }
+
         if (preparedConfig == null) {
             LOGGER.warn(
                     "Config was not set before execution - WorkflowTrace may me invalid for Test:"
@@ -108,7 +113,7 @@ public class WorkflowRunner {
         allowOptionalClientApplicationMessage(trace);
 
         TlsTestCase annotatedState =
-                new TlsTestCase(extensionContext, new State(config, trace), derivationContainer);
+                new TlsTestCase(extensionContext, new State(config, trace), parameterCombination);
 
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             StateExecutionTask task =
@@ -319,11 +324,11 @@ public class WorkflowRunner {
     }
 
     public TlsParameterCombination getTlsParameterCombination() {
-        return derivationContainer;
+        return parameterCombination;
     }
 
     public void setTlsParameterCombination(TlsParameterCombination derivationContainer) {
-        this.derivationContainer = derivationContainer;
+        this.parameterCombination = derivationContainer;
     }
 
     public boolean shouldInsertHelloRetryRequest() {

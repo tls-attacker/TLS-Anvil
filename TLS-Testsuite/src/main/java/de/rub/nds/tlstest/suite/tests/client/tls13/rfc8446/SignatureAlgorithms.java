@@ -16,7 +16,7 @@ import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
@@ -192,7 +192,7 @@ public class SignatureAlgorithms extends Tls13Test {
                 && algorithmPair.getSignatureAlgorithm().name().contains("PSS");
     }
 
-    public List<ConditionalConstraint> getMixedEccHashLengthPairs(DerivationScope scope) {
+    public List<ConditionalConstraint> getMixedEccHashLengthPairs(AnvilTestTemplate scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
         condConstraints.addAll(SigAndHashDerivation.getSharedDefaultConditionalConstraints(scope));
         condConstraints.addAll(SigAndHashDerivation.getDefaultPreTls13Constraints(scope));

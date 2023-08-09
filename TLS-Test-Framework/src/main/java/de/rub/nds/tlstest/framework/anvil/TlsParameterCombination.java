@@ -1,7 +1,7 @@
 package de.rub.nds.tlstest.framework.anvil;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.ParameterCombination;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
@@ -20,8 +20,8 @@ public class TlsParameterCombination extends ParameterCombination {
     }
 
     public TlsParameterCombination(
-            List<DerivationParameter> parameters, DerivationScope derivationScope) {
-        super(parameters, derivationScope);
+            List<DerivationParameter> parameters, AnvilTestTemplate anvilTestTemplate) {
+        super(parameters, anvilTestTemplate);
     }
 
     public static TlsParameterCombination fromCombination(Combination combination) {
@@ -32,13 +32,13 @@ public class TlsParameterCombination extends ParameterCombination {
     }
 
     public static TlsParameterCombination fromArgumentsAccessor(
-            ArgumentsAccessor argumentsAccessor, DerivationScope derivationScope) {
+            ArgumentsAccessor argumentsAccessor, AnvilTestTemplate anvilTestTemplate) {
         ParameterCombination parameterCombination =
-                ParameterCombination.fromArgumentsAccessor(argumentsAccessor, derivationScope);
+                ParameterCombination.fromArgumentsAccessor(argumentsAccessor, anvilTestTemplate);
         TlsParameterCombination tlsParameterCombination =
                 new TlsParameterCombination(parameterCombination.getParameterValues());
         // set separately so we do not fetch static parameters twice
-        tlsParameterCombination.setDerivationScope(derivationScope);
+        tlsParameterCombination.setDerivationScope(anvilTestTemplate);
         return tlsParameterCombination;
     }
 
@@ -53,8 +53,8 @@ public class TlsParameterCombination extends ParameterCombination {
     }
 
     public byte[] buildBitmask(ParameterIdentifier parameterIdentifier) {
-        DerivationParameter byteParameter = getParameter(parameterIdentifier);
-        DerivationParameter bitParameter = getLinkedParameter(parameterIdentifier);
+        DerivationParameter byteParameter = getParameter(parameterIdentifier);      // ...BitmaskDerivation
+        DerivationParameter bitParameter = getLinkedParameter(parameterIdentifier); // BitPositionDerivation
 
         byte[] constructed = new byte[(Integer) byteParameter.getSelectedValue() + 1];
         constructed[(Integer) byteParameter.getSelectedValue()] =

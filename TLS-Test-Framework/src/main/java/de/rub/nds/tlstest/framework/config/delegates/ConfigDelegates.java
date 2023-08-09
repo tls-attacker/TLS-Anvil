@@ -12,7 +12,8 @@ import java.util.Arrays;
 public enum ConfigDelegates {
     SERVER("server"),
     CLIENT("client"),
-    EXTRACT_TESTS("extractTests");
+    EXTRACT_TESTS("extractTests"),
+    WORKER("worker");
 
     private final String commandName;
 

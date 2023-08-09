@@ -15,7 +15,7 @@ import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.annotation.ManualConfig;
 import de.rub.nds.anvilcore.annotation.ServerTest;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -88,7 +88,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
     }
 
     public List<DerivationParameter<TlsAnvilConfig, byte[]>> get03ProtocolVersions(
-            DerivationScope scope) {
+            AnvilTestTemplate scope) {
         List<DerivationParameter<TlsAnvilConfig, byte[]>> parameterValues = new LinkedList<>();
         for (byte i : new byte[] {0x00, 0x01, 0x02, 0x04, 0x05, (byte) 0xff}) {
             parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, i}));

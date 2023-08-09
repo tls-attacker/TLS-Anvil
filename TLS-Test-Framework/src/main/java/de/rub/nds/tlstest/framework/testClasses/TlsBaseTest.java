@@ -9,7 +9,7 @@ package de.rub.nds.tlstest.framework.testClasses;
 
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.junit.CombinatorialAnvilTest;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
@@ -60,7 +60,7 @@ public abstract class TlsBaseTest extends CombinatorialAnvilTest {
             Config config, ArgumentsAccessor argAccessor, WorkflowRunner runner) {
         parameterCombination =
                 TlsParameterCombination.fromArgumentsAccessor(
-                        argAccessor, new DerivationScope(extensionContext));
+                        argAccessor, new AnvilTestTemplate(extensionContext));
         parameterCombination.applyToConfig(new TlsAnvilConfig(config));
         runner.setPreparedConfig(config);
         runner.setTlsParameterCombination(parameterCombination);

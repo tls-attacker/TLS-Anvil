@@ -7,11 +7,11 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
-import de.rub.nds.anvilcore.model.parameter.ParameterFactory;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
@@ -45,12 +45,12 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
 
     @Override
     public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
-            DerivationScope derivationScope) {
-        return getFirstAndLastByteOfEachSignature(context, derivationScope);
+            AnvilTestTemplate anvilTestTemplate) {
+        return getFirstAndLastByteOfEachSignature(context, anvilTestTemplate);
     }
 
     private List<DerivationParameter<TlsAnvilConfig, Integer>> getAllPossibleBytePositions(
-            TestContext context, DerivationScope scope) {
+            TestContext context, AnvilTestTemplate scope) {
         List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
         int maxSignatureLength = getMaxSignatureByteLength(context, scope);
 
@@ -61,14 +61,12 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
     }
 
     private List<DerivationParameter<TlsAnvilConfig, Integer>> getFirstAndLastByteOfEachSignature(
-            TestContext context, DerivationScope scope) {
+            TestContext context, AnvilTestTemplate scope) {
         Set<Integer> listedValues = new HashSet<>();
         listedValues.add(0);
 
         List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>> applicableCertificates =
-                ParameterFactory.getInstanceFromIdentifier(
-                                new ParameterIdentifier(TlsParameterType.CERTIFICATE))
-                        .getConstrainedParameterValues(scope);
+                TlsParameterType.CERTIFICATE.getInstance(ParameterScope.NO_SCOPE).getConstrainedParameterValues(scope);
         applicableCertificates.forEach(
                 selectableCert ->
                         listedValues.add(
@@ -83,7 +81,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         return parameterValues;
     }
 
-    private int getMaxSignatureByteLength(TestContext context, DerivationScope scope) {
+    private int getMaxSignatureByteLength(TestContext context, AnvilTestTemplate scope) {
         List<SignatureAndHashAlgorithm> signatureAndHashAlgorithms;
         if (!context.getFeatureExtractionResult()
                 .getSignatureAndHashAlgorithmsForDerivation()
@@ -162,7 +160,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {}
+    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {}
 
     public static int computeEstimatedMaxSignatureSize(
             SignatureAndHashAlgorithm signatureHashAlgorithm) {
@@ -233,9 +231,9 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
 
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<ConditionalConstraint> conditionalConstraints = new LinkedList<>();
-        if (ConstraintHelper.signatureLengthConstraintApplicable(derivationScope)) {
+        if (ConstraintHelper.signatureLengthConstraintApplicable(anvilTestTemplate)) {
             conditionalConstraints.add(getMustBeWithinSignatureSizeConstraint());
         }
         return conditionalConstraints;

@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
@@ -40,7 +40,7 @@ public class PRFBitmaskDerivation extends TlsDerivationParameter<Integer> {
     }
 
     @Override
-    public List getParameterValues(DerivationScope scope) {
+    public List getParameterValues(AnvilTestTemplate scope) {
         List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
         if (ConstraintHelper.isTls13Test(scope)) {
             int maxHkdfSize = 0;
@@ -64,7 +64,7 @@ public class PRFBitmaskDerivation extends TlsDerivationParameter<Integer> {
     }
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(AnvilTestTemplate scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
         if (ConstraintHelper.isTls13Test(scope)
                 && ConstraintHelper.multipleHkdfSizesModeled(scope)) {

@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.IpmProvider;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
@@ -48,8 +48,8 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
 
     @Override
     public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
-            DerivationScope derivationScope) {
-        if (ConstraintHelper.isTls13Test(derivationScope)) {
+            AnvilTestTemplate anvilTestTemplate) {
+        if (ConstraintHelper.isTls13Test(anvilTestTemplate)) {
             throw new RuntimeException(
                     "Padding bitmask is not configured for optional TLS 1.3 record padding");
         }
@@ -72,28 +72,28 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {}
+    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {}
 
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
-        condConstraints.add(getMustNotExceedPaddingLengthConstraint(derivationScope, false));
-        if (encThenMacDerivationModeled(derivationScope)) {
-            condConstraints.add(getMustNotResultInPlausiblePadding(derivationScope, false));
+        condConstraints.add(getMustNotExceedPaddingLengthConstraint(anvilTestTemplate, false));
+        if (encThenMacDerivationModeled(anvilTestTemplate)) {
+            condConstraints.add(getMustNotResultInPlausiblePadding(anvilTestTemplate, false));
         }
         return condConstraints;
     }
 
-    private static boolean encThenMacDerivationModeled(DerivationScope derivationScope) {
-        return IpmProvider.getParameterIdentifiersForScope(derivationScope).stream()
+    private static boolean encThenMacDerivationModeled(AnvilTestTemplate anvilTestTemplate) {
+        return IpmProvider.getParameterIdentifiersForScope(anvilTestTemplate).stream()
                 .map(ParameterIdentifier::getParameterType)
                 .anyMatch(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION::equals);
     }
 
     public ConditionalConstraint getMustNotExceedPaddingLengthConstraint(
-            DerivationScope scope, boolean enforceEncryptThenMacMode) {
+            AnvilTestTemplate scope, boolean enforceEncryptThenMacMode) {
         Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
         requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
         requiredDerivations.add(new ParameterIdentifier(TlsParameterType.APP_MSG_LENGHT));
@@ -162,7 +162,7 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
     }
 
     public ConditionalConstraint getMustNotResultInPlausiblePadding(
-            DerivationScope scope, boolean enforceEncryptThenMacMode) {
+            AnvilTestTemplate scope, boolean enforceEncryptThenMacMode) {
         Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
         requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
         requiredDerivations.add(new ParameterIdentifier(TlsParameterType.APP_MSG_LENGHT));
@@ -207,7 +207,7 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
     }
 
     private boolean resultsInPlausiblePadding(
-            DerivationScope scope,
+            AnvilTestTemplate scope,
             PaddingBitmaskDerivation paddingBitmaskDerivation,
             CipherSuiteDerivation cipherSuiteDerivation,
             AppMsgLengthDerivation appMsgLengthDerivation,
@@ -240,7 +240,7 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
     }
 
     private boolean chosenByteIsWithinPadding(
-            DerivationScope scope,
+            AnvilTestTemplate scope,
             int selectedPaddingBitmaskBytePosition,
             CipherSuite selectedCipherSuite,
             int selectedAppMsgLength,

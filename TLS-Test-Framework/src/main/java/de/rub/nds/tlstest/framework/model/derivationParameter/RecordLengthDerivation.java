@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
@@ -30,7 +30,7 @@ public class RecordLengthDerivation extends TlsDerivationParameter<Integer> {
 
     @Override
     public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
 
         if (context.getFeatureExtractionResult()
@@ -45,7 +45,7 @@ public class RecordLengthDerivation extends TlsDerivationParameter<Integer> {
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
         config.getTlsConfig().setDefaultMaxRecordData(getSelectedValue());
     }
 

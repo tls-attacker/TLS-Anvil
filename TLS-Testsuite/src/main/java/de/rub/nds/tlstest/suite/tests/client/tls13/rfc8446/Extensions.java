@@ -12,7 +12,7 @@ import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.annotation.ManualConfig;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -52,7 +52,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class Extensions extends Tls13Test {
 
     public List<DerivationParameter<TlsAnvilConfig, ExtensionType>> getUnrequestedExtensions(
-            DerivationScope scope) {
+            AnvilTestTemplate scope) {
         List<DerivationParameter<TlsAnvilConfig, ExtensionType>> parameterValues =
                 new LinkedList<>();
         List<ExtensionType> extensions = new LinkedList<>();

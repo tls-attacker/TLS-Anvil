@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
@@ -31,7 +31,7 @@ public class IncludeGreaseSigHashDerivation extends TlsDerivationParameter<Boole
 
     @Override
     public List<DerivationParameter<TlsAnvilConfig, Boolean>> getParameterValues(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<DerivationParameter<TlsAnvilConfig, Boolean>> parameterValues = new LinkedList<>();
         parameterValues.add(new IncludeGreaseSigHashDerivation(true));
         parameterValues.add(new IncludeGreaseSigHashDerivation(false));
@@ -39,10 +39,10 @@ public class IncludeGreaseSigHashDerivation extends TlsDerivationParameter<Boole
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {}
+    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {}
 
     @Override
-    public void postProcessConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+    public void postProcessConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
         if (getSelectedValue()) {
             Arrays.asList(SignatureAndHashAlgorithm.values()).stream()
                     .filter(algorithm -> algorithm.isGrease())

@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
@@ -43,7 +43,7 @@ public class AppMsgLengthDerivation extends TlsDerivationParameter<Integer> {
     }
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(AnvilTestTemplate scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         if (ConstraintHelper.multipleBlocksizesModeled(scope)) {
@@ -80,7 +80,7 @@ public class AppMsgLengthDerivation extends TlsDerivationParameter<Integer> {
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < getSelectedValue(); i++) {
             builder.append(ASCII_LETTER);
@@ -90,10 +90,10 @@ public class AppMsgLengthDerivation extends TlsDerivationParameter<Integer> {
 
     @Override
     public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         int maxCipherTextByteLen = 0;
         Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
-        if (ConstraintHelper.isTls13Test(derivationScope)) {
+        if (ConstraintHelper.isTls13Test(anvilTestTemplate)) {
             cipherSuiteList = context.getFeatureExtractionResult().getSupportedTls13CipherSuites();
         }
         for (CipherSuite cipherSuite : cipherSuiteList) {

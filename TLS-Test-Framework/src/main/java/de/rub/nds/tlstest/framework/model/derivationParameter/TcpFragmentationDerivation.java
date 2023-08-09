@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.transport.TransportHandlerType;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
@@ -29,7 +29,7 @@ public class TcpFragmentationDerivation extends TlsDerivationParameter<Boolean> 
 
     @Override
     public List<DerivationParameter<TlsAnvilConfig, Boolean>> getParameterValues(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<DerivationParameter<TlsAnvilConfig, Boolean>> parameterValues = new LinkedList<>();
         parameterValues.add(new TcpFragmentationDerivation(false));
         parameterValues.add(new TcpFragmentationDerivation(true));
@@ -37,7 +37,7 @@ public class TcpFragmentationDerivation extends TlsDerivationParameter<Boolean> 
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
         if (getSelectedValue() == true) {
             config.getTlsConfig()
                     .getDefaultClientConnection()

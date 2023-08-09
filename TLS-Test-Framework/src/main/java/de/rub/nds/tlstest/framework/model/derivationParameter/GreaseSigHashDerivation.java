@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
@@ -35,7 +35,7 @@ public class GreaseSigHashDerivation extends TlsDerivationParameter<SignatureAnd
 
     @Override
     public List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> getParameterValues(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         for (SignatureAndHashAlgorithm sigHashAlg : SignatureAndHashAlgorithm.values()) {

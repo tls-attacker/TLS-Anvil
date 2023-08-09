@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
@@ -30,7 +30,7 @@ public class IncludeExtendedMasterSecretExtensionDerivation
 
     @Override
     public List<DerivationParameter<TlsAnvilConfig, Boolean>> getParameterValues(
-            DerivationScope derivationScope) {
+            AnvilTestTemplate anvilTestTemplate) {
         List<DerivationParameter<TlsAnvilConfig, Boolean>> parameterValues = new LinkedList<>();
         parameterValues.add(new IncludeExtendedMasterSecretExtensionDerivation(true));
         parameterValues.add(new IncludeExtendedMasterSecretExtensionDerivation(false));
@@ -38,7 +38,7 @@ public class IncludeExtendedMasterSecretExtensionDerivation
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
         config.getTlsConfig().setAddExtendedMasterSecretExtension(getSelectedValue());
     }
 

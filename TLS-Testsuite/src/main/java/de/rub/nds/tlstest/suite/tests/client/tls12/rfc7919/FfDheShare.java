@@ -20,7 +20,7 @@ import de.rub.nds.anvilcore.annotation.ManualConfig;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.bytearray.ByteArrayExplicitValueModification;
@@ -230,7 +230,7 @@ public class FfDheShare extends Tls12Test {
     }
 
     public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getSupportedFfdheNamedGroups(
-            DerivationScope scope) {
+            AnvilTestTemplate scope) {
         List<DerivationParameter<TlsAnvilConfig, NamedGroup>> parameterValues = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getFfdheNamedGroups()
@@ -238,7 +238,7 @@ public class FfDheShare extends Tls12Test {
         return parameterValues;
     }
 
-    public List<ConditionalConstraint> getEmptyConstraintsList(DerivationScope scope) {
+    public List<ConditionalConstraint> getEmptyConstraintsList(AnvilTestTemplate scope) {
         return new LinkedList<>();
     }
 }

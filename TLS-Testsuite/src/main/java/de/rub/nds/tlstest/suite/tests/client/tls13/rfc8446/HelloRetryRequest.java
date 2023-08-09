@@ -22,7 +22,7 @@ import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.annotation.ManualConfig;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -77,7 +77,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class HelloRetryRequest extends Tls13Test {
 
     public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getUnofferedGroups(
-            DerivationScope scope) {
+            AnvilTestTemplate scope) {
         List<DerivationParameter<TlsAnvilConfig, NamedGroup>> parameterValues = new LinkedList<>();
         List<NamedGroup> offeredGroups =
                 ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
@@ -108,7 +108,7 @@ public class HelloRetryRequest extends Tls13Test {
         performHelloRetryRequestTest(argumentAccessor, runner);
     }
 
-    public List<DerivationParameter> getUnofferedTls13CipherSuites(DerivationScope scope) {
+    public List<DerivationParameter> getUnofferedTls13CipherSuites(AnvilTestTemplate scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         List<CipherSuite> offeredTls13 =
                 CipherSuite.getCipherSuites(
@@ -729,7 +729,7 @@ public class HelloRetryRequest extends Tls13Test {
                         retryClientHello.getSessionId().getValue()));
     }
 
-    public List<DerivationParameter> getTls12CipherSuites(DerivationScope scope) {
+    public List<DerivationParameter> getTls12CipherSuites(AnvilTestTemplate scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getCipherSuites()

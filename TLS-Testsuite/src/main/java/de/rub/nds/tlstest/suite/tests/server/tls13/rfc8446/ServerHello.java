@@ -13,7 +13,7 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -448,7 +448,7 @@ public class ServerHello extends Tls13Test {
     }
 
     public List<DerivationParameter<TlsAnvilConfig, byte[]>> getTlsVersionsBelow12(
-            DerivationScope scope) {
+            AnvilTestTemplate scope) {
         List<DerivationParameter<TlsAnvilConfig, byte[]>> derivationParameters = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getSupportedVersions()

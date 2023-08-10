@@ -34,7 +34,7 @@ public enum TlsParameterType implements ParameterType {
     PRF_BITMASK(PRFBitmaskDerivation.class),
     GREASE_CIPHERSUITE(GreaseCipherSuiteDerivation.class),
     GREASE_PROTOCOL_VERSION(GreaseCipherSuiteDerivation.class),
-    GREASE_EXTENSION(GreaseCipherSuiteDerivation.class),
+    GREASE_EXTENSION(GreaseExtensionDerivation.class),
     GREASE_NAMED_GROUP(GreaseNamedGroupDerivation.class),
     GREASE_SIG_HASH(GreaseSigHashDerivation.class),
     PROTOCOL_VERSION(ProtocolVersionDerivation.class),

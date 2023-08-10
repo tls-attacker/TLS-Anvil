@@ -61,13 +61,4 @@ public class TlsParameterCombination extends ParameterCombination {
                 (byte) (1 << (Integer) bitParameter.getSelectedValue());
         return constructed;
     }
-
-    @JsonValue
-    public Map<String, DerivationParameter> jsonObject() {
-        Map<String, DerivationParameter> res = new HashMap<>();
-        for (DerivationParameter i : getParameterValues()) {
-            res.put(i.getParameterIdentifier().name(), i);
-        }
-        return res;
-    }
 }

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.context.AnvilContext;
@@ -167,7 +168,7 @@ public class TlsTestConfig extends TLSDelegateConfig {
         }
 
         this.setTestEndpointMode(argParser.getParsedCommand());
-        this.getAnvilTestConfig().setEnpointMode(this.getTestEndpointMode());
+        this.getAnvilTestConfig().setEndpointMode(this.getTestEndpointMode());
 
         if (getAnvilTestConfig().getIdentifier() == null) {
             if (argParser.getParsedCommand().equals(ConfigDelegates.SERVER.getCommand())) {
@@ -221,12 +222,14 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
     public void fromWorker(AnvilTestConfig anvilConfig, String additionalConfig) {
         this.anvilTestConfig = anvilConfig;
-        this.setTestEndpointMode(anvilConfig.getEnpointMode());
+        this.setTestEndpointMode(anvilConfig.getEndpointMode());
         ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         try {
             TlsTestConfig newConfig = mapper.readValue(additionalConfig, this.getClass());
             this.testClientDelegate = newConfig.testClientDelegate;
             this.testServerDelegate = newConfig.testServerDelegate;
+            this.parsedArgs = true;
         } catch (JsonProcessingException e) {
             LOGGER.error("Error applying tls test config", e);
         }

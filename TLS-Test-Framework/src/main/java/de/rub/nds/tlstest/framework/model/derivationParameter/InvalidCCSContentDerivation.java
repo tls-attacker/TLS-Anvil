@@ -9,7 +9,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -27,9 +27,9 @@ public class InvalidCCSContentDerivation extends TlsDerivationParameter<byte[]> 
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getParameterValues(
+    public List<DerivationParameter<Config, byte[]>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, byte[]>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, byte[]>> parameterValues = new LinkedList<>();
         parameterValues.add(new InvalidCCSContentDerivation(new byte[] {125}));
         parameterValues.add(new InvalidCCSContentDerivation(new byte[] {1, 1}));
         parameterValues.add(new InvalidCCSContentDerivation(new byte[] {1, 2}));

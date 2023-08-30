@@ -9,8 +9,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -33,9 +33,9 @@ public class GreaseCipherSuiteDerivation extends TlsDerivationParameter<CipherSu
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, CipherSuite>> getParameterValues(
+    public List<DerivationParameter<Config, CipherSuite>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, CipherSuite>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, CipherSuite>> parameterValues = new LinkedList<>();
         for (CipherSuite cipherSuite : CipherSuite.values()) {
             if (cipherSuite.isGrease()) {
                 parameterValues.add(new GreaseCipherSuiteDerivation(cipherSuite));

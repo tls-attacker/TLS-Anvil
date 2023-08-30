@@ -9,7 +9,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -27,17 +27,17 @@ public class IncludePSKExchangeModesExtensionDerivation extends TlsDerivationPar
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, Boolean>> getParameterValues(
+    public List<DerivationParameter<Config, Boolean>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, Boolean>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, Boolean>> parameterValues = new LinkedList<>();
         parameterValues.add(new IncludePSKExchangeModesExtensionDerivation(true));
         parameterValues.add(new IncludePSKExchangeModesExtensionDerivation(false));
         return parameterValues;
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
-        config.getTlsConfig().setAddPSKKeyExchangeModesExtension(getSelectedValue());
+    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
+        config.setAddPSKKeyExchangeModesExtension(getSelectedValue());
     }
 
     @Override

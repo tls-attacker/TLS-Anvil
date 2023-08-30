@@ -9,8 +9,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.MaxFragmentLength;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -32,9 +32,9 @@ public class MaxFragmentLengthDerivation extends TlsDerivationParameter<MaxFragm
         setSelectedValue(selectedValue);
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, MaxFragmentLength>> getParameterValues(
+    public List<DerivationParameter<Config, MaxFragmentLength>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, MaxFragmentLength>> parameterValues =
+        List<DerivationParameter<Config, MaxFragmentLength>> parameterValues =
                 new LinkedList<>();
 
         // TODO The layer system fails to process messages when max length was set
@@ -49,12 +49,12 @@ public class MaxFragmentLengthDerivation extends TlsDerivationParameter<MaxFragm
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
+    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
         MaxFragmentLength selectedValue = getSelectedValue();
 
         if (selectedValue != null) {
-            config.getTlsConfig().setDefaultMaxFragmentLength(selectedValue);
-            config.getTlsConfig().setAddMaxFragmentLengthExtension(true);
+            config.setDefaultMaxFragmentLength(selectedValue);
+            config.setAddMaxFragmentLengthExtension(true);
         }
     }
 

@@ -38,7 +38,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
@@ -83,9 +82,9 @@ public class SignatureAlgorithms extends Tls13Test {
                         });
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>>
+    public List<DerivationParameter<Config, SignatureAndHashAlgorithm>>
             getLegacySigHashAlgoritms(AnvilTestTemplate scope) {
-        List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
+        List<DerivationParameter<Config, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         List<SignatureAndHashAlgorithm> algos =
                 SignatureAndHashAlgorithm.getImplemented().stream()

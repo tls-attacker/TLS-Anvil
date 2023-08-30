@@ -10,8 +10,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
@@ -31,19 +31,19 @@ public class CipherSuiteDerivation extends TlsDerivationParameter<CipherSuite> {
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
+    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-            config.getTlsConfig().setDefaultClientSupportedCipherSuites(getSelectedValue());
+            config.setDefaultClientSupportedCipherSuites(getSelectedValue());
         } else {
-            config.getTlsConfig().setDefaultServerSupportedCipherSuites(getSelectedValue());
+            config.setDefaultServerSupportedCipherSuites(getSelectedValue());
         }
-        config.getTlsConfig().setDefaultSelectedCipherSuite(getSelectedValue());
+        config.setDefaultSelectedCipherSuite(getSelectedValue());
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, CipherSuite>> getParameterValues(
+    public List<DerivationParameter<Config, CipherSuite>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, CipherSuite>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, CipherSuite>> parameterValues = new LinkedList<>();
         Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
         cipherSuiteList.addAll(
                 context.getFeatureExtractionResult().getSupportedTls13CipherSuites());

@@ -9,8 +9,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -34,9 +34,9 @@ public class CompressionMethodDerivation extends TlsDerivationParameter<Compress
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, CompressionMethod>> getParameterValues(
+    public List<DerivationParameter<Config, CompressionMethod>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, CompressionMethod>> parameterValues =
+        List<DerivationParameter<Config, CompressionMethod>> parameterValues =
                 new LinkedList<>();
         for (CompressionMethod compressionMethod : CompressionMethod.values()) {
             parameterValues.add(new CompressionMethodDerivation(compressionMethod));

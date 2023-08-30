@@ -37,7 +37,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -159,7 +158,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getUnsupportedProtocolVersions(
+    public List<DerivationParameter<Config, byte[]>> getUnsupportedProtocolVersions(
             AnvilTestTemplate scope) {
         List<ProtocolVersion> consideredVersions = new LinkedList<>();
         consideredVersions.add(ProtocolVersion.SSL2);
@@ -170,7 +169,7 @@ public class SupportedVersions extends Tls13Test {
         context.getFeatureExtractionResult()
                 .getSupportedVersions()
                 .forEach(version -> consideredVersions.remove(version));
-        List<DerivationParameter<TlsAnvilConfig, byte[]>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, byte[]>> parameterValues = new LinkedList<>();
         consideredVersions.forEach(
                 version -> parameterValues.add(new ProtocolVersionDerivation(version.getValue())));
         return parameterValues;

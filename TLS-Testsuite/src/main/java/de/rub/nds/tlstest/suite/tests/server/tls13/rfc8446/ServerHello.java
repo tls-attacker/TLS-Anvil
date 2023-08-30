@@ -36,7 +36,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
@@ -447,9 +446,9 @@ public class ServerHello extends Tls13Test {
         }
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getTlsVersionsBelow12(
+    public List<DerivationParameter<Config, byte[]>> getTlsVersionsBelow12(
             AnvilTestTemplate scope) {
-        List<DerivationParameter<TlsAnvilConfig, byte[]>> derivationParameters = new LinkedList<>();
+        List<DerivationParameter<Config, byte[]>> derivationParameters = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getSupportedVersions()
                 .forEach(

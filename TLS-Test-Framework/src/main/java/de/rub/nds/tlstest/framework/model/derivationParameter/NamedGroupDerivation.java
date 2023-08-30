@@ -12,12 +12,12 @@ import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsscanner.serverscanner.probe.namedgroup.NamedGroupWitness;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
@@ -41,9 +41,9 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getParameterValues(
+    public List<DerivationParameter<Config, NamedGroup>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, NamedGroup>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, NamedGroup>> parameterValues = new LinkedList<>();
         List<NamedGroup> groupList = context.getFeatureExtractionResult().getTls13Groups();
         if (!ConstraintHelper.isTls13Test(anvilTestTemplate)
                 || ConstraintHelper.getKeyExchangeRequirements(anvilTestTemplate)
@@ -64,23 +64,23 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
+    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
         if (getSelectedValue() != null) {
             if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-                config.getTlsConfig().setDefaultClientNamedGroups(getSelectedValue());
-                config.getTlsConfig().setDefaultClientKeyShareNamedGroups(getSelectedValue());
+                config.setDefaultClientNamedGroups(getSelectedValue());
+                config.setDefaultClientKeyShareNamedGroups(getSelectedValue());
             } else {
-                config.getTlsConfig().setDefaultServerNamedGroups(getSelectedValue());
+                config.setDefaultServerNamedGroups(getSelectedValue());
             }
-            config.getTlsConfig().setDefaultSelectedNamedGroup(getSelectedValue());
+            config.setDefaultSelectedNamedGroup(getSelectedValue());
         } else {
-            config.getTlsConfig().setAddEllipticCurveExtension(false);
-            config.getTlsConfig().setAddECPointFormatExtension(false);
+            config.setAddEllipticCurveExtension(false);
+            config.setAddECPointFormatExtension(false);
         }
     }
 
     @Override
-    public void postProcessConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
+    public void postProcessConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
         if (getSelectedValue() != null
                 && context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             Set<NamedGroup> groups = new HashSet<NamedGroup>();
@@ -91,7 +91,7 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
                     extractionResult.getNamedGroupWitnesses().get(selectedGroup);
             groups.add(selectedGroup);
             if (witness != null) {
-                if (config.getTlsConfig().getDefaultSelectedCipherSuite().isEphemeral()) {
+                if (config.getDefaultSelectedCipherSuite().isEphemeral()) {
                     groups.add(witness.getEcdsaPkGroupEphemeral());
                     groups.add(witness.getEcdsaSigGroupEphemeral());
                 } else {
@@ -99,7 +99,7 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
                 }
             }
             groups.remove(null);
-            config.getTlsConfig().setDefaultClientNamedGroups(new LinkedList<>(groups));
+            config.setDefaultClientNamedGroups(new LinkedList<>(groups));
         }
     }
 

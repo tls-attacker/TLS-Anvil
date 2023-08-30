@@ -35,7 +35,6 @@ import de.rub.nds.tlstest.framework.annotations.RFC;
 import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ExtensionDerivation;
@@ -51,9 +50,9 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class Extensions extends Tls13Test {
 
-    public List<DerivationParameter<TlsAnvilConfig, ExtensionType>> getUnrequestedExtensions(
+    public List<DerivationParameter<Config, ExtensionType>> getUnrequestedExtensions(
             AnvilTestTemplate scope) {
-        List<DerivationParameter<TlsAnvilConfig, ExtensionType>> parameterValues =
+        List<DerivationParameter<Config, ExtensionType>> parameterValues =
                 new LinkedList<>();
         List<ExtensionType> extensions = new LinkedList<>();
         extensions.add(ExtensionType.SERVER_NAME_INDICATION);

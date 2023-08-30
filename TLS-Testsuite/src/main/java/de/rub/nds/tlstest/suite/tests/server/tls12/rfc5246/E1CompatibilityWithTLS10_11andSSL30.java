@@ -35,7 +35,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
@@ -164,9 +163,9 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getInvalidHighRecordVersion(
+    public List<DerivationParameter<Config, byte[]>> getInvalidHighRecordVersion(
             AnvilTestTemplate scope) {
-        List<DerivationParameter<TlsAnvilConfig, byte[]>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, byte[]>> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x00}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x03}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x0F}));

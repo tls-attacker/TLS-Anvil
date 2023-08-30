@@ -15,12 +15,12 @@ import de.rub.nds.scanner.core.constants.NumericResult;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
@@ -98,9 +98,9 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
         setSelectedValue(certKeyPair);
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>> getApplicableCertificates(
+    public List<DerivationParameter<Config, CertificateKeyPair>> getApplicableCertificates(
             TestContext context, AnvilTestTemplate scope, boolean allowUnsupportedPkGroups) {
-        List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>> parameterValues =
+        List<DerivationParameter<Config, CertificateKeyPair>> parameterValues =
                 new LinkedList<>();
         CertificateByteChooser.getInstance().getCertificateKeyPairList().stream()
                 .filter(cert -> certMatchesAnySupportedCipherSuite(cert, scope))
@@ -172,9 +172,9 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
-        config.getTlsConfig().setAutoSelectCertificate(false);
-        config.getTlsConfig().setDefaultExplicitCertificateKeyPair(getSelectedValue());
+    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
+        config.setAutoSelectCertificate(false);
+        config.setDefaultExplicitCertificateKeyPair(getSelectedValue());
     }
 
     @Override
@@ -232,7 +232,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>> getParameterValues(
+    public List<DerivationParameter<Config, CertificateKeyPair>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
         return getApplicableCertificates(context, anvilTestTemplate, false);
     }

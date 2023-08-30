@@ -41,7 +41,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -68,9 +67,9 @@ public class SupportedVersions extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getInvalidLegacyVersions(
+    public List<DerivationParameter<Config, byte[]>> getInvalidLegacyVersions(
             AnvilTestTemplate scope) {
-        List<DerivationParameter<TlsAnvilConfig, byte[]>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, byte[]>> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x05, 0x05}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x04}));
         return parameterValues;

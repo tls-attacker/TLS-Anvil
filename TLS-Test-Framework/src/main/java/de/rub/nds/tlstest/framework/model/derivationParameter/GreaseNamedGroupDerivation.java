@@ -9,8 +9,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -33,9 +33,9 @@ public class GreaseNamedGroupDerivation extends TlsDerivationParameter<NamedGrou
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getParameterValues(
+    public List<DerivationParameter<Config, NamedGroup>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, NamedGroup>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, NamedGroup>> parameterValues = new LinkedList<>();
         for (NamedGroup group : NamedGroup.values()) {
             if (group.isGrease()) {
                 parameterValues.add(new GreaseNamedGroupDerivation(group));

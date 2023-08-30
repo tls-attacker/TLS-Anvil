@@ -10,7 +10,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -28,9 +28,9 @@ public class BitPositionDerivation extends TlsDerivationParameter<Integer> {
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
+    public List<DerivationParameter<Config, Integer>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, Integer>> parameterValues = new LinkedList<>();
         for (int i = 0; i < 8; i++) {
             parameterValues.add(new BitPositionDerivation(i, getParameterIdentifier()));
         }

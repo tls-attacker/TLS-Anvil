@@ -9,14 +9,11 @@ package de.rub.nds.tlstest.suite;
 
 import com.beust.jcommander.ParameterException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.anvilcore.execution.TestRunner;
 import de.rub.nds.anvilcore.worker.WorkerClient;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
-import de.rub.nds.tlstest.framework.config.TlsTestConfig;
 import de.rub.nds.tlstest.framework.extractor.TestCaseExtractor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

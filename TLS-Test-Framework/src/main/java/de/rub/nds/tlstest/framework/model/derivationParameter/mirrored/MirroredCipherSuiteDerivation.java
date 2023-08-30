@@ -12,8 +12,8 @@ import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.anvilcore.model.parameter.ParameterScope;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
@@ -39,9 +39,9 @@ public class MirroredCipherSuiteDerivation extends MirroredDerivationParameter<C
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, CipherSuite>> getParameterValues(
+    public List<DerivationParameter<Config, CipherSuite>> getParameterValues(
             AnvilTestTemplate scope) {
-        List<DerivationParameter<TlsAnvilConfig, CipherSuite>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, CipherSuite>> parameterValues = new LinkedList<>();
         getMirroredType().getInstance(ParameterScope.NO_SCOPE)
                 .getParameterValues(scope)
                 .forEach(

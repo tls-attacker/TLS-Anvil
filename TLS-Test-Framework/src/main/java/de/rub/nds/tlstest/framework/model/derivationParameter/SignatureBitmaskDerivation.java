@@ -14,13 +14,13 @@ import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.crypto.keys.CustomDSAPrivateKey;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
@@ -44,14 +44,14 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
+    public List<DerivationParameter<Config, Integer>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
         return getFirstAndLastByteOfEachSignature(context, anvilTestTemplate);
     }
 
-    private List<DerivationParameter<TlsAnvilConfig, Integer>> getAllPossibleBytePositions(
+    private List<DerivationParameter<Config, Integer>> getAllPossibleBytePositions(
             TestContext context, AnvilTestTemplate scope) {
-        List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, Integer>> parameterValues = new LinkedList<>();
         int maxSignatureLength = getMaxSignatureByteLength(context, scope);
 
         for (int i = 0; i < maxSignatureLength; i++) {
@@ -60,12 +60,12 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         return parameterValues;
     }
 
-    private List<DerivationParameter<TlsAnvilConfig, Integer>> getFirstAndLastByteOfEachSignature(
+    private List<DerivationParameter<Config, Integer>> getFirstAndLastByteOfEachSignature(
             TestContext context, AnvilTestTemplate scope) {
         Set<Integer> listedValues = new HashSet<>();
         listedValues.add(0);
 
-        List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>> applicableCertificates =
+        List<DerivationParameter<Config, CertificateKeyPair>> applicableCertificates =
                 TlsParameterType.CERTIFICATE.getInstance(ParameterScope.NO_SCOPE).getConstrainedParameterValues(scope);
         applicableCertificates.forEach(
                 selectableCert ->
@@ -75,7 +75,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
                                                         selectableCert.getSelectedValue())
                                         - 1));
 
-        List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, Integer>> parameterValues = new LinkedList<>();
         listedValues.forEach(
                 position -> parameterValues.add(new SignatureBitmaskDerivation(position)));
         return parameterValues;
@@ -160,7 +160,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {}
+    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {}
 
     public static int computeEstimatedMaxSignatureSize(
             SignatureAndHashAlgorithm signatureHashAlgorithm) {

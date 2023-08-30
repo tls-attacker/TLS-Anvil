@@ -9,8 +9,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -34,9 +34,9 @@ public class GreaseSigHashDerivation extends TlsDerivationParameter<SignatureAnd
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> getParameterValues(
+    public List<DerivationParameter<Config, SignatureAndHashAlgorithm>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
+        List<DerivationParameter<Config, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         for (SignatureAndHashAlgorithm sigHashAlg : SignatureAndHashAlgorithm.values()) {
             if (sigHashAlg.isGrease()) {

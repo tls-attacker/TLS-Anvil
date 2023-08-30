@@ -9,7 +9,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -27,8 +27,8 @@ public class HelloRetryCookieDerivation extends TlsDerivationParameter<byte[]> {
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
-        config.getTlsConfig().setDefaultExtensionCookie(getSelectedValue());
+    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
+        config.setDefaultExtensionCookie(getSelectedValue());
     }
 
     @Override
@@ -37,9 +37,9 @@ public class HelloRetryCookieDerivation extends TlsDerivationParameter<byte[]> {
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getParameterValues(
+    public List<DerivationParameter<Config, byte[]>> getParameterValues(
             AnvilTestTemplate AnvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, byte[]>> derivationParameters = new LinkedList<>();
+        List<DerivationParameter<Config, byte[]>> derivationParameters = new LinkedList<>();
         derivationParameters.add(new HelloRetryCookieDerivation(new byte[] {0x55}));
         derivationParameters.add(
                 new HelloRetryCookieDerivation(

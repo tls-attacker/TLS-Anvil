@@ -9,8 +9,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -29,9 +29,9 @@ public class ProtocolMessageTypeDerivation extends TlsDerivationParameter<Protoc
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, ProtocolMessageType>> getParameterValues(
+    public List<DerivationParameter<Config, ProtocolMessageType>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, ProtocolMessageType>> parameterValues =
+        List<DerivationParameter<Config, ProtocolMessageType>> parameterValues =
                 new LinkedList<>();
         for (ProtocolMessageType messageType : ProtocolMessageType.values()) {
             parameterValues.add(new ProtocolMessageTypeDerivation(messageType));

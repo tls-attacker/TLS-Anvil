@@ -45,7 +45,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -123,7 +122,7 @@ public class ServerKeyExchange extends Tls12Test {
         return parameterValues;
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>>
+    public List<DerivationParameter<Config, CertificateKeyPair>>
             getCertsIncludingUnsupportedPkGroups(AnvilTestTemplate scope) {
         CertificateDerivation certDerivation = (CertificateDerivation) TlsParameterType.CERTIFICATE.getInstance(ParameterScope.NO_SCOPE);
         return certDerivation.getApplicableCertificates(context, scope, true);

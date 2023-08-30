@@ -9,7 +9,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.AnvilTestTemplate;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -27,8 +27,8 @@ public class IncludeALPNExtensionDerivation extends TlsDerivationParameter<Boole
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, AnvilTestTemplate anvilTestTemplate) {
-        config.getTlsConfig().setAddAlpnExtension(getSelectedValue());
+    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
+        config.setAddAlpnExtension(getSelectedValue());
     }
 
     @Override
@@ -38,9 +38,9 @@ public class IncludeALPNExtensionDerivation extends TlsDerivationParameter<Boole
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, Boolean>> getParameterValues(
+    public List<DerivationParameter<Config, Boolean>> getParameterValues(
             AnvilTestTemplate anvilTestTemplate) {
-        List<DerivationParameter<TlsAnvilConfig, Boolean>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, Boolean>> parameterValues = new LinkedList<>();
         parameterValues.add(new IncludeALPNExtensionDerivation(true));
         parameterValues.add(new IncludeALPNExtensionDerivation(false));
         return parameterValues;

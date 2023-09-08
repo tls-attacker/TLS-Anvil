@@ -54,6 +54,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           push: ${{ fromJSON(env.SHOULD_PUSH) }}
           tags: 'ghcr.io/tls-attacker/tlsanvil:${{ env.DOCKER_TAG }}'
 

@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
@@ -45,12 +45,12 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
 
     @Override
     public List<DerivationParameter<Config, Integer>> getParameterValues(
-            AnvilTestTemplate anvilTestTemplate) {
-        return getFirstAndLastByteOfEachSignature(context, anvilTestTemplate);
+            DerivationScope derivationScope) {
+        return getFirstAndLastByteOfEachSignature(context, derivationScope);
     }
 
     private List<DerivationParameter<Config, Integer>> getAllPossibleBytePositions(
-            TestContext context, AnvilTestTemplate scope) {
+            TestContext context, DerivationScope scope) {
         List<DerivationParameter<Config, Integer>> parameterValues = new LinkedList<>();
         int maxSignatureLength = getMaxSignatureByteLength(context, scope);
 
@@ -61,7 +61,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
     }
 
     private List<DerivationParameter<Config, Integer>> getFirstAndLastByteOfEachSignature(
-            TestContext context, AnvilTestTemplate scope) {
+            TestContext context, DerivationScope scope) {
         Set<Integer> listedValues = new HashSet<>();
         listedValues.add(0);
 
@@ -81,7 +81,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         return parameterValues;
     }
 
-    private int getMaxSignatureByteLength(TestContext context, AnvilTestTemplate scope) {
+    private int getMaxSignatureByteLength(TestContext context, DerivationScope scope) {
         List<SignatureAndHashAlgorithm> signatureAndHashAlgorithms;
         if (!context.getFeatureExtractionResult()
                 .getSignatureAndHashAlgorithmsForDerivation()
@@ -160,7 +160,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
     }
 
     @Override
-    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {}
+    public void applyToConfig(Config config, DerivationScope derivationScope) {}
 
     public static int computeEstimatedMaxSignatureSize(
             SignatureAndHashAlgorithm signatureHashAlgorithm) {
@@ -231,9 +231,9 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
 
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(
-            AnvilTestTemplate anvilTestTemplate) {
+            DerivationScope derivationScope) {
         List<ConditionalConstraint> conditionalConstraints = new LinkedList<>();
-        if (ConstraintHelper.signatureLengthConstraintApplicable(anvilTestTemplate)) {
+        if (ConstraintHelper.signatureLengthConstraintApplicable(derivationScope)) {
             conditionalConstraints.add(getMustBeWithinSignatureSizeConstraint());
         }
         return conditionalConstraints;

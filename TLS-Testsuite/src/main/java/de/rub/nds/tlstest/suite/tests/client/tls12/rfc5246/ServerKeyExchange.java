@@ -14,7 +14,7 @@ import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -107,7 +107,7 @@ public class ServerKeyExchange extends Tls12Test {
                         });
     }
 
-    public List<DerivationParameter> getUnproposedNamedGroups(AnvilTestTemplate scope) {
+    public List<DerivationParameter> getUnproposedNamedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         NamedGroup.getImplemented().stream()
                 .filter(group -> group.isCurve())
@@ -123,7 +123,7 @@ public class ServerKeyExchange extends Tls12Test {
     }
 
     public List<DerivationParameter<Config, CertificateKeyPair>>
-            getCertsIncludingUnsupportedPkGroups(AnvilTestTemplate scope) {
+            getCertsIncludingUnsupportedPkGroups(DerivationScope scope) {
         CertificateDerivation certDerivation = (CertificateDerivation) TlsParameterType.CERTIFICATE.getInstance(ParameterScope.NO_SCOPE);
         return certDerivation.getApplicableCertificates(context, scope, true);
     }
@@ -165,7 +165,7 @@ public class ServerKeyExchange extends Tls12Test {
                 && !cipherSuite.isEphemeral();
     }
 
-    public List<DerivationParameter> getEcdhCertsForUnproposedGroups(AnvilTestTemplate scope) {
+    public List<DerivationParameter> getEcdhCertsForUnproposedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         CertificateByteChooser.getInstance().getCertificateKeyPairList().stream()
                 .filter(
@@ -304,7 +304,7 @@ public class ServerKeyExchange extends Tls12Test {
     }
 
     public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(
-            AnvilTestTemplate scope) {
+            DerivationScope scope) {
         List<DerivationParameter> unsupportedAlgorithms = new LinkedList<>();
         ClientFeatureExtractionResult extractionResult =
                 (ClientFeatureExtractionResult) context.getFeatureExtractionResult();

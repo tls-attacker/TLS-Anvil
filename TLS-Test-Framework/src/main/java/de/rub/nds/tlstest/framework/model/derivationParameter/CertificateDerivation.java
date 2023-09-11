@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
@@ -99,7 +99,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
     }
 
     public List<DerivationParameter<Config, CertificateKeyPair>> getApplicableCertificates(
-            TestContext context, AnvilTestTemplate scope, boolean allowUnsupportedPkGroups) {
+            TestContext context, DerivationScope scope, boolean allowUnsupportedPkGroups) {
         List<DerivationParameter<Config, CertificateKeyPair>> parameterValues =
                 new LinkedList<>();
         CertificateByteChooser.getInstance().getCertificateKeyPairList().stream()
@@ -137,14 +137,14 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
                 || allowUnsupportedPkGroups;
     }
 
-    private boolean filterTls13Groups(CertificateKeyPair cert, AnvilTestTemplate scope) {
+    private boolean filterTls13Groups(CertificateKeyPair cert, DerivationScope scope) {
         return cert.getPublicKeyGroup() == null
                 || !ConstraintHelper.isTls13Test(scope)
                 || cert.getPublicKeyGroup().isTls13();
     }
 
     private boolean certMatchesAnySupportedCipherSuite(
-            CertificateKeyPair cert, AnvilTestTemplate scope) {
+            CertificateKeyPair cert, DerivationScope scope) {
         Set<CipherSuite> cipherSuites;
         if (!ConstraintHelper.isTls13Test(scope)) {
             cipherSuites = TestContext.getInstance().getFeatureExtractionResult().getCipherSuites();
@@ -172,13 +172,13 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
     }
 
     @Override
-    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
+    public void applyToConfig(Config config, DerivationScope derivationScope) {
         config.setAutoSelectCertificate(false);
         config.setDefaultExplicitCertificateKeyPair(getSelectedValue());
     }
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(AnvilTestTemplate scope) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         if (!ConstraintHelper.isTls13Test(scope)) {
@@ -233,8 +233,8 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
 
     @Override
     public List<DerivationParameter<Config, CertificateKeyPair>> getParameterValues(
-            AnvilTestTemplate anvilTestTemplate) {
-        return getApplicableCertificates(context, anvilTestTemplate, false);
+            DerivationScope derivationScope) {
+        return getApplicableCertificates(context, derivationScope, false);
     }
 
     @Override

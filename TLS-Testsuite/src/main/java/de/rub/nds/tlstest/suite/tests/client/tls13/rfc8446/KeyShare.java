@@ -18,7 +18,7 @@ import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -333,7 +333,7 @@ public class KeyShare extends Tls13Test {
     }
 
     public List<DerivationParameter<Config, NamedGroup>> getFfdheGroups(
-            AnvilTestTemplate scope) {
+            DerivationScope scope) {
         List<DerivationParameter<Config, NamedGroup>> derivationParameters =
                 new LinkedList<>();
         context.getFeatureExtractionResult()

@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.constraint;
 
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
@@ -47,7 +47,7 @@ public class ConstraintHelper {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static boolean staticEcdhCipherSuiteModeled(AnvilTestTemplate scope) {
+    public static boolean staticEcdhCipherSuiteModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
                 (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<Config, CipherSuite>> values =
@@ -62,7 +62,7 @@ public class ConstraintHelper {
         return false;
     }
 
-    public static boolean staticCipherSuiteModeled(AnvilTestTemplate scope) {
+    public static boolean staticCipherSuiteModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
                 (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<Config, CipherSuite>> values =
@@ -76,7 +76,7 @@ public class ConstraintHelper {
         return false;
     }
 
-    public static boolean ephemeralCipherSuiteModeled(AnvilTestTemplate scope) {
+    public static boolean ephemeralCipherSuiteModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
                 (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<Config, CipherSuite>> values =
@@ -90,7 +90,7 @@ public class ConstraintHelper {
         return false;
     }
 
-    public static boolean nullSigHashModeled(AnvilTestTemplate scope) {
+    public static boolean nullSigHashModeled(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv =
                 (SigAndHashDerivation) getParameterInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter<Config, SignatureAndHashAlgorithm>> values =
@@ -98,7 +98,7 @@ public class ConstraintHelper {
         return values.stream().anyMatch(parameter -> parameter.getSelectedValue() == null);
     }
 
-    public static boolean multipleBlocksizesModeled(AnvilTestTemplate scope) {
+    public static boolean multipleBlocksizesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
                 (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<Config, CipherSuite>> values =
@@ -114,7 +114,7 @@ public class ConstraintHelper {
         return blockLengths.size() > 1;
     }
 
-    public static boolean unpaddedCipherSuitesModeled(AnvilTestTemplate scope) {
+    public static boolean unpaddedCipherSuitesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
                 (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<Config, CipherSuite>> values =
@@ -130,7 +130,7 @@ public class ConstraintHelper {
         return false;
     }
 
-    public static boolean multipleMacSizesModeled(AnvilTestTemplate scope) {
+    public static boolean multipleMacSizesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
                 (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<Config, CipherSuite>> values =
@@ -149,7 +149,7 @@ public class ConstraintHelper {
         return macLengths.size() > 1;
     }
 
-    public static boolean ecdhCipherSuiteModeled(AnvilTestTemplate scope) {
+    public static boolean ecdhCipherSuiteModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
                 (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<Config, CipherSuite>> values =
@@ -167,7 +167,7 @@ public class ConstraintHelper {
         return false;
     }
 
-    public static boolean nonEcdhCipherSuiteModeled(AnvilTestTemplate scope) {
+    public static boolean nonEcdhCipherSuiteModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
                 (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<Config, CipherSuite>> values =
@@ -182,7 +182,7 @@ public class ConstraintHelper {
         return false;
     }
 
-    public static boolean multipleHkdfSizesModeled(AnvilTestTemplate scope) {
+    public static boolean multipleHkdfSizesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
                 (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<Config, CipherSuite>> values =
@@ -196,7 +196,7 @@ public class ConstraintHelper {
         return hkdfAlgos.size() > 1;
     }
 
-    public static boolean multipleTagSizesModeled(AnvilTestTemplate scope) {
+    public static boolean multipleTagSizesModeled(DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
                 (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<Config, CipherSuite>> values =
@@ -210,14 +210,14 @@ public class ConstraintHelper {
         return tagLengths.size() > 1;
     }
 
-    public static boolean nullModeled(AnvilTestTemplate scope, TlsParameterType type) {
+    public static boolean nullModeled(DerivationScope scope, TlsParameterType type) {
         return getParameterInstance(type).getConstrainedParameterValues(scope).stream()
                 .anyMatch(
                         parameterValue ->
                                 ((DerivationParameter) parameterValue).getSelectedValue() == null);
     }
 
-    public static boolean multipleSigAlgorithmRequiredKeyTypesModeled(AnvilTestTemplate scope) {
+    public static boolean multipleSigAlgorithmRequiredKeyTypesModeled(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv =
                 (SigAndHashDerivation) getParameterInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter<Config, SignatureAndHashAlgorithm>> values =
@@ -250,7 +250,7 @@ public class ConstraintHelper {
         return keyTypes.size() > 1;
     }
 
-    public static boolean multipleCertPublicKeyTypesModeled(AnvilTestTemplate scope) {
+    public static boolean multipleCertPublicKeyTypesModeled(DerivationScope scope) {
         CertificateDerivation certDeriv =
                 (CertificateDerivation) getParameterInstance(TlsParameterType.CERTIFICATE);
         List<DerivationParameter<Config, CertificateKeyPair>> values =
@@ -264,7 +264,7 @@ public class ConstraintHelper {
     }
 
     public static boolean cipherSuitesWithDifferentCertPublicKeyRequirementsModeled(
-            AnvilTestTemplate scope) {
+            DerivationScope scope) {
         CipherSuiteDerivation cipherSuiteDeriv =
                 (CipherSuiteDerivation) getParameterInstance(TlsParameterType.CIPHER_SUITE);
         List<DerivationParameter<Config, CipherSuite>> values =
@@ -282,7 +282,7 @@ public class ConstraintHelper {
         return certKeyTypes.size() > 1;
     }
 
-    public static boolean pssSigAlgoModeled(AnvilTestTemplate scope) {
+    public static boolean pssSigAlgoModeled(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv =
                 (SigAndHashDerivation) getParameterInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter<Config, SignatureAndHashAlgorithm>> algorithms =
@@ -297,7 +297,7 @@ public class ConstraintHelper {
                                         .contains("PSS"));
     }
 
-    public static boolean rsaPkMightNotSufficeForPss(AnvilTestTemplate scope) {
+    public static boolean rsaPkMightNotSufficeForPss(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv =
                 (SigAndHashDerivation) getParameterInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter<Config, SignatureAndHashAlgorithm>> algorithms =
@@ -357,7 +357,7 @@ public class ConstraintHelper {
         return false;
     }
 
-    public static boolean rsaPkBelow1024BitsModeled(AnvilTestTemplate scope) {
+    public static boolean rsaPkBelow1024BitsModeled(DerivationScope scope) {
         CertificateDerivation certDerivation =
                 (CertificateDerivation) getParameterInstance(TlsParameterType.CERTIFICATE);
         List<DerivationParameter<Config, CertificateKeyPair>> certificates =
@@ -377,7 +377,7 @@ public class ConstraintHelper {
                         });
     }
 
-    public static boolean rsaShaAlgLongerThan256BitsModeled(AnvilTestTemplate scope) {
+    public static boolean rsaShaAlgLongerThan256BitsModeled(DerivationScope scope) {
         SigAndHashDerivation sigHashDeriv =
                 (SigAndHashDerivation) getParameterInstance(TlsParameterType.SIG_HASH_ALGORIHTM);
         List<DerivationParameter<Config, SignatureAndHashAlgorithm>> algorithms =
@@ -404,7 +404,7 @@ public class ConstraintHelper {
                         });
     }
 
-    public static boolean signatureLengthConstraintApplicable(AnvilTestTemplate scope) {
+    public static boolean signatureLengthConstraintApplicable(DerivationScope scope) {
         CertificateDerivation certDeriv =
                 (CertificateDerivation) getParameterInstance(TlsParameterType.CERTIFICATE);
         SignatureBitmaskDerivation sigBitmaskDeriv =
@@ -462,16 +462,16 @@ public class ConstraintHelper {
     }
 
     // TODO remove these functions
-    public static boolean isTls13Test(AnvilTestTemplate scope) {
+    public static boolean isTls13Test(DerivationScope scope) {
         KeyX keyExchangeRequirements = getKeyExchangeRequirements(scope);
         return keyExchangeRequirements.supports(KeyExchangeType.ALL13);
     }
 
-    public static KeyX getKeyExchangeRequirements(AnvilTestTemplate scope) {
+    public static KeyX getKeyExchangeRequirements(DerivationScope scope) {
         return (KeyX) KeyX.resolveKexAnnotation(scope.getExtensionContext());
     }
 
-    public static ProtocolVersion getTargetVersion(AnvilTestTemplate scope) {
+    public static ProtocolVersion getTargetVersion(DerivationScope scope) {
         if (isTls13Test(scope)) {
             return ProtocolVersion.TLS13;
         } else {

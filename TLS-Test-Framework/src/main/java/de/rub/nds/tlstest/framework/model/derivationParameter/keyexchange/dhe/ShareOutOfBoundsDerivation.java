@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe;
 
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
@@ -41,7 +41,7 @@ public class ShareOutOfBoundsDerivation
 
     @Override
     public List<DerivationParameter<Config, OutOfBoundsType>> getParameterValues(
-            AnvilTestTemplate anvilTestTemplate) {
+            DerivationScope derivationScope) {
         List<DerivationParameter<Config, OutOfBoundsType>> parameterValues =
                 new LinkedList<>();
         for (OutOfBoundsType type : OutOfBoundsType.values()) {
@@ -51,7 +51,7 @@ public class ShareOutOfBoundsDerivation
     }
 
     @Override
-    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
+    public void applyToConfig(Config config, DerivationScope derivationScope) {
         if (config.getDefaultRunningMode() == RunningModeType.CLIENT) {
             throw new UnsupportedOperationException(
                     "This Derivation has to be configured manually if used as a client (use @ManualConfig)");

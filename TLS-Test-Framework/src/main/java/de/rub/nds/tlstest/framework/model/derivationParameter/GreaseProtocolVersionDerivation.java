@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
@@ -34,7 +34,7 @@ public class GreaseProtocolVersionDerivation extends TlsDerivationParameter<Prot
 
     @Override
     public List<DerivationParameter<Config, ProtocolVersion>> getParameterValues(
-            AnvilTestTemplate anvilTestTemplate) {
+            DerivationScope derivationScope) {
         List<DerivationParameter<Config, ProtocolVersion>> parameterValues =
                 new LinkedList<>();
         for (ProtocolVersion version : ProtocolVersion.values()) {

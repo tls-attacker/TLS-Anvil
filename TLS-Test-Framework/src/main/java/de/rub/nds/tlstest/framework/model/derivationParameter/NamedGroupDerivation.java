@@ -8,7 +8,7 @@
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.constants.TestEndpointType;
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
@@ -42,15 +42,15 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
 
     @Override
     public List<DerivationParameter<Config, NamedGroup>> getParameterValues(
-            AnvilTestTemplate anvilTestTemplate) {
+            DerivationScope derivationScope) {
         List<DerivationParameter<Config, NamedGroup>> parameterValues = new LinkedList<>();
         List<NamedGroup> groupList = context.getFeatureExtractionResult().getTls13Groups();
-        if (!ConstraintHelper.isTls13Test(anvilTestTemplate)
-                || ConstraintHelper.getKeyExchangeRequirements(anvilTestTemplate)
+        if (!ConstraintHelper.isTls13Test(derivationScope)
+                || ConstraintHelper.getKeyExchangeRequirements(derivationScope)
                         .supports(KeyExchangeType.ECDH)) {
             groupList = context.getFeatureExtractionResult().getNamedGroups();
             parameterValues.add(new NamedGroupDerivation(null));
-        } else if (ConstraintHelper.isTls13Test(anvilTestTemplate)
+        } else if (ConstraintHelper.isTls13Test(derivationScope)
                 && context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
             groupList = context.getFeatureExtractionResult().getTls13Groups();
         }
@@ -64,7 +64,7 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
     }
 
     @Override
-    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
+    public void applyToConfig(Config config, DerivationScope derivationScope) {
         if (getSelectedValue() != null) {
             if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
                 config.setDefaultClientNamedGroups(getSelectedValue());
@@ -80,7 +80,7 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
     }
 
     @Override
-    public void postProcessConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
+    public void postProcessConfig(Config config, DerivationScope derivationScope) {
         if (getSelectedValue() != null
                 && context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             Set<NamedGroup> groups = new HashSet<NamedGroup>();
@@ -104,7 +104,7 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
     }
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(AnvilTestTemplate scope) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
         if (!ConstraintHelper.isTls13Test(scope)) {
             if (ConstraintHelper.ecdhCipherSuiteModeled(scope)

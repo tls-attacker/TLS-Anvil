@@ -13,7 +13,7 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.bytearray.ModifiableByteArray;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -164,7 +164,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
     }
 
     public List<DerivationParameter<Config, byte[]>> getInvalidHighRecordVersion(
-            AnvilTestTemplate scope) {
+            DerivationScope scope) {
         List<DerivationParameter<Config, byte[]>> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x00}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x04, 0x03}));

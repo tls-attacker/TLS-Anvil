@@ -14,7 +14,7 @@ import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.annotation.ManualConfig;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -68,7 +68,7 @@ public class CertificateVerify extends Tls13Test {
     }
 
     public List<DerivationParameter<Config, SignatureAndHashAlgorithm>>
-            getLegacyRSASAHAlgorithms(AnvilTestTemplate scope) {
+            getLegacyRSASAHAlgorithms(DerivationScope scope) {
         List<DerivationParameter<Config, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         for (SignatureAndHashAlgorithm algo :
@@ -197,7 +197,7 @@ public class CertificateVerify extends Tls13Test {
     }
 
     public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(
-            AnvilTestTemplate scope) {
+            DerivationScope scope) {
         List<DerivationParameter> unsupportedAlgorithms = new LinkedList<>();
         SignatureAndHashAlgorithm.getImplemented().stream()
                 .filter(

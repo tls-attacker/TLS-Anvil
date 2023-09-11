@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.MaxFragmentLength;
@@ -33,7 +33,7 @@ public class MaxFragmentLengthDerivation extends TlsDerivationParameter<MaxFragm
     }
 
     public List<DerivationParameter<Config, MaxFragmentLength>> getParameterValues(
-            AnvilTestTemplate anvilTestTemplate) {
+            DerivationScope derivationScope) {
         List<DerivationParameter<Config, MaxFragmentLength>> parameterValues =
                 new LinkedList<>();
 
@@ -49,7 +49,7 @@ public class MaxFragmentLengthDerivation extends TlsDerivationParameter<MaxFragm
     }
 
     @Override
-    public void applyToConfig(Config config, AnvilTestTemplate anvilTestTemplate) {
+    public void applyToConfig(Config config, DerivationScope derivationScope) {
         MaxFragmentLength selectedValue = getSelectedValue();
 
         if (selectedValue != null) {

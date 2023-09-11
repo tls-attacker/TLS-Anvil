@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
@@ -36,7 +36,7 @@ public class CipherTextBitmaskDerivation extends TlsDerivationParameter<Integer>
     }
 
     @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(AnvilTestTemplate scope) {
+    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
         if (ConstraintHelper.multipleBlocksizesModeled(scope)) {
@@ -69,7 +69,7 @@ public class CipherTextBitmaskDerivation extends TlsDerivationParameter<Integer>
                                 }));
     }
 
-    private ConditionalConstraint getMustBeWithinCiphertextSizeConstraint(AnvilTestTemplate scope) {
+    private ConditionalConstraint getMustBeWithinCiphertextSizeConstraint(DerivationScope scope) {
         Set<ParameterIdentifier> requiredDerivationsCiphertext = new HashSet<>();
         requiredDerivationsCiphertext.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
         requiredDerivationsCiphertext.add(new ParameterIdentifier(TlsParameterType.APP_MSG_LENGHT));
@@ -108,10 +108,10 @@ public class CipherTextBitmaskDerivation extends TlsDerivationParameter<Integer>
 
     @Override
     public List<DerivationParameter<Config, Integer>> getParameterValues(
-            AnvilTestTemplate anvilTestTemplate) {
+            DerivationScope derivationScope) {
         int maxCipherTextByteLen = 0;
         Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
-        if (ConstraintHelper.isTls13Test(anvilTestTemplate)) {
+        if (ConstraintHelper.isTls13Test(derivationScope)) {
             cipherSuiteList = context.getFeatureExtractionResult().getSupportedTls13CipherSuites();
         }
         for (CipherSuite cipherSuite : cipherSuiteList) {

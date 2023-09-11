@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -34,7 +34,7 @@ public class GreaseExtensionDerivation extends TlsDerivationParameter<ExtensionT
 
     @Override
     public List<DerivationParameter<Config, ExtensionType>> getParameterValues(
-            AnvilTestTemplate anvilTestTemplate) {
+            DerivationScope derivationScope) {
         List<DerivationParameter<Config, ExtensionType>> parameterValues =
                 new LinkedList<>();
         for (ExtensionType extType : ExtensionType.values()) {

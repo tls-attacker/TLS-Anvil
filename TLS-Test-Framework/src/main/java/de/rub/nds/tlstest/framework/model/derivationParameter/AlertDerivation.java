@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -30,7 +30,7 @@ public class AlertDerivation extends TlsDerivationParameter<AlertDescription> {
 
     @Override
     public List<DerivationParameter<Config, AlertDescription>> getParameterValues(
-            AnvilTestTemplate anvilTestTemplate) {
+            DerivationScope derivationScope) {
         List<DerivationParameter<Config, AlertDescription>> parameterValues =
                 new LinkedList<>();
         Arrays.stream(AlertDescription.values())

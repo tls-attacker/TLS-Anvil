@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
@@ -29,7 +29,7 @@ public class ChosenHandshakeMessageDerivation extends TlsDerivationParameter<Han
 
     @Override
     public List<DerivationParameter<Config, HandshakeMessageType>> getParameterValues(
-            AnvilTestTemplate anvilTestTemplate) {
+            DerivationScope derivationScope) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

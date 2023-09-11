@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
-import de.rub.nds.anvilcore.model.AnvilTestTemplate;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
@@ -30,7 +30,7 @@ public class ProtocolMessageTypeDerivation extends TlsDerivationParameter<Protoc
 
     @Override
     public List<DerivationParameter<Config, ProtocolMessageType>> getParameterValues(
-            AnvilTestTemplate anvilTestTemplate) {
+            DerivationScope derivationScope) {
         List<DerivationParameter<Config, ProtocolMessageType>> parameterValues =
                 new LinkedList<>();
         for (ProtocolMessageType messageType : ProtocolMessageType.values()) {

@@ -8,12 +8,12 @@ import de.rub.nds.tlsattacker.core.exceptions.ConfigurationException;
 
 @Parameters(
         commandDescription =
-                "Starts TLS-Anvil in worker mode, accepting commands from the anvil web ui.")
+                "Starts TLS-Anvil in worker mode, accepting commands from the Anvil web ui.")
 public class WorkerDelegate extends Delegate {
 
     @Parameter(
             names = "-controller",
-            description = "Hostname or ip address of the anvil-web backend server.",
+            description = "Hostname or ip address of the Anvil web backend server.",
             required = true)
     private String controller = "backend:5001";
 

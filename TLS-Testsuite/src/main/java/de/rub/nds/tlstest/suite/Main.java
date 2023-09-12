@@ -28,8 +28,8 @@ public class Main {
     }
 
     /**
-     * Creates a TLS-Anvil TestContext, pareses the command line args and runs the selected
-     * processes based on the command.
+     * Creates a TLS-Anvil TestContext, parses the command line args and runs the selected processes
+     * based on the command.
      *
      * @param args supplied command line arguments
      */
@@ -114,7 +114,7 @@ public class Main {
                         testContext.getConfig().getAnvilTestConfig(),
                         additionalConfig,
                         new TlsParameterIdentifierProvider());
-        // set TLS-Anvils TestContext as listener for callbacks
+        // set TLS-Anvil's TestContext as listener for callbacks
         // in the beforeStart callback, the test preparation is started
         runner.setListener(testContext);
 

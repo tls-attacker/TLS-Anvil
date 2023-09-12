@@ -59,14 +59,12 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @RFC(number = 8446, section = "4.2.11 Pre-Shared Key Extension")
-@Disabled // disabled for development, because it fails on windows
 public class PreSharedKey extends Tls13Test {
 
     public ConditionEvaluationResult supportsPsk() {

@@ -230,7 +230,7 @@ public class TlsTestConfig extends TLSDelegateConfig {
             this.testServerDelegate = newConfig.testServerDelegate;
             this.parsedArgs = true;
         } catch (JsonProcessingException e) {
-            LOGGER.error("Error applying tls test config", e);
+            LOGGER.error("Error applying TLS test config", e);
         }
     }
 

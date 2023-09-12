@@ -42,8 +42,7 @@ public class ShareOutOfBoundsDerivation
     @Override
     public List<DerivationParameter<Config, OutOfBoundsType>> getParameterValues(
             DerivationScope derivationScope) {
-        List<DerivationParameter<Config, OutOfBoundsType>> parameterValues =
-                new LinkedList<>();
+        List<DerivationParameter<Config, OutOfBoundsType>> parameterValues = new LinkedList<>();
         for (OutOfBoundsType type : OutOfBoundsType.values()) {
             parameterValues.add(new ShareOutOfBoundsDerivation(type));
         }

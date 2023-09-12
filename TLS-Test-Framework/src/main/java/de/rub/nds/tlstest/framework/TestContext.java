@@ -12,7 +12,6 @@ import de.rub.nds.anvilcore.execution.AnvilListener;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlstest.framework.config.TlsTestConfig;
-
 import de.rub.nds.tlstest.framework.execution.TestPreparator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

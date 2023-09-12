@@ -8,7 +8,6 @@
 package de.rub.nds.tlstest.framework.model.derivationParameter.mirrored;
 
 import de.rub.nds.anvilcore.model.DerivationScope;
-import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;

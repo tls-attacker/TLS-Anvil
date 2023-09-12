@@ -124,7 +124,9 @@ public class ServerKeyExchange extends Tls12Test {
 
     public List<DerivationParameter<Config, CertificateKeyPair>>
             getCertsIncludingUnsupportedPkGroups(DerivationScope scope) {
-        CertificateDerivation certDerivation = (CertificateDerivation) TlsParameterType.CERTIFICATE.getInstance(ParameterScope.NO_SCOPE);
+        CertificateDerivation certDerivation =
+                (CertificateDerivation)
+                        TlsParameterType.CERTIFICATE.getInstance(ParameterScope.NO_SCOPE);
         return certDerivation.getApplicableCertificates(context, scope, true);
     }
 

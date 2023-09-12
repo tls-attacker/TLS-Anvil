@@ -31,8 +31,7 @@ public class ProtocolMessageTypeDerivation extends TlsDerivationParameter<Protoc
     @Override
     public List<DerivationParameter<Config, ProtocolMessageType>> getParameterValues(
             DerivationScope derivationScope) {
-        List<DerivationParameter<Config, ProtocolMessageType>> parameterValues =
-                new LinkedList<>();
+        List<DerivationParameter<Config, ProtocolMessageType>> parameterValues = new LinkedList<>();
         for (ProtocolMessageType messageType : ProtocolMessageType.values()) {
             parameterValues.add(new ProtocolMessageTypeDerivation(messageType));
         }

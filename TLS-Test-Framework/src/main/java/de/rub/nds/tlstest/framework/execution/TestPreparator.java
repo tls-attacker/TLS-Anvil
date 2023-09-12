@@ -30,15 +30,6 @@ import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.config.TlsTestConfig;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.platform.engine.TestSource;
-import org.junit.platform.engine.TestTag;
-import org.junit.platform.engine.support.descriptor.MethodSource;
-import org.junit.platform.launcher.*;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -49,10 +40,18 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.platform.engine.TestSource;
+import org.junit.platform.engine.TestTag;
+import org.junit.platform.engine.support.descriptor.MethodSource;
+import org.junit.platform.launcher.*;
 
 /**
- * The TestPreparator is used before a test execution. It ensures, that the server or client
- * is ready to be tested and runs a feature extraction scan.
+ * The TestPreparator is used before a test execution. It ensures, that the server or client is
+ * ready to be tested and runs a feature extraction scan.
  */
 public class TestPreparator {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -69,8 +68,9 @@ public class TestPreparator {
     }
 
     /**
-     * Save the supplied FeatureExtractionResult to the disk.
-     * Two files are created: a JavaObject .ser and a readable .json file.
+     * Save the supplied FeatureExtractionResult to the disk. Two files are created: a JavaObject
+     * .ser and a readable .json file.
+     *
      * @param report the FeatureExtractionResult created through TLS-Scanner
      */
     private void saveToCache(@Nonnull FeatureExtractionResult report) {
@@ -78,8 +78,10 @@ public class TestPreparator {
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
             fileName = testConfig.getTestClientDelegate().getPort().toString();
         } else {
-            fileName = testConfig.getTestServerDelegate().getExtractedHost() + "_" +
-                    testConfig.getTestServerDelegate().getExtractedPort();
+            fileName =
+                    testConfig.getTestServerDelegate().getExtractedHost()
+                            + "_"
+                            + testConfig.getTestServerDelegate().getExtractedPort();
         }
 
         try {
@@ -89,7 +91,7 @@ public class TestPreparator {
 
             mapper.writeValue(new File(fileName + ".json"), report);
 
-            FileOutputStream fos = new FileOutputStream(fileName+".ser");
+            FileOutputStream fos = new FileOutputStream(fileName + ".ser");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(report);
         } catch (Exception e) {
@@ -97,10 +99,10 @@ public class TestPreparator {
         }
     }
 
-
     /**
-     * Returns a FeatureExtractionResult, if a corresponding file for the given configuration is found on disk.
-     * Only the serialized Java-Object .ser file is used.
+     * Returns a FeatureExtractionResult, if a corresponding file for the given configuration is
+     * found on disk. Only the serialized Java-Object .ser file is used.
+     *
      * @return the FeatureExtractionResult or null, if not found
      */
     @Nullable
@@ -109,8 +111,11 @@ public class TestPreparator {
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
             fileName = testConfig.getTestClientDelegate().getPort().toString();
         } else {
-            fileName = testConfig.getTestServerDelegate().getExtractedHost() + "_" +
-                    testConfig.getTestServerDelegate().getExtractedPort() + ".ser";
+            fileName =
+                    testConfig.getTestServerDelegate().getExtractedHost()
+                            + "_"
+                            + testConfig.getTestServerDelegate().getExtractedPort()
+                            + ".ser";
         }
 
         File f = new File(fileName);
@@ -131,29 +136,29 @@ public class TestPreparator {
     }
 
     /**
-     * Runs the client trigger script stored in the config until a client connects.
-     * Blocks until success.
+     * Runs the client trigger script stored in the config until a client connects. Blocks until
+     * success.
      */
     private void waitForClient() {
         try {
             new Thread(
-                    () -> {
-                        while (!targetIsReady && !testContext.isAborted()) {
-                            LOGGER.info("Waiting for the client to get ready...");
-                            try {
-                                State state = new State();
-                                testConfig
-                                        .getTestClientDelegate()
-                                        .executeTriggerScript(state);
-                            } catch (Exception ignored) {
-                            }
+                            () -> {
+                                while (!targetIsReady && !testContext.isAborted()) {
+                                    LOGGER.info("Waiting for the client to get ready...");
+                                    try {
+                                        State state = new State();
+                                        testConfig
+                                                .getTestClientDelegate()
+                                                .executeTriggerScript(state);
+                                    } catch (Exception ignored) {
+                                    }
 
-                            try {
-                                Thread.sleep(1000);
-                            } catch (Exception ignored) {
-                            }
-                        }
-                    })
+                                    try {
+                                        Thread.sleep(1000);
+                                    } catch (Exception ignored) {
+                                    }
+                                }
+                            })
                     .start();
             Socket socket = testConfig.getTestClientDelegate().getServerSocket().accept();
             targetIsReady = true;
@@ -165,8 +170,8 @@ public class TestPreparator {
     }
 
     /**
-     * Tries to make a TCP handshake connection with the server host given in the config.
-     * Blocks until success.
+     * Tries to make a TCP handshake connection with the server host given in the config. Blocks
+     * until success.
      */
     private void waitForServer() {
         OutboundConnection connection = testConfig.createConfig().getDefaultClientConnection();
@@ -196,8 +201,8 @@ public class TestPreparator {
     }
 
     /**
-     * Prepare server test execution: Waiting until the server is ready, and starting a
-     * feature extraction scan if necessary.
+     * Prepare server test execution: Waiting until the server is ready, and starting a feature
+     * extraction scan if necessary.
      */
     private void serverTestPreparation() {
         waitForServer();
@@ -251,8 +256,8 @@ public class TestPreparator {
     }
 
     /**
-     * Prepare client test execution: Waiting until the client is ready and starting a
-     * feature extraction scan if necessary.
+     * Prepare client test execution: Waiting until the client is ready and starting a feature
+     * extraction scan if necessary.
      */
     private void clientTestPreparation() {
         waitForClient();
@@ -328,8 +333,9 @@ public class TestPreparator {
     }
 
     /**
-     * Should be called before starting the testing phase to ensure server or client is ready
-     * and a FeatureExtractionResult is set.
+     * Should be called before starting the testing phase to ensure server or client is ready and a
+     * FeatureExtractionResult is set.
+     *
      * @return returns true if preparation was successful, false if the test cannot be started
      */
     public boolean prepareTestExecution() {
@@ -363,18 +369,18 @@ public class TestPreparator {
             LOGGER.error("Target does not support any ProtocolVersion");
         } else if (testContext.getFeatureExtractionResult().getCipherSuites().isEmpty()
                 && testContext
-                .getFeatureExtractionResult()
-                .getSupportedTls13CipherSuites()
-                .isEmpty()) {
+                        .getFeatureExtractionResult()
+                        .getSupportedTls13CipherSuites()
+                        .isEmpty()) {
             LOGGER.error("Target does not support any CipherSuites");
         } else if (!testContext
-                .getFeatureExtractionResult()
-                .getSupportedVersions()
-                .contains(ProtocolVersion.TLS12)
+                        .getFeatureExtractionResult()
+                        .getSupportedVersions()
+                        .contains(ProtocolVersion.TLS12)
                 && !testContext
-                .getFeatureExtractionResult()
-                .getSupportedVersions()
-                .contains(ProtocolVersion.TLS13)) {
+                        .getFeatureExtractionResult()
+                        .getSupportedVersions()
+                        .contains(ProtocolVersion.TLS13)) {
             LOGGER.error("Target does not support any ProtocolVersion that the Testsuite supports");
         } else {
             startTestSuite = true;
@@ -427,7 +433,6 @@ public class TestPreparator {
         }
     }
 
-
     private void stopTcpDump() {
         if (tcpdumpProcess != null) {
             try {
@@ -441,39 +446,39 @@ public class TestPreparator {
         LOGGER.info(
                 "Supported NamedGroups:  "
                         + TestContext.getInstance()
-                        .getFeatureExtractionResult()
-                        .getNamedGroups()
-                        .stream()
-                        .map(NamedGroup::toString)
-                        .collect(Collectors.joining(",")));
+                                .getFeatureExtractionResult()
+                                .getNamedGroups()
+                                .stream()
+                                .map(NamedGroup::toString)
+                                .collect(Collectors.joining(",")));
         LOGGER.info(
                 "Supported CipherSuites: "
                         + TestContext.getInstance()
-                        .getFeatureExtractionResult()
-                        .getCipherSuites()
-                        .stream()
-                        .map(CipherSuite::toString)
-                        .collect(Collectors.joining(",")));
+                                .getFeatureExtractionResult()
+                                .getCipherSuites()
+                                .stream()
+                                .map(CipherSuite::toString)
+                                .collect(Collectors.joining(",")));
         if (TestContext.getInstance().getFeatureExtractionResult().getTls13Groups() != null) {
             LOGGER.info(
                     "Supported TLS 1.3 NamedGroups: "
                             + TestContext.getInstance()
-                            .getFeatureExtractionResult()
-                            .getTls13Groups()
-                            .stream()
-                            .map(NamedGroup::toString)
-                            .collect(Collectors.joining(",")));
+                                    .getFeatureExtractionResult()
+                                    .getTls13Groups()
+                                    .stream()
+                                    .map(NamedGroup::toString)
+                                    .collect(Collectors.joining(",")));
         }
         if (TestContext.getInstance().getFeatureExtractionResult().getSupportedTls13CipherSuites()
                 != null) {
             LOGGER.info(
                     "Supported TLS 1.3 CipherSuites: "
                             + TestContext.getInstance()
-                            .getFeatureExtractionResult()
-                            .getSupportedTls13CipherSuites()
-                            .stream()
-                            .map(CipherSuite::toString)
-                            .collect(Collectors.joining(",")));
+                                    .getFeatureExtractionResult()
+                                    .getSupportedTls13CipherSuites()
+                                    .stream()
+                                    .map(CipherSuite::toString)
+                                    .collect(Collectors.joining(",")));
         }
     }
 
@@ -522,17 +527,14 @@ public class TestPreparator {
     /**
      * Logs, how many tests were discovered for every TLS version, as well as test strength and
      * connection timeout.
+     *
      * @param testPlan the testPlan, supplied by JUnits discovery
      */
     public static void printTestInfo(TestPlan testPlan) {
-        long clientTls12 =
-                testPlan.countTestIdentifiers(i -> countTests(i, "tls12", "client"));
-        long clientTls13 =
-                testPlan.countTestIdentifiers(i -> countTests(i, "tls13", "client"));
-        long serverTls12 =
-                testPlan.countTestIdentifiers(i -> countTests(i, "tls12", "server"));
-        long serverTls13 =
-                testPlan.countTestIdentifiers(i -> countTests(i, "tls13", "server"));
+        long clientTls12 = testPlan.countTestIdentifiers(i -> countTests(i, "tls12", "client"));
+        long clientTls13 = testPlan.countTestIdentifiers(i -> countTests(i, "tls13", "client"));
+        long serverTls12 = testPlan.countTestIdentifiers(i -> countTests(i, "tls12", "server"));
+        long serverTls13 = testPlan.countTestIdentifiers(i -> countTests(i, "tls13", "server"));
         long bothTls12 = testPlan.countTestIdentifiers(i -> countTests(i, "tls12", "both"));
         long bothTls13 = testPlan.countTestIdentifiers(i -> countTests(i, "tls13", "both"));
 
@@ -549,9 +551,10 @@ public class TestPreparator {
                         + TestContext.getInstance().getConfig().getAnvilTestConfig().getStrength());
         LOGGER.info(
                 "Default timeout "
-                        + TestContext.getInstance().getConfig().getAnvilTestConfig().getConnectionTimeout()
+                        + TestContext.getInstance()
+                                .getConfig()
+                                .getAnvilTestConfig()
+                                .getConnectionTimeout()
                         + " ms");
-
     }
 }
-

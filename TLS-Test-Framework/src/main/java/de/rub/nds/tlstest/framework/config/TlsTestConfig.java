@@ -11,16 +11,12 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
-import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.anvilcore.context.AnvilTestConfig;
-import de.rub.nds.anvilcore.worker.WorkerClient;
 import de.rub.nds.scanner.core.constants.CollectionResult;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
@@ -57,17 +53,18 @@ import org.apache.logging.log4j.Logger;
         setterVisibility = JsonAutoDetect.Visibility.NONE,
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE,
-        creatorVisibility = JsonAutoDetect.Visibility.NONE
-)
+        creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class TlsTestConfig extends TLSDelegateConfig {
 
-    @JsonProperty
-    private AnvilTestConfig anvilTestConfig;
+    @JsonProperty private AnvilTestConfig anvilTestConfig;
     private static final Logger LOGGER = LogManager.getLogger();
+
     @JsonProperty("clientConfig")
     private TestClientDelegate testClientDelegate = null;
+
     @JsonProperty("serverConfig")
     private TestServerDelegate testServerDelegate = null;
+
     private TestExtractorDelegate testExtractorDelegate = null;
     private WorkerDelegate workerDelegate = null;
 
@@ -141,7 +138,9 @@ public class TlsTestConfig extends TLSDelegateConfig {
                     JCommander.newBuilder()
                             .addCommand(ConfigDelegates.CLIENT.getCommand(), testClientDelegate)
                             .addCommand(ConfigDelegates.SERVER.getCommand(), testServerDelegate)
-                            .addCommand(ConfigDelegates.EXTRACT_TESTS.getCommand(), testExtractorDelegate)
+                            .addCommand(
+                                    ConfigDelegates.EXTRACT_TESTS.getCommand(),
+                                    testExtractorDelegate)
                             .addCommand(ConfigDelegates.WORKER.getCommand(), workerDelegate)
                             .addObject(getAnvilTestConfig())
                             .addObject(this)

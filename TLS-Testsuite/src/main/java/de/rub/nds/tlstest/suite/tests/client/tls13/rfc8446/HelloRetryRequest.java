@@ -75,8 +75,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "4.1.4 Hello Retry Request")
 public class HelloRetryRequest extends Tls13Test {
 
-    public List<DerivationParameter<Config, NamedGroup>> getUnofferedGroups(
-            DerivationScope scope) {
+    public List<DerivationParameter<Config, NamedGroup>> getUnofferedGroups(DerivationScope scope) {
         List<DerivationParameter<Config, NamedGroup>> parameterValues = new LinkedList<>();
         List<NamedGroup> offeredGroups =
                 ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())

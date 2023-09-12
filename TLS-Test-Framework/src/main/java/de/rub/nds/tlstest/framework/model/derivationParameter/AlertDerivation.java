@@ -31,8 +31,7 @@ public class AlertDerivation extends TlsDerivationParameter<AlertDescription> {
     @Override
     public List<DerivationParameter<Config, AlertDescription>> getParameterValues(
             DerivationScope derivationScope) {
-        List<DerivationParameter<Config, AlertDescription>> parameterValues =
-                new LinkedList<>();
+        List<DerivationParameter<Config, AlertDescription>> parameterValues = new LinkedList<>();
         Arrays.stream(AlertDescription.values())
                 .forEach(descr -> parameterValues.add(new AlertDerivation(descr)));
         return parameterValues;

@@ -86,8 +86,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
                         });
     }
 
-    public List<DerivationParameter<Config, byte[]>> get03ProtocolVersions(
-            DerivationScope scope) {
+    public List<DerivationParameter<Config, byte[]>> get03ProtocolVersions(DerivationScope scope) {
         List<DerivationParameter<Config, byte[]>> parameterValues = new LinkedList<>();
         for (byte i : new byte[] {0x00, 0x01, 0x02, 0x04, 0x05, (byte) 0xff}) {
             parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, i}));

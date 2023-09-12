@@ -226,8 +226,7 @@ public class KeyShare extends Tls13Test {
                         });
     }
 
-    public List<DerivationParameter<Config, NamedGroup>> getLegacyGroups(
-            DerivationScope scope) {
+    public List<DerivationParameter<Config, NamedGroup>> getLegacyGroups(DerivationScope scope) {
         List<DerivationParameter<Config, NamedGroup>> parameterValues = new LinkedList<>();
         List<NamedGroup> groups = NamedGroup.getImplemented();
         groups.removeIf(i -> i.isTls13());
@@ -454,10 +453,8 @@ public class KeyShare extends Tls13Test {
         runner.execute(worklfowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    public List<DerivationParameter<Config, NamedGroup>> getFfdheGroups(
-            DerivationScope scope) {
-        List<DerivationParameter<Config, NamedGroup>> derivationParameters =
-                new LinkedList<>();
+    public List<DerivationParameter<Config, NamedGroup>> getFfdheGroups(DerivationScope scope) {
+        List<DerivationParameter<Config, NamedGroup>> derivationParameters = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getTls13FfdheNamedGroups()
                 .forEach(group -> derivationParameters.add(new NamedGroupDerivation(group)));

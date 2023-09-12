@@ -67,8 +67,8 @@ public class CertificateVerify extends Tls13Test {
                 "Client does not support legacy rsa signature and hash algorithms");
     }
 
-    public List<DerivationParameter<Config, SignatureAndHashAlgorithm>>
-            getLegacyRSASAHAlgorithms(DerivationScope scope) {
+    public List<DerivationParameter<Config, SignatureAndHashAlgorithm>> getLegacyRSASAHAlgorithms(
+            DerivationScope scope) {
         List<DerivationParameter<Config, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         for (SignatureAndHashAlgorithm algo :

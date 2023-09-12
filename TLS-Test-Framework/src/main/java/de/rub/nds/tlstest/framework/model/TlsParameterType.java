@@ -15,7 +15,6 @@ import de.rub.nds.tlstest.framework.anvil.BitPositionParameterScope;
 import de.rub.nds.tlstest.framework.model.derivationParameter.*;
 import de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe.ShareOutOfBoundsDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.mirrored.MirroredCipherSuiteDerivation;
-
 import java.lang.reflect.InvocationTargetException;
 
 /** Represents the properties affected by the test derivation models. */
@@ -79,21 +78,25 @@ public enum TlsParameterType implements ParameterType {
         if (parameterScope == ParameterScope.NO_SCOPE) {
             try {
                 return derivationClass.getDeclaredConstructor().newInstance();
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                     NoSuchMethodException e) {
+            } catch (InstantiationException
+                    | IllegalAccessException
+                    | InvocationTargetException
+                    | NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
         } else if (parameterScope instanceof BitPositionParameterScope) {
             if (!parameterScope.getUniqueScopeIdentifier().contains("BITMASK")) {
                 throw new IllegalArgumentException(
                         "Found ParameterIdentifier for TLS with scope set to "
-                                + parameterScope + ". Only bitmasks are supported.");
+                                + parameterScope
+                                + ". Only bitmasks are supported.");
             } else {
                 return new BitPositionDerivation(
                         new ParameterIdentifier(TlsParameterType.BIT_POSITION, parameterScope));
             }
         } else {
-            throw new IllegalArgumentException("ParameterScope " + parameterScope.toString() + " is not known.");
+            throw new IllegalArgumentException(
+                    "ParameterScope " + parameterScope.toString() + " is not known.");
         }
     }
 }

@@ -6,10 +6,15 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.Delegate;
 import de.rub.nds.tlsattacker.core.exceptions.ConfigurationException;
 
-@Parameters(commandDescription = "Starts TLS-Anvil in worker mode, accepting commands from the anvil web ui.")
+@Parameters(
+        commandDescription =
+                "Starts TLS-Anvil in worker mode, accepting commands from the anvil web ui.")
 public class WorkerDelegate extends Delegate {
 
-    @Parameter(names = "-controller", description = "Hostname or ip address of the anvil-web backend server.", required = true)
+    @Parameter(
+            names = "-controller",
+            description = "Hostname or ip address of the anvil-web backend server.",
+            required = true)
     private String controller = "backend:5001";
 
     @Parameter(names = "-name", description = "Name of the worker, as seen in the web ui.")
@@ -24,7 +29,5 @@ public class WorkerDelegate extends Delegate {
     }
 
     @Override
-    public void applyDelegate(Config config) throws ConfigurationException {
-
-    }
+    public void applyDelegate(Config config) throws ConfigurationException {}
 }

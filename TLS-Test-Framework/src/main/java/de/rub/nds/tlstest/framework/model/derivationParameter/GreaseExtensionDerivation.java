@@ -35,8 +35,7 @@ public class GreaseExtensionDerivation extends TlsDerivationParameter<ExtensionT
     @Override
     public List<DerivationParameter<Config, ExtensionType>> getParameterValues(
             DerivationScope derivationScope) {
-        List<DerivationParameter<Config, ExtensionType>> parameterValues =
-                new LinkedList<>();
+        List<DerivationParameter<Config, ExtensionType>> parameterValues = new LinkedList<>();
         for (ExtensionType extType : ExtensionType.values()) {
             if (extType.isGrease()) {
                 parameterValues.add(new GreaseExtensionDerivation(extType));

@@ -36,8 +36,7 @@ public class CompressionMethodDerivation extends TlsDerivationParameter<Compress
     @Override
     public List<DerivationParameter<Config, CompressionMethod>> getParameterValues(
             DerivationScope derivationScope) {
-        List<DerivationParameter<Config, CompressionMethod>> parameterValues =
-                new LinkedList<>();
+        List<DerivationParameter<Config, CompressionMethod>> parameterValues = new LinkedList<>();
         for (CompressionMethod compressionMethod : CompressionMethod.values()) {
             parameterValues.add(new CompressionMethodDerivation(compressionMethod));
         }

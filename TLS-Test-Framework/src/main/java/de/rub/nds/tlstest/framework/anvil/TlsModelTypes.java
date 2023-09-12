@@ -8,7 +8,6 @@
 package de.rub.nds.tlstest.framework.anvil;
 
 import de.rub.nds.anvilcore.model.DefaultModelTypes;
-
 import java.util.Set;
 
 public class TlsModelTypes {
@@ -16,5 +15,6 @@ public class TlsModelTypes {
     public static final String CERTIFICATE = "CERTIFICATE";
     public static final String LENGTHFIELD = "LENGTHFIELD";
 
-    public static Set<String> tlsModelTypes = Set.of(DefaultModelTypes.EMPTY, GENERIC, CERTIFICATE, LENGTHFIELD);
+    public static Set<String> tlsModelTypes =
+            Set.of(DefaultModelTypes.EMPTY, GENERIC, CERTIFICATE, LENGTHFIELD);
 }

@@ -82,8 +82,8 @@ public class SignatureAlgorithms extends Tls13Test {
                         });
     }
 
-    public List<DerivationParameter<Config, SignatureAndHashAlgorithm>>
-            getLegacySigHashAlgoritms(DerivationScope scope) {
+    public List<DerivationParameter<Config, SignatureAndHashAlgorithm>> getLegacySigHashAlgoritms(
+            DerivationScope scope) {
         List<DerivationParameter<Config, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         List<SignatureAndHashAlgorithm> algos =

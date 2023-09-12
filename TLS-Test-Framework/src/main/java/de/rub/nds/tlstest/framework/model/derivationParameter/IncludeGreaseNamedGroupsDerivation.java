@@ -46,10 +46,7 @@ public class IncludeGreaseNamedGroupsDerivation extends TlsDerivationParameter<B
         if (getSelectedValue()) {
             Arrays.asList(NamedGroup.values()).stream()
                     .filter(group -> group.isGrease())
-                    .forEach(
-                            greaseGroup ->
-                                    config.getDefaultClientNamedGroups()
-                                            .add(greaseGroup));
+                    .forEach(greaseGroup -> config.getDefaultClientNamedGroups().add(greaseGroup));
         }
     }
 

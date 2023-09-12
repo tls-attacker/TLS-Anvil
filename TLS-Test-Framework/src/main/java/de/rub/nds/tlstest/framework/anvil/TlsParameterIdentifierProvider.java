@@ -1,8 +1,11 @@
 package de.rub.nds.tlstest.framework.anvil;
 
+import static de.rub.nds.tlstest.framework.anvil.TlsModelTypes.*;
+import static de.rub.nds.tlstest.framework.model.TlsParameterType.BIT_POSITION;
+
 import de.rub.nds.anvilcore.constants.TestEndpointType;
-import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.DefaultModelTypes;
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.ParameterIdentifierProvider;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.scanner.core.constants.TestResults;
@@ -13,21 +16,18 @@ import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static de.rub.nds.tlstest.framework.anvil.TlsModelTypes.*;
-import static de.rub.nds.tlstest.framework.model.TlsParameterType.BIT_POSITION;
-
 public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider {
 
     /**
-     * Creates a list of all possible ParameterIdentifiers.
-     * For every normal DerivationType there will be one Identifier.
-     * For every BITMASK DerivationTypes, a second BIT_POSITION Identifier will be added.
+     * Creates a list of all possible ParameterIdentifiers. For every normal DerivationType there
+     * will be one Identifier. For every BITMASK DerivationTypes, a second BIT_POSITION Identifier
+     * will be added.
+     *
      * @return all known ParameterIdentifiers
      */
     @Override
@@ -39,7 +39,8 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
                 identifiers.add(identifierToAdd);
                 if (listed.isBitmaskDerivation()) {
                     ParameterIdentifier linkedIdentifier =
-                            new ParameterIdentifier(BIT_POSITION, new BitPositionParameterScope(listed));
+                            new ParameterIdentifier(
+                                    BIT_POSITION, new BitPositionParameterScope(listed));
                     identifierToAdd.setLinkedParameterIdentifier(linkedIdentifier);
                     identifiers.add(linkedIdentifier);
                 }

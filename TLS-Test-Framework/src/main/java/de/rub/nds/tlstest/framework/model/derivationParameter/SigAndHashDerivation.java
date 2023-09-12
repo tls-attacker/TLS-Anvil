@@ -103,9 +103,8 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                 .anyMatch(cipherSuite -> cipherSuite.isDSS());
     }
 
-    private List<DerivationParameter<Config, SignatureAndHashAlgorithm>>
-            getClientTestAlgorithms(
-                    ClientFeatureExtractionResult extractionResult, DerivationScope scope) {
+    private List<DerivationParameter<Config, SignatureAndHashAlgorithm>> getClientTestAlgorithms(
+            ClientFeatureExtractionResult extractionResult, DerivationScope scope) {
         List<DerivationParameter<Config, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         extractionResult.getAdvertisedSignatureAndHashAlgorithms().stream()
@@ -118,8 +117,7 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
         return parameterValues;
     }
 
-    private List<DerivationParameter<Config, SignatureAndHashAlgorithm>>
-            getServerTestAlgorithms() {
+    private List<DerivationParameter<Config, SignatureAndHashAlgorithm>> getServerTestAlgorithms() {
         // TLS-Scanner has no probe for this yet
         throw new UnsupportedOperationException(
                 "SigAndHash derivation is currently not supported for server tests");

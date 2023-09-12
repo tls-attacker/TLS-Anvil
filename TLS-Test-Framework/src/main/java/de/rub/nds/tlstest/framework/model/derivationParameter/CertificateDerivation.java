@@ -100,8 +100,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
 
     public List<DerivationParameter<Config, CertificateKeyPair>> getApplicableCertificates(
             TestContext context, DerivationScope scope, boolean allowUnsupportedPkGroups) {
-        List<DerivationParameter<Config, CertificateKeyPair>> parameterValues =
-                new LinkedList<>();
+        List<DerivationParameter<Config, CertificateKeyPair>> parameterValues = new LinkedList<>();
         CertificateByteChooser.getInstance().getCertificateKeyPairList().stream()
                 .filter(cert -> certMatchesAnySupportedCipherSuite(cert, scope))
                 .filter(cert -> filterRsaKeySize(cert))

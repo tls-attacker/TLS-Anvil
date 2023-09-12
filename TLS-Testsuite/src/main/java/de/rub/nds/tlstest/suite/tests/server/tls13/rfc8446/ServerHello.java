@@ -446,8 +446,7 @@ public class ServerHello extends Tls13Test {
         }
     }
 
-    public List<DerivationParameter<Config, byte[]>> getTlsVersionsBelow12(
-            DerivationScope scope) {
+    public List<DerivationParameter<Config, byte[]>> getTlsVersionsBelow12(DerivationScope scope) {
         List<DerivationParameter<Config, byte[]>> derivationParameters = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getSupportedVersions()

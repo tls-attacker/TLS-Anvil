@@ -18,9 +18,7 @@ import de.rub.nds.tlstest.framework.extractor.TestCaseExtractor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * Main entrypoint for the TLS-Attacker testsuite.
- */
+/** Main entrypoint for the TLS-Attacker testsuite. */
 public class Main {
     private static final Logger LOGGER = LogManager.getLogger();
     private static boolean finished = false;
@@ -30,8 +28,9 @@ public class Main {
     }
 
     /**
-     * Creates a TLS-Anvil TestContext, pareses the command line args and runs the
-     * selected processes based on the command.
+     * Creates a TLS-Anvil TestContext, pareses the command line args and runs the selected
+     * processes based on the command.
+     *
      * @param args supplied command line arguments
      */
     public static void main(String[] args) {
@@ -63,10 +62,15 @@ public class Main {
             testContext.getConfig().parse(args);
 
             if (testContext.getConfig().getAnvilTestConfig().getTestPackage() != null) {
-                LOGGER.info("Limiting test to those of package {}", testContext.getConfig().getAnvilTestConfig().getTestPackage());
+                LOGGER.info(
+                        "Limiting test to those of package {}",
+                        testContext.getConfig().getAnvilTestConfig().getTestPackage());
             } else {
                 // set test package if not specified via command args
-                testContext.getConfig().getAnvilTestConfig().setTestPackage(Main.class.getPackageName());
+                testContext
+                        .getConfig()
+                        .getAnvilTestConfig()
+                        .setTestPackage(Main.class.getPackageName());
             }
 
             switch (testContext.getConfig().getParsedCommand()) {
@@ -98,16 +102,18 @@ public class Main {
 
     /**
      * Start AnvilCores TestRunner with the supplied config contained in the TLS-Anvil TestContext
+     *
      * @param testContext TLS-Anvils TestContext with filled AnvilConfig
      */
     public static void startTestRunner(TestContext testContext) throws JsonProcessingException {
         LOGGER.info("Started in testing mode.");
-        ObjectMapper mapper =  new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper();
         String additionalConfig = mapper.writeValueAsString(testContext.getConfig());
-        TestRunner runner = new TestRunner(
-                testContext.getConfig().getAnvilTestConfig(),
-                additionalConfig,
-                new TlsParameterIdentifierProvider());
+        TestRunner runner =
+                new TestRunner(
+                        testContext.getConfig().getAnvilTestConfig(),
+                        additionalConfig,
+                        new TlsParameterIdentifierProvider());
         // set TLS-Anvils TestContext as listener for callbacks
         // in the beforeStart callback, the test preparation is started
         runner.setListener(testContext);
@@ -117,27 +123,30 @@ public class Main {
 
     /**
      * Starts the built-in TestCaseExtractor
+     *
      * @param testContext TLS-Anvils TestContext with filled AnvilConfig
      */
     public static void startTestExtractor(TestContext testContext) {
         LOGGER.info("Started in extract mode.");
-        TestCaseExtractor extractor = new TestCaseExtractor(
-                testContext.getConfig().getAnvilTestConfig().getTestPackage());
+        TestCaseExtractor extractor =
+                new TestCaseExtractor(
+                        testContext.getConfig().getAnvilTestConfig().getTestPackage());
         extractor.start();
     }
 
     /**
-     * Starts the WorkerClient of AnvilCore with the supplied config in TLS-Anvils TestContext.
-     * The client connects to a backend and can start tests.
+     * Starts the WorkerClient of AnvilCore with the supplied config in TLS-Anvils TestContext. The
+     * client connects to a backend and can start tests.
+     *
      * @param testContext TLS-Anvils TestContext with filled AnvilConfig
      */
     public static void startWorkerClient(TestContext testContext) {
         LOGGER.info("Started in worker mode.");
-        WorkerClient workerClient = new WorkerClient(
-                testContext.getConfig().getWorkerDelegate().getController(),
-                Main.class.getPackageName(),
-                new TlsParameterIdentifierProvider()
-        );
+        WorkerClient workerClient =
+                new WorkerClient(
+                        testContext.getConfig().getWorkerDelegate().getController(),
+                        Main.class.getPackageName(),
+                        new TlsParameterIdentifierProvider());
         // set the TLS-Anvil TestContext as listener for callbacks
         // the gotConfig callback is used to set config parameters before a test
         // the beforeStart callback is used to start the test preparation phase

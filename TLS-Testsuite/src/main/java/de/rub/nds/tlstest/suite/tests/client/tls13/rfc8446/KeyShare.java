@@ -332,10 +332,8 @@ public class KeyShare extends Tls13Test {
         runner.execute(worklfowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    public List<DerivationParameter<Config, NamedGroup>> getFfdheGroups(
-            DerivationScope scope) {
-        List<DerivationParameter<Config, NamedGroup>> derivationParameters =
-                new LinkedList<>();
+    public List<DerivationParameter<Config, NamedGroup>> getFfdheGroups(DerivationScope scope) {
+        List<DerivationParameter<Config, NamedGroup>> derivationParameters = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getTls13FfdheNamedGroups()
                 .forEach(group -> derivationParameters.add(new NamedGroupDerivation(group)));

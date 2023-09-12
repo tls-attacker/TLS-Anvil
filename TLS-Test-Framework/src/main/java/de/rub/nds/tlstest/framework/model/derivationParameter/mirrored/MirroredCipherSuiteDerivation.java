@@ -42,7 +42,8 @@ public class MirroredCipherSuiteDerivation extends MirroredDerivationParameter<C
     public List<DerivationParameter<Config, CipherSuite>> getParameterValues(
             DerivationScope scope) {
         List<DerivationParameter<Config, CipherSuite>> parameterValues = new LinkedList<>();
-        getMirroredType().getInstance(ParameterScope.NO_SCOPE)
+        getMirroredType()
+                .getInstance(ParameterScope.NO_SCOPE)
                 .getParameterValues(scope)
                 .forEach(
                         derivation ->

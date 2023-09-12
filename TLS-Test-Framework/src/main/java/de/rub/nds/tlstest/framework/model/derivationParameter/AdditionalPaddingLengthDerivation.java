@@ -28,8 +28,7 @@ public class AdditionalPaddingLengthDerivation extends TlsDerivationParameter<In
     }
 
     @Override
-    public void applyToConfig(
-            Config config, DerivationScope derivationScope) {
+    public void applyToConfig(Config config, DerivationScope derivationScope) {
         config.setDefaultAdditionalPadding(getSelectedValue());
     }
 

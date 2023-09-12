@@ -34,8 +34,7 @@ public class MaxFragmentLengthDerivation extends TlsDerivationParameter<MaxFragm
 
     public List<DerivationParameter<Config, MaxFragmentLength>> getParameterValues(
             DerivationScope derivationScope) {
-        List<DerivationParameter<Config, MaxFragmentLength>> parameterValues =
-                new LinkedList<>();
+        List<DerivationParameter<Config, MaxFragmentLength>> parameterValues = new LinkedList<>();
 
         // TODO The layer system fails to process messages when max length was set
         for (MaxFragmentLength maxFragmentLength : MaxFragmentLength.values()) {

@@ -34,10 +34,8 @@ public class TestClientDelegate extends ServerDelegate {
             variableArity = true)
     protected List<String> triggerScriptCommand = new ArrayList<>();
 
-    @JsonIgnore
-    private Function<State, Integer> triggerScript;
-    @JsonIgnore
-    private ServerSocket serverSocket;
+    @JsonIgnore private Function<State, Integer> triggerScript;
+    @JsonIgnore private ServerSocket serverSocket;
 
     @Override
     public void applyDelegate(Config config) {

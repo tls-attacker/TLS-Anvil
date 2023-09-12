@@ -35,8 +35,7 @@ public class GreaseProtocolVersionDerivation extends TlsDerivationParameter<Prot
     @Override
     public List<DerivationParameter<Config, ProtocolVersion>> getParameterValues(
             DerivationScope derivationScope) {
-        List<DerivationParameter<Config, ProtocolVersion>> parameterValues =
-                new LinkedList<>();
+        List<DerivationParameter<Config, ProtocolVersion>> parameterValues = new LinkedList<>();
         for (ProtocolVersion version : ProtocolVersion.values()) {
             if (version.isGrease()) {
                 parameterValues.add(new GreaseProtocolVersionDerivation(version));

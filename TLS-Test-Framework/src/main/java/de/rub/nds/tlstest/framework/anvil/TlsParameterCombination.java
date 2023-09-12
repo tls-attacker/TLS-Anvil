@@ -50,8 +50,10 @@ public class TlsParameterCombination extends ParameterCombination {
     }
 
     public byte[] buildBitmask(ParameterIdentifier parameterIdentifier) {
-        DerivationParameter byteParameter = getParameter(parameterIdentifier);      // ...BitmaskDerivation
-        DerivationParameter bitParameter = getLinkedParameter(parameterIdentifier); // BitPositionDerivation
+        DerivationParameter byteParameter =
+                getParameter(parameterIdentifier); // ...BitmaskDerivation
+        DerivationParameter bitParameter =
+                getLinkedParameter(parameterIdentifier); // BitPositionDerivation
 
         byte[] constructed = new byte[(Integer) byteParameter.getSelectedValue() + 1];
         constructed[(Integer) byteParameter.getSelectedValue()] =

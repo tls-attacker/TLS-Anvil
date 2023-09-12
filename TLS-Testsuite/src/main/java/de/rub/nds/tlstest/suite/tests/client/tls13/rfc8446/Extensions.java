@@ -52,8 +52,7 @@ public class Extensions extends Tls13Test {
 
     public List<DerivationParameter<Config, ExtensionType>> getUnrequestedExtensions(
             DerivationScope scope) {
-        List<DerivationParameter<Config, ExtensionType>> parameterValues =
-                new LinkedList<>();
+        List<DerivationParameter<Config, ExtensionType>> parameterValues = new LinkedList<>();
         List<ExtensionType> extensions = new LinkedList<>();
         extensions.add(ExtensionType.SERVER_NAME_INDICATION);
         extensions.add(ExtensionType.MAX_FRAGMENT_LENGTH);

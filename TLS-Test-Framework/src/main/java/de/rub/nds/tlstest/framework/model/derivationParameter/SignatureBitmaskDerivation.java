@@ -66,7 +66,9 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         listedValues.add(0);
 
         List<DerivationParameter<Config, CertificateKeyPair>> applicableCertificates =
-                TlsParameterType.CERTIFICATE.getInstance(ParameterScope.NO_SCOPE).getConstrainedParameterValues(scope);
+                TlsParameterType.CERTIFICATE
+                        .getInstance(ParameterScope.NO_SCOPE)
+                        .getConstrainedParameterValues(scope);
         applicableCertificates.forEach(
                 selectableCert ->
                         listedValues.add(

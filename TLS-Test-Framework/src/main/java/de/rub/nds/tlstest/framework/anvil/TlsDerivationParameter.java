@@ -9,8 +9,7 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 
-public abstract class TlsDerivationParameter<TypeT>
-        extends DerivationParameter<Config, TypeT> {
+public abstract class TlsDerivationParameter<TypeT> extends DerivationParameter<Config, TypeT> {
 
     protected TestContext context = TestContext.getInstance();
 

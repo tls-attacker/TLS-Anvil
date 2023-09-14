@@ -9,7 +9,7 @@ import de.rub.nds.anvilcore.annotation.ExplicitValues;
 import de.rub.nds.anvilcore.annotation.ManualConfig;
 import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
-import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,9 +24,10 @@ public class AnnotationReferences {
     @Test
     public void referencesMatchParameterIdentifiers() {
         List<String> knownIdentifierStrings =
-                Arrays.asList(TlsParameterType.getAllIdentifiers()).stream()
-                        .map(ParameterIdentifier::name)
-                        .collect(Collectors.toList());
+                new TlsParameterIdentifierProvider()
+                        .generateAllParameterIdentifiers().stream()
+                                .map(ParameterIdentifier::name)
+                                .collect(Collectors.toList());
         Reflections reflections =
                 new Reflections("de.rub.nds.tlstest", new MethodAnnotationsScanner());
         Set<Method> testMethods = reflections.getMethodsAnnotatedWith(TestDescription.class);

@@ -10,8 +10,12 @@ package de.rub.nds.tlstest.framework.config;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
-import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.anvilcore.context.AnvilTestConfig;
 import de.rub.nds.scanner.core.constants.CollectionResult;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -28,10 +32,7 @@ import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.config.delegates.ConfigDelegates;
-import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
-import de.rub.nds.tlstest.framework.config.delegates.TestExtractorDelegate;
-import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
+import de.rub.nds.tlstest.framework.config.delegates.*;
 import de.rub.nds.tlstest.framework.utils.Utils;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,13 +48,25 @@ import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+@JsonAutoDetect(
+        fieldVisibility = JsonAutoDetect.Visibility.NONE,
+        setterVisibility = JsonAutoDetect.Visibility.NONE,
+        getterVisibility = JsonAutoDetect.Visibility.NONE,
+        isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+        creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class TlsTestConfig extends TLSDelegateConfig {
 
-    private AnvilTestConfig anvilTestConfig;
+    @JsonProperty private AnvilTestConfig anvilTestConfig;
     private static final Logger LOGGER = LogManager.getLogger();
+
+    @JsonProperty("clientConfig")
     private TestClientDelegate testClientDelegate = null;
+
+    @JsonProperty("serverConfig")
     private TestServerDelegate testServerDelegate = null;
+
     private TestExtractorDelegate testExtractorDelegate = null;
+    private WorkerDelegate workerDelegate = null;
 
     private JCommander argParser = null;
 
@@ -80,6 +93,7 @@ public class TlsTestConfig extends TLSDelegateConfig {
         this.testServerDelegate = new TestServerDelegate();
         this.testClientDelegate = new TestClientDelegate();
         this.testExtractorDelegate = new TestExtractorDelegate();
+        this.workerDelegate = new WorkerDelegate();
     }
 
     /**
@@ -127,7 +141,9 @@ public class TlsTestConfig extends TLSDelegateConfig {
                             .addCommand(
                                     ConfigDelegates.EXTRACT_TESTS.getCommand(),
                                     testExtractorDelegate)
+                            .addCommand(ConfigDelegates.WORKER.getCommand(), workerDelegate)
                             .addObject(getAnvilTestConfig())
+                            .addObject(this)
                             .build();
         }
 
@@ -145,14 +161,13 @@ public class TlsTestConfig extends TLSDelegateConfig {
         } else if (argParser.getParsedCommand() == null) {
             argParser.usage();
             throw new ParameterException("You have to use the client or server command");
-        } else if (argParser
-                .getParsedCommand()
-                .equals(ConfigDelegates.EXTRACT_TESTS.getCommand())) {
+        } else if (argParser.getParsedCommand().equals(ConfigDelegates.EXTRACT_TESTS.getCommand())
+                || argParser.getParsedCommand().equals(ConfigDelegates.WORKER.getCommand())) {
             return;
         }
 
         this.setTestEndpointMode(argParser.getParsedCommand());
-        AnvilContext.getInstance().setEvaluatedEndpoint(this.getTestEndpointMode());
+        this.getAnvilTestConfig().setEndpointMode(this.getTestEndpointMode());
 
         if (getAnvilTestConfig().getIdentifier() == null) {
             if (argParser.getParsedCommand().equals(ConfigDelegates.SERVER.getCommand())) {
@@ -201,8 +216,22 @@ public class TlsTestConfig extends TLSDelegateConfig {
         } catch (Exception e) {
             throw new ParameterException(e);
         }
-        getAnvilTestConfig().restrictParallelization();
         parsedArgs = true;
+    }
+
+    public void fromWorker(AnvilTestConfig anvilConfig, String additionalConfig) {
+        this.anvilTestConfig = anvilConfig;
+        this.setTestEndpointMode(anvilConfig.getEndpointMode());
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        try {
+            TlsTestConfig newConfig = mapper.readValue(additionalConfig, this.getClass());
+            this.testClientDelegate = newConfig.testClientDelegate;
+            this.testServerDelegate = newConfig.testServerDelegate;
+            this.parsedArgs = true;
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Error applying TLS test config", e);
+        }
     }
 
     @Override
@@ -408,6 +437,10 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
     public TestClientDelegate getTestClientDelegate() {
         return testClientDelegate;
+    }
+
+    public WorkerDelegate getWorkerDelegate() {
+        return workerDelegate;
     }
 
     public void setArgParser(JCommander argParser) {

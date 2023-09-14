@@ -7,8 +7,9 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -27,15 +28,14 @@ public class AdditionalPaddingLengthDerivation extends TlsDerivationParameter<In
     }
 
     @Override
-    public void applyToConfig(
-            TlsAnvilConfig config, de.rub.nds.anvilcore.model.DerivationScope derivationScope) {
-        config.getTlsConfig().setDefaultAdditionalPadding(getSelectedValue());
+    public void applyToConfig(Config config, DerivationScope derivationScope) {
+        config.setDefaultAdditionalPadding(getSelectedValue());
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
-            de.rub.nds.anvilcore.model.DerivationScope derivationScope) {
-        List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<Config, Integer>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<Config, Integer>> parameterValues = new LinkedList<>();
         parameterValues.add(new AdditionalPaddingLengthDerivation(5));
         parameterValues.add(new AdditionalPaddingLengthDerivation(100));
         parameterValues.add(new AdditionalPaddingLengthDerivation(1000));

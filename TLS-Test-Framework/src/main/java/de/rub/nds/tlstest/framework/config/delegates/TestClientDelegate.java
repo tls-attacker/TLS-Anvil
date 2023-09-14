@@ -9,6 +9,7 @@ package de.rub.nds.tlstest.framework.config.delegates;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.ServerDelegate;
 import de.rub.nds.tlsattacker.core.state.State;
@@ -33,8 +34,8 @@ public class TestClientDelegate extends ServerDelegate {
             variableArity = true)
     protected List<String> triggerScriptCommand = new ArrayList<>();
 
-    private Function<State, Integer> triggerScript;
-    private ServerSocket serverSocket;
+    @JsonIgnore private Function<State, Integer> triggerScript;
+    @JsonIgnore private ServerSocket serverSocket;
 
     @Override
     public void applyDelegate(Config config) {

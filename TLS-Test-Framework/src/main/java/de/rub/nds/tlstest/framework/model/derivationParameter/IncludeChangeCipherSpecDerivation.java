@@ -9,7 +9,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
@@ -31,8 +31,8 @@ public class IncludeChangeCipherSpecDerivation extends TlsDerivationParameter<Bo
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
-        config.getTlsConfig().setTls13BackwardsCompatibilityMode(getSelectedValue());
+    public void applyToConfig(Config config, DerivationScope derivationScope) {
+        config.setTls13BackwardsCompatibilityMode(getSelectedValue());
     }
 
     @Override
@@ -41,9 +41,9 @@ public class IncludeChangeCipherSpecDerivation extends TlsDerivationParameter<Bo
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, Boolean>> getParameterValues(
+    public List<DerivationParameter<Config, Boolean>> getParameterValues(
             DerivationScope derivationScope) {
-        List<DerivationParameter<TlsAnvilConfig, Boolean>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, Boolean>> parameterValues = new LinkedList<>();
         parameterValues.add(new IncludeChangeCipherSpecDerivation(true));
         parameterValues.add(new IncludeChangeCipherSpecDerivation(false));
         return parameterValues;

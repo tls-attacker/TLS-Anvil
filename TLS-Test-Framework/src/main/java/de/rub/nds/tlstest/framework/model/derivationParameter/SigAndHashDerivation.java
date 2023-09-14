@@ -13,6 +13,7 @@ import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
@@ -21,7 +22,6 @@ import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
@@ -44,9 +44,9 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> getParameterValues(
+    public List<DerivationParameter<Config, SignatureAndHashAlgorithm>> getParameterValues(
             DerivationScope derivationScope) {
-        List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
+        List<DerivationParameter<Config, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
             ClientFeatureExtractionResult extractionResult =
@@ -66,9 +66,9 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
         return parameterValues;
     }
 
-    private List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>>
+    private List<DerivationParameter<Config, SignatureAndHashAlgorithm>>
             getClientTestDefaultAlgorithms() {
-        List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
+        List<DerivationParameter<Config, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         // the applied algorithm depends on the chosen ciphersuite - see constraints
         // TLS 1.3 clients must send the extension if they expect a server cert
@@ -103,10 +103,9 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                 .anyMatch(cipherSuite -> cipherSuite.isDSS());
     }
 
-    private List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>>
-            getClientTestAlgorithms(
-                    ClientFeatureExtractionResult extractionResult, DerivationScope scope) {
-        List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>> parameterValues =
+    private List<DerivationParameter<Config, SignatureAndHashAlgorithm>> getClientTestAlgorithms(
+            ClientFeatureExtractionResult extractionResult, DerivationScope scope) {
+        List<DerivationParameter<Config, SignatureAndHashAlgorithm>> parameterValues =
                 new LinkedList<>();
         extractionResult.getAdvertisedSignatureAndHashAlgorithms().stream()
                 .filter(
@@ -118,24 +117,21 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
         return parameterValues;
     }
 
-    private List<DerivationParameter<TlsAnvilConfig, SignatureAndHashAlgorithm>>
-            getServerTestAlgorithms() {
+    private List<DerivationParameter<Config, SignatureAndHashAlgorithm>> getServerTestAlgorithms() {
         // TLS-Scanner has no probe for this yet
         throw new UnsupportedOperationException(
                 "SigAndHash derivation is currently not supported for server tests");
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+    public void applyToConfig(Config config, DerivationScope derivationScope) {
         if (getSelectedValue() != null) {
-            config.getTlsConfig().setAutoAdjustSignatureAndHashAlgorithm(false);
-            config.getTlsConfig().setDefaultSelectedSignatureAndHashAlgorithm(getSelectedValue());
+            config.setAutoAdjustSignatureAndHashAlgorithm(false);
+            config.setDefaultSelectedSignatureAndHashAlgorithm(getSelectedValue());
             if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-                config.getTlsConfig()
-                        .setDefaultClientSupportedSignatureAndHashAlgorithms(getSelectedValue());
+                config.setDefaultClientSupportedSignatureAndHashAlgorithms(getSelectedValue());
             } else {
-                config.getTlsConfig()
-                        .setDefaultServerSupportedSignatureAndHashAlgorithms(getSelectedValue());
+                config.setDefaultServerSupportedSignatureAndHashAlgorithms(getSelectedValue());
             }
         }
     }

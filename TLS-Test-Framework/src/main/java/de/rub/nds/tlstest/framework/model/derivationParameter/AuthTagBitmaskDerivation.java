@@ -11,8 +11,8 @@ import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
@@ -75,9 +75,9 @@ public class AuthTagBitmaskDerivation extends TlsDerivationParameter<Integer> {
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
+    public List<DerivationParameter<Config, Integer>> getParameterValues(
             DerivationScope derivationScope) {
-        List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, Integer>> parameterValues = new LinkedList<>();
         int maxTagLen = 0;
         Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
         if (ConstraintHelper.isTls13Test(derivationScope)) {

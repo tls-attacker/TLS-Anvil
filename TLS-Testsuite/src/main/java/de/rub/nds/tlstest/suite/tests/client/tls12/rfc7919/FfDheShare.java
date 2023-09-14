@@ -47,7 +47,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -229,9 +228,9 @@ public class FfDheShare extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getSupportedFfdheNamedGroups(
+    public List<DerivationParameter<Config, NamedGroup>> getSupportedFfdheNamedGroups(
             DerivationScope scope) {
-        List<DerivationParameter<TlsAnvilConfig, NamedGroup>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, NamedGroup>> parameterValues = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getFfdheNamedGroups()
                 .forEach(group -> parameterValues.add(new NamedGroupDerivation(group)));

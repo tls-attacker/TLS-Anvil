@@ -14,9 +14,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <junit.minor-version>7.0</junit.minor-version>
-        <junit.jupiter.version>5.${junit.minor-version}</junit.jupiter.version>
-        <junit.platform.version>1.${junit.minor-version}</junit.platform.version>
     </properties>
     <dependencies>
         <dependency>
@@ -32,22 +29,18 @@
         <dependency>
             <groupId>de.rub.nds</groupId>
             <artifactId>anvil-core</artifactId>
-            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls</groupId>
             <artifactId>coffee4j-anvil-engine</artifactId>
-            <version>1.0.6</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls</groupId>
             <artifactId>coffee4j-anvil-junit-jupiter</artifactId>
-            <version>1.0.6</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls</groupId>
             <artifactId>coffee4j-anvil-model</artifactId>
-            <version>1.0.6</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls.attacker</groupId>
@@ -90,11 +83,20 @@
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>junit-jupiter-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
         </dependency>
         <dependency>
             <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-launcher</artifactId>
+            <artifactId>junit-platform-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

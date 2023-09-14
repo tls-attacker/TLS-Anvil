@@ -7,36 +7,32 @@
  */
 package de.rub.nds.tlstest.framework;
 
+import de.rub.nds.anvilcore.context.AnvilTestConfig;
+import de.rub.nds.anvilcore.execution.AnvilListener;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlstest.framework.config.TlsTestConfig;
-import de.rub.nds.tlstest.framework.execution.TestRunner;
-import java.util.Date;
-import me.tongfei.progressbar.ProgressBar;
+import de.rub.nds.tlstest.framework.execution.TestPreparator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.platform.launcher.TestPlan;
 
 /**
  * Shared global Singleton object that stores information that are used by the JUnit extensions and
  * the test cases.
  */
-public class TestContext {
+public class TestContext implements AnvilListener {
     private static final Logger LOGGER = LogManager.getLogger();
     private TlsTestConfig config;
 
     private static TestContext instance = null;
-    private TestRunner testRunner = null;
     private ParallelExecutor stateExecutor;
 
     private FeatureExtractionResult featureExtractionResult = null;
     private ClientHelloMessage receivedClientHelloMessage;
 
-    private long performedHandshakes = 0;
-
-    private ProgressBar proggressBar = null;
-    private final Date startTime = new Date();
-
     private int serverHandshakesSinceRestart = 0;
+    private boolean aborted = false;
 
     public static synchronized TestContext getInstance() {
         if (TestContext.instance == null) {
@@ -48,7 +44,6 @@ public class TestContext {
     private TestContext() {
         super();
         this.config = new TlsTestConfig();
-        this.testRunner = new TestRunner(this.config, this);
     }
 
     public synchronized TlsTestConfig getConfig() {
@@ -59,32 +54,12 @@ public class TestContext {
         this.config = config;
     }
 
-    public synchronized TestRunner getTestRunner() {
-        return testRunner;
-    }
-
-    public synchronized void setTestRunner(TestRunner testRunner) {
-        this.testRunner = testRunner;
-    }
-
     public ClientHelloMessage getReceivedClientHelloMessage() {
         return receivedClientHelloMessage;
     }
 
     public void setReceivedClientHelloMessage(ClientHelloMessage receivedClientHelloMessage) {
         this.receivedClientHelloMessage = receivedClientHelloMessage;
-    }
-
-    public boolean isDocker() {
-        return System.getenv("DOCKER") != null;
-    }
-
-    public ProgressBar getProggressBar() {
-        return proggressBar;
-    }
-
-    public Date getStartTime() {
-        return startTime;
     }
 
     public FeatureExtractionResult getFeatureExtractionResult() {
@@ -115,11 +90,25 @@ public class TestContext {
         this.serverHandshakesSinceRestart += 1;
     }
 
-    public long getPerformedHandshakes() {
-        return performedHandshakes;
+    @Override
+    public void gotConfig(AnvilTestConfig anvilConfig, String tlsConfig) {
+        getConfig().fromWorker(anvilConfig, tlsConfig);
     }
 
-    public void increasePerformedHandshakes(long performedHandshakes) {
-        this.performedHandshakes += performedHandshakes;
+    @Override
+    public boolean beforeStart(TestPlan testPlan, long totalTests) {
+        // print out test counts before each run
+        TestPreparator.printTestInfo(testPlan);
+        // run TestPreparator before each run
+        return new TestPreparator(getConfig(), this).prepareTestExecution();
+    }
+
+    @Override
+    public void onAborted() {
+        aborted = true;
+    }
+
+    public boolean isAborted() {
+        return aborted;
     }
 }

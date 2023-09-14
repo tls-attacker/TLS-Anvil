@@ -16,8 +16,7 @@ import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
-import de.rub.nds.anvilcore.model.parameter.ParameterFactory;
-import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
@@ -46,7 +45,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -124,12 +122,11 @@ public class ServerKeyExchange extends Tls12Test {
         return parameterValues;
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, CertificateKeyPair>>
+    public List<DerivationParameter<Config, CertificateKeyPair>>
             getCertsIncludingUnsupportedPkGroups(DerivationScope scope) {
         CertificateDerivation certDerivation =
                 (CertificateDerivation)
-                        ParameterFactory.getInstanceFromIdentifier(
-                                new ParameterIdentifier(TlsParameterType.CERTIFICATE));
+                        TlsParameterType.CERTIFICATE.getInstance(ParameterScope.NO_SCOPE);
         return certDerivation.getApplicableCertificates(context, scope, true);
     }
 

@@ -56,7 +56,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCate
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
@@ -76,9 +75,8 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @RFC(number = 8446, section = "4.1.4 Hello Retry Request")
 public class HelloRetryRequest extends Tls13Test {
 
-    public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getUnofferedGroups(
-            DerivationScope scope) {
-        List<DerivationParameter<TlsAnvilConfig, NamedGroup>> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<Config, NamedGroup>> getUnofferedGroups(DerivationScope scope) {
+        List<DerivationParameter<Config, NamedGroup>> parameterValues = new LinkedList<>();
         List<NamedGroup> offeredGroups =
                 ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
                         .getClientHelloNamedGroups();

@@ -30,7 +30,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
@@ -55,9 +54,9 @@ public class SCSV extends Tls12Test {
         return ConditionEvaluationResult.disabled("No other TLS versions are supported");
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, CipherSuite>> getOldCiphersuites(
+    public List<DerivationParameter<Config, CipherSuite>> getOldCiphersuites(
             DerivationScope scope) {
-        List<DerivationParameter<TlsAnvilConfig, CipherSuite>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, CipherSuite>> parameterValues = new LinkedList<>();
         Set<CipherSuite> olderCipherSuites = new HashSet<>();
 
         List<VersionSuiteListPair> olderPairs =

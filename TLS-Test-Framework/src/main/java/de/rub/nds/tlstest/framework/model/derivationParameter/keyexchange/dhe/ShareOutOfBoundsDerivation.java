@@ -9,8 +9,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe;
 
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.math.BigInteger;
@@ -40,10 +40,9 @@ public class ShareOutOfBoundsDerivation
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, OutOfBoundsType>> getParameterValues(
+    public List<DerivationParameter<Config, OutOfBoundsType>> getParameterValues(
             DerivationScope derivationScope) {
-        List<DerivationParameter<TlsAnvilConfig, OutOfBoundsType>> parameterValues =
-                new LinkedList<>();
+        List<DerivationParameter<Config, OutOfBoundsType>> parameterValues = new LinkedList<>();
         for (OutOfBoundsType type : OutOfBoundsType.values()) {
             parameterValues.add(new ShareOutOfBoundsDerivation(type));
         }
@@ -51,25 +50,25 @@ public class ShareOutOfBoundsDerivation
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
-        if (config.getTlsConfig().getDefaultRunningMode() == RunningModeType.CLIENT) {
+    public void applyToConfig(Config config, DerivationScope derivationScope) {
+        if (config.getDefaultRunningMode() == RunningModeType.CLIENT) {
             throw new UnsupportedOperationException(
                     "This Derivation has to be configured manually if used as a client (use @ManualConfig)");
         } else {
             BigInteger pubShare;
             switch (getSelectedValue()) {
                 case SHARE_IS_ZERO:
-                    config.getTlsConfig().setDefaultServerDhPrivateKey(BigInteger.ZERO);
-                    config.getTlsConfig().setDefaultServerDhPublicKey(BigInteger.ZERO);
+                    config.setDefaultServerDhPrivateKey(BigInteger.ZERO);
+                    config.setDefaultServerDhPublicKey(BigInteger.ZERO);
                     break;
                 case SHARE_IS_ONE:
-                    config.getTlsConfig().setDefaultServerDhPrivateKey(BigInteger.ZERO);
-                    config.getTlsConfig().setDefaultServerDhPublicKey(BigInteger.ONE);
+                    config.setDefaultServerDhPrivateKey(BigInteger.ZERO);
+                    config.setDefaultServerDhPublicKey(BigInteger.ONE);
                     break;
                 case SHARE_PLUS_P:
-                    pubShare = config.getTlsConfig().getDefaultServerDhPublicKey();
-                    pubShare = pubShare.add(config.getTlsConfig().getDefaultServerDhModulus());
-                    config.getTlsConfig().setDefaultServerDhPublicKey(pubShare);
+                    pubShare = config.getDefaultServerDhPublicKey();
+                    pubShare = pubShare.add(config.getDefaultServerDhModulus());
+                    config.setDefaultServerDhPublicKey(pubShare);
                     break;
             }
         }

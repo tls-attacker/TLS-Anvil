@@ -7,82 +7,96 @@
  */
 package de.rub.nds.tlstest.framework.model;
 
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.anvilcore.model.parameter.ParameterType;
-import de.rub.nds.tlstest.framework.anvil.TlsParameterScope;
-import java.util.LinkedList;
-import java.util.List;
+import de.rub.nds.tlstest.framework.anvil.BitPositionParameterScope;
+import de.rub.nds.tlstest.framework.model.derivationParameter.*;
+import de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe.ShareOutOfBoundsDerivation;
+import de.rub.nds.tlstest.framework.model.derivationParameter.mirrored.MirroredCipherSuiteDerivation;
+import java.lang.reflect.InvocationTargetException;
 
 /** Represents the properties affected by the test derivation models. */
 public enum TlsParameterType implements ParameterType {
-    CIPHER_SUITE,
-    NAMED_GROUP,
-    MAC_BITMASK,
-    ALERT,
-    RECORD_LENGTH,
-    TCP_FRAGMENTATION,
-    CIPHERTEXT_BITMASK,
-    AUTH_TAG_BITMASK,
-    APP_MSG_LENGHT,
-    PADDING_BITMASK,
-    INVALID_CCS_CONTENT,
-    PRF_BITMASK,
-    GREASE_CIPHERSUITE,
-    GREASE_PROTOCOL_VERSION,
-    GREASE_EXTENSION,
-    GREASE_NAMED_GROUP,
-    GREASE_SIG_HASH,
-    PROTOCOL_VERSION,
-    SIG_HASH_ALGORIHTM,
-    EXTENSION,
-    CHOSEN_HANDSHAKE_MSG,
-    MIRRORED_CIPHERSUITE,
-    CERTIFICATE,
-    SIGNATURE_BITMASK,
-    BIT_POSITION,
-    INCLUDE_RENEGOTIATION_EXTENSION,
-    INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION,
-    INCLUDE_PADDING_EXTENSION,
-    INCLUDE_ENCRYPT_THEN_MAC_EXTENSION,
-    INCLUDE_ALPN_EXTENSION,
-    INCLUDE_HEARTBEAT_EXTENSION,
-    INCLUDE_CHANGE_CIPHER_SPEC,
-    INCLUDE_PSK_EXCHANGE_MODES_EXTENSION,
-    INCLUDE_SESSION_TICKET_EXTENSION,
-    INCLUDE_GREASE_CIPHER_SUITES,
-    INCLUDE_GREASE_SIG_HASH_ALGORITHMS,
-    INCLUDE_GREASE_NAMED_GROUPS,
-    ADDITIONAL_PADDING_LENGTH,
-    COMPRESSION_METHOD,
-    PROTOCOL_MESSAGE_TYPE,
-    FFDHE_SHARE_OUT_OF_BOUNDS,
-    MAX_FRAGMENT_LENGTH,
-    HELLO_RETRY_COOKIE;
+    CIPHER_SUITE(CipherSuiteDerivation.class),
+    NAMED_GROUP(NamedGroupDerivation.class),
+    MAC_BITMASK(MacBitmaskDerivation.class),
+    ALERT(AlertDerivation.class),
+    RECORD_LENGTH(RecordLengthDerivation.class),
+    TCP_FRAGMENTATION(TcpFragmentationDerivation.class),
+    CIPHERTEXT_BITMASK(CipherTextBitmaskDerivation.class),
+    AUTH_TAG_BITMASK(AuthTagBitmaskDerivation.class),
+    APP_MSG_LENGHT(AppMsgLengthDerivation.class),
+    PADDING_BITMASK(PaddingBitmaskDerivation.class),
+    INVALID_CCS_CONTENT(InvalidCCSContentDerivation.class),
+    PRF_BITMASK(PRFBitmaskDerivation.class),
+    GREASE_CIPHERSUITE(GreaseCipherSuiteDerivation.class),
+    GREASE_PROTOCOL_VERSION(GreaseCipherSuiteDerivation.class),
+    GREASE_EXTENSION(GreaseExtensionDerivation.class),
+    GREASE_NAMED_GROUP(GreaseNamedGroupDerivation.class),
+    GREASE_SIG_HASH(GreaseSigHashDerivation.class),
+    PROTOCOL_VERSION(ProtocolVersionDerivation.class),
+    SIG_HASH_ALGORIHTM(SigAndHashDerivation.class),
+    EXTENSION(ExtensionDerivation.class),
+    CHOSEN_HANDSHAKE_MSG(ChosenHandshakeMessageDerivation.class),
+    MIRRORED_CIPHERSUITE(MirroredCipherSuiteDerivation.class),
+    CERTIFICATE(CertificateDerivation.class),
+    SIGNATURE_BITMASK(SigAndHashDerivation.class),
+    BIT_POSITION(BitPositionDerivation.class),
+    INCLUDE_RENEGOTIATION_EXTENSION(IncludeRenegotiationExtensionDerivation.class),
+    INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION(IncludeExtendedMasterSecretExtensionDerivation.class),
+    INCLUDE_PADDING_EXTENSION(IncludePaddingExtensionDerivation.class),
+    INCLUDE_ENCRYPT_THEN_MAC_EXTENSION(IncludeEncryptThenMacExtensionDerivation.class),
+    INCLUDE_ALPN_EXTENSION(IncludeALPNExtensionDerivation.class),
+    INCLUDE_HEARTBEAT_EXTENSION(IncludeHeartbeatExtensionDerivation.class),
+    INCLUDE_CHANGE_CIPHER_SPEC(IncludeChangeCipherSpecDerivation.class),
+    INCLUDE_PSK_EXCHANGE_MODES_EXTENSION(IncludePSKExchangeModesExtensionDerivation.class),
+    INCLUDE_SESSION_TICKET_EXTENSION(IncludeSessionTicketExtensionDerivation.class),
+    INCLUDE_GREASE_CIPHER_SUITES(IncludeGreaseCipherSuitesDerivation.class),
+    INCLUDE_GREASE_SIG_HASH_ALGORITHMS(IncludeGreaseSigHashDerivation.class),
+    INCLUDE_GREASE_NAMED_GROUPS(IncludeGreaseNamedGroupsDerivation.class),
+    ADDITIONAL_PADDING_LENGTH(AdditionalPaddingLengthDerivation.class),
+    COMPRESSION_METHOD(CompressionMethodDerivation.class),
+    PROTOCOL_MESSAGE_TYPE(ProtocolMessageTypeDerivation.class),
+    FFDHE_SHARE_OUT_OF_BOUNDS(ShareOutOfBoundsDerivation.class),
+    MAX_FRAGMENT_LENGTH(MaxFragmentLengthDerivation.class),
+    HELLO_RETRY_COOKIE(HelloRetryCookieDerivation.class);
+
+    TlsParameterType(Class<? extends DerivationParameter> derivationClass) {
+        this.derivationClass = derivationClass;
+    }
+
+    private Class<? extends DerivationParameter> derivationClass;
 
     public boolean isBitmaskDerivation() {
         return this.name().contains("BITMASK");
     }
 
-    /**
-     * Lists the known ParameterIdentifiers. Known scopes will be combined here, too.
-     *
-     * @return An array containing the known ParameterIdentifier[]
-     */
-    public static ParameterIdentifier[] getAllIdentifiers() {
-        List<ParameterIdentifier> identifiers = new LinkedList<>();
-        for (TlsParameterType listed : TlsParameterType.values()) {
-            if (listed != BIT_POSITION) {
-                ParameterIdentifier identifierToAdd = new ParameterIdentifier(listed);
-                identifiers.add(identifierToAdd);
-                if (listed.isBitmaskDerivation()) {
-                    ParameterIdentifier linkedIdentifier =
-                            new ParameterIdentifier(
-                                    BIT_POSITION, TlsParameterScope.resolveScope(listed.name()));
-                    identifierToAdd.setLinkedParameterIdentifier(linkedIdentifier);
-                    identifiers.add(linkedIdentifier);
-                }
+    @Override
+    public DerivationParameter getInstance(ParameterScope parameterScope) {
+        if (parameterScope == ParameterScope.NO_SCOPE) {
+            try {
+                return derivationClass.getDeclaredConstructor().newInstance();
+            } catch (InstantiationException
+                    | IllegalAccessException
+                    | InvocationTargetException
+                    | NoSuchMethodException e) {
+                throw new RuntimeException(e);
             }
+        } else if (parameterScope instanceof BitPositionParameterScope) {
+            if (!parameterScope.getUniqueScopeIdentifier().contains("BITMASK")) {
+                throw new IllegalArgumentException(
+                        "Found ParameterIdentifier for TLS with scope set to "
+                                + parameterScope
+                                + ". Only bitmasks are supported.");
+            } else {
+                return new BitPositionDerivation(
+                        new ParameterIdentifier(TlsParameterType.BIT_POSITION, parameterScope));
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    "ParameterScope " + parameterScope.toString() + " is not known.");
         }
-        return identifiers.toArray(ParameterIdentifier[]::new);
     }
 }

@@ -11,10 +11,10 @@ import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CipherType;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
@@ -80,16 +80,16 @@ public class AppMsgLengthDerivation extends TlsDerivationParameter<Integer> {
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {
+    public void applyToConfig(Config config, DerivationScope derivationScope) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < getSelectedValue(); i++) {
             builder.append(ASCII_LETTER);
         }
-        config.getTlsConfig().setDefaultApplicationMessageData(builder.toString());
+        config.setDefaultApplicationMessageData(builder.toString());
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
+    public List<DerivationParameter<Config, Integer>> getParameterValues(
             DerivationScope derivationScope) {
         int maxCipherTextByteLen = 0;
         Set<CipherSuite> cipherSuiteList = context.getFeatureExtractionResult().getCipherSuites();
@@ -106,7 +106,7 @@ public class AppMsgLengthDerivation extends TlsDerivationParameter<Integer> {
             maxCipherTextByteLen = UNPADDED_MIN_LENGTH;
         }
 
-        List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, Integer>> parameterValues = new LinkedList<>();
         for (int i = 1; i <= maxCipherTextByteLen; i++) {
             parameterValues.add(new AppMsgLengthDerivation(i));
         }

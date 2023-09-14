@@ -12,11 +12,11 @@ import de.rub.nds.anvilcore.model.IpmProvider;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
@@ -47,7 +47,7 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, Integer>> getParameterValues(
+    public List<DerivationParameter<Config, Integer>> getParameterValues(
             DerivationScope derivationScope) {
         if (ConstraintHelper.isTls13Test(derivationScope)) {
             throw new RuntimeException(
@@ -64,7 +64,7 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
             }
         }
 
-        List<DerivationParameter<TlsAnvilConfig, Integer>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, Integer>> parameterValues = new LinkedList<>();
         for (int i = 0; i < maxCipherTextByteLen - 1; i++) {
             parameterValues.add(new PaddingBitmaskDerivation(i));
         }
@@ -72,7 +72,7 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
     }
 
     @Override
-    public void applyToConfig(TlsAnvilConfig config, DerivationScope derivationScope) {}
+    public void applyToConfig(Config config, DerivationScope derivationScope) {}
 
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(
@@ -177,7 +177,7 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
                                 TlsParameterType.APP_MSG_LENGHT.name(),
                                 TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION.name(),
                                 getParameterIdentifier()
-                                        + "."
+                                        + ":"
                                         + TlsParameterType.BIT_POSITION.name())
                         .by(
                                 (PaddingBitmaskDerivation paddingBitmaskDerivation,

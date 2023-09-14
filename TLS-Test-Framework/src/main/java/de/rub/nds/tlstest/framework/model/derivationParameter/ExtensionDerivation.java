@@ -9,8 +9,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.List;
@@ -33,7 +33,7 @@ public class ExtensionDerivation extends TlsDerivationParameter<ExtensionType> {
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, ExtensionType>> getParameterValues(
+    public List<DerivationParameter<Config, ExtensionType>> getParameterValues(
             DerivationScope derivationScope) {
         // currently this is only used for explicitly listed (unrequested) extensions
         throw new UnsupportedOperationException("Not supported yet.");

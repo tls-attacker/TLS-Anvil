@@ -53,7 +53,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCate
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
@@ -333,10 +332,8 @@ public class KeyShare extends Tls13Test {
         runner.execute(worklfowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, NamedGroup>> getFfdheGroups(
-            DerivationScope scope) {
-        List<DerivationParameter<TlsAnvilConfig, NamedGroup>> derivationParameters =
-                new LinkedList<>();
+    public List<DerivationParameter<Config, NamedGroup>> getFfdheGroups(DerivationScope scope) {
+        List<DerivationParameter<Config, NamedGroup>> derivationParameters = new LinkedList<>();
         context.getFeatureExtractionResult()
                 .getTls13FfdheNamedGroups()
                 .forEach(group -> derivationParameters.add(new NamedGroupDerivation(group)));

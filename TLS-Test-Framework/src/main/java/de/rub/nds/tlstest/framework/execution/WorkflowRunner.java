@@ -58,7 +58,7 @@ public class WorkflowRunner {
 
     private Config preparedConfig;
 
-    private TlsParameterCombination derivationContainer;
+    private TlsParameterCombination parameterCombination;
     private HandshakeMessageType untilHandshakeMessage;
     private ProtocolMessageType untilProtocolMessage;
     private Boolean untilSendingMessage = null;
@@ -79,9 +79,15 @@ public class WorkflowRunner {
      * Executes a WorkflowTrace. It performs the derivation and executes each derived handshake.
      *
      * @param trace Trace to execute
+     * @param config TLS-Attacker Config to be used for execution
      * @return
      */
     public TlsTestCase execute(WorkflowTrace trace, Config config) {
+        // don't run if testrun is already aborted
+        if (context.isAborted()) {
+            return new TlsTestCase(extensionContext, new State(), parameterCombination);
+        }
+
         if (preparedConfig == null) {
             LOGGER.warn(
                     "Config was not set before execution - WorkflowTrace may me invalid for Test:"
@@ -107,14 +113,13 @@ public class WorkflowRunner {
 
         allowOptionalClientApplicationMessage(trace);
 
-        TlsTestCase annotatedState =
-                new TlsTestCase(extensionContext, new State(config, trace), derivationContainer);
+        TlsTestCase tlsTestCase =
+                new TlsTestCase(extensionContext, new State(config, trace), parameterCombination);
 
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             StateExecutionTask task =
                     new StateExecutionTask(
-                            annotatedState.getState(),
-                            context.getStateExecutor().getReexecutions());
+                            tlsTestCase.getState(), context.getStateExecutor().getReexecutions());
             TestContext.getInstance().increaseServerHandshakesSinceRestart();
             if (TestContext.getInstance().getServerHandshakesSinceRestart()
                             == TestContext.getInstance()
@@ -140,7 +145,7 @@ public class WorkflowRunner {
             context.getStateExecutor().bulkExecuteTasks(task);
         } else {
             try {
-                annotatedState
+                tlsTestCase
                         .getState()
                         .getTlsContext()
                         .setTransportHandler(
@@ -154,7 +159,7 @@ public class WorkflowRunner {
                                         context.getConfig()
                                                 .getTestClientDelegate()
                                                 .getServerSocket()));
-                StateExecutionTask task = new StateExecutionTask(annotatedState.getState(), 2);
+                StateExecutionTask task = new StateExecutionTask(tlsTestCase.getState(), 2);
 
                 task.setBeforeTransportInitCallback(
                         context.getConfig().getTestClientDelegate().getTriggerScript());
@@ -164,7 +169,7 @@ public class WorkflowRunner {
             }
         }
 
-        return annotatedState;
+        return tlsTestCase;
     }
 
     /**
@@ -319,11 +324,11 @@ public class WorkflowRunner {
     }
 
     public TlsParameterCombination getTlsParameterCombination() {
-        return derivationContainer;
+        return parameterCombination;
     }
 
     public void setTlsParameterCombination(TlsParameterCombination derivationContainer) {
-        this.derivationContainer = derivationContainer;
+        this.parameterCombination = derivationContainer;
     }
 
     public boolean shouldInsertHelloRetryRequest() {

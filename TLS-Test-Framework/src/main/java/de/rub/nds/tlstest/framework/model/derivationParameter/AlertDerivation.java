@@ -9,8 +9,8 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.Arrays;
@@ -29,10 +29,9 @@ public class AlertDerivation extends TlsDerivationParameter<AlertDescription> {
     }
 
     @Override
-    public List<DerivationParameter<TlsAnvilConfig, AlertDescription>> getParameterValues(
+    public List<DerivationParameter<Config, AlertDescription>> getParameterValues(
             DerivationScope derivationScope) {
-        List<DerivationParameter<TlsAnvilConfig, AlertDescription>> parameterValues =
-                new LinkedList<>();
+        List<DerivationParameter<Config, AlertDescription>> parameterValues = new LinkedList<>();
         Arrays.stream(AlertDescription.values())
                 .forEach(descr -> parameterValues.add(new AlertDerivation(descr)));
         return parameterValues;

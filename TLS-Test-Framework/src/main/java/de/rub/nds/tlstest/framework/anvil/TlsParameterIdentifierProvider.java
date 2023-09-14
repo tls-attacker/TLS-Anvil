@@ -1,13 +1,11 @@
 package de.rub.nds.tlstest.framework.anvil;
 
-import static de.rub.nds.tlstest.framework.anvil.TlsModelType.CERTIFICATE;
-import static de.rub.nds.tlstest.framework.anvil.TlsModelType.EMPTY;
-import static de.rub.nds.tlstest.framework.anvil.TlsModelType.GENERIC;
-import static de.rub.nds.tlstest.framework.anvil.TlsModelType.LENGTHFIELD;
+import static de.rub.nds.tlstest.framework.anvil.TlsModelTypes.*;
+import static de.rub.nds.tlstest.framework.model.TlsParameterType.BIT_POSITION;
 
 import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.model.DefaultModelTypes;
 import de.rub.nds.anvilcore.model.DerivationScope;
-import de.rub.nds.anvilcore.model.ModelType;
 import de.rub.nds.anvilcore.model.ParameterIdentifierProvider;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.scanner.core.constants.TestResults;
@@ -18,7 +16,6 @@ import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -26,19 +23,37 @@ import java.util.stream.Collectors;
 
 public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider {
 
+    /**
+     * Creates a list of all possible ParameterIdentifiers. For every normal DerivationType there
+     * will be one Identifier. For every BITMASK DerivationTypes, a second BIT_POSITION Identifier
+     * will be added.
+     *
+     * @return all known ParameterIdentifiers
+     */
     @Override
-    public List<ParameterIdentifier> getAllParameterIdentifiers() {
-        List<ParameterIdentifier> parameterIdentifiers = new LinkedList<>();
-        parameterIdentifiers.addAll(Arrays.asList(TlsParameterType.getAllIdentifiers()));
-        return parameterIdentifiers;
+    public List<ParameterIdentifier> generateAllParameterIdentifiers() {
+        List<ParameterIdentifier> identifiers = new LinkedList<>();
+        for (TlsParameterType listed : TlsParameterType.values()) {
+            if (listed != BIT_POSITION) {
+                ParameterIdentifier identifierToAdd = new ParameterIdentifier(listed);
+                identifiers.add(identifierToAdd);
+                if (listed.isBitmaskDerivation()) {
+                    ParameterIdentifier linkedIdentifier =
+                            new ParameterIdentifier(
+                                    BIT_POSITION, new BitPositionParameterScope(listed));
+                    identifierToAdd.setLinkedParameterIdentifier(linkedIdentifier);
+                    identifiers.add(linkedIdentifier);
+                }
+            }
+        }
+        return identifiers;
     }
 
     @Override
     public List<ParameterIdentifier> getModelParameterIdentifiers(DerivationScope derivationScope) {
-        ModelType modelType = derivationScope.getModelType();
-        if (modelType instanceof TlsModelType) {
-            TlsModelType tlsModelType = (TlsModelType) modelType;
-            return getDerivationsOfModel(derivationScope, tlsModelType).stream()
+        String modelType = derivationScope.getModelType();
+        if (TlsModelTypes.tlsModelTypes.contains(modelType)) {
+            return getDerivationsOfModel(derivationScope, modelType).stream()
                     .map(ParameterIdentifier::new)
                     .collect(Collectors.toList());
         }
@@ -46,10 +61,10 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
     }
 
     private static List<TlsParameterType> getDerivationsOfModel(
-            DerivationScope derivationScope, TlsModelType baseModel) {
+            DerivationScope derivationScope, String baseModel) {
         LinkedList<TlsParameterType> derivationsOfModel = new LinkedList<>();
         switch (baseModel) {
-            case EMPTY:
+            case DefaultModelTypes.EMPTY:
                 break;
             case LENGTHFIELD:
             case CERTIFICATE:

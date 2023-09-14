@@ -45,7 +45,6 @@ import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
@@ -212,9 +211,9 @@ public class RecordLayer extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    public List<DerivationParameter<TlsAnvilConfig, byte[]>> getRecordProtocolVersions(
+    public List<DerivationParameter<Config, byte[]>> getRecordProtocolVersions(
             DerivationScope scope) {
-        List<DerivationParameter<TlsAnvilConfig, byte[]>> parameterValues = new LinkedList<>();
+        List<DerivationParameter<Config, byte[]>> parameterValues = new LinkedList<>();
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x00}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x01}));
         parameterValues.add(new ProtocolVersionDerivation(new byte[] {0x03, 0x02}));

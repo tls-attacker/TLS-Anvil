@@ -15,7 +15,6 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.anvil.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.junitExtensions.EnforcedSenderRestrictionConditionExtension;
@@ -61,7 +60,7 @@ public abstract class TlsBaseTest extends CombinatorialAnvilTest {
         parameterCombination =
                 TlsParameterCombination.fromArgumentsAccessor(
                         argAccessor, new DerivationScope(extensionContext));
-        parameterCombination.applyToConfig(new TlsAnvilConfig(config));
+        parameterCombination.applyToConfig(config);
         runner.setPreparedConfig(config);
         runner.setTlsParameterCombination(parameterCombination);
         return config;

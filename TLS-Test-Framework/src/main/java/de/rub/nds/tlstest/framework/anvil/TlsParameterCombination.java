@@ -1,16 +1,13 @@
 package de.rub.nds.tlstest.framework.anvil;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.ParameterCombination;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rwth.swc.coffee4j.model.Combination;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class TlsParameterCombination extends ParameterCombination {
@@ -53,21 +50,14 @@ public class TlsParameterCombination extends ParameterCombination {
     }
 
     public byte[] buildBitmask(ParameterIdentifier parameterIdentifier) {
-        DerivationParameter byteParameter = getParameter(parameterIdentifier);
-        DerivationParameter bitParameter = getLinkedParameter(parameterIdentifier);
+        DerivationParameter byteParameter =
+                getParameter(parameterIdentifier); // ...BitmaskDerivation
+        DerivationParameter bitParameter =
+                getLinkedParameter(parameterIdentifier); // BitPositionDerivation
 
         byte[] constructed = new byte[(Integer) byteParameter.getSelectedValue() + 1];
         constructed[(Integer) byteParameter.getSelectedValue()] =
                 (byte) (1 << (Integer) bitParameter.getSelectedValue());
         return constructed;
-    }
-
-    @JsonValue
-    public Map<String, DerivationParameter> jsonObject() {
-        Map<String, DerivationParameter> res = new HashMap<>();
-        for (DerivationParameter i : getParameterValues()) {
-            res.put(i.getParameterIdentifier().name(), i);
-        }
-        return res;
     }
 }

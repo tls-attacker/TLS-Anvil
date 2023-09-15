@@ -7,11 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -31,31 +27,15 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 8446, section = "4.6.3.  Key and Initialization Vector Update")
 public class KeyUpdate extends Tls13Test {
 
-    @AnvilTest(
-            description =
-                    "Implementations "
-                            + "that receive a KeyUpdate message prior to receiving a Finished "
-                            + "message MUST terminate the connection with an \"unexpected_message\" "
-                            + "alert.")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
-    @HandshakeCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void sendKeyUpdateBeforeFinished(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -76,14 +56,7 @@ public class KeyUpdate extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "request_update:  Indicates whether the recipient of the KeyUpdate "
-                            + "should respond with its own KeyUpdate.  If an implementation "
-                            + "receives any other value, it MUST terminate the connection with an "
-                            + "\"illegal_parameter\" alert.")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AnvilTest
     @Tag("new")
     public void sendUnknownRequestMode(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -102,14 +75,7 @@ public class KeyUpdate extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "If the request_update field is set to \"update_requested\", then the receiver MUST send a KeyUpdate of its own with request_update set to \"update_not_requested\" prior to sending its next Application Data record. [...]"
-                            + "Both sender and receiver MUST encrypt their KeyUpdate messages with "
-                            + "the old keys.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @RecordLayerCategory(SeverityLevel.HIGH)
+    @AnvilTest
     @Tag("new")
     public void respondsWithValidKeyUpdate(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -148,12 +114,7 @@ public class KeyUpdate extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Upon receiving a KeyUpdate, the receiver MUST update " + "its receiving keys.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @RecordLayerCategory(SeverityLevel.HIGH)
+    @AnvilTest
     @Tag("new")
     public void appDataUnderNewKeysSucceeds(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

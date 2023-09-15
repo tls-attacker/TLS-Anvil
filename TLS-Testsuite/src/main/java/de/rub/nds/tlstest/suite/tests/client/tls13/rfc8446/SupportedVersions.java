@@ -10,13 +10,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.ClientTest;
-import de.rub.nds.anvilcore.annotation.ExplicitValues;
-import de.rub.nds.anvilcore.annotation.IncludeParameter;
-import de.rub.nds.anvilcore.annotation.ManualConfig;
-import de.rub.nds.anvilcore.annotation.MethodCondition;
-import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
@@ -35,14 +29,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -54,7 +41,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 8446, section = "4.2.1 Supported Versions")
 @ClientTest
 public class SupportedVersions extends Tls13Test {
 
@@ -75,18 +61,11 @@ public class SupportedVersions extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest(
-            description =
-                    "If this extension is present, clients MUST ignore the "
-                            + "ServerHello.legacy_version value and MUST use "
-                            + "only the \"supported_versions\" extension to determine the selected version.")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("PROTOCOL_VERSION")
     @ManualConfig(identifiers = "PROTOCOL_VERSION")
     @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "getInvalidLegacyVersions")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.MEDIUM)
     public void invalidLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] chosenInvalidVersion =
@@ -102,18 +81,9 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest(
-            description =
-                    "If the \"supported_versions\" extension in the ServerHello "
-                            + "contains a version not offered by the client or contains a version "
-                            + "prior to TLS 1.3, the client MUST abort the "
-                            + "handshake with an \"illegal_parameter\" alert.")
+    @AnvilTest
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @SecurityCategory(SeverityLevel.HIGH)
     public void selectOlderTlsVersionInTls12(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
@@ -140,16 +110,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "If the \"supported_versions\" extension in the ServerHello "
-                            + "contains a version not offered by the client or contains a version "
-                            + "prior to TLS 1.3, the client MUST abort the "
-                            + "handshake with an \"illegal_parameter\" alert.")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @SecurityCategory(SeverityLevel.HIGH)
+    @AnvilTest
     public void selectOlderTlsVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setEnforceSettings(true);
@@ -173,22 +134,8 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    /*@AnvilTest(description = "Implementations of this specification MUST send this " +
-    "extension in the ClientHello containing all versions of TLS which they " +
-    "are prepared to negotiate (for this specification, that means minimally " +
-    "0x0304, but if previous versions of TLS are allowed to be " +
-    "negotiated, they MUST be present as well).")*/
+    /*@AnvilTest.")*/
     @Test
-    @TestDescription(
-            "Implementations of this specification MUST send this extension in the "
-                    + "ClientHello containing all versions of TLS which they are prepared to "
-                    + "negotiate (for this specification, that means minimally 0x0304, but "
-                    + "if previous versions of TLS are allowed to be negotiated, they MUST "
-                    + "be present as well).")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void supportedVersionContainsTls13() {
         SupportedVersionsExtensionMessage ext =
                 context.getReceivedClientHelloMessage()
@@ -237,27 +184,12 @@ public class SupportedVersions extends Tls13Test {
         return versions;
     }
 
-    @AnvilTest(
-            description =
-                    "The \"supported_versions\" extension is used by the client to indicate "
-                            + "which versions of TLS it supports and by the server to indicate which "
-                            + "version it is using.  The extension contains a list of supported "
-                            + "versions in preference order, with the most preferred version first. [...]"
-                            + "If the version chosen by the server is not supported by the client "
-                            + "(or is not acceptable), the client MUST abort the handshake with a "
-                            + "\"protocol_version\" alert.")
-    @RFC(
-            number = 8446,
-            section = "4.2.1 Supported Versions and D.1. Negotiating with an Older Server")
+    @AnvilTest
     @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(
             affectedIdentifiers = "PROTOCOL_VERSION",
             methods = "getUnsupportedProtocolVersions")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
     @Tag("adjusted")
     public void negotiateUnproposedOldProtocolVersion(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -283,27 +215,12 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "The \"supported_versions\" extension is used by the client to indicate "
-                            + "which versions of TLS it supports and by the server to indicate which "
-                            + "version it is using.  The extension contains a list of supported "
-                            + "versions in preference order, with the most preferred version first. [...]"
-                            + "If the version chosen by the server is not supported by the client "
-                            + "(or is not acceptable), the client MUST abort the handshake with a "
-                            + "\"protocol_version\" alert.")
-    @RFC(
-            number = 8446,
-            section = "4.2.1 Supported Versions and D.1. Negotiating with an Older Server")
+    @AnvilTest
     @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(
             affectedIdentifiers = "PROTOCOL_VERSION",
             methods = "getUndefinedProtocolVersions")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
     @Tag("new")
     public void legacyNegotiateUndefinedProtocolVersion(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

@@ -25,24 +25,13 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 7507, section = "3. Server Behavior")
 @ServerTest
 public class SCSV extends Tls12Test {
 
@@ -91,21 +80,9 @@ public class SCSV extends Tls12Test {
         return null;
     }
 
-    @AnvilTest(
-            description =
-                    "If TLS_FALLBACK_SCSV appears in ClientHello.cipher_suites and the highest protocol version "
-                            + "supported by the server is higher than the version indicated in ClientHello.client_version, "
-                            + "the server MUST respond with a fatal inappropriate_fallback alert (unless it responds with a fatal protocol_version alert "
-                            + "because the version indicated in ClientHello.client_version is unsupported). "
-                            + "The record layer version number for this alert MUST be set to either ClientHello.client_version "
-                            + "(as it would for the Server Hello message if the server was continuing the handshake) "
-                            + "or to the record layer version number used by the client.")
+    @AnvilTest
     @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @SecurityCategory(SeverityLevel.HIGH)
     public void includeFallbackSCSV(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite cipherSuite =
@@ -135,21 +112,9 @@ public class SCSV extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "If TLS_FALLBACK_SCSV appears in ClientHello.cipher_suites and the highest protocol version "
-                            + "supported by the server is higher than the version indicated in ClientHello.client_version, "
-                            + "the server MUST respond with a fatal inappropriate_fallback alert (unless it responds with a fatal protocol_version alert "
-                            + "because the version indicated in ClientHello.client_version is unsupported). "
-                            + "The record layer version number for this alert MUST be set to either ClientHello.client_version "
-                            + "(as it would for the Server Hello message if the server was continuing the handshake) "
-                            + "or to the record layer version number used by the client.")
+    @AnvilTest
     @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @SecurityCategory(SeverityLevel.HIGH)
     public void includeFallbackSCSV_nonRecommendedCipherSuiteOrder(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

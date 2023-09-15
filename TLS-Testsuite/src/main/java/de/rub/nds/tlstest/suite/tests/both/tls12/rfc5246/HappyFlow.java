@@ -17,10 +17,6 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
@@ -28,16 +24,10 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /** Runs a benign handshake with all default derivations to identify parameter-related bugs. */
 @Tag("happyflow12")
-@RFC(number = 5246, section = "7.3.  Handshake Protocol Overview")
 public class HappyFlow extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "A benign handshake executed with all parameter combinations "
-                            + " that affect a regular handshake")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
-    @HandshakeCategory(SeverityLevel.HIGH)
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     public void happyFlow(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);

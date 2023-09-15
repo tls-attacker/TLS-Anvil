@@ -13,19 +13,12 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
-import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,13 +31,6 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 public class ClientHello extends Tls12Test {
 
     @Test
-    @RFC(number = 5246, section = "7.4.1.2. Client Hello")
-    @TestDescription(
-            "This vector MUST contain, and all implementations MUST support, CompressionMethod.null. "
-                    + "Thus, a client and server will always be able to agree on a compression method.")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void supportsNullCompressionMethod() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         byte[] compression = clientHelloMessage.getCompressions().getValue();
@@ -58,14 +44,6 @@ public class ClientHello extends Tls12Test {
     }
 
     @Test
-    @RFC(number = 7457, section = "2.6.  Compression Attacks: CRIME, TIME, and BREACH")
-    @TestDescription(
-            "The CRIME attack [...] (CVE-2012-4929) allows an active attacker to "
-                    + "decrypt ciphertext (specifically, cookies) when TLS is used with TLS- "
-                    + "level compression.")
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void offersNonNullCompressionMethod() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         byte[] compression = clientHelloMessage.getCompressions().getValue();
@@ -89,14 +67,6 @@ public class ClientHello extends Tls12Test {
     }
 
     @Test
-    @RFC(number = 5246, section = "7.4.1.4.1.  Signature Algorithms")
-    @TestDescription(
-            "The client uses the \"signature_algorithms\" extension to indicate to "
-                    + "the server which signature/hash algorithm pairs may be used in "
-                    + "digital signatures.")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "sentSignatureAndHashAlgorithmsExtension")
     public void offeredSignatureAlgorithmsForAllCipherSuites() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
@@ -155,14 +125,6 @@ public class ClientHello extends Tls12Test {
     }
 
     @Test
-    @TestDescription(
-            "There MUST NOT be more than one extension of the same type. [...]"
-                    + "The \"anonymous\" value is meaningless in this context but used in "
-                    + "Section 7.4.3.  It MUST NOT appear in this extension.")
-    @RFC(number = 5246, section = "7.4.1.4. Hello Extensions and 7.4.1.4.1. Signature Algorithms")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.CRITICAL)
     @Tag("new")
     public void checkExtensions() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();

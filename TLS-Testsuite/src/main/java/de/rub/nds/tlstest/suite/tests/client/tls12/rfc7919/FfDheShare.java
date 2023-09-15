@@ -10,15 +10,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7919;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.ClientTest;
-import de.rub.nds.anvilcore.annotation.ExcludeParameter;
-import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
-import de.rub.nds.anvilcore.annotation.ExplicitValues;
-import de.rub.nds.anvilcore.annotation.IncludeParameter;
-import de.rub.nds.anvilcore.annotation.ManualConfig;
-import de.rub.nds.anvilcore.annotation.MethodCondition;
-import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
@@ -40,15 +32,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -62,7 +46,6 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 @Tag("dheshare")
-@RFC(number = 7919, section = "3. Client Behavior")
 public class FfDheShare extends Tls12Test {
 
     public ConditionEvaluationResult supportsFfdheAndEcNamedGroups() {
@@ -79,19 +62,9 @@ public class FfDheShare extends Tls12Test {
                 "Target does not support both FFDHE and EC NamedGroups");
     }
 
-    @RFC(number = 7919, section = "3. Client Behavior and 5.1. Checking the Peer's Public Key")
-    @AnvilTest(
-            description =
-                    "[...] the client MUST verify that dh_Ys is in the range 1 < "
-                            + "dh_Ys < dh_p - 1.  If dh_Ys is not in this range, the client MUST "
-                            + "terminate the connection with a fatal handshake_failure(40) alert. [...]"
-                            + "Peers MUST validate each other's public key Y (dh_Ys offered by the "
-                            + "server or dh_Yc offered by the client) by ensuring that 1 < Y < p-1.")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
-    @HandshakeCategory(SeverityLevel.INFORMATIONAL)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     public void shareOutOfBounds(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -131,16 +104,7 @@ public class FfDheShare extends Tls12Test {
     }
 
     @Test
-    @TestDescription(
-            "If the client also supports and wants "
-                    + "to offer ECDHE key exchange, it MUST use a single Supported Groups "
-                    + "extension to include all supported groups (both ECDHE and FFDHE "
-                    + "groups).")
-    @RFC(number = 7919, section = "3. Client Behavior")
     @MethodCondition(method = "supportsFfdheAndEcNamedGroups")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.CRITICAL)
     @Tag("new")
     public void listsCurvesAndFfdheCorrectly() {
         // we always test for duplicate extensions anyway
@@ -149,21 +113,13 @@ public class FfDheShare extends Tls12Test {
                 context.getFeatureExtractionResult().getNamedGroups().isEmpty());
     }
 
-    @AnvilTest(
-            description =
-                    "A client that offers a group MUST be able and willing to perform a DH "
-                            + "key exchange using that group.")
-    @RFC(number = 7919, section = "3. Client Behavior")
+    @AnvilTest
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getSupportedFfdheNamedGroups")
     @ManualConfig(identifiers = "NAMED_GROUP")
     @ExplicitModelingConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "getEmptyConstraintsList")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.CRITICAL)
-    @CryptoCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void supportsOfferedFfdheGroup(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -185,21 +141,8 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "This document cannot enumerate all possible safe local policy (the "
-                            + "safest may be to simply reject all custom groups), but compatible "
-                            + "clients that accept some custom groups from the server MUST do at "
-                            + "least cursory checks on group size and may take other properties into "
-                            + "consideration as well. [...]"
-                            + "A compatible client that accepts FFDHE cipher suites using custom "
-                            + "groups from non-compatible servers MUST reject any group with |dh_p| "
-                            + "< 768 bits")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.CRITICAL)
-    @CryptoCategory(SeverityLevel.MEDIUM)
-    @SecurityCategory(SeverityLevel.CRITICAL)
     @ExcludeParameter("NAMED_GROUP")
     @Tag("new")
     public void performsRequiredSecurityCheck(

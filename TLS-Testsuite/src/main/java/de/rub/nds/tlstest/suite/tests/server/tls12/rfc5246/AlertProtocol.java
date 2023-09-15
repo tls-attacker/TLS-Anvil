@@ -19,11 +19,7 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
@@ -31,12 +27,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -55,17 +45,7 @@ public class AlertProtocol extends Tls12Test {
         return lengthCandidate >= 50;
     }
 
-    @AnvilTest(
-            description =
-                    "Unless some other fatal alert has been transmitted, each party is "
-                            + "required to send a close_notify alert before closing the write side "
-                            + "of the connection. The other party MUST respond with a close_notify "
-                            + "alert of its own and close down the connection immediately, "
-                            + "discarding any pending writes.")
-    @RFC(number = 5246, section = "7.2.1 Closure Alerts")
-    @InteroperabilityCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.LOW)
+    @AnvilTest
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
@@ -102,14 +82,7 @@ public class AlertProtocol extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Upon transmission or receipt of a fatal alert message, both"
-                            + " parties immediately close the connection.")
-    @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
+    @AnvilTest
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
@@ -144,14 +117,7 @@ public class AlertProtocol extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Upon transmission or receipt of a fatal alert message, both"
-                            + " parties immediately close the connection.")
-    @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
+    @AnvilTest
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",

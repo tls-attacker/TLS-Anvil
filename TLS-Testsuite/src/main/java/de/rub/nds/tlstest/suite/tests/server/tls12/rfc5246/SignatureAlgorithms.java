@@ -28,11 +28,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
@@ -41,7 +36,6 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-@RFC(number = 5246, section = "7.4.1.4.1. Signature Algorithms")
 public class SignatureAlgorithms extends Tls12Test {
 
     private WorkflowTrace getWorkflowFor(Config c) {
@@ -81,15 +75,8 @@ public class SignatureAlgorithms extends Tls12Test {
         return ConditionEvaluationResult.disabled("No ECDSA signature ciphersuites supported");
     }
 
-    @AnvilTest(
-            description =
-                    "If the client does not send the signature_algorithms extension, the server MUST do the following:"
-                            + "[...]If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), "
-                            + "behave as if the client had sent the value {sha1,dsa}.")
+    @AnvilTest
     @MethodCondition(method = "dssCiphersuitesSupported")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void dssNoSignatureAlgorithmsExtension(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -117,15 +104,8 @@ public class SignatureAlgorithms extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "If the client does not send the signature_algorithms extension, the server MUST do the following:"
-                            + "[...]If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), "
-                            + "behave as if the client had sent the value {sha1,dsa}.")
+    @AnvilTest
     @MethodCondition(method = "ecdsaCiphersuitesSupported")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void ecdsaNoSignatureAlgorithmsExtension(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -153,19 +133,8 @@ public class SignatureAlgorithms extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Each SignatureAndHashAlgorithm value lists a single hash/signature "
-                            + "pair that the client is willing to verify.  The values are indicated "
-                            + "in descending order of preference. [...]"
-                            + "Because not all signature algorithms and hash algorithms may be "
-                            + "accepted by an implementation (e.g., DSA with SHA-1, but not "
-                            + "SHA-256), algorithms here are listed in pairs.")
+    @AnvilTest
     // This requirement also applies to older versions
-    @RFC(number = 5246, section = "7.4.1.4.1.  Signature Algorithms")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void includeUnknownSignatureAndHashAlgorithm(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -184,11 +153,8 @@ public class SignatureAlgorithms extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest(description = "Send a ClientHello that offers many SignatureAndHash algorithms")
+    @AnvilTest
     @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void offerManyAlgorithms(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);

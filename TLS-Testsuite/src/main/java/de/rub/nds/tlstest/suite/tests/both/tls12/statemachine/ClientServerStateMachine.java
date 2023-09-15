@@ -18,11 +18,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -30,15 +25,8 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 /** Statemachine tests used both for TLS 1.2 clients and servers. */
 public class ClientServerStateMachine extends Tls12Test {
 
-    @RFC(number = 5246, section = "7.4.9 Finished")
-    @AnvilTest(
-            description =
-                    "It is a fatal error if a Finished message is not preceded by a ChangeCipherSpec "
-                            + "message at the appropriate point in the handshake.")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
     public void omitCCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

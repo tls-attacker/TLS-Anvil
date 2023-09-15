@@ -13,27 +13,12 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
-import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
-import de.rub.nds.tlsattacker.core.constants.ECPointFormat;
-import de.rub.nds.tlsattacker.core.constants.ExtensionType;
-import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
-import de.rub.nds.tlsattacker.core.crypto.ec.CurveFactory;
-import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurve;
-import de.rub.nds.tlsattacker.core.crypto.ec.FieldElementFp;
-import de.rub.nds.tlsattacker.core.crypto.ec.Point;
-import de.rub.nds.tlsattacker.core.crypto.ec.PointFormatter;
-import de.rub.nds.tlsattacker.core.crypto.ec.RFC7748Curve;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ECDHClientKeyExchangeMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
+import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.crypto.ec.*;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
@@ -45,17 +30,8 @@ import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.InvalidCurve
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.TwistedCurvePoint;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -67,7 +43,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 8422, section = "4. TLS Extensions for ECC")
 @ClientTest
 public class TLSExtensionForECC extends Tls12Test {
 
@@ -86,27 +61,6 @@ public class TLSExtensionForECC extends Tls12Test {
 
     @Test
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @TestDescription(
-            "A client compliant with this specification that supports no other "
-                    + "curves MUST send the following octets; note that the first two octets "
-                    + "indicate the extension type (Supported Point Formats Extension)[...]"
-                    + "If the Supported Point Formats "
-                    + "Extension is indeed sent, it MUST contain the value 0 (uncompressed) "
-                    + "as one of the items in the list of point formats. [...]"
-                    + "Implementations of this document MUST support the "
-                    + "uncompressed format for all of their supported curves and MUST NOT "
-                    + "support other formats for curves defined in this specification.  For "
-                    + "backwards compatibility purposes, the point format list extension MAY "
-                    + "still be included and contain exactly one value: the uncompressed "
-                    + "point format (0).")
-    @RFC(
-            number = 8422,
-            section =
-                    "4. TLS Extensions for ECC, 5.1. Client Hello Extensions, and 5.1.2. Supported Point Formats Extension")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     @Tag("adjusted")
     public void invalidPointFormat() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
@@ -146,16 +100,6 @@ public class TLSExtensionForECC extends Tls12Test {
 
     @Test
     @KeyExchange(supported = {KeyExchangeType.ECDH})
-    @TestDescription(
-            "RFC 4492 defined 25 different curves in the NamedCurve registry (now "
-                    + "renamed the \"TLS Supported Groups\" registry, although the enumeration "
-                    + "below is still named NamedCurve) for use in TLS. Only three have "
-                    + "seen much use. This specification is deprecating the rest (with "
-                    + "numbers 1-22).")
-    @CryptoCategory(SeverityLevel.MEDIUM)
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void offeredDeprecatedGroup() {
         boolean deprecated = false;
         List<NamedGroup> deprecatedFound = new LinkedList<>();
@@ -195,23 +139,12 @@ public class TLSExtensionForECC extends Tls12Test {
         return false;
     }
 
-    @AnvilTest(
-            description =
-                    "With the NIST curves, each party MUST validate the public key sent by "
-                            + "its peer in the ClientKeyExchange and ServerKeyExchange messages.  A "
-                            + "receiving party MUST check that the x and y parameters from the "
-                            + "peer's public value satisfy the curve equation, y^2 = x^3 + ax + b "
-                            + "mod p.")
-    @RFC(number = 8422, section = "5.11. Public Key Validation")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
-    @CryptoCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void rejectsInvalidCurvePoints(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -242,23 +175,12 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "if either party obtains all-zeroes x_S, it MUST "
-                            + "abort the handshake (as required by definition of X25519 and X448). [...]"
-                            + "With X25519 and X448, a receiving party MUST check whether the "
-                            + "computed premaster secret is the all-zero value and abort the "
-                            + "handshake if so")
-    @RFC(
-            number = 8422,
-            section = "5.10. ECDH, ECDSA, and RSA Computations and 5.11. Public Key Validation")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
     public void abortsWhenSharedSecretIsZero(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -289,19 +211,12 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "A client that receives a ServerHello message containing a Supported "
-                            + "Point Formats Extension MUST respect the server's choice of point "
-                            + "formats during the handshake (cf.  Sections 5.6 and 5.7).")
-    @RFC(number = 8422, section = "5.2. Server Hello Extension")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void respectsPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -325,12 +240,7 @@ public class TLSExtensionForECC extends Tls12Test {
     }
 
     @Test
-    @TestDescription(
-            "The client MUST NOT include these extensions in the ClientHello "
-                    + "message if it does not propose any ECC cipher suites.")
     @MethodCondition(method = "doesNotOfferEccCipherSuite")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void offersExtensionsWithoutCipher() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();

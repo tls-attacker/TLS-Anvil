@@ -7,8 +7,6 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import static org.junit.Assert.*;
-
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
@@ -29,32 +27,17 @@ import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Random;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 8446, section = "4.1.3 Server Hello")
 @ClientTest
 public class ServerHello extends Tls13Test {
 
-    @AnvilTest(
-            description =
-                    "A client which receives a legacy_session_id_echo "
-                            + "field that does not match what it sent in the ClientHello MUST "
-                            + "abort the handshake with an \"illegal_parameter\" alert.")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void testSessionId(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -91,16 +74,9 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "A client which receives a cipher suite that was "
-                            + "not offered MUST abort the handshake with "
-                            + "an \"illegal_parameter\" alert.")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExcludeParameter("CIPHER_SUITE")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void testCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -118,15 +94,8 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "legacy_compression_method: A single byte which " + "MUST have the value 0.")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @DeprecatedFeatureCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
     public void testCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -148,18 +117,9 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "TLS 1.3 clients receiving a ServerHello indicating TLS 1.2 or below "
-                            + "MUST check that the last 8 bytes are not equal to either of these "
-                            + "values. [...] If a match is found, the client MUST abort the handshake with "
-                            + "an \"illegal_parameter\" alert.")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.CRITICAL)
     public void testRandomDowngradeValue(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);

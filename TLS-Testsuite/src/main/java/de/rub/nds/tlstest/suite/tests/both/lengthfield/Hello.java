@@ -23,11 +23,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -37,12 +33,9 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @AnvilTest(description = "Send a Hello Message with a modified Session ID length value (+1)")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void helloSessionIdLengthTLS12(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
@@ -51,12 +44,9 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @AnvilTest(description = "Send a Hello Message with a modified Session ID length value (+1)")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void helloSessionIdLengthTLS13(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
@@ -65,12 +55,9 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @AnvilTest(description = "Send a Hello Message with a modified length value (-1)")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void helloLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         helloLenghtTest(workflowTrace, runner);
@@ -78,12 +65,9 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @AnvilTest(description = "Send a Hello Message with a modified length value (-1)")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void helloLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         helloLenghtTest(workflowTrace, runner);
@@ -91,13 +75,9 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @AnvilTest(
-            description = "Send a Hello Message with a modified Extension list length value (-1)")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void helloExtensionsLengthTLS12(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
@@ -106,13 +86,9 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @AnvilTest(
-            description = "Send a Hello Message with a modified Extension list length value (-1)")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void helloExtensionsLengthTLS13(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
@@ -122,14 +98,9 @@ public class Hello extends TlsGenericTest {
     @Tag("tls12")
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @AnvilTest(
-            description =
-                    "Send a Client Hello Message with a modified Cipher Suite list length value (-1)")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void clientHelloCipherSuitesLengthTLS12(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
@@ -139,14 +110,9 @@ public class Hello extends TlsGenericTest {
     @Tag("tls13")
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @AnvilTest(
-            description =
-                    "Send a Client Hello Message with a modified Cipher Suite list length value (-1)")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void clientHelloCipherSuitesLengthTLS13(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
@@ -156,14 +122,9 @@ public class Hello extends TlsGenericTest {
     @Tag("tls12")
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @AnvilTest(
-            description =
-                    "Send a Client Hello Message with a modified compression list length value (-1)")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void clientHelloCompressionLengthTLS12(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
@@ -173,14 +134,9 @@ public class Hello extends TlsGenericTest {
     @Tag("tls13")
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @AnvilTest(
-            description =
-                    "Send a Client Hello Message with a modified compression list length value (-1)")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void clientHelloCompressionLengthTLS13(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);

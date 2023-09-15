@@ -10,11 +10,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc8701;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.ExcludeParameter;
-import de.rub.nds.anvilcore.annotation.ExcludeParameters;
-import de.rub.nds.anvilcore.annotation.IncludeParameter;
-import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -29,11 +25,6 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.alpn.AlpnEntry;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseExtensionDerivation;
@@ -48,23 +39,14 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-@RFC(number = 8701, section = "3. Client-Initiated Extension Points")
 public class ClientInitiatedExtensionPoints extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "A client MAY select one or more GREASE cipher suite values and advertise them in the \"cipher_suites\" field. [...]"
-                            + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello. Servers MUST correctly "
-                            + "ignore unknown values in a ClientHello and attempt to negotiate with "
-                            + "one of the remaining parameters.")
+    @AnvilTest
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
         @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     })
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void advertiseGreaseCiphersuites(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -92,21 +74,13 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "A client MAY select one or more GREASE extension values and advertise them as extensions with varying length and contents. [...]"
-                            + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello. Servers MUST correctly "
-                            + "ignore unknown values in a ClientHello and attempt to negotiate with "
-                            + "one of the remaining parameters.")
+    @AnvilTest
     @IncludeParameter("GREASE_EXTENSION")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
         @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     })
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void advertiseGreaseExtensions(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -136,24 +110,12 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "A client MAY select one or more GREASE named group values and "
-                            + "advertise them in the \"supported_groups\" extension, if sent.  It "
-                            + "MAY also send KeyShareEntry values for a subset of those selected "
-                            + "in the \"key_share\" extension.  For each of these, the "
-                            + "\"key_exchange\" field MAY be any value. [...]"
-                            + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello. Servers MUST correctly "
-                            + "ignore unknown values in a ClientHello and attempt to negotiate with "
-                            + "one of the remaining parameters.")
+    @AnvilTest
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
         @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     })
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void advertiseGreaseNamedGroup(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -171,23 +133,13 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest(
-            description =
-                    "A client MAY select one or more GREASE signature algorithm values "
-                            + "and advertise them in the \"signature_algorithms\" or "
-                            + "\"signature_algorithms_cert\" extensions, if sent. [...]"
-                            + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello. Servers MUST correctly "
-                            + "ignore unknown values in a ClientHello and attempt to negotiate with "
-                            + "one of the remaining parameters.")
+    @AnvilTest
     @IncludeParameter("GREASE_SIG_HASH")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
         @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     })
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void advertiseGreaseSignatureAlgorithms(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -218,22 +170,12 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "A client MAY select one or more GREASE ALPN identifiers and "
-                            + "advertise them in the \"application_layer_protocol_negotiation\" "
-                            + "extension, if sent. [...]"
-                            + "Servers MUST NOT negotiate any GREASE value when offered in a ClientHello. Servers MUST correctly "
-                            + "ignore unknown values in a ClientHello and attempt to negotiate with "
-                            + "one of the remaining parameters.")
+    @AnvilTest
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
         @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     })
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void advertiseGreaseALPNIdentifiers(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

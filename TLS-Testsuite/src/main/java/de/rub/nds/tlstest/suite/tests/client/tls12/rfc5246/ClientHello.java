@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
@@ -24,13 +25,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 @ClientTest
 public class ClientHello extends Tls12Test {
 
-    @Test
+    @NonCombinatorialAnvilTest
     public void supportsNullCompressionMethod() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         byte[] compression = clientHelloMessage.getCompressions().getValue();
@@ -43,7 +43,7 @@ public class ClientHello extends Tls12Test {
         assertTrue("ClientHello does not contain compression method null", containsZero);
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     public void offersNonNullCompressionMethod() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         byte[] compression = clientHelloMessage.getCompressions().getValue();
@@ -66,7 +66,7 @@ public class ClientHello extends Tls12Test {
                 : ConditionEvaluationResult.enabled("");
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     @MethodCondition(method = "sentSignatureAndHashAlgorithmsExtension")
     public void offeredSignatureAlgorithmsForAllCipherSuites() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
@@ -124,7 +124,7 @@ public class ClientHello extends Tls12Test {
                 proposedCipherSuites.isEmpty());
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     @Tag("new")
     public void checkExtensions() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();

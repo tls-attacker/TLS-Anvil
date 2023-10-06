@@ -9,10 +9,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import static org.junit.Assert.assertTrue;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.ExcludeParameter;
-import de.rub.nds.anvilcore.annotation.MethodCondition;
-import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -35,7 +32,6 @@ import de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests;
 import java.util.Arrays;
 import java.util.LinkedList;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -255,7 +251,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     /*
     Clients MAY send an empty client_shares vector in order to request
     group selection from the server, at the cost of an additional round

@@ -10,16 +10,16 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7568;
 import static org.junit.Assert.assertFalse;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Arrays;
-import org.junit.jupiter.api.Test;
 
 @ClientTest
 public class DoNotUseSSLVersion30 extends Tls12Test {
 
-    @Test
+    @NonCombinatorialAnvilTest
     public void sendClientHelloVersion0300() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         assertFalse(

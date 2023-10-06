@@ -9,10 +9,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8422;
 
 import static org.junit.Assert.*;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.ClientTest;
-import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
-import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -39,7 +36,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -59,7 +55,7 @@ public class TLSExtensionForECC extends Tls12Test {
         return ConditionEvaluationResult.enabled("");
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @Tag("adjusted")
     public void invalidPointFormat() {
@@ -98,7 +94,7 @@ public class TLSExtensionForECC extends Tls12Test {
         }
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     public void offeredDeprecatedGroup() {
         boolean deprecated = false;
@@ -239,7 +235,7 @@ public class TLSExtensionForECC extends Tls12Test {
                         });
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     @MethodCondition(method = "doesNotOfferEccCipherSuite")
     @Tag("new")
     public void offersExtensionsWithoutCipher() {

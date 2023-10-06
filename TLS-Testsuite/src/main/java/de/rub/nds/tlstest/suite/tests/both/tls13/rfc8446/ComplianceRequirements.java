@@ -9,14 +9,14 @@ package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 
 public class ComplianceRequirements extends Tls13Test {
-    @Test
+    @NonCombinatorialAnvilTest
     @Tag("new")
     public void supportsAes128GcmSha256() {
         assertTrue(
@@ -26,7 +26,7 @@ public class ComplianceRequirements extends Tls13Test {
                         .contains(CipherSuite.TLS_AES_128_GCM_SHA256));
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     @Tag("new")
     public void supportsSecp256r1() {
         assertTrue(

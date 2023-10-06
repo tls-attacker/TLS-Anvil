@@ -9,17 +9,17 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import static org.junit.Assert.assertEquals;
 
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import org.junit.jupiter.api.Test;
 
 public class CipherSuites extends Tls12Test {
 
-    @Test
+    @NonCombinatorialAnvilTest
     public void supportOfDeprecatedCipherSuites() {
         List<CipherSuite> suites =
                 new LinkedList<>(context.getFeatureExtractionResult().getCipherSuites());

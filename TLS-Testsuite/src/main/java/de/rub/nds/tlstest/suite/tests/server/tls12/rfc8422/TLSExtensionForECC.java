@@ -39,7 +39,6 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
@@ -137,7 +136,7 @@ public class TLSExtensionForECC extends Tls12Test {
     "numbers 1-22).  This specification also deprecates the explicit " +
     "curves with identifiers 0xFF01 and 0xFF02.  It also adds the new\n" +
     "curves defined in [RFC7748]", securitySeverity = SeverityLevel.LOW)*/
-    @Test
+    @NonCombinatorialAnvilTest
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     public void supportsDeprecated(WorkflowRunner runner) {
         List<NamedGroup> deprecatedFound = new LinkedList<>();

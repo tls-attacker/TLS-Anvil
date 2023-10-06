@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7465;
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -22,7 +23,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
@@ -32,7 +32,7 @@ public class RC4Ciphersuites extends Tls12Test {
         return cipherSuite.name().contains("RC4");
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     public void offersRC4Ciphersuites() {
         List<CipherSuite> supported =
                 new ArrayList<>(this.context.getFeatureExtractionResult().getCipherSuites());

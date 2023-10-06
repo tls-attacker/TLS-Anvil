@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -85,7 +84,7 @@ public class SignatureAlgorithms extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     @Tag("new")
     public void noDeprecatedAlgorithmsOffered() {
         ClientFeatureExtractionResult extractionResult =

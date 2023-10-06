@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls12;
 import static org.junit.Assert.assertEquals;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -17,12 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 
 @ClientTest
 public class SupportedCiphersuites extends Tls12Test {
 
-    @Test
+    @NonCombinatorialAnvilTest
     @Tag("ciphersuites")
     public void supportsMoreCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
@@ -44,7 +44,7 @@ public class SupportedCiphersuites extends Tls12Test {
                 supported.size());
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     @Tag("ciphersuites")
     public void supportsLessCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();

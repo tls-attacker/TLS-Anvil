@@ -45,13 +45,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class KeyShare extends Tls13Test {
 
-    @Test
+    @NonCombinatorialAnvilTest
     public void testOrderOfKeyshareEntries() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         EllipticCurvesExtensionMessage groups =
@@ -205,7 +204,7 @@ public class KeyShare extends Tls13Test {
         return group.name().contains("ECDH_X");
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     public void offeredDeprecatedGroups() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         boolean foundDeprecated = false;

@@ -37,7 +37,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -135,7 +134,7 @@ public class SupportedVersions extends Tls13Test {
     }
 
     /*@AnvilTest.")*/
-    @Test
+    @NonCombinatorialAnvilTest
     public void supportedVersionContainsTls13() {
         SupportedVersionsExtensionMessage ext =
                 context.getReceivedClientHelloMessage()

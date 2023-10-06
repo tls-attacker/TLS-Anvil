@@ -7,15 +7,15 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Test;
 
 public class A5CipherSuite extends Tls12Test {
 
-    @Test
+    @NonCombinatorialAnvilTest
     public void negotiateTLS_NULL_WITH_NULL_NULL() {
         List<CipherSuite> suites =
                 new ArrayList<>(context.getFeatureExtractionResult().getCipherSuites());
@@ -25,7 +25,7 @@ public class A5CipherSuite extends Tls12Test {
     }
 
     /*@AnvilTest*/
-    @Test
+    @NonCombinatorialAnvilTest
     public void anonCipherSuites() {
         List<CipherSuite> suites =
                 new ArrayList<>(context.getFeatureExtractionResult().getCipherSuites());

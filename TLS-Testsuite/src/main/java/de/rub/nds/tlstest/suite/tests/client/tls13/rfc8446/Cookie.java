@@ -8,15 +8,15 @@
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Arrays;
-import org.junit.jupiter.api.Test;
 
 @ClientTest
 public class Cookie extends Tls13Test {
 
-    @Test
+    @NonCombinatorialAnvilTest
     public void clientHelloContainsCookieExtension() {
         int size =
                 (int)

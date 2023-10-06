@@ -25,7 +25,8 @@ public class AnnotationReferences {
                                 .collect(Collectors.toList());
         Reflections reflections =
                 new Reflections("de.rub.nds.tlstest", new MethodAnnotationsScanner());
-        Set<Method> testMethods = reflections.getMethodsAnnotatedWith(TestId.class);
+        Set<Method> testMethods =
+                reflections.getMethodsAnnotatedWith(NonCombinatorialAnvilTest.class);
         testMethods.addAll(reflections.getMethodsAnnotatedWith(AnvilTest.class));
         for (Method method : testMethods) {
             Set<String> identifiers = collectAnnotationIdentifiers(method);

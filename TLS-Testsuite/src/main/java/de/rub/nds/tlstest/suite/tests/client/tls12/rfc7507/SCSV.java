@@ -10,16 +10,16 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7507;
 import static org.junit.Assert.assertFalse;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 
 @ClientTest
 public class SCSV extends Tls12Test {
-    @Test
+    @NonCombinatorialAnvilTest
     @Tag("new")
     public void doesNotIncludeFallbackCipherSuite() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();

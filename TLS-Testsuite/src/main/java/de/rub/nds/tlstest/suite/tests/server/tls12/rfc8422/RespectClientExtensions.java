@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc8422;
 import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -29,7 +30,6 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Arrays;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
@@ -56,7 +56,7 @@ public class RespectClientExtensions extends Tls12Test {
         constructTest(runner, c);
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     public void respectsChosenCurveForCertificates() {
         assertTrue(
                 "The server does not respect the client's supported curves when selecting the certificate",

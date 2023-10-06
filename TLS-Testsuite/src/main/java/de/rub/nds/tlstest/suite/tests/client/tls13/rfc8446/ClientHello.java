@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
@@ -17,12 +18,11 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsE
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 
 @ClientTest
 public class ClientHello extends Tls13Test {
 
-    @Test
+    @NonCombinatorialAnvilTest
     public void checkLegacyVersion() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
         byte[] version = clientHello.getProtocolVersion().getValue();
@@ -32,7 +32,7 @@ public class ClientHello extends Tls13Test {
         assertNotNull("Does not contain supported_versions extension", ext);
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     @Tag("new")
     public void checkExtensionsValidity() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
@@ -40,7 +40,7 @@ public class ClientHello extends Tls13Test {
         SharedExtensionTests.checkForDuplicateExtensions(clientHello);
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     @Tag("new")
     public void checkMandatoryExtensions() {
         if (!context.getReceivedClientHelloMessage()
@@ -69,7 +69,7 @@ public class ClientHello extends Tls13Test {
                 clientHello.containsExtension(ExtensionType.TRUNCATED_HMAC));
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     @Tag("new")
     public void checkLegacySessionId() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();

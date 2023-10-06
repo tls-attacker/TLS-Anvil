@@ -40,7 +40,6 @@ import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -103,7 +102,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @Test
+    @NonCombinatorialAnvilTest
     @MethodCondition(method = "supportsFfdheAndEcNamedGroups")
     @Tag("new")
     public void listsCurvesAndFfdheCorrectly() {

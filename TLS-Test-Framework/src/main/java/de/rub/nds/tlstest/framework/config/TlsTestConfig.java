@@ -11,6 +11,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -34,13 +35,11 @@ import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.config.delegates.*;
 import de.rub.nds.tlstest.framework.utils.Utils;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -56,7 +55,7 @@ import org.apache.logging.log4j.Logger;
         creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class TlsTestConfig extends TLSDelegateConfig {
 
-    @JsonProperty private AnvilTestConfig anvilTestConfig;
+    @JsonProperty private AnvilTestConfig anvilTestConfig; // = new AnvilTestConfig();
     private static final Logger LOGGER = LogManager.getLogger();
 
     @JsonProperty("clientConfig")
@@ -78,11 +77,15 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
     private ConfigDelegates parsedCommand = null;
 
+    @JsonProperty("exportTraces")
     @Parameter(
             names = "-exportTraces",
             description =
-                    "Export executed WorkflowTraces with all values " + "used in the messages")
+                    "Export executed WorkflowTraces with all values " + "used in the messagesx")
     private boolean exportTraces = false;
+
+    @Parameter(names = "-tlsAnvilConfig", description = "tlsAnvilConfig")
+    private String tlsAnvilConfig;
 
     // we might want to turn these into CLI parameters in the future
     private boolean expectTls13Alerts = false;
@@ -154,8 +157,41 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
         this.argParser.parse(args);
         this.parsedCommand = ConfigDelegates.delegateForCommand(this.argParser.getParsedCommand());
+        if (tlsAnvilConfig != null) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            TlsTestConfig tlsTestConfig;
+            Map<?, ?> raw = null;
+            try {
+                objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                tlsTestConfig =
+                        objectMapper.readValue(new File(tlsAnvilConfig), TlsTestConfig.class);
 
-        if (getGeneralDelegate().isHelp()) {
+                raw = objectMapper.readValue(new File(tlsAnvilConfig), Map.class);
+                if (raw.get("clientConfig") == null) tlsTestConfig.setTestClientDelegate(null);
+                if (raw.get("serverConfig") == null) tlsTestConfig.setTestServerDelegate(null);
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            this.setExportTraces(tlsTestConfig.isExportTraces());
+            this.anvilTestConfig = tlsTestConfig.getAnvilTestConfig();
+
+            TestClientDelegate testClientDelegate = tlsTestConfig.getTestClientDelegate();
+            TestServerDelegate testServerDelegate = tlsTestConfig.getTestServerDelegate();
+            if (testClientDelegate == null && testServerDelegate != null) {
+                this.testEndpointMode = TestEndpointType.SERVER;
+                this.parsedCommand = ConfigDelegates.SERVER;
+                this.testServerDelegate = tlsTestConfig.getTestServerDelegate();
+            } else if (testClientDelegate != null && testServerDelegate == null) {
+                this.testEndpointMode = TestEndpointType.CLIENT;
+                this.parsedCommand = ConfigDelegates.CLIENT;
+                this.testClientDelegate = tlsTestConfig.getTestClientDelegate();
+            } else {
+                LOGGER.error("Config must contain either client or server section.");
+            }
+            this.parsedArgs = true;
+            return;
+        } else if (getGeneralDelegate().isHelp()) {
             argParser.usage();
             System.exit(0);
         } else if (argParser.getParsedCommand() == null) {
@@ -164,19 +200,19 @@ public class TlsTestConfig extends TLSDelegateConfig {
         } else if (argParser.getParsedCommand().equals(ConfigDelegates.EXTRACT_TESTS.getCommand())
                 || argParser.getParsedCommand().equals(ConfigDelegates.WORKER.getCommand())) {
             return;
-        }
+        } else {
 
-        this.setTestEndpointMode(argParser.getParsedCommand());
-        this.getAnvilTestConfig().setEndpointMode(this.getTestEndpointMode());
+            this.setTestEndpointMode(argParser.getParsedCommand());
+            this.getAnvilTestConfig().setEndpointMode(this.getTestEndpointMode());
 
-        if (getAnvilTestConfig().getIdentifier() == null) {
-            if (argParser.getParsedCommand().equals(ConfigDelegates.SERVER.getCommand())) {
-                getAnvilTestConfig().setIdentifier(testServerDelegate.getHost());
-            } else {
-                getAnvilTestConfig().setIdentifier(testClientDelegate.getPort().toString());
+            if (getAnvilTestConfig().getIdentifier() == null) {
+                if (argParser.getParsedCommand().equals(ConfigDelegates.SERVER.getCommand())) {
+                    getAnvilTestConfig().setIdentifier(testServerDelegate.getHost());
+                } else {
+                    getAnvilTestConfig().setIdentifier(testClientDelegate.getPort().toString());
+                }
             }
         }
-
         if (getAnvilTestConfig().getOutputFolder().isEmpty()) {
             getAnvilTestConfig()
                     .setOutputFolder(
@@ -493,5 +529,13 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
     public Callable<Integer> getTimeoutActionScript() {
         return timeoutActionScript;
+    }
+
+    public void setTestClientDelegate(TestClientDelegate testClientDelegate) {
+        this.testClientDelegate = testClientDelegate;
+    }
+
+    public void setTestServerDelegate(TestServerDelegate testServerDelegate) {
+        this.testServerDelegate = testServerDelegate;
     }
 }

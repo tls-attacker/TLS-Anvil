@@ -10,36 +10,20 @@ package de.rub.nds.tlstest.suite.tests.client.tls12;
 import static org.junit.Assert.assertEquals;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
-import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 
 @ClientTest
-@RFC(number = 5246, section = "7.4.1.2.  Client Hello")
 public class SupportedCiphersuites extends Tls12Test {
 
-    @Test
-    @TestDescription(
-            "The cipher suite list, passed from the client to the server in the "
-                    + "ClientHello message, contains the combinations of cryptographic "
-                    + "algorithms supported by the client in order of the client's "
-                    + "preference (favorite choice first).")
+    @NonCombinatorialAnvilTest
     @Tag("ciphersuites")
-    @SecurityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void supportsMoreCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
 
@@ -60,16 +44,8 @@ public class SupportedCiphersuites extends Tls12Test {
                 supported.size());
     }
 
-    @Test
-    @TestDescription(
-            "The cipher suite list, passed from the client to the server in the "
-                    + "ClientHello message, contains the combinations of cryptographic "
-                    + "algorithms supported by the client in order of the client's "
-                    + "preference (favorite choice first).")
+    @NonCombinatorialAnvilTest
     @Tag("ciphersuites")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
     public void supportsLessCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
 

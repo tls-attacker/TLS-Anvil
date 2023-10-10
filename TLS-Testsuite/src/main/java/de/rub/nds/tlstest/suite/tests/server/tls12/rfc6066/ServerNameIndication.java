@@ -20,11 +20,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.nio.charset.Charset;
@@ -32,7 +27,6 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 6066, section = "3. Server Name Indication")
 @ServerTest
 public class ServerNameIndication extends Tls12Test {
 
@@ -44,14 +38,8 @@ public class ServerNameIndication extends Tls12Test {
         return ConditionEvaluationResult.disabled("SNI is disabled");
     }
 
-    @AnvilTest(
-            description =
-                    "The ServerNameList MUST NOT contain more than one name of the same "
-                            + "name_type.")
+    @AnvilTest
     @MethodCondition(method = "sniActive")
-    @HandshakeCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     @EnforcedSenderRestriction
     public void moreThanOneNameOfTheSameType(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

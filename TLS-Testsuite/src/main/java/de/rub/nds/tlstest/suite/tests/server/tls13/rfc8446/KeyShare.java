@@ -7,35 +7,16 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
-import de.rub.nds.anvilcore.annotation.ExcludeParameter;
-import de.rub.nds.anvilcore.annotation.ExplicitValues;
-import de.rub.nds.anvilcore.annotation.IncludeParameter;
-import de.rub.nds.anvilcore.annotation.ManualConfig;
-import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.AlertDescription;
-import de.rub.nds.tlsattacker.core.constants.AlertLevel;
-import de.rub.nds.tlsattacker.core.constants.Bits;
-import de.rub.nds.tlsattacker.core.constants.ECPointFormat;
-import de.rub.nds.tlsattacker.core.constants.ExtensionType;
-import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlsattacker.core.crypto.ec.CurveFactory;
-import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurve;
-import de.rub.nds.tlsattacker.core.crypto.ec.FieldElementFp;
-import de.rub.nds.tlsattacker.core.crypto.ec.Point;
-import de.rub.nds.tlsattacker.core.crypto.ec.PointFormatter;
-import de.rub.nds.tlsattacker.core.crypto.ec.RFC7748Curve;
+import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.crypto.ec.*;
 import de.rub.nds.tlsattacker.core.crypto.ffdh.FFDHEGroup;
 import de.rub.nds.tlsattacker.core.crypto.ffdh.GroupFactory;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -53,15 +34,7 @@ import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.InvalidCurve
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.TwistedCurvePoint;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.keyexchange.dhe.ShareOutOfBoundsDerivation;
@@ -76,17 +49,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-@RFC(number = 8446, section = "4.2.8. Key Share")
 public class KeyShare extends Tls13Test {
 
-    @AnvilTest(
-            description =
-                    "Each KeyShareEntry value MUST correspond "
-                            + "to a group offered in the \"supported_groups\" extension "
-                            + "and MUST appear in the same order.")
+    @AnvilTest
     @ExcludeParameter("NAMED_GROUP")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     /*
         Servers MAY check for violations of these rules and abort the
         handshake with an "illegal_parameter" alert if one is violated.
@@ -137,19 +103,7 @@ public class KeyShare extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "If (EC)DHE key establishment "
-                            + "is in use, then the ServerHello contains a \"key_share\" extension with "
-                            + "the server's ephemeral Diffie-Hellman share; the server's share MUST "
-                            + "be in the same group as one of the client's shares. [...]"
-                            + "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
-                            + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
-                            + "that the server has selected for the negotiated key exchange.")
-    @RFC(number = 8446, section = "2. Protocol Overview and 4.2.8. Key Share")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
+    @AnvilTest
     public void serverOnlyOffersOneKeyshare(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -165,18 +119,8 @@ public class KeyShare extends Tls13Test {
         performOneKeyshareTest(c, runner);
     }
 
-    @AnvilTest(
-            description =
-                    "If using (EC)DHE key establishment, servers offer exactly one KeyShareEntry in the ServerHello. "
-                            + "This value MUST be in the same group as the KeyShareEntry value offered by the client "
-                            + "that the server has selected for the negotiated key exchange. [...]"
-                            + "Servers "
-                            + "MUST NOT send a KeyShareEntry for any group not indicated in the "
-                            + "client's \"supported_groups\" extension")
+    @AnvilTest
     @ExcludeParameter("NAMED_GROUP")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void serverOnlyOffersOneKeyshareAllGroupsAtOnce(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -234,17 +178,8 @@ public class KeyShare extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest(
-            description =
-                    "secp256r1(0x0017), secp384r1(0x0018), secp521r1(0x0019),"
-                            + " x25519(0x001D), x448(0x001E),")
-    @RFC(number = 8446, section = "4.2.7. Supported Groups")
+    @AnvilTest
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getLegacyGroups")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @CryptoCategory(SeverityLevel.HIGH)
-    @DeprecatedFeatureCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.LOW)
     public void serverAcceptsDeprecatedGroups(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -253,17 +188,8 @@ public class KeyShare extends Tls13Test {
         performDeprecatedGroupsTest(c, runner);
     }
 
-    @AnvilTest(
-            description =
-                    "secp256r1(0x0017), secp384r1(0x0018), secp521r1(0x0019),"
-                            + " x25519(0x001D), x448(0x001E),")
-    @RFC(number = 8446, section = "4.2.7. Supported Groups")
+    @AnvilTest
     @ExcludeParameter("NAMED_GROUP")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @CryptoCategory(SeverityLevel.HIGH)
-    @DeprecatedFeatureCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.LOW)
     public void serverAcceptsDeprecatedGroupsAllAtOnce(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -309,15 +235,7 @@ public class KeyShare extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "A server receiving a ClientHello MUST correctly ignore all "
-                            + "unrecognized cipher suites, extensions, and other parameters. "
-                            + "Otherwise, it may fail to interoperate with newer clients.")
-    @RFC(number = 8446, section = "9.3.  Protocol Invariants")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @AnvilTest
     public void includeUnknownGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -344,15 +262,8 @@ public class KeyShare extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest(
-            description =
-                    "For the curves secp256r1, secp384r1, and secp521r1, peers MUST "
-                            + "validate each other's public value Q by ensuring that the point is a "
-                            + "valid point on the elliptic curve.")
+    @AnvilTest
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
-    @HandshakeCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.CRITICAL)
     @Tag("new")
     public void rejectsPointsNotOnCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -400,16 +311,10 @@ public class KeyShare extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Peers MUST validate each other's public key Y by ensuring that 1 < Y "
-                            + "< p-1.")
-    @RFC(number = 8446, section = "4.2.8.1.  Diffie-Hellman Parameters")
+    @AnvilTest
     @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
     @ManualConfig(identifiers = "FFDHE_SHARE_OUT_OF_BOUNDS")
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getFfdheGroups")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
     public void ffdheShareOutOfBounds(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -461,17 +366,8 @@ public class KeyShare extends Tls13Test {
         return derivationParameters;
     }
 
-    @AnvilTest(
-            description =
-                    "For X25519 and X448, [...]"
-                            + "For these curves, implementations SHOULD use the approach specified "
-                            + "in [RFC7748] to calculate the Diffie-Hellman shared secret. "
-                            + "Implementations MUST check whether the computed Diffie-Hellman shared "
-                            + "secret is the all-zero value and abort if so")
-    @RFC(number = 8446, section = "7.4.2.  Elliptic Curve Diffie-Hellman")
+    @AnvilTest
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
     public void abortsWhenSharedSecretIsZero(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

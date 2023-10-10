@@ -18,11 +18,7 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -30,14 +26,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseCipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseExtensionDerivation;
@@ -47,20 +36,11 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
-@RFC(number = 8701, section = "4. Server-Initiated Extension Points")
 public class ServerInitiatedExtensionPoints extends Tls13Test {
 
-    @AnvilTest(
-            description =
-                    "When sending a NewSessionTicket message in TLS 1.3, a server "
-                            + "MAY select one or more GREASE extension values and advertise them as extensions "
-                            + "with varying length and contents. [...]"
-                            + "When processing a CertificateRequest or NewSessionTicket, "
-                            + "clients MUST NOT treat GREASE values differently from any unknown value.")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_EXTENSION")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void advertiseGreaseExtensionsInSessionTicket(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -78,17 +58,9 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest(
-            description =
-                    "Clients MUST reject GREASE values when negotiated by the server. "
-                            + "In particular, the client MUST fail the connection "
-                            + "if a GREASE value appears in any of the following: "
-                            + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_PROTOCOL_VERSION")
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -114,18 +86,10 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 .validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Clients MUST reject GREASE values when negotiated by the server. "
-                            + "In particular, the client MUST fail the connection "
-                            + "if a GREASE value appears in any of the following: "
-                            + "[...] The \"cipher_suite\" value in a ServerHello")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_CIPHERSUITE")
     @ExcludeParameter("CIPHER_SUITE")
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -149,17 +113,9 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 .validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Clients MUST reject GREASE values when negotiated by the server. "
-                            + "In particular, the client MUST fail the connection "
-                            + "if a GREASE value appears in any of the following: "
-                            + "[...] Any ServerHello extension")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     @IncludeParameter("GREASE_EXTENSION")
-    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendServerHelloGreaseExtension(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -184,18 +140,9 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 .validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Clients MUST reject GREASE values when negotiated by the server. "
-                            + "In particular, the client MUST fail the connection "
-                            + "if a GREASE value appears in any of the following: "
-                            + "[...] Any HelloRetryRequest, EncryptedExtensions, or Certificate "
-                            + "extension in TLS 1.3")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_EXTENSION")
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void sendEncryptedExtensionsGreaseExtension(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -213,18 +160,8 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Clients MUST reject GREASE values when negotiated by the server. "
-                            + "In particular, the client MUST fail the connection "
-                            + "if a GREASE value appears in any of the following: "
-                            + "[...] The signature algorithm in a server CertificateVerify signature in TLS 1.3")
+    @AnvilTest
     @IncludeParameter("GREASE_SIG_HASH")
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.CRITICAL)
-    @CryptoCategory(SeverityLevel.CRITICAL)
-    @CertificateCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
     public void sendCertificateVerifyGreaseSignatureAlgorithm(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

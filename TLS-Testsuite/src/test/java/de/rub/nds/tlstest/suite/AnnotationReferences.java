@@ -2,12 +2,7 @@ package de.rub.nds.tlstest.suite;
 
 import static org.junit.Assert.assertTrue;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
-import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
-import de.rub.nds.anvilcore.annotation.ExplicitValues;
-import de.rub.nds.anvilcore.annotation.ManualConfig;
-import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import java.lang.reflect.Method;
@@ -30,7 +25,8 @@ public class AnnotationReferences {
                                 .collect(Collectors.toList());
         Reflections reflections =
                 new Reflections("de.rub.nds.tlstest", new MethodAnnotationsScanner());
-        Set<Method> testMethods = reflections.getMethodsAnnotatedWith(TestDescription.class);
+        Set<Method> testMethods =
+                reflections.getMethodsAnnotatedWith(NonCombinatorialAnvilTest.class);
         testMethods.addAll(reflections.getMethodsAnnotatedWith(AnvilTest.class));
         for (Method method : testMethods) {
             Set<String> identifiers = collectAnnotationIdentifiers(method);

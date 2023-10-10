@@ -17,11 +17,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAl
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -32,13 +28,8 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
 
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @AnvilTest(
-            description =
-                    "Send a Signature And Hash Algorithms Extension in the Hello Message with a modified length value (-1)")
+    @AnvilTest
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void signatureAndHashAlgorithmsExtensionLengthTLS12(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
@@ -50,13 +41,8 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @AnvilTest(
-            description =
-                    "Send a Signature And Hash Algorithms Extension in the Hello Message with a modified length value (-1)")
+    @AnvilTest
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void signatureAndHashAlgorithmsExtensionLengthTLS13(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
@@ -68,13 +54,8 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @AnvilTest(
-            description =
-                    "Send a Signature And Hash Algorithms Extension in the Hello Message with a modified algorithm list length value (-1)")
+    @AnvilTest
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void signatureAndHashAlgorithmsListLengthTLS12(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
@@ -84,13 +65,8 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @AnvilTest(
-            description =
-                    "Send a Signature And Hash Algorithms Extension in the Hello Message with a modified algorithm list length value (-1)")
+    @AnvilTest
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void signatureAndHashAlgorithmsListLengthTLS13(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();

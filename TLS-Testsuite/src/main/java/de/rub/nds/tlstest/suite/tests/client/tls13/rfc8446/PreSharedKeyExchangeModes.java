@@ -19,18 +19,12 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
-@RFC(number = 8446, section = "4.2.9 Pre-Shared Key Exchane Modes")
 public class PreSharedKeyExchangeModes extends Tls13Test {
 
     public ConditionEvaluationResult supportsPSKModeExtension() {
@@ -42,11 +36,8 @@ public class PreSharedKeyExchangeModes extends Tls13Test {
         return ConditionEvaluationResult.disabled("PSKModeExtension is not supported");
     }
 
-    @AnvilTest(description = "The server MUST NOT send a \"psk_key_exchange_modes\" extension.")
+    @AnvilTest
     @MethodCondition(method = "supportsPSKModeExtension")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
     public void sendPSKModeExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

@@ -21,11 +21,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -35,12 +31,9 @@ public class Finished extends TlsGenericTest {
 
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @AnvilTest(description = "Send a Finished Message with a modified length value (-1)")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void finishedLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         finishedLengthTest(workflowTrace, runner);
@@ -48,12 +41,9 @@ public class Finished extends TlsGenericTest {
 
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @AnvilTest(description = "Send a Finished Message with a modified length value (-1)")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void finishedLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
         finishedLengthTest(workflowTrace, runner);

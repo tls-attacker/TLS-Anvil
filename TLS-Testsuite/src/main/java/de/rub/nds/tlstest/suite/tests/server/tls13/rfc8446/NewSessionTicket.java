@@ -20,12 +20,6 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Arrays;
@@ -34,7 +28,6 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-@RFC(number = 8446, section = "4.6.1.  New Session Ticket Message")
 public class NewSessionTicket extends Tls13Test {
 
     public ConditionEvaluationResult issuesTickets() {
@@ -47,20 +40,7 @@ public class NewSessionTicket extends Tls13Test {
         }
     }
 
-    @AnvilTest(
-            description =
-                    "Indicates the lifetime in seconds as a 32-bit unsigned integer in network byte order from the time of "
-                            + "ticket issuance. Servers MUST NOT use any value greater than 604800 seconds (7 days). [...]"
-                            + "A securely generated, random 32-bit value that is "
-                            + "used to obscure the age of the ticket that the client includes in "
-                            + "the \"pre_shared_key\" extension.  The client-side ticket age is "
-                            + "added to this value modulo 2^32 to obtain the value that is "
-                            + "transmitted by the client.  The server MUST generate a fresh value "
-                            + "for each ticket it sends.")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
+    @AnvilTest
     @MethodCondition(method = "issuesTickets")
     @Tag("new")
     public void newSessionTicketsAreValid(

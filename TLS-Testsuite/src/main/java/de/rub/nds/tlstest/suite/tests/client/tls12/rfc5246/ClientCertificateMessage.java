@@ -15,29 +15,14 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
-@RFC(number = 5246, section = "7.4.6. Client Certificate")
 public class ClientCertificateMessage extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "If the server has sent "
-                            + "a CertificateRequest message, the client MUST send the Certificate "
-                            + "message. [...]"
-                            + "If no suitable certificate is available, the client MUST send a certificate message containing no certificates.")
-    @RFC(number = 5246, section = "7.3. Handshake Protocol Overview and 7.4.6. Client Certificate")
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.HIGH)
+    @AnvilTest
     public void clientMustSendCertMsg(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

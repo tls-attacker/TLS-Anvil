@@ -18,11 +18,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -34,12 +30,8 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class EncryptedExtensions extends TlsGenericTest {
 
-    @AnvilTest(
-            description = "Send an Encrypted Extensions Message with a modified length value (-1)")
+    @AnvilTest
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void encryptedExtensionsLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
@@ -52,13 +44,8 @@ public class EncryptedExtensions extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest(
-            description =
-                    "Send an Encrypted Extensions Message with a modified Extensions list length value (+1)")
+    @AnvilTest
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void encryptedExtensionsExtensionsLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);

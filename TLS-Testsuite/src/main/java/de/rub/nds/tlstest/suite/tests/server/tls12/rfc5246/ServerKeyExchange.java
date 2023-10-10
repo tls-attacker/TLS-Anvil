@@ -14,29 +14,15 @@ import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
-import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.HandshakeByteLength;
-import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.DHEServerKeyExchangeMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
+import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.util.SignatureValidation;
@@ -52,17 +38,13 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 /** */
 @Tag("signature")
 @ServerTest
-@RFC(number = 5246, section = "7.4.3. Server Key Exchange Message")
 public class ServerKeyExchange extends Tls12Test {
 
-    @AnvilTest(description = "Test if the Server sends Key Exchange Messages with valid signatures")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(
             affectedIdentifiers = "CIPHER_SUITE",
             methods = "isSupportedCipherSuite")
-    @CryptoCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.CRITICAL)
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
     public void signatureIsValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);

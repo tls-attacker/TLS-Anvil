@@ -9,11 +9,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7465;
 
 import static org.junit.Assert.assertArrayEquals;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
-import de.rub.nds.anvilcore.annotation.ManualConfig;
-import de.rub.nds.anvilcore.annotation.MethodCondition;
-import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -26,15 +22,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -44,7 +32,6 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 7465, section = "2")
 @ServerTest
 public class RC4Ciphersuites extends Tls12Test {
 
@@ -66,18 +53,10 @@ public class RC4Ciphersuites extends Tls12Test {
         return !isRC4(cipherSuite);
     }
 
-    @AnvilTest(
-            description =
-                    "TLS servers MUST NOT select an RC4 cipher suite when a TLS client "
-                            + "sends such a cipher suite in the ClientHello message.")
+    @AnvilTest
     @ManualConfig(identifiers = "CIPHER_SUITE")
     @MethodCondition(method = "supportsRC4")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNonRC4")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @CryptoCategory(SeverityLevel.MEDIUM)
-    @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
-    @SecurityCategory(SeverityLevel.HIGH)
     public void offerRC4AndOtherCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite selectedCipherSuite =
@@ -110,18 +89,8 @@ public class RC4Ciphersuites extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "If the TLS client only offers RC4 cipher suites, the TLS server "
-                            + "MUST terminate the handshake. The TLS server MAY send the "
-                            + "insufficient_security fatal alert in this case.")
+    @AnvilTest
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isRC4")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @CryptoCategory(SeverityLevel.MEDIUM)
-    @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
     public void onlyRC4Suites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

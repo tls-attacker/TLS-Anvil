@@ -7,30 +7,15 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
-import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.api.Test;
 
-@RFC(number = 5246, section = "A.5. The Cipher Suite")
 public class A5CipherSuite extends Tls12Test {
 
-    @Test
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @TestDescription(
-            "TLS_NULL_WITH_NULL_NULL is specified and is the initial state of a "
-                    + "TLS connection during the first handshake on that channel, but MUST "
-                    + "NOT be negotiated, as it provides no more protection than an "
-                    + "unsecured connection.")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
+    @NonCombinatorialAnvilTest
     public void negotiateTLS_NULL_WITH_NULL_NULL() {
         List<CipherSuite> suites =
                 new ArrayList<>(context.getFeatureExtractionResult().getCipherSuites());
@@ -39,17 +24,8 @@ public class A5CipherSuite extends Tls12Test {
         }
     }
 
-    /*@AnvilTest(description = "These cipher suites MUST NOT be used by TLS 1.2 implementations unless the application " +
-    "layer has specifically requested to allow anonymous key exchange", securitySeverity = SeverityLevel.HIGH)*/
-    @Test
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @TestDescription(
-            "These "
-                    + "cipher suites MUST NOT be used by TLS 1.2 implementations unless the "
-                    + "application layer has specifically requested to allow anonymous key "
-                    + "exchange.")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
+    /*@AnvilTest*/
+    @NonCombinatorialAnvilTest
     public void anonCipherSuites() {
         List<CipherSuite> suites =
                 new ArrayList<>(context.getFeatureExtractionResult().getCipherSuites());

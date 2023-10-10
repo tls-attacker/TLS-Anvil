@@ -19,30 +19,14 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
-@RFC(number = 8446, section = "4.4.2.4. Receiving a Certificate Message")
 public class Certificate extends Tls13Test {
 
-    @AnvilTest(
-            description =
-                    "If the server supplies an empty Certificate message, "
-                            + "the client MUST abort the handshake with a \"decode_error\" alert.")
-    @HandshakeCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @CertificateCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AnvilTest
     public void emptyCertificateMessage(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -65,15 +49,7 @@ public class Certificate extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "If the server supplies an empty Certificate message, "
-                            + "the client MUST abort the handshake with a \"decode_error\" alert.")
-    @HandshakeCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @CertificateCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AnvilTest
     public void emptyCertificateList(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

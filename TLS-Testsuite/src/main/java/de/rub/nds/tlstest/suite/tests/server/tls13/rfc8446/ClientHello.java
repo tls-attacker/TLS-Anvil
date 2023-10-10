@@ -31,14 +31,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Arrays;
@@ -46,22 +39,9 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-@RFC(number = 8446, section = "4.1.2 Client Hello")
 public class ClientHello extends Tls13Test {
 
-    @AnvilTest(
-            description =
-                    "If the list contains cipher suites that the server "
-                            + "does not recognize, support, or wish to use, the server MUST "
-                            + "ignore those cipher suites and process the remaining ones as "
-                            + "usual. [...]"
-                            + "A server receiving a ClientHello MUST correctly ignore all "
-                            + "unrecognized cipher suites, extensions, and other parameters. "
-                            + "Otherwise, it may fail to interoperate with newer clients.")
-    @RFC(number = 8446, section = "4.1.2 Client Hello and 9.3. Protocol Invariants")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @AnvilTest
     public void includeUnknownCipherSuite(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -74,14 +54,7 @@ public class ClientHello extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest(
-            description =
-                    "In TLS 1.3, the client indicates its version preferences "
-                            + "in the \"supported_versions\" extension (Section 4.2.1) and the legacy_version "
-                            + "field MUST be set to 0x0303, which is the version number for TLS 1.2.")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest
     @EnforcedSenderRestriction
     public void invalidLegacyVersion_higher(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -96,14 +69,7 @@ public class ClientHello extends Tls13Test {
         runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "In TLS 1.3, the client indicates its version preferences "
-                            + "in the \"supported_versions\" extension (Section 4.2.1) and the legacy_version "
-                            + "field MUST be set to 0x0303, which is the version number for TLS 1.2.")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest
     @EnforcedSenderRestriction
     public void invalidLegacyVersion_lower(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -118,18 +84,7 @@ public class ClientHello extends Tls13Test {
         runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send a "
-                            + "ClientHello.legacy_version or ServerHello.legacy_version "
-                            + "set to 0x0300 or less. Any endpoint receiving a Hello message with "
-                            + "ClientHello.legacy_version or ServerHello.legacy_version set to 0x0300 "
-                            + "MUST abort the handshake with a \"protocol_version\" alert.")
-    @RFC(number = 8446, section = "D.5. Security Restrictions Related to Backward Compatibility")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest
     public void invalidLegacyVersion_ssl30(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -143,17 +98,7 @@ public class ClientHello extends Tls13Test {
         runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "For every TLS 1.3 ClientHello, this vector MUST contain "
-                            + "exactly one byte, set to zero, which corresponds to the \"null\" compression method in prior "
-                            + "versions of TLS. If a TLS 1.3 ClientHello is received with any other value in this field, "
-                            + "the server MUST abort the handshake with an \"illegal_parameter\" alert.")
-    @RFC(number = 8446, section = "4.1.2 Client Hello and 9.3. Protocol Invariants")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AnvilTest
     public void invalidCompression(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -176,17 +121,7 @@ public class ClientHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Servers MUST ignore unrecognized extensions. [...]"
-                            + "A server receiving a ClientHello MUST correctly ignore all "
-                            + "unrecognized cipher suites, extensions, and other parameters. "
-                            + "Otherwise, it may fail to interoperate with newer clients.")
-    @RFC(number = 8446, section = "4.1.2 Client Hello and 9.3. Protocol Invariants")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @SecurityCategory(SeverityLevel.MEDIUM)
+    @AnvilTest
     public void includeUnknownExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -225,25 +160,8 @@ public class ClientHello extends Tls13Test {
 
     // there is an omitSignatureAlgorithms test in SignatureAlgorithms
 
-    @AnvilTest(
-            description =
-                    "A client is considered to be attempting to negotiate using this "
-                            + "specification if the ClientHello contains a \"supported_versions\" "
-                            + "extension with 0x0304 contained in its body.  Such a ClientHello "
-                            + "message MUST meet the following requirements: [...]"
-                            + "If not containing a \"pre_shared_key\" extension, it MUST contain "
-                            + "both a \"signature_algorithms\" extension and a \"supported_groups\" "
-                            + "extension. [...]"
-                            + "If containing a \"supported_groups\" extension, it MUST also contain "
-                            + "a \"key_share\" extension, and vice versa.[...]"
-                            + "Servers receiving a ClientHello which does not conform to these "
-                            + "requirements MUST abort the handshake with a \"missing_extension\" "
-                            + "alert.")
-    @RFC(number = 8446, section = "9.2.  Mandatory-to-Implement Extensions")
+    @AnvilTest
     @ExcludeParameter("NAMED_GROUP")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void omitKeyShareAndSupportedGroups(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -267,25 +185,8 @@ public class ClientHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "A client is considered to be attempting to negotiate using this "
-                            + "specification if the ClientHello contains a \"supported_versions\" "
-                            + "extension with 0x0304 contained in its body.  Such a ClientHello "
-                            + "message MUST meet the following requirements: [...]"
-                            + "If not containing a \"pre_shared_key\" extension, it MUST contain "
-                            + "both a \"signature_algorithms\" extension and a \"supported_groups\" "
-                            + "extension. [...]"
-                            + "If containing a \"supported_groups\" extension, it MUST also contain "
-                            + "a \"key_share\" extension, and vice versa.[...]"
-                            + "Servers receiving a ClientHello which does not conform to these "
-                            + "requirements MUST abort the handshake with a \"missing_extension\" "
-                            + "alert.")
-    @RFC(number = 8446, section = "9.2.  Mandatory-to-Implement Extensions")
+    @AnvilTest
     @ExcludeParameter("NAMED_GROUP")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void omitKeyShare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -294,24 +195,7 @@ public class ClientHello extends Tls13Test {
         performMissingExtensionTest(config, runner);
     }
 
-    @AnvilTest(
-            description =
-                    "A client is considered to be attempting to negotiate using this "
-                            + "specification if the ClientHello contains a \"supported_versions\" "
-                            + "extension with 0x0304 contained in its body.  Such a ClientHello "
-                            + "message MUST meet the following requirements: [...]"
-                            + "If not containing a \"pre_shared_key\" extension, it MUST contain "
-                            + "both a \"signature_algorithms\" extension and a \"supported_groups\" "
-                            + "extension. [...]"
-                            + "If containing a \"supported_groups\" extension, it MUST also contain "
-                            + "a \"key_share\" extension, and vice versa.[...]"
-                            + "Servers receiving a ClientHello which does not conform to these "
-                            + "requirements MUST abort the handshake with a \"missing_extension\" "
-                            + "alert.")
-    @RFC(number = 8446, section = "9.2.  Mandatory-to-Implement Extensions")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
+    @AnvilTest
     @Tag("new")
     public void omitSupportedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -320,13 +204,8 @@ public class ClientHello extends Tls13Test {
         performMissingExtensionTest(config, runner);
     }
 
-    @AnvilTest(
-            description =
-                    "Note that TLS 1.3 servers might receive TLS 1.2 or prior ClientHellos which contain other compression methods and (if negotiating such a prior version) MUST follow the procedures for the appropriate prior version of TLS.")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
     public void acceptsCompressionListForLegacyClient(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

@@ -29,19 +29,12 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 6066, section = "4. Maximum Fragment Length Negotiation")
 @ServerTest
 public class MaximumFragmentLength extends Tls12Test {
 
@@ -58,13 +51,7 @@ public class MaximumFragmentLength extends Tls12Test {
         return ConditionEvaluationResult.disabled("Target does not support the Extension");
     }
 
-    @AnvilTest(
-            description =
-                    "If a server receives a maximum fragment length negotiation request for "
-                            + "a value other than the allowed values, it MUST abort the handshake with an \"illegal_parameter\" alert.")
-    @HandshakeCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AnvilTest
     @MethodCondition(method = "targetCanBeTested")
     public void invalidMaximumFragmentLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -92,15 +79,7 @@ public class MaximumFragmentLength extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Once a maximum fragment length other than 2^14 has been successfully "
-                            + "negotiated, the client and server MUST immediately begin fragmenting "
-                            + "messages (including handshake messages) to ensure that no fragment "
-                            + "larger than the negotiated length is sent.")
-    @HandshakeCategory(SeverityLevel.LOW)
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AnvilTest
     @MethodCondition(method = "targetCanBeTested")
     @Tag("new")
     public void respectsNegotiatedMaxFragmentLength(

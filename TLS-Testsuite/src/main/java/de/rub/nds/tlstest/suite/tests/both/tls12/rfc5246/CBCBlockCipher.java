@@ -9,12 +9,7 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import static org.junit.Assert.assertTrue;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
-import de.rub.nds.anvilcore.annotation.IncludeParameter;
-import de.rub.nds.anvilcore.annotation.IncludeParameters;
-import de.rub.nds.anvilcore.annotation.ValueConstraint;
-import de.rub.nds.anvilcore.annotation.ValueConstraints;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -30,20 +25,11 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5246, section = "6.2.3.2 CBC Block Cipher")
 public class CBCBlockCipher extends Tls12Test {
 
     // tests are supposed to test validity with different padding sizes etc
@@ -52,23 +38,13 @@ public class CBCBlockCipher extends Tls12Test {
         return lengthCandidate >= 50;
     }
 
-    @AnvilTest(
-            description =
-                    "Each uint8 in the padding data "
-                            + "vector MUST be filled with the padding length value. The receiver "
-                            + "MUST check this padding and MUST use the bad_record_mac alert to "
-                            + "indicate padding errors.")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
-    @SecurityCategory(SeverityLevel.HIGH)
     @IncludeParameters({@IncludeParameter("APP_MSG_LENGHT"), @IncludeParameter("PADDING_BITMASK")})
     @ValueConstraints({@ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC")})
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    @CryptoCategory(SeverityLevel.CRITICAL)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void invalidCBCPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();
@@ -97,15 +73,8 @@ public class CBCBlockCipher extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "bad_record_mac[...]This alert also MUST be returned if an alert is sent because "
-                            + "a TLSCiphertext decrypted in an invalid way: either it wasn’t an "
-                            + "even multiple of the block length, or its padding values, when "
-                            + "checked, weren’t correct.")
-    @RFC(number = 5246, section = "7.2.2. Error Alerts")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
-    @SecurityCategory(SeverityLevel.HIGH)
     @IncludeParameter("CIPHERTEXT_BITMASK")
     @ValueConstraints({
         @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
@@ -113,10 +82,6 @@ public class CBCBlockCipher extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    @CryptoCategory(SeverityLevel.CRITICAL)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void invalidCipherText(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();
@@ -161,13 +126,8 @@ public class CBCBlockCipher extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "bad_record_mac[...]This alert is returned if a record is received with an incorrect "
-                            + "MAC.")
-    @RFC(number = 5246, section = "7.2.2. Error Alerts")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
-    @SecurityCategory(SeverityLevel.HIGH)
     @IncludeParameter("MAC_BITMASK")
     @ValueConstraints({
         @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
@@ -175,10 +135,6 @@ public class CBCBlockCipher extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    @CryptoCategory(SeverityLevel.HIGH)
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void invalidMAC(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] bitmask = parameterCombination.buildBitmask();
@@ -206,20 +162,11 @@ public class CBCBlockCipher extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "A sequence number is incremented after each "
-                            + "record: specifically, the first record transmitted under a "
-                            + "particular connection state MUST use sequence number 0.")
-    @RFC(number = 5246, section = "6.1. Connection States")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
     @ValueConstraints({
         @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
     })
-    @CryptoCategory(SeverityLevel.MEDIUM)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
     @Tag("new")
     public void checkReceivedMac(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

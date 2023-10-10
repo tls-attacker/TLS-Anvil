@@ -9,36 +9,20 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import static org.junit.Assert.assertTrue;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.ClientTest;
-import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
-import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
-import de.rub.nds.anvilcore.annotation.MethodCondition;
-import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
-import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
-import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
-import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivation;
@@ -51,11 +35,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 8446, section = "4.2.3. Signature Algorithms")
 @ClientTest
 public class SignatureAlgorithms extends Tls13Test {
 
@@ -68,20 +50,8 @@ public class SignatureAlgorithms extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
 
-    @AnvilTest(
-            description =
-                    "Note that TLS 1.2 defines this extension differently.  TLS 1.3 "
-                            + "implementations willing to negotiate TLS 1.2 MUST behave in "
-                            + "accordance with the requirements of [RFC5246] when negotiating that "
-                            + "version. In particular:[...]"
-                            + "ECDSA signature schemes align with TLS 1.2's ECDSA hash/signature "
-                            + "pairs.  However, the old semantics did not constrain the signing "
-                            + "curve.  If TLS 1.2 is negotiated, implementations MUST be prepared "
-                            + "to accept a signature that uses any curve that they advertised in "
-                            + "the \"supported_groups\" extension.")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
-    @HandshakeCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ExplicitModelingConstraints(
@@ -99,19 +69,8 @@ public class SignatureAlgorithms extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest(
-            description =
-                    "Note that TLS 1.2 defines this extension differently.  TLS 1.3 "
-                            + "implementations willing to negotiate TLS 1.2 MUST behave in "
-                            + "accordance with the requirements of [RFC5246] when negotiating that "
-                            + "version. In particular:[...]"
-                            + "Implementations that advertise support for RSASSA-PSS (which is "
-                            + "mandatory in TLS 1.3) MUST be prepared to accept a signature using "
-                            + "that scheme even when TLS 1.2 is negotiated.  In TLS 1.2, "
-                            + "RSASSA-PSS is used with RSA cipher suites.")
+    @AnvilTest
     @ModelFromScope(modelType = "CERTIFICATE")
-    @HandshakeCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @DynamicValueConstraints(
@@ -125,19 +84,7 @@ public class SignatureAlgorithms extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    @Test
-    @TestDescription(
-            "Note that TLS 1.2 defines this extension differently.  TLS 1.3 "
-                    + "implementations willing to negotiate TLS 1.2 MUST behave in "
-                    + "accordance with the requirements of [RFC5246] when negotiating that "
-                    + "version. In particular:[...]"
-                    + "In TLS 1.2, the extension contained hash/signature pairs.  The "
-                    + "pairs are encoded in two octets, so SignatureScheme values have "
-                    + "been allocated to align with TLS 1.2's encoding.  Some legacy "
-                    + "pairs are left unallocated.  These algorithms are deprecated as of "
-                    + "TLS 1.3.  They MUST NOT be offered or negotiated by any "
-                    + "implementation.  In particular, MD5 [SLOTH], SHA-224, and DSA "
-                    + "MUST NOT be used.")
+    @NonCombinatorialAnvilTest
     @Tag("new")
     public void noDeprecatedAlgorithmsOffered() {
         ClientFeatureExtractionResult extractionResult =

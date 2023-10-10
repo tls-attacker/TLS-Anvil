@@ -25,38 +25,20 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-@RFC(number = 8446, section = "4.1.1 Cryptographic Negotiation")
 public class CryptographicNegotiation extends Tls13Test {
 
-    @AnvilTest(
-            description =
-                    "If no "
-                            + "common cryptographic parameters can be negotiated, the server MUST "
-                            + "abort the handshake with an appropriate alert.[...] "
-                            + "If there is no overlap between the received "
-                            + "\"supported_groups\" and the groups supported by the server, then the "
-                            + "server MUST abort the handshake with a \"handshake_failure\" or an "
-                            + "\"insufficient_security\" alert.")
-    @RFC(number = 8446, section = "2.1.  Incorrect DHE Share and 4.1.1 Cryptographic Negotiation")
+    @AnvilTest
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
         @ExcludeParameter("NAMED_GROUP")
     })
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
     // Todo: add 'Groups' to method name
     public void noOverlappingParameters(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -81,18 +63,11 @@ public class CryptographicNegotiation extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "If the server is unable to negotiate a supported set of parameters "
-                            + "(i.e., there is no overlap between the client and server parameters), it MUST abort "
-                            + "the handshake with either a \"handshake_failure\" or \"insufficient_security\" fatal alert (see Section 6).")
+    @AnvilTest
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
         @ExcludeParameter("CIPHER_SUITE")
     })
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
     @Tag("new")
     public void noOverlappingParametersCipherSuite(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

@@ -16,11 +16,7 @@ import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.ExtensionType;
-import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
@@ -32,34 +28,17 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseCipherSuiteDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseExtensionDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseNamedGroupDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseProtocolVersionDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseSigHashDerivation;
+import de.rub.nds.tlstest.framework.model.derivationParameter.*;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
-@RFC(number = 8701, section = "3.1 Client Behavior")
 public class ServerInitiatedExtensionPoints extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "Clients MUST reject GREASE values when negotiated by the server. "
-                            + "In particular, the client MUST fail the connection "
-                            + "if a GREASE value appears in any of the following: "
-                            + "[...] The \"version\" value in a ServerHello or HelloRetryRequest")
+    @AnvilTest
     @IncludeParameter("GREASE_PROTOCOL_VERSION")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -87,16 +66,9 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Clients MUST reject GREASE values when negotiated by the server. "
-                            + "In particular, the client MUST fail the connection "
-                            + "if a GREASE value appears in any of the following: "
-                            + "[...] The \"cipher_suite\" value in a ServerHello")
+    @AnvilTest
     @ExcludeParameter("CIPHER_SUITE")
     @IncludeParameter("GREASE_CIPHERSUITE")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         CipherSuite greaseCipher =
@@ -113,15 +85,8 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Clients MUST reject GREASE values when negotiated by the server. "
-                            + "In particular, the client MUST fail the connection "
-                            + "if a GREASE value appears in any of the following: "
-                            + "[...] Any ServerHello extension")
+    @AnvilTest
     @IncludeParameter("GREASE_EXTENSION")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void sendServerHelloGreaseExtension(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -139,20 +104,10 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Clients MUST reject GREASE values when negotiated by the server. "
-                            + "In particular, the client MUST fail the connection "
-                            + "if a GREASE value appears in any of the following: "
-                            + "[...] The \"namedcurve\" value in a ServerKeyExchange for an Ephemeral "
-                            + "Elliptic Curve Diffie-Hellman (ECDHE) cipher in TLS 1.2 [RFC5246] "
-                            + "or earlier")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
     @ExcludeParameter("NAMED_GROUP")
     @IncludeParameter("GREASE_NAMED_GROUP")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
     public void selectGreaseNamedGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -169,17 +124,9 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Clients MUST reject GREASE values when negotiated by the server. "
-                            + "In particular, the client MUST fail the connection "
-                            + "if a GREASE value appears in any of the following: "
-                            + "[...] The signature algorithm in a ServerKeyExchange signature in TLS 1.2 or earlier")
+    @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
     @IncludeParameter("GREASE_SIG_HASH")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
     public void selectGreaseSignatureAlgorithm(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

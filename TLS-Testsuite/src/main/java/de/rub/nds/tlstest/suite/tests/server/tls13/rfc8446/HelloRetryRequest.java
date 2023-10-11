@@ -15,12 +15,14 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
+import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
@@ -350,6 +352,20 @@ public class HelloRetryRequest extends Tls13Test {
         secondHelloTrace
                 .getFirstSendMessage(ClientHelloMessage.class)
                 .setRandom(Modifiable.explicit(fixedRandom));
+
+        // In middlebox compatibility mode, a CCS message is sent
+        // immediately after a ServerHello/HelloRetryRequest message. Since the
+        // workflow trace considers the CCS message optional, it does not wait
+        // for CCS before executing the SendAction. In this case, the CSS is received
+        // in the second ReceiveAction. Therefore, an optional CCS option must be
+        // allowed in the second receive action. A CCS message after the
+        // second ServerHello is invalid, though.
+        ChangeCipherSpecMessage optionalCCSMessage = new ChangeCipherSpecMessage();
+        optionalCCSMessage.setRequired(false);
+
+        ReceiveAction firstReceive = (ReceiveAction) secondHelloTrace.getFirstReceivingAction();
+        firstReceive.getExpectedMessages().removeIf(msg -> msg instanceof ChangeCipherSpecMessage);
+        firstReceive.getExpectedMessages().add(0, optionalCCSMessage);
 
         workflowTrace.addTlsActions(secondHelloTrace.getTlsActions());
         return workflowTrace;

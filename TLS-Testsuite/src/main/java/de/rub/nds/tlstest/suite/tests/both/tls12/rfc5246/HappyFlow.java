@@ -26,7 +26,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @Tag("happyflow12")
 public class HappyFlow extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-jsdAL1vDy5")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void happyFlow(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

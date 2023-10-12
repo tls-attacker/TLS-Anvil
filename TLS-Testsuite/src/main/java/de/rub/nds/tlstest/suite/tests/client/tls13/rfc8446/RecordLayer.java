@@ -42,7 +42,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class RecordLayer extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-i8hwrTotPM")
     @EnforcedSenderRestriction
     public void zeroLengthRecord_ServerHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -65,7 +65,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-2R6GNvoUEs")
     public void zeroLengthRecord_Finished(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -95,7 +95,7 @@ public class RecordLayer extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not support Record fragmentation");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-BbKKCCtSdd")
     @ExcludeParameter("RECORD_LENGTH")
     @IncludeParameter("ALERT")
     @MethodCondition(method = "supportsRecordFragmentation")
@@ -145,7 +145,7 @@ public class RecordLayer extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-m6iEnsoJCw")
     @IncludeParameter("CHOSEN_HANDSHAKE_MSG")
     @ExcludeParameter("RECORD_LENGTH")
     @ExplicitValues(
@@ -197,7 +197,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-VNQgpDNZVS")
     @ExcludeParameter("RECORD_LENGTH")
     @Tag("new")
     public void incompleteCertVerifyBeforeFinished(

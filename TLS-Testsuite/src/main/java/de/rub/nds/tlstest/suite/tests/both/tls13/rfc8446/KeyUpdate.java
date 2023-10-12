@@ -34,7 +34,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class KeyUpdate extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-KAEXNq6tsi")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void sendKeyUpdateBeforeFinished(
@@ -56,7 +56,7 @@ public class KeyUpdate extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-Dy4H1oQ8bc")
     @Tag("new")
     public void sendUnknownRequestMode(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -75,7 +75,7 @@ public class KeyUpdate extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-J6tVdjJCzF")
     @Tag("new")
     public void respondsWithValidKeyUpdate(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -114,7 +114,7 @@ public class KeyUpdate extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-fFh7mHrXow")
     @Tag("new")
     public void appDataUnderNewKeysSucceeds(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

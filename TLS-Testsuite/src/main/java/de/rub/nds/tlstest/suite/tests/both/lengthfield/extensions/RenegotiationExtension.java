@@ -30,7 +30,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-oU4NN7JA83")
     @ExcludeParameter("INCLUDE_RENEGOTIATION_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void renegotiationExtensionLengthTLS12(
@@ -44,7 +44,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-iqfnLSxRsR")
     @ExcludeParameter("INCLUDE_RENEGOTIATION_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void renegotiationExtensionLengthTLS13(
@@ -58,7 +58,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-AxKvemiN6n")
     @ExcludeParameter("INCLUDE_RENEGOTIATION_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void renegotiationExtensionInfoLengthTLS12(

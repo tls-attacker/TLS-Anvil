@@ -15,7 +15,7 @@ import java.util.List;
 
 public class A5CipherSuite extends Tls12Test {
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "5246-eFjEfmd5DJ")
     public void negotiateTLS_NULL_WITH_NULL_NULL() {
         List<CipherSuite> suites =
                 new ArrayList<>(context.getFeatureExtractionResult().getCipherSuites());
@@ -25,7 +25,7 @@ public class A5CipherSuite extends Tls12Test {
     }
 
     /*@AnvilTest*/
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "5246-Tc1PNh8yZh")
     public void anonCipherSuites() {
         List<CipherSuite> suites =
                 new ArrayList<>(context.getFeatureExtractionResult().getCipherSuites());

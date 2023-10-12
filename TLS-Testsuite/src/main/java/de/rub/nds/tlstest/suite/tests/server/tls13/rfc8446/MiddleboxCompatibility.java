@@ -45,7 +45,7 @@ public class MiddleboxCompatibility extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not send a Hello Retry Request");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-bgegNHeUgg")
     @Tag("new")
     public void respectsClientCompatibilityWish(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -80,7 +80,7 @@ public class MiddleboxCompatibility extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-vUL6yuqsbj")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     @Tag("new")
     public void respectsClientCompatibilityWishWithHrr(

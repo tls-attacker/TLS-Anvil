@@ -36,7 +36,7 @@ public class PreSharedKeyExchangeModes extends Tls13Test {
         return ConditionEvaluationResult.disabled("PSKModeExtension is not supported");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-t4AtKzmU9J")
     @MethodCondition(method = "supportsPSKModeExtension")
     public void sendPSKModeExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

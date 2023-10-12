@@ -27,7 +27,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class ProhibitingSSLv2 extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "6176-KmcHZWR21g")
     @EnforcedSenderRestriction
     public void sendSSL2CompatibleClientHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -41,7 +41,7 @@ public class ProhibitingSSLv2 extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "6176-UvTTXNibXJ")
     public void sendClientHelloVersionLower0300(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

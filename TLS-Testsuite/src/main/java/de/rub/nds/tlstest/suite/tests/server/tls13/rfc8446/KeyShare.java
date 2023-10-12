@@ -51,7 +51,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class KeyShare extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-9hMnjrCbMV")
     @ExcludeParameter("NAMED_GROUP")
     /*
         Servers MAY check for violations of these rules and abort the
@@ -103,7 +103,7 @@ public class KeyShare extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-R2rb1WZoQo")
     public void serverOnlyOffersOneKeyshare(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -119,7 +119,7 @@ public class KeyShare extends Tls13Test {
         performOneKeyshareTest(c, runner);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-TKn1mNn5mY")
     @ExcludeParameter("NAMED_GROUP")
     public void serverOnlyOffersOneKeyshareAllGroupsAtOnce(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -178,7 +178,7 @@ public class KeyShare extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-KdkvUJX3HK")
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getLegacyGroups")
     public void serverAcceptsDeprecatedGroups(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -188,7 +188,7 @@ public class KeyShare extends Tls13Test {
         performDeprecatedGroupsTest(c, runner);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-1vps8J91dU")
     @ExcludeParameter("NAMED_GROUP")
     public void serverAcceptsDeprecatedGroupsAllAtOnce(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -235,7 +235,7 @@ public class KeyShare extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-tCzswEB5Ua")
     public void includeUnknownGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -262,7 +262,7 @@ public class KeyShare extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-Pew9n1pYvc")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
     @Tag("new")
     public void rejectsPointsNotOnCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -311,7 +311,7 @@ public class KeyShare extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-5Vqv9qrKQQ")
     @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
     @ManualConfig(identifiers = "FFDHE_SHARE_OUT_OF_BOUNDS")
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getFfdheGroups")
@@ -366,7 +366,7 @@ public class KeyShare extends Tls13Test {
         return derivationParameters;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-sa4RjSVVNr")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
     @Tag("new")
     public void abortsWhenSharedSecretIsZero(

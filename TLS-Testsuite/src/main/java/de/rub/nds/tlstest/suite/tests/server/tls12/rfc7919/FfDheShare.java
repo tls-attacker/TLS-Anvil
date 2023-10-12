@@ -68,7 +68,7 @@ public class FfDheShare extends Tls12Test {
         return ConditionEvaluationResult.disabled("Target does not support DHE Cipher Suites");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7919-1GQ8w3rdqd")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
     @ManualConfig(identifiers = "FFDHE_SHARE_OUT_OF_BOUNDS")
@@ -131,7 +131,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7919-pPnKVL1dfj")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     @MethodCondition(method = "supportsDheCipherSuiteAndNamedGroups")
     @Tag("new")
@@ -172,7 +172,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7919-5qMeS9hJ7K")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     @ExcludeParameter("NAMED_GROUP")
     @MethodCondition(method = "supportsNamedFfdheGroups")
@@ -200,7 +200,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7919-poUc9K3yfd")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getSupportedFfdheNamedGroups")
     @ManualConfig(identifiers = "NAMED_GROUP")
@@ -228,7 +228,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7919-stXkxYBEVU")
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @Tag("new")
     public void doesNotNegotiateDheCipherSuiteWhenNotOffered(

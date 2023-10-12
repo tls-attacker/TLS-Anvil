@@ -36,7 +36,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class ServerHello extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-zgsrCx4EDP")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void testSessionId(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -74,7 +74,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-2yeDE1Bso6")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExcludeParameter("CIPHER_SUITE")
     public void testCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -94,7 +94,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-oEdBWdqUnm")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void testCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -117,7 +117,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-TyxxKdqwv3")
     @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void testRandomDowngradeValue(

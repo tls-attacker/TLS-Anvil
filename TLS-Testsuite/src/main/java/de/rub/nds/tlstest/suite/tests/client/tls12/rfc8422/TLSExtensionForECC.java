@@ -55,7 +55,7 @@ public class TLSExtensionForECC extends Tls12Test {
         return ConditionEvaluationResult.enabled("");
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8422-exVPmQoGGM")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     @Tag("adjusted")
     public void invalidPointFormat() {
@@ -94,7 +94,7 @@ public class TLSExtensionForECC extends Tls12Test {
         }
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8422-zPzy3N3kzG")
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     public void offeredDeprecatedGroup() {
         boolean deprecated = false;
@@ -135,7 +135,7 @@ public class TLSExtensionForECC extends Tls12Test {
         return false;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8422-A5SiH3AcVB")
     @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
@@ -171,7 +171,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8422-nGxjfcCt1i")
     @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
@@ -207,7 +207,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8422-DknikJ9VC5")
     @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
     @KeyExchange(
@@ -235,7 +235,7 @@ public class TLSExtensionForECC extends Tls12Test {
                         });
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8422-jJBYYpiKBH")
     @MethodCondition(method = "doesNotOfferEccCipherSuite")
     @Tag("new")
     public void offersExtensionsWithoutCipher() {

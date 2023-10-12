@@ -37,7 +37,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class ServerInitiatedExtensionPoints extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8701-1yNET6C4bb")
     @IncludeParameter("GREASE_PROTOCOL_VERSION")
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -66,7 +66,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-tEzdghyrj5")
     @ExcludeParameter("CIPHER_SUITE")
     @IncludeParameter("GREASE_CIPHERSUITE")
     public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -85,7 +85,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-KSVZP6dF7j")
     @IncludeParameter("GREASE_EXTENSION")
     public void sendServerHelloGreaseExtension(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -104,7 +104,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-Dct8jKkrvf")
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
     @ExcludeParameter("NAMED_GROUP")
     @IncludeParameter("GREASE_NAMED_GROUP")
@@ -124,7 +124,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-1YAGJouHo8")
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
     @IncludeParameter("GREASE_SIG_HASH")
     public void selectGreaseSignatureAlgorithm(

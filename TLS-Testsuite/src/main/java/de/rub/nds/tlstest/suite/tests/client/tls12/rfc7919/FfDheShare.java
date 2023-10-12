@@ -61,7 +61,7 @@ public class FfDheShare extends Tls12Test {
                 "Target does not support both FFDHE and EC NamedGroups");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7919-vE2y2kZU5J")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
@@ -102,7 +102,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "7919-D3SJNRC99x")
     @MethodCondition(method = "supportsFfdheAndEcNamedGroups")
     @Tag("new")
     public void listsCurvesAndFfdheCorrectly() {
@@ -112,7 +112,7 @@ public class FfDheShare extends Tls12Test {
                 context.getFeatureExtractionResult().getNamedGroups().isEmpty());
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7919-ZZzQLMYM3L")
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getSupportedFfdheNamedGroups")
     @ManualConfig(identifiers = "NAMED_GROUP")
     @ExplicitModelingConstraints(
@@ -140,7 +140,7 @@ public class FfDheShare extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7919-64FAvRFA4A")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     @ExcludeParameter("NAMED_GROUP")
     @Tag("new")

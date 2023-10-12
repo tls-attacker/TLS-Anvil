@@ -22,7 +22,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class ClientCertificateMessage extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-JwYcazUHHv")
     public void clientMustSendCertMsg(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

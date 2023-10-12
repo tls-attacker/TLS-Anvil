@@ -44,7 +44,7 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-p6RPJ7GabA")
     @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
@@ -60,7 +60,7 @@ public class EncryptThenMacExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-1y1FTzJRE5")
     @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void encryptThenMacExtensionLengthTLS13(

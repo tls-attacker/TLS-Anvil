@@ -37,7 +37,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class DoNotUseSSLVersion30 extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "7568-SxJGaYDNfG")
     public void sendClientHelloVersion0300(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -68,7 +68,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7568-4aw1KUVQi9")
     @IncludeParameter("PROTOCOL_VERSION")
     // we can't retain the version across all records if we don't know how
     // many are required
@@ -103,7 +103,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7568-6CdJpT15w2")
     @IncludeParameter("PROTOCOL_VERSION")
     // we can't retain the version across all records if we don't know how
     // many are required

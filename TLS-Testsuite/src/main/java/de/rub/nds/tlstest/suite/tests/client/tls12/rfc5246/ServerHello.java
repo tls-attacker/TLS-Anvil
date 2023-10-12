@@ -36,7 +36,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class ServerHello extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-YnrTYxwh4n")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void sendAdditionalExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -112,7 +112,7 @@ public class ServerHello extends Tls12Test {
         return !proposedCompressionMethods.contains(compressionMethod);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-UXM2CG5DPA")
     @IncludeParameter("COMPRESSION_METHOD")
     @DynamicValueConstraints(
             affectedIdentifiers = "COMPRESSION_METHOD",

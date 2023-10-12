@@ -30,7 +30,7 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 @ClientTest
 public class ClientHello extends Tls12Test {
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "5246-kUgwh5Nkzn")
     public void supportsNullCompressionMethod() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         byte[] compression = clientHelloMessage.getCompressions().getValue();
@@ -43,7 +43,7 @@ public class ClientHello extends Tls12Test {
         assertTrue("ClientHello does not contain compression method null", containsZero);
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "5246-iAJbTqtHyt")
     public void offersNonNullCompressionMethod() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         byte[] compression = clientHelloMessage.getCompressions().getValue();
@@ -66,7 +66,7 @@ public class ClientHello extends Tls12Test {
                 : ConditionEvaluationResult.enabled("");
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "5246-D6cXH2VnPy")
     @MethodCondition(method = "sentSignatureAndHashAlgorithmsExtension")
     public void offeredSignatureAlgorithmsForAllCipherSuites() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
@@ -124,7 +124,7 @@ public class ClientHello extends Tls12Test {
                 proposedCipherSuites.isEmpty());
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "5246-booCra12We")
     @Tag("new")
     public void checkExtensions() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();

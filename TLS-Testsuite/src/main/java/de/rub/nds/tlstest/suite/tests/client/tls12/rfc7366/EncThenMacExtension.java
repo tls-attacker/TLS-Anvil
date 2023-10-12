@@ -52,7 +52,7 @@ public class EncThenMacExtension extends Tls12Test {
         }
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7366-rCfTYbGUus")
     @MethodCondition(method = "supportsExtension")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNotBlockCipher")
     @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
@@ -74,7 +74,7 @@ public class EncThenMacExtension extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7366-2aUxJrnngy")
     @MethodCondition(method = "supportsExtension")
     @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isBlockCipher")

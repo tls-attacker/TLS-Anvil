@@ -56,7 +56,7 @@ public class ALPNExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-MNJikTAwVv")
     @ExcludeParameter("INCLUDE_ALPN_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
@@ -70,7 +70,7 @@ public class ALPNExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-3D5DbZQNVB")
     @ExcludeParameter("INCLUDE_ALPN_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "contentCanBeTested")
@@ -83,7 +83,7 @@ public class ALPNExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-yU3WPbhb9z")
     @ExcludeParameter("INCLUDE_ALPN_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
@@ -97,7 +97,7 @@ public class ALPNExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-47Go2svX7H")
     @ExcludeParameter("INCLUDE_ALPN_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "contentCanBeTested")

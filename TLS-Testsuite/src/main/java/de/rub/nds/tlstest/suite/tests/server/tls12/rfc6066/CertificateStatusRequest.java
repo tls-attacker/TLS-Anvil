@@ -27,7 +27,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class CertificateStatusRequest extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "6066-JyjogiVdHS")
     public void doesNotSendUnrequestedCertificateStatus(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

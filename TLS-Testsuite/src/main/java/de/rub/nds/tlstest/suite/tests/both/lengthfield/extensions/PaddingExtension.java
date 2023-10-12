@@ -28,7 +28,7 @@ public class PaddingExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-thAfdtNTPh")
     @ExcludeParameter("INCLUDE_PADDING_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void paddingExtensionLengthTLS12(
@@ -41,7 +41,7 @@ public class PaddingExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-a56v24NnM5")
     @ExcludeParameter("INCLUDE_PADDING_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void paddingExtensionLengthTLS13(

@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Tag;
 @ClientTest
 public class SupportedCiphersuites extends Tls12Test {
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "XXX-GFtKDMr9x7")
     @Tag("ciphersuites")
     public void supportsMoreCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
@@ -44,7 +44,7 @@ public class SupportedCiphersuites extends Tls12Test {
                 supported.size());
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "XXX-DZsWLPbTuc")
     @Tag("ciphersuites")
     public void supportsLessCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();

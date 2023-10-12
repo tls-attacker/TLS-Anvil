@@ -37,7 +37,7 @@ public class CertificateVerify extends Tls12Test {
         return ConditionEvaluationResult.disabled("No client auth required");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-ZTQ27ZY8s8")
     @MethodCondition(method = "clientAuth")
     @Disabled
     public void invalidCertificateVerify(

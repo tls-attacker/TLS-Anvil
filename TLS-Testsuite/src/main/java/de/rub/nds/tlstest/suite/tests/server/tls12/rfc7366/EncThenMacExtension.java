@@ -55,7 +55,7 @@ public class EncThenMacExtension extends Tls12Test {
         return ConditionEvaluationResult.disabled("Encrypt-Then-Mac Extension not supported");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7366-rFjsKGrqCe")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isBlockCipher")
     @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @MethodCondition(method = "targetCanBeTested")
@@ -76,7 +76,7 @@ public class EncThenMacExtension extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7366-HSEGiXELMF")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNotBlockCipher")
     @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @MethodCondition(method = "targetCanBeTested")

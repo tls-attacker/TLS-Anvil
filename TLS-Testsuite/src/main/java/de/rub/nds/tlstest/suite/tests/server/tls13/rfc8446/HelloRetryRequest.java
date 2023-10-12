@@ -47,7 +47,7 @@ public class HelloRetryRequest extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not send a Hello Retry Request");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-7STiGzfK9u")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     @Tag("adjusted")
     public void helloRetryRequestValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -114,7 +114,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-aVxixR6JLE")
     @ExcludeParameter("CIPHER_SUITE")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     public void selectsSameCipherSuiteAllAtOnce(
@@ -163,7 +163,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-PqtPy7dAY2")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     public void selectsSameCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -208,7 +208,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-i5qA9bNwto")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     @Tag("new")
     public void retainsProtocolVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -251,7 +251,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-FwJUHPJFYr")
     /*
     Clients MAY send an empty client_shares vector in order to request
     group selection from the server, at the cost of an additional round

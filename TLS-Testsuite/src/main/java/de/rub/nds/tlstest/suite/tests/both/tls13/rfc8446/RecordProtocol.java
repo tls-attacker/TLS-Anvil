@@ -36,7 +36,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class RecordProtocol extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-vbFRZNusey")
     public void invalidRecordContentType(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -67,7 +67,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-PN89HSERKp")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void invalidRecordContentTypeAfterEncryption(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -96,7 +96,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-GXAiyehrdF")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("AUTH_TAG_BITMASK")
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -125,7 +125,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-n1veCSRVjQ")
     // Note that the additional byte is the encoded content type, which we also add
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExcludeParameter("RECORD_LENGTH")
@@ -165,7 +165,7 @@ public class RecordProtocol extends Tls13Test {
         return lengthCandidate >= 50;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-GNEMTQXXpq")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameters({
         @IncludeParameter("CIPHERTEXT_BITMASK"),
@@ -200,7 +200,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-i9pq4Yt8pz")
     @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
@@ -235,7 +235,7 @@ public class RecordProtocol extends Tls13Test {
         c.getDefaultServerConnection().setTimeout((int) (baseTimeout * multiplier));
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-BkyuGXzztX")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExcludeParameter("RECORD_LENGTH")
     public void sendRecordWithCiphertextOver2pow14plus256(
@@ -266,7 +266,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-aUT8tc8oYz")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("PROTOCOL_MESSAGE_TYPE")
     @Tag("emptyRecord")
@@ -291,7 +291,7 @@ public class RecordProtocol extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-BSsVDoM82Z")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void sendZeroLengthApplicationRecord(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -340,7 +340,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-EmE5eWBxE7")
     @Tag("new")
     public void sendEncryptedHandshakeRecordWithNoNonZeroOctet(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -363,7 +363,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-hKUhsUFCnx")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void sendEncryptedAppRecordWithNoNonZeroOctet(
@@ -385,7 +385,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-V3SF3rXAAW")
     @Tag("new")
     public void checkMinimumRecordProtocolVersions(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

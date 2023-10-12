@@ -26,7 +26,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class Finished extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-mEQLrje2mh")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("PRF_BITMASK")
     public void verifyFinishedMessageCorrect(

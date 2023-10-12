@@ -26,7 +26,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class Certificate extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-vN4oMaYkC6")
     public void emptyCertificateMessage(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -49,7 +49,7 @@ public class Certificate extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-cM4fvnBMce")
     public void emptyCertificateList(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 

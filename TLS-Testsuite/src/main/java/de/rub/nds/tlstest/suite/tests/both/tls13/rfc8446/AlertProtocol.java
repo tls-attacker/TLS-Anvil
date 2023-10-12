@@ -36,7 +36,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class AlertProtocol extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-VkKqN54gN1")
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(affectedIdentifiers = "ALERT", methods = "isMeantToBeFatalLevel")
     @Tag("new")
@@ -49,7 +49,7 @@ public class AlertProtocol extends Tls13Test {
         performFatalAlertWithWarningLevelTest(trace, runner, config);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-k8Fht68Dq2")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(affectedIdentifiers = "ALERT", methods = "isMeantToBeFatalLevel")
@@ -61,7 +61,7 @@ public class AlertProtocol extends Tls13Test {
         performFatalAlertWithWarningLevelTest(trace, runner, config);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-4vT4QZyhRd")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void treatsUnknownWarningAlertsAsFatalHandshake(
@@ -73,7 +73,7 @@ public class AlertProtocol extends Tls13Test {
         peformUnknownWarningAlertTest(trace, runner, config);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-Q8Xknkk2vi")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void treatsUnknownWarningAlertsAsFatalPostHandshake(
@@ -83,7 +83,7 @@ public class AlertProtocol extends Tls13Test {
         peformUnknownWarningAlertTest(trace, runner, config);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-zUe5jnQtoN")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void treatsUnknownFatalAlertsAsFatalHandshake(
@@ -95,7 +95,7 @@ public class AlertProtocol extends Tls13Test {
         peformUnknownFatalAlertTest(trace, runner, config);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-PDB3U8CTKu")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void treatsUnknownFatalAlertsAsFatalPostHandshake(
@@ -105,7 +105,7 @@ public class AlertProtocol extends Tls13Test {
         peformUnknownFatalAlertTest(trace, runner, config);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-V9hFSg6hoE")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void sendsCloseNotify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

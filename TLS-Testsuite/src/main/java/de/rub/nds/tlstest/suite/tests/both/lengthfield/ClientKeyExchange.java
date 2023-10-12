@@ -32,7 +32,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL12)
 public class ClientKeyExchange extends TlsGenericTest {
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-4iPUuT51YH")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void clientKeyExchangeLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace =
@@ -46,7 +46,7 @@ public class ClientKeyExchange extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-NFYNXBgXk8")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void clientKeyExchangePublicKeyLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

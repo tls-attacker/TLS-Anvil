@@ -50,7 +50,7 @@ public class EncryptedExtensions extends Tls13Test {
         return MaxFragmentLength.TWO_11;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-X68SWFRBVS")
     public void sendSupportedVersionsExtensionInEE(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -74,7 +74,7 @@ public class EncryptedExtensions extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-U5uSdqYohP")
     public void sendPaddingExtensionInEE(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -98,7 +98,7 @@ public class EncryptedExtensions extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-34CYsV98Fs")
     @MethodCondition(method = "sentMaximumFragmentLength")
     public void invalidMaximumFragmentLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -125,7 +125,7 @@ public class EncryptedExtensions extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-XDu7chdPTM")
     @MethodCondition(method = "sentMaximumFragmentLength")
     public void unrequestedMaximumFragmentLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

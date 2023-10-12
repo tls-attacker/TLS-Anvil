@@ -43,7 +43,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class RecordLayer extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-HWUJWNwjoA")
     @EnforcedSenderRestriction
     public void zeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -60,7 +60,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-orNs8sPcM8")
     public void zeroLengthRecord_Finished(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -102,7 +102,7 @@ public class RecordLayer extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not support Record fragmentation");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-EHgkL2huNs")
     @ExcludeParameter("RECORD_LENGTH")
     @IncludeParameter("ALERT")
     @MethodCondition(method = "supportsRecordFragmentation")
@@ -135,7 +135,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-UCLQ6PhSyy")
     @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "getRecordProtocolVersions")
     @Tag("new")
@@ -174,7 +174,7 @@ public class RecordLayer extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-qrenZekKeD")
     @Tag("new")
     public void checkRecordProtocolVersion(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

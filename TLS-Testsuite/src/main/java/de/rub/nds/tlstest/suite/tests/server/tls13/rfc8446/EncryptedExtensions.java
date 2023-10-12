@@ -40,7 +40,7 @@ public class EncryptedExtensions extends Tls13Test {
         return ConditionEvaluationResult.disabled("SNI is disabled");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-ZkFrZYKzbi")
     public void includedInvalidExtensions(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

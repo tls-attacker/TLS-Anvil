@@ -97,7 +97,7 @@ public class PreSharedKey extends Tls13Test {
         }
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-8RhYHEGBvv")
     @MethodCondition(method = "supportsPsk")
     @Tag("new")
     public void isNotLastExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -129,7 +129,7 @@ public class PreSharedKey extends Tls13Test {
         return workflowTrace;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-K5PYwUqs8E")
     @MethodCondition(method = "supportsPsk")
     @Tag("new")
     public void isLastButDuplicatedExtension(
@@ -146,7 +146,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-Hq5yKcFcmQ")
     @MethodCondition(method = "supportsPskOnlyHandshake")
     @Tag("new")
     public void respectsKeyExchangeChoicePskOnly(
@@ -180,7 +180,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-Eqo9cmGAET")
     @MethodCondition(method = "supportsPskDheHandshake")
     @Tag("new")
     public void respectsKeyExchangeChoicePskDhe(
@@ -213,7 +213,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-AGtoN1G2B3")
     @IncludeParameter("PRF_BITMASK")
     @MethodCondition(method = "supportsPsk")
     public void invalidBinder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -240,7 +240,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-1SEHo5n8WM")
     @MethodCondition(method = "supportsPsk")
     public void noBinder(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -266,7 +266,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-2eQTsmq7d1")
     @MethodCondition(method = "supportsPsk")
     public void selectedPSKIndexIsWithinOfferedListSize(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -322,7 +322,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-Yo68xBhELu")
     @MethodCondition(method = "supportsMultipleHdkfHashesAndPsk")
     @Tag("new")
     public void resumeWithCipherWithDifferentHkdfHash(
@@ -365,7 +365,7 @@ public class PreSharedKey extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-mwDQtBNg4o")
     public void sendPskExtensionWithoutPskKeyExchangeModes(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

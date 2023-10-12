@@ -42,7 +42,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-1dbRcCn9si")
     public void versionGreaterThanSupportedByServer(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -82,7 +82,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         return ConditionEvaluationResult.disabled("Does not support legacy versions");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-cBgzhL56ow")
     @MethodCondition(method = "doesSupportLegacyVersions")
     public void versionLowerThanSupportedByServer(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -120,7 +120,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-YLok6XJr7R")
     @ExcludeParameter("RECORD_LENGTH")
     public void acceptAnyRecordVersionNumber(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

@@ -31,7 +31,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class CertificateVerify extends TlsGenericTest {
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-tSjRqK81S8")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void certificateVerifyLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
@@ -44,7 +44,7 @@ public class CertificateVerify extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-PkwVF7pRQa")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void certificateVerifySignatureLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

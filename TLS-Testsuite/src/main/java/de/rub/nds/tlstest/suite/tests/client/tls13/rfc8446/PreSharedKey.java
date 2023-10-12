@@ -30,7 +30,7 @@ public class PreSharedKey extends Tls13Test {
     /*@AnvilTest. " +
     "Servers MUST check that it is the last extension and otherwise fail " +
     "the handshake with an \"illegal_parameter\" alert.")*/
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-v48HMDRHVT")
     @MethodCondition(method = "sendsPSKExtension")
     @Disabled
     public void isLastExtension() {

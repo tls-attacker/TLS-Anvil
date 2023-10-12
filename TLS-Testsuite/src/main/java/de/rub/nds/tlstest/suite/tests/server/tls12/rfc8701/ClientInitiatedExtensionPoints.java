@@ -41,7 +41,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class ClientInitiatedExtensionPoints extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8701-E4jT9RDD5y")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
@@ -74,7 +74,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-7DCDj6NnBm")
     @IncludeParameter("GREASE_EXTENSION")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
@@ -110,7 +110,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-BAMcGFuNFr")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
@@ -133,7 +133,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-ngetVmJySH")
     @IncludeParameter("GREASE_SIG_HASH")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
@@ -170,7 +170,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-SCkMwRniGX")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),

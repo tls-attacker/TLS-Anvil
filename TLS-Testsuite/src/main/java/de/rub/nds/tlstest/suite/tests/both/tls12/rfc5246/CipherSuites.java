@@ -19,7 +19,7 @@ import java.util.List;
 
 public class CipherSuites extends Tls12Test {
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "5246-jxPrq1MPSR")
     public void supportOfDeprecatedCipherSuites() {
         List<CipherSuite> suites =
                 new LinkedList<>(context.getFeatureExtractionResult().getCipherSuites());

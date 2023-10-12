@@ -44,7 +44,7 @@ public class PSKKeyExchangeModesExtension extends TlsGenericTest {
                 "Server does not issue Session Tickets and might ignore the extension");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-NaN98M5Hqd")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     public void pskKeyExchangeModesExtensionLength(
@@ -55,7 +55,7 @@ public class PSKKeyExchangeModesExtension extends TlsGenericTest {
                 runner, argumentAccessor, config, PSKKeyExchangeModesExtensionMessage.class);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-Nq22Dyhfzt")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @MethodCondition(method = "contentCanBeTested")

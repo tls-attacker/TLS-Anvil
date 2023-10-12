@@ -44,7 +44,7 @@ public class HeartbeatExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-eouPKJt7Ht")
     @ExcludeParameter("INCLUDE_HEARTBEAT_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
@@ -60,7 +60,7 @@ public class HeartbeatExtension extends TlsGenericTest {
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-dQABdv21Am")
     @ExcludeParameter("INCLUDE_HEARTBEAT_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void heartbeatExtensionLengthTLS13(

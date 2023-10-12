@@ -29,7 +29,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class Fragmentation extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-uMW2Qzjt88")
     @EnforcedSenderRestriction
     public void sendZeroLengthRecord_SH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -51,7 +51,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-FsvDkXCwAy")
     @ExcludeParameter("RECORD_LENGTH")
     public void sendHandshakeMessagesWithinSingleRecord(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

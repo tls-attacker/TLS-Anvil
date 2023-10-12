@@ -70,7 +70,7 @@ public class Resumption extends Tls12Test {
         return ConditionEvaluationResult.disabled("SNI is disabled");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-Zs3yXnQzh6")
     @MethodCondition(method = "supportsResumptionAndSniActive")
     public void rejectSniDisparityResumption(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -122,7 +122,7 @@ public class Resumption extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-JmGqP73yfy")
     @MethodCondition(method = "supportsResumptionAndSniActive")
     public void serverHelloSniInResumption(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -155,7 +155,7 @@ public class Resumption extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-5svSoN3NYm")
     @MethodCondition(method = "supportsResumption")
     @IncludeParameter("ALERT")
     @ExcludeParameter("INCLUDE_SESSION_TICKET_EXTENSION")
@@ -219,7 +219,7 @@ public class Resumption extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-qXpKD7cBiC")
     @MethodCondition(method = "supportsResumption")
     @ExcludeParameter("INCLUDE_SESSION_TICKET_EXTENSION")
     @IncludeParameter("ALERT")

@@ -33,7 +33,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
 public class ServerKeyExchange extends TlsGenericTest {
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-Z5CqDTjvni")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void serverKeyExchangeLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
@@ -46,7 +46,7 @@ public class ServerKeyExchange extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-gvZTTfnQTn")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @DynamicValueConstraints(
             affectedIdentifiers = "CIPHER_SUITE",
@@ -63,7 +63,7 @@ public class ServerKeyExchange extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-yiZVhouStn")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void serverKeyExchangePublicKeyLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -77,7 +77,7 @@ public class ServerKeyExchange extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-8852p34nEP")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     public void modulusLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -91,7 +91,7 @@ public class ServerKeyExchange extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-DVpNzSiTq5")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     public void generatorLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

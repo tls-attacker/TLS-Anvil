@@ -37,7 +37,7 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
         return lengthCandidate >= 2;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-DFJ73jUtxK")
     @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",

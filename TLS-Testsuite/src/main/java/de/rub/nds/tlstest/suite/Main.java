@@ -119,6 +119,7 @@ public class Main {
         runner.setListener(testContext);
 
         runner.runTests();
+        System.exit(0);
     }
 
     /**

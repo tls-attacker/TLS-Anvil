@@ -28,7 +28,7 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
 
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-Dtq2iEmPmd")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void signatureAndHashAlgorithmsExtensionLengthTLS12(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -41,7 +41,7 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-s6s3mWStow")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void signatureAndHashAlgorithmsExtensionLengthTLS13(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -54,7 +54,7 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-x666dC8D1Z")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void signatureAndHashAlgorithmsListLengthTLS12(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -65,7 +65,7 @@ public class SignatureAndHashAlgorithmsExtension extends TlsGenericTest {
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-Qm9jhF6Pn8")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void signatureAndHashAlgorithmsListLengthTLS13(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

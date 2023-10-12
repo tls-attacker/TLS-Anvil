@@ -50,7 +50,7 @@ public class SignatureAlgorithms extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-qibaoRRFDr")
     @ModelFromScope(modelType = "CERTIFICATE")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
@@ -69,7 +69,7 @@ public class SignatureAlgorithms extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-qNaBPZ4ofA")
     @ModelFromScope(modelType = "CERTIFICATE")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
@@ -84,7 +84,7 @@ public class SignatureAlgorithms extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-5E3CVBTFdt")
     @Tag("new")
     public void noDeprecatedAlgorithmsOffered() {
         ClientFeatureExtractionResult extractionResult =

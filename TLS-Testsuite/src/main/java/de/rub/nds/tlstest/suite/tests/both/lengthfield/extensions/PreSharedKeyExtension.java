@@ -37,7 +37,6 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @Tag("tls13")
 @TlsVersion(supported = ProtocolVersion.TLS13)
 @KeyExchange(supported = KeyExchangeType.ALL13)
-@Disabled // disabled for development, because it fails on windows
 public class PreSharedKeyExtension extends TlsGenericTest {
 
     public ConditionEvaluationResult supportsPsk() {
@@ -52,7 +51,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
         }
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-XHw8giy6m4")
     @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "supportsPsk")
@@ -65,7 +64,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-kwNxe25ef8")
     @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "supportsPsk")
@@ -78,7 +77,7 @@ public class PreSharedKeyExtension extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-4L65zmLyuG")
     @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "supportsPsk")

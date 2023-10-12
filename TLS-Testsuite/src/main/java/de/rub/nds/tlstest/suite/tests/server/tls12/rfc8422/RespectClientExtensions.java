@@ -35,7 +35,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class RespectClientExtensions extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8422-zuAGxqyDEg")
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
     public void respectChosenCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -45,7 +45,7 @@ public class RespectClientExtensions extends Tls12Test {
         constructTest(runner, c);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8422-bc43G6qpcS")
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
     public void respectChosenCurveWithoutFormats(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -56,7 +56,7 @@ public class RespectClientExtensions extends Tls12Test {
         constructTest(runner, c);
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8422-xyn7SDVFRX")
     public void respectsChosenCurveForCertificates() {
         assertTrue(
                 "The server does not respect the client's supported curves when selecting the certificate",

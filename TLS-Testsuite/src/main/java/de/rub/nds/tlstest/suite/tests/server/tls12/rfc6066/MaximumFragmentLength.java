@@ -51,7 +51,7 @@ public class MaximumFragmentLength extends Tls12Test {
         return ConditionEvaluationResult.disabled("Target does not support the Extension");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "6066-39keM8ZKdL")
     @MethodCondition(method = "targetCanBeTested")
     public void invalidMaximumFragmentLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -79,7 +79,7 @@ public class MaximumFragmentLength extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "6066-UYvTvBM1mm")
     @MethodCondition(method = "targetCanBeTested")
     @Tag("new")
     public void respectsNegotiatedMaxFragmentLength(

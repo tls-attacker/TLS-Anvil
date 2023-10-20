@@ -5,17 +5,18 @@ import Definition from '@site/src/components/Definition';
 In the following we want to discuss a test template example.
 This template aims to test if the <Definition id="SUT" /> sends the correct TLS alert, if the CBC padding is incorrect. This test works for client and servers by changing the first application message to use an invalid padding. The template is only executed when the SUT supports a CBC Cipher Suite, otherwise it is skipped. The padding error is injected into multiple positions. The positions are determined by combinatorial testing.
 
-
 ### Annotations
+
 * Line 1: Generic `TlsTest` annotation that activates the TLS-Anvil test execution lifecycle. In addition basic parameters are added automatically to the <Definition id="IPM" />.
 * Line 5-8: Those annotations modify the IPM
-    * Line 5: Changes the default IPM model
-    * Line 6: Adds additional parameters to the IPM
-    * Line 7: Adds a constraint to the Cipher Suite parameter of the IPM, so that the test only runs when a CBC Cipher Suite is selected. The `isCBC` method is called on the TLS-Attacker Cipher Suite enum.
-    * Line 8: Adds a constraint to the Record Length parameter. The `recordLengthAllowsModification` method is called on the current class (line 43), given the selected value as argument.
+  * Line 5: Changes the default IPM model
+  * Line 6: Adds additional parameters to the IPM
+  * Line 7: Adds a constraint to the Cipher Suite parameter of the IPM, so that the test only runs when a CBC Cipher Suite is selected. The `isCBC` method is called on the TLS-Attacker Cipher Suite enum.
+  * Line 8: Adds a constraint to the Record Length parameter. The `recordLengthAllowsModification` method is called on the current class (line 43), given the selected value as argument.
 * Line 9-13: Each test is annotated with categories and a severity level. Depending on the test result, a score is calculated for each test. Since it is not possible to choose the categories and severity levels objectively, those are not mentioned in our USENIX Security paper.
 
 ### Test function
+
 * Line 15: This is line basically part of every test case, it generates the TLS-Attacker `Config` that defines how the TLS-Attacker Server/Client should behave (e.g. which algorithms are offered, etc.)
 * Line 17-18: An application message is created from which the padding is invalidated. The message that is received from the config is set inside the `AppMsgLengthDerivation.applyToConfig` method.
 * Line 20-24: A bitmask is generated that xored on the padding. During the parameter value generation a byte and bit position is chosen by the combinatorial testing algorithm. From those positions the bitmask is generated during the test execution.
@@ -31,11 +32,6 @@ This template aims to test if the <Definition id="SUT" /> sends the correct TLS 
 @ScopeExtensions({DerivationType.APP_MSG_LENGHT, DerivationType.PADDING_BITMASK})
 @ValueConstraints(affectedTypes = {DerivationType.CIPHERSUITE}, methods = "isCBC")
 @DynamicValueConstraints(affectedTypes = DerivationType.RECORD_LENGTH, methods = "recordLengthAllowsModification")
-@SecurityCategory(SeverityLevel.HIGH)
-@CryptoCategory(SeverityLevel.CRITICAL)
-@RecordLayerCategory(SeverityLevel.CRITICAL)
-@AlertCategory(SeverityLevel.HIGH)
-@ComplianceCategory(SeverityLevel.HIGH)
 public void invalidCBCPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
     Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -70,3 +66,4 @@ public boolean recordLengthAllowsModification(Integer lengthCandidate) {
     return lengthCandidate >= 50;
 }
 ```
+

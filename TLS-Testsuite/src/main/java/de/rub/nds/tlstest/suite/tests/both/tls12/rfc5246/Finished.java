@@ -20,28 +20,15 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5246, section = "7.4.9 Finished")
 public class Finished extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "Recipients of Finished messages MUST verify that the contents are correct.")
+    @AnvilTest(id = "5246-mEQLrje2mh")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @SecurityCategory(SeverityLevel.CRITICAL)
     @IncludeParameter("PRF_BITMASK")
-    @HandshakeCategory(SeverityLevel.CRITICAL)
-    @CryptoCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void verifyFinishedMessageCorrect(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

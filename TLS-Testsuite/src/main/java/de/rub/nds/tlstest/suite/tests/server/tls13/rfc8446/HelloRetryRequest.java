@@ -9,11 +9,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import static org.junit.Assert.assertTrue;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.ExcludeParameter;
-import de.rub.nds.anvilcore.annotation.MethodCondition;
-import de.rub.nds.anvilcore.annotation.ServerTest;
-import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -29,12 +25,6 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -42,12 +32,10 @@ import de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests;
 import java.util.Arrays;
 import java.util.LinkedList;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-@RFC(number = 8446, section = "4.1.4 Hello Retry Request")
 public class HelloRetryRequest extends Tls13Test {
 
     public ConditionEvaluationResult sendsHelloRetryRequestForEmptyKeyShare() {
@@ -59,20 +47,7 @@ public class HelloRetryRequest extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not send a Hello Retry Request");
     }
 
-    @AnvilTest(
-            description =
-                    "The server will send this message in response to a ClientHello "
-                            + "message if it is able to find an acceptable set of parameters but the "
-                            + "ClientHello does not contain sufficient information to proceed with "
-                            + "the handshake. [...]"
-                            + "The server's extensions MUST contain \"supported_versions\". [...]"
-                            + "\"supported_versions\" is REQUIRED for all ClientHello, ServerHello, and HelloRetryRequest messages.")
-    @RFC(
-            number = 8446,
-            section = "4.1.4 Hello Retry Request and 9.2.  Mandatory-to-Implement Extensions")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
+    @AnvilTest(id = "8446-7STiGzfK9u")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     @Tag("adjusted")
     public void helloRetryRequestValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -139,16 +114,8 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Servers MUST ensure that they negotiate the "
-                            + "same cipher suite when receiving a conformant updated ClientHello")
-    @RFC(number = 8446, section = "4.2.10 Early Data Indication")
+    @AnvilTest(id = "8446-aVxixR6JLE")
     @ExcludeParameter("CIPHER_SUITE")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.MEDIUM)
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     public void selectsSameCipherSuiteAllAtOnce(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -196,14 +163,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Servers MUST ensure that they negotiate the "
-                            + "same cipher suite when receiving a conformant updated ClientHello")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "8446-PqtPy7dAY2")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     public void selectsSameCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -248,14 +208,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "The value of selected_version in the HelloRetryRequest "
-                            + "\"supported_versions\" extension MUST be retained in the ServerHello")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "8446-i5qA9bNwto")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     @Tag("new")
     public void retainsProtocolVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -298,22 +251,12 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @Test
+    @NonCombinatorialAnvilTest(id = "8446-FwJUHPJFYr")
     /*
     Clients MAY send an empty client_shares vector in order to request
     group selection from the server, at the cost of an additional round
     trip
     */
-    @RFC(number = 8446, section = "4.1.1 Cryptographic Negotiation and 4.2.8.  Key Share")
-    @TestDescription(
-            "If the server selects an (EC)DHE group and the client did not offer a "
-                    + "compatible \"key_share\" extension in the initial ClientHello, the "
-                    + "server MUST respond with a HelloRetryRequest (Section 4.1.4) message. "
-                    + "[...] Clients MAY send an empty client_shares vector in order to request "
-                    + "group selection from the server, at the cost of an additional round "
-                    + "trip")
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @InteroperabilityCategory(SeverityLevel.LOW)
     public void sentHelloRetryRequest() {
         assertTrue(
                 "No Hello Retry Request received by Scanner",

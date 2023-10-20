@@ -9,11 +9,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7366;
 
 import static org.junit.Assert.assertFalse;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.ClientTest;
-import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
-import de.rub.nds.anvilcore.annotation.ExcludeParameter;
-import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
@@ -24,12 +20,6 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -62,18 +52,10 @@ public class EncThenMacExtension extends Tls12Test {
         }
     }
 
-    @RFC(number = 7366, section = "3.  Applying Encrypt-then-MAC")
-    @AnvilTest(
-            description =
-                    "If a server receives an encrypt-then-MAC request extension from a client and then "
-                            + "selects a stream or Authenticated Encryption with Associated Data (AEAD) ciphersuite, "
-                            + "it MUST NOT send an encrypt-then-MAC response extension back to the client.")
+    @AnvilTest(id = "7366-rCfTYbGUus")
     @MethodCondition(method = "supportsExtension")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNotBlockCipher")
     @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     @EnforcedSenderRestriction
     public void sendEncThenMacExtWithNonBlockCiphers(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -92,21 +74,11 @@ public class EncThenMacExtension extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Once the use of encrypt-then-MAC has been negotiated, processing of "
-                            + "TLS/DTLS packets switches from the standard: "
-                            + "[...]encrypt( data || MAC || pad ) "
-                            + "[...]to the new:"
-                            + "[...]encrypt( data || pad ) || MAC")
-    @RFC(number = 7366, section = "3.  Applying Encrypt-then-MAC")
+    @AnvilTest(id = "7366-2aUxJrnngy")
     @MethodCondition(method = "supportsExtension")
     @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isBlockCipher")
     @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void encryptThenMacTest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddEncryptThenMacExtension(true);

@@ -28,26 +28,17 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 8446, section = "6. Alert Protocol")
 public class AlertProtocol extends Tls13Test {
 
-    @AnvilTest(
-            description =
-                    "All the alerts listed in Section 6.2 MUST be sent with AlertLevel=fatal and MUST be treated as error alerts when received regardless of the AlertLevel in the message.")
+    @AnvilTest(id = "8446-VkKqN54gN1")
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(affectedIdentifiers = "ALERT", methods = "isMeantToBeFatalLevel")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void treatsFatalAlertsAsFatalHandshake(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -58,14 +49,10 @@ public class AlertProtocol extends Tls13Test {
         performFatalAlertWithWarningLevelTest(trace, runner, config);
     }
 
-    @AnvilTest(
-            description =
-                    "All the alerts listed in Section 6.2 MUST be sent with AlertLevel=fatal and MUST be treated as error alerts when received regardless of the AlertLevel in the message.")
+    @AnvilTest(id = "8446-k8Fht68Dq2")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(affectedIdentifiers = "ALERT", methods = "isMeantToBeFatalLevel")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void treatsFatalAlertsAsFatalPostHandshake(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -74,10 +61,8 @@ public class AlertProtocol extends Tls13Test {
         performFatalAlertWithWarningLevelTest(trace, runner, config);
     }
 
-    @AnvilTest(description = "Unknown Alert types MUST be treated as error alerts.")
+    @AnvilTest(id = "8446-4vT4QZyhRd")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void treatsUnknownWarningAlertsAsFatalHandshake(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -88,10 +73,8 @@ public class AlertProtocol extends Tls13Test {
         peformUnknownWarningAlertTest(trace, runner, config);
     }
 
-    @AnvilTest(description = "Unknown Alert types MUST be treated as error alerts.")
+    @AnvilTest(id = "8446-Q8Xknkk2vi")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void treatsUnknownWarningAlertsAsFatalPostHandshake(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -100,10 +83,8 @@ public class AlertProtocol extends Tls13Test {
         peformUnknownWarningAlertTest(trace, runner, config);
     }
 
-    @AnvilTest(description = "Unknown Alert types MUST be treated as error alerts.")
+    @AnvilTest(id = "8446-zUe5jnQtoN")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void treatsUnknownFatalAlertsAsFatalHandshake(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -114,10 +95,8 @@ public class AlertProtocol extends Tls13Test {
         peformUnknownFatalAlertTest(trace, runner, config);
     }
 
-    @AnvilTest(description = "Unknown Alert types MUST be treated as error alerts.")
+    @AnvilTest(id = "8446-PDB3U8CTKu")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void treatsUnknownFatalAlertsAsFatalPostHandshake(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -126,12 +105,8 @@ public class AlertProtocol extends Tls13Test {
         peformUnknownFatalAlertTest(trace, runner, config);
     }
 
-    @AnvilTest(
-            description =
-                    "Each party MUST send a \"close_notify\" alert before closing its write side of the connection, unless it has already sent some error alert.")
+    @AnvilTest(id = "8446-V9hFSg6hoE")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void sendsCloseNotify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

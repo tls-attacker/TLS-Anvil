@@ -30,13 +30,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -44,17 +38,10 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5246, section = "7.4.1.2. Client Hello")
 @ServerTest
 public class ClientHello extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "If the list contains cipher suites the server does not recognize, support, "
-                            + "or wish to use, the server MUST ignore those cipher suites, and process the remaining ones as usual.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "5246-ST5MN96BuF")
     public void unknownCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -69,14 +56,7 @@ public class ClientHello extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest(
-            description =
-                    "This vector MUST contain, and all implementations MUST support, CompressionMethod.null. "
-                            + "Thus, a client and server will always be able to agree on a compression method.")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "5246-P4AGQWTZsM")
     public void unknownCompressionMethod(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -92,14 +72,7 @@ public class ClientHello extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @RFC(number = 5246, section = "7.4.1.4.1 Signature Algorithms")
-    @AnvilTest(
-            description =
-                    "The rules specified in [TLSEXT] "
-                            + "require servers to ignore extensions they do not understand.")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "5246-YhZ7GJjrwk")
     public void includeUnknownExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -138,11 +111,8 @@ public class ClientHello extends Tls12Test {
                         });
     }
 
-    @AnvilTest(description = "Send a ClientHello that offers many cipher suites")
+    @AnvilTest(id = "5246-RMehEjs346")
     @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void offerManyCipherSuites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -175,10 +145,7 @@ public class ClientHello extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest(
-            description =
-                    "A server MUST accept ClientHello "
-                            + "messages both with and without the extensions field")
+    @AnvilTest(id = "5246-LtPf1AMt7Y")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_ALPN_EXTENSION"),
         @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION"),
@@ -193,9 +160,6 @@ public class ClientHello extends Tls12Test {
         @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     })
     @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.RSA})
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void leaveOutExtensions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

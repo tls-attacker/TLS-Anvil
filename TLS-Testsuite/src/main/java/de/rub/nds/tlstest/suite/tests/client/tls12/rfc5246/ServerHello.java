@@ -14,20 +14,11 @@ import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.AlertDescription;
-import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
-import de.rub.nds.tlsattacker.core.constants.ExtensionType;
-import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.NameType;
+import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.EncryptThenMacExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.PaddingExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.RenegotiationInfoExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.ServerNameIndicationExtensionMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.extension.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.ServerNamePair;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
@@ -35,11 +26,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CompressionMethodDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -50,16 +36,8 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class ServerHello extends Tls12Test {
 
-    @RFC(number = 5246, section = "7.4.1.4. Hello Extensions")
-    @AnvilTest(
-            description =
-                    "If a client receives an extension type in ServerHello that it did "
-                            + "not request in the associated ClientHello, it MUST abort the handshake with an "
-                            + "unsupported_extension fatal alert.")
+    @AnvilTest(id = "5246-YnrTYxwh4n")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @HandshakeCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendAdditionalExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setAddRenegotiationInfoExtension(false);
@@ -134,18 +112,11 @@ public class ServerHello extends Tls12Test {
         return !proposedCompressionMethods.contains(compressionMethod);
     }
 
-    @AnvilTest(
-            description =
-                    "The single compression algorithm selected by the server from the "
-                            + "list in ClientHello.compression_methods.")
-    @RFC(number = 5246, section = "7.4.1.3.  Server Hello")
+    @AnvilTest(id = "5246-UXM2CG5DPA")
     @IncludeParameter("COMPRESSION_METHOD")
     @DynamicValueConstraints(
             affectedIdentifiers = "COMPRESSION_METHOD",
             methods = "isUnproposedCompressionMethod")
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
     public void selectUnproposedCompressionMethod(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

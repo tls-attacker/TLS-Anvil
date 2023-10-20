@@ -9,19 +9,14 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.statemachine;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
-import de.rub.nds.anvilcore.annotation.TestDescription;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.HeartbeatMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
@@ -34,16 +29,10 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.tests.server.both.statemachine.SharedStateMachineTest;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
@@ -59,12 +48,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class StateMachine extends Tls12Test {
 
     // Figure 2: path 0, 1, 10
-    @AnvilTest(
-            description =
-                    "Send a Heartbeat Request after sending the Client Hello Message and observe the response")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-N5VTen5U6e")
     public void sendHeartbeatRequestAfterClientHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -75,12 +59,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 2: path 0, 1, 10
-    @AnvilTest(
-            description =
-                    "Send a Heartbeat Request after sending the Client Key Exchange Message and observer the response")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-hUmvB1guzB")
     public void sendHeartbeatRequestAfterClientKeyExchange(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -91,12 +70,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 2: path 0, 1, 10 and Figure 4: path 0, 1, 3, 5, 8
-    @AnvilTest(
-            description =
-                    "Send a Heartbeat Request after sending the Change Cipher Spec Message and observer the response")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-RGwxgMCeT9")
     public void sendHeartbeatRequestAfterChangeCipherSpec(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -107,12 +81,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 2: 0, 1, 3, 5 and Figure 4: path 0, 1, 3, 4
-    @AnvilTest(
-            description = "Send a Client Hello Message after sending a Client Key Exchange Message")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-JoVdmVr5by")
     public void secondClientHelloAfterClientKeyExchange(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -128,11 +97,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 3: path 0, 1, 3, 5, 6, 2
-    @AnvilTest(description = "Send a Finished Message after the ServerHello")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-uscvmqxrG3")
     public void sendFinishedAfterServerHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -143,23 +108,14 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 4: path 0, 2
-    @Test
-    @TestDescription("Begin the Handshake with a Finished Message")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
+    @NonCombinatorialAnvilTest(id = "XSM-hV8iCuJCXT")
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
     }
 
     // Figure 4: path 0, 1, 3, 2
-    @AnvilTest(description = "Send two Client Key Exchange Messages")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-zmpmr7nVki")
     public void secondClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace =
@@ -177,11 +133,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 4: path 0, 1, 3, 2
-    @AnvilTest(description = "Send two Client Key Exchange Messages with different Send Actions")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-7HDSP4DS95")
     public void secondClientKeyExchangeDifferentAction(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -199,13 +151,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 4: path 0, 1, 3, 5, 2
-    @AnvilTest(
-            description =
-                    "Send a second Client Key Exchange Message after sending Change Cipher Spec")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-RPJWoZQFc5")
     public void secondClientKeyExchangeAfterChangeCipherSpec(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -224,13 +170,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 4: path 0, 1, 3, 5, 2
-    @AnvilTest(
-            description =
-                    "Send a second unencrypted Client Key Exchange Message after sending Change Cipher Spec")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-9TgGnWGw1S")
     public void secondClientKeyExchangeAfterChangeCipherSpecUnencrypted(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -259,13 +199,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: path 0,2
-    @Test
-    @TestDescription(
-            "Begin the Handshake with Change Cipher Spec. A stateless server may ignore this record from TLS 1.3 on.")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @NonCombinatorialAnvilTest(id = "XSM-1yXVP5Gbsr")
     @MethodCondition(method = "onlySupportsTls12")
     public void beginWithChangeCipherSpec(WorkflowRunner runner) {
         Config config = getConfig();
@@ -273,12 +207,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: path 0,3
-    @Test
-    @TestDescription("Begin the Handshake with empty Application Data")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
+    @NonCombinatorialAnvilTest(id = "XSM-Lz5fCfdmQi")
     public void beginWithEmptyApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         runner.setPreparedConfig(config);
@@ -295,25 +224,14 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: path 0,3 (with content in Application Message)
-    @Test
-    @TestDescription("Begin the Handshake with Application Data")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
+    @NonCombinatorialAnvilTest(id = "XSM-tVGt2rqQy1")
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);
     }
 
     // Figure 7: 0, 1, 5, 6, 7, 8
-    @AnvilTest(
-            description =
-                    "Send a second Change Cipher Spec after receiving the servers Finished Message")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-jQ4aV9UCUM")
     @Tag("libressl")
     public void secondChangeCipherSpecAfterHandshake(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -327,13 +245,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: 0, 1, 5, 6, 7, 8
-    @AnvilTest(
-            description =
-                    "Send a second Change Cipher Spec after receiving the servers Finished Message")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-WzfTB6GdUF")
     public void secondChangeCipherSpecAfterHandshakeUnencrypted(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -347,13 +259,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: path 0, 1, 4
-    @AnvilTest(
-            description =
-                    "Send a second Client Hello after receiving the first batch of server messages")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-mnyxwyTTK2")
     public void secondClientHelloAfterServerHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -361,22 +267,14 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: path 0, 1, 4
-    @AnvilTest(description = "Send two Client Hello Messages at the beginning of the Handshake")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-xDPE4XDweY")
     public void secondClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSecondClientHelloTest(config, runner);
     }
 
     // Figure 8: path 0, 1, 6
-    @AnvilTest(description = "Send a Change Cipher Spec before the Client Key Exchange Message")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "XSM-dV8FPhVnww")
     public void earlyChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace =

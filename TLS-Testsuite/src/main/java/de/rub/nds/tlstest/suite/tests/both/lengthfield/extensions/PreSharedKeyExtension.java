@@ -25,14 +25,9 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -41,7 +36,6 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @Tag("tls13")
 @TlsVersion(supported = ProtocolVersion.TLS13)
 @KeyExchange(supported = KeyExchangeType.ALL13)
-@Disabled // disabled for development, because it fails on windows
 public class PreSharedKeyExtension extends TlsGenericTest {
 
     public ConditionEvaluationResult supportsPsk() {
@@ -56,15 +50,10 @@ public class PreSharedKeyExtension extends TlsGenericTest {
         }
     }
 
-    @AnvilTest(
-            description =
-                    "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
+    @AnvilTest(id = "XLF-XHw8giy6m4")
     @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "supportsPsk")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void preSharedKeyExtensionLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
@@ -74,15 +63,10 @@ public class PreSharedKeyExtension extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest(
-            description =
-                    "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
+    @AnvilTest(id = "XLF-kwNxe25ef8")
     @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "supportsPsk")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void preSharedKeyExtensionIdentityListLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
@@ -92,15 +76,10 @@ public class PreSharedKeyExtension extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest(
-            description =
-                    "Send a Pre Shared Key Extension in the Hello Message with a modified length value (-1)")
+    @AnvilTest(id = "XLF-4L65zmLyuG")
     @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "supportsPsk")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void preSharedKeyExtensionBinderListLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);

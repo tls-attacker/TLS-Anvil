@@ -22,14 +22,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Disabled;
@@ -37,7 +29,6 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-@RFC(number = 5246, section = "7.4.8. Certificate Verify")
 public class CertificateVerify extends Tls12Test {
     public ConditionEvaluationResult clientAuth() {
         if (this.getConfig().isClientAuthentication()) {
@@ -46,19 +37,8 @@ public class CertificateVerify extends Tls12Test {
         return ConditionEvaluationResult.disabled("No client auth required");
     }
 
-    @AnvilTest(
-            description =
-                    "Here handshake_messages refers to all handshake messages sent or received, "
-                            + "starting at client hello and up to, but not including, this message, including the "
-                            + "type and length fields of the handshake messages. This is the concatenation of all "
-                            + "the Handshake structures (as defined in Section 7.4) exchanged thus far.")
+    @AnvilTest(id = "5246-ZTQ27ZY8s8")
     @MethodCondition(method = "clientAuth")
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @CryptoCategory(SeverityLevel.CRITICAL)
-    @CertificateCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
     @Disabled
     public void invalidCertificateVerify(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

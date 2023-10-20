@@ -28,18 +28,12 @@ import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 6066, section = "4.  Maximum Fragment Length Negotiation")
 public class MaxFragmentLengthExtension extends Tls12Test {
 
     public ConditionEvaluationResult supportsMaxFragmentLength() {
@@ -58,21 +52,7 @@ public class MaxFragmentLengthExtension extends Tls12Test {
                 "Client does not support maximum fragment length");
     }
 
-    @AnvilTest(
-            description =
-                    "Note that the "
-                            + "output of the record layer may be larger.  For example, if the "
-                            + "negotiated length is 2^9=512, then, when using currently defined "
-                            + "cipher suites (those defined in [RFC5246] and [RFC2712]) and null "
-                            + "compression, the record-layer output can be at most 805 bytes: 5 "
-                            + "bytes of headers, 512 bytes of application data, 256 bytes of "
-                            + "padding, and 32 bytes of MAC.  This means that in this event a TLS "
-                            + "record-layer peer receiving a TLS record-layer message larger than "
-                            + "805 bytes MUST discard the message and send a \"record_overflow\" "
-                            + "alert, without decrypting the message.")
-    @HandshakeCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "6066-XH6ZKSteMh")
     @ExcludeParameter("MAX_FRAGMENT_LENGTH")
     @MethodCondition(method = "supportsMaxFragmentLength")
     @Tag("new")

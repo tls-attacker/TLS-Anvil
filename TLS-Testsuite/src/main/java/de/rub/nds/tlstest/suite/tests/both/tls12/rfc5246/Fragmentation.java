@@ -7,14 +7,11 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
-import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
@@ -37,33 +34,15 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5246, section = "6.2.1 Fragmentation")
 public class Fragmentation extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send zero-length fragments of Handshake, "
-                            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
-                            + "Application data MAY be sent as they are potentially useful as a "
-                            + "traffic analysis countermeasure.")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "5246-bXbN8uEo2c")
     @EnforcedSenderRestriction
     public void sendZeroLengthRecord_CCS(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -87,14 +66,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send zero-length fragments of Handshake, "
-                            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
-                            + "Application data MAY be sent as they are potentially useful as a "
-                            + "traffic analysis countermeasure.")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @AnvilTest(id = "5246-swjhCGVQMb")
     public void sendZeroLengthApplicationRecord(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -142,15 +114,9 @@ public class Fragmentation extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Send a record without any content with Content Type Application Data. "
-                            + " The former record increases the sequencenumber, which should not be allowed")
+    @AnvilTest(id = "5246-q5y1zcoCCW")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("emptyRecord")
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
     public void sendEmptyApplicationRecord(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -170,14 +136,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Send a record without any content with Content Type Handshake followed by an encrypted record. "
-                            + " The former record increases the sequencenumber, which should not be allowed")
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "5246-5JmcCtfFY3")
     @Tag("emptyRecord")
     public void sendEmptyFinishedRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -197,15 +156,9 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "The length (in bytes) of the following TLSPlaintext.fragment. "
-                            + "The length MUST NOT exceed 2^14.")
+    @AnvilTest(id = "5246-oqJiBwUXN8")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExcludeParameter("RECORD_LENGTH")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendRecordWithPlaintextOver2pow14(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -239,14 +192,8 @@ public class Fragmentation extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "The length (in bytes) of the following TLSCiphertext.fragment. "
-                            + "The length MUST NOT exceed 2^14 + 2048") // .
+    @AnvilTest(id = "5246-6w2UjD5RGT")
     @ExcludeParameter("RECORD_LENGTH")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendRecordWithCiphertextOver2pow14plus2048(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -277,15 +224,7 @@ public class Fragmentation extends Tls12Test {
                         });
     }
 
-    @Test
-    @TestDescription(
-            "Client "
-                    + "message boundaries are not preserved in the record layer [...] "
-                    + "a single message MAY be fragmented across several records")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.HIGH)
+    @NonCombinatorialAnvilTest(id = "5246-M5X6WTePcK")
     public void recordFragmentationSupported() {
         assertTrue(
                 "Record fragmentation support has not been detected",

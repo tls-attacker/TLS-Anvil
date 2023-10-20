@@ -1,31 +1,4 @@
 {
-  "000-000-001": {
-    "description": "Implementations that receive a KeyUpdate message prior to receiving a Finished message MUST terminate the connection with an \"unexpected_message\" alert.",
-    "severityLevels": {
-      "Handshake": 80,
-      "Interoperability": 80,
-      "Alert": 60
-    },
-    "rfc": {
-      "number": 8446,
-      "section": "4.6.3.  Key and Initialization Vector Update"
-    }
-  },
-  "XLF-7iivb12njd": {
-    "description": "Send a Certificate Message with a modified length value (-1)",
-    "severityLevels": {
-      "MessageStructure": 60,
-      "Handshake": 60,
-      "Alert": 40
-    },
-    "rfc": null,
-    "tags": [
-      "both",
-      "lengthfield",
-      "Certificate",
-      "certificateMessageLengthTLS12"
-    ]
-  },
   "XLF-eqZYAdwNye": {
     "description": "Send a Certificate Message with a modified certificate list length value (-1)",
     "severityLevels": {

@@ -110,6 +110,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
+    //TODO Must be excluded from DTLS test, because of the TCP_FRAGMENTATION.
     @AnvilTest(
             description =
                     "Client "
@@ -143,6 +144,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
+    //TODO Must be excluded from DTLS test, because of the TCP_FRAGMENTATION.
     @AnvilTest(
             description =
                     "Client "

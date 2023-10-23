@@ -84,6 +84,9 @@ public class TlsTestConfig extends TLSDelegateConfig {
                     "Export executed WorkflowTraces with all values " + "used in the messages")
     private boolean exportTraces = false;
 
+    @Parameter(names = "-dtls", description = "Set DTLS as default for the test-suite.")
+    private boolean useDTLS = false;
+
     // we might want to turn these into CLI parameters in the future
     private boolean expectTls13Alerts = false;
     private boolean enforceSenderRestrictions = false;
@@ -94,6 +97,10 @@ public class TlsTestConfig extends TLSDelegateConfig {
         this.testClientDelegate = new TestClientDelegate();
         this.testExtractorDelegate = new TestExtractorDelegate();
         this.workerDelegate = new WorkerDelegate();
+        if (isUseDTLS()) {
+            testClientDelegate.setUseUDP(true);
+            cachedConfig.setAddRetransmissionsToWorkflowTraceInDtls(true);
+        }
     }
 
     /**
@@ -249,10 +256,18 @@ public class TlsTestConfig extends TLSDelegateConfig {
                     }
                     config.setAddRenegotiationInfoExtension(checkRenegotiationInfoOffer());
                 } else {
-                    Optional<VersionSuiteListPair> suitePair =
-                            report.getVersionSuitePairs().stream()
-                                    .filter(i -> i.getVersion() == ProtocolVersion.TLS12)
-                                    .findFirst();
+                    Optional<VersionSuiteListPair> suitePair;
+                    if (useDTLS) {
+                        suitePair =
+                                report.getVersionSuitePairs().stream()
+                                        .filter(i -> i.getVersion() == ProtocolVersion.DTLS12)
+                                        .findFirst();
+                    } else {
+                        suitePair =
+                                report.getVersionSuitePairs().stream()
+                                        .filter(i -> i.getVersion() == ProtocolVersion.TLS12)
+                                        .findFirst();
+                    }
                     if (suitePair.isPresent()
                             && !suitePair
                                     .get()
@@ -292,6 +307,23 @@ public class TlsTestConfig extends TLSDelegateConfig {
                     }
                 }
             }
+            if (useDTLS) {
+                boolean exists = false;
+                for (Delegate i : getDelegateList()) {
+                    if (i instanceof DtlsDelegate) {
+                        exists = true;
+                        i.applyDelegate(config);
+                    }
+                }
+                if (!exists) {
+                    DtlsDelegate dtlsDelegate = new DtlsDelegate();
+                    dtlsDelegate.setDTLS(true);
+                    dtlsDelegate.applyDelegate(config);
+                    addDelegate(dtlsDelegate);
+                }
+                config.setWorkflowExecutorType(WorkflowExecutorType.DTLS);
+                config.setSupportedVersions(ProtocolVersion.DTLS12);
+            }
             return config;
         }
 
@@ -329,6 +361,18 @@ public class TlsTestConfig extends TLSDelegateConfig {
         config.setReceiveFinalTcpSocketStateWithTimeout(true);
         config.setPreferredCertRsaKeySize(4096);
         config.setPreferredCertDssKeySize(3072);
+
+        if (useDTLS) {
+            config.setSupportedVersions(ProtocolVersion.DTLS12);
+            config.setHighestProtocolVersion(ProtocolVersion.DTLS12);
+            config.setDefaultSelectedProtocolVersion(ProtocolVersion.DTLS12);
+            config.getDefaultClientConnection().setTransportHandlerType(TransportHandlerType.UDP);
+            config.getDefaultServerConnection().setTransportHandlerType(TransportHandlerType.UDP);
+            config.setWorkflowExecutorType(WorkflowExecutorType.DTLS);
+            config.setFinishWithCloseNotify(true);
+            config.setIgnoreRetransmittedCssInDtls(true);
+            config.setAddRetransmissionsToWorkflowTraceInDtls(true);
+        }
 
         config.setFiltersKeepUserSettings(Boolean.FALSE);
         config.setDefaultProposedAlpnProtocols(
@@ -493,5 +537,13 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
     public Callable<Integer> getTimeoutActionScript() {
         return timeoutActionScript;
+    }
+
+    public boolean isUseDTLS() {
+        return useDTLS;
+    }
+
+    public void setUseDTLS(boolean useDTLS) {
+        this.useDTLS = useDTLS;
     }
 }

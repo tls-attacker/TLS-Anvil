@@ -145,6 +145,16 @@ public class WorkflowRunner {
             context.getStateExecutor().bulkExecuteTasks(task);
         } else {
             try {
+                if (context.getConfig().isUseDTLS()) {
+                    tlsTestCase
+                            .getState()
+                            .getTlsContext()
+                            .setTransportHandler(
+                                    new ServerUdpTransportHandler(
+                                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                            context.getConfig().getTestClientDelegate().getPort()));
+                } else {
                 tlsTestCase
                         .getState()
                         .getTlsContext()
@@ -159,6 +169,7 @@ public class WorkflowRunner {
                                         context.getConfig()
                                                 .getTestClientDelegate()
                                                 .getServerSocket()));
+                }
                 StateExecutionTask task = new StateExecutionTask(tlsTestCase.getState(), 2);
 
                 task.setBeforeTransportInitCallback(

@@ -61,7 +61,9 @@ public enum TlsParameterType implements ParameterType {
     PROTOCOL_MESSAGE_TYPE(ProtocolMessageTypeDerivation.class),
     FFDHE_SHARE_OUT_OF_BOUNDS(ShareOutOfBoundsDerivation.class),
     MAX_FRAGMENT_LENGTH(MaxFragmentLengthDerivation.class),
-    HELLO_RETRY_COOKIE(HelloRetryCookieDerivation.class);
+    HELLO_RETRY_COOKIE(HelloRetryCookieDerivation.class),
+    COOKIE_EXCHANGE(CookieExchangeDerivation.class),
+    DTLS_COOKIE_BITMASK(DtlsCookieBitmaskDerivation.class);
 
     TlsParameterType(Class<? extends DerivationParameter> derivationClass) {
         this.derivationClass = derivationClass;

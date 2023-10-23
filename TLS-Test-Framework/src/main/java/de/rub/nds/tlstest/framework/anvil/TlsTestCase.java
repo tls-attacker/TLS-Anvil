@@ -119,12 +119,26 @@ public class TlsTestCase extends AnvilTestCase {
     @JsonProperty("SrcPort")
     public Integer getSrcPort() {
         if (state == null) return null;
-        return ((TcpTransportHandler) state.getTlsContext().getTransportHandler()).getSrcPort();
+        else if (state.getTlsContext().getTransportHandler() instanceof TcpTransportHandler) {
+            return ((TcpTransportHandler) state.getTlsContext().getTransportHandler()).getSrcPort();
+        } else if (state.getTlsContext().getTransportHandler() instanceof UdpTransportHandler) {
+            return ((UdpTransportHandler) state.getTlsContext().getTransportHandler()).getSrcPort();
+        } else {
+            throw new NotImplementedException(
+                    "The transport protocol used is not yet implemented.");
+        }
     }
 
     @JsonProperty("DstPort")
     public Integer getDstPort() {
         if (state == null) return null;
-        return ((TcpTransportHandler) state.getTlsContext().getTransportHandler()).getDstPort();
+        else if (state.getTlsContext().getTransportHandler() instanceof TcpTransportHandler) {
+            return ((TcpTransportHandler) state.getTlsContext().getTransportHandler()).getDstPort();
+        } else if (state.getTlsContext().getTransportHandler() instanceof UdpTransportHandler) {
+            return ((UdpTransportHandler) state.getTlsContext().getTransportHandler()).getDstPort();
+        } else {
+            throw new NotImplementedException(
+                    "The transport protocol used is not yet implemented.");
+        }
     }
 }

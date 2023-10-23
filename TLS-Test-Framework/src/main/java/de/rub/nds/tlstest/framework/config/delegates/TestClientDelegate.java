@@ -26,6 +26,8 @@ import org.apache.logging.log4j.Logger;
 public class TestClientDelegate extends ServerDelegate {
     private static final Logger LOGGER = LogManager.getLogger();
 
+    private boolean useUDP = false;
+
     @Parameter(
             names = "-triggerScript",
             description =
@@ -57,7 +59,10 @@ public class TestClientDelegate extends ServerDelegate {
         }
 
         try {
-            serverSocket = new ServerSocket(this.port);
+            if (!useUDP) {
+                if (serverSocket == null || !serverSocket.isBound())
+                    serverSocket = new ServerSocket(this.port);
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -81,5 +86,9 @@ public class TestClientDelegate extends ServerDelegate {
 
     public void setServerSocket(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
+    }
+
+    public void setUseUDP(boolean useUDP) {
+        this.useUDP = useUDP;
     }
 }

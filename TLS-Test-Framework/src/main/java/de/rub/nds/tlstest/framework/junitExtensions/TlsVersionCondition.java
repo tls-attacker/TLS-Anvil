@@ -37,7 +37,8 @@ public class TlsVersionCondition extends BaseCondition {
         TestContext context = TestContext.getInstance();
         FeatureExtractionResult report = context.getFeatureExtractionResult();
         Set<ProtocolVersion> protocolVersionList = report.getSupportedVersions();
-        ProtocolVersion testSupportedVersion;
+        // ProtocolVersion[] testSupportedVersionList; //TODO activate if TLSVersion is an array
+        ProtocolVersion testSupportedVersion; //TODO Delete if TLSVerion is an array
 
         if (testM.isAnnotationPresent(TlsVersion.class)) {
             testSupportedVersion = testM.getAnnotation(TlsVersion.class).supported();
@@ -49,7 +50,9 @@ public class TlsVersionCondition extends BaseCondition {
             return ConditionEvaluationResult.disabled("No TlsVersion annotation present");
         }
 
-        if (protocolVersionList.contains(testSupportedVersion)) {
+        // for (ProtocolVersion testSupportedVersion : testSupportedVersionList) { //TODO Use when TLSVersion is an Array
+        if (protocolVersionList.contains(testSupportedVersion)|| (protocolVersionList.contains(ProtocolVersion.DTLS12)
+        && testSupportedVersionList == ProtocolVersion.TLS12)) {//TODO Change if TLSVersion is an array
             return ConditionEvaluationResult.enabled(
                     "ProtocolVersion of the test is supported by the target");
         }

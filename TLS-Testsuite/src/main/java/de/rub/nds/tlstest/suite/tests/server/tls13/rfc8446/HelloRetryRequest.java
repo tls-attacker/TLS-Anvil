@@ -7,6 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -15,6 +16,7 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
+import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
@@ -165,6 +167,7 @@ public class HelloRetryRequest extends Tls13Test {
                 .validateFinal(
                         i -> {
                             Validator.executedAsPlanned(i);
+                            checkForDuplicateCcs(workflowTrace);
 
                             ServerHelloMessage helloRetryRequest =
                                     (ServerHelloMessage)
@@ -219,6 +222,7 @@ public class HelloRetryRequest extends Tls13Test {
                 .validateFinal(
                         i -> {
                             Validator.executedAsPlanned(i);
+                            checkForDuplicateCcs(workflowTrace);
 
                             ServerHelloMessage helloRetryRequest =
                                     (ServerHelloMessage)
@@ -270,6 +274,7 @@ public class HelloRetryRequest extends Tls13Test {
                 .validateFinal(
                         i -> {
                             Validator.executedAsPlanned(i);
+                            checkForDuplicateCcs(workflowTrace);
 
                             ServerHelloMessage helloRetryRequest =
                                     (ServerHelloMessage)
@@ -369,5 +374,17 @@ public class HelloRetryRequest extends Tls13Test {
 
         workflowTrace.addTlsActions(secondHelloTrace.getTlsActions());
         return workflowTrace;
+    }
+
+    private void checkForDuplicateCcs(WorkflowTrace executedTrace) {
+        // due to our workflow structure, CCS may be parsed with the first ServerHello or before the
+        // new
+        // ServerHello but it must not be sent twice by the server
+        assertFalse(
+                "Received more than one compatibility CCS from Server",
+                WorkflowTraceUtil.getAllReceivedMessages(
+                                        executedTrace, ProtocolMessageType.CHANGE_CIPHER_SPEC)
+                                .size()
+                        > 1);
     }
 }

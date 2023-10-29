@@ -60,7 +60,7 @@ public class SupportedVersions extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-oysw9PbeiT")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("PROTOCOL_VERSION")
     @ManualConfig(identifiers = "PROTOCOL_VERSION")
@@ -80,7 +80,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-w9k9gMLaeU")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void selectOlderTlsVersionInTls12(
@@ -109,7 +109,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-YDjQAqZ2LM")
     public void selectOlderTlsVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         c.setEnforceSettings(true);
@@ -134,7 +134,7 @@ public class SupportedVersions extends Tls13Test {
     }
 
     /*@AnvilTest.")*/
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-o5uxfywWFS")
     public void supportedVersionContainsTls13() {
         SupportedVersionsExtensionMessage ext =
                 context.getReceivedClientHelloMessage()
@@ -183,7 +183,7 @@ public class SupportedVersions extends Tls13Test {
         return versions;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-cck1BzgJ1h")
     @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(
             affectedIdentifiers = "PROTOCOL_VERSION",
@@ -214,7 +214,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-eNP4DYhWjk")
     @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(
             affectedIdentifiers = "PROTOCOL_VERSION",

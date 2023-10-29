@@ -25,7 +25,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class Cookie extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-i1e2R9UFD2")
     @EnforcedSenderRestriction
     public void clientHelloWithUnsolicitedCookieExtension(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

@@ -19,7 +19,7 @@ import java.util.Arrays;
 @ClientTest
 public class DoNotUseSSLVersion30 extends Tls12Test {
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "7568-BiD6J3KQPu")
     public void sendClientHelloVersion0300() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         assertFalse(

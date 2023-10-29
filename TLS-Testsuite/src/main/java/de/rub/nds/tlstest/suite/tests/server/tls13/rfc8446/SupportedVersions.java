@@ -51,7 +51,7 @@ public class SupportedVersions extends Tls13Test {
         return ConditionEvaluationResult.disabled("TLS 1.2 is not supported by the server.");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-UwCnJTWbmd")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void testVersionPreferrence(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -69,7 +69,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-ZiLwhbnp3y")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void omitSupportedVersionsExtension(
@@ -88,7 +88,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-zCaAr5BmNR")
     @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(
             affectedIdentifiers = "PROTOCOL_VERSION",
@@ -136,7 +136,7 @@ public class SupportedVersions extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-ihyps8KzBF")
     @MethodCondition(method = "supportsTls12")
     @ManualConfig(identifiers = "CIPHER_SUITE")
     public void oldLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -165,7 +165,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-LoyBdjVUeE")
     public void unknownVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -179,7 +179,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-vdaMcxzYj2")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void supportedVersionsWithoutTls13(
@@ -208,7 +208,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-n5pojEqeaS")
     public void tls13Handshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -242,7 +242,7 @@ public class SupportedVersions extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-2NRWKXH1nX")
     public void setLegacyVersionTo0304(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -258,7 +258,7 @@ public class SupportedVersions extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-WKMbKXKLH1")
     public void setLegacyVersionTo0304WithoutSVExt(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

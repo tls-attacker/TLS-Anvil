@@ -29,7 +29,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class NewSessionTicket extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-b7XLVJA8Pn")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void ignoresUnknownNewSessionTicketExtension(

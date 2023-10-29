@@ -32,7 +32,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class ServerHello extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-rjHUSd1Lnf")
     public void serverRandom(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -60,7 +60,7 @@ public class ServerHello extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-yM4KkM8m6m")
     @Tag("new")
     public void checkExtensions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

@@ -25,7 +25,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 /** Statemachine tests used both for TLS 1.2 clients and servers. */
 public class ClientServerStateMachine extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-azpktANa8c")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void omitCCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

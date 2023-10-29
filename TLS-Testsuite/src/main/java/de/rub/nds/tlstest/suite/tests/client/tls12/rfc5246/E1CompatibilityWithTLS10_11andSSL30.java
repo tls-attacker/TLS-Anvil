@@ -26,7 +26,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-EMvcCVyKtv")
     public void selectUnsupportedVersion(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

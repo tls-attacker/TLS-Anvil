@@ -46,7 +46,7 @@ public class TLSExtensionForECC extends Tls12Test {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    @AnvilTest
+    @AnvilTest(id = "8422-rxF7z2tc5t")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     public void addUnknownEllipticCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -63,7 +63,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8422-Dk77D7HNBW")
     @ExcludeParameter("NAMED_GROUP")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     public void onlyInvalidEllipticCurve(
@@ -84,7 +84,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8422-4G8mbkQ9LM")
     @ExcludeParameter("NAMED_GROUP")
     @ManualConfig(identifiers = "CIPHER_SUITE")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
@@ -136,7 +136,7 @@ public class TLSExtensionForECC extends Tls12Test {
     "numbers 1-22).  This specification also deprecates the explicit " +
     "curves with identifiers 0xFF01 and 0xFF02.  It also adds the new\n" +
     "curves defined in [RFC7748]", securitySeverity = SeverityLevel.LOW)*/
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8422-ErkUw4SDEy")
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     public void supportsDeprecated(WorkflowRunner runner) {
         List<NamedGroup> deprecatedFound = new LinkedList<>();
@@ -155,7 +155,7 @@ public class TLSExtensionForECC extends Tls12Test {
                 deprecatedFound.isEmpty());
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8422-PtimgKWxss")
     @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     public void manyGroupsOffered(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -187,7 +187,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8422-4MTo5xU82i")
     @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
@@ -228,7 +228,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8422-fV4R6XHPeJ")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @Tag("new")
@@ -261,7 +261,7 @@ public class TLSExtensionForECC extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8422-ymcrNp3RQw")
     @DynamicValueConstraints(
             affectedIdentifiers = "CIPHER_SUITE",
             methods = "isEcdheAnonCipherSuite")

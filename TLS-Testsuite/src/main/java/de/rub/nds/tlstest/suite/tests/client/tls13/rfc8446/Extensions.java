@@ -60,7 +60,7 @@ public class Extensions extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-guYpWN18yk")
     @IncludeParameter("EXTENSION")
     @ManualConfig(identifiers = "EXTENSION")
     @ExplicitValues(affectedIdentifiers = "EXTENSION", methods = "getUnrequestedExtensions")
@@ -124,7 +124,7 @@ public class Extensions extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-6dvAUhLdUW")
     public void sendHeartBeatExtensionInSH(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

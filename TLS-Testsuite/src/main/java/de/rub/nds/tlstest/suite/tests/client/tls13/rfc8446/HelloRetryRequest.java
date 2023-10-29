@@ -62,7 +62,7 @@ public class HelloRetryRequest extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-2L9AK4xSva")
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getUnofferedGroups")
     public void helloRetryRequestsUnofferedGroup(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -81,7 +81,7 @@ public class HelloRetryRequest extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-bfziReZMw4")
     @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getUnofferedTls13CipherSuites")
     public void helloRetryRequestsUnofferedTls13CipherSuite(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -115,7 +115,7 @@ public class HelloRetryRequest extends Tls13Test {
                 .contains(group);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-s2k4bG3Gz9")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isKeyShareInInitialHello")
@@ -171,7 +171,7 @@ public class HelloRetryRequest extends Tls13Test {
                 "Target does not support more than one NamedGroup in TLS 1.3");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-FviCUju7gw")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
@@ -234,7 +234,7 @@ public class HelloRetryRequest extends Tls13Test {
                 "Target does not support more than one CipherSuite in TLS 1.3");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-f3pZavKkyP")
     @IncludeParameter("MIRRORED_CIPHERSUITE")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
@@ -275,7 +275,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-KLkH56oYzC")
     @IncludeParameter("MIRRORED_CIPHERSUITE")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
@@ -310,7 +310,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-ncR52WSgGx")
     @IncludeParameter("MIRRORED_CIPHERSUITE")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
@@ -346,7 +346,7 @@ public class HelloRetryRequest extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-6X9hLRk9V4")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
@@ -356,7 +356,7 @@ public class HelloRetryRequest extends Tls13Test {
         ServerHello.sharedSessionIdTest(workflowTrace, runner);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-dyTnCEsFo1")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
@@ -366,7 +366,7 @@ public class HelloRetryRequest extends Tls13Test {
         ServerHello.sharedCompressionValueTest(workflowTrace, runner);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-qN6nNMX9Sx")
     @IncludeParameter("GREASE_CIPHERSUITE")
     @ExcludeParameter("CIPHER_SUITE")
     @DynamicValueConstraints(
@@ -379,7 +379,7 @@ public class HelloRetryRequest extends Tls13Test {
                 workflowTrace, runner, parameterCombination);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-TyCkZKkVMt")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_EXTENSION")
     @DynamicValueConstraints(
@@ -392,7 +392,7 @@ public class HelloRetryRequest extends Tls13Test {
                 workflowTrace, runner, parameterCombination);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-vU6BQin9Eo")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_PROTOCOL_VERSION")
     @DynamicValueConstraints(
@@ -418,7 +418,7 @@ public class HelloRetryRequest extends Tls13Test {
         return workflowTrace;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-5NRGuXE3Em")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
@@ -585,7 +585,7 @@ public class HelloRetryRequest extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-7byKPGEA8Q")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
@@ -595,7 +595,7 @@ public class HelloRetryRequest extends Tls13Test {
         performHelloRetryRequestTest(argumentAccessor, runner);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-2v6S87AwgY")
     @IncludeParameter("HELLO_RETRY_COOKIE")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",

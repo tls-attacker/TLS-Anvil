@@ -40,7 +40,7 @@ public class NewSessionTicket extends Tls13Test {
         }
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-Av3GbEztrR")
     @MethodCondition(method = "issuesTickets")
     @Tag("new")
     public void newSessionTicketsAreValid(

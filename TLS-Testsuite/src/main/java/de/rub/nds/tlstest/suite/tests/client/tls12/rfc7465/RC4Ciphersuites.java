@@ -32,7 +32,7 @@ public class RC4Ciphersuites extends Tls12Test {
         return cipherSuite.name().contains("RC4");
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "7465-Het2o2vRcv")
     public void offersRC4Ciphersuites() {
         List<CipherSuite> supported =
                 new ArrayList<>(this.context.getFeatureExtractionResult().getCipherSuites());
@@ -42,7 +42,7 @@ public class RC4Ciphersuites extends Tls12Test {
         }
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7465-pUNK4mxZNB")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isRC4CipherSuite")
     @EnforcedSenderRestriction
     public void selectRC4CipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

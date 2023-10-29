@@ -28,7 +28,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class KeyShareExtension extends TlsGenericTest {
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-YEP4C4ruSR")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void keyShareExtensionLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
@@ -37,7 +37,7 @@ public class KeyShareExtension extends TlsGenericTest {
     }
 
     @ServerTest
-    @AnvilTest
+    @AnvilTest(id = "XLF-kVXshRHqZy")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void keyShareEntryListLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);

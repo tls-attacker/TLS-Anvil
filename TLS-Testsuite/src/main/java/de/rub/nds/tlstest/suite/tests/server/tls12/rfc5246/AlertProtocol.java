@@ -45,7 +45,7 @@ public class AlertProtocol extends Tls12Test {
         return lengthCandidate >= 50;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-ANzf57gCyp")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
@@ -82,7 +82,7 @@ public class AlertProtocol extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-fGCWkS7TDf")
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
@@ -117,7 +117,7 @@ public class AlertProtocol extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-hD2QPXyAHw")
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",

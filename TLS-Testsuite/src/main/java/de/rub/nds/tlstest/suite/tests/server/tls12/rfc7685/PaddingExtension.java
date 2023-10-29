@@ -34,7 +34,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class PaddingExtension extends Tls12Test {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    @AnvilTest
+    @AnvilTest(id = "7685-gMPk6BA96F")
     @ExcludeParameter("INCLUDE_PADDING_EXTENSION")
     @EnforcedSenderRestriction
     public void paddingWithNonZero(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -51,7 +51,7 @@ public class PaddingExtension extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7685-mCUrK3JRDo")
     @ExcludeParameter("INCLUDE_PADDING_EXTENSION")
     @Tag("new")
     public void serverDoesNotEcho(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

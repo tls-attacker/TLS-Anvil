@@ -42,7 +42,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class Fragmentation extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-bXbN8uEo2c")
     @EnforcedSenderRestriction
     public void sendZeroLengthRecord_CCS(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -66,7 +66,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-swjhCGVQMb")
     public void sendZeroLengthApplicationRecord(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -114,7 +114,7 @@ public class Fragmentation extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-q5y1zcoCCW")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("emptyRecord")
     public void sendEmptyApplicationRecord(
@@ -136,7 +136,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-5JmcCtfFY3")
     @Tag("emptyRecord")
     public void sendEmptyFinishedRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -156,7 +156,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-oqJiBwUXN8")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExcludeParameter("RECORD_LENGTH")
     public void sendRecordWithPlaintextOver2pow14(
@@ -192,7 +192,7 @@ public class Fragmentation extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-6w2UjD5RGT")
     @ExcludeParameter("RECORD_LENGTH")
     public void sendRecordWithCiphertextOver2pow14plus2048(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -224,7 +224,7 @@ public class Fragmentation extends Tls12Test {
                         });
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "5246-M5X6WTePcK")
     public void recordFragmentationSupported() {
         assertTrue(
                 "Record fragmentation support has not been detected",

@@ -39,7 +39,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class StateMachine extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-LdxAqeL2Te")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void sendFinishedWithoutCert(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -52,7 +52,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-2iKDTUhXF5")
     @ExcludeParameter("INCLUDE_CHANGE_CIPHER_SPEC")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void sendHandshakeTrafficSecretEncryptedChangeCipherSpec(
@@ -72,7 +72,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-Xb6pAYY3fT")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void sendAppTrafficSecretEncryptedChangeCipherSpec(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -88,7 +88,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-sHFfpjZxQh")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void sendLegacyChangeCipherSpecAfterFinished(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -100,7 +100,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-gN2Mz9wD2D")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void sendLegacyFlowCertificate(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -116,7 +116,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-aWBzNYEKwz")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void sendLegacyFlowECDHEKeyExchange(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -133,7 +133,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-F8VTZ3optN")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void sendLegacyFlowDHEKeyExchange(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -150,25 +150,25 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "XSM-iTKLQBFN9A")
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "XSM-TQQj27kntr")
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-FLPgMqSvg9")
     public void sendServerHelloTwice(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-LrxDfiLZM5")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void sendEndOfEarlyDataAsServer(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -193,7 +193,7 @@ public class StateMachine extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-gN61eQrmNv")
     public void omitCertificateVerify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

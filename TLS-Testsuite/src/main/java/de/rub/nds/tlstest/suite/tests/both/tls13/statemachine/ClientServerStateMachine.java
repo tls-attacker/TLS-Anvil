@@ -27,7 +27,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 /** Statemachine tests used both for TLS 1.3 clients and servers. */
 public class ClientServerStateMachine extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-tGmYudnsgE")
     public void sendEmptyRecordFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

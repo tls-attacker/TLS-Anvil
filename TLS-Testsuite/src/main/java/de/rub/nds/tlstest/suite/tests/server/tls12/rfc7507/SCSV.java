@@ -80,7 +80,7 @@ public class SCSV extends Tls12Test {
         return null;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7507-vRFeTtQWZU")
     @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     public void includeFallbackSCSV(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -112,7 +112,7 @@ public class SCSV extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7507-tdAiQecjfD")
     @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     public void includeFallbackSCSV_nonRecommendedCipherSuiteOrder(

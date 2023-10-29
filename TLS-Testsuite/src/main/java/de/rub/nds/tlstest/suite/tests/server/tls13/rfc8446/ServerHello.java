@@ -68,7 +68,7 @@ public class ServerHello extends Tls13Test {
         return ConditionEvaluationResult.disabled("No TLS 1.0 support");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-8bcX8V9Zve")
     public void testLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -93,7 +93,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-p17y8QGnbD")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     public void testServerRandomFor12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -121,7 +121,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-CyEBbGYnB5")
     @MethodCondition(method = "supportsTls11")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isTls11CipherSuite")
     @KeyExchange(supported = KeyExchangeType.ALL12)
@@ -151,7 +151,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-h8ESe4vrN3")
     @MethodCondition(method = "supportsTls10")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isTls10CipherSuite")
@@ -189,7 +189,7 @@ public class ServerHello extends Tls13Test {
         return cipherSuite.isSupportedInProtocol(ProtocolVersion.TLS11);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-3FhkMFZvbt")
     public void testSessionIdEchoed(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -220,7 +220,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-aDiNwQZBTY")
     @Tag("new")
     public void testShortSessionIdEchoed(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -252,7 +252,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-S1VjZrpD1J")
     public void testCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -275,7 +275,7 @@ public class ServerHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-sm3XxXFjbr")
     @Tag("new")
     public void testProvidedExtensions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

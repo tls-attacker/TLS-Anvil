@@ -41,7 +41,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class ClientHello extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-Ruhj2eLN2t")
     public void includeUnknownCipherSuite(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -54,7 +54,7 @@ public class ClientHello extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-B41SD1Cnr6")
     @EnforcedSenderRestriction
     public void invalidLegacyVersion_higher(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -69,7 +69,7 @@ public class ClientHello extends Tls13Test {
         runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-fsDXt1hint")
     @EnforcedSenderRestriction
     public void invalidLegacyVersion_lower(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -84,7 +84,7 @@ public class ClientHello extends Tls13Test {
         runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-hsFoi24Gdh")
     public void invalidLegacyVersion_ssl30(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -98,7 +98,7 @@ public class ClientHello extends Tls13Test {
         runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-qgJEM4UoBe")
     public void invalidCompression(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
 
@@ -121,7 +121,7 @@ public class ClientHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-vtJcLUKtNv")
     public void includeUnknownExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -160,7 +160,7 @@ public class ClientHello extends Tls13Test {
 
     // there is an omitSignatureAlgorithms test in SignatureAlgorithms
 
-    @AnvilTest
+    @AnvilTest(id = "8446-GZpjQTKUD4")
     @ExcludeParameter("NAMED_GROUP")
     @Tag("new")
     public void omitKeyShareAndSupportedGroups(
@@ -185,7 +185,7 @@ public class ClientHello extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-jEEunwNUJ3")
     @ExcludeParameter("NAMED_GROUP")
     @Tag("new")
     public void omitKeyShare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -195,7 +195,7 @@ public class ClientHello extends Tls13Test {
         performMissingExtensionTest(config, runner);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-KQn4u3Xj4M")
     @Tag("new")
     public void omitSupportedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -204,7 +204,7 @@ public class ClientHello extends Tls13Test {
         performMissingExtensionTest(config, runner);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-Uqrk3dnMz7")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @Tag("new")
     public void acceptsCompressionListForLegacyClient(

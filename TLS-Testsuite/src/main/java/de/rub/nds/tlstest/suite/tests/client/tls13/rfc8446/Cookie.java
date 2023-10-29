@@ -16,7 +16,7 @@ import java.util.Arrays;
 @ClientTest
 public class Cookie extends Tls13Test {
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-C9aFBzrCbX")
     public void clientHelloContainsCookieExtension() {
         int size =
                 (int)

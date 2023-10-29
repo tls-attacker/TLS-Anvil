@@ -31,7 +31,7 @@ public class Finished extends TlsGenericTest {
 
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-CSQn3dUG9L")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void finishedLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -41,7 +41,7 @@ public class Finished extends TlsGenericTest {
 
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-CALCiXbvRo")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void finishedLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

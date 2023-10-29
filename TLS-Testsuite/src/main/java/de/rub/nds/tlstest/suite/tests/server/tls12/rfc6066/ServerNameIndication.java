@@ -38,7 +38,7 @@ public class ServerNameIndication extends Tls12Test {
         return ConditionEvaluationResult.disabled("SNI is disabled");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "6066-R1bTAhZhmS")
     @MethodCondition(method = "sniActive")
     @EnforcedSenderRestriction
     public void moreThanOneNameOfTheSameType(

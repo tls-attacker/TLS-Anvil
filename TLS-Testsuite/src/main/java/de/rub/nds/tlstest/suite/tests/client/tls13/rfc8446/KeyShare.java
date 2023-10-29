@@ -50,7 +50,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class KeyShare extends Tls13Test {
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-WtTcgsZFA3")
     public void testOrderOfKeyshareEntries() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         EllipticCurvesExtensionMessage groups =
@@ -80,7 +80,7 @@ public class KeyShare extends Tls13Test {
         }
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-F9bWYMiB45")
     @ExcludeParameter("NAMED_GROUP")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void selectInvalidKeyshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -126,7 +126,7 @@ public class KeyShare extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-YMYRto48Jg")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
     @Tag("new")
     public void rejectsPointsNotOnCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -167,7 +167,7 @@ public class KeyShare extends Tls13Test {
         return group.isCurve() && group.name().contains("SECP");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-h4RyAhoVZy")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
     @Tag("new")
     public void abortsWhenSharedSecretIsZero(
@@ -204,7 +204,7 @@ public class KeyShare extends Tls13Test {
         return group.name().contains("ECDH_X");
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-JKvCjP5mKE")
     public void offeredDeprecatedGroups() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         boolean foundDeprecated = false;
@@ -218,7 +218,7 @@ public class KeyShare extends Tls13Test {
         assertFalse("Deprecated or invalid group used for key share", foundDeprecated);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-QxfMDM9cBK")
     @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getFfdheGroups")
     @Tag("new")

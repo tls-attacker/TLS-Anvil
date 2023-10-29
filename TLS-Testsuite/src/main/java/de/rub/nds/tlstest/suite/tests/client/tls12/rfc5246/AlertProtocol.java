@@ -40,7 +40,7 @@ public class AlertProtocol extends Tls12Test {
         return lengthCandidate >= 50;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-DjYR2JiJKn")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
@@ -77,7 +77,7 @@ public class AlertProtocol extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-N8VwCXYaTF")
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
@@ -104,7 +104,7 @@ public class AlertProtocol extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::socketClosed);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-rcBco3YXw8")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(

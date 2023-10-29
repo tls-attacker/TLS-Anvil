@@ -33,25 +33,25 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class StateMachine extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-FeqjZ8aw4M")
     public void secondClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSecondClientHelloTest(config, runner);
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "XSM-h4swiGTUoj")
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "XSM-ttrqZTyAR7")
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-suejNj5yGF")
     public void sendLegacyChangeCipherSpecAfterFinished(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -62,7 +62,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-XKTmaWjbUn")
     public void sendEncryptedChangeCipherSpec(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -76,7 +76,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-nRMHLnST86")
     public void sendLegacyFlowECDHClientKeyExchange(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -87,7 +87,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-fiTPAjuY4v")
     public void sendLegacyFlowDHClientKeyExchange(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -98,7 +98,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-jGhG25V2Jy")
     public void sendLegacyFlowRSAClientKeyExchange(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -109,7 +109,7 @@ public class StateMachine extends Tls13Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-Q5G5Vrenab")
     public void sendClientHelloAfterFinishedHandshake(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);

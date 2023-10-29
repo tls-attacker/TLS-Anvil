@@ -30,7 +30,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-VfW71fZRBF")
     @KeyExchange(supported = KeyExchangeType.RSA)
     public void PMWithWrongClientVersion(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -53,7 +53,7 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-jnNzxCinX4")
     @KeyExchange(supported = KeyExchangeType.RSA)
     public void PMWithWrongPKCS1Padding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

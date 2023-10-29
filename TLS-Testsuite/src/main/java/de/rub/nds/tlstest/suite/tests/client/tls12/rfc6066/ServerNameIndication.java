@@ -32,7 +32,7 @@ public class ServerNameIndication extends Tls12Test {
         return ConditionEvaluationResult.disabled("SNI is disabled");
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "6066-E12eJCyta7")
     @MethodCondition(method = "sniActive")
     public void moreThanOneNameOfTheSameType() {
         ServerNameIndicationExtensionMessage ext =

@@ -30,7 +30,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class TLSRecordProtocol extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-E35jpNkWHS")
     public void sendNotDefinedRecordTypesWithClientHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -58,7 +58,7 @@ public class TLSRecordProtocol extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-J3JUrjX6Xa")
     public void sendNotDefinedRecordTypesWithCCSAndFinished(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

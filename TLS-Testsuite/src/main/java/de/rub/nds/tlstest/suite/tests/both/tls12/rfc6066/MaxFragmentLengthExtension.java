@@ -52,7 +52,7 @@ public class MaxFragmentLengthExtension extends Tls12Test {
                 "Client does not support maximum fragment length");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "6066-XH6ZKSteMh")
     @ExcludeParameter("MAX_FRAGMENT_LENGTH")
     @MethodCondition(method = "supportsMaxFragmentLength")
     @Tag("new")

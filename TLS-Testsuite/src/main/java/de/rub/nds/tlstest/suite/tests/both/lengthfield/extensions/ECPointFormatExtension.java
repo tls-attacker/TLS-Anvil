@@ -29,7 +29,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ECDH)
 public class ECPointFormatExtension extends TlsGenericTest {
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-mgWov7XYiw")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void pointFormatExtensionLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -38,7 +38,7 @@ public class ECPointFormatExtension extends TlsGenericTest {
                 runner, argumentAccessor, config, ECPointFormatExtensionMessage.class);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-XdYDypM7gN")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void pointFormatExtensionFormatsLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

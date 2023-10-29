@@ -43,7 +43,7 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
 
     @TlsVersion(supported = ProtocolVersion.TLS12)
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-FjfCZ7g3ZD")
     @ExcludeParameter("INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
@@ -59,7 +59,7 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS13)
     @KeyExchange(supported = KeyExchangeType.ALL13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-THGYQGHHdD")
     @ExcludeParameter("INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void extendedMasterSecretExtensionLengthTLS13(

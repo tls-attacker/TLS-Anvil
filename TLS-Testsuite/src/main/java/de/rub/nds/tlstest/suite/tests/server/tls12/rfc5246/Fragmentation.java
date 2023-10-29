@@ -31,7 +31,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class Fragmentation extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-J6zSpKaaXP")
     @ExcludeParameter("RECORD_LENGTH")
     @EnforcedSenderRestriction
     public void sendZeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -52,7 +52,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-2FWjWfzv3Q")
     @ExcludeParameter("RECORD_LENGTH")
     @EnforcedSenderRestriction
     public void sendZeroLengthRecord_Alert(
@@ -78,7 +78,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-yNEWNcjFZF")
     @ExcludeParameters({@ExcludeParameter("RECORD_LENGTH"), @ExcludeParameter("TCP_FRAGMENTATION")})
     public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCS_F(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -102,7 +102,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-RNQeBZXVNc")
     @ExcludeParameters({@ExcludeParameter("RECORD_LENGTH"), @ExcludeParameter("TCP_FRAGMENTATION")})
     public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCSF(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

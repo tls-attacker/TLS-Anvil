@@ -40,7 +40,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class ServerKeyExchange extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-nZ7mATYszU")
     @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(
             affectedIdentifiers = "CIPHER_SUITE",

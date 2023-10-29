@@ -31,7 +31,7 @@ public class PaddingExtension extends Tls12Test {
                 "Extension has not been offered and can not be evaluated");
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "7685-9JJaftYtP3")
     @MethodCondition(method = "offeredExtension")
     public void paddingWithNonZero() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();

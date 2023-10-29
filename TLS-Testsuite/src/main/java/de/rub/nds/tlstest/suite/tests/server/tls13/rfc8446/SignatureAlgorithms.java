@@ -39,7 +39,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class SignatureAlgorithms extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-kAJgkp7NBf")
     public void omitSignatureAlgorithmsExtension(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -74,7 +74,7 @@ public class SignatureAlgorithms extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-gKTTeCxk6m")
     @IncludeParameter("SIG_HASH_ALGORIHTM")
     @ManualConfig(identifiers = "SIG_HASH_ALGORIHTM")
     @ExplicitValues(
@@ -115,7 +115,7 @@ public class SignatureAlgorithms extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-3WqNtgoV2Z")
     @IncludeParameter("SIG_HASH_ALGORIHTM")
     @ExplicitValues(
             affectedIdentifiers = "SIG_HASH_ALGORIHTM",
@@ -131,7 +131,7 @@ public class SignatureAlgorithms extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-5YCxveMdpt")
     public void includeUnknownSignatureAndHashAlgorithm(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

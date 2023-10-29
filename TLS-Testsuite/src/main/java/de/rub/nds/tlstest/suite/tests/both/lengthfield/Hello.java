@@ -33,7 +33,7 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-anjpbghN69")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void helloSessionIdLengthTLS12(
@@ -44,7 +44,7 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-c4Db7ctU7V")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void helloSessionIdLengthTLS13(
@@ -55,7 +55,7 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-7AdFFavtAd")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void helloLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -65,7 +65,7 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-RUoZsBa3n4")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void helloLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -75,7 +75,7 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls12")
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-8NkdoEnnup")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void helloExtensionsLengthTLS12(
@@ -86,7 +86,7 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls13")
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-hjh8QDJmvK")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void helloExtensionsLengthTLS13(
@@ -98,7 +98,7 @@ public class Hello extends TlsGenericTest {
     @Tag("tls12")
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-9XEqy2ZCoa")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void clientHelloCipherSuitesLengthTLS12(
@@ -110,7 +110,7 @@ public class Hello extends TlsGenericTest {
     @Tag("tls13")
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-rUWM4KWG2t")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void clientHelloCipherSuitesLengthTLS13(
@@ -122,7 +122,7 @@ public class Hello extends TlsGenericTest {
     @Tag("tls12")
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS12)
-    @AnvilTest
+    @AnvilTest(id = "XLF-2BCMFwzm2j")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void clientHelloCompressionLengthTLS12(
@@ -134,7 +134,7 @@ public class Hello extends TlsGenericTest {
     @Tag("tls13")
     @ServerTest
     @TlsVersion(supported = ProtocolVersion.TLS13)
-    @AnvilTest
+    @AnvilTest(id = "XLF-pR3iFN7Miv")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void clientHelloCompressionLengthTLS13(

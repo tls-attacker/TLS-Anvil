@@ -44,7 +44,7 @@ public class PointFormatExtension extends Tls12Test {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    @AnvilTest
+    @AnvilTest(id = "8422-cxTqTQ7WwQ")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     public void serverAdvertisesOnlyUncompressedPointFormat(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -95,7 +95,7 @@ public class PointFormatExtension extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8422-hCNJHtPUAY")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     public void invalidPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -123,7 +123,7 @@ public class PointFormatExtension extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8422-DRMPmFHPDy")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     public void deprecatedFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

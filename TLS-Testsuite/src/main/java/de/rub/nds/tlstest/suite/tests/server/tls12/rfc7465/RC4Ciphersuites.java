@@ -53,7 +53,7 @@ public class RC4Ciphersuites extends Tls12Test {
         return !isRC4(cipherSuite);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7465-Wgqu8SjgSW")
     @ManualConfig(identifiers = "CIPHER_SUITE")
     @MethodCondition(method = "supportsRC4")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNonRC4")
@@ -89,7 +89,7 @@ public class RC4Ciphersuites extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "7465-YNsMZJY6pa")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isRC4")
     public void onlyRC4Suites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

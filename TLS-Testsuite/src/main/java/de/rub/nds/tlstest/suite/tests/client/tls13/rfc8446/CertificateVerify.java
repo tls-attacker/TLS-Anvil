@@ -63,7 +63,7 @@ public class CertificateVerify extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-oN7MGas4sq")
     @IncludeParameter("SIG_HASH_ALGORIHTM")
     @ExplicitValues(
             affectedIdentifiers = "SIG_HASH_ALGORIHTM",
@@ -96,7 +96,7 @@ public class CertificateVerify extends Tls13Test {
                 "Client does not support legacy rsa signature and hash algorithms");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-LNoEKntfip")
     @MethodCondition(method = "supportsLegacyECDSASAHAlgorithms")
     public void selectLegacyECDSASignatureAlgorithm(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -111,7 +111,7 @@ public class CertificateVerify extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-cEg5hNM3Lm")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("SIGNATURE_BITMASK")
     public void invalidSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -163,7 +163,7 @@ public class CertificateVerify extends Tls13Test {
         return unsupportedAlgorithms;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-NYgNsg97bX")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExplicitValues(
             affectedIdentifiers = "SIG_HASH_ALGORIHTM",
@@ -184,7 +184,7 @@ public class CertificateVerify extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-HKxd74FVbC")
     public void emptySignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -207,7 +207,7 @@ public class CertificateVerify extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-CZWhi6PJvQ")
     public void emptySigAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -220,7 +220,7 @@ public class CertificateVerify extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-AptaW3C62X")
     public void emptyBoth(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

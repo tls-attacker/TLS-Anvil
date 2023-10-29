@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Tag;
 @ClientTest
 public class ClientHello extends Tls13Test {
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-Agnoga6SCd")
     public void checkLegacyVersion() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
         byte[] version = clientHello.getProtocolVersion().getValue();
@@ -32,7 +32,7 @@ public class ClientHello extends Tls13Test {
         assertNotNull("Does not contain supported_versions extension", ext);
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-eMuKxJmUfq")
     @Tag("new")
     public void checkExtensionsValidity() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
@@ -40,7 +40,7 @@ public class ClientHello extends Tls13Test {
         SharedExtensionTests.checkForDuplicateExtensions(clientHello);
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-u9JfnwgsWH")
     @Tag("new")
     public void checkMandatoryExtensions() {
         if (!context.getReceivedClientHelloMessage()
@@ -69,7 +69,7 @@ public class ClientHello extends Tls13Test {
                 clientHello.containsExtension(ExtensionType.TRUNCATED_HMAC));
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-Q2RbRWjAdJ")
     @Tag("new")
     public void checkLegacySessionId() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();

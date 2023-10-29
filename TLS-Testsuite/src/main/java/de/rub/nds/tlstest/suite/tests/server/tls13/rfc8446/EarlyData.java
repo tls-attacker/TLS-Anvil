@@ -74,7 +74,7 @@ public class EarlyData extends Tls13Test {
         return null;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-3tUPL8K9nh")
     @MethodCondition(method = "supports0rtt")
     @Disabled
     public void selectedFirstIdentity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -112,7 +112,7 @@ public class EarlyData extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-QX4UnMXsbP")
     @MethodCondition(method = "tls13multipleCipherSuites")
     @Disabled
     public void cipherSuiteDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -147,7 +147,7 @@ public class EarlyData extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-wiNRa3novJ")
     @MethodCondition(method = "supports0rtt")
     @Disabled
     public void tlsVersionDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -182,7 +182,7 @@ public class EarlyData extends Tls13Test {
         return lengthCandidate >= 50;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-LSEXdVf1sN")
     @MethodCondition(method = "supports0rtt")
     @IncludeParameters({
         @IncludeParameter("APP_MSG_LENGHT"),
@@ -252,7 +252,7 @@ public class EarlyData extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-QSom3GGTZ1")
     @IncludeParameter("AUTH_TAG_BITMASK")
     @MethodCondition(method = "supports0rtt")
     @Disabled

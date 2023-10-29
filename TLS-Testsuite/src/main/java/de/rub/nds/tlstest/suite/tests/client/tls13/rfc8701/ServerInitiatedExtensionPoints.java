@@ -38,7 +38,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class ServerInitiatedExtensionPoints extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8701-91tcbyhyNk")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_EXTENSION")
     public void advertiseGreaseExtensionsInSessionTicket(
@@ -58,7 +58,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-q8vvYUsUCu")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_PROTOCOL_VERSION")
     public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -86,7 +86,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 .validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-xwVd59Y3Fq")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_CIPHERSUITE")
     @ExcludeParameter("CIPHER_SUITE")
@@ -113,7 +113,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 .validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-NczJT3TSj4")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_EXTENSION")
     public void sendServerHelloGreaseExtension(
@@ -140,7 +140,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 .validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-pVCWxJraM8")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_EXTENSION")
     public void sendEncryptedExtensionsGreaseExtension(
@@ -160,7 +160,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-9F3St2di12")
     @IncludeParameter("GREASE_SIG_HASH")
     public void sendCertificateVerifyGreaseSignatureAlgorithm(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

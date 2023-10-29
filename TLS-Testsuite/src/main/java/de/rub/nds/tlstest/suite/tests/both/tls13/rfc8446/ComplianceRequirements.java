@@ -16,7 +16,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 
 public class ComplianceRequirements extends Tls13Test {
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-nvo5NZdCUK")
     @Tag("new")
     public void supportsAes128GcmSha256() {
         assertTrue(
@@ -26,7 +26,7 @@ public class ComplianceRequirements extends Tls13Test {
                         .contains(CipherSuite.TLS_AES_128_GCM_SHA256));
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "8446-xhexdB876E")
     @Tag("new")
     public void supportsSecp256r1() {
         assertTrue(

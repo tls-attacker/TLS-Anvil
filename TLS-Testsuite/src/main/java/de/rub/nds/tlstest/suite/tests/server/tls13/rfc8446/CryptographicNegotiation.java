@@ -34,7 +34,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class CryptographicNegotiation extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8446-5fMfqyHu68")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
         @ExcludeParameter("NAMED_GROUP")
@@ -63,7 +63,7 @@ public class CryptographicNegotiation extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8446-QxURSJAYJj")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
         @ExcludeParameter("CIPHER_SUITE")

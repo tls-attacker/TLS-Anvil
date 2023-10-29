@@ -75,7 +75,7 @@ public class SignatureAlgorithms extends Tls12Test {
         return ConditionEvaluationResult.disabled("No ECDSA signature ciphersuites supported");
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-ZdnCWL4k5G")
     @MethodCondition(method = "dssCiphersuitesSupported")
     public void dssNoSignatureAlgorithmsExtension(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -104,7 +104,7 @@ public class SignatureAlgorithms extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-MjFVuYUzfF")
     @MethodCondition(method = "ecdsaCiphersuitesSupported")
     public void ecdsaNoSignatureAlgorithmsExtension(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -133,7 +133,7 @@ public class SignatureAlgorithms extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-gnRCzTtN6q")
     // This requirement also applies to older versions
     public void includeUnknownSignatureAndHashAlgorithm(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -153,7 +153,7 @@ public class SignatureAlgorithms extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-52fQFPB85j")
     @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     public void offerManyAlgorithms(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

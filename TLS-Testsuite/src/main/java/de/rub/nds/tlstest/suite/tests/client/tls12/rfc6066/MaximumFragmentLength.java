@@ -55,7 +55,7 @@ public class MaximumFragmentLength extends Tls12Test {
         return MaxFragmentLength.TWO_11;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "6066-WpGEGtHscM")
     @MethodCondition(method = "sentMaximumFragmentLength")
     @ExcludeParameter("RECORD_LENGTH")
     public void invalidMaximumFragmentLength(
@@ -84,7 +84,7 @@ public class MaximumFragmentLength extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "6066-ossqki78mA")
     @MethodCondition(method = "sentMaximumFragmentLength")
     @ExcludeParameter("RECORD_LENGTH")
     public void unrequestedMaximumFragmentLength(
@@ -118,7 +118,7 @@ public class MaximumFragmentLength extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "6066-XXJU5VtxbB")
     @MethodCondition(method = "sentMaximumFragmentLength")
     @Tag("new")
     public void respectsNegotiatedMaxFragmentLength(

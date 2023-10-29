@@ -38,7 +38,7 @@ public class StateMachine extends Tls12Test {
         return !cipherSuite.isAnon();
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-g5sZueNdGS")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNotAnonCipherSuite")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExcludeParameter("CERTIFICATE")
@@ -54,7 +54,7 @@ public class StateMachine extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-YWHyrAVFo3")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void omitChangeCipherSpecEncryptedFinished(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -72,13 +72,13 @@ public class StateMachine extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-TPgoAceVQB")
     public void sendServerHelloTwice(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSendServerHelloTwiceTest(config, runner);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-jnFHuGoQR3")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void sendSecondServerHelloAfterClientFinished(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -96,7 +96,7 @@ public class StateMachine extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XSM-SJ9mzNY9kZ")
     public void sendResumptionMessageFlow(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -109,13 +109,13 @@ public class StateMachine extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "XSM-Rdcvemgd4h")
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
     }
 
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "XSM-Bv4mqPoKa4")
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);

@@ -28,7 +28,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class SupportedVersionsExtension extends TlsGenericTest {
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-9xtqzkYrTD")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void supportedVersionsExtensionLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -38,7 +38,7 @@ public class SupportedVersionsExtension extends TlsGenericTest {
     }
 
     @ServerTest
-    @AnvilTest
+    @AnvilTest(id = "XLF-ATViZnuPw9")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void supportedVersionsListLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

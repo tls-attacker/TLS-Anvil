@@ -48,7 +48,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class StateMachine extends Tls12Test {
 
     // Figure 2: path 0, 1, 10
-    @AnvilTest
+    @AnvilTest(id = "XSM-N5VTen5U6e")
     public void sendHeartbeatRequestAfterClientHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -59,7 +59,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 2: path 0, 1, 10
-    @AnvilTest
+    @AnvilTest(id = "XSM-hUmvB1guzB")
     public void sendHeartbeatRequestAfterClientKeyExchange(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -70,7 +70,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 2: path 0, 1, 10 and Figure 4: path 0, 1, 3, 5, 8
-    @AnvilTest
+    @AnvilTest(id = "XSM-RGwxgMCeT9")
     public void sendHeartbeatRequestAfterChangeCipherSpec(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -81,7 +81,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 2: 0, 1, 3, 5 and Figure 4: path 0, 1, 3, 4
-    @AnvilTest
+    @AnvilTest(id = "XSM-JoVdmVr5by")
     public void secondClientHelloAfterClientKeyExchange(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -97,7 +97,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 3: path 0, 1, 3, 5, 6, 2
-    @AnvilTest
+    @AnvilTest(id = "XSM-uscvmqxrG3")
     public void sendFinishedAfterServerHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -108,14 +108,14 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 4: path 0, 2
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "XSM-hV8iCuJCXT")
     public void beginWithFinished(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
     }
 
     // Figure 4: path 0, 1, 3, 2
-    @AnvilTest
+    @AnvilTest(id = "XSM-zmpmr7nVki")
     public void secondClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace =
@@ -133,7 +133,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 4: path 0, 1, 3, 2
-    @AnvilTest
+    @AnvilTest(id = "XSM-7HDSP4DS95")
     public void secondClientKeyExchangeDifferentAction(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -151,7 +151,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 4: path 0, 1, 3, 5, 2
-    @AnvilTest
+    @AnvilTest(id = "XSM-RPJWoZQFc5")
     public void secondClientKeyExchangeAfterChangeCipherSpec(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -170,7 +170,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 4: path 0, 1, 3, 5, 2
-    @AnvilTest
+    @AnvilTest(id = "XSM-9TgGnWGw1S")
     public void secondClientKeyExchangeAfterChangeCipherSpecUnencrypted(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -199,7 +199,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: path 0,2
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "XSM-1yXVP5Gbsr")
     @MethodCondition(method = "onlySupportsTls12")
     public void beginWithChangeCipherSpec(WorkflowRunner runner) {
         Config config = getConfig();
@@ -207,7 +207,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: path 0,3
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "XSM-Lz5fCfdmQi")
     public void beginWithEmptyApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         runner.setPreparedConfig(config);
@@ -224,14 +224,14 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: path 0,3 (with content in Application Message)
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "XSM-tVGt2rqQy1")
     public void beginWithApplicationData(WorkflowRunner runner) {
         Config config = getConfig();
         SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);
     }
 
     // Figure 7: 0, 1, 5, 6, 7, 8
-    @AnvilTest
+    @AnvilTest(id = "XSM-jQ4aV9UCUM")
     @Tag("libressl")
     public void secondChangeCipherSpecAfterHandshake(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -245,7 +245,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: 0, 1, 5, 6, 7, 8
-    @AnvilTest
+    @AnvilTest(id = "XSM-WzfTB6GdUF")
     public void secondChangeCipherSpecAfterHandshakeUnencrypted(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -259,7 +259,7 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: path 0, 1, 4
-    @AnvilTest
+    @AnvilTest(id = "XSM-mnyxwyTTK2")
     public void secondClientHelloAfterServerHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
@@ -267,14 +267,14 @@ public class StateMachine extends Tls12Test {
     }
 
     // Figure 7: path 0, 1, 4
-    @AnvilTest
+    @AnvilTest(id = "XSM-xDPE4XDweY")
     public void secondClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         SharedStateMachineTest.sharedSecondClientHelloTest(config, runner);
     }
 
     // Figure 8: path 0, 1, 6
-    @AnvilTest
+    @AnvilTest(id = "XSM-dV8FPhVnww")
     public void earlyChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace =

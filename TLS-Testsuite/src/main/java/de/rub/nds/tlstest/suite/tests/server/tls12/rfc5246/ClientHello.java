@@ -41,7 +41,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class ClientHello extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-ST5MN96BuF")
     public void unknownCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -56,7 +56,7 @@ public class ClientHello extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-P4AGQWTZsM")
     public void unknownCompressionMethod(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -72,7 +72,7 @@ public class ClientHello extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-YhZ7GJjrwk")
     public void includeUnknownExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = getPreparedConfig(argumentAccessor, runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -111,7 +111,7 @@ public class ClientHello extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-RMehEjs346")
     @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES")
     public void offerManyCipherSuites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -145,7 +145,7 @@ public class ClientHello extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-LtPf1AMt7Y")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_ALPN_EXTENSION"),
         @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION"),

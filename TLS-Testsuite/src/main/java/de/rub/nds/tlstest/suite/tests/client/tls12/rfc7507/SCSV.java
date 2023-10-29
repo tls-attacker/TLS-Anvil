@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Tag;
 
 @ClientTest
 public class SCSV extends Tls12Test {
-    @NonCombinatorialAnvilTest
+    @NonCombinatorialAnvilTest(id = "7507-YMY8CHMEzt")
     @Tag("new")
     public void doesNotIncludeFallbackCipherSuite() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();

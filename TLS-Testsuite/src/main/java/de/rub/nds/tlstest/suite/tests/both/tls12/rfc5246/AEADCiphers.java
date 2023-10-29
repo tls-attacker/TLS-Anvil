@@ -27,7 +27,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class AEADCiphers extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-7JhgKXeTXv")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("AUTH_TAG_BITMASK")
     @ValueConstraints({
@@ -62,7 +62,7 @@ public class AEADCiphers extends Tls12Test {
         return lengthCandidate >= 50;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-sYXZ8a3B4C")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameters({
         @IncludeParameter("CIPHERTEXT_BITMASK"),

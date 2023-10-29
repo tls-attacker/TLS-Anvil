@@ -41,7 +41,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ClientTest
 public class ServerKeyExchange extends Tls12Test {
 
-    @AnvilTest
+    @AnvilTest(id = "5246-zqCFt52rqY")
     @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
@@ -101,7 +101,7 @@ public class ServerKeyExchange extends Tls12Test {
         return certDerivation.getApplicableCertificates(context, scope, true);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-wPU1BxUpeu")
     @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
@@ -147,7 +147,7 @@ public class ServerKeyExchange extends Tls12Test {
         return parameterValues;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-cNKtuNg3Lc")
     @ModelFromScope(modelType = "GENERIC")
     @IncludeParameter("CERTIFICATE")
     @ExcludeParameter("NAMED_GROUP")
@@ -173,7 +173,7 @@ public class ServerKeyExchange extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-KAA9dJJg3h")
     @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
@@ -203,7 +203,7 @@ public class ServerKeyExchange extends Tls12Test {
         return !cipherSuite.isAnon();
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-xTN7vXv2VU")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExcludeParameter("SIG_HASH_ALGORIHTM")
     @KeyExchange(
@@ -264,7 +264,7 @@ public class ServerKeyExchange extends Tls12Test {
         return unsupportedAlgorithms;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-1Bsg5xe2cv")
     @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},

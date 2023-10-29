@@ -30,7 +30,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL13)
 public class EncryptedExtensions extends TlsGenericTest {
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-SA1CoksBgE")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void encryptedExtensionsLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -44,7 +44,7 @@ public class EncryptedExtensions extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest
+    @AnvilTest(id = "XLF-Ax6kVTgheY")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void encryptedExtensionsExtensionsLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

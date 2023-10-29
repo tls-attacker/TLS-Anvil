@@ -38,7 +38,7 @@ public class CBCBlockCipher extends Tls12Test {
         return lengthCandidate >= 50;
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-RNB9LX21i9")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameters({@IncludeParameter("APP_MSG_LENGHT"), @IncludeParameter("PADDING_BITMASK")})
     @ValueConstraints({@ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC")})
@@ -73,7 +73,7 @@ public class CBCBlockCipher extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-VC1baM1Mn1")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("CIPHERTEXT_BITMASK")
     @ValueConstraints({
@@ -126,7 +126,7 @@ public class CBCBlockCipher extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-JBqS2uGywY")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("MAC_BITMASK")
     @ValueConstraints({
@@ -162,7 +162,7 @@ public class CBCBlockCipher extends Tls12Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "5246-BWb6uwVEte")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ValueConstraints({
         @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),

@@ -45,7 +45,7 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @ServerTest
 public class ClientInitiatedExtensionPoints extends Tls13Test {
 
-    @AnvilTest
+    @AnvilTest(id = "8701-iaW1cm19MU")
     @IncludeParameter("GREASE_CIPHERSUITE")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
@@ -75,7 +75,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-PErDdQZt7u")
     @IncludeParameter("GREASE_EXTENSION")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
@@ -115,7 +115,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-2XMSQq7p9T")
     @IncludeParameter("GREASE_NAMED_GROUP")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
@@ -168,7 +168,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-ek86W17BUz")
     @IncludeParameter("GREASE_SIG_HASH")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
@@ -202,7 +202,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
                         });
     }
 
-    @AnvilTest
+    @AnvilTest(id = "8701-fe7Ev3bbiq")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),

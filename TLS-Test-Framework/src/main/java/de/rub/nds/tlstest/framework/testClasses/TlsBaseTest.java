@@ -16,6 +16,7 @@ import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
+import de.rub.nds.tlstest.framework.anvil.TlsPcapCapturingInvocationInterceptor;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.junitExtensions.EnforcedSenderRestrictionConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
@@ -33,8 +34,10 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
     TlsVersionCondition.class,
     KexCondition.class,
     EnforcedSenderRestrictionConditionExtension.class,
-    WorkflowRunnerResolver.class
+    WorkflowRunnerResolver.class,
+    TlsPcapCapturingInvocationInterceptor.class
 })
+// @ExtendWith(N_InvocationInterceptor.class)
 @ModelFromScope(modelType = "GENERIC")
 public abstract class TlsBaseTest extends CombinatorialAnvilTest {
     protected static final Logger LOGGER = LogManager.getLogger();

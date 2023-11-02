@@ -8,22 +8,32 @@
 package de.rub.nds.tlstest.framework.anvil;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import de.rub.nds.anvilcore.context.AnvilContext;
+import de.rub.nds.anvilcore.context.AnvilTestConfig;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
+import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.config.TlsTestConfig;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import jakarta.xml.bind.DatatypeConverter;
+import java.io.EOFException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.pcap4j.core.*;
+import org.pcap4j.packet.Packet;
 
 public class TlsTestCase extends AnvilTestCase {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -31,10 +41,58 @@ public class TlsTestCase extends AnvilTestCase {
 
     private TlsTestCase() {}
 
+    private String tmpPcapFileName;
+
+    private static int pcapFileCounter = 0;
+
+    public String getTmpPcapFileName() {
+        return tmpPcapFileName;
+    }
+
     public TlsTestCase(
             ExtensionContext context, State state, TlsParameterCombination parameterCombination) {
         super(parameterCombination, context);
         this.state = state;
+        this.tmpPcapFileName = String.format("tmp_%s.pcap", TlsTestCase.pcapFileCounter);
+        TlsTestCase.pcapFileCounter += 1;
+    }
+
+    @Override
+    protected void finalizeAnvilTestCase() {
+
+        TlsTestConfig tlsConfig = TestContext.getInstance().getConfig();
+        AnvilTestConfig anvilconfig = AnvilContext.getInstance().getConfig();
+        Path basePath = Paths.get(anvilconfig.getOutputFolder());
+        basePath =
+                basePath.resolve(this.associatedContainer.getTestMethodName()); // TODO: get RunID
+        Path pathTmpCap = basePath.resolve(this.getTmpPcapFileName());
+        Path pathCap = basePath.resolve(String.format("dump_%s.pcap", this.getUuid()));
+
+        try (PcapHandle pcapHandle = Pcaps.openOffline(pathTmpCap.toString())) {
+            pcapHandle.setFilter(
+                    String.format("tcp port %s", this.getSrcPort().toString()),
+                    BpfProgram.BpfCompileMode.OPTIMIZE);
+            PcapDumper pcapDumper = pcapHandle.dumpOpen(pathCap.toString());
+            while (true) {
+                try {
+                    Packet p = pcapHandle.getNextPacketEx();
+                    if (p != null) {
+                        pcapDumper.dump(p, pcapHandle.getTimestamp());
+                    }
+                } catch (EOFException e) {
+                    LOGGER.debug("End of pcap file");
+                    break;
+                } catch (TimeoutException e) {
+                    LOGGER.error("TimeoutException");
+                }
+            }
+            pcapDumper.close();
+            pathTmpCap.toFile().delete();
+        } catch (PcapNativeException e) {
+            throw new RuntimeException(e);
+        } catch (NotOpenException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public State getState() {

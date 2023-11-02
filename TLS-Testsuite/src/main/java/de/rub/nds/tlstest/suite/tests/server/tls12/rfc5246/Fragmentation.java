@@ -13,17 +13,8 @@ import de.rub.nds.anvilcore.annotation.ExcludeParameters;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.AlertDescription;
-import de.rub.nds.tlsattacker.core.constants.AlertLevel;
-import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
-import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
+import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -33,30 +24,15 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.transport.TransportHandlerType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5246, section = "6.2.1 Fragmentation")
 @ServerTest
 public class Fragmentation extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send zero-length fragments of Handshake, "
-                            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
-                            + "Application data MAY be sent as they are potentially useful as a "
-                            + "traffic analysis countermeasure.")
+    @AnvilTest(id = "5246-J6zSpKaaXP")
     @ExcludeParameter("RECORD_LENGTH")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
     @EnforcedSenderRestriction
     public void sendZeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -76,16 +52,8 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send zero-length fragments of Handshake, "
-                            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
-                            + "Application data MAY be sent as they are potentially useful as a "
-                            + "traffic analysis countermeasure.")
+    @AnvilTest(id = "5246-2FWjWfzv3Q")
     @ExcludeParameter("RECORD_LENGTH")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
     @EnforcedSenderRestriction
     public void sendZeroLengthRecord_Alert(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -110,17 +78,8 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Client "
-                            + "message boundaries are not preserved in the record layer (i.e., "
-                            + "multiple client messages of the same ContentType MAY be coalesced "
-                            + "into a single TLSPlaintext record, or a single message MAY be "
-                            + "fragmented across several records).")
+    @AnvilTest(id = "5246-yNEWNcjFZF")
     @ExcludeParameters({@ExcludeParameter("RECORD_LENGTH"), @ExcludeParameter("TCP_FRAGMENTATION")})
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCS_F(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -143,17 +102,8 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-    @AnvilTest(
-            description =
-                    "Client "
-                            + "message boundaries are not preserved in the record layer (i.e., "
-                            + "multiple client messages of the same ContentType MAY be coalesced "
-                            + "into a single TLSPlaintext record, or a single message MAY be "
-                            + "fragmented across several records).")
+    @AnvilTest(id = "5246-RNQeBZXVNc")
     @ExcludeParameters({@ExcludeParameter("RECORD_LENGTH"), @ExcludeParameter("TCP_FRAGMENTATION")})
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCSF(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

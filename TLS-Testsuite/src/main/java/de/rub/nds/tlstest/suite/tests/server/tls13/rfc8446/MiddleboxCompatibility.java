@@ -25,11 +25,6 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.LinkedList;
@@ -39,7 +34,6 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-@RFC(number = 8446, section = "D.4.  Middlebox Compatibility Mode")
 public class MiddleboxCompatibility extends Tls13Test {
 
     public ConditionEvaluationResult sendsHelloRetryRequestForEmptyKeyShare() {
@@ -51,15 +45,7 @@ public class MiddleboxCompatibility extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not send a Hello Retry Request");
     }
 
-    @AnvilTest(
-            description =
-                    "Either side can send change_cipher_spec at any time during "
-                            + "the handshake, as they must be ignored by the peer, but if "
-                            + "the client sends a non-empty session ID, the server MUST "
-                            + "send the change_cipher_spec as described in this appendix.")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @AnvilTest(id = "8446-bgegNHeUgg")
     @Tag("new")
     public void respectsClientCompatibilityWish(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -94,15 +80,7 @@ public class MiddleboxCompatibility extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Either side can send change_cipher_spec at any time during "
-                            + "the handshake, as they must be ignored by the peer, but if "
-                            + "the client sends a non-empty session ID, the server MUST "
-                            + "send the change_cipher_spec as described in this appendix.")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @AnvilTest(id = "8446-vUL6yuqsbj")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     @Tag("new")
     public void respectsClientCompatibilityWishWithHrr(

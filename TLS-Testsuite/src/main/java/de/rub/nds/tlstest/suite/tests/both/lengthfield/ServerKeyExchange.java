@@ -21,11 +21,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -37,11 +33,8 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @KeyExchange(supported = KeyExchangeType.ALL12, requiresServerKeyExchMsg = true)
 public class ServerKeyExchange extends TlsGenericTest {
 
-    @AnvilTest(description = "Send a Server Key Exchange Message with a modified length value (-1)")
+    @AnvilTest(id = "XLF-Z5CqDTjvni")
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void serverKeyExchangeLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         ServerKeyExchangeMessage serverKeyExchange =
@@ -53,16 +46,11 @@ public class ServerKeyExchange extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest(
-            description =
-                    "Send a Server Key Exchange Message with a modified signature length value (-1)")
+    @AnvilTest(id = "XLF-gvZTTfnQTn")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @DynamicValueConstraints(
             affectedIdentifiers = "CIPHER_SUITE",
             methods = "isNotAnonymousCipherSuite")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void serverKeyExchangeSignatureLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
@@ -75,13 +63,8 @@ public class ServerKeyExchange extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest(
-            description =
-                    "Send a Server Key Exchange Message with a modified public key length value (-1)")
+    @AnvilTest(id = "XLF-yiZVhouStn")
     @ModelFromScope(modelType = "LENGTHFIELD")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void serverKeyExchangePublicKeyLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
@@ -94,14 +77,9 @@ public class ServerKeyExchange extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest(
-            description =
-                    "Send a Diffie-Hellman Server Key Exchange Message with a modified modulus length value (-1)")
+    @AnvilTest(id = "XLF-8852p34nEP")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void modulusLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         DHEServerKeyExchangeMessage serverKeyExchange =
@@ -113,14 +91,9 @@ public class ServerKeyExchange extends TlsGenericTest {
                 .validateFinal(super::validateLengthTest);
     }
 
-    @AnvilTest(
-            description =
-                    "Send a Diffie-Hellman Server Key Exchange Message with a modified generator length value (-1)")
+    @AnvilTest(id = "XLF-DVpNzSiTq5")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void generatorLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
         DHEServerKeyExchangeMessage serverKeyExchange =

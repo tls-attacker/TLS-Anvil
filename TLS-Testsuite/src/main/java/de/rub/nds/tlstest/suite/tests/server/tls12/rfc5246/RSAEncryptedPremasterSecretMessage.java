@@ -22,35 +22,16 @@ import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5246, section = "7.4.7.1")
 @ServerTest
 public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "Client implementations MUST always send the correct version number in PreMasterSecret. "
-                            + "If ClientHello.client_version is TLS 1.1 or higher, server implementations MUST check "
-                            + "the version number as described in the note below. [...]"
-                            + "In any case, a TLS server MUST NOT generate an alert if processing an "
-                            + "RSA-encrypted premaster secret message fails, or the version number "
-                            + "is not as expected.  Instead, it MUST continue the handshake with a "
-                            + "randomly generated premaster secret.")
+    @AnvilTest(id = "5246-VfW71fZRBF")
     @KeyExchange(supported = KeyExchangeType.RSA)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @CryptoCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
     public void PMWithWrongClientVersion(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -72,17 +53,8 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "In any case, a TLS server MUST NOT generate an alert if processing an "
-                            + "RSA-encrypted premaster secret message fails, or the version number "
-                            + "is not as expected.  Instead, it MUST continue the handshake with a "
-                            + "randomly generated premaster secret.")
+    @AnvilTest(id = "5246-jnNzxCinX4")
     @KeyExchange(supported = KeyExchangeType.RSA)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @CryptoCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
     public void PMWithWrongPKCS1Padding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

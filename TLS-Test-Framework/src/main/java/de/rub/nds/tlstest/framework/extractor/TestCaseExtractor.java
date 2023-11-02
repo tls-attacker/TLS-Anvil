@@ -8,12 +8,12 @@
 package de.rub.nds.tlstest.framework.extractor;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.TestDescription;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.junit.extension.EndpointConditionExtension;
+import de.rub.nds.anvilcore.teststate.reporting.MetadataFetcher;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.RFC;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +35,7 @@ public class TestCaseExtractor {
     private static final Logger LOGGER = LogManager.getLogger(TestCaseExtractor.class);
 
     private String packageName;
+    private static MetadataFetcher fetcher;
 
     public TestCaseExtractor(String packageName) {
         this.packageName = packageName;
@@ -45,19 +44,18 @@ public class TestCaseExtractor {
     public void start() {
         boolean detailedOutput =
                 TestContext.getInstance().getConfig().getTestExtractorDelegate().isDetailed();
+
+        fetcher = new MetadataFetcher();
+
         Reflections reflections = new Reflections(packageName, new MethodAnnotationsScanner());
-        Set<Method> testMethodsRaw = reflections.getMethodsAnnotatedWith(TestDescription.class);
-        testMethodsRaw.addAll(reflections.getMethodsAnnotatedWith(AnvilTest.class));
+        Set<Method> testMethodsRaw = reflections.getMethodsAnnotatedWith(AnvilTest.class);
+        testMethodsRaw.addAll(reflections.getMethodsAnnotatedWith(NonCombinatorialAnvilTest.class));
 
         Set<ExtractionMethod> testMethods =
                 testMethodsRaw.stream()
-                        .filter(
-                                i ->
-                                        i.getAnnotation(RFC.class) != null
-                                                || i.getDeclaringClass().getAnnotation(RFC.class)
-                                                        != null)
                         .filter(i -> i.getAnnotation(EnforcedSenderRestriction.class) == null)
                         .map(ExtractionMethod::new)
+                        .filter(i -> i.getRfcNumber() != null)
                         .filter(i -> !i.getDescription().matches("^[\\s\\n]*$"))
                         .collect(Collectors.toSet());
 
@@ -135,7 +133,7 @@ public class TestCaseExtractor {
         Map<Integer, List<ExtractionMethod>> rfcMap = new HashMap<>();
         testMethods.forEach(
                 i -> {
-                    int rfcNumber = i.getRFCAnnotation().number();
+                    int rfcNumber = i.getRfcNumber();
                     if (!rfcMap.containsKey(rfcNumber)) {
                         rfcMap.put(rfcNumber, new ArrayList<>());
                     }
@@ -267,54 +265,29 @@ public class TestCaseExtractor {
     }
 
     private static class ExtractionMethod {
+        private String testId;
         private final Method m;
-        private final RFC rfcAnnotation;
+        private Integer rfc;
+        private String section;
         private String description;
 
         public ExtractionMethod(Method method) {
             this.m = method;
-            this.rfcAnnotation = getRFCAnnotation();
-            TestDescription description = method.getAnnotation(TestDescription.class);
-            if (description != null) {
-                this.description = description.value();
+            NonCombinatorialAnvilTest NonCombinatorialAnvilTest =
+                    m.getAnnotation(NonCombinatorialAnvilTest.class);
+            AnvilTest AnvilTest = m.getAnnotation(AnvilTest.class);
+            this.testId = method.getDeclaringClass().getName() + "." + method.getName();
+            if (NonCombinatorialAnvilTest != null && !NonCombinatorialAnvilTest.id().isEmpty()) {
+                this.testId = NonCombinatorialAnvilTest.id();
+            } else if (AnvilTest != null && !AnvilTest.id().isEmpty()) {
+                this.testId = AnvilTest.id();
             }
-
-            AnvilTest desc = method.getAnnotation(AnvilTest.class);
-            if (desc != null) {
-                this.description = desc.description();
+            Map<?, ?> meta = fetcher.getRawMetadata(testId);
+            if (meta.get("rfc") != null) {
+                this.rfc = (int) ((Map<?, ?>) meta.get("rfc")).get("number");
+                this.section = (String) ((Map<?, ?>) meta.get("rfc")).get("section");
             }
-
-            if (description == null && desc == null) {
-                LOGGER.warn("No description found {}", method);
-            }
-        }
-
-        public RFC getRFCAnnotation() {
-            if (rfcAnnotation != null) return rfcAnnotation;
-
-            String pName = m.getDeclaringClass().getPackage().getName();
-            Pattern rfcPattern = Pattern.compile("rfc([0-9]+)");
-            Matcher matcher = rfcPattern.matcher(pName);
-            int rfcNumber = -1;
-            if (matcher.find()) {
-                rfcNumber = Integer.parseInt(matcher.group(1));
-            }
-
-            RFC annotation = m.getAnnotation(RFC.class);
-            if (annotation == null) {
-                annotation = m.getDeclaringClass().getAnnotation(RFC.class);
-            }
-
-            if (annotation != null && annotation.number() != rfcNumber) {
-                LOGGER.warn(
-                        "RFC number mismatch: Detected {} vs Expected {} for {}.{}",
-                        annotation.number(),
-                        rfcNumber,
-                        this.m.getDeclaringClass().getName(),
-                        this.m.getName());
-            }
-
-            return annotation;
+            description = (String) meta.get("description");
         }
 
         public String getDescription() {
@@ -326,6 +299,10 @@ public class TestCaseExtractor {
 
         public TestEndpointType getEndpointType() {
             return EndpointConditionExtension.endpointOfMethod(m, m.getDeclaringClass());
+        }
+
+        public Integer getRfcNumber() {
+            return rfc;
         }
 
         public String getFullTestName() {

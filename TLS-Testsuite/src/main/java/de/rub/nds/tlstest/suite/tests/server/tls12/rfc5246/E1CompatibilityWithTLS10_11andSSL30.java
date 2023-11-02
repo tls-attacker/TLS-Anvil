@@ -30,12 +30,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -45,18 +39,10 @@ import java.util.Set;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5246, section = "E.1. Compatibility with TLS 1.0/1.1 and SSL 3.0")
 @ServerTest
 public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "If a TLS server receives a ClientHello containing a version number "
-                            + "greater than the highest version supported by the server, it MUST "
-                            + "reply according to the highest version supported by the server.")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "5246-1dbRcCn9si")
     public void versionGreaterThanSupportedByServer(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -96,14 +82,8 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         return ConditionEvaluationResult.disabled("Does not support legacy versions");
     }
 
-    @AnvilTest(
-            description =
-                    "If server supports (or is willing to use) only "
-                            + "versions greater than client_version, it MUST send a "
-                            + "\"protocol_version\" alert message and close the connection.")
+    @AnvilTest(id = "5246-cBgzhL56ow")
     @MethodCondition(method = "doesSupportLegacyVersions")
-    @ComplianceCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.MEDIUM)
     public void versionLowerThanSupportedByServer(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -140,13 +120,8 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Thus, TLS servers compliant with this specification MUST accept any value {03,XX} as the "
-                            + "record layer version number for ClientHello.")
+    @AnvilTest(id = "5246-YLok6XJr7R")
     @ExcludeParameter("RECORD_LENGTH")
-    @InteroperabilityCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
     public void acceptAnyRecordVersionNumber(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

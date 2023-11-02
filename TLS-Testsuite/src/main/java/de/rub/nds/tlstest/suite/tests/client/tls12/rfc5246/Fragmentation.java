@@ -22,31 +22,14 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5246, section = "6.2.1 Fragmentation")
 @ClientTest
 public class Fragmentation extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send zero-length fragments of Handshake, "
-                            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
-                            + "Application data MAY be sent as they are potentially useful as a "
-                            + "traffic analysis countermeasure.")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "5246-uMW2Qzjt88")
     @EnforcedSenderRestriction
     public void sendZeroLengthRecord_SH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -68,18 +51,8 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Client "
-                            + "message boundaries are not preserved in the record layer (i.e., "
-                            + "multiple client messages of the same ContentType MAY be coalesced "
-                            + "into a single TLSPlaintext record, or a single message MAY be "
-                            + "fragmented across several records).")
+    @AnvilTest(id = "5246-FsvDkXCwAy")
     @ExcludeParameter("RECORD_LENGTH")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void sendHandshakeMessagesWithinSingleRecord(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

@@ -7,9 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc8422;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
@@ -32,15 +30,8 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
@@ -53,23 +44,8 @@ public class PointFormatExtension extends Tls12Test {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    @RFC(number = 8422, section = "5.2. Server Hello Extensions")
-    @AnvilTest(
-            description =
-                    "The Supported "
-                            + "Point Formats Extension, when used, MUST contain the value 0 "
-                            + "(uncompressed) as one of the items in the list of point formats. [...]"
-                            + "Implementations of this document MUST support the "
-                            + "uncompressed format for all of their supported curves and MUST NOT "
-                            + "support other formats for curves defined in this specification.  For "
-                            + "backwards compatibility purposes, the point format list extension MAY "
-                            + "still be included and contain exactly one value: the uncompressed "
-                            + "point format (0).")
+    @AnvilTest(id = "8422-cxTqTQ7WwQ")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     public void serverAdvertisesOnlyUncompressedPointFormat(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -119,19 +95,8 @@ public class PointFormatExtension extends Tls12Test {
                         });
     }
 
-    @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @AnvilTest(
-            description =
-                    "If the client sends the extension and the extension does not contain "
-                            + "the uncompressed point format, and the client has used the Supported "
-                            + "Groups extension to indicate support for any of the curves defined in "
-                            + "this specification, then the server MUST abort the handshake and "
-                            + "return an illegal_parameter alert.")
+    @AnvilTest(id = "8422-hCNJHtPUAY")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     public void invalidPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -158,19 +123,8 @@ public class PointFormatExtension extends Tls12Test {
                         });
     }
 
-    @RFC(number = 8422, section = "5.1. Client Hello Extensions")
-    @AnvilTest(
-            description =
-                    "If the client sends the extension and the extension does not contain "
-                            + "the uncompressed point format, and the client has used the Supported "
-                            + "Groups extension to indicate support for any of the curves defined in "
-                            + "this specification, then the server MUST abort the handshake and "
-                            + "return an illegal_parameter alert.")
+    @AnvilTest(id = "8422-DRMPmFHPDy")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
     public void deprecatedFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

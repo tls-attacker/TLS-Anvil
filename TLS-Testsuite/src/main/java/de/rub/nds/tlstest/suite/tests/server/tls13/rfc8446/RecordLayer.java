@@ -9,22 +9,13 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
 import static org.junit.Assert.assertArrayEquals;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.ExcludeParameter;
-import de.rub.nds.anvilcore.annotation.ExplicitValues;
-import de.rub.nds.anvilcore.annotation.IncludeParameter;
-import de.rub.nds.anvilcore.annotation.MethodCondition;
-import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.constants.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.AlertDescription;
-import de.rub.nds.tlsattacker.core.constants.AlertLevel;
-import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
-import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
+import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
@@ -39,13 +30,6 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDerivation;
@@ -57,17 +41,9 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-@RFC(number = 8446, section = "5.1. Record Layer")
 public class RecordLayer extends Tls13Test {
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send "
-                            + "zero-length fragments of Handshake types, even "
-                            + "if those fragments contain padding.")
-    @RecordLayerCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "8446-HWUJWNwjoA")
     @EnforcedSenderRestriction
     public void zeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -84,17 +60,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Implementations "
-                            + "MUST NOT send Handshake and Alert records that have a zero-length "
-                            + "TLSInnerPlaintext.content; if such a message is received, the "
-                            + "receiving implementation MUST terminate the connection with an "
-                            + "\"unexpected_message\" alert.")
-    @RFC(number = 8446, section = "5.4. Record Padding")
-    @RecordLayerCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "8446-orNs8sPcM8")
     public void zeroLengthRecord_Finished(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -136,16 +102,9 @@ public class RecordLayer extends Tls13Test {
         return ConditionEvaluationResult.disabled("Target does not support Record fragmentation");
     }
 
-    @AnvilTest(
-            description =
-                    "Handshake messages MUST NOT be interleaved "
-                            + "with other record types. That is, if a handshake message is split over two or more\n"
-                            + "records, there MUST NOT be any other records between them.")
+    @AnvilTest(id = "8446-EHgkL2huNs")
     @ExcludeParameter("RECORD_LENGTH")
     @IncludeParameter("ALERT")
-    @RecordLayerCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
     @MethodCondition(method = "supportsRecordFragmentation")
     @EnforcedSenderRestriction
     public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -176,15 +135,7 @@ public class RecordLayer extends Tls13Test {
         runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Note that earlier versions of TLS did not clearly specify the record "
-                            + "layer version number value in all cases "
-                            + "(TLSPlaintext.legacy_record_version).  Servers will receive various "
-                            + "TLS 1.x versions in this field, but its value MUST always be ignored.")
-    @RFC(number = 8446, section = "D.2.  Negotiating with an Older Client")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
+    @AnvilTest(id = "8446-UCLQ6PhSyy")
     @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "getRecordProtocolVersions")
     @Tag("new")
@@ -223,20 +174,7 @@ public class RecordLayer extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest(
-            description =
-                    "legacy_record_version:  MUST be set to 0x0303 for all records "
-                            + "generated by a TLS 1.3 implementation other than an initial "
-                            + "ClientHello [...]"
-                            + "In order to maximize backward "
-                            + "compatibility, a record containing an initial ClientHello SHOULD have "
-                            + "version 0x0301 (reflecting TLS 1.0) and a record containing a second "
-                            + "ClientHello or a ServerHello MUST have version 0x0303 (reflecting "
-                            + "TLS 1.2).")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @RecordLayerCategory(SeverityLevel.HIGH)
+    @AnvilTest(id = "8446-qrenZekKeD")
     @Tag("new")
     public void checkRecordProtocolVersion(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

@@ -7,15 +7,9 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
-import de.rub.nds.anvilcore.annotation.ExcludeParameter;
-import de.rub.nds.anvilcore.annotation.IncludeParameter;
-import de.rub.nds.anvilcore.annotation.IncludeParameters;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -30,22 +24,9 @@ import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.action.ChangeConnectionTimeoutAction;
-import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
-import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
-import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
-import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.*;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AdditionalPaddingLengthDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolMessageTypeDerivation;
@@ -53,18 +34,9 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 8446, section = "5. Record Protocol")
 public class RecordProtocol extends Tls13Test {
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send record types not "
-                            + "defined in this document unless negotiated by some extension. "
-                            + "If a TLS implementation receives an unexpected record type, "
-                            + "it MUST terminate the connection with an \"unexpected_message\" alert.")
-    @RecordLayerCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "8446-vbFRZNusey")
     public void invalidRecordContentType(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -95,16 +67,8 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send record types not "
-                            + "defined in this document unless negotiated by some extension. "
-                            + "If a TLS implementation receives an unexpected record type, "
-                            + "it MUST terminate the connection with an \"unexpected_message\" alert.")
+    @AnvilTest(id = "8446-PN89HSERKp")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @RecordLayerCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.LOW)
     public void invalidRecordContentTypeAfterEncryption(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -132,17 +96,9 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "If the decryption fails, the receiver MUST "
-                            + "terminate the connection with a \"bad_record_mac\" alert.")
+    @AnvilTest(id = "8446-GXAiyehrdF")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @SecurityCategory(SeverityLevel.CRITICAL)
     @IncludeParameter("AUTH_TAG_BITMASK")
-    @CryptoCategory(SeverityLevel.CRITICAL)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();
@@ -169,21 +125,10 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "The length (in bytes) of the following "
-                            + "TLSPlaintext.fragment.  The length MUST NOT exceed 2^14 bytes.  An "
-                            + "endpoint that receives a record that exceeds this length MUST "
-                            + "terminate the connection with a \"record_overflow\" alert. [...]"
-                            + "the full encoded TLSInnerPlaintext MUST NOT exceed 2^14 "
-                            + "+ 1 octets.")
+    @AnvilTest(id = "8446-n1veCSRVjQ")
     // Note that the additional byte is the encoded content type, which we also add
     @ModelFromScope(modelType = "CERTIFICATE")
-    @RFC(number = 8446, section = "5.1. Record Layer and 5.4 Reccord Padding")
     @ExcludeParameter("RECORD_LENGTH")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendRecordWithPlaintextOver2pow14(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -220,12 +165,8 @@ public class RecordProtocol extends Tls13Test {
         return lengthCandidate >= 50;
     }
 
-    @AnvilTest(
-            description =
-                    "If the decryption fails, the receiver MUST "
-                            + "terminate the connection with a \"bad_record_mac\" alert.")
+    @AnvilTest(id = "8446-GNEMTQXXpq")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @SecurityCategory(SeverityLevel.CRITICAL)
     @IncludeParameters({
         @IncludeParameter("CIPHERTEXT_BITMASK"),
         @IncludeParameter("APP_MSG_LENGHT")
@@ -233,11 +174,6 @@ public class RecordProtocol extends Tls13Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    @RFC(number = 8446, section = "5.2. Record Payload Protection")
-    @CryptoCategory(SeverityLevel.CRITICAL)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();
@@ -264,18 +200,12 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "All encrypted TLS records can be padded to inflate the size of the "
-                            + "TLSCiphertext.")
+    @AnvilTest(id = "8446-i9pq4Yt8pz")
     @ModelFromScope(modelType = "CERTIFICATE")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "isReasonableRecordSize")
     @IncludeParameter("ADDITIONAL_PADDING_LENGTH")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.HIGH)
     public void acceptsOptionalPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         int selectedPaddingLength =
@@ -305,20 +235,9 @@ public class RecordProtocol extends Tls13Test {
         c.getDefaultServerConnection().setTimeout((int) (baseTimeout * multiplier));
     }
 
-    @AnvilTest(
-            description =
-                    "The length MUST NOT exceed 2^14 + 256 bytes. "
-                            + "An endpoint that receives a record that exceeds this "
-                            + "length MUST terminate the connection with a \"record_overflow\" alert. [...]"
-                            + "An endpoint that receives a record from its "
-                            + "peer with TLSCiphertext.length larger than 2^14 + 256 octets MUST "
-                            + "terminate the connection with a \"record_overflow\" alert.")
+    @AnvilTest(id = "8446-BkyuGXzztX")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExcludeParameter("RECORD_LENGTH")
-    @RFC(number = 8446, section = "5.2. Record Payload Protection")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
     public void sendRecordWithCiphertextOver2pow14plus256(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -347,12 +266,9 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest(description = "Send a record without any content to increase the sequencenumber.")
+    @AnvilTest(id = "8446-aUT8tc8oYz")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @SecurityCategory(SeverityLevel.CRITICAL)
     @IncludeParameter("PROTOCOL_MESSAGE_TYPE")
-    @AlertCategory(SeverityLevel.LOW)
     @Tag("emptyRecord")
     public void sendEmptyRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -375,15 +291,8 @@ public class RecordProtocol extends Tls13Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(
-            description =
-                    "Zero-length "
-                            + "fragments of Application Data MAY be sent, as they are potentially "
-                            + "useful as a traffic analysis countermeasure.")
+    @AnvilTest(id = "8446-BSsVDoM82Z")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @InteroperabilityCategory(SeverityLevel.HIGH)
     public void sendZeroLengthApplicationRecord(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -431,17 +340,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST limit their scanning to the cleartext returned "
-                            + "from the AEAD decryption.  If a receiving implementation does not "
-                            + "find a non-zero octet in the cleartext, it MUST terminate the "
-                            + "connection with an \"unexpected_message\" alert.")
-    @RFC(number = 8446, section = "5.4.  Record Padding")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @RecordLayerCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "8446-EmE5eWBxE7")
     @Tag("new")
     public void sendEncryptedHandshakeRecordWithNoNonZeroOctet(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -464,17 +363,8 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST limit their scanning to the cleartext returned "
-                            + "from the AEAD decryption.  If a receiving implementation does not "
-                            + "find a non-zero octet in the cleartext, it MUST terminate the "
-                            + "connection with an \"unexpected_message\" alert.")
+    @AnvilTest(id = "8446-hKUhsUFCnx")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @RFC(number = 8446, section = "5.4.  Record Padding")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @RecordLayerCategory(SeverityLevel.MEDIUM)
     @Tag("new")
     public void sendEncryptedAppRecordWithNoNonZeroOctet(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -495,13 +385,7 @@ public class RecordProtocol extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send any records with a version less than 0x0300.")
-    @RFC(number = 8446, section = "D.5. Security Restrictions Related to Backward Compatibility")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @RecordLayerCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "8446-V3SF3rXAAW")
     @Tag("new")
     public void checkMinimumRecordProtocolVersions(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

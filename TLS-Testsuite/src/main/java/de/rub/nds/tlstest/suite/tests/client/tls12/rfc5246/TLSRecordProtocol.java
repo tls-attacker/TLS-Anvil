@@ -24,29 +24,14 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5246, section = "6. The TLS Record Protocol")
 @ClientTest
 public class TLSRecordProtocol extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send record types not defined in this document "
-                            + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
-                            + "record type, it MUST send an unexpected_message alert.")
-    @RecordLayerCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.LOW)
-    @HandshakeCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "5246-AnX5PH2NS5")
     public void sendNotDefinedRecordTypesWithServerHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -76,15 +61,7 @@ public class TLSRecordProtocol extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send record types not defined in this document "
-                            + "unless negotiated by some extension. If a TLS implementation receives an unexpected "
-                            + "record type, it MUST send an unexpected_message alert.")
-    @RecordLayerCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.LOW)
-    @HandshakeCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "5246-Y2z3WpemKt")
     public void sendNotDefinedRecordTypesWithCCSAndFinished(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

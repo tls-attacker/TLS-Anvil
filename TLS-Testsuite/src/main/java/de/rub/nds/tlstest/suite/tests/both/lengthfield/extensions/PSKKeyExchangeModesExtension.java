@@ -21,11 +21,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
@@ -48,14 +44,9 @@ public class PSKKeyExchangeModesExtension extends TlsGenericTest {
                 "Server does not issue Session Tickets and might ignore the extension");
     }
 
-    @AnvilTest(
-            description =
-                    "Send a Pre Shared Key Exchange Modes Extension in the Hello Message with a modified length value (-1)")
+    @AnvilTest(id = "XLF-NaN98M5Hqd")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     public void pskKeyExchangeModesExtensionLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
@@ -64,14 +55,9 @@ public class PSKKeyExchangeModesExtension extends TlsGenericTest {
                 runner, argumentAccessor, config, PSKKeyExchangeModesExtensionMessage.class);
     }
 
-    @AnvilTest(
-            description =
-                    "Send a Pre Shared Key Exchange Modes Extension in the Hello Message with a modified length value (-1)")
+    @AnvilTest(id = "XLF-Nq22Dyhfzt")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
-    @MessageStructureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
     @MethodCondition(method = "contentCanBeTested")
     public void pskKeyExchangeModesExtensionListLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

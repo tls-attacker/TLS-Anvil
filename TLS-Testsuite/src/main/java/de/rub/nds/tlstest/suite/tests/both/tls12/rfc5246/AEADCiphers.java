@@ -7,12 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
-import de.rub.nds.anvilcore.annotation.IncludeParameter;
-import de.rub.nds.anvilcore.annotation.IncludeParameters;
-import de.rub.nds.anvilcore.annotation.ValueConstraint;
-import de.rub.nds.anvilcore.annotation.ValueConstraints;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -26,33 +21,18 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5246, section = "6.2.3.3 AEAD Ciphers")
 public class AEADCiphers extends Tls12Test {
 
-    @AnvilTest(
-            description =
-                    "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
+    @AnvilTest(id = "5246-7JhgKXeTXv")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @SecurityCategory(SeverityLevel.CRITICAL)
     @IncludeParameter("AUTH_TAG_BITMASK")
     @ValueConstraints({
         @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
     })
-    @CryptoCategory(SeverityLevel.CRITICAL)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();
@@ -82,11 +62,8 @@ public class AEADCiphers extends Tls12Test {
         return lengthCandidate >= 50;
     }
 
-    @AnvilTest(
-            description =
-                    "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
+    @AnvilTest(id = "5246-sYXZ8a3B4C")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @SecurityCategory(SeverityLevel.CRITICAL)
     @IncludeParameters({
         @IncludeParameter("CIPHERTEXT_BITMASK"),
         @IncludeParameter("APP_MSG_LENGHT")
@@ -97,10 +74,6 @@ public class AEADCiphers extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    @CryptoCategory(SeverityLevel.CRITICAL)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();

@@ -28,19 +28,12 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 6066, section = "4. Maximum Fragment Length Negotiation")
 @ClientTest
 public class MaximumFragmentLength extends Tls12Test {
 
@@ -62,15 +55,9 @@ public class MaximumFragmentLength extends Tls12Test {
         return MaxFragmentLength.TWO_11;
     }
 
-    @AnvilTest(
-            description =
-                    "Similarly, if a client receives a maximum fragment length negotiation "
-                            + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
+    @AnvilTest(id = "6066-WpGEGtHscM")
     @MethodCondition(method = "sentMaximumFragmentLength")
     @ExcludeParameter("RECORD_LENGTH")
-    @HandshakeCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidMaximumFragmentLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -97,15 +84,9 @@ public class MaximumFragmentLength extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Similarly, if a client receives a maximum fragment length negotiation "
-                            + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
+    @AnvilTest(id = "6066-ossqki78mA")
     @MethodCondition(method = "sentMaximumFragmentLength")
     @ExcludeParameter("RECORD_LENGTH")
-    @HandshakeCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void unrequestedMaximumFragmentLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -137,15 +118,7 @@ public class MaximumFragmentLength extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Once a maximum fragment length other than 2^14 has been successfully "
-                            + "negotiated, the client and server MUST immediately begin fragmenting "
-                            + "messages (including handshake messages) to ensure that no fragment "
-                            + "larger than the negotiated length is sent.")
-    @HandshakeCategory(SeverityLevel.LOW)
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "6066-XXJU5VtxbB")
     @MethodCondition(method = "sentMaximumFragmentLength")
     @Tag("new")
     public void respectsNegotiatedMaxFragmentLength(

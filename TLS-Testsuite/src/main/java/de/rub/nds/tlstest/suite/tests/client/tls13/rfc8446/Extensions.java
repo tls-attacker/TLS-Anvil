@@ -7,11 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.ClientTest;
-import de.rub.nds.anvilcore.annotation.ExplicitValues;
-import de.rub.nds.anvilcore.annotation.IncludeParameter;
-import de.rub.nds.anvilcore.annotation.ManualConfig;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.teststate.TestResult;
@@ -31,11 +27,6 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ExtensionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -46,7 +37,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 8446, section = "4.2 Extensions")
 @ClientTest
 public class Extensions extends Tls13Test {
 
@@ -70,19 +60,10 @@ public class Extensions extends Tls13Test {
         return parameterValues;
     }
 
-    @AnvilTest(
-            description =
-                    "Implementations MUST NOT send extension responses if "
-                            + "the remote endpoint did not send the corresponding extension requests, "
-                            + "with the exception of the \"cookie\" extension in the HelloRetryRequest. "
-                            + "Upon receiving such an extension, an endpoint MUST abort "
-                            + "the handshake with an \"unsupported_extension\" alert.")
+    @AnvilTest(id = "8446-guYpWN18yk")
     @IncludeParameter("EXTENSION")
     @ManualConfig(identifiers = "EXTENSION")
     @ExplicitValues(affectedIdentifiers = "EXTENSION", methods = "getUnrequestedExtensions")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void sendAdditionalExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
         ExtensionType selectedExtension =
@@ -143,14 +124,7 @@ public class Extensions extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "If an implementation receives an extension which it "
-                            + "recognizes and which is not specified for the message in "
-                            + "which it appears, it MUST abort the handshake with an \"illegal_parameter\" alert.")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "8446-6dvAUhLdUW")
     public void sendHeartBeatExtensionInSH(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

@@ -23,11 +23,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.apache.logging.log4j.LogManager;
@@ -35,18 +30,11 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 7685, section = "3")
 @ServerTest
 public class PaddingExtension extends Tls12Test {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    @AnvilTest(
-            description =
-                    "The client MUST fill the padding extension completely with zero "
-                            + "bytes, although the padding extension_data field may be empty.")
-    @ComplianceCategory(SeverityLevel.LOW)
-    @HandshakeCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "7685-gMPk6BA96F")
     @ExcludeParameter("INCLUDE_PADDING_EXTENSION")
     @EnforcedSenderRestriction
     public void paddingWithNonZero(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
@@ -63,9 +51,7 @@ public class PaddingExtension extends Tls12Test {
         runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
     }
 
-    @AnvilTest(description = "The server MUST NOT echo the extension.")
-    @ComplianceCategory(SeverityLevel.LOW)
-    @HandshakeCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "7685-mCUrK3JRDo")
     @ExcludeParameter("INCLUDE_PADDING_EXTENSION")
     @Tag("new")
     public void serverDoesNotEcho(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

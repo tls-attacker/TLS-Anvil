@@ -27,19 +27,11 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 5246, section = "7.2.1 Closure Alerts")
 @ClientTest
 public class AlertProtocol extends Tls12Test {
 
@@ -48,19 +40,10 @@ public class AlertProtocol extends Tls12Test {
         return lengthCandidate >= 50;
     }
 
-    @AnvilTest(
-            description =
-                    "Unless some other fatal alert has been transmitted, each party is "
-                            + "required to send a close_notify alert before closing the write side "
-                            + "of the connection. The other party MUST respond with a close_notify "
-                            + "alert of its own and close down the connection immediately, "
-                            + "discarding any pending writes.")
+    @AnvilTest(id = "5246-DjYR2JiJKn")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    @InteroperabilityCategory(SeverityLevel.LOW)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.LOW)
     public void closeNotify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
@@ -94,19 +77,11 @@ public class AlertProtocol extends Tls12Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "Upon transmission or receipt of a fatal alert message, both "
-                            + "parties immediately close the connection.")
-    @RFC(number = 5246, section = "7.2.2 Error Alerts")
+    @AnvilTest(id = "5246-N8VwCXYaTF")
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void abortAfterFatalAlertServerHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -129,20 +104,12 @@ public class AlertProtocol extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::socketClosed);
     }
 
-    @AnvilTest(
-            description =
-                    "Upon transmission or receipt of a fatal alert message, both "
-                            + "parties immediately close the connection.")
+    @AnvilTest(id = "5246-rcBco3YXw8")
     @ModelFromScope(modelType = "CERTIFICATE")
-    @RFC(number = 5246, section = "7.2.2 Error Alerts")
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void abortAfterFatalAlertServerHelloDone(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

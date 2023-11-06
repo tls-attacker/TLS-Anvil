@@ -23,18 +23,12 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
-@RFC(number = 8446, section = "4.3.1. Encrypted Extensions")
 public class EncryptedExtensions extends Tls13Test {
 
     public ConditionEvaluationResult sentMaximumFragmentLength() {
@@ -56,15 +50,7 @@ public class EncryptedExtensions extends Tls13Test {
         return MaxFragmentLength.TWO_11;
     }
 
-    @AnvilTest(
-            description =
-                    "The client MUST check EncryptedExtensions "
-                            + "for the presence of any forbidden extensions and if "
-                            + "any are found MUST abort the handshake "
-                            + "with an \"illegal_parameter\" alert.")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "8446-X68SWFRBVS")
     public void sendSupportedVersionsExtensionInEE(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -88,15 +74,7 @@ public class EncryptedExtensions extends Tls13Test {
                         });
     }
 
-    @AnvilTest(
-            description =
-                    "The client MUST check EncryptedExtensions "
-                            + "for the presence of any forbidden extensions and if "
-                            + "any are found MUST abort the handshake "
-                            + "with an \"illegal_parameter\" alert.")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @AnvilTest(id = "8446-U5uSdqYohP")
     public void sendPaddingExtensionInEE(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -120,15 +98,8 @@ public class EncryptedExtensions extends Tls13Test {
                         });
     }
 
-    @RFC(number = 6066, section = "4. Maximum Fragment Length Negotiation")
-    @AnvilTest(
-            description =
-                    "Similarly, if a client receives a maximum fragment length negotiation "
-                            + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
+    @AnvilTest(id = "8446-34CYsV98Fs")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void invalidMaximumFragmentLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -154,15 +125,8 @@ public class EncryptedExtensions extends Tls13Test {
                         });
     }
 
-    @RFC(number = 6066, section = "4. Maximum Fragment Length Negotiation")
-    @AnvilTest(
-            description =
-                    "Similarly, if a client receives a maximum fragment length negotiation "
-                            + "response that differs from the length it requested, it MUST also abort the handshake with an \"illegal_parameter\" alert.")
+    @AnvilTest(id = "8446-XDu7chdPTM")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
     public void unrequestedMaximumFragmentLength(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

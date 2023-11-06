@@ -111,6 +111,26 @@
             <artifactId>anvil-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>de.rub.nds</groupId>
+            <artifactId>anvil-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds</groupId>
+            <artifactId>anvil-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds</groupId>
+            <artifactId>anvil-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds</groupId>
+            <artifactId>anvil-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds</groupId>
+            <artifactId>anvil-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>de.rub.nds.tls</groupId>
             <artifactId>coffee4j-anvil-engine</artifactId>
         </dependency>
@@ -172,6 +192,12 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.pcap4j</groupId>
+            <artifactId>pcap4j-core</artifactId>
+            <version>1.7.3</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

@@ -63,8 +63,7 @@ public class TlsTestCase extends AnvilTestCase {
         TlsTestConfig tlsConfig = TestContext.getInstance().getConfig();
         AnvilTestConfig anvilconfig = AnvilContext.getInstance().getConfig();
         Path basePath = Paths.get(anvilconfig.getOutputFolder());
-        basePath =
-                basePath.resolve(this.associatedContainer.getTestMethodName()); // TODO: get RunID
+        basePath = basePath.resolve(this.getAssociatedContainer().getTestId());
         Path pathTmpCap = basePath.resolve(this.getTmpPcapFileName());
         Path pathCap = basePath.resolve(String.format("dump_%s.pcap", this.getUuid()));
 

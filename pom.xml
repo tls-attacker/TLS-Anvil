@@ -54,6 +54,12 @@
                 <artifactId>tls-testsuite</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.pcap4j</groupId>
+                <artifactId>pcap4j-core</artifactId>
+                <version>1.7.3</version>
+                <type>jar</type>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>

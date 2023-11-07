@@ -1,4 +1,5 @@
 # TLS-Anvil
+
 TLS-Anvil is a test suite for the evaluation of RFC compliance of Transport Layer Security (TLS) libraries using combinatorial testing (CT).
 
 Have a look at our docs ([https://tls-anvil.com](https://tls-anvil.com)) to learn more about the project.
@@ -19,11 +20,13 @@ The test suite contains around 408 client and server tests for TLS 1.2 and TLS 1
 * RFC 8701 - Applying Generate Random Extensions And Sustain Extensibility (GREASE) to TLS Extensibility
 
 ## Project Structure
+
 * TLS-Testsuite: Contains the test templates
 * TLS-Test-Framework: Aggregator that combines coffee4j and implements JUnit extensions, annotations and the API for modeling tests for the TLS protocol
-* Report-Analyzer: Standalone web application that facilitates the analysis of TLS-Anvil's output 
+* Report-Analyzer: Standalone web application that facilitates the analysis of TLS-Anvil's output
 
 ## Build and Run
+
 To build this project from scratch, we included all the dependencies as submodules and a `Dockerfile` that compiles everything in the correct order. You only need clone the repository and execute the `build.sh` script.
 
 Alternatively you can use the prebuilt Docker image that is available as GitHub package.
@@ -33,6 +36,6 @@ docker run --rm -it ghcr.io/tls-attacker/tlsanvil -help
 ```
 
 ## Acknowledgements
-The foundation of TLS-Anvil was developed as part of the master's thesis *Development and Evaluation of a TLS-Testsuite* by Philipp Nieting at *Ruhr University Bochum* in cooperation with the *TÜV Informationstechnik GmbH*.
 
+The foundation of TLS-Anvil was developed as part of the master's thesis *Development and Evaluation of a TLS-Testsuite* by Philipp Nieting at *Ruhr University Bochum* in cooperation with the *TÜV Informationstechnik GmbH*.
 

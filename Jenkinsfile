@@ -14,10 +14,6 @@ pipeline {
     stages {
         stage('Clean') {
             steps {
-                // This is necessary to make the origin/master refspec available to spotless (for ratcheting)
-                withCredentials([gitUsernamePassword(credentialsId: 'github-app-tls-attacker')]) {
-                    sh 'git fetch origin main:refs/remotes/origin/main'
-                }
                 withMaven(jdk: env.JDK_TOOL_NAME, maven: env.MAVEN_TOOL_NAME) {
                     sh 'mvn clean'
                 }

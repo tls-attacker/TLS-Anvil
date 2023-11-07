@@ -83,7 +83,10 @@ public class TlsTestConfig extends TLSDelegateConfig {
             description = "Export executed WorkflowTraces with all values used in the messages")
     private boolean exportTraces = false;
 
-    @Parameter(names = "-tlsAnvilConfig", description = "Path to Tls-Anvil config file")
+    @Parameter(
+            names = "-tlsAnvilConfig",
+            description =
+                    "Path to a TLS-Anvil config file. Can be used instead of command-line-arguments.")
     private String tlsAnvilConfig;
 
     // we might want to turn these into CLI parameters in the future
@@ -173,7 +176,8 @@ public class TlsTestConfig extends TLSDelegateConfig {
                 if (raw.get("serverConfig") == null) tlsTestConfig.setTestServerDelegate(null);
 
             } catch (IOException e) {
-                LOGGER.error("Error while parsing config file.");
+                LOGGER.error("Error while parsing config file.", e);
+                System.exit(1);
                 return;
             }
             this.setExportTraces(tlsTestConfig.isExportTraces());

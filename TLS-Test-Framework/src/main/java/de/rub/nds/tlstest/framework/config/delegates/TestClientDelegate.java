@@ -41,7 +41,7 @@ public class TestClientDelegate extends ServerDelegate {
     public void applyDelegate(Config config) {
         super.applyDelegate(config);
 
-        if (this.triggerScriptCommand.size() > 0) {
+        if (!this.triggerScriptCommand.isEmpty()) {
             triggerScript =
                     (State state) -> {
                         try {
@@ -81,5 +81,13 @@ public class TestClientDelegate extends ServerDelegate {
 
     public void setServerSocket(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
+    }
+
+    public List<String> getTriggerScriptCommand() {
+        return triggerScriptCommand;
+    }
+
+    public void setTriggerScriptCommand(List<String> triggerScriptCommand) {
+        this.triggerScriptCommand = triggerScriptCommand;
     }
 }

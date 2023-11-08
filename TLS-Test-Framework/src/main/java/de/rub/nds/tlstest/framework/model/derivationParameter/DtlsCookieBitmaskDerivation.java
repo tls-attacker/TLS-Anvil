@@ -7,18 +7,19 @@
  */
 package de.rub.nds.tlstest.framework.model.derivationParameter;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import java.util.LinkedList;
 import java.util.List;
 
 /** Provides a modification bitmask for HelloVerifyRequest and second ClientHello cookie. */
-public class DtlsCookieBitmaskDerivation extends DerivationParameter<Integer> {
+public class DtlsCookieBitmaskDerivation extends TlsDerivationParameter<Integer> {
 
     public DtlsCookieBitmaskDerivation() {
-        super(DerivationType.DTLS_COOKIE_BITMASK, Integer.class);
+        super(TlsParameterType.DTLS_COOKIE_BITMASK, Integer.class);
     }
 
     public DtlsCookieBitmaskDerivation(Integer selectedValue) {
@@ -27,9 +28,8 @@ public class DtlsCookieBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public List<DerivationParameter<Config, Integer>> getParameterValues(DerivationScope scope) {
+        List<DerivationParameter<Config, Integer>> parameterValues = new LinkedList<>();
 
         for (int i = 0; i < context.getConfig().createConfig().getDtlsDefaultCookieLength(); i++) {
             parameterValues.add(new DtlsCookieBitmaskDerivation(i));
@@ -38,5 +38,7 @@ public class DtlsCookieBitmaskDerivation extends DerivationParameter<Integer> {
     }
 
     @Override
-    public void applyToConfig(Config config, TestContext context) {}
+    protected TlsDerivationParameter<Integer> generateValue(Integer selectedValue) {
+        return new DtlsCookieBitmaskDerivation(selectedValue);
+    }
 }

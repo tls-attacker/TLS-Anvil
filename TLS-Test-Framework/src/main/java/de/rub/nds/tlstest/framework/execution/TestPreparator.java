@@ -19,6 +19,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
+import de.rub.nds.tlsattacker.transport.udp.ServerUdpTransportHandler;
 import de.rub.nds.tlsscanner.clientscanner.config.ClientScannerConfig;
 import de.rub.nds.tlsscanner.clientscanner.execution.TlsClientScanner;
 import de.rub.nds.tlsscanner.core.constants.TlsProbeType;
@@ -31,7 +32,11 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.config.TlsTestConfig;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import java.io.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.LinkedList;
@@ -160,34 +165,34 @@ public class TestPreparator {
                                 }
                             })
                     .start();
-                    if (!testConfig.isUseDTLS()) {
-                        Socket socket = testConfig.getTestClientDelegate().getServerSocket().accept();
-                        targetIsReady = true;
-                        socket.close();
-                    } else {
+            if (!testConfig.isUseDTLS()) {
+                Socket socket = testConfig.getTestClientDelegate().getServerSocket().accept();
+                targetIsReady = true;
+                socket.close();
+            } else {
+                try {
+                    DatagramSocket socket =
+                            new DatagramSocket(testConfig.getTestClientDelegate().getPort());
+
+                    byte[] buf = new byte[256];
+
+                    while (!targetIsReady) {
                         try {
-                            DatagramSocket socket =
-                                    new DatagramSocket(testConfig.getTestClientDelegate().getPort());
-        
-                            byte[] buf = new byte[256];
-        
-                            while (!targetIsReady) {
-                                try {
-                                    DatagramPacket packet = new DatagramPacket(buf, buf.length);
-                                    socket.receive(packet);
-                                    if (packet.getLength() > 0) {
-                                        targetIsReady = true;
-                                        socket.close();
-                                    }
-        
-                                } catch (Exception ignored) {
-                                    ignored.printStackTrace();
-                                }
+                            DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                            socket.receive(packet);
+                            if (packet.getLength() > 0) {
+                                targetIsReady = true;
+                                socket.close();
                             }
-                        } catch (SocketException e) {
-                            throw new RuntimeException(e);
+
+                        } catch (Exception ignored) {
+                            ignored.printStackTrace();
                         }
                     }
+                } catch (SocketException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         } catch (Exception ignored) {
         }
 
@@ -217,17 +222,17 @@ public class TestPreparator {
                         conTestDtls = new DatagramSocket();
                         conTestDtls.connect(
                                 InetAddress.getByName(connectionEndpoint), connection.getPort());
-                        SendAction act = new SendAction();
-                        targetIsReady = conTestDtls.isConnected(); //TODO always true
+                        targetIsReady = conTestDtls.isConnected(); // TODO always true
                     } else {
-                    String connectionEndpoint;
-                    if (connection.getHostname() != null) {
-                        connectionEndpoint = connection.getHostname();
-                    } else {
-                        connectionEndpoint = connection.getIp();
+                        String connectionEndpoint;
+                        if (connection.getHostname() != null) {
+                            connectionEndpoint = connection.getHostname();
+                        } else {
+                            connectionEndpoint = connection.getIp();
+                        }
+                        conTest = new Socket(connectionEndpoint, connection.getPort());
+                        targetIsReady = conTest.isConnected();
                     }
-                    conTest = new Socket(connectionEndpoint, connection.getPort());
-                    targetIsReady = conTest.isConnected();}
                 } catch (Exception e) {
                     LOGGER.warn("Server not yet available (" + e.getLocalizedMessage() + ")");
                     Thread.sleep(1000);
@@ -310,7 +315,7 @@ public class TestPreparator {
      */
     private void clientTestPreparation() {
         waitForClient();
-        //TODO
+        // TODO
 
         ClientFeatureExtractionResult cachedReport =
                 (ClientFeatureExtractionResult) loadFromCache();
@@ -431,7 +436,7 @@ public class TestPreparator {
                         .getFeatureExtractionResult()
                         .getSupportedVersions()
                         .contains(ProtocolVersion.TLS13)
-                        && !testContext
+                && !testContext
                         .getFeatureExtractionResult()
                         .getSupportedVersions()
                         .contains(ProtocolVersion.DTLS12)) {
@@ -552,12 +557,12 @@ public class TestPreparator {
                                             testConfig.getAnvilTestConfig().getConnectionTimeout(),
                                             testConfig.getTestClientDelegate().getPort()));
                 } else {
-                state.getTlsContext()
-                        .setTransportHandler(
-                                new ServerTcpTransportHandler(
-                                        testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                                        testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                                        testConfig.getTestClientDelegate().getServerSocket()));
+                    state.getTlsContext()
+                            .setTransportHandler(
+                                    new ServerTcpTransportHandler(
+                                            testConfig.getAnvilTestConfig().getConnectionTimeout(),
+                                            testConfig.getAnvilTestConfig().getConnectionTimeout(),
+                                            testConfig.getTestClientDelegate().getServerSocket()));
                 }
                 return 0;
             } catch (IOException ex) {

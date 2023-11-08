@@ -100,7 +100,7 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
         derivationTypes.add(TlsParameterType.NAMED_GROUP);
         derivationTypes.add(TlsParameterType.RECORD_LENGTH);
         if (!TestContext.getInstance().getConfig().isUseDTLS()) {
-        derivationTypes.add(TlsParameterType.TCP_FRAGMENTATION);
+            derivationTypes.add(TlsParameterType.TCP_FRAGMENTATION);
         }
 
         if (ConstraintHelper.isTls13Test(derivationScope)) {
@@ -184,7 +184,7 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
             }
         }
         if (TestContext.getInstance().getConfig().isUseDTLS()) {
-            derivationTypes.add(DerivationType.COOKIE_EXCHANGE);
+            derivationTypes.add(TlsParameterType.COOKIE_EXCHANGE);
         }
         return derivationTypes;
     }

@@ -13,6 +13,7 @@ import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
+import de.rub.nds.tlsattacker.transport.udp.UdpTransportHandler;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import jakarta.xml.bind.DatatypeConverter;
 import java.nio.charset.StandardCharsets;
@@ -124,7 +125,7 @@ public class TlsTestCase extends AnvilTestCase {
         } else if (state.getTlsContext().getTransportHandler() instanceof UdpTransportHandler) {
             return ((UdpTransportHandler) state.getTlsContext().getTransportHandler()).getSrcPort();
         } else {
-            throw new NotImplementedException(
+            throw new UnsupportedOperationException(
                     "The transport protocol used is not yet implemented.");
         }
     }
@@ -137,7 +138,7 @@ public class TlsTestCase extends AnvilTestCase {
         } else if (state.getTlsContext().getTransportHandler() instanceof UdpTransportHandler) {
             return ((UdpTransportHandler) state.getTlsContext().getTransportHandler()).getDstPort();
         } else {
-            throw new NotImplementedException(
+            throw new UnsupportedOperationException(
                     "The transport protocol used is not yet implemented.");
         }
     }

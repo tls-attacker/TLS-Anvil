@@ -1,8 +1,8 @@
 package de.rub.nds.tlstest.suite.tests.client.dtls.rfc6347;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
@@ -10,22 +10,17 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Dtls12Test;
 import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 6347, section = "4.2.1. Denial-of-Service Countermeasures")
 @Tag("dtls12")
 public class DoS extends Dtls12Test {
 
     @Tag("Test12")
-    @TlsTest(description = "The client MUST retransmit the ClientHello with the cookie added.")
-    @ClientTest
+    @AnvilTest(id = "6347-8A36GOAO5u")
     /**
      * This test validates that a client responds to a {@link HelloVerifyRequestMessage} with a
      * second {@link ClientHelloMessage} that contains the cookie from the {@link
@@ -73,12 +68,7 @@ public class DoS extends Dtls12Test {
     }
 
     @Tag("Test13")
-    @TlsTest(
-            description =
-                    "When responding to a HelloVerifyRequest, the client MUST use the same"
-                            + "   parameter values (version, random, session_id, cipher_suites,"
-                            + "   compression_method) as it did in the original ClientHello.")
-    @ClientTest
+    @AnvilTest(id = "6347-tT9LA2Ba7T")
     /**
      * The test is successful if the first and second {@link ClientHelloMessage} contain exactly the
      * same values, except for the cookie and the cookie length.

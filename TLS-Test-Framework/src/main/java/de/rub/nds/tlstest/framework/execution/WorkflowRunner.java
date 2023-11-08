@@ -37,6 +37,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
+import de.rub.nds.tlsattacker.transport.udp.ServerUdpTransportHandler;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
@@ -151,24 +152,28 @@ public class WorkflowRunner {
                             .getTlsContext()
                             .setTransportHandler(
                                     new ServerUdpTransportHandler(
-                                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                            context.getConfig()
+                                                    .getAnvilTestConfig()
+                                                    .getConnectionTimeout(),
+                                            context.getConfig()
+                                                    .getAnvilTestConfig()
+                                                    .getConnectionTimeout(),
                                             context.getConfig().getTestClientDelegate().getPort()));
                 } else {
-                tlsTestCase
-                        .getState()
-                        .getTlsContext()
-                        .setTransportHandler(
-                                new ServerTcpTransportHandler(
-                                        context.getConfig()
-                                                .getAnvilTestConfig()
-                                                .getConnectionTimeout(),
-                                        context.getConfig()
-                                                .getAnvilTestConfig()
-                                                .getConnectionTimeout(),
-                                        context.getConfig()
-                                                .getTestClientDelegate()
-                                                .getServerSocket()));
+                    tlsTestCase
+                            .getState()
+                            .getTlsContext()
+                            .setTransportHandler(
+                                    new ServerTcpTransportHandler(
+                                            context.getConfig()
+                                                    .getAnvilTestConfig()
+                                                    .getConnectionTimeout(),
+                                            context.getConfig()
+                                                    .getAnvilTestConfig()
+                                                    .getConnectionTimeout(),
+                                            context.getConfig()
+                                                    .getTestClientDelegate()
+                                                    .getServerSocket()));
                 }
                 StateExecutionTask task = new StateExecutionTask(tlsTestCase.getState(), 2);
 

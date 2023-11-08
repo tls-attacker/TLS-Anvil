@@ -78,7 +78,7 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
     }
 
-    //TODO Must be excluded from DTLS test, because of the TCP_FRAGMENTATION.
+    // TODO Must be excluded from DTLS test, because of the TCP_FRAGMENTATION.
     @AnvilTest(id = "5246-yNEWNcjFZF")
     @ExcludeParameters({@ExcludeParameter("RECORD_LENGTH"), @ExcludeParameter("TCP_FRAGMENTATION")})
     public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCS_F(
@@ -103,10 +103,8 @@ public class Fragmentation extends Tls12Test {
         runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
     }
 
-
-    //TODO Must be excluded from DTLS test, because of the TCP_FRAGMENTATION.
+    // TODO Must be excluded from DTLS test, because of the TCP_FRAGMENTATION.
     @AnvilTest(id = "5246-RNQeBZXVNc")
-
     @ExcludeParameters({@ExcludeParameter("RECORD_LENGTH"), @ExcludeParameter("TCP_FRAGMENTATION")})
     public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCSF(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {

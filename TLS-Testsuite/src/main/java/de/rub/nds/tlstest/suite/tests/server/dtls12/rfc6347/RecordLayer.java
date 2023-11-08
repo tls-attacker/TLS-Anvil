@@ -1,5 +1,6 @@
 package de.rub.nds.tlstest.suite.tests.server.dtls12.rfc6347;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
@@ -10,14 +11,11 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Dtls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@RFC(number = 6347, section = "4.1.  Record Layer")
 @Tag("dtls12")
 public class RecordLayer extends Dtls12Test {
 
@@ -26,12 +24,7 @@ public class RecordLayer extends Dtls12Test {
      * reduced. The test is successful if such a message is ignored or rejected with a FatalAlert.
      */
     @Tag("Test1")
-    @TlsTest(
-            description =
-                    "In order\n"
-                            + "    to ensure that any given sequence/epoch pair is unique,\n"
-                            + "    implementations MUST NOT allow the same epoch value to be reused\n"
-                            + "    within two times the TCP maximum segment lifetime.")
+    @AnvilTest(id = "6347-Krh31b84Lx")
     public void decreaseEpoche(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 

@@ -95,7 +95,7 @@ public class Validator {
             checkReceivedMultipleAlerts(trace, i);
             alertIsFatal = (lastAlert.getLevel().getValue() == AlertLevel.FATAL.getValue());
         }
-        if(TestContext.getInstance().getConfig().isUseDTLS()) return;
+        if (TestContext.getInstance().getConfig().isUseDTLS()) return;
         if (!socketClosed) {
             // must fail
             assertFalse("Socket still open after fatal alert", receivedAlert && alertIsFatal);

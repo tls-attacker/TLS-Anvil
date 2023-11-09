@@ -16,10 +16,12 @@ import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
+import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.HandshakeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
@@ -27,10 +29,12 @@ import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ResetConnectionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
@@ -43,6 +47,7 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import java.io.IOException;
+import java.util.List;
 import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,7 +69,10 @@ public class WorkflowRunner {
     private ProtocolMessageType untilProtocolMessage;
     private Boolean untilSendingMessage = null;
     private Boolean untilLast = false;
+
+    // adjust WorkflowTrace if necessary
     private Boolean autoHelloRetryRequest = true;
+    private Boolean autoAdaptForDtls = true;
 
     public WorkflowRunner(ExtensionContext extensionContext) {
         this.context = TestContext.getInstance();
@@ -94,6 +102,10 @@ public class WorkflowRunner {
                     "Config was not set before execution - WorkflowTrace may me invalid for Test:"
                             + extensionContext.getRequiredTestMethod().getName());
             preparedConfig = config;
+        }
+
+        if (shouldAdaptForDtls(trace, config)) {
+            adaptForDtls(trace, config, context.getConfig().getTestEndpointMode());
         }
 
         if (shouldInsertHelloRetryRequest()) {
@@ -197,10 +209,7 @@ public class WorkflowRunner {
      * @return empty WorkflowTrace
      */
     public WorkflowTrace generateWorkflowTrace(@Nonnull WorkflowTraceType type) {
-        RunningModeType runningMode = RunningModeType.CLIENT;
-        if (context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
-            runningMode = RunningModeType.SERVER;
-        }
+        RunningModeType runningMode = resolveRunningMode(context.getConfig().getTestEndpointMode());
         WorkflowTrace trace =
                 new WorkflowConfigurationFactory(preparedConfig)
                         .createWorkflowTrace(type, runningMode);
@@ -362,6 +371,139 @@ public class WorkflowRunner {
         return true;
     }
 
+    private static RunningModeType resolveRunningMode(TestEndpointType testEndpointType) {
+        RunningModeType runningMode = RunningModeType.CLIENT;
+        if (testEndpointType == TestEndpointType.CLIENT) {
+            runningMode = RunningModeType.SERVER;
+        }
+        return runningMode;
+    }
+
+    public static void adaptForDtls(
+            WorkflowTrace trace, Config config, TestEndpointType testEndpointType) {
+        WorkflowConfigurationFactory workflowFactory = new WorkflowConfigurationFactory(config);
+        RunningModeType runningModeType = resolveRunningMode(testEndpointType);
+        WorkflowTrace completeHandshake =
+                workflowFactory.createWorkflowTrace(WorkflowTraceType.HANDSHAKE, runningModeType);
+        List<ProtocolMessage> plannedMessages = WorkflowTraceUtil.getAllSendMessages(trace);
+        ProtocolMessage lastMessage = plannedMessages.get(plannedMessages.size() - 1);
+        if (lastMessage.getProtocolMessageType() == ProtocolMessageType.HANDSHAKE) {
+            HandshakeMessage lastHandshakeMessage = (HandshakeMessage) lastMessage;
+            SendingAction lastSendingAction =
+                    (SendingAction)
+                            WorkflowTraceUtil.getLastSendingActionForMessage(
+                                    lastHandshakeMessage.getHandshakeMessageType(), trace);
+            SendingAction fullHandshakeEquivalentAction =
+                    (SendingAction)
+                            WorkflowTraceUtil.getFirstSendingActionForMessage(
+                                    lastHandshakeMessage.getHandshakeMessageType(),
+                                    completeHandshake);
+            completeMessageFlight(
+                    fullHandshakeEquivalentAction,
+                    completeHandshake,
+                    lastSendingAction,
+                    lastMessage);
+        } else if (lastMessage.getProtocolMessageType() == ProtocolMessageType.CHANGE_CIPHER_SPEC) {
+            SendingAction lastSendingAction =
+                    (SendingAction)
+                            WorkflowTraceUtil.getLastSendingActionForMessage(
+                                    ProtocolMessageType.CHANGE_CIPHER_SPEC, trace);
+            SendingAction fullHandshakeEquivalentAction =
+                    (SendingAction)
+                            WorkflowTraceUtil.getFirstSendingActionForMessage(
+                                    ProtocolMessageType.CHANGE_CIPHER_SPEC, completeHandshake);
+            completeMessageFlight(
+                    fullHandshakeEquivalentAction,
+                    completeHandshake,
+                    lastSendingAction,
+                    lastMessage);
+        } else {
+            // this trace either manipulates a non-handshake message or places the message
+            // outside of a valid flow
+            // adding handshake message to the invalid flow would appear to be
+            // a valid handshake flow for the receiver as the message SQNs
+            // remain valid
+            throw new IllegalArgumentException(
+                    "Unable to adapt trace for DTLS as last planned message is not part of a regular handshake");
+        }
+    }
+
+    private static void completeMessageFlight(
+            SendingAction fullHandshakeEquivalentAction,
+            WorkflowTrace completeHandshake,
+            SendingAction firstSendingAction,
+            ProtocolMessage lastHandshakeMessage)
+            throws IllegalArgumentException {
+        if (fullHandshakeEquivalentAction != null) {
+            int fullHandshakeEquivalentActionIndex =
+                    completeHandshake.getTlsActions().indexOf(fullHandshakeEquivalentAction);
+            // add subsequent messages from the equivalent send action
+            firstSendingAction
+                    .getSendMessages()
+                    .addAll(
+                            fullHandshakeEquivalentAction
+                                    .getSendMessages()
+                                    .subList(
+                                            fullHandshakeEquivalentAction
+                                                            .getSendMessages()
+                                                            .indexOf(lastHandshakeMessage)
+                                                    + 1,
+                                            fullHandshakeEquivalentAction
+                                                    .getSendMessages()
+                                                    .size()));
+            // also add message from all send actions that are immediately after another send action
+            // (only applies when we spilt into multiple send actions)
+            for (int i = fullHandshakeEquivalentActionIndex + 1;
+                    i < completeHandshake.getTlsActions().size();
+                    i++) {
+                if (completeHandshake.getTlsActions().get(i) instanceof SendingAction) {
+                    firstSendingAction
+                            .getSendMessages()
+                            .addAll(
+                                    ((SendingAction) completeHandshake.getTlsActions().get(i))
+                                            .getSendMessages());
+                } else {
+                    break;
+                }
+            }
+        } else {
+            throw new IllegalArgumentException(
+                    "Unable to adapt trace for DTLS as last message is not included in benign handshake");
+        }
+    }
+
+    /**
+     * Since DTLS does not use TCP, we can not leverage the connection state. Hence, to identify if
+     * a peer detected a manipulated message within a flight of our messages, we must always
+     * conclude the flight. The peer should then either proceed with the handshake, which means the
+     * manipulation remained unnoticed, or remain within the current state (with no messages sent /
+     * alert / retransmission).
+     *
+     * @param trace The WorkflowTrace built by the test
+     * @param config The Config prepared by the
+     * @return true if the WorklfowTrace should be adapted to enable evaluation
+     */
+    private boolean shouldAdaptForDtls(WorkflowTrace trace, Config config) {
+        if (isAutoAdaptForDtls() && config.getHighestProtocolVersion().isDTLS()) {
+            TlsAction lastAction = trace.getTlsActions().get(trace.getTlsActions().size());
+            boolean lastActionIsGenericReceive = lastAction instanceof GenericReceiveAction;
+            boolean isExpectingAlert = false;
+            if (!lastActionIsGenericReceive) {
+                isExpectingAlert =
+                        lastAction instanceof ReceivingAction
+                                && ((ReceiveAction) lastAction)
+                                        .getGoingToReceiveProtocolMessageTypes()
+                                        .contains(ProtocolMessageType.ALERT);
+            }
+
+            // we never have to add anything if we do not even send a CH
+            return WorkflowTraceUtil.getLastSendMessage(HandshakeMessageType.CLIENT_HELLO, trace)
+                            != null
+                    && (lastActionIsGenericReceive || isExpectingAlert);
+        }
+        return false;
+    }
+
     private boolean shouldInsertNewSessionTicket() {
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER
                 && preparedConfig.getHighestProtocolVersion() == ProtocolVersion.TLS12
@@ -509,5 +651,13 @@ public class WorkflowRunner {
 
     public void setAutoHelloRetryRequest(Boolean autoHelloRetryRequest) {
         this.autoHelloRetryRequest = autoHelloRetryRequest;
+    }
+
+    public Boolean isAutoAdaptForDtls() {
+        return autoAdaptForDtls;
+    }
+
+    public void setAutoAdaptForDtls(Boolean autoAdaptForDtls) {
+        this.autoAdaptForDtls = autoAdaptForDtls;
     }
 }

@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import de.rub.nds.tlsscanner.serverscanner.report.ServerReport;
 import de.rub.nds.tlstest.framework.exceptions.FeatureExtractionFailedException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ServerFeatureExtractionResultTest {
 

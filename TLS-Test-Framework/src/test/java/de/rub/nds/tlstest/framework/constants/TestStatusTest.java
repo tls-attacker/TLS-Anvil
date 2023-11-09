@@ -10,7 +10,7 @@ package de.rub.nds.tlstest.framework.constants;
 import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.teststate.TestResult;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestStatusTest {
 
@@ -45,16 +45,24 @@ public class TestStatusTest {
         assertEquals(TestResult.CONCEPTUALLY_SUCCEEDED, status);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test()
     public void containsNotSpecified() {
-        TestResult.resultForBitmask(
-                (TestResult.STRICTLY_SUCCEEDED.getValue() | TestResult.NOT_SPECIFIED.getValue()));
+        assertThrows(
+                UnsupportedOperationException.class,
+                () ->
+                        TestResult.resultForBitmask(
+                                (TestResult.STRICTLY_SUCCEEDED.getValue()
+                                        | TestResult.NOT_SPECIFIED.getValue())));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test()
     public void containsDisabled() {
-        TestResult.resultForBitmask(
-                (TestResult.STRICTLY_SUCCEEDED.getValue() | TestResult.DISABLED.getValue()));
+        assertThrows(
+                UnsupportedOperationException.class,
+                () ->
+                        TestResult.resultForBitmask(
+                                (TestResult.STRICTLY_SUCCEEDED.getValue()
+                                        | TestResult.DISABLED.getValue())));
     }
 
     @Test()

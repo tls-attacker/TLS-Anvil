@@ -485,7 +485,7 @@ public class WorkflowRunner {
      */
     private boolean shouldAdaptForDtls(WorkflowTrace trace, Config config) {
         if (isAutoAdaptForDtls() && config.getHighestProtocolVersion().isDTLS()) {
-            TlsAction lastAction = trace.getTlsActions().get(trace.getTlsActions().size());
+            TlsAction lastAction = trace.getTlsActions().get(trace.getTlsActions().size() - 1);
             boolean lastActionIsGenericReceive = lastAction instanceof GenericReceiveAction;
             boolean isExpectingAlert = false;
             if (!lastActionIsGenericReceive) {

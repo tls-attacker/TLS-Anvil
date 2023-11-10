@@ -3,7 +3,7 @@ package de.rub.nds.tlstest.framework.execution;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
-import de.rub.nds.scanner.core.constants.ProbeType;
+import de.rub.nds.scanner.core.probe.ProbeType;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
@@ -193,7 +193,9 @@ public class TestPreparator {
                     throw new RuntimeException(e);
                 }
             }
-        } catch (Exception ignored) {
+        } catch (Exception ex) {
+            LOGGER.error(ex);
+            throw new RuntimeException("Failed to await client connection");
         }
 
         LOGGER.info("Client is ready, prepapring client exploration...");
@@ -274,7 +276,6 @@ public class TestPreparator {
 
         if (testConfig.isUseDTLS()) {
             scannerConfig.getDtlsDelegate().setDTLS(true);
-            scannerConfig.getDtlsDelegate().applyDelegate(config);
         }
 
         scannerConfig
@@ -315,7 +316,6 @@ public class TestPreparator {
      */
     private void clientTestPreparation() {
         waitForClient();
-        // TODO
 
         ClientFeatureExtractionResult cachedReport =
                 (ClientFeatureExtractionResult) loadFromCache();
@@ -345,6 +345,7 @@ public class TestPreparator {
         probes.add(TlsProbeType.EC_POINT_FORMAT);
         probes.add(TlsProbeType.SERVER_CERTIFICATE_MINIMUM_KEY_SIZE);
         probes.add(TlsProbeType.CONNECTION_CLOSING_DELTA);
+        probes.add(TlsProbeType.APPLICATION_MESSAGE);
         clientScannerConfig
                 .getServerDelegate()
                 .setPort(testConfig.getDelegate(TestClientDelegate.class).getPort());
@@ -352,6 +353,9 @@ public class TestPreparator {
         clientScannerConfig.getExecutorConfig().setProbes(probes);
         clientScannerConfig.setExternalRunCallback(
                 testConfig.getTestClientDelegate().getTriggerScript());
+        if (testConfig.isUseDTLS()) {
+            clientScannerConfig.getDtlsDelegate().setDTLS(true);
+        }
 
         TlsClientScanner clientScanner =
                 new TlsClientScanner(clientScannerConfig, preparedExecutor);

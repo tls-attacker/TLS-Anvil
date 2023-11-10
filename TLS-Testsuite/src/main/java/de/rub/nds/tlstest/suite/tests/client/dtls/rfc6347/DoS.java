@@ -3,6 +3,7 @@ package de.rub.nds.tlstest.suite.tests.client.dtls.rfc6347;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
@@ -13,61 +14,14 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Dtls12Test;
 import java.util.Arrays;
+import org.junit.Assert;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @Tag("dtls12")
+@ClientTest
 public class DoS extends Dtls12Test {
 
-    @Tag("Test12")
-    @AnvilTest(id = "6347-8A36GOAO5u")
-    /**
-     * This test validates that a client responds to a {@link HelloVerifyRequestMessage} with a
-     * second {@link ClientHelloMessage} that contains the cookie from the {@link
-     * HelloVerifyRequestMessage}.
-     */
-    public void clintHelloWithoutAndWithCookie(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-        c.setDtlsCookieExchange(true);
-
-        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
-
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace executedTrace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
-
-                            HelloVerifyRequestMessage helloVerifyRequest =
-                                    (HelloVerifyRequestMessage)
-                                            WorkflowTraceUtil.getFirstSendMessage(
-                                                    HandshakeMessageType.HELLO_VERIFY_REQUEST,
-                                                    executedTrace);
-                            ClientHelloMessage secondClientHello =
-                                    (ClientHelloMessage)
-                                            WorkflowTraceUtil.getLastReceivedMessage(
-                                                    HandshakeMessageType.CLIENT_HELLO,
-                                                    executedTrace);
-                            assertTrue(
-                                    "Did not send Hello Verify Request messages",
-                                    helloVerifyRequest != null);
-                            assertTrue(
-                                    "Did not receive second Client Hello messages",
-                                    secondClientHello != null);
-                            assertTrue(
-                                    "Did not receive second Client Hello messages with cookie",
-                                    secondClientHello.getCookieLength().getValue() != 0);
-
-                            assertTrue(
-                                    "Did not recive the cookie from the hello verify request message in the second client hello message.",
-                                    helloVerifyRequest
-                                            .getCookie()
-                                            .equals(secondClientHello.getCookie()));
-                        });
-    }
-
-    @Tag("Test13")
     @AnvilTest(id = "6347-tT9LA2Ba7T")
     /**
      * The test is successful if the first and second {@link ClientHelloMessage} contain exactly the
@@ -91,6 +45,11 @@ public class DoS extends Dtls12Test {
                                     (ClientHelloMessage)
                                             WorkflowTraceUtil.getFirstReceivedMessage(
                                                     HandshakeMessageType.CLIENT_HELLO, trace);
+                            HelloVerifyRequestMessage helloVerifyRequest =
+                                    (HelloVerifyRequestMessage)
+                                            WorkflowTraceUtil.getFirstSendMessage(
+                                                    HandshakeMessageType.HELLO_VERIFY_REQUEST,
+                                                    trace);
                             ClientHelloMessage secondClientHello =
                                     (ClientHelloMessage)
                                             WorkflowTraceUtil.getLastReceivedMessage(
@@ -105,12 +64,15 @@ public class DoS extends Dtls12Test {
                             assertTrue(
                                     "Did not receive first Client Hello messages without cookie",
                                     firstClientHello.getCookieLength().getValue() == 0);
-                            assertTrue(
-                                    "Did not receive second Client Hello messages with cookie",
-                                    secondClientHello.getCookieLength().getValue() >= 0);
 
                             testIfClientHelloFieldsAreEqualWithoutCookie(
                                     firstClientHello, secondClientHello);
+
+                            assertTrue(
+                                    "Did not recive the cookie from the hello verify request message in the second client hello message.",
+                                    helloVerifyRequest
+                                            .getCookie()
+                                            .equals(secondClientHello.getCookie()));
                         });
     }
 
@@ -129,12 +91,10 @@ public class DoS extends Dtls12Test {
                 Arrays.equals(
                         firstClientHello.getCipherSuites().getValue(),
                         retryClientHello.getCipherSuites().getValue()));
-        assertTrue(
-                "Offered CompressionList lengths are not identical",
-                firstClientHello
-                        .getCompressionLength()
-                        .getValue()
-                        .equals(retryClientHello.getCompressionLength().getValue()));
+        Assert.assertArrayEquals(
+                "Offered CompressionLists are not identical",
+                firstClientHello.getCompressions().getValue(),
+                retryClientHello.getCompressions().getValue());
         assertTrue(
                 "Selected ClientRandoms are not identical",
                 Arrays.equals(
@@ -146,7 +106,7 @@ public class DoS extends Dtls12Test {
                         firstClientHello.getProtocolVersion().getValue(),
                         retryClientHello.getProtocolVersion().getValue()));
         assertTrue(
-                "TLS 1.3 compatibility SessionIDs are not identical",
+                "Offered SessionIDs are not identical",
                 Arrays.equals(
                         firstClientHello.getSessionId().getValue(),
                         retryClientHello.getSessionId().getValue()));

@@ -1,6 +1,6 @@
 package de.rub.nds.tlstest.framework;
 
-import de.rub.nds.scanner.core.constants.NotApplicableResult;
+import de.rub.nds.scanner.core.probe.result.NotApplicableResult;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;

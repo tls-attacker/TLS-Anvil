@@ -1,24 +1,31 @@
 package de.rub.nds.tlstest.suite.tests.server.dtls12.rfc6347;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
+import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendingAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Dtls12Test;
+import de.rub.nds.tlstest.suite.util.DtlsTestConditions;
 import java.math.BigInteger;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
@@ -27,12 +34,9 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 @Tag("dtls12")
 public class DoS extends Dtls12Test {
 
-    @Tag("Test7")
+    private static final long MODIFIED_SEQUENCE_NUMBER = 999;
+
     @AnvilTest(id = "6347-z0AiXbV3Y6")
-    /**
-     * This test test, wether the same {@link ProtocolVersion} is used in the {@link
-     * HelloVerifyRequestMessage} and the {@link ServerHelloMessage}.
-     */
     public void sameVersionNumberServerHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
 
@@ -66,15 +70,13 @@ public class DoS extends Dtls12Test {
                                             .getProtocolVersion()
                                             .equals(serverHello.getProtocolVersion()),
                                     "Did not recive the version number from the hello verify request message in the server hello message.");
+
+                            i.addAdditionalResultInfo(
+                                    "This mandatory RFC requirement contradicts the statement from Sect. 4.2.1 in RFC 6347 that implementations SHOULD use DTLS 1.0 in the HelloVerifyRequest regardless of the version negotiated in the ServerHello");
                         });
     }
 
-    @Tag("Test8")
     @AnvilTest(id = "6347-5R0A5tlkOm")
-    /**
-     * This test test, wether the same sequenceNumber is used in the {@link ClientHelloMessage} and
-     * the {@link HelloVerifyRequestMessage}.
-     */
     public void clientSequenceNumberInHelloVerifyRequest(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -82,7 +84,10 @@ public class DoS extends Dtls12Test {
         WorkflowTrace trace =
                 runner.generateWorkflowTraceUntilReceivingMessage(
                         WorkflowTraceType.HELLO, HandshakeMessageType.HELLO_VERIFY_REQUEST);
-
+        Record preparedRecord = new Record();
+        preparedRecord.setSequenceNumber(
+                Modifiable.explicit(BigInteger.valueOf(MODIFIED_SEQUENCE_NUMBER)));
+        trace.getFirstSendingAction().getSendRecords().add(preparedRecord);
         trace.addTlsActions(new ReceiveAction(new HelloVerifyRequestMessage()));
 
         runner.execute(trace, c)
@@ -91,60 +96,42 @@ public class DoS extends Dtls12Test {
                             WorkflowTrace executedTrace = i.getWorkflowTrace();
                             Validator.executedAsPlanned(i);
 
-                            BigInteger clientHelloSeqNum =
-                                    executedTrace
-                                            .getFirstSendingAction()
-                                            .getSendRecords()
+                            BigInteger helloVerifyRequestSeqNum = null;
+                            HelloVerifyRequestMessage hvrMsg =
+                                    executedTrace.getLastReceivedMessage(
+                                            HelloVerifyRequestMessage.class);
+                            ReceivingAction receivingAction =
+                                    (ReceivingAction)
+                                            WorkflowTraceUtil.getLastReceivingActionForMessage(
+                                                    HandshakeMessageType.HELLO_VERIFY_REQUEST,
+                                                    executedTrace);
+                            assertNotNull(hvrMsg, "Did not receive a HelloVerifyRequest");
+                            // potential retransmission also use the explicitly modified sequence
+                            // number, hence, the HVR should also have this sequence number
+                            long hvrSequenceNumber =
+                                    receivingAction
+                                            .getReceivedRecords()
                                             .get(0)
                                             .getSequenceNumber()
-                                            .getValue();
-                            BigInteger helloVerifyRequestSeqNum = null;
-
-                            for (ReceivingAction tlsAction : executedTrace.getReceivingActions()) {
-                                int helloVerifyRequestNum = 0;
-                                if (helloVerifyRequestSeqNum == null) {
-                                    for (ProtocolMessage message :
-                                            tlsAction.getReceivedMessages()) {
-                                        if (message.getClass() == HelloVerifyRequestMessage.class) {
-                                            helloVerifyRequestSeqNum =
-                                                    tlsAction
-                                                            .getReceivedRecords()
-                                                            .get(helloVerifyRequestNum)
-                                                            .getSequenceNumber()
-                                                            .getValue();
-                                            break;
-                                        }
-                                        helloVerifyRequestNum++;
-                                    }
-                                }
-                            }
-
-                            assertTrue(
-                                    clientHelloSeqNum != null,
-                                    "Did not send Client Hello messages");
-                            assertTrue(
-                                    helloVerifyRequestSeqNum != null,
-                                    "Did not receive Hello Verify Request messages");
-                            assertTrue(
-                                    clientHelloSeqNum.compareTo(helloVerifyRequestSeqNum) == 0,
-                                    "Did not recive the message sequence from the client hello in the hello verify request message.");
-                            assertTrue(
-                                    helloVerifyRequestSeqNum.intValue() == 0,
-                                    "The Sequence Number of the HelloVerifyRequest is not 0.");
+                                            .getValue()
+                                            .longValue();
+                            assertEquals(
+                                    MODIFIED_SEQUENCE_NUMBER,
+                                    hvrSequenceNumber,
+                                    "Server did not use sequence number from Client Hello record");
                         });
     }
 
-    @Tag("Test9")
     @AnvilTest(id = "6347-56hL9Blfzp")
-    /**
-     * This test test, wether the same sequenceNumber is used in the {@link ClientHelloMessage} and
-     * the {@link ServerHelloMessage}.
-     */
     public void sequenceNumberFromClientHelloInServerHello(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        Record preparedRecord = new Record();
+        preparedRecord.setSequenceNumber(
+                Modifiable.explicit(BigInteger.valueOf(MODIFIED_SEQUENCE_NUMBER)));
+        trace.getLastSendingAction().getSendRecords().add(preparedRecord);
 
         runner.execute(trace, c)
                 .validateFinal(
@@ -153,58 +140,34 @@ public class DoS extends Dtls12Test {
 
                             Validator.executedAsPlanned(i);
 
-                            BigInteger clientHelloSeqNum = null;
-                            if (executedTrace.getSendingActions().size() > 1) {
-                                clientHelloSeqNum =
-                                        executedTrace
-                                                .getSendingActions()
-                                                .get(1)
-                                                .getSendRecords()
-                                                .get(0)
-                                                .getSequenceNumber()
-                                                .getValue();
-                            }
-                            BigInteger serverHelloRequestSeqNum = null;
-
-                            for (ReceivingAction tlsAction : executedTrace.getReceivingActions()) {
-                                int helloVerifyRequestNum = 0;
-                                if (serverHelloRequestSeqNum == null) {
-                                    for (ProtocolMessage message :
-                                            tlsAction.getReceivedMessages()) {
-                                        if (message.getClass() == ServerHelloMessage.class) {
-                                            serverHelloRequestSeqNum =
-                                                    tlsAction
-                                                            .getReceivedRecords()
-                                                            .get(helloVerifyRequestNum)
-                                                            .getSequenceNumber()
-                                                            .getValue();
-                                            break;
-                                        }
-                                        helloVerifyRequestNum++;
-                                    }
-                                }
-                            }
-
-                            assertTrue(
-                                    clientHelloSeqNum != null,
-                                    "Did not send Client Hello messages");
-                            assertTrue(
-                                    serverHelloRequestSeqNum != null,
-                                    "Did not receive Server Hello messages");
-                            assertTrue(
-                                    clientHelloSeqNum.compareTo(serverHelloRequestSeqNum) == 0,
-                                    "Did not recive the message sequence from the client hello in the server hello message.");
+                            ServerHelloMessage serverHello =
+                                    executedTrace.getLastReceivedMessage(ServerHelloMessage.class);
+                            ReceivingAction receivingAction =
+                                    (ReceivingAction)
+                                            WorkflowTraceUtil.getLastReceivingActionForMessage(
+                                                    HandshakeMessageType.SERVER_HELLO,
+                                                    executedTrace);
+                            assertNotNull(serverHello, "Did not receive a HelloVerifyRequest");
+                            // potential retransmission also use the explicitly modified sequence
+                            // number, hence, the HVR should also have this sequence number
+                            long serverHelloSqn =
+                                    receivingAction
+                                            .getReceivedRecords()
+                                            .get(0)
+                                            .getSequenceNumber()
+                                            .getValue()
+                                            .longValue();
+                            assertEquals(
+                                    MODIFIED_SEQUENCE_NUMBER,
+                                    serverHelloSqn,
+                                    "Server did not use sequence number from Client Hello record");
                         });
     }
 
     @Tag("Test10")
     @AnvilTest(id = "6347-g65TNbT3uV")
     @IncludeParameter("DTLS_COOKIE_BITMASK")
-    /**
-     * The test checks the handling of the server when it receives a wrong cookie in the {@link
-     * ClientHelloMessage}. In this case, the server must deal with the ClientHello in the same way
-     * as a ClientHello without a cookie and resend a {@link HelloVerifyRequestMessage}.
-     */
+    @MethodCondition(clazz = DtlsTestConditions.class, method = "serverSendsHelloVerifyRequest")
     public void invalidClientHelloCookie(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
@@ -226,6 +189,44 @@ public class DoS extends Dtls12Test {
                             i.addAdditionalTestInfo(
                                     i.getWorkflowTrace().getMessageActions().toString());
                             Validator.executedAsPlanned(i);
+                        });
+    }
+
+    @AnvilTest(id = "6347-76Jna7IPv8")
+    public void negotiateDtls12viaRecordHeader(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config config = getPreparedConfig(argumentAccessor, runner);
+        WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        trace.getFirstSendMessage(ClientHelloMessage.class)
+                .setProtocolVersion(Modifiable.explicit(ProtocolVersion.DTLS10.getValue()));
+        trace.getLastSendMessage(ClientHelloMessage.class)
+                .setProtocolVersion(Modifiable.explicit(ProtocolVersion.DTLS10.getValue()));
+        Record preparedRecord1 = new Record();
+        Record preparedRecord2 = new Record();
+        preparedRecord1.setProtocolVersion(Modifiable.explicit(ProtocolVersion.DTLS12.getValue()));
+        ((SendingAction)
+                        WorkflowTraceUtil.getFirstSendingActionForMessage(
+                                HandshakeMessageType.CLIENT_HELLO, trace))
+                .getSendRecords()
+                .add(preparedRecord1);
+        // when server does not require a HVR cycle, this will only overwrite the previous record
+        preparedRecord2.setProtocolVersion(Modifiable.explicit(ProtocolVersion.DTLS12.getValue()));
+        ((SendingAction)
+                        WorkflowTraceUtil.getLastSendingActionForMessage(
+                                HandshakeMessageType.CLIENT_HELLO, trace))
+                .getSendRecords()
+                .add(preparedRecord2);
+
+        runner.execute(trace, config)
+                .validateFinal(
+                        i -> {
+                            // peer must reject handshake or negotiate DTLS 1.0
+                            if (i.getWorkflowTrace().executedAsPlanned()) {
+                                assertFalse(
+                                        i.getState().getTlsContext().getSelectedProtocolVersion()
+                                                == ProtocolVersion.DTLS12,
+                                        "Server negotiated DTLS 1.2 based on record header");
+                            }
                         });
     }
 }

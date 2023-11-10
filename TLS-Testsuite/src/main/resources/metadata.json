@@ -7781,24 +7781,6 @@
       "sendClientHelloAfterFinishedHandshake"
     ]
   },
-  "6347-oaZ5hs6d76": {
-    "description": "The receiver packet counter for this session MUST be initialized to    zero when the session is established.",
-    "severityLevels": {
-      "Handshake": 100,
-      "Interoperability": 100
-    },
-    "rfc": {
-      "number": 6347,
-      "section": "4.1.2.6. Anti-Replay"
-    },
-    "tags": [
-      "both",
-      "dtls12",
-      "rfc6347",
-      "AntiReplay",
-      "packetStartWithZero"
-    ]
-  },
   "6347-GeZa64E0Nt": {
     "description": "For each received record, the receiver MUST verify that the record contains a sequence number that does not duplicate the sequence number of any other record received during the life of this session.",
     "severityLevels": {
@@ -7846,51 +7828,16 @@
       "section": "4.2.1. Denial-of-Service Countermeasures"
     },
     "tags": [
-      "both",
+      "server",
       "dtls12",
       "rfc6347",
       "DoS",
-      "versionForPacketFormating"
-    ]
-  },
-  "6347-99R91XGv5E": {
-    "description": "If a DTLS implementation chooses to generate an alert when it receives a message with an invalid MAC, it MUST generate a bad_record_mac alert with level fatal and terminate its connection state.",
-    "severityLevels": {
-      "Handshake": 100,
-      "Interoperability": 100
-    },
-    "rfc": {
-      "number": 6347,
-      "section": "4.1.2.1. MAC"
-    },
-    "tags": [
-      "both",
-      "dtls12",
-      "rfc6347",
-      "MAC",
-      "badMACAlert"
-    ]
-  },
-  "6347-8A36GOAO5u": {
-    "description": "The client MUST retransmit the ClientHello with the cookie added.",
-    "severityLevels": {
-      "Handshake": 100,
-      "Interoperability": 100
-    },
-    "rfc": {
-      "number": 6347,
-      "section": "4.2.1. Denial-of-Service Countermeasures"
-    },
-    "tags": [
-      "client",
-      "dtls12",
-      "rfc6347",
-      "DoS",
-      "clintHelloWithoutAndWithCookie"
+      "negotiateDtls12viaRecordHeader"
     ]
   },
   "6347-tT9LA2Ba7T": {
     "description": "When responding to a HelloVerifyRequest, the client MUST use the same   parameter values (version, random, session_id, cipher_suites,   compression_method) as it did in the original ClientHello.",
+    "addToSecondRfcRef" : "4.2.1. Denial-of-Service Countermeasures -- The client MUST retransmit the ClientHello with the cookie added.",
     "severityLevels": {
       "Handshake": 100,
       "Interoperability": 100
@@ -7977,24 +7924,6 @@
       "rfc6347",
       "DoS",
       "invalidClientHelloCookie"
-    ]
-  },
-  "6347-Krh31b84Lx": {
-    "description": "In order    to ensure that any given sequence/epoch pair is unique,    implementations MUST NOT allow the same epoch value to be reused    within two times the TCP maximum segment lifetime.",
-    "severityLevels": {
-      "Handshake": 100,
-      "Interoperability": 100
-    },
-    "rfc": {
-      "number": 6347,
-      "section": "4.1.  Record Layer"
-    },
-    "tags": [
-      "server",
-      "dtls12",
-      "rfc6347",
-      "RecordLayer",
-      "decreaseEpoche"
     ]
   }
 }

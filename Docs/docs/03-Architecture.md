@@ -7,7 +7,6 @@ Each of those phases is explained in our USENIX Security Paper in Section 4.1. P
 
 ![](/Architecture.png)
 
-
 ### Code related information
 
 TLS-Anvil is written in Java and uses the following libraries.

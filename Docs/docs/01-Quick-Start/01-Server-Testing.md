@@ -4,6 +4,7 @@ This site demonstrates how to test the OpenSSL server provided by the TLS-Docker
 Testing the server in the most simple form roughly takes around 38 minutes. However, this duration can increase to several depending on the strength parameter that that basically defines how often a single test case triggered with different parameters.
 
 ### Preperations
+
 Before the server is able to do anything we need to generate a TLS certificate.
 
 ```bash
@@ -11,6 +12,7 @@ Before the server is able to do anything we need to generate a TLS certificate.
 ```
 
 Next we create a dedicated docker network that is used by the TLS-Anvil and OpenSSL server container to communicate with each other.
+
 ```bash
 docker network create tls-anvil
 ```
@@ -63,6 +65,4 @@ docker run \
 * Line 10: Defines the strength, i.e. the `t` for t-way combinatorial testing
 * Line 12: We want to test a server.
 * Line 13-14: Determines the details how TLS-Anvil should connect to the server.
- 
-        
 

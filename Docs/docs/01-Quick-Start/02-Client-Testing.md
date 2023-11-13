@@ -4,6 +4,7 @@ This site demonstrates how to test the OpenSSL client provided by the TLS-Docker
 Testing the client in the most simple form roughly takes around 15 minutes. However, this duration can increase to several depending on the strength parameter that that basically defines how often a single test case triggered with different parameters.
 
 ### Preperations
+
 Similar to the server test we first create a dedicated docker network that is used by the TLS-Anvil and OpenSSL client container to communicate with each other.
 
 ```bash
@@ -42,6 +43,7 @@ docker run \
 * Line 15: Specifies a script that is executed before each handshake, which the goal to trigger a connection from the client. See below how this works.
 
 ### Starting the OpenSSL client container
+
 The OpenSSL client image is provided by the TLS-Docker-Library. The entrypoint of the client images is a small HTTP server that provides two REST-API endpoints on port 8090.
 * `GET /trigger` starts the client
 * `GET /shutdown` shutdown the HTTP server to terminate the container
@@ -59,3 +61,4 @@ docker run \
 * Lines 2-5: Docker related command flags
 * Line 7: Specifies the OpenSSL client image from the TLS-Docker-Library
 * Line 8: This is passed to the OpenSSL `s_client` binary, which is started each time a HTTP-GET request is sent to `:8090/trigger`.
+

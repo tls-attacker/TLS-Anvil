@@ -1,9 +1,13 @@
 package de.rub.nds.tlstest.framework.execution;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.scanner.core.constants.ProbeType;
+import de.rub.nds.scanner.core.guideline.GuidelineReport;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
@@ -24,6 +28,7 @@ import de.rub.nds.tlsscanner.clientscanner.execution.TlsClientScanner;
 import de.rub.nds.tlsscanner.core.constants.TlsProbeType;
 import de.rub.nds.tlsscanner.serverscanner.config.ServerScannerConfig;
 import de.rub.nds.tlsscanner.serverscanner.execution.TlsServerScanner;
+import de.rub.nds.tlsscanner.serverscanner.report.ServerReport;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
@@ -34,6 +39,7 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -247,12 +253,41 @@ public class TestPreparator {
         TlsServerScanner scanner =
                 new TlsServerScanner(scannerConfig, testContext.getStateExecutor());
 
+        ServerReport serverReport = scanner.scan();
         FeatureExtractionResult report =
-                ServerFeatureExtractionResult.fromServerScanReport(scanner.scan());
+                ServerFeatureExtractionResult.fromServerScanReport(serverReport);
+        saveGuidelines(serverReport.getGuidelineReports());
         saveToCache(report);
 
         testContext.setFeatureExtractionResult(report);
         LOGGER.debug("TLS-Scanner finished!");
+    }
+
+    private void saveGuidelines(List<GuidelineReport> reports) {
+        List<JsonNode> guidelineList = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+        for (GuidelineReport report : reports) {
+            JsonNode jsonGuideline = mapper.valueToTree(report);
+            for (int i = 0; i < report.getPassed().size(); i++) {
+                ObjectNode node = (ObjectNode) jsonGuideline.get("passed").get(i);
+                node.put("display", report.getPassed().get(i).display());
+            }
+            for (int i = 0; i < report.getFailed().size(); i++) {
+                ObjectNode node = (ObjectNode) jsonGuideline.get("failed").get(i);
+                node.put("display", report.getFailed().get(i).display());
+            }
+            for (int i = 0; i < report.getUncertain().size(); i++) {
+                ObjectNode node = (ObjectNode) jsonGuideline.get("uncertain").get(i);
+                node.put("display", report.getUncertain().get(i).display());
+            }
+            for (int i = 0; i < report.getSkipped().size(); i++) {
+                ObjectNode node = (ObjectNode) jsonGuideline.get("skipped").get(i);
+                node.put("display", report.getSkipped().get(i).display());
+            }
+            guidelineList.add(jsonGuideline);
+        }
+
+        AnvilContext.getInstance().getMapper().saveExtraFileToPath(guidelineList, "guidelines");
     }
 
     /**

@@ -17,4 +17,3 @@ Welcome to TLS-Anvil, our test suite for TLS 1.2 and 1.3 servers and clients. TL
 * [RFC 6176](https://datatracker.ietf.org/doc/html/rfc6176) - Prohibiting Secure Sockets Layer (SSL) Version 2.0
 * [RFC 7457](https://datatracker.ietf.org/doc/html/rfc7457) - Summarizing Known Attacks on Transport Layer Security (TLS) and Datagram TLS (DTLS)
 
-

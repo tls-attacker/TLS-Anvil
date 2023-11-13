@@ -55,7 +55,7 @@ import org.apache.logging.log4j.Logger;
         creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class TlsTestConfig extends TLSDelegateConfig {
 
-    @JsonProperty private AnvilTestConfig anvilTestConfig; // = new AnvilTestConfig();
+    @JsonProperty private AnvilTestConfig anvilTestConfig;
     private static final Logger LOGGER = LogManager.getLogger();
 
     @JsonProperty("clientConfig")
@@ -80,11 +80,13 @@ public class TlsTestConfig extends TLSDelegateConfig {
     @JsonProperty("exportTraces")
     @Parameter(
             names = "-exportTraces",
-            description =
-                    "Export executed WorkflowTraces with all values " + "used in the messagesx")
+            description = "Export executed WorkflowTraces with all values used in the messages")
     private boolean exportTraces = false;
 
-    @Parameter(names = "-tlsAnvilConfig", description = "tlsAnvilConfig")
+    @Parameter(
+            names = "-tlsAnvilConfig",
+            description =
+                    "Path to a TLS-Anvil config file. Can be used instead of command-line-arguments.")
     private String tlsAnvilConfig;
 
     // we might want to turn these into CLI parameters in the future
@@ -157,7 +159,10 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
         this.argParser.parse(args);
         this.parsedCommand = ConfigDelegates.delegateForCommand(this.argParser.getParsedCommand());
-        if (tlsAnvilConfig != null) {
+        if (getGeneralDelegate().isHelp()) {
+            argParser.usage();
+            System.exit(0);
+        } else if (tlsAnvilConfig != null) {
             ObjectMapper objectMapper = new ObjectMapper();
             TlsTestConfig tlsTestConfig;
             Map<?, ?> raw = null;
@@ -171,7 +176,9 @@ public class TlsTestConfig extends TLSDelegateConfig {
                 if (raw.get("serverConfig") == null) tlsTestConfig.setTestServerDelegate(null);
 
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                LOGGER.error("Error while parsing config file.", e);
+                System.exit(1);
+                return;
             }
             this.setExportTraces(tlsTestConfig.isExportTraces());
             this.anvilTestConfig = tlsTestConfig.getAnvilTestConfig();
@@ -191,9 +198,6 @@ public class TlsTestConfig extends TLSDelegateConfig {
             }
             this.parsedArgs = true;
             return;
-        } else if (getGeneralDelegate().isHelp()) {
-            argParser.usage();
-            System.exit(0);
         } else if (argParser.getParsedCommand() == null) {
             argParser.usage();
             throw new ParameterException("You have to use the client or server command");

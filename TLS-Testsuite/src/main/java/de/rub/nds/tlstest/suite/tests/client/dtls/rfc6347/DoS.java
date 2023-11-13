@@ -15,10 +15,8 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Dtls12Test;
 import java.util.Arrays;
 import org.junit.Assert;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
-@Tag("dtls12")
 @ClientTest
 public class DoS extends Dtls12Test {
 

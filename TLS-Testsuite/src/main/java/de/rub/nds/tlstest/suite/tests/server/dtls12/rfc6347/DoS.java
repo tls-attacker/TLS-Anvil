@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-@Tag("dtls12")
 public class DoS extends Dtls12Test {
 
     private static final long MODIFIED_SEQUENCE_NUMBER = 999;

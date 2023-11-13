@@ -21,6 +21,5 @@ import java.lang.annotation.Target;
 public @interface TlsVersion {
 
     @JsonProperty("TlsVersion")
-    // ProtocolVersion[] supported(); TODO Replace by an Array to suport more versions at one time
-    ProtocolVersion supported();
+    ProtocolVersion[] supported();
 }

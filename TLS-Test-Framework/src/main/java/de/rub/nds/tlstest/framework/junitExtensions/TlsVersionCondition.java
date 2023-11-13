@@ -37,28 +37,23 @@ public class TlsVersionCondition extends BaseCondition {
         TestContext context = TestContext.getInstance();
         FeatureExtractionResult report = context.getFeatureExtractionResult();
         Set<ProtocolVersion> protocolVersionList = report.getSupportedVersions();
-        // ProtocolVersion[] testSupportedVersionList; //TODO activate if TLSVersion is an array
-        ProtocolVersion testSupportedVersion; // TODO Delete if TLSVerion is an array
+        ProtocolVersion[] testSupportedVersions;
 
         if (testM.isAnnotationPresent(TlsVersion.class)) {
-            testSupportedVersion = testM.getAnnotation(TlsVersion.class).supported();
+            testSupportedVersions = testM.getAnnotation(TlsVersion.class).supported();
         } else if (testC.isAnnotationPresent(TlsVersion.class)) {
-            testSupportedVersion = testC.getAnnotation(TlsVersion.class).supported();
+            testSupportedVersions = testC.getAnnotation(TlsVersion.class).supported();
         } else {
             LOGGER.error(
                     "No TlsVersion annotation available. Use Tls12Test or Tls13Test class as superclass for your test class or annotate the test method/class with the TlsVersion annotation.");
             return ConditionEvaluationResult.disabled("No TlsVersion annotation present");
         }
 
-        // for (ProtocolVersion testSupportedVersion : testSupportedVersionList) { //TODO Use when
-        // TLSVersion is an Array
-        if (protocolVersionList.contains(testSupportedVersion)
-                || (protocolVersionList.contains(ProtocolVersion.DTLS12)
-                        && testSupportedVersion
-                                == ProtocolVersion
-                                        .TLS12)) { // TODO Change if TLSVersion is an array
-            return ConditionEvaluationResult.enabled(
-                    "ProtocolVersion of the test is supported by the target");
+        for (ProtocolVersion supportedVersion : testSupportedVersions) {
+            if (protocolVersionList.contains(supportedVersion)) {
+                return ConditionEvaluationResult.enabled(
+                        "ProtocolVersion of the test is supported by the target");
+            }
         }
 
         return ConditionEvaluationResult.disabled(

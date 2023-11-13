@@ -3,6 +3,7 @@ package de.rub.nds.tlstest.framework.execution;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.junit.extension.EndpointConditionExtension;
 import de.rub.nds.scanner.core.probe.ProbeType;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
@@ -31,7 +32,9 @@ import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.config.TlsTestConfig;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
+import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -39,6 +42,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -50,7 +54,6 @@ import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.platform.engine.TestSource;
-import org.junit.platform.engine.TestTag;
 import org.junit.platform.engine.support.descriptor.MethodSource;
 import org.junit.platform.launcher.*;
 
@@ -198,7 +201,7 @@ public class TestPreparator {
             throw new RuntimeException("Failed to await client connection");
         }
 
-        LOGGER.info("Client is ready, prepapring client exploration...");
+        LOGGER.info("Client is ready, preparing client exploration...");
     }
 
     /**
@@ -506,43 +509,34 @@ public class TestPreparator {
     }
 
     private void logCommonDerivationValues() {
+        FeatureExtractionResult featureExtractionResult =
+                TestContext.getInstance().getFeatureExtractionResult();
         LOGGER.info(
-                "Supported NamedGroups:  "
-                        + TestContext.getInstance()
-                                .getFeatureExtractionResult()
-                                .getNamedGroups()
-                                .stream()
-                                .map(NamedGroup::toString)
-                                .collect(Collectors.joining(",")));
+                "Supported Protocol Versions: {}",
+                featureExtractionResult.getSupportedVersions().stream()
+                        .map(ProtocolVersion::toString)
+                        .collect(Collectors.joining(",")));
         LOGGER.info(
-                "Supported CipherSuites: "
-                        + TestContext.getInstance()
-                                .getFeatureExtractionResult()
-                                .getCipherSuites()
-                                .stream()
-                                .map(CipherSuite::toString)
-                                .collect(Collectors.joining(",")));
-        if (TestContext.getInstance().getFeatureExtractionResult().getTls13Groups() != null) {
-            LOGGER.info(
-                    "Supported TLS 1.3 NamedGroups: "
-                            + TestContext.getInstance()
-                                    .getFeatureExtractionResult()
-                                    .getTls13Groups()
-                                    .stream()
-                                    .map(NamedGroup::toString)
-                                    .collect(Collectors.joining(",")));
-        }
-        if (TestContext.getInstance().getFeatureExtractionResult().getSupportedTls13CipherSuites()
-                != null) {
-            LOGGER.info(
-                    "Supported TLS 1.3 CipherSuites: "
-                            + TestContext.getInstance()
-                                    .getFeatureExtractionResult()
-                                    .getSupportedTls13CipherSuites()
-                                    .stream()
-                                    .map(CipherSuite::toString)
-                                    .collect(Collectors.joining(",")));
-        }
+                "Supported (D)TLS 1.2 Named Groups: {}",
+                featureExtractionResult.getNamedGroups().stream()
+                        .map(NamedGroup::toString)
+                        .collect(Collectors.joining(",")));
+        LOGGER.info(
+                "Supported (D)TLS 1.3 Named Groups: {}",
+                featureExtractionResult.getTls13Groups().stream()
+                        .map(NamedGroup::toString)
+                        .collect(Collectors.joining(",")));
+        LOGGER.info(
+                "Supported (D)TLS 1.2 Cipher Suites: {}",
+                featureExtractionResult.getCipherSuites().stream()
+                        .map(CipherSuite::toString)
+                        .collect(Collectors.joining(",")));
+
+        LOGGER.info(
+                "Supported (D)TLS 1.3 Cipher Suites: {}",
+                featureExtractionResult.getSupportedTls13CipherSuites().stream()
+                        .map(CipherSuite::toString)
+                        .collect(Collectors.joining(",")));
     }
 
     /**
@@ -576,24 +570,31 @@ public class TestPreparator {
         };
     }
 
-    private static boolean countTests(TestIdentifier i, String versionS, String modeS) {
+    private static boolean countTests(
+            TestIdentifier i,
+            ProtocolVersion versionToCount,
+            TestEndpointType endpointTypeToCount,
+            TestEndpointType executionTestEndpointType) {
         TestSource source = i.getSource().orElse(null);
         if (!i.isTest() && (source == null || !source.getClass().equals(MethodSource.class))) {
             return false;
         }
 
-        Set<TestTag> tags = i.getTags();
-        boolean version = tags.stream().anyMatch(j -> j.getName().equals(versionS));
-        boolean mode;
-        if (!modeS.equals("both")) {
-            mode = tags.stream().anyMatch(j -> j.getName().equals(modeS));
-        } else {
-            mode =
-                    tags.stream().noneMatch(j -> j.getName().equals("server"))
-                            && tags.stream().noneMatch(j -> j.getName().equals("client"));
-        }
-
-        return version && mode;
+        MethodSource methodSource = (MethodSource) source;
+        Class<?> testClass = methodSource.getJavaClass();
+        Method testMethod = methodSource.getJavaMethod();
+        TestEndpointType requiredEndpointType =
+                EndpointConditionExtension.endpointOfMethod(testMethod, testClass);
+        Set<ProtocolVersion> versionList = new HashSet<>();
+        versionList.add(versionToCount);
+        return TlsVersionCondition.versionsMatch(
+                        versionList,
+                        TlsVersionCondition.getSupportedTestVersions(testMethod, testClass))
+                && requiredEndpointType != null
+                && (executionTestEndpointType == TestEndpointType.BOTH
+                        || requiredEndpointType == endpointTypeToCount
+                        || executionTestEndpointType == endpointTypeToCount)
+                && requiredEndpointType.isMatchingTestEndpointType(executionTestEndpointType);
     }
 
     /**
@@ -603,21 +604,66 @@ public class TestPreparator {
      * @param testPlan the testPlan, supplied by JUnits discovery
      */
     public static void printTestInfo(TestPlan testPlan) {
-        long clientTls12 = testPlan.countTestIdentifiers(i -> countTests(i, "tls12", "client"));
-        long clientTls13 = testPlan.countTestIdentifiers(i -> countTests(i, "tls13", "client"));
-        long serverTls12 = testPlan.countTestIdentifiers(i -> countTests(i, "tls12", "server"));
-        long serverTls13 = testPlan.countTestIdentifiers(i -> countTests(i, "tls13", "server"));
-        long bothTls12 = testPlan.countTestIdentifiers(i -> countTests(i, "tls12", "both"));
-        long bothTls13 = testPlan.countTestIdentifiers(i -> countTests(i, "tls13", "both"));
-
-        LOGGER.info(
-                "Server tests, TLS 1.2: {}, TLS 1.3: {}",
-                serverTls12 + bothTls12,
-                serverTls13 + bothTls13);
-        LOGGER.info(
-                "Client tests, TLS 1.2: {}, TLS 1.3: {}",
-                clientTls12 + bothTls12,
-                clientTls13 + bothTls13);
+        LOGGER.info("Scheduled test templates:");
+        TestEndpointType executionEndpointType =
+                TestContext.getInstance().getConfig().getTestEndpointMode();
+        if (TestContext.getInstance().getConfig().isUseDTLS()) {
+            long clientDtls12 =
+                    testPlan.countTestIdentifiers(
+                            i ->
+                                    countTests(
+                                            i,
+                                            ProtocolVersion.DTLS12,
+                                            TestEndpointType.CLIENT,
+                                            executionEndpointType));
+            long serverDtls12 =
+                    testPlan.countTestIdentifiers(
+                            i ->
+                                    countTests(
+                                            i,
+                                            ProtocolVersion.DTLS12,
+                                            TestEndpointType.SERVER,
+                                            executionEndpointType));
+            LOGGER.info(
+                    "DTLS 1.2 tests: {} client tests, {} server tests", clientDtls12, serverDtls12);
+        } else {
+            long clientTls12 =
+                    testPlan.countTestIdentifiers(
+                            i ->
+                                    countTests(
+                                            i,
+                                            ProtocolVersion.TLS12,
+                                            TestEndpointType.CLIENT,
+                                            executionEndpointType));
+            long serverTls12 =
+                    testPlan.countTestIdentifiers(
+                            i ->
+                                    countTests(
+                                            i,
+                                            ProtocolVersion.TLS12,
+                                            TestEndpointType.SERVER,
+                                            executionEndpointType));
+            long clientTls13 =
+                    testPlan.countTestIdentifiers(
+                            i ->
+                                    countTests(
+                                            i,
+                                            ProtocolVersion.TLS13,
+                                            TestEndpointType.CLIENT,
+                                            executionEndpointType));
+            long serverTls13 =
+                    testPlan.countTestIdentifiers(
+                            i ->
+                                    countTests(
+                                            i,
+                                            ProtocolVersion.TLS13,
+                                            TestEndpointType.SERVER,
+                                            executionEndpointType));
+            LOGGER.info(
+                    "TLS 1.2 tests: {} client tests, {} server tests", clientTls12, serverTls12);
+            LOGGER.info(
+                    "TLS 1.3 tests: {} client tests, {} server tests", clientTls13, serverTls13);
+        }
         LOGGER.info(
                 "Testing using default strength "
                         + TestContext.getInstance().getConfig().getAnvilTestConfig().getStrength());

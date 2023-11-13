@@ -12,14 +12,12 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
 
 public class TlsPcapCapturingInvocationInterceptor implements InvocationInterceptor {
-    private static final Logger LOGGER = LogManager.getLogger();
 
     public void interceptTestTemplateMethod(
             final Invocation<Void> invocation,
@@ -27,18 +25,17 @@ public class TlsPcapCapturingInvocationInterceptor implements InvocationIntercep
             final ExtensionContext extensionContext)
             throws Throwable {
 
-        AnvilTestConfig anvilconfig = AnvilContext.getInstance().getConfig();
+        AnvilTestConfig anvilConfig = AnvilContext.getInstance().getConfig();
         TlsTestConfig tlsConfig = TestContext.getInstance().getConfig();
+        AnvilTestRun testRun = AnvilTestRun.forExtensionContext(extensionContext);
+        TlsTestCase tlsTestCase = WorkflowRunner.getTlsTestCaseFromExtensionContext(extensionContext);
+        Path path = Paths.get(anvilConfig.getOutputFolder(), "results", testRun.getTestId(), tlsTestCase.getTemporaryPcapFileName());
 
-        AnvilTestRun run = AnvilTestRun.forExtensionContext(extensionContext);
-        Method m = extensionContext.getTestMethod().orElseThrow(() -> null);
-        Path path = Paths.get(anvilconfig.getOutputFolder());
-        path = path.resolve(run.getTestId());
+        // create capturer
         Files.createDirectories(path);
-        TlsTestCase tlsTestCase =
-                WorkflowRunner.getTlsTestCaseFromExtensionContext(extensionContext);
-        path = path.resolve(tlsTestCase.getTmpPcapFileName());
         PcapCapturer.Builder builder = PcapCapturer.builder().withFilePath(path.toString());
+
+        // set filter
         if (tlsConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
             builder.withBpfExpression(
                     String.format(
@@ -47,6 +44,8 @@ public class TlsPcapCapturingInvocationInterceptor implements InvocationIntercep
             builder.withBpfExpression(
                     String.format("tcp port %s", tlsConfig.getTestClientDelegate().getPort()));
         }
+
+        // start capturing - auto closes when test is done
         try (PcapCapturer pcapCapturer = builder.build()) {
             invocation.proceed();
         }

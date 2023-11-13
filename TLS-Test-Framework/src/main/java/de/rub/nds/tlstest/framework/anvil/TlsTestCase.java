@@ -15,12 +15,12 @@ import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.config.TlsTestConfig;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import jakarta.xml.bind.DatatypeConverter;
 import java.io.EOFException;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -41,37 +41,35 @@ public class TlsTestCase extends AnvilTestCase {
 
     private TlsTestCase() {}
 
-    private String tmpPcapFileName;
-
+    private String temporaryPcapFileName;
     private static int pcapFileCounter = 0;
 
-    public String getTmpPcapFileName() {
-        return tmpPcapFileName;
+    public String getTemporaryPcapFileName() {
+        return temporaryPcapFileName;
     }
 
     public TlsTestCase(
             ExtensionContext context, State state, TlsParameterCombination parameterCombination) {
         super(parameterCombination, context);
         this.state = state;
-        this.tmpPcapFileName = String.format("tmp_%s.pcap", TlsTestCase.pcapFileCounter);
+        // set temporary file name counting up - gets renamed in finalizeAnvilTestCase()
+        this.temporaryPcapFileName = String.format("tmp_%s.pcap", TlsTestCase.pcapFileCounter);
         TlsTestCase.pcapFileCounter += 1;
     }
 
     @Override
     protected void finalizeAnvilTestCase() {
+        // filter the pcap files according to used ports and save them with their uuid
+        AnvilTestConfig anvilConfig = AnvilContext.getInstance().getConfig();
+        Path basePath = Paths.get(anvilConfig.getOutputFolder(), "results", this.getAssociatedContainer().getTestId());
+        Path temporaryPcapPath = basePath.resolve(this.getTemporaryPcapFileName());
+        Path finalPcapPath = basePath.resolve(String.format("dump_%s.pcap", this.getUuid()));
 
-        TlsTestConfig tlsConfig = TestContext.getInstance().getConfig();
-        AnvilTestConfig anvilconfig = AnvilContext.getInstance().getConfig();
-        Path basePath = Paths.get(anvilconfig.getOutputFolder());
-        basePath = basePath.resolve(this.getAssociatedContainer().getTestId());
-        Path pathTmpCap = basePath.resolve(this.getTmpPcapFileName());
-        Path pathCap = basePath.resolve(String.format("dump_%s.pcap", this.getUuid()));
-
-        try (PcapHandle pcapHandle = Pcaps.openOffline(pathTmpCap.toString())) {
-            pcapHandle.setFilter(
-                    String.format("tcp port %s", this.getSrcPort().toString()),
-                    BpfProgram.BpfCompileMode.OPTIMIZE);
-            PcapDumper pcapDumper = pcapHandle.dumpOpen(pathCap.toString());
+        try (PcapHandle pcapHandle = Pcaps.openOffline(temporaryPcapPath.toString())) {
+            // filter final used ports
+            pcapHandle.setFilter(String.format("tcp port %s", this.getSrcPort().toString()), BpfProgram.BpfCompileMode.OPTIMIZE);
+            PcapDumper pcapDumper = pcapHandle.dumpOpen(finalPcapPath.toString());
+            // dump filtered packets to new file
             while (true) {
                 try {
                     Packet p = pcapHandle.getNextPacketEx();
@@ -79,18 +77,22 @@ public class TlsTestCase extends AnvilTestCase {
                         pcapDumper.dump(p, pcapHandle.getTimestamp());
                     }
                 } catch (EOFException e) {
-                    LOGGER.debug("End of pcap file");
+                    // break on end of file
                     break;
                 } catch (TimeoutException e) {
-                    LOGGER.error("TimeoutException");
+                    LOGGER.error("Error during filtering of pcap files: ", e);
                 }
             }
             pcapDumper.close();
-            pathTmpCap.toFile().delete();
-        } catch (PcapNativeException e) {
-            throw new RuntimeException(e);
-        } catch (NotOpenException e) {
-            throw new RuntimeException(e);
+        } catch (PcapNativeException | NotOpenException e) {
+            LOGGER.error("Error filtering pcap dump: ", e);
+        }
+
+        // delete temporary file afterwards
+        try {
+            Files.delete(temporaryPcapPath);
+        } catch (IOException e) {
+            LOGGER.error("Error deleting temporary pcap dump file: ", e);
         }
     }
 

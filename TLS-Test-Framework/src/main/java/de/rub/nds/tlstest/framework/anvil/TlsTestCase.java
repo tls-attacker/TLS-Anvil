@@ -58,7 +58,7 @@ public class TlsTestCase extends AnvilTestCase {
     }
 
     @Override
-    protected void finalizeAnvilTestCase() {
+    public void finalizeAnvilTestCase() {
         // filter the pcap files according to used ports and save them with their uuid
         AnvilTestConfig anvilConfig = AnvilContext.getInstance().getConfig();
         Path basePath =

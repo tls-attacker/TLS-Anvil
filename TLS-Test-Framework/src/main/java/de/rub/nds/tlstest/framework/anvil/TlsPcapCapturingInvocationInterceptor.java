@@ -29,16 +29,12 @@ public class TlsPcapCapturingInvocationInterceptor implements InvocationIntercep
         AnvilTestRun testRun = AnvilTestRun.forExtensionContext(extensionContext);
         TlsTestCase tlsTestCase =
                 WorkflowRunner.getTlsTestCaseFromExtensionContext(extensionContext);
-        Path path =
-                Paths.get(
-                        anvilConfig.getOutputFolder(),
-                        "results",
-                        testRun.getTestId(),
-                        tlsTestCase.getTemporaryPcapFileName());
+        Path folderPath = Paths.get(anvilConfig.getOutputFolder(), "results", testRun.getTestId());
 
         // create capturer
-        Files.createDirectories(path);
-        PcapCapturer.Builder builder = PcapCapturer.builder().withFilePath(path.toString());
+        Files.createDirectories(folderPath);
+        Path filePath = folderPath.resolve(tlsTestCase.getTemporaryPcapFileName());
+        PcapCapturer.Builder builder = PcapCapturer.builder().withFilePath(filePath.toString());
 
         // set filter
         if (tlsConfig.getTestEndpointMode() == TestEndpointType.SERVER) {

@@ -12,7 +12,6 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
@@ -28,8 +27,14 @@ public class TlsPcapCapturingInvocationInterceptor implements InvocationIntercep
         AnvilTestConfig anvilConfig = AnvilContext.getInstance().getConfig();
         TlsTestConfig tlsConfig = TestContext.getInstance().getConfig();
         AnvilTestRun testRun = AnvilTestRun.forExtensionContext(extensionContext);
-        TlsTestCase tlsTestCase = WorkflowRunner.getTlsTestCaseFromExtensionContext(extensionContext);
-        Path path = Paths.get(anvilConfig.getOutputFolder(), "results", testRun.getTestId(), tlsTestCase.getTemporaryPcapFileName());
+        TlsTestCase tlsTestCase =
+                WorkflowRunner.getTlsTestCaseFromExtensionContext(extensionContext);
+        Path path =
+                Paths.get(
+                        anvilConfig.getOutputFolder(),
+                        "results",
+                        testRun.getTestId(),
+                        tlsTestCase.getTemporaryPcapFileName());
 
         // create capturer
         Files.createDirectories(path);

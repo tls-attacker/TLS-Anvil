@@ -11,6 +11,10 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 public class DtlsTestConditions {
 
     public ConditionEvaluationResult isServerTestOrClientSendsAppData() {
+        if (!TestContext.getInstance().getConfig().isUseDTLS()) {
+            // accept if TLS is used so we can use this method for limited DTLS tests
+            return ConditionEvaluationResult.enabled("Target can be evaluated");
+        }
         if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER
                 || ((ClientFeatureExtractionResult)
                                         TestContext.getInstance().getFeatureExtractionResult())
@@ -19,7 +23,7 @@ public class DtlsTestConditions {
             return ConditionEvaluationResult.enabled("Target can be evaluated");
         }
         return ConditionEvaluationResult.disabled(
-                "Target is a client and does not send application data after the handshake. Unable to evaluate if client detects the manipulated verify_data.");
+                "Target is a client and does not send application data after the handshake. Unable to evaluate if client detects the manipulated final message flight.");
     }
 
     public ConditionEvaluationResult serverSendsHelloVerifyRequest() {

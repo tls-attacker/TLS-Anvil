@@ -59,6 +59,10 @@ public class TlsTestCase extends AnvilTestCase {
 
     @Override
     public void finalizeAnvilTestCase() {
+        if (AnvilContext.getInstance().getConfig().isDisableTcpDump()) {
+            return;
+        }
+
         // filter the pcap files according to used ports and save them with their uuid
         AnvilTestConfig anvilConfig = AnvilContext.getInstance().getConfig();
         Path basePath =
@@ -67,13 +71,19 @@ public class TlsTestCase extends AnvilTestCase {
                         "results",
                         this.getAssociatedContainer().getTestId());
         Path temporaryPcapPath = basePath.resolve(this.getTemporaryPcapFileName());
+        if (!temporaryPcapPath.toFile().exists()) {
+            LOGGER.error("No temporary pcap file found for testcase.");
+            return;
+        }
         Path finalPcapPath = basePath.resolve(String.format("dump_%s.pcap", this.getUuid()));
 
         try (PcapHandle pcapHandle = Pcaps.openOffline(temporaryPcapPath.toString())) {
             // filter final used ports
-            pcapHandle.setFilter(
-                    String.format("tcp port %s", this.getSrcPort().toString()),
-                    BpfProgram.BpfCompileMode.OPTIMIZE);
+            if (this.getSrcPort() != null) {
+                pcapHandle.setFilter(
+                        String.format("tcp port %s", this.getSrcPort().toString()),
+                        BpfProgram.BpfCompileMode.OPTIMIZE);
+            }
             PcapDumper pcapDumper = pcapHandle.dumpOpen(finalPcapPath.toString());
             // dump filtered packets to new file
             while (true) {

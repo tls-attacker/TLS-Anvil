@@ -24,6 +24,11 @@ public class TlsPcapCapturingInvocationInterceptor implements InvocationIntercep
             final ExtensionContext extensionContext)
             throws Throwable {
 
+        if (AnvilContext.getInstance().getConfig().isDisableTcpDump()) {
+            invocation.proceed();
+            return;
+        }
+
         AnvilTestConfig anvilConfig = AnvilContext.getInstance().getConfig();
         TlsTestConfig tlsConfig = TestContext.getInstance().getConfig();
         AnvilTestRun testRun = AnvilTestRun.forExtensionContext(extensionContext);

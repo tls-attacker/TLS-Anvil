@@ -37,7 +37,6 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
     WorkflowRunnerResolver.class,
     TlsPcapCapturingInvocationInterceptor.class
 })
-// @ExtendWith(N_InvocationInterceptor.class)
 @ModelFromScope(modelType = "GENERIC")
 public abstract class TlsBaseTest extends CombinatorialAnvilTest {
     protected static final Logger LOGGER = LogManager.getLogger();

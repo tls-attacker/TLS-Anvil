@@ -68,8 +68,6 @@ public class WorkflowRunner {
     private Boolean untilLast = false;
     private Boolean autoHelloRetryRequest = true;
 
-    // private static Map<ExtensionContext, TlsTestCase> tlsTestCases = new HashMap<>();
-
     private static Map<ExtensionContext, WorkflowRunner> workflowRunners = new HashMap<>();
     private TlsTestCase tlsTestCase;
 
@@ -99,13 +97,10 @@ public class WorkflowRunner {
      */
     public TlsTestCase execute(WorkflowTrace trace, Config config) {
         // don't run if testrun is already aborted
-        // TlsTestCase tlsTestCase = new TlsTestCase(extensionContext, null, null);
-        // TlsTestCase tlsTestCase = WorkflowRunner.createTlsTestCase(extensionContext);
         if (context.isAborted()) {
             tlsTestCase.setState(new State());
             tlsTestCase.setParameterCombination(parameterCombination);
             return tlsTestCase;
-            // return new TlsTestCase(extensionContext, new State(), parameterCombination);
         }
 
         if (preparedConfig == null) {

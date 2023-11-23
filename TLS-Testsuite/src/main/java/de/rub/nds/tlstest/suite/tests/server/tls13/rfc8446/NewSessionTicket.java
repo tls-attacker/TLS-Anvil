@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
-import de.rub.nds.scanner.core.constants.TestResults;
+import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
@@ -32,7 +32,7 @@ public class NewSessionTicket extends Tls13Test {
 
     public ConditionEvaluationResult issuesTickets() {
         if (context.getFeatureExtractionResult()
-                        .getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_SESSION_TICKETS)
+                        .getResult(TlsAnalyzedProperty.ISSUES_TLS13_SESSION_TICKETS_AFTER_HANDSHAKE)
                 == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {

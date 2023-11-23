@@ -11,8 +11,8 @@ import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
-import de.rub.nds.scanner.core.constants.NumericResult;
-import de.rub.nds.scanner.core.constants.TestResults;
+import de.rub.nds.scanner.core.probe.result.IntegerResult;
+import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -46,14 +46,13 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
                         .getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_RSA_SIG)
                 == TestResults.TRUE) {
             MIN_RSA_SIG_KEY_LEN =
-                    ((NumericResult)
+                    ((IntegerResult)
                                     TestContext.getInstance()
                                             .getFeatureExtractionResult()
                                             .getResult(
                                                     TlsAnalyzedProperty
                                                             .SERVER_CERT_MIN_KEY_SIZE_RSA_SIG))
-                            .getValue()
-                            .intValue();
+                            .getValue();
         } else {
             MIN_RSA_SIG_KEY_LEN = 0;
         }
@@ -63,14 +62,13 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
                         .getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_RSA)
                 == TestResults.TRUE) {
             MIN_RSA_KEY_LEN =
-                    ((NumericResult)
+                    ((IntegerResult)
                                     TestContext.getInstance()
                                             .getFeatureExtractionResult()
                                             .getResult(
                                                     TlsAnalyzedProperty
                                                             .SERVER_CERT_MIN_KEY_SIZE_RSA))
-                            .getValue()
-                            .intValue();
+                            .getValue();
         } else {
             MIN_RSA_KEY_LEN = 0;
         }
@@ -80,14 +78,13 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
                         .getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_DSS)
                 == TestResults.TRUE) {
             MIN_DSS_KEY_LEN =
-                    ((NumericResult)
+                    ((IntegerResult)
                                     TestContext.getInstance()
                                             .getFeatureExtractionResult()
                                             .getResult(
                                                     TlsAnalyzedProperty
                                                             .SERVER_CERT_MIN_KEY_SIZE_DSS))
-                            .getValue()
-                            .intValue();
+                            .getValue();
         } else {
             MIN_DSS_KEY_LEN = 0;
         }

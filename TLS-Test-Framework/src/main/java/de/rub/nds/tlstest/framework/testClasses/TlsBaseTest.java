@@ -10,7 +10,7 @@ package de.rub.nds.tlstest.framework.testClasses;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.junit.CombinatorialAnvilTest;
 import de.rub.nds.anvilcore.model.DerivationScope;
-import de.rub.nds.scanner.core.constants.TestResults;
+import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;

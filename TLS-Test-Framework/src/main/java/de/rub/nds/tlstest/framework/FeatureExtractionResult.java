@@ -7,8 +7,9 @@
  */
 package de.rub.nds.tlstest.framework;
 
-import de.rub.nds.scanner.core.constants.CollectionResult;
-import de.rub.nds.scanner.core.constants.TestResult;
+import de.rub.nds.scanner.core.probe.AnalyzedProperty;
+import de.rub.nds.scanner.core.probe.result.CollectionResult;
+import de.rub.nds.scanner.core.probe.result.TestResult;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
@@ -20,12 +21,7 @@ import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
 import de.rub.nds.tlsscanner.core.report.TlsScanReport;
 import de.rub.nds.tlstest.framework.exceptions.FeatureExtractionFailedException;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class FeatureExtractionResult implements Serializable {
@@ -40,7 +36,7 @@ public abstract class FeatureExtractionResult implements Serializable {
     private Set<CompressionMethod> supportedCompressionMethods = new HashSet<>();
     private Set<NamedGroup> supportedTls13Groups = new HashSet<>();
 
-    private HashMap<String, TestResult> resultMap;
+    private Map<AnalyzedProperty, TestResult> resultMap;
 
     private long closedAfterAppDataDelta = ConnectionClosingUtils.NO_RESULT;
     private long closedAfterFinishedDelta = ConnectionClosingUtils.NO_RESULT;
@@ -164,11 +160,11 @@ public abstract class FeatureExtractionResult implements Serializable {
         this.supportedTls13Groups = supportedTls13Groups;
     }
 
-    public HashMap<String, TestResult> getResultMap() {
+    public Map<AnalyzedProperty, TestResult> getResultMap() {
         return resultMap;
     }
 
-    public void setResultMap(HashMap<String, TestResult> resultMap) {
+    public void setResultMap(Map<AnalyzedProperty, TestResult> resultMap) {
         this.resultMap = resultMap;
     }
 

@@ -1,9 +1,7 @@
 package de.rub.nds.tlstest.framework.execution;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.anvilcore.junit.extension.EndpointConditionExtension;
@@ -314,38 +312,10 @@ public class TestPreparator {
         ServerReport serverReport = scanner.scan();
         FeatureExtractionResult report =
                 ServerFeatureExtractionResult.fromServerScanReport(serverReport);
-        saveGuidelines(serverReport.getGuidelineReports());
         saveToCache(report);
 
         testContext.setFeatureExtractionResult(report);
         LOGGER.debug("TLS-Scanner finished!");
-    }
-
-    private void saveGuidelines(List<GuidelineReport> reports) {
-        List<JsonNode> guidelineList = new ArrayList<>();
-        ObjectMapper mapper = new ObjectMapper();
-        for (GuidelineReport report : reports) {
-            JsonNode jsonGuideline = mapper.valueToTree(report);
-            for (int i = 0; i < report.getAdhered().size(); i++) {
-                ObjectNode node = (ObjectNode) jsonGuideline.get("passed").get(i);
-                node.put("display", report.getAdhered().get(i).toString());
-            }
-            for (int i = 0; i < report.getViolated().size(); i++) {
-                ObjectNode node = (ObjectNode) jsonGuideline.get("failed").get(i);
-                node.put("display", report.getViolated().get(i).toString());
-            }
-            for (int i = 0; i < report.getFailedChecks().size(); i++) {
-                ObjectNode node = (ObjectNode) jsonGuideline.get("uncertain").get(i);
-                node.put("display", report.getFailedChecks().get(i).toString());
-            }
-            for (int i = 0; i < report.getConditionNotMet().size(); i++) {
-                ObjectNode node = (ObjectNode) jsonGuideline.get("skipped").get(i);
-                node.put("display", report.getConditionNotMet().get(i).toString());
-            }
-            guidelineList.add(jsonGuideline);
-        }
-
-        AnvilContext.getInstance().getMapper().saveExtraFileToPath(guidelineList, "guidelines");
     }
 
     /**
@@ -453,6 +423,12 @@ public class TestPreparator {
             clientTestPreparation();
         } else if (this.testConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
             serverTestPreparation();
+            ServerFeatureExtractionResult featureExtractionResult =
+                    (ServerFeatureExtractionResult) testContext.getFeatureExtractionResult();
+            AnvilContext.getInstance()
+                    .getMapper()
+                    .saveExtraFileToPath(
+                            featureExtractionResult.getGuidelineChecks(), "guidelines");
         } else throw new RuntimeException("Invalid TestEndpointMode");
 
         if (testContext.getFeatureExtractionResult() == null) {

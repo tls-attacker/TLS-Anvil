@@ -36,7 +36,7 @@ public class PSKKeyExchangeModesExtension extends TlsGenericTest {
 
     public ConditionEvaluationResult contentCanBeTested() {
         if (context.getFeatureExtractionResult()
-                        .getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_SESSION_TICKETS)
+                        .getResult(TlsAnalyzedProperty.ISSUES_TLS13_SESSION_TICKETS_AFTER_HANDSHAKE)
                 == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("The Extension content can be tested");
         }

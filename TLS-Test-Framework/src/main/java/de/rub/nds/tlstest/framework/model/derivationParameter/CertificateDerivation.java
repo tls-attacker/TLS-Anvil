@@ -52,8 +52,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
                                             .getResult(
                                                     TlsAnalyzedProperty
                                                             .SERVER_CERT_MIN_KEY_SIZE_RSA_SIG))
-                            .getValue()
-                            .intValue();
+                            .getValue();
         } else {
             MIN_RSA_SIG_KEY_LEN = 0;
         }
@@ -69,8 +68,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
                                             .getResult(
                                                     TlsAnalyzedProperty
                                                             .SERVER_CERT_MIN_KEY_SIZE_RSA))
-                            .getValue()
-                            .intValue();
+                            .getValue();
         } else {
             MIN_RSA_KEY_LEN = 0;
         }
@@ -86,8 +84,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
                                             .getResult(
                                                     TlsAnalyzedProperty
                                                             .SERVER_CERT_MIN_KEY_SIZE_DSS))
-                            .getValue()
-                            .intValue();
+                            .getValue();
         } else {
             MIN_DSS_KEY_LEN = 0;
         }

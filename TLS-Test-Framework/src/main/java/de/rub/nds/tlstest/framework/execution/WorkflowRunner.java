@@ -47,6 +47,8 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;
@@ -59,6 +61,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  */
 public class WorkflowRunner {
     private static final Logger LOGGER = LogManager.getLogger();
+
     private TestContext context = null;
     private ExtensionContext extensionContext = null;
 
@@ -74,9 +77,19 @@ public class WorkflowRunner {
     private Boolean autoHelloRetryRequest = true;
     private Boolean autoAdaptForDtls = true;
 
+    private static Map<ExtensionContext, WorkflowRunner> workflowRunners = new HashMap<>();
+    private TlsTestCase tlsTestCase;
+
     public WorkflowRunner(ExtensionContext extensionContext) {
         this.context = TestContext.getInstance();
         this.extensionContext = extensionContext;
+        WorkflowRunner.workflowRunners.put(extensionContext, this);
+        tlsTestCase = new TlsTestCase(extensionContext, null, parameterCombination);
+    }
+
+    public static TlsTestCase getTlsTestCaseFromExtensionContext(
+            ExtensionContext extensionContext) {
+        return workflowRunners.get(extensionContext).tlsTestCase;
     }
 
     public WorkflowRunner(ExtensionContext extensionContext, Config config) {
@@ -94,7 +107,9 @@ public class WorkflowRunner {
     public TlsTestCase execute(WorkflowTrace trace, Config config) {
         // don't run if testrun is already aborted
         if (context.isAborted()) {
-            return new TlsTestCase(extensionContext, new State(), parameterCombination);
+            tlsTestCase.setState(new State());
+            tlsTestCase.setParameterCombination(parameterCombination);
+            return tlsTestCase;
         }
 
         if (preparedConfig == null) {
@@ -126,8 +141,8 @@ public class WorkflowRunner {
 
         allowOptionalClientApplicationMessage(trace);
 
-        TlsTestCase tlsTestCase =
-                new TlsTestCase(extensionContext, new State(config, trace), parameterCombination);
+        tlsTestCase.setState(new State(config, trace));
+        tlsTestCase.setParameterCombination(parameterCombination);
 
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             StateExecutionTask task =

@@ -4,7 +4,7 @@
     <parent>
         <groupId>de.rub.nds.tls.anvil</groupId>
         <artifactId>tls-anvil</artifactId>
-        <version>1.2.4-SNAPSHOT</version>
+        <version>1.2.6-SNAPSHOT</version>
     </parent>
     <groupId>de.rub.nds.tls.anvil</groupId>
     <artifactId>tls-test-framework</artifactId>
@@ -87,6 +87,12 @@
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.pcap4j</groupId>
+            <artifactId>pcap4j-core</artifactId>
+            <version>1.8.2</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

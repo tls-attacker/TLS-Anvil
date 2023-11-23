@@ -32,7 +32,7 @@ public class NewSessionTicket extends Tls13Test {
 
     public ConditionEvaluationResult issuesTickets() {
         if (context.getFeatureExtractionResult()
-                        .getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_SESSION_TICKETS)
+                        .getResult(TlsAnalyzedProperty.ISSUES_TLS13_SESSION_TICKETS_AFTER_HANDSHAKE)
                 == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {

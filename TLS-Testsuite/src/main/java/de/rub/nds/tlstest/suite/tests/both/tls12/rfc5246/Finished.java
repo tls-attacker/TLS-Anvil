@@ -24,7 +24,6 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.util.DtlsTestConditions;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class Finished extends Tls12Test {
@@ -34,7 +33,6 @@ public class Finished extends Tls12Test {
     @IncludeParameter("PRF_BITMASK")
     // this test is applicable to DTLS but requires app data for client tests
     @MethodCondition(clazz = DtlsTestConditions.class, method = "isServerTestOrClientSendsAppData")
-    @Tag("testerino")
     public void verifyFinishedMessageCorrect(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);

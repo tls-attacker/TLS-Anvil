@@ -124,10 +124,9 @@ public class TestPreparator {
             fileName =
                     testConfig.getTestServerDelegate().getExtractedHost()
                             + "_"
-                            + testConfig.getTestServerDelegate().getExtractedPort()
-                            + ".ser";
+                            + testConfig.getTestServerDelegate().getExtractedPort();
         }
-
+        fileName = fileName + ".ser";
         File f = new File(fileName);
         if (f.exists() && !testConfig.getAnvilTestConfig().isIgnoreCache()) {
             try {
@@ -138,8 +137,12 @@ public class TestPreparator {
             } catch (InvalidClassException e) {
                 LOGGER.info("Cached SiteReport appears to be outdated");
             } catch (Exception e) {
-                LOGGER.error("Failed to load cached ScanReport");
+                LOGGER.error("Failed to load cached ScanReport {}", fileName, e);
             }
+        } else if (f.exists() && testConfig.getAnvilTestConfig().isIgnoreCache()) {
+            LOGGER.info("Ignoring cached ScanReport as configurated");
+        } else {
+            LOGGER.info("No matching ScanReport has been cached yet");
         }
 
         return null;

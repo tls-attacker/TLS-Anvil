@@ -8,6 +8,7 @@ import de.rub.nds.anvilcore.teststate.reporting.PcapCapturer;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.config.TlsTestConfig;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,24 +37,44 @@ public class TlsPcapCapturingInvocationInterceptor implements InvocationIntercep
                 WorkflowRunner.getTlsTestCaseFromExtensionContext(extensionContext);
         Path folderPath = Paths.get(anvilConfig.getOutputFolder(), "results", testRun.getTestId());
 
-        // create capturer
-        Files.createDirectories(folderPath);
-        Path filePath = folderPath.resolve(tlsTestCase.getTemporaryPcapFileName());
-        PcapCapturer.Builder builder = PcapCapturer.builder().withFilePath(filePath.toString());
+        PcapCapturer.Builder builder = createCapturer(folderPath, tlsTestCase);
 
-        // set filter
-        if (tlsConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
-            builder.withBpfExpression(
-                    String.format(
-                            "tcp port %s", tlsConfig.getTestServerDelegate().getExtractedPort()));
-        } else if (tlsConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
-            builder.withBpfExpression(
-                    String.format("tcp port %s", tlsConfig.getTestClientDelegate().getPort()));
-        }
+        setFilter(tlsConfig, builder);
 
         // start capturing - auto closes when test is done
         try (PcapCapturer pcapCapturer = builder.build()) {
             invocation.proceed();
         }
+    }
+
+    private PcapCapturer.Builder createCapturer(Path folderPath, TlsTestCase tlsTestCase)
+            throws IOException {
+        Files.createDirectories(folderPath);
+        Path filePath = folderPath.resolve(tlsTestCase.getTemporaryPcapFileName());
+        PcapCapturer.Builder builder = PcapCapturer.builder().withFilePath(filePath.toString());
+        return builder;
+    }
+
+    private void setFilter(TlsTestConfig tlsConfig, PcapCapturer.Builder builder) {
+        String transportProtocolPrefix = resolveTransportProtocolPrefix(tlsConfig);
+        if (tlsConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
+            builder.withBpfExpression(
+                    String.format(
+                            transportProtocolPrefix + " port %s",
+                            tlsConfig.getTestServerDelegate().getExtractedPort()));
+        } else if (tlsConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
+            builder.withBpfExpression(
+                    String.format(
+                            transportProtocolPrefix + " port %s",
+                            tlsConfig.getTestClientDelegate().getPort()));
+        }
+    }
+
+    public static String resolveTransportProtocolPrefix(TlsTestConfig tlsConfig) {
+        String transportProtocolPrefix = "tcp";
+        if (tlsConfig.isUseDTLS()) {
+            transportProtocolPrefix = "udp";
+        }
+        return transportProtocolPrefix;
     }
 }

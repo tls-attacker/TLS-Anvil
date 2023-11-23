@@ -13,11 +13,16 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
+import org.pcap4j.core.PcapNativeException;
 
 public class TlsPcapCapturingInvocationInterceptor implements InvocationInterceptor {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     public void interceptTestTemplateMethod(
             final Invocation<Void> invocation,
@@ -43,6 +48,10 @@ public class TlsPcapCapturingInvocationInterceptor implements InvocationIntercep
 
         // start capturing - auto closes when test is done
         try (PcapCapturer pcapCapturer = builder.build()) {
+            invocation.proceed();
+        } catch (PcapNativeException ex) {
+            LOGGER.error("Failed to start packet capture: {}", ex.getLocalizedMessage());
+            // continue invocation even if pcap can not be recorded
             invocation.proceed();
         }
     }

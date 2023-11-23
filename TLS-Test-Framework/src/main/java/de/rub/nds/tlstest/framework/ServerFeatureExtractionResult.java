@@ -1,5 +1,9 @@
 package de.rub.nds.tlstest.framework;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import de.rub.nds.scanner.core.guideline.GuidelineReport;
 import de.rub.nds.scanner.core.probe.result.NotApplicableResult;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
@@ -7,10 +11,7 @@ import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlsscanner.serverscanner.probe.namedgroup.NamedGroupWitness;
 import de.rub.nds.tlsscanner.serverscanner.report.ServerReport;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ServerFeatureExtractionResult extends FeatureExtractionResult {
 
@@ -20,6 +21,8 @@ public class ServerFeatureExtractionResult extends FeatureExtractionResult {
     private Set<SignatureAndHashAlgorithm> supportedSignatureAndHashAlgorithmsSke = new HashSet<>();
     private String configProfileIdentifier = "";
     private String configProfileIdentifierTls13 = "";
+
+    private List<JsonNode> guidelineChecks = new ArrayList<>();
 
     public ServerFeatureExtractionResult(String host, int port) {
         super(host, 4433);
@@ -52,7 +55,25 @@ public class ServerFeatureExtractionResult extends FeatureExtractionResult {
                 serverReport.getConfigProfileIdentifierTls13());
         extractionResult.getNegotiableExtensions().addAll(serverReport.getSupportedExtensions());
 
+        extractionResult.setGuidelineChecks(getGuidelines(serverReport.getGuidelineReports()));
+
         return extractionResult;
+    }
+
+    private static List<JsonNode> getGuidelines(List<GuidelineReport> reports) {
+        List<JsonNode> guidelineList = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+        for (GuidelineReport report : reports) {
+            // add an info node with extra information that the mapper would not pick up by itself
+            JsonNode jsonGuideline = mapper.valueToTree(report);
+            for (int i = 0; i < report.getResults().size(); i++) {
+                ObjectNode node = (ObjectNode) jsonGuideline.get("results").get(i);
+                node.put("info", report.getResults().get(i).toString());
+            }
+            guidelineList.add(jsonGuideline);
+        }
+
+        return guidelineList;
     }
 
     public String getConfigProfileIdentifier() {
@@ -108,5 +129,13 @@ public class ServerFeatureExtractionResult extends FeatureExtractionResult {
     public void setSupportedSignatureAndHashAlgorithmsSke(
             Set<SignatureAndHashAlgorithm> supportedSignatureAndHashAlgorithmsSke) {
         this.supportedSignatureAndHashAlgorithmsSke = supportedSignatureAndHashAlgorithmsSke;
+    }
+
+    public List<JsonNode> getGuidelineChecks() {
+        return guidelineChecks;
+    }
+
+    public void setGuidelineChecks(List<JsonNode> guidelineChecks) {
+        this.guidelineChecks = guidelineChecks;
     }
 }

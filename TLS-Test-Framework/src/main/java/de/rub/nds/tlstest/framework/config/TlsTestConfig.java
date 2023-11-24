@@ -387,18 +387,13 @@ public class TlsTestConfig extends TLSDelegateConfig {
         config.setChooserType(ChooserType.SMART_RECORD_SIZE);
 
         // Server test -> TLS-Attacker acts as Client
-        config.getDefaultClientConnection()
-                .setFirstTimeout(
-                        (getAnvilTestConfig().getParallelTestCases() + 1)
-                                * getAnvilTestConfig().getConnectionTimeout());
         config.getDefaultClientConnection().setTimeout(getAnvilTestConfig().getConnectionTimeout());
         config.getDefaultClientConnection().setConnectionTimeout(0);
 
         // Client test -> TLS-Attacker acts as Server
-        config.getDefaultServerConnection()
-                .setFirstTimeout(getAnvilTestConfig().getConnectionTimeout());
         config.getDefaultServerConnection().setTimeout(getAnvilTestConfig().getConnectionTimeout());
 
+        // close by default, will be overwritten for DTLS by WorkflowRunner
         config.setWorkflowExecutorShouldClose(true);
         config.setStealthMode(true);
         config.setRetryFailedClientTcpSocketInitialization(true);

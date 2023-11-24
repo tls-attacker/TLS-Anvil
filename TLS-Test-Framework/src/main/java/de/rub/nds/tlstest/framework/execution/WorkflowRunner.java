@@ -37,11 +37,15 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.WorkflowExecutorType;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
+import de.rub.nds.tlsattacker.transport.TransportHandler;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
+import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
 import de.rub.nds.tlsattacker.transport.udp.ServerUdpTransportHandler;
+import de.rub.nds.tlsattacker.transport.udp.UdpTransportHandler;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
@@ -119,6 +123,48 @@ public class WorkflowRunner {
             preparedConfig = config;
         }
 
+        adaptWorkflowTrace(trace, config);
+        tlsTestCase.setState(new State(config, trace));
+        tlsTestCase.setParameterCombination(parameterCombination);
+        StateExecutionTask task =
+                new StateExecutionTask(
+                        tlsTestCase.getState(), context.getStateExecutor().getReexecutions());
+        if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
+            prepareServerTask(task);
+
+        } else {
+            prepareClientTask(task);
+        }
+        context.getStateExecutor().bulkExecuteTasks(task);
+        postExecution();
+
+        return tlsTestCase;
+    }
+
+    public void postExecution() {
+        TransportHandler transportHandler =
+                tlsTestCase.getState().getTlsContext().getTransportHandler();
+        if (transportHandler instanceof UdpTransportHandler) {
+            UdpTransportHandler udpTransportHandler = (UdpTransportHandler) transportHandler;
+            tlsTestCase.setDstPort(udpTransportHandler.getDstPort());
+            tlsTestCase.setSrcPort(udpTransportHandler.getSrcPort());
+        } else {
+            tlsTestCase.setDstPort(((TcpTransportHandler) transportHandler).getDstPort());
+            tlsTestCase.setSrcPort(((TcpTransportHandler) transportHandler).getSrcPort());
+        }
+        if (transportHandler instanceof UdpTransportHandler) {
+            try {
+                transportHandler.closeConnection();
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    public void adaptWorkflowTrace(WorkflowTrace trace, Config config) {
+        if (config.getWorkflowExecutorType() == WorkflowExecutorType.DTLS) {
+            config.setWorkflowExecutorShouldClose(false);
+        }
+
         if (shouldAdaptForDtls(trace, config)) {
             adaptForDtls(trace, config, context.getConfig().getTestEndpointMode());
         }
@@ -140,79 +186,67 @@ public class WorkflowRunner {
         }
 
         allowOptionalClientApplicationMessage(trace);
+    }
 
-        tlsTestCase.setState(new State(config, trace));
-        tlsTestCase.setParameterCombination(parameterCombination);
-
-        if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
-            StateExecutionTask task =
-                    new StateExecutionTask(
-                            tlsTestCase.getState(), context.getStateExecutor().getReexecutions());
-            TestContext.getInstance().increaseServerHandshakesSinceRestart();
-            if (TestContext.getInstance().getServerHandshakesSinceRestart()
-                            == TestContext.getInstance()
+    public void prepareServerTask(StateExecutionTask task) {
+        TestContext.getInstance().increaseServerHandshakesSinceRestart();
+        if (TestContext.getInstance().getServerHandshakesSinceRestart()
+                        == TestContext.getInstance()
+                                .getConfig()
+                                .getAnvilTestConfig()
+                                .getRestartServerAfter()
+                && TestContext.getInstance().getConfig().getTimeoutActionScript() != null) {
+            LOGGER.info("Scheduling server restart with task");
+            task.setBeforeTransportPreInitCallback(
+                    (State state) -> {
+                        try {
+                            return TestContext.getInstance()
                                     .getConfig()
-                                    .getAnvilTestConfig()
-                                    .getRestartServerAfter()
-                    && TestContext.getInstance().getConfig().getTimeoutActionScript() != null) {
-                LOGGER.info("Scheduling server restart with task");
-                task.setBeforeTransportPreInitCallback(
-                        (State state) -> {
-                            try {
-                                return TestContext.getInstance()
-                                        .getConfig()
-                                        .getTimeoutActionScript()
-                                        .call();
-                            } catch (Exception ex) {
-                                LOGGER.error(ex);
-                                return 1;
-                            }
-                        });
-                TestContext.getInstance().resetServerHandshakesSinceRestart();
-            }
-            context.getStateExecutor().bulkExecuteTasks(task);
-        } else {
-            try {
-                if (context.getConfig().isUseDTLS()) {
-                    tlsTestCase
-                            .getState()
-                            .getTlsContext()
-                            .setTransportHandler(
-                                    new ServerUdpTransportHandler(
-                                            context.getConfig()
-                                                    .getAnvilTestConfig()
-                                                    .getConnectionTimeout(),
-                                            context.getConfig()
-                                                    .getAnvilTestConfig()
-                                                    .getConnectionTimeout(),
-                                            context.getConfig().getTestClientDelegate().getPort()));
-                } else {
-                    tlsTestCase
-                            .getState()
-                            .getTlsContext()
-                            .setTransportHandler(
-                                    new ServerTcpTransportHandler(
-                                            context.getConfig()
-                                                    .getAnvilTestConfig()
-                                                    .getConnectionTimeout(),
-                                            context.getConfig()
-                                                    .getAnvilTestConfig()
-                                                    .getConnectionTimeout(),
-                                            context.getConfig()
-                                                    .getTestClientDelegate()
-                                                    .getServerSocket()));
-                }
-                StateExecutionTask task = new StateExecutionTask(tlsTestCase.getState(), 2);
-
-                task.setBeforeTransportInitCallback(
-                        context.getConfig().getTestClientDelegate().getTriggerScript());
-                context.getStateExecutor().bulkExecuteTasks(task);
-            } catch (IOException ex) {
-                throw new RuntimeException("Failed to set TransportHandler");
-            }
+                                    .getTimeoutActionScript()
+                                    .call();
+                        } catch (Exception ex) {
+                            LOGGER.error(ex);
+                            return 1;
+                        }
+                    });
+            TestContext.getInstance().resetServerHandshakesSinceRestart();
         }
+    }
 
-        return tlsTestCase;
+    public void prepareClientTask(StateExecutionTask task) throws RuntimeException {
+        try {
+            if (context.getConfig().isUseDTLS()) {
+                setServerUdpTransportHandler();
+            } else {
+                setServerTcpTransportHandler();
+            }
+            task.setBeforeTransportInitCallback(
+                    context.getConfig().getTestClientDelegate().getTriggerScript());
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to set TransportHandler");
+        }
+    }
+
+    public void setServerTcpTransportHandler() throws IOException {
+        tlsTestCase
+                .getState()
+                .getTlsContext()
+                .setTransportHandler(
+                        new ServerTcpTransportHandler(
+                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                context.getConfig().getTestClientDelegate().getServerSocket()));
+    }
+
+    public void setServerUdpTransportHandler() {
+        tlsTestCase
+                .getState()
+                .getTlsContext()
+                .setTransportHandler(
+                        new ServerUdpTransportHandler(
+                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                context.getConfig().getTestClientDelegate().getPort()));
     }
 
     /**

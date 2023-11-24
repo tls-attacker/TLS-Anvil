@@ -14,8 +14,6 @@ import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
-import de.rub.nds.tlsattacker.transport.udp.UdpTransportHandler;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import jakarta.xml.bind.DatatypeConverter;
@@ -40,6 +38,8 @@ import org.pcap4j.packet.Packet;
 public class TlsTestCase extends AnvilTestCase {
     private static final Logger LOGGER = LogManager.getLogger();
     private State state;
+    private Integer srcPort = null;
+    private Integer dstPort = null;
 
     private TlsTestCase() {}
 
@@ -120,7 +120,7 @@ public class TlsTestCase extends AnvilTestCase {
 
     private void setPacketFilter(final PcapHandle pcapHandle)
             throws PcapNativeException, NotOpenException {
-        if (this.getSrcPort() != null) {
+        if (this.getSrcPort() != null && this.getSrcPort() != -1) {
             pcapHandle.setFilter(
                     String.format(
                             TlsPcapCapturingInvocationInterceptor.resolveTransportProtocolPrefix(
@@ -128,6 +128,9 @@ public class TlsTestCase extends AnvilTestCase {
                                     + " port %s",
                             this.getSrcPort().toString()),
                     BpfProgram.BpfCompileMode.OPTIMIZE);
+        } else if (this.getSrcPort() == -1) {
+            LOGGER.info(
+                    "Unable to fetch port from DatagramSocket for packet filter as socket is in closed state");
         }
     }
 
@@ -212,27 +215,19 @@ public class TlsTestCase extends AnvilTestCase {
 
     @JsonProperty("SrcPort")
     public Integer getSrcPort() {
-        if (state == null) return null;
-        else if (state.getTlsContext().getTransportHandler() instanceof TcpTransportHandler) {
-            return ((TcpTransportHandler) state.getTlsContext().getTransportHandler()).getSrcPort();
-        } else if (state.getTlsContext().getTransportHandler() instanceof UdpTransportHandler) {
-            return ((UdpTransportHandler) state.getTlsContext().getTransportHandler()).getSrcPort();
-        } else {
-            throw new UnsupportedOperationException(
-                    "The transport protocol used is not yet implemented.");
-        }
+        return srcPort;
     }
 
     @JsonProperty("DstPort")
     public Integer getDstPort() {
-        if (state == null) return null;
-        else if (state.getTlsContext().getTransportHandler() instanceof TcpTransportHandler) {
-            return ((TcpTransportHandler) state.getTlsContext().getTransportHandler()).getDstPort();
-        } else if (state.getTlsContext().getTransportHandler() instanceof UdpTransportHandler) {
-            return ((UdpTransportHandler) state.getTlsContext().getTransportHandler()).getDstPort();
-        } else {
-            throw new UnsupportedOperationException(
-                    "The transport protocol used is not yet implemented.");
-        }
+        return dstPort;
+    }
+
+    public void setSrcPort(Integer srcPort) {
+        this.srcPort = srcPort;
+    }
+
+    public void setDstPort(Integer dstPort) {
+        this.dstPort = dstPort;
     }
 }

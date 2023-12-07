@@ -21,5 +21,5 @@ import java.lang.annotation.Target;
 public @interface TlsVersion {
 
     @JsonProperty("TlsVersion")
-    ProtocolVersion supported();
+    ProtocolVersion[] supported();
 }

@@ -99,7 +99,9 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
         derivationTypes.add(TlsParameterType.CIPHER_SUITE);
         derivationTypes.add(TlsParameterType.NAMED_GROUP);
         derivationTypes.add(TlsParameterType.RECORD_LENGTH);
-        derivationTypes.add(TlsParameterType.TCP_FRAGMENTATION);
+        if (!TestContext.getInstance().getConfig().isUseDTLS()) {
+            derivationTypes.add(TlsParameterType.TCP_FRAGMENTATION);
+        }
 
         if (ConstraintHelper.isTls13Test(derivationScope)) {
             derivationTypes.add(TlsParameterType.INCLUDE_CHANGE_CIPHER_SPEC);
@@ -180,6 +182,9 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
                     .containsExtension(ExtensionType.EXTENDED_MASTER_SECRET)) {
                 derivationTypes.add(TlsParameterType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
             }
+        }
+        if (TestContext.getInstance().getConfig().isUseDTLS()) {
+            derivationTypes.add(TlsParameterType.COOKIE_EXCHANGE);
         }
         return derivationTypes;
     }

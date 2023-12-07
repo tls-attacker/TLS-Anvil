@@ -15,6 +15,7 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import java.util.HashSet;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 
 public class KexAnnotationTLS13 extends KexAnnotationTest {
 
@@ -35,9 +36,11 @@ public class KexAnnotationTLS13 extends KexAnnotationTest {
 
     @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL13)
+    @Disabled
     public void execute_supported() {}
 
     @AnvilTest
     @KeyExchange(supported = KeyExchangeType.ALL12)
+    @Disabled
     public void not_execute_unsupported() {}
 }

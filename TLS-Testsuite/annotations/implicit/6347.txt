@@ -1,0 +1,1 @@
+The receiver packet counter for this session MUST be initialized to zero when the session is established.

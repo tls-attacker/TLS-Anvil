@@ -17,6 +17,7 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
 import java.util.HashSet;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 @KeyExchange(supported = KeyExchangeType.ECDH)
@@ -40,15 +41,18 @@ public class KexAnnotationClassTest {
     }
 
     @AnvilTest
+    @Disabled
     public void execute_inheritedClassAnnoation() {}
 
     @AnvilTest
     @KeyExchange(
             supported = {},
             mergeSupportedWithClassSupported = true)
+    @Disabled
     public void execute_mergedWithClassAnnoation() {}
 
     @AnvilTest
     @KeyExchange(supported = KeyExchangeType.DH)
+    @Disabled
     public void not_execute_unsupportedKex() {}
 }

@@ -12,9 +12,10 @@ import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.anvilcore.context.AnvilTestConfig;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.anvilcore.teststate.TestResult;
+import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
 import jakarta.xml.bind.DatatypeConverter;
 import java.io.EOFException;
@@ -38,6 +39,8 @@ import org.pcap4j.packet.Packet;
 public class TlsTestCase extends AnvilTestCase {
     private static final Logger LOGGER = LogManager.getLogger();
     private State state;
+    private Integer srcPort = null;
+    private Integer dstPort = null;
 
     private TlsTestCase() {}
 
@@ -59,12 +62,15 @@ public class TlsTestCase extends AnvilTestCase {
 
     @Override
     public void finalizeAnvilTestCase() {
-        if (AnvilContext.getInstance().getConfig().isDisableTcpDump()) {
+        finalizePacketCapture();
+    }
+
+    public void finalizePacketCapture() {
+        AnvilTestConfig anvilConfig = AnvilContext.getInstance().getConfig();
+        if (anvilConfig.isDisableTcpDump()) {
             return;
         }
-
         // filter the pcap files according to used ports and save them with their uuid
-        AnvilTestConfig anvilConfig = AnvilContext.getInstance().getConfig();
         Path basePath =
                 Paths.get(
                         anvilConfig.getOutputFolder(),
@@ -76,40 +82,72 @@ public class TlsTestCase extends AnvilTestCase {
             return;
         }
         Path finalPcapPath = basePath.resolve(String.format("dump_%s.pcap", this.getUuid()));
-
         try (PcapHandle pcapHandle = Pcaps.openOffline(temporaryPcapPath.toString())) {
-            // filter final used ports
-            if (this.getSrcPort() != null) {
-                pcapHandle.setFilter(
-                        String.format("tcp port %s", this.getSrcPort().toString()),
-                        BpfProgram.BpfCompileMode.OPTIMIZE);
-            }
-            PcapDumper pcapDumper = pcapHandle.dumpOpen(finalPcapPath.toString());
-            // dump filtered packets to new file
-            while (true) {
-                try {
-                    Packet p = pcapHandle.getNextPacketEx();
-                    if (p != null) {
-                        pcapDumper.dump(p, pcapHandle.getTimestamp());
-                    }
-                } catch (EOFException e) {
-                    // break on end of file
-                    break;
-                } catch (TimeoutException e) {
-                    LOGGER.error("Error during filtering of pcap files: ", e);
-                }
-            }
-            pcapDumper.close();
+            setPacketFilter(pcapHandle);
+            dumpFilteredPacketsToFile(pcapHandle, finalPcapPath);
         } catch (PcapNativeException | NotOpenException e) {
             LOGGER.error("Error filtering pcap dump: ", e);
         }
+        cleanupTemporaryPacketFiles(temporaryPcapPath);
+        return;
+    }
 
-        // delete temporary file afterwards
+    private void cleanupTemporaryPacketFiles(Path temporaryPcapPath) {
         try {
             Files.delete(temporaryPcapPath);
         } catch (IOException e) {
             LOGGER.error("Error deleting temporary pcap dump file: ", e);
         }
+    }
+
+    private void dumpFilteredPacketsToFile(final PcapHandle pcapHandle, Path finalPcapPath)
+            throws NotOpenException, PcapNativeException {
+        PcapDumper pcapDumper = pcapHandle.dumpOpen(finalPcapPath.toString());
+        while (true) {
+            try {
+                Packet p = pcapHandle.getNextPacketEx();
+                if (p != null) {
+                    pcapDumper.dump(p, pcapHandle.getTimestamp());
+                }
+            } catch (EOFException e) {
+                // break on end of file
+                break;
+            } catch (TimeoutException e) {
+                LOGGER.error("Error during filtering of pcap files: ", e);
+            }
+        }
+        pcapDumper.close();
+    }
+
+    private void setPacketFilter(final PcapHandle pcapHandle)
+            throws PcapNativeException, NotOpenException {
+        String relevantPort = resolvePort();
+        if (relevantPort != null) {
+            pcapHandle.setFilter(
+                    String.format(
+                            TlsPcapCapturingInvocationInterceptor.resolveTransportProtocolPrefix(
+                                            TestContext.getInstance().getConfig())
+                                    + " port %s",
+                            relevantPort),
+                    BpfProgram.BpfCompileMode.OPTIMIZE);
+        } else if (this.getSrcPort() == -1) {
+            LOGGER.info(
+                    "Unable to fetch port from DatagramSocket for packet filter as socket is in closed state");
+        }
+    }
+
+    private String resolvePort() {
+        String relevantPort = null;
+        if (state.getContext().getConfig().getDefaultRunningMode() == RunningModeType.CLIENT
+                && this.getSrcPort() != null
+                && this.getSrcPort() != -1) {
+            relevantPort = this.getSrcPort().toString();
+        } else if (state.getContext().getConfig().getDefaultRunningMode() == RunningModeType.SERVER
+                && this.getDstPort() != null
+                && this.getDstPort() != -1) {
+            relevantPort = this.getDstPort().toString();
+        }
+        return relevantPort;
     }
 
     public State getState() {
@@ -193,13 +231,19 @@ public class TlsTestCase extends AnvilTestCase {
 
     @JsonProperty("SrcPort")
     public Integer getSrcPort() {
-        if (state == null) return null;
-        return ((TcpTransportHandler) state.getTlsContext().getTransportHandler()).getSrcPort();
+        return srcPort;
     }
 
     @JsonProperty("DstPort")
     public Integer getDstPort() {
-        if (state == null) return null;
-        return ((TcpTransportHandler) state.getTlsContext().getTransportHandler()).getDstPort();
+        return dstPort;
+    }
+
+    public void setSrcPort(Integer srcPort) {
+        this.srcPort = srcPort;
+    }
+
+    public void setDstPort(Integer dstPort) {
+        this.dstPort = dstPort;
     }
 }

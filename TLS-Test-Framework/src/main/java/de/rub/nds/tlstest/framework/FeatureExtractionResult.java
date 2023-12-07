@@ -185,7 +185,7 @@ public abstract class FeatureExtractionResult implements Serializable {
     }
 
     public TestResult getResult(TlsAnalyzedProperty property) {
-        return resultMap.get(property.name());
+        return resultMap.get(property);
     }
 
     public abstract Set<SignatureAndHashAlgorithm> getSignatureAndHashAlgorithmsForDerivation();

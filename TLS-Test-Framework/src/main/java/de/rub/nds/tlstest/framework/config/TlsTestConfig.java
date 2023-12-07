@@ -21,6 +21,7 @@ import de.rub.nds.anvilcore.context.AnvilTestConfig;
 import de.rub.nds.scanner.core.probe.result.CollectionResult;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
+import de.rub.nds.tlsattacker.core.config.delegate.Delegate;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
 import de.rub.nds.tlsattacker.core.constants.ChooserType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -28,6 +29,9 @@ import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.WorkflowExecutorType;
+import de.rub.nds.tlsattacker.transport.TransportHandlerType;
+import de.rub.nds.tlsscanner.core.config.delegate.DtlsDelegate;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlsscanner.core.probe.result.VersionSuiteListPair;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
@@ -89,6 +93,9 @@ public class TlsTestConfig extends TLSDelegateConfig {
                     "Path to a TLS-Anvil config file. Can be used instead of command-line-arguments.")
     private String tlsAnvilConfig;
 
+    @Parameter(names = "-dtls", description = "Set DTLS as default for the test-suite.")
+    private boolean useDTLS = false;
+
     // we might want to turn these into CLI parameters in the future
     private boolean expectTls13Alerts = false;
     private boolean enforceSenderRestrictions = false;
@@ -99,6 +106,10 @@ public class TlsTestConfig extends TLSDelegateConfig {
         this.testClientDelegate = new TestClientDelegate();
         this.testExtractorDelegate = new TestExtractorDelegate();
         this.workerDelegate = new WorkerDelegate();
+        if (isUseDTLS()) {
+            testClientDelegate.setUseUDP(true);
+            cachedConfig.setAddRetransmissionsToWorkflowTraceInDtls(true);
+        }
     }
 
     /**
@@ -289,10 +300,18 @@ public class TlsTestConfig extends TLSDelegateConfig {
                     }
                     config.setAddRenegotiationInfoExtension(checkRenegotiationInfoOffer());
                 } else {
-                    Optional<VersionSuiteListPair> suitePair =
-                            report.getVersionSuitePairs().stream()
-                                    .filter(i -> i.getVersion() == ProtocolVersion.TLS12)
-                                    .findFirst();
+                    Optional<VersionSuiteListPair> suitePair;
+                    if (useDTLS) {
+                        suitePair =
+                                report.getVersionSuitePairs().stream()
+                                        .filter(i -> i.getVersion() == ProtocolVersion.DTLS12)
+                                        .findFirst();
+                    } else {
+                        suitePair =
+                                report.getVersionSuitePairs().stream()
+                                        .filter(i -> i.getVersion() == ProtocolVersion.TLS12)
+                                        .findFirst();
+                    }
                     if (suitePair.isPresent()
                             && !suitePair
                                     .get()
@@ -332,6 +351,23 @@ public class TlsTestConfig extends TLSDelegateConfig {
                     }
                 }
             }
+            if (useDTLS) {
+                boolean exists = false;
+                for (Delegate i : getDelegateList()) {
+                    if (i instanceof DtlsDelegate) {
+                        exists = true;
+                        i.applyDelegate(config);
+                    }
+                }
+                if (!exists) {
+                    DtlsDelegate dtlsDelegate = new DtlsDelegate();
+                    dtlsDelegate.setDTLS(true);
+                    dtlsDelegate.applyDelegate(config);
+                    addDelegate(dtlsDelegate);
+                }
+                config.setWorkflowExecutorType(WorkflowExecutorType.DTLS);
+                config.setSupportedVersions(ProtocolVersion.DTLS12);
+            }
             return config;
         }
 
@@ -351,24 +387,31 @@ public class TlsTestConfig extends TLSDelegateConfig {
         config.setChooserType(ChooserType.SMART_RECORD_SIZE);
 
         // Server test -> TLS-Attacker acts as Client
-        config.getDefaultClientConnection()
-                .setFirstTimeout(
-                        (getAnvilTestConfig().getParallelTestCases() + 1)
-                                * getAnvilTestConfig().getConnectionTimeout());
         config.getDefaultClientConnection().setTimeout(getAnvilTestConfig().getConnectionTimeout());
         config.getDefaultClientConnection().setConnectionTimeout(0);
 
         // Client test -> TLS-Attacker acts as Server
-        config.getDefaultServerConnection()
-                .setFirstTimeout(getAnvilTestConfig().getConnectionTimeout());
         config.getDefaultServerConnection().setTimeout(getAnvilTestConfig().getConnectionTimeout());
 
+        // close by default, will be overwritten for DTLS by WorkflowRunner
         config.setWorkflowExecutorShouldClose(true);
         config.setStealthMode(true);
         config.setRetryFailedClientTcpSocketInitialization(true);
         config.setReceiveFinalTcpSocketStateWithTimeout(true);
         config.setPreferredCertRsaKeySize(4096);
         config.setPreferredCertDssKeySize(3072);
+
+        if (useDTLS) {
+            config.setSupportedVersions(ProtocolVersion.DTLS12);
+            config.setHighestProtocolVersion(ProtocolVersion.DTLS12);
+            config.setDefaultSelectedProtocolVersion(ProtocolVersion.DTLS12);
+            config.getDefaultClientConnection().setTransportHandlerType(TransportHandlerType.UDP);
+            config.getDefaultServerConnection().setTransportHandlerType(TransportHandlerType.UDP);
+            config.setWorkflowExecutorType(WorkflowExecutorType.DTLS);
+            config.setFinishWithCloseNotify(true);
+            config.setIgnoreRetransmittedCssInDtls(true);
+            config.setAddRetransmissionsToWorkflowTraceInDtls(true);
+        }
 
         config.setFiltersKeepUserSettings(Boolean.FALSE);
         config.setDefaultProposedAlpnProtocols(
@@ -541,5 +584,13 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
     public void setTestServerDelegate(TestServerDelegate testServerDelegate) {
         this.testServerDelegate = testServerDelegate;
+    }
+
+    public boolean isUseDTLS() {
+        return useDTLS;
+    }
+
+    public void setUseDTLS(boolean useDTLS) {
+        this.useDTLS = useDTLS;
     }
 }

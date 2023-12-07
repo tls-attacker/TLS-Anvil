@@ -14,11 +14,10 @@ import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import org.junit.jupiter.api.Tag;
 
-// allow TLS 1.2 tests for DTLS 1.2 by default, restrict on method/class level if necessary
-@TlsVersion(supported = {ProtocolVersion.TLS12, ProtocolVersion.DTLS12})
+@TlsVersion(supported = ProtocolVersion.DTLS12)
 @KeyExchange(supported = KeyExchangeType.ALL12)
-@Tag("tls12")
-public class Tls12Test extends TlsBaseTest {
+@Tag("dtls12")
+public class Dtls12Test extends TlsBaseTest {
     @Override
     public Config getConfig() {
         Config baseConfig = context.getConfig().createConfig();

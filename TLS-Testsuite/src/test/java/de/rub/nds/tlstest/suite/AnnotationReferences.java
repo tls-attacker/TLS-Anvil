@@ -1,8 +1,10 @@
 package de.rub.nds.tlstest.suite;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import de.rub.nds.anvilcore.annotation.*;
+import de.rub.nds.anvilcore.junit.extension.MethodConditionExtension;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import java.lang.reflect.Method;
@@ -65,5 +67,18 @@ public class AnnotationReferences {
                     Arrays.asList(method.getAnnotation(ManualConfig.class).identifiers()));
         }
         return annotationIdentifiers;
+    }
+
+    @Test
+    public void referencesMatchMethodConditions() {
+        Reflections reflections =
+                new Reflections("de.rub.nds.tlstest", new MethodAnnotationsScanner());
+        Set<Method> testMethods = reflections.getMethodsAnnotatedWith(MethodCondition.class);
+        for (Method method : testMethods) {
+            Class<?> methodClass = method.getDeclaringClass();
+            MethodCondition methodCondition = method.getAnnotation(MethodCondition.class);
+            assertNotNull(
+                    MethodConditionExtension.getMethodForAnnotation(methodCondition, methodClass));
+        }
     }
 }

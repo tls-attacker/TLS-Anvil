@@ -31,30 +31,45 @@ public class TlsVersionCondition extends BaseCondition {
             return ConditionEvaluationResult.enabled("Class annotations are not relevant");
         }
 
-        Method testM = extensionContext.getRequiredTestMethod();
-        Class<?> testC = extensionContext.getRequiredTestClass();
+        Method testMethod = extensionContext.getRequiredTestMethod();
+        Class<?> testClass = extensionContext.getRequiredTestClass();
 
         TestContext context = TestContext.getInstance();
         FeatureExtractionResult report = context.getFeatureExtractionResult();
         Set<ProtocolVersion> protocolVersionList = report.getSupportedVersions();
-        ProtocolVersion testSupportedVersion;
+        ProtocolVersion[] testSupportedVersions = getSupportedTestVersions(testMethod, testClass);
 
-        if (testM.isAnnotationPresent(TlsVersion.class)) {
-            testSupportedVersion = testM.getAnnotation(TlsVersion.class).supported();
-        } else if (testC.isAnnotationPresent(TlsVersion.class)) {
-            testSupportedVersion = testC.getAnnotation(TlsVersion.class).supported();
-        } else {
+        if (testSupportedVersions.length == 0) {
             LOGGER.error(
                     "No TlsVersion annotation available. Use Tls12Test or Tls13Test class as superclass for your test class or annotate the test method/class with the TlsVersion annotation.");
             return ConditionEvaluationResult.disabled("No TlsVersion annotation present");
-        }
-
-        if (protocolVersionList.contains(testSupportedVersion)) {
+        } else if (versionsMatch(protocolVersionList, testSupportedVersions)) {
             return ConditionEvaluationResult.enabled(
                     "ProtocolVersion of the test is supported by the target");
         }
 
         return ConditionEvaluationResult.disabled(
                 "ProtocolVersion of the test is not supported by the target");
+    }
+
+    public static boolean versionsMatch(
+            Set<ProtocolVersion> supportedVersions, ProtocolVersion[] testVersions) {
+        for (ProtocolVersion supportedVersion : testVersions) {
+            if (supportedVersions.contains(supportedVersion)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static ProtocolVersion[] getSupportedTestVersions(
+            Method testMethod, Class<?> testClass) {
+        if (testMethod.isAnnotationPresent(TlsVersion.class)) {
+            return testMethod.getAnnotation(TlsVersion.class).supported();
+        } else if (testClass.isAnnotationPresent(TlsVersion.class)) {
+            return testClass.getAnnotation(TlsVersion.class).supported();
+        } else {
+            return new ProtocolVersion[0];
+        }
     }
 }

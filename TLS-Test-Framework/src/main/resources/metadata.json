@@ -1,0 +1,14 @@
+{
+  "TST-1234567890": {
+    "description": "Description for a unit test",
+    "severityLevels": {
+      "SomeSeverity": 1,
+      "AnotherSeverity": 2,
+      "ThirdSeverity": 3
+    },
+    "rfc": null,
+    "tags": [
+      "test"
+    ]
+  }
+}

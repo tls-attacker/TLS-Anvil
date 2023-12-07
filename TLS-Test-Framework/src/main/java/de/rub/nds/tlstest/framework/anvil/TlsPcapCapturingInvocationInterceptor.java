@@ -43,6 +43,7 @@ public class TlsPcapCapturingInvocationInterceptor implements InvocationIntercep
         Path folderPath = Paths.get(anvilConfig.getOutputFolder(), "results", testRun.getTestId());
 
         PcapCapturer.Builder builder = createCapturer(folderPath, tlsTestCase);
+        builder.withTestCase(tlsTestCase);
 
         setFilter(tlsConfig, builder);
 

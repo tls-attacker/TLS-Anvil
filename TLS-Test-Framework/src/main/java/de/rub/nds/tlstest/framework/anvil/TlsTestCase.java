@@ -12,6 +12,7 @@ import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.anvilcore.context.AnvilTestConfig;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.anvilcore.teststate.TestResult;
+import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlstest.framework.TestContext;
@@ -120,18 +121,33 @@ public class TlsTestCase extends AnvilTestCase {
 
     private void setPacketFilter(final PcapHandle pcapHandle)
             throws PcapNativeException, NotOpenException {
-        if (this.getSrcPort() != null && this.getSrcPort() != -1) {
+        String relevantPort = resolvePort();
+        if (relevantPort != null) {
             pcapHandle.setFilter(
                     String.format(
                             TlsPcapCapturingInvocationInterceptor.resolveTransportProtocolPrefix(
                                             TestContext.getInstance().getConfig())
                                     + " port %s",
-                            this.getSrcPort().toString()),
+                            relevantPort),
                     BpfProgram.BpfCompileMode.OPTIMIZE);
         } else if (this.getSrcPort() == -1) {
             LOGGER.info(
                     "Unable to fetch port from DatagramSocket for packet filter as socket is in closed state");
         }
+    }
+
+    private String resolvePort() {
+        String relevantPort = null;
+        if (state.getContext().getConfig().getDefaultRunningMode() == RunningModeType.CLIENT
+                && this.getSrcPort() != null
+                && this.getSrcPort() != -1) {
+            relevantPort = this.getSrcPort().toString();
+        } else if (state.getContext().getConfig().getDefaultRunningMode() == RunningModeType.SERVER
+                && this.getDstPort() != null
+                && this.getDstPort() != -1) {
+            relevantPort = this.getDstPort().toString();
+        }
+        return relevantPort;
     }
 
     public State getState() {

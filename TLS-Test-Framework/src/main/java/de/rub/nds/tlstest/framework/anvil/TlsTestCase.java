@@ -14,9 +14,6 @@ import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
-import jakarta.xml.bind.DatatypeConverter;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -81,25 +78,6 @@ public class TlsTestCase extends AnvilTestCase {
             return state.getWorkflowTrace();
         }
         return null;
-    }
-
-    @JsonProperty("uuid")
-    public String getUuid() {
-        StringBuilder toHash = new StringBuilder();
-        toHash.append(this.getAdditionalTestInformation());
-        if (getParameterCombination() != null) {
-            toHash.append(this.getParameterCombination().toString());
-        }
-        toHash.append(getAssociatedContainer().getTestClass().getName());
-        toHash.append(getAssociatedContainer().getTestMethod().getName());
-
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(toHash.toString().getBytes(StandardCharsets.UTF_8));
-            return DatatypeConverter.printHexBinary(hash);
-        } catch (Exception e) {
-            throw new RuntimeException("SHA-256 not possible...");
-        }
     }
 
     @JsonProperty("StartTimestamp")

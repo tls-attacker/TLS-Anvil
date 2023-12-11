@@ -275,9 +275,9 @@ public class TlsTestConfig extends TLSDelegateConfig {
     private String resolvePcapFilter() {
         StringBuilder pcapFilterBuilder = new StringBuilder();
         if (isUseDTLS()) {
-            pcapFilterBuilder.append("tcp");
-        } else {
             pcapFilterBuilder.append("udp");
+        } else {
+            pcapFilterBuilder.append("tcp");
         }
         pcapFilterBuilder.append(" port ");
         if (getTestEndpointMode() == TestEndpointType.SERVER) {

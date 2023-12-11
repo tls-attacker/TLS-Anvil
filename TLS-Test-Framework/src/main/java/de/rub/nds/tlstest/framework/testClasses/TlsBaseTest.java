@@ -8,7 +8,7 @@
 package de.rub.nds.tlstest.framework.testClasses;
 
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
-import de.rub.nds.anvilcore.junit.CombinatorialAnvilTest;
+import de.rub.nds.anvilcore.junit.AnvilTestBaseClass;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -16,7 +16,6 @@ import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
-import de.rub.nds.tlstest.framework.anvil.TlsPcapCapturingInvocationInterceptor;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.junitExtensions.EnforcedSenderRestrictionConditionExtension;
 import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
@@ -34,11 +33,10 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
     TlsVersionCondition.class,
     KexCondition.class,
     EnforcedSenderRestrictionConditionExtension.class,
-    WorkflowRunnerResolver.class,
-    TlsPcapCapturingInvocationInterceptor.class
+    WorkflowRunnerResolver.class
 })
 @ModelFromScope(modelType = "GENERIC")
-public abstract class TlsBaseTest extends CombinatorialAnvilTest {
+public abstract class TlsBaseTest extends AnvilTestBaseClass {
     protected static final Logger LOGGER = LogManager.getLogger();
 
     protected TestContext context;

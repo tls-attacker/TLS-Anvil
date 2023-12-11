@@ -238,6 +238,8 @@ public class TlsTestConfig extends TLSDelegateConfig {
                                     .toString());
         }
 
+        getAnvilTestConfig().setGeneralPcapFilter(resolvePcapFilter());
+
         try {
             Path outputFolder = Paths.get(getAnvilTestConfig().getOutputFolder());
             outputFolder = outputFolder.toAbsolutePath();
@@ -268,6 +270,22 @@ public class TlsTestConfig extends TLSDelegateConfig {
             throw new ParameterException(e);
         }
         parsedArgs = true;
+    }
+
+    private String resolvePcapFilter() {
+        StringBuilder pcapFilterBuilder = new StringBuilder();
+        if (isUseDTLS()) {
+            pcapFilterBuilder.append("tcp");
+        } else {
+            pcapFilterBuilder.append("udp");
+        }
+        pcapFilterBuilder.append(" port ");
+        if (getTestEndpointMode() == TestEndpointType.SERVER) {
+            pcapFilterBuilder.append(getTestServerDelegate().getExtractedPort());
+        } else {
+            pcapFilterBuilder.append(getTestClientDelegate().getPort());
+        }
+        return pcapFilterBuilder.toString();
     }
 
     public void fromWorker(AnvilTestConfig anvilConfig, String additionalConfig) {

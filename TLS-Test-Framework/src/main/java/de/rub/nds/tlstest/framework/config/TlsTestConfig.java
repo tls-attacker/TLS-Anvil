@@ -297,6 +297,11 @@ public class TlsTestConfig extends TLSDelegateConfig {
             TlsTestConfig newConfig = mapper.readValue(additionalConfig, this.getClass());
             this.testClientDelegate = newConfig.testClientDelegate;
             this.testServerDelegate = newConfig.testServerDelegate;
+            if (this.testServerDelegate != null
+                    && this.testServerDelegate.getSniHostname() != null
+                    && this.testServerDelegate.getSniHostname().isEmpty()) {
+                this.testServerDelegate.setSniHostname(null);
+            }
             this.parsedArgs = true;
         } catch (JsonProcessingException e) {
             LOGGER.error("Error applying TLS test config", e);

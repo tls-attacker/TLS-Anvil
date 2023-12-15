@@ -248,13 +248,14 @@ public class TestPreparator {
                     Thread.sleep(1000);
                 }
             }
+
             if (testConfig.isUseDTLS()) {
-                conTestDtls.close();
+                if (conTestDtls != null) conTestDtls.close();
             } else {
-                conTest.close();
+                if (conTest != null) conTest.close();
             }
         } catch (Exception e) {
-            LOGGER.error(e);
+            LOGGER.error("Error during server preparation", e);
             System.exit(2);
         }
     }

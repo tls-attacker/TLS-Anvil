@@ -19,13 +19,15 @@ const sidebars = {
   // But you can create a sidebar manually
   /*
   tutorialSidebar: [
+    'intro',
+    'hello',
     {
       type: 'category',
       label: 'Tutorial',
-      items: ['hello'],
+      items: ['tutorial-basics/create-a-document'],
     },
   ],
    */
 };
 
-module.exports = sidebars;
+export default sidebars;

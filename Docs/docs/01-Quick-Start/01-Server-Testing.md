@@ -1,7 +1,7 @@
 # Server Testing
 
 This site demonstrates how to test the OpenSSL server provided by the TLS-Docker-Library.
-Testing the server in the most simple form roughly takes around 38 minutes. However, this duration can increase to several depending on the strength parameter that that basically defines how often a single test case triggered with different parameters.
+Testing the server in the most simple form roughly takes around 5 minutes. However, this duration can increase to several depending on the strength parameter that that basically defines how often a single test case triggered with different parameters.
 
 ### Preperations
 
@@ -51,7 +51,7 @@ docker run \
     --network tls-anvil \
     ghcr.io/tls-attacker/tlsanvil:latest \
     -outputFolder ./ \
-    -parallelHandshakes 1 \
+    -parallelTestCases 1 \
     -strength 1 \
     -identifier openssl-server \
     server \

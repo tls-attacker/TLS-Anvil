@@ -5,10 +5,12 @@ Testing the server in the most simple form roughly takes around 5 minutes. Howev
 
 ### Preperations
 
-Before the server is able to do anything we need to generate a TLS certificate.
+The server we will use, is found in the [TLS-Docker-Library](https://github.com/tls-attacker/tls-docker-library).
+
+Before the server is able to do anything we need to generate a TLS certificate. Inside the TLS-Docker-Library repo, run:
 
 ```bash
-./TLS-Docker-Library/setup.sh
+./setup.sh
 ```
 
 Next we create a dedicated docker network that is used by the TLS-Anvil and OpenSSL server container to communicate with each other.
@@ -52,6 +54,7 @@ docker run \
     ghcr.io/tls-attacker/tlsanvil:latest \
     -outputFolder ./ \
     -parallelTestCases 1 \
+    -connectionTimeout 200 \
     -strength 1 \
     -identifier openssl-server \
     server \
@@ -62,7 +65,8 @@ docker run \
 * Lines 2-6: Docker related command flags
 * Line 7: Specifies the TLS-Anvil docker image
 * Line 9: Since the OpenSSL example server is single threaded, we can only perform one handshakes sequentially
-* Line 10: Defines the strength, i.e. the `t` for t-way combinatorial testing
-* Line 12: We want to test a server.
-* Line 13-14: Determines the details how TLS-Anvil should connect to the server.
+* Line 10: We run our server locally, so we can reduce the timeout to 200ms.
+* Line 11: Defines the strength, i.e. the `t` for t-way combinatorial testing
+* Line 13: We want to test a server.
+* Line 14-15: Determines the details how TLS-Anvil should connect to the server.
 

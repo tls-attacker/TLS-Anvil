@@ -146,8 +146,8 @@ public class Main {
         WorkerClient workerClient =
                 new WorkerClient(
                         testContext.getConfig().getWorkerDelegate().getController(),
-                        Main.class.getPackageName(),
-                        new TlsParameterIdentifierProvider());
+                        new TlsParameterIdentifierProvider(),
+                        testContext.getConfig().getWorkerDelegate().getWorkerName());
         // set the TLS-Anvil TestContext as listener for callbacks
         // the gotConfig callback is used to set config parameters before a test
         // the beforeStart callback is used to start the test preparation phase

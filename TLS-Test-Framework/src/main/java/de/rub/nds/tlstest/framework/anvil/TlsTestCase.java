@@ -8,33 +8,19 @@
 package de.rub.nds.tlstest.framework.anvil;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.rub.nds.anvilcore.context.AnvilContext;
-import de.rub.nds.anvilcore.context.AnvilTestConfig;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.utils.ExecptionPrinter;
-import jakarta.xml.bind.DatatypeConverter;
-import java.io.EOFException;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.pcap4j.core.*;
-import org.pcap4j.packet.Packet;
 
 public class TlsTestCase extends AnvilTestCase {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -44,110 +30,10 @@ public class TlsTestCase extends AnvilTestCase {
 
     private TlsTestCase() {}
 
-    private String temporaryPcapFileName;
-    private static int pcapFileCounter = 0;
-
-    public String getTemporaryPcapFileName() {
-        return temporaryPcapFileName;
-    }
-
     public TlsTestCase(
             ExtensionContext context, State state, TlsParameterCombination parameterCombination) {
         super(parameterCombination, context);
         this.state = state;
-        // set temporary file name counting up - gets renamed in finalizeAnvilTestCase()
-        this.temporaryPcapFileName = String.format("tmp_%s.pcap", TlsTestCase.pcapFileCounter);
-        TlsTestCase.pcapFileCounter += 1;
-    }
-
-    @Override
-    public void finalizeAnvilTestCase() {
-        finalizePacketCapture();
-    }
-
-    public void finalizePacketCapture() {
-        AnvilTestConfig anvilConfig = AnvilContext.getInstance().getConfig();
-        if (anvilConfig.isDisableTcpDump()) {
-            return;
-        }
-        // filter the pcap files according to used ports and save them with their uuid
-        Path basePath =
-                Paths.get(
-                        anvilConfig.getOutputFolder(),
-                        "results",
-                        this.getAssociatedContainer().getTestId());
-        Path temporaryPcapPath = basePath.resolve(this.getTemporaryPcapFileName());
-        if (!temporaryPcapPath.toFile().exists()) {
-            LOGGER.error("No temporary pcap file found for testcase.");
-            return;
-        }
-        Path finalPcapPath = basePath.resolve(String.format("dump_%s.pcap", this.getUuid()));
-        try (PcapHandle pcapHandle = Pcaps.openOffline(temporaryPcapPath.toString())) {
-            setPacketFilter(pcapHandle);
-            dumpFilteredPacketsToFile(pcapHandle, finalPcapPath);
-        } catch (PcapNativeException | NotOpenException e) {
-            LOGGER.error("Error filtering pcap dump: ", e);
-        }
-        cleanupTemporaryPacketFiles(temporaryPcapPath);
-        return;
-    }
-
-    private void cleanupTemporaryPacketFiles(Path temporaryPcapPath) {
-        try {
-            Files.delete(temporaryPcapPath);
-        } catch (IOException e) {
-            LOGGER.error("Error deleting temporary pcap dump file: ", e);
-        }
-    }
-
-    private void dumpFilteredPacketsToFile(final PcapHandle pcapHandle, Path finalPcapPath)
-            throws NotOpenException, PcapNativeException {
-        PcapDumper pcapDumper = pcapHandle.dumpOpen(finalPcapPath.toString());
-        while (true) {
-            try {
-                Packet p = pcapHandle.getNextPacketEx();
-                if (p != null) {
-                    pcapDumper.dump(p, pcapHandle.getTimestamp());
-                }
-            } catch (EOFException e) {
-                // break on end of file
-                break;
-            } catch (TimeoutException e) {
-                LOGGER.error("Error during filtering of pcap files: ", e);
-            }
-        }
-        pcapDumper.close();
-    }
-
-    private void setPacketFilter(final PcapHandle pcapHandle)
-            throws PcapNativeException, NotOpenException {
-        String relevantPort = resolvePort();
-        if (relevantPort != null) {
-            pcapHandle.setFilter(
-                    String.format(
-                            TlsPcapCapturingInvocationInterceptor.resolveTransportProtocolPrefix(
-                                            TestContext.getInstance().getConfig())
-                                    + " port %s",
-                            relevantPort),
-                    BpfProgram.BpfCompileMode.OPTIMIZE);
-        } else if (this.getSrcPort() == -1) {
-            LOGGER.info(
-                    "Unable to fetch port from DatagramSocket for packet filter as socket is in closed state");
-        }
-    }
-
-    private String resolvePort() {
-        String relevantPort = null;
-        if (state.getContext().getConfig().getDefaultRunningMode() == RunningModeType.CLIENT
-                && this.getSrcPort() != null
-                && this.getSrcPort() != -1) {
-            relevantPort = this.getSrcPort().toString();
-        } else if (state.getContext().getConfig().getDefaultRunningMode() == RunningModeType.SERVER
-                && this.getDstPort() != null
-                && this.getDstPort() != -1) {
-            relevantPort = this.getDstPort().toString();
-        }
-        return relevantPort;
     }
 
     public State getState() {
@@ -194,25 +80,6 @@ public class TlsTestCase extends AnvilTestCase {
         return null;
     }
 
-    @JsonProperty("uuid")
-    public String getUuid() {
-        StringBuilder toHash = new StringBuilder();
-        toHash.append(this.getAdditionalTestInformation());
-        if (getParameterCombination() != null) {
-            toHash.append(this.getParameterCombination().toString());
-        }
-        toHash.append(getAssociatedContainer().getTestClass().getName());
-        toHash.append(getAssociatedContainer().getTestMethod().getName());
-
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(toHash.toString().getBytes(StandardCharsets.UTF_8));
-            return DatatypeConverter.printHexBinary(hash);
-        } catch (Exception e) {
-            throw new RuntimeException("SHA-256 not possible...");
-        }
-    }
-
     @JsonProperty("StartTimestamp")
     public String getStartTimestamp() {
         if (state == null) return null;
@@ -245,5 +112,18 @@ public class TlsTestCase extends AnvilTestCase {
 
     public void setDstPort(Integer dstPort) {
         this.dstPort = dstPort;
+    }
+
+    @Override
+    public String getCaseSpecificPcapFilter() {
+        Integer relevantPort =
+                state.getContext().getConfig().getDefaultRunningMode() == RunningModeType.CLIENT
+                        ? getSrcPort()
+                        : getDstPort();
+        if (relevantPort != null) {
+            return String.format("port %d", relevantPort);
+        } else {
+            return super.getCaseSpecificPcapFilter();
+        }
     }
 }

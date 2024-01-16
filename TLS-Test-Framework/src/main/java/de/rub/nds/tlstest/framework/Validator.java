@@ -274,7 +274,8 @@ public class Validator {
         if (executedAsPlanned) return;
 
         TcpFragmentationDerivation tcpFragmentation = null;
-        if (state.getParameterCombination() != null) {
+        if (state.getParameterCombination() != null
+                && state.getParameterCombination().hasParameter(TcpFragmentationDerivation.class)) {
             tcpFragmentation =
                     state.getParameterCombination().getParameter(TcpFragmentationDerivation.class);
         }

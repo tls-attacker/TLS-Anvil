@@ -1868,6 +1868,24 @@
   "5246-DjYR2JiJKn": {
     "description": "Unless some other fatal alert has been transmitted, each party is required to send a close_notify alert before closing the write side of the connection. The other party MUST respond with a close_notify alert of its own and close down the connection immediately, discarding any pending writes.",
     "severityLevels": {
+      "Interoperability": 20,
+      "Alert": 20
+    },
+    "rfc": {
+      "number": 5246,
+      "section": "7.2.1 Closure Alerts"
+    },
+    "tags": [
+      "client",
+      "tls12",
+      "rfc5246",
+      "AlertProtocol",
+      "closeNotifyInHandshake"
+    ]
+  },
+  "5246-e4Fsk3lp2z": {
+    "description": "Unless some other fatal alert has been transmitted, each party is required to send a close_notify alert before closing the write side of the connection. The other party MUST respond with a close_notify alert of its own and close down the connection immediately, discarding any pending writes.",
+    "severityLevels": {
       "Interoperability": 40,
       "Alert": 40
     },
@@ -1880,7 +1898,7 @@
       "tls12",
       "rfc5246",
       "AlertProtocol",
-      "closeNotify"
+      "closeNotifyPostHandshake"
     ]
   },
   "5246-N8VwCXYaTF": {

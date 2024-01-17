@@ -42,7 +42,7 @@ public enum TlsParameterType implements ParameterType {
     CHOSEN_HANDSHAKE_MSG(ChosenHandshakeMessageDerivation.class),
     MIRRORED_CIPHERSUITE(MirroredCipherSuiteDerivation.class),
     CERTIFICATE(CertificateDerivation.class),
-    SIGNATURE_BITMASK(SigAndHashDerivation.class),
+    SIGNATURE_BITMASK(SignatureBitmaskDerivation.class),
     BIT_POSITION(BitPositionDerivation.class),
     INCLUDE_RENEGOTIATION_EXTENSION(IncludeRenegotiationExtensionDerivation.class),
     INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION(IncludeExtendedMasterSecretExtensionDerivation.class),

@@ -345,7 +345,6 @@ public class TestPreparator {
         probes.add(TlsProbeType.CIPHER_SUITE);
         probes.add(TlsProbeType.PROTOCOL_VERSION);
         probes.add(TlsProbeType.NAMED_GROUPS);
-        probes.add(TlsProbeType.RECORD_FRAGMENTATION);
         probes.add(TlsProbeType.EC_POINT_FORMAT);
         probes.add(TlsProbeType.SERVER_CERTIFICATE_MINIMUM_KEY_SIZE);
         probes.add(TlsProbeType.CONNECTION_CLOSING_DELTA);
@@ -359,6 +358,9 @@ public class TestPreparator {
                 testConfig.getTestClientDelegate().getTriggerScript());
         if (testConfig.isUseDTLS()) {
             clientScannerConfig.getDtlsDelegate().setDTLS(true);
+            probes.add(TlsProbeType.DTLS_FRAGMENTATION);
+        } else {
+            probes.add(TlsProbeType.RECORD_FRAGMENTATION);
         }
 
         TlsClientScanner clientScanner =

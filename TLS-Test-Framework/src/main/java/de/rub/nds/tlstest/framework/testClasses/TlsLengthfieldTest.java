@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @Tag("lengthTest")
-public class TlsGenericTest extends TlsBaseTest {
+public class TlsLengthfieldTest extends TlsBaseTest {
     @Override
     public Config getConfig() {
         throw new RuntimeException("Invalid method, call context.getConfig.createConfig() instead");

@@ -416,7 +416,7 @@ public class TestPreparator {
         }
 
         ParallelExecutor executor =
-                new ParallelExecutor(testConfig.getAnvilTestConfig().getParallelTestCases(), 2);
+                new ParallelExecutor(testConfig.getAnvilTestConfig().getParallelTestCases(), 1);
         executor.setTimeoutAction(testConfig.getTimeoutActionScript());
         executor.armTimeoutAction(20000);
         testContext.setStateExecutor(executor);

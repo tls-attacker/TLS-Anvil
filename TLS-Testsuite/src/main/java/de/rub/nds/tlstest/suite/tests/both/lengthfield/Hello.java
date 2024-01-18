@@ -54,7 +54,10 @@ public class Hello extends TlsLengthfieldTest {
     }
 
     @Tag("tls12")
-    @TlsVersion(supported = {ProtocolVersion.TLS12, ProtocolVersion.DTLS12})
+    @TlsVersion(
+            supported =
+                    ProtocolVersion
+                            .TLS12) // TODO: adapt DTLS layer to retain message length modification
     @AnvilTest(id = "XLF-7AdFFavtAd")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")

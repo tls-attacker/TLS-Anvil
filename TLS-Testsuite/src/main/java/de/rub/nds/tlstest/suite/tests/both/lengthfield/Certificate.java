@@ -28,7 +28,10 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class Certificate extends TlsLengthfieldTest {
 
     @Tag("tls12")
-    @TlsVersion(supported = {ProtocolVersion.TLS12, ProtocolVersion.DTLS12})
+    @TlsVersion(
+            supported = {
+                ProtocolVersion.TLS12
+            }) // TODO: adapt DTLS layer to retain message length modification
     @AnvilTest(id = "XLF-7iivb12njd")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")

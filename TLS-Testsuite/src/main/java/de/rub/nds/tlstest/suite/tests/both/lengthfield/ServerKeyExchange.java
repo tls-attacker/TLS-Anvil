@@ -34,6 +34,10 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class ServerKeyExchange extends TlsLengthfieldTest {
 
     @AnvilTest(id = "XLF-Z5CqDTjvni")
+    @TlsVersion(
+            supported =
+                    ProtocolVersion
+                            .TLS12) // TODO: adapt DTLS layer to retain message length modification
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void serverKeyExchangeLength(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);

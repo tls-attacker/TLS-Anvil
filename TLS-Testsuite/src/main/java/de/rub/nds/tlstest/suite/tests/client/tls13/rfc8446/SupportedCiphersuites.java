@@ -5,7 +5,7 @@
  *
  * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
-package de.rub.nds.tlstest.suite.tests.client.tls12;
+package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,25 +13,24 @@ import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 
 @ClientTest
-public class SupportedCiphersuites extends Tls12Test {
+public class SupportedCiphersuites extends Tls13Test {
 
-    @NonCombinatorialAnvilTest(id = "XXX-GFtKDMr9x7")
-    @Tag("ciphersuites")
-    public void supportsMoreCiphersuitesThanAdvertised() {
+    @NonCombinatorialAnvilTest(id = "8446-FnJguFLqcc")
+    public void supportsMoreCipherSuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
 
         List<CipherSuite> advertised =
                 CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue());
         List<CipherSuite> supported =
-                new ArrayList<>(context.getFeatureExtractionResult().getCipherSuites());
-        supported.addAll(context.getFeatureExtractionResult().getSupportedTls13CipherSuites());
+                new ArrayList<>(
+                        context.getFeatureExtractionResult().getSupportedTls13CipherSuites());
 
         advertised.forEach(supported::remove);
 
@@ -44,31 +43,20 @@ public class SupportedCiphersuites extends Tls12Test {
                 supported.size());
     }
 
-    @NonCombinatorialAnvilTest(id = "XXX-DZsWLPbTuc")
-    @Tag("ciphersuites")
-    public void supportsLessCiphersuitesThanAdvertised() {
+    @NonCombinatorialAnvilTest(id = "8446-CFyJvy1SNZ")
+    @Tag("new")
+    public void supportsLessCipherSuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
-
         List<CipherSuite> advertised =
-                CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue());
-        advertised.remove(CipherSuite.TLS_FALLBACK_SCSV);
-        advertised.remove(CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV);
-
-        List<CipherSuite> supported =
-                new ArrayList<>(context.getFeatureExtractionResult().getCipherSuites());
-        supported.addAll(context.getFeatureExtractionResult().getSupportedTls13CipherSuites());
-
-        supported.forEach(advertised::remove);
-        advertised =
-                advertised.stream()
-                        .filter(
-                                cipherSuite ->
-                                        CipherSuite.getImplemented().contains(cipherSuite)
-                                                && !cipherSuite.isGOST())
+                CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue()).stream()
+                        .filter(CipherSuite::isTLS13)
                         .collect(Collectors.toList());
-
+        List<CipherSuite> supported =
+                new ArrayList<>(
+                        context.getFeatureExtractionResult().getSupportedTls13CipherSuites());
+        supported.forEach(advertised::remove);
         assertEquals(
-                "Client supports less ciphersuites than advertised. "
+                "Client supports less cipher suites than advertised. Unsupported: "
                         + advertised.parallelStream()
                                 .map(Enum::name)
                                 .collect(Collectors.joining(",")),

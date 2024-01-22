@@ -1830,7 +1830,7 @@
       "sendEmptyRecordFinished"
     ]
   },
-  "XXX-GFtKDMr9x7": {
+  "5246-GFtKDMr9x7": {
     "description": "The cipher suite list, passed from the client to the server in the ClientHello message, contains the combinations of cryptographic algorithms supported by the client in order of the client's preference (favorite choice first).",
     "severityLevels": {
       "Security": 80,
@@ -1848,7 +1848,7 @@
       "supportsMoreCiphersuitesThanAdvertised"
     ]
   },
-  "XXX-DZsWLPbTuc": {
+  "5246-DZsWLPbTuc": {
     "description": "The cipher suite list, passed from the client to the server in the ClientHello message, contains the combinations of cryptographic algorithms supported by the client in order of the client's preference (favorite choice first).",
     "severityLevels": {
       "Handshake": 60,
@@ -2929,7 +2929,7 @@
       "beginWithApplicationData"
     ]
   },
-  "XXX-FnJguFLqcc": {
+  "8446-FnJguFLqcc": {
     "description": "cipher_suites:  A list of the symmetric cipher options supported by the client, specifically the record protection algorithm (including secret key length) and a hash to be used with HKDF, in descending order of client preference.",
     "severityLevels": {
       "Security": 80,
@@ -2947,7 +2947,7 @@
       "supportsMoreCipherSuitesThanAdvertised"
     ]
   },
-  "XXX-CFyJvy1SNZ": {
+  "8446-CFyJvy1SNZ": {
     "description": "For this to work, implementations MUST correctly handle extensible fields:[...] A client sending a ClientHello MUST support all parameters advertised in it.",
     "severityLevels": {
       "Security": 80,

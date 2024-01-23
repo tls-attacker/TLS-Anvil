@@ -138,7 +138,7 @@ public class TLSExtensionForECC extends Tls12Test {
     "curves defined in [RFC7748]", securitySeverity = SeverityLevel.LOW)*/
     @NonCombinatorialAnvilTest(id = "8422-ErkUw4SDEy")
     @KeyExchange(supported = {KeyExchangeType.ECDH})
-    public void supportsDeprecated(WorkflowRunner runner) {
+    public void supportsDeprecated() {
         List<NamedGroup> deprecatedFound = new LinkedList<>();
         for (NamedGroup group : context.getFeatureExtractionResult().getNamedGroups()) {
             if (group.getIntValue() < NamedGroup.SECP256R1.getIntValue()

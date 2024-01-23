@@ -1001,7 +1001,7 @@
     ]
   },
   "5246-VC1baM1Mn1": {
-    "description": "bad_record_mac[...]This alert also MUST be returned if an alert is sent because a TLSCiphertext decrypted in an invalid way: either it wasn\u00e2\u20ac\u2122t an even multiple of the block length, or its padding values, when checked, weren\u00e2\u20ac\u2122t correct.",
+    "description": "bad_record_mac[...]This alert also MUST be returned if an alert is sent because a TLSCiphertext decrypted in an invalid way: either it wasn't an even multiple of the block length, or its padding values, when checked, weren't correct.",
     "severityLevels": {
       "Crypto": 100,
       "Security": 80,
@@ -5607,7 +5607,7 @@
     ]
   },
   "8422-xyn7SDVFRX": {
-    "description": "If the client has used a Supported Elliptic Curves Extension, the public key in the server\u00e2\u20ac\u2122s certificate MUST respect the client\u00e2\u20ac\u2122s choice of elliptic curves. A server that cannot satisfy this requirement MUST NOT choose an ECC cipher suite in its ServerHello message.)",
+    "description": "If the client has used a Supported Elliptic Curves Extension, the public key in the server's certificate MUST respect the client's choice of elliptic curves. A server that cannot satisfy this requirement MUST NOT choose an ECC cipher suite in its ServerHello message.)",
     "severityLevels": {
       "Handshake": 60,
       "Interoperability": 80
@@ -7001,7 +7001,7 @@
     ]
   },
   "8446-2eQTsmq7d1": {
-    "description": "Clients MUST verify that the server\u00e2\u20ac\u2122s selected_identity is within the range supplied by the client",
+    "description": "Clients MUST verify that the server's selected_identity is within the range supplied by the client",
     "severityLevels": {
       "Security": 80,
       "Handshake": 60,

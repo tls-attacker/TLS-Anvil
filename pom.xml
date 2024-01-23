@@ -248,6 +248,7 @@
                         <importOrder />
                         <removeUnusedImports />
                         <excludes>TLS-Test-Framework/coffee4j</excludes>
+                        <excludes>Docs</excludes>
                         <indent>
                             <spaces>true</spaces>
                             <spacesPerTab>4</spacesPerTab>

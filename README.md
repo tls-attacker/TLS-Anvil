@@ -18,7 +18,7 @@ The test suite contains around 408 client and server tests for (D)TLS 1.2 and TL
 * RFC 7919 - Negotiated Finite Field Diffie-Hellman Ephemeral Parameters for Transport Layer Security (TLS)
 * RFC 8446 - The Transport Layer Security (TLS) Protocol Version 1.3
 * RFC 8701 - Applying Generate Random Extensions And Sustain Extensibility (GREASE) to TLS Extensibility
-* RFC 6347 - Datagram Transport Layer Security Version 1.2
+* RFC 6347 - Datagram Transport Layer Security Version 1.2 (Experimental)
 
 ## Project Structure
 

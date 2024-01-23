@@ -239,6 +239,11 @@
                 <groupId>com.diffplug.spotless</groupId>
                 <artifactId>spotless-maven-plugin</artifactId>
                 <configuration>
+                    <markdown>
+                        <excludes>
+                            <exclude>Docs/**/*.*</exclude>
+                        </excludes>
+                    </markdown>
                     <java>
                         <!-- Introduce spotless using ratchetFrom to format files gradually on change.
                              Also avoid merge conflicts when merging into master due to one large format commit. -->
@@ -247,8 +252,6 @@
                         <endWithNewline />
                         <importOrder />
                         <removeUnusedImports />
-                        <excludes>TLS-Test-Framework/coffee4j</excludes>
-                        <excludes>Docs</excludes>
                         <indent>
                             <spaces>true</spaces>
                             <spacesPerTab>4</spacesPerTab>

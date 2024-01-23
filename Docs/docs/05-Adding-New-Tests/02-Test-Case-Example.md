@@ -60,6 +60,7 @@ public boolean recordLengthAllowsModification(Integer lengthCandidate) {
 ```
 
 ### Metadata
+
 A metadata entry has to be provided for every test. It is stored in `src/main/resources/metadata.json`. A basic entry looks like this:
 
 * The metadata file is a json object which keys are the test ids.
@@ -94,3 +95,4 @@ A metadata entry has to be provided for every test. It is stored in `src/main/re
     },
 }
 ```
+

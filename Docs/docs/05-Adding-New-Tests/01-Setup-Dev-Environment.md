@@ -1,6 +1,6 @@
 # Development Environment Setup
 
-First our repository needs to be cloned. 
+First our repository needs to be cloned.
 
 ```
 git clone git://github.com/tls-attacker/TLS-Anvil

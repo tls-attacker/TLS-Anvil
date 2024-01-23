@@ -22,7 +22,7 @@ The application should be available at [http://localhost:5001](http://localhost:
 
 ### Importing the results
 
-Next the results need to be imported, i.e. importing the JSON files of TLS-Anvil into a MongoDB that is accessed by the backend of the web application. 
+Next the results need to be imported, i.e. importing the JSON files of TLS-Anvil into a MongoDB that is accessed by the backend of the web application.
 The easiest way to do that is to zip your results folder (the folder that contains the report.json file) and upload it in the web-interface.
 Just go to `Tests` -> `Upload Test` and select the zip file.
 

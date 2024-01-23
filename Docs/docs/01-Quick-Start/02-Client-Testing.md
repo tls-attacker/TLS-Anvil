@@ -24,7 +24,7 @@ docker run \
     --name tls-anvil \
     ghcr.io/tls-attacker/tlsanvil:latest \
     -outputFolder ./ \
-    -parallelHandshakes 3 \
+    -parallelTestCases 3 \
     -parallelTests 3 \
     -strength 1 \
     -identifier openssl-client \

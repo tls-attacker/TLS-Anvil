@@ -7,4 +7,11 @@ The second step is to analyze the results. Those are going to be imported into a
 ### Requirements
 
 - Docker
+- Python (for using TLS-Docker-Library)
+
+### GitHub Repos
+
+- TLS-Anvil (Testsuite)
+- TLS-Docker-Library (optional, for test server and clients)
+- Anvil-Web (optional, for a graphical user interface)
 

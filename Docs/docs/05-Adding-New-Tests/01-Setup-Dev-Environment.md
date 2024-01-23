@@ -1,37 +1,24 @@
 # Development Environment Setup
 
-First our repository needs to be cloned. Since TLS-Anvil depends on specific TLS-Attacker and TLS-Scanner versions, those are included as submodules.
+First our repository needs to be cloned.
 
 ```
-git clone --recurse-submodules git://github.com/tls-attacker/TLS-Anvil
+git clone git://github.com/tls-attacker/TLS-Anvil
 ```
 
 ## Compile From Terminal
 
-Next we need to compile TLS-Attacker and TLS-Scanner to be able to use TLS-Anvil.
+TLS-Anvil depends on specific TLS-Attacker and TLS-Scanner as well as Anvil-Core as testing framework. Those are implemented as maven dependencies and should be fetched during build automatically.
 
 ```bash
-cd Dependencies/TLS-Attacker-Development
-mvn install -DskipTests
-cd ../TLS-Scanner-Development
-mvn install -DskipTests
-
-cd ../../TLS-Test-Framework
-mvn install -DskipTests
-```
-
-After that the tests should compile as well.
-
-```bash
-cd TLS-Testsuite
-mvn package -DskipTests
+mvn clean install -DskipTests
 ```
 
 TLS-Anvil can be started by executing the jar file.
 
 ```bash
 cd TLS-Testsuite/apps
-java -jar TLS-Anvil.jar
+java -jar TLS-Testsuite.jar
 ```
 
 ## Setup IDE
@@ -43,9 +30,9 @@ TLS-Anvil was mainly developed in IntelliJ IDEA and Netbeans. Since IDEA offers 
 1. Open the TLS-Testsuite Project (`pom.xml`) in IntelliJ
 2. Open the `Project Structure` -> `Module` Menu.
 3. Add the `TLS-Test-Framework` (`TLS-Test-Framework/pom.xml`) as new Module
-4. If you want or need to modify TLS-Attacker and TLS-Scanner as well:
-   1. Add `TLS-Attacker` (`Dependencies/TLS-Attacker/pom.xml`) as new Module
-   2. Add `TLS-Scanner` (`Dependencies/TLS-Scanner/pom.xml`) as new Module
+4. If you want or need to modify TLS-Attacker and TLS-Scanner as well (separate git repositories):
+   1. Add `TLS-Attacker` (`TLS-Attacker/pom.xml`) as new Module
+   2. Add `TLS-Scanner` (`TLS-Scanner/pom.xml`) as new Module
 
 The project should compile now.
 
@@ -64,14 +51,14 @@ The recommended way is to edit the JUnit 5 template of IDEA.
 Simple example:
 
 ```
--networkInterface lo0 -parallelHandshakes 1 -strength 1 server -connect localhost:8443 -doNotSendSNIExtension
+-networkInterface lo0 -parallelTestCases 1 -strength 1 server -connect localhost:8443 -doNotSendSNIExtension
 ```
 
 * Use `COMMAND_CLIENT` to specify CLI options for testing a client  
   Simple example:
 
 ```
--networkInterface lo0 -parallelHandshakes 1 -strength 1 client -port 8443 -triggerScript [path to script]
+-networkInterface lo0 -parallelTestCases 1 -strength 1 client -port 8443 -triggerScript [path to script]
 ```
 
 When the environment variables are configured, it is possible to run a client or server test by clicking the green play buttons next to a function. The specified variables are used by TLS-Anvil to setup the test backend accordingly.

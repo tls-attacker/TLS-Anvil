@@ -42,8 +42,8 @@ In the following, the 4 base models are listed with their corresponding paramete
 * `LENGTHFIELD`
     * Same as `CERTIFICATE`
 
-Beside those parameters many more are available that are specified inside the <JavaClass path="TLS-Test-Framework/src/main/java/de/rub/nds/tlstest/framework/model/TlsParameterType.java" /> enum.
+Beside those parameters, many more are available that are specified inside the <JavaClass path="TLS-Test-Framework/src/main/java/de/rub/nds/tlstest/framework/model/TlsParameterType.java" /> enum.
 
-For each parameter a separate class exists inside the <JavaClass path="TLS-Test-Framework/src/main/java/de/rub/nds/tlstest/framework/model/derivationParameter"/> package that defines how the parameter value is applied to the TLS-Attacker configuration.
+For each parameter, a separate class exists inside the <JavaClass path="TLS-Test-Framework/src/main/java/de/rub/nds/tlstest/framework/model/derivationParameter"/> package that defines how the parameter value is applied to the TLS-Attacker configuration.
 
 How additional parameters and/or parameter values are used, is described on the next page.

@@ -17,7 +17,7 @@ This template aims to test if the <Definition id="SUT" /> sends the correct TLS 
 ### Test function
 
 * Line 7: This is line basically part of every test case, it generates the TLS-Attacker `Config` that defines how the TLS-Attacker Server/Client should behave (e.g. which algorithms are offered, etc.)
-* Line 8-12: A bitmask is generated that xored on the padding. During the parameter value generation a byte and bit position is chosen by the combinatorial testing algorithm. From those positions the bitmask is generated during the test execution.
+* Line 8-12: A bitmask is generated and XORed on the padding. During the parameter value generation a byte and bit position is chosen by the combinatorial testing algorithm. From those positions, the bitmask is generated during the test execution.
 * Line 14-15: An application message is created from which the padding is invalidated. The message that is received from the config is set inside the `AppMsgLengthDerivation.applyToConfig` method.
 * Line 17-21: A TLS-Attacker `WorkflowTrace` is generated that performs a complete handshake and sends an application message after the handshake.
 * Line 23-29: The WorkflowTrace is scheduled to be sent. After the handshake is completed, the lambda function get's executed that determines the test result for a single <Definition id="test case" />. The result of the test template is determined by all test case results.

@@ -9,10 +9,12 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -20,7 +22,6 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /** Runs a benign handshake with all default derivations to identify parameter-related bugs. */
 @Tag("happyflow12")
@@ -28,32 +29,29 @@ public class HappyFlow extends Tls12Test {
 
     @AnvilTest(id = "5246-jsdAL1vDy5")
     @ModelFromScope(modelType = "CERTIFICATE")
-    public void happyFlow(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void happyFlow(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            boolean receivedAlert =
-                                    WorkflowTraceUtil.didReceiveMessage(
-                                            ProtocolMessageType.ALERT, i.getWorkflowTrace());
-                            if (receivedAlert) {
-                                AlertMessage alert =
-                                        (AlertMessage)
-                                                WorkflowTraceUtil.getFirstReceivedMessage(
-                                                        ProtocolMessageType.ALERT,
-                                                        i.getWorkflowTrace());
-                                LOGGER.error(
-                                        "Received Alert "
-                                                + AlertDescription.getAlertDescription(
-                                                        alert.getDescription().getValue())
-                                                + " for Happy Flow using derivations:\n"
-                                                + parameterCombination.toString()
-                                                + "\nWorkflowTrace:\n"
-                                                + i.getWorkflowTrace().toString());
-                            }
-                            Validator.executedAsPlanned(i);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        boolean receivedAlert =
+                WorkflowTraceUtil.didReceiveMessage(
+                        ProtocolMessageType.ALERT, state.getWorkflowTrace());
+        if (receivedAlert) {
+            AlertMessage alert =
+                    (AlertMessage)
+                            WorkflowTraceUtil.getFirstReceivedMessage(
+                                    ProtocolMessageType.ALERT, state.getWorkflowTrace());
+            LOGGER.error(
+                    "Received Alert "
+                            + AlertDescription.getAlertDescription(
+                                    alert.getDescription().getValue())
+                            + " for Happy Flow using derivations:\n"
+                            + parameterCombination.toString()
+                            + "\nWorkflowTrace:\n"
+                            + state.getWorkflowTrace().toString());
+        }
+        Validator.executedAsPlanned(state, testCase);
     }
 }

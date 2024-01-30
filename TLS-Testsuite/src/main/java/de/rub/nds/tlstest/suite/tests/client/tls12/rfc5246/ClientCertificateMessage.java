@@ -11,31 +11,29 @@ import static org.junit.Assert.assertNotNull;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class ClientCertificateMessage extends Tls12Test {
 
     @AnvilTest(id = "5246-JwYcazUHHv")
-    public void clientMustSendCertMsg(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void clientMustSendCertMsg(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         c.setClientAuthentication(true);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            assertNotNull(
-                                    "Client didn't send CertificateMessage",
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(CertificateMessage.class));
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        assertNotNull(
+                "Client didn't send CertificateMessage",
+                state.getWorkflowTrace().getFirstReceivedMessage(CertificateMessage.class));
     }
 }

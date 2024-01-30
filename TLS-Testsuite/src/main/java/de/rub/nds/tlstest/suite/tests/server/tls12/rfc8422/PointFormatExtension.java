@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -23,6 +24,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
@@ -37,7 +39,6 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class PointFormatExtension extends Tls12Test {
@@ -47,8 +48,8 @@ public class PointFormatExtension extends Tls12Test {
     @AnvilTest(id = "8422-cxTqTQ7WwQ")
     @KeyExchange(supported = KeyExchangeType.ECDH)
     public void serverAdvertisesOnlyUncompressedPointFormat(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
@@ -58,47 +59,42 @@ public class PointFormatExtension extends Tls12Test {
                 new SendAction(new ClientHelloMessage(c)),
                 new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage message =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, message);
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.executedAsPlanned(state, testCase);
 
-                            ECPointFormatExtensionMessage ext =
-                                    message.getExtension(ECPointFormatExtensionMessage.class);
+        ServerHelloMessage message = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, message);
 
-                            if (ext != null) {
-                                byte[] points = ext.getPointFormats().getValue();
-                                boolean containsZero = false;
-                                boolean containsOther = false;
-                                for (byte b : points) {
-                                    if (b == ECPointFormat.UNCOMPRESSED.getValue()) {
-                                        containsZero = true;
-                                    } else {
-                                        containsOther = true;
-                                    }
-                                }
+        ECPointFormatExtensionMessage ext =
+                message.getExtension(ECPointFormatExtensionMessage.class);
 
-                                assertTrue(
-                                        "ECPointFormatExtension does not contain uncompressed format",
-                                        containsZero);
-                                if (choseRfc8422Curve(i.getState().getTlsContext())) {
-                                    assertFalse(
-                                            "ECPointFormatExtension contains compressed / invalid format",
-                                            containsOther);
-                                }
-                            }
-                        });
+        if (ext != null) {
+            byte[] points = ext.getPointFormats().getValue();
+            boolean containsZero = false;
+            boolean containsOther = false;
+            for (byte b : points) {
+                if (b == ECPointFormat.UNCOMPRESSED.getValue()) {
+                    containsZero = true;
+                } else {
+                    containsOther = true;
+                }
+            }
+
+            assertTrue("ECPointFormatExtension does not contain uncompressed format", containsZero);
+            if (choseRfc8422Curve(state.getTlsContext())) {
+                assertFalse(
+                        "ECPointFormatExtension contains compressed / invalid format",
+                        containsOther);
+            }
+        }
     }
 
     @AnvilTest(id = "8422-hCNJHtPUAY")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    public void invalidPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidPointFormat(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
@@ -111,22 +107,17 @@ public class PointFormatExtension extends Tls12Test {
         chm.getExtension(ECPointFormatExtensionMessage.class)
                 .setPointFormats(Modifiable.explicit(new byte[] {(byte) 33}));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     @AnvilTest(id = "8422-DRMPmFHPDy")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    public void deprecatedFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void deprecatedFormat(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
@@ -141,16 +132,11 @@ public class PointFormatExtension extends Tls12Test {
                         WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     // See 5.1.1.  Supported Elliptic Curves Extension

@@ -17,17 +17,18 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class EncryptedExtensions extends Tls13Test {
@@ -41,29 +42,24 @@ public class EncryptedExtensions extends Tls13Test {
     }
 
     @AnvilTest(id = "8446-ZkFrZYKzbi")
-    public void includedInvalidExtensions(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void includedInvalidExtensions(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            EncryptedExtensionsMessage encExt =
-                                    trace.getFirstReceivedMessage(EncryptedExtensionsMessage.class);
-                            assertNotNull(AssertMsgs.ENCRYPTED_EXTENSIONS_NOT_RECEIVED, encExt);
+        State state = runner.execute(workflowTrace, c);
 
-                            for (ExtensionMessage ext : encExt.getExtensions()) {
-                                assertTrue(
-                                        "EncryptedExtensions contained a forbidden extension: "
-                                                + ExtensionType.getExtensionType(
-                                                        ext.getExtensionType().getValue()),
-                                        ExtensionType.allowedInEncryptedExtensions(
-                                                ExtensionType.getExtensionType(
-                                                        ext.getExtensionType().getValue())));
-                            }
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        EncryptedExtensionsMessage encExt =
+                trace.getFirstReceivedMessage(EncryptedExtensionsMessage.class);
+        assertNotNull(AssertMsgs.ENCRYPTED_EXTENSIONS_NOT_RECEIVED, encExt);
+
+        for (ExtensionMessage ext : encExt.getExtensions()) {
+            assertTrue(
+                    "EncryptedExtensions contained a forbidden extension: "
+                            + ExtensionType.getExtensionType(ext.getExtensionType().getValue()),
+                    ExtensionType.allowedInEncryptedExtensions(
+                            ExtensionType.getExtensionType(ext.getExtensionType().getValue())));
+        }
     }
 }

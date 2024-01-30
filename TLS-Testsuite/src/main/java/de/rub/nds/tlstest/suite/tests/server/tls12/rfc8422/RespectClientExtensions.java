@@ -12,12 +12,14 @@ import static org.junit.Assert.*;
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -30,30 +32,28 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Arrays;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class RespectClientExtensions extends Tls12Test {
 
     @AnvilTest(id = "8422-zuAGxqyDEg")
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
-    public void respectChosenCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void respectChosenCurve(WorkflowRunner runner, AnvilTestCase testCase) {
+        Config c = getPreparedConfig(runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
-        constructTest(runner, c);
+        constructTest(runner, c, testCase);
     }
 
     @AnvilTest(id = "8422-bc43G6qpcS")
     @KeyExchange(supported = KeyExchangeType.ECDH, requiresServerKeyExchMsg = true)
-    public void respectChosenCurveWithoutFormats(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void respectChosenCurveWithoutFormats(WorkflowRunner runner, AnvilTestCase testCase) {
+        Config c = getPreparedConfig(runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(false);
-        constructTest(runner, c);
+        constructTest(runner, c, testCase);
     }
 
     @NonCombinatorialAnvilTest(id = "8422-xyn7SDVFRX")
@@ -66,35 +66,28 @@ public class RespectClientExtensions extends Tls12Test {
                         != TestResults.TRUE);
     }
 
-    private void constructTest(WorkflowRunner runner, Config c) {
-        ClientHelloMessage chm = new ClientHelloMessage(c);
+    private void constructTest(WorkflowRunner runner, Config config, AnvilTestCase testCase) {
+        ClientHelloMessage chm = new ClientHelloMessage(config);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(chm), new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, config);
 
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            ECDHEServerKeyExchangeMessage message =
-                                    trace.getFirstReceivedMessage(
-                                            ECDHEServerKeyExchangeMessage.class);
-                            assertNotNull(AssertMsgs.SERVER_KEY_EXCHANGE_NOT_RECEIVED, message);
+        Validator.executedAsPlanned(state, testCase);
 
-                            ClientHelloMessage sentChm =
-                                    trace.getFirstSendMessage(ClientHelloMessage.class);
-                            byte[] allSentCurves =
-                                    sentChm.getExtension(EllipticCurvesExtensionMessage.class)
-                                            .getSupportedGroups()
-                                            .getValue();
-                            byte[] sentEllipticCurve = Arrays.copyOfRange(allSentCurves, 0, 2);
-                            byte[] receivedEllipticCurve = message.getNamedGroup().getValue();
-                            assertArrayEquals(
-                                    "Unexpected named group",
-                                    sentEllipticCurve,
-                                    receivedEllipticCurve);
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        ECDHEServerKeyExchangeMessage message =
+                trace.getFirstReceivedMessage(ECDHEServerKeyExchangeMessage.class);
+        assertNotNull(AssertMsgs.SERVER_KEY_EXCHANGE_NOT_RECEIVED, message);
+
+        ClientHelloMessage sentChm = trace.getFirstSendMessage(ClientHelloMessage.class);
+        byte[] allSentCurves =
+                sentChm.getExtension(EllipticCurvesExtensionMessage.class)
+                        .getSupportedGroups()
+                        .getValue();
+        byte[] sentEllipticCurve = Arrays.copyOfRange(allSentCurves, 0, 2);
+        byte[] receivedEllipticCurve = message.getNamedGroup().getValue();
+        assertArrayEquals("Unexpected named group", sentEllipticCurve, receivedEllipticCurve);
     }
 }

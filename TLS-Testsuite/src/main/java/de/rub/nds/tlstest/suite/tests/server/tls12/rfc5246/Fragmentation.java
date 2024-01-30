@@ -11,11 +11,13 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExcludeParameters;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -26,7 +28,6 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class Fragmentation extends Tls12Test {
@@ -34,8 +35,8 @@ public class Fragmentation extends Tls12Test {
     @AnvilTest(id = "5246-J6zSpKaaXP")
     @ExcludeParameter("RECORD_LENGTH")
     @EnforcedSenderRestriction
-    public void sendZeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendZeroLengthRecord_CH(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setUseAllProvidedRecords(true);
 
         Record r = new Record();
@@ -49,15 +50,16 @@ public class Fragmentation extends Tls12Test {
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
+        ;
     }
 
     @AnvilTest(id = "5246-2FWjWfzv3Q")
     @ExcludeParameter("RECORD_LENGTH")
     @EnforcedSenderRestriction
-    public void sendZeroLengthRecord_Alert(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendZeroLengthRecord_Alert(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setUseAllProvidedRecords(true);
 
         AlertMessage alertMsg = new AlertMessage();
@@ -75,15 +77,17 @@ public class Fragmentation extends Tls12Test {
                         WorkflowTraceType.HELLO, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
+        ;
     }
 
     // TODO Must be excluded from DTLS test, because of the TCP_FRAGMENTATION.
     @AnvilTest(id = "5246-yNEWNcjFZF")
     @ExcludeParameters({@ExcludeParameter("RECORD_LENGTH"), @ExcludeParameter("TCP_FRAGMENTATION")})
     public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCS_F(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         if (c.isClientAuthentication()) {
@@ -100,15 +104,16 @@ public class Fragmentation extends Tls12Test {
         workflowTrace.addTlsActions(
                 new ReceiveAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     // TODO Must be excluded from DTLS test, because of the TCP_FRAGMENTATION.
     @AnvilTest(id = "5246-RNQeBZXVNc")
     @ExcludeParameters({@ExcludeParameter("RECORD_LENGTH"), @ExcludeParameter("TCP_FRAGMENTATION")})
     public void sendHandshakeMessagesWithinMultipleRecords_CKE_CCSF(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.getDefaultClientConnection().setTransportHandlerType(TransportHandlerType.TCP_NO_DELAY);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -126,6 +131,7 @@ public class Fragmentation extends Tls12Test {
         workflowTrace.addTlsActions(
                 new ReceiveAction(new ChangeCipherSpecMessage(), new FinishedMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 }

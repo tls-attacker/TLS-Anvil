@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.both.lengthfield;
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
@@ -17,6 +18,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.HandshakeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.HelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -27,7 +29,6 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class Hello extends TlsGenericTest {
 
@@ -36,10 +37,9 @@ public class Hello extends TlsGenericTest {
     @AnvilTest(id = "XLF-anjpbghN69")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void helloSessionIdLengthTLS12(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
-        sessionIdLengthTest(workflowTrace, runner);
+    public void helloSessionIdLengthTLS12(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(runner);
+        sessionIdLengthTest(workflowTrace, runner, testCase);
     }
 
     @Tag("tls13")
@@ -47,10 +47,9 @@ public class Hello extends TlsGenericTest {
     @AnvilTest(id = "XLF-c4Db7ctU7V")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void helloSessionIdLengthTLS13(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
-        sessionIdLengthTest(workflowTrace, runner);
+    public void helloSessionIdLengthTLS13(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(runner);
+        sessionIdLengthTest(workflowTrace, runner, testCase);
     }
 
     @Tag("tls12")
@@ -58,9 +57,9 @@ public class Hello extends TlsGenericTest {
     @AnvilTest(id = "XLF-7AdFFavtAd")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void helloLengthTLS12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
-        helloLenghtTest(workflowTrace, runner);
+    public void helloLengthTLS12(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(runner);
+        helloLenghtTest(workflowTrace, runner, testCase);
     }
 
     @Tag("tls13")
@@ -68,9 +67,9 @@ public class Hello extends TlsGenericTest {
     @AnvilTest(id = "XLF-RUoZsBa3n4")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void helloLengthTLS13(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
-        helloLenghtTest(workflowTrace, runner);
+    public void helloLengthTLS13(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(runner);
+        helloLenghtTest(workflowTrace, runner, testCase);
     }
 
     @Tag("tls12")
@@ -78,10 +77,9 @@ public class Hello extends TlsGenericTest {
     @AnvilTest(id = "XLF-8NkdoEnnup")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void helloExtensionsLengthTLS12(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
-        helloExtensionsLengthTest(workflowTrace, runner);
+    public void helloExtensionsLengthTLS12(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(runner);
+        helloExtensionsLengthTest(workflowTrace, runner, testCase);
     }
 
     @Tag("tls13")
@@ -89,10 +87,9 @@ public class Hello extends TlsGenericTest {
     @AnvilTest(id = "XLF-hjh8QDJmvK")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void helloExtensionsLengthTLS13(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
-        helloExtensionsLengthTest(workflowTrace, runner);
+    public void helloExtensionsLengthTLS13(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(runner);
+        helloExtensionsLengthTest(workflowTrace, runner, testCase);
     }
 
     @Tag("tls12")
@@ -101,10 +98,9 @@ public class Hello extends TlsGenericTest {
     @AnvilTest(id = "XLF-9XEqy2ZCoa")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void clientHelloCipherSuitesLengthTLS12(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
-        clientHelloCipherSuitesLengthTest(workflowTrace, runner);
+    public void clientHelloCipherSuitesLengthTLS12(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(runner);
+        clientHelloCipherSuitesLengthTest(workflowTrace, runner, testCase);
     }
 
     @Tag("tls13")
@@ -113,10 +109,9 @@ public class Hello extends TlsGenericTest {
     @AnvilTest(id = "XLF-rUWM4KWG2t")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void clientHelloCipherSuitesLengthTLS13(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
-        clientHelloCipherSuitesLengthTest(workflowTrace, runner);
+    public void clientHelloCipherSuitesLengthTLS13(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(runner);
+        clientHelloCipherSuitesLengthTest(workflowTrace, runner, testCase);
     }
 
     @Tag("tls12")
@@ -125,10 +120,9 @@ public class Hello extends TlsGenericTest {
     @AnvilTest(id = "XLF-2BCMFwzm2j")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void clientHelloCompressionLengthTLS12(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(argumentAccessor, runner);
-        clientHelloCompressionLengthTest(workflowTrace, runner);
+    public void clientHelloCompressionLengthTLS12(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls12(runner);
+        clientHelloCompressionLengthTest(workflowTrace, runner, testCase);
     }
 
     @Tag("tls13")
@@ -137,56 +131,58 @@ public class Hello extends TlsGenericTest {
     @AnvilTest(id = "XLF-pR3iFN7Miv")
     @KeyExchange(supported = KeyExchangeType.ALL13)
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void clientHelloCompressionLengthTLS13(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(argumentAccessor, runner);
-        clientHelloCompressionLengthTest(workflowTrace, runner);
+    public void clientHelloCompressionLengthTLS13(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupLengthFieldTestTls13(runner);
+        clientHelloCompressionLengthTest(workflowTrace, runner, testCase);
     }
 
     private void clientHelloCompressionLengthTest(
-            WorkflowTrace workflowTrace, WorkflowRunner runner) {
+            WorkflowTrace workflowTrace, WorkflowRunner runner, AnvilTestCase testCase) {
         ClientHelloMessage helloMessage = (ClientHelloMessage) getHelloMessage(workflowTrace);
         helloMessage.setCompressionLength(Modifiable.sub(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig())
-                .validateFinal(super::validateLengthTest);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        validateLengthTest(state, testCase);
     }
 
     private void clientHelloCipherSuitesLengthTest(
-            WorkflowTrace workflowTrace, WorkflowRunner runner) {
+            WorkflowTrace workflowTrace, WorkflowRunner runner, AnvilTestCase testCase) {
         ClientHelloMessage helloMessage = (ClientHelloMessage) getHelloMessage(workflowTrace);
         helloMessage.setCipherSuiteLength(Modifiable.sub(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig())
-                .validateFinal(super::validateLengthTest);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        validateLengthTest(state, testCase);
     }
 
-    private void helloExtensionsLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
+    private void helloExtensionsLengthTest(
+            WorkflowTrace workflowTrace, WorkflowRunner runner, AnvilTestCase testCase) {
         if (isClientTest()) {
             separateServerHelloMessage(workflowTrace);
         }
         HelloMessage helloMessage = getHelloMessage(workflowTrace);
         helloMessage.setExtensionsLength(Modifiable.sub(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig())
-                .validateFinal(super::validateLengthTest);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        validateLengthTest(state, testCase);
     }
 
-    private void helloLenghtTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
+    private void helloLenghtTest(
+            WorkflowTrace workflowTrace, WorkflowRunner runner, AnvilTestCase testCase) {
         if (isClientTest()) {
             separateServerHelloMessage(workflowTrace);
         }
         HelloMessage helloMessage = getHelloMessage(workflowTrace);
         helloMessage.setLength(Modifiable.sub(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig())
-                .validateFinal(super::validateLengthTest);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        validateLengthTest(state, testCase);
     }
 
-    private void sessionIdLengthTest(WorkflowTrace workflowTrace, WorkflowRunner runner) {
+    private void sessionIdLengthTest(
+            WorkflowTrace workflowTrace, WorkflowRunner runner, AnvilTestCase testCase) {
         if (isClientTest()) {
             separateServerHelloMessage(workflowTrace);
         }
         HelloMessage helloMessage = getHelloMessage(workflowTrace);
         helloMessage.setSessionIdLength(Modifiable.add(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig())
-                .validateFinal(super::validateLengthTest);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        validateLengthTest(state, testCase);
     }
 
     private HelloMessage getHelloMessage(WorkflowTrace workflowTrace) {

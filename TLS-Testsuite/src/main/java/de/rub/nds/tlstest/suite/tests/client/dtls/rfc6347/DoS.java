@@ -4,9 +4,11 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -15,7 +17,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Dtls12Test;
 import java.util.Arrays;
 import org.junit.Assert;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class DoS extends Dtls12Test {
@@ -25,59 +26,48 @@ public class DoS extends Dtls12Test {
      * The test is successful if the first and second {@link ClientHelloMessage} contain exactly the
      * same values, except for the cookie and the cookie length.
      */
-    public void responseToHelloVerifyRequest(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void responseToHelloVerifyRequest(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setDtlsCookieExchange(true);
 
         WorkflowTrace trace =
                 runner.generateWorkflowTraceUntilLastSendingMessage(
                         WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO);
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(trace, c);
 
-                            ClientHelloMessage firstClientHello =
-                                    (ClientHelloMessage)
-                                            WorkflowTraceUtil.getFirstReceivedMessage(
-                                                    HandshakeMessageType.CLIENT_HELLO, trace);
-                            HelloVerifyRequestMessage helloVerifyRequest =
-                                    (HelloVerifyRequestMessage)
-                                            WorkflowTraceUtil.getFirstSendMessage(
-                                                    HandshakeMessageType.HELLO_VERIFY_REQUEST,
-                                                    trace);
-                            ClientHelloMessage secondClientHello =
-                                    (ClientHelloMessage)
-                                            WorkflowTraceUtil.getLastReceivedMessage(
-                                                    HandshakeMessageType.CLIENT_HELLO, trace);
-                            assertTrue(
-                                    "Did not receive first Client Hello messages",
-                                    firstClientHello != null);
-                            assertTrue(
-                                    "Did not receive second Client Hello messages",
-                                    secondClientHello != null);
+        Validator.executedAsPlanned(state, testCase);
 
-                            assertTrue(
-                                    "Did not receive first Client Hello messages without cookie",
-                                    firstClientHello.getCookieLength().getValue() == 0);
+        ClientHelloMessage firstClientHello =
+                (ClientHelloMessage)
+                        WorkflowTraceUtil.getFirstReceivedMessage(
+                                HandshakeMessageType.CLIENT_HELLO, trace);
+        HelloVerifyRequestMessage helloVerifyRequest =
+                (HelloVerifyRequestMessage)
+                        WorkflowTraceUtil.getFirstSendMessage(
+                                HandshakeMessageType.HELLO_VERIFY_REQUEST, trace);
+        ClientHelloMessage secondClientHello =
+                (ClientHelloMessage)
+                        WorkflowTraceUtil.getLastReceivedMessage(
+                                HandshakeMessageType.CLIENT_HELLO, trace);
+        assertTrue("Did not receive first Client Hello messages", firstClientHello != null);
+        assertTrue("Did not receive second Client Hello messages", secondClientHello != null);
 
-                            testIfClientHelloFieldsAreEqualWithoutCookie(
-                                    firstClientHello, secondClientHello);
+        assertTrue(
+                "Did not receive first Client Hello messages without cookie",
+                firstClientHello.getCookieLength().getValue() == 0);
 
-                            assertTrue(
-                                    "Did not recive the cookie from the hello verify request message in the second client hello message.",
-                                    helloVerifyRequest
-                                            .getCookie()
-                                            .equals(secondClientHello.getCookie()));
-                        });
+        testIfClientHelloFieldsAreEqualWithoutCookie(firstClientHello, secondClientHello);
+
+        assertTrue(
+                "Did not recive the cookie from the hello verify request message in the second client hello message.",
+                helloVerifyRequest.getCookie().equals(secondClientHello.getCookie()));
     }
 
     /**
      * This method checks if the values of the two passed \{@link ClientHelloMessage} are identical.
      * The value of the cookie is not considered. If both messages are different, an \{@link
-     * AssertionException} is thrown.
+     * AssertionError} is thrown.
      *
      * @param firstClientHello the first \{@link ClientHelloMessage} send from the client
      * @param retryClientHello the second \{@link ClientHelloMessage} send from the client

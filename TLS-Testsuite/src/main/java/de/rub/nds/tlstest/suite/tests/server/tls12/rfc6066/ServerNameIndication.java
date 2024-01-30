@@ -10,11 +10,13 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc6066;
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ServerNameIndicationExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.ServerNamePair;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -25,7 +27,6 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class ServerNameIndication extends Tls12Test {
@@ -41,9 +42,8 @@ public class ServerNameIndication extends Tls12Test {
     @AnvilTest(id = "6066-R1bTAhZhmS")
     @MethodCondition(method = "sniActive")
     @EnforcedSenderRestriction
-    public void moreThanOneNameOfTheSameType(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void moreThanOneNameOfTheSameType(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddServerNameIndicationExtension(true);
 
         ServerNamePair pair =
@@ -68,6 +68,8 @@ public class ServerNameIndication extends Tls12Test {
         workflowTrace.addTlsActions(
                 new SendAction(clientHello), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
+        ;
     }
 }

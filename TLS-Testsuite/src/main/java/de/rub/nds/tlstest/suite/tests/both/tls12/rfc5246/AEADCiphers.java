@@ -9,6 +9,7 @@ package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -16,6 +17,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -23,7 +25,6 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class AEADCiphers extends Tls12Test {
 
@@ -33,8 +34,8 @@ public class AEADCiphers extends Tls12Test {
     @ValueConstraints({
         @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
     })
-    public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidAuthTag(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
@@ -47,15 +48,13 @@ public class AEADCiphers extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, msg);
     }
 
     public boolean recordLengthAllowsModification(Integer lengthCandidate) {
@@ -74,8 +73,8 @@ public class AEADCiphers extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidCiphertext(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
@@ -91,14 +90,12 @@ public class AEADCiphers extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, msg);
     }
 }

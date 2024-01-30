@@ -12,6 +12,7 @@ import static org.junit.Assert.*;
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -25,6 +26,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -46,7 +48,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class KeyShare extends Tls13Test {
@@ -58,9 +59,8 @@ public class KeyShare extends Tls13Test {
         handshake with an "illegal_parameter" alert if one is violated.
     */
     @EnforcedSenderRestriction
-    public void testOrderOfKeyshareEntries(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void testOrderOfKeyshareEntries(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         List<NamedGroup> groups =
                 new ArrayList<NamedGroup>() {
@@ -78,35 +78,30 @@ public class KeyShare extends Tls13Test {
         c.setDefaultClientNamedGroups(groups);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
-                            ServerHelloMessage shm =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            if (alert != null && shm == null) {
-                                assertEquals(
-                                        "No fatal alert received",
-                                        AlertLevel.FATAL.getValue(),
-                                        alert.getLevel().getValue().byteValue());
-                                Validator.testAlertDescription(
-                                        i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                                i.addAdditionalResultInfo("Received alert");
-                                return;
-                            }
+        State state = runner.execute(workflowTrace, c);
 
-                            assertTrue(
-                                    AssertMsgs.WORKFLOW_NOT_EXECUTED
-                                            + ", server likely selected the wrong key share",
-                                    i.getWorkflowTrace().executedAsPlanned());
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
+        ServerHelloMessage shm = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        if (alert != null && shm == null) {
+            assertEquals(
+                    "No fatal alert received",
+                    AlertLevel.FATAL.getValue(),
+                    alert.getLevel().getValue().byteValue());
+            Validator.testAlertDescription(
+                    state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
+            testCase.addAdditionalResultInfo("Received alert");
+            return;
+        }
+
+        assertTrue(
+                AssertMsgs.WORKFLOW_NOT_EXECUTED + ", server likely selected the wrong key share",
+                state.getWorkflowTrace().executedAsPlanned());
     }
 
     @AnvilTest(id = "8446-R2rb1WZoQo")
-    public void serverOnlyOffersOneKeyshare(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void serverOnlyOffersOneKeyshare(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         List<NamedGroup> supportedTls13 = context.getFeatureExtractionResult().getTls13Groups();
 
         // place selected group at the top to avoid (optional) HRR
@@ -116,58 +111,55 @@ public class KeyShare extends Tls13Test {
         supportedTls13.add(0, selectedGroup);
 
         c.setDefaultClientNamedGroups(supportedTls13);
-        performOneKeyshareTest(c, runner);
+        performOneKeyshareTest(c, runner, testCase);
     }
 
     @AnvilTest(id = "8446-TKn1mNn5mY")
     @ExcludeParameter("NAMED_GROUP")
     public void serverOnlyOffersOneKeyshareAllGroupsAtOnce(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         List<NamedGroup> supportedTls13 = context.getFeatureExtractionResult().getTls13Groups();
         c.setDefaultClientKeyShareNamedGroups(supportedTls13);
         c.setDefaultClientNamedGroups(supportedTls13);
-        performOneKeyshareTest(c, runner);
+        performOneKeyshareTest(c, runner, testCase);
     }
 
-    public void performOneKeyshareTest(Config c, WorkflowRunner runner) {
+    public void performOneKeyshareTest(Config c, WorkflowRunner runner, AnvilTestCase testCase) {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            ServerHelloMessage serverHello =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertTrue("No ServerHello has been received", serverHello != null);
-                            KeyShareExtensionMessage keyshare =
-                                    serverHello.getExtension(KeyShareExtensionMessage.class);
-                            if (serverHello.isTls13HelloRetryRequest()) {
-                                i.addAdditionalResultInfo("Server enforced own preferred group");
-                                assertTrue(
-                                        "Server requested an unproposed group in HelloRetryRequest",
-                                        c.getDefaultClientNamedGroups()
-                                                .contains(
-                                                        keyshare.getKeyShareList().stream()
-                                                                .map(KeyShareEntry::getGroupConfig)
-                                                                .collect(Collectors.toList())
-                                                                .get(0)));
-                            } else {
-                                Validator.executedAsPlanned(i);
-                                assertTrue(
-                                        "Server selected group for which no Key Share was sent outside of HelloRetryRequest",
-                                        c.getDefaultClientKeyShareNamedGroups()
-                                                .contains(
-                                                        keyshare.getKeyShareList().stream()
-                                                                .map(KeyShareEntry::getGroupConfig)
-                                                                .collect(Collectors.toList())
-                                                                .get(0)));
-                            }
-                            assertEquals(
-                                    "Server offered more than one keyshare entry",
-                                    1,
-                                    keyshare.getKeyShareList().size());
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        ServerHelloMessage serverHello =
+                state.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
+        assertTrue("No ServerHello has been received", serverHello != null);
+        KeyShareExtensionMessage keyshare =
+                serverHello.getExtension(KeyShareExtensionMessage.class);
+        if (serverHello.isTls13HelloRetryRequest()) {
+            testCase.addAdditionalResultInfo("Server enforced own preferred group");
+            assertTrue(
+                    "Server requested an unproposed group in HelloRetryRequest",
+                    c.getDefaultClientNamedGroups()
+                            .contains(
+                                    keyshare.getKeyShareList().stream()
+                                            .map(KeyShareEntry::getGroupConfig)
+                                            .collect(Collectors.toList())
+                                            .get(0)));
+        } else {
+            Validator.executedAsPlanned(state, testCase);
+            assertTrue(
+                    "Server selected group for which no Key Share was sent outside of HelloRetryRequest",
+                    c.getDefaultClientKeyShareNamedGroups()
+                            .contains(
+                                    keyshare.getKeyShareList().stream()
+                                            .map(KeyShareEntry::getGroupConfig)
+                                            .collect(Collectors.toList())
+                                            .get(0)));
+        }
+        assertEquals(
+                "Server offered more than one keyshare entry",
+                1,
+                keyshare.getKeyShareList().size());
     }
 
     public List<DerivationParameter<Config, NamedGroup>> getLegacyGroups(DerivationScope scope) {
@@ -180,9 +172,8 @@ public class KeyShare extends Tls13Test {
 
     @AnvilTest(id = "8446-KdkvUJX3HK")
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getLegacyGroups")
-    public void serverAcceptsDeprecatedGroups(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void serverAcceptsDeprecatedGroups(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         List<NamedGroup> groups = NamedGroup.getImplemented();
         groups.removeIf(i -> i.isTls13());
         performDeprecatedGroupsTest(c, runner);
@@ -191,8 +182,8 @@ public class KeyShare extends Tls13Test {
     @AnvilTest(id = "8446-1vps8J91dU")
     @ExcludeParameter("NAMED_GROUP")
     public void serverAcceptsDeprecatedGroupsAllAtOnce(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         List<NamedGroup> groups = NamedGroup.getImplemented();
         groups.removeIf(i -> i.isTls13());
         c.setDefaultClientNamedGroups(groups);
@@ -205,39 +196,36 @@ public class KeyShare extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         List<NamedGroup> groups = c.getDefaultClientKeyShareNamedGroups();
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            if (WorkflowTraceUtil.didReceiveMessage(
-                                            HandshakeMessageType.SERVER_HELLO, trace)
-                                    && trace.getFirstReceivedMessage(ServerHelloMessage.class)
-                                            .containsExtension(ExtensionType.KEY_SHARE)) {
-                                KeyShareExtensionMessage ksExt =
-                                        trace.getFirstReceivedMessage(ServerHelloMessage.class)
-                                                .getExtension(KeyShareExtensionMessage.class);
-                                assertFalse(
-                                        "Server accepted a deprecated group",
-                                        groups.contains(
-                                                ksExt.getKeyShareList().stream()
-                                                        .map(KeyShareEntry::getGroupConfig)
-                                                        .collect(Collectors.toList())
-                                                        .get(0)));
-                                // other groups may not be used - even in HelloRetryRequest
-                                assertTrue(
-                                        "Server selected an unproposed group",
-                                        groups.contains(
-                                                ksExt.getKeyShareList().stream()
-                                                        .map(KeyShareEntry::getGroupConfig)
-                                                        .collect(Collectors.toList())
-                                                        .get(0)));
-                            }
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        WorkflowTrace trace = state.getWorkflowTrace();
+        if (WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.SERVER_HELLO, trace)
+                && trace.getFirstReceivedMessage(ServerHelloMessage.class)
+                        .containsExtension(ExtensionType.KEY_SHARE)) {
+            KeyShareExtensionMessage ksExt =
+                    trace.getFirstReceivedMessage(ServerHelloMessage.class)
+                            .getExtension(KeyShareExtensionMessage.class);
+            assertFalse(
+                    "Server accepted a deprecated group",
+                    groups.contains(
+                            ksExt.getKeyShareList().stream()
+                                    .map(KeyShareEntry::getGroupConfig)
+                                    .collect(Collectors.toList())
+                                    .get(0)));
+            // other groups may not be used - even in HelloRetryRequest
+            assertTrue(
+                    "Server selected an unproposed group",
+                    groups.contains(
+                            ksExt.getKeyShareList().stream()
+                                    .map(KeyShareEntry::getGroupConfig)
+                                    .collect(Collectors.toList())
+                                    .get(0)));
+        }
     }
 
     @AnvilTest(id = "8446-tCzswEB5Ua")
-    public void includeUnknownGroup(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void includeUnknownGroup(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         byte[] undefinedGroup = new byte[] {(byte) 123, 124};
@@ -259,14 +247,15 @@ public class KeyShare extends Tls13Test {
                 clientHello.getExtension(KeyShareExtensionMessage.class);
         keyShareExtension.setKeyShareListBytes(Modifiable.insert(completeEntry, 0));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, config);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "8446-Pew9n1pYvc")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
     @Tag("new")
-    public void rejectsPointsNotOnCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void rejectsPointsNotOnCurve(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
@@ -295,20 +284,18 @@ public class KeyShare extends Tls13Test {
         workflowTrace.addTlsAction(new SendAction(clientHello));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            if (WorkflowTraceUtil.didReceiveMessage(
-                                    HandshakeMessageType.SERVER_HELLO, i.getWorkflowTrace())) {
-                                assertTrue(
-                                        "Server sent a Server Hello that is not a Hello Retry Request",
-                                        i.getWorkflowTrace()
-                                                .getLastReceivedMessage(ServerHelloMessage.class)
-                                                .isTls13HelloRetryRequest());
-                            } else {
-                                Validator.receivedFatalAlert(i);
-                            }
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        if (WorkflowTraceUtil.didReceiveMessage(
+                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace())) {
+            assertTrue(
+                    "Server sent a Server Hello that is not a Hello Retry Request",
+                    state.getWorkflowTrace()
+                            .getLastReceivedMessage(ServerHelloMessage.class)
+                            .isTls13HelloRetryRequest());
+        } else {
+            Validator.receivedFatalAlert(state, testCase);
+        }
     }
 
     @AnvilTest(id = "8446-5Vqv9qrKQQ")
@@ -316,8 +303,8 @@ public class KeyShare extends Tls13Test {
     @ManualConfig(identifiers = "FFDHE_SHARE_OUT_OF_BOUNDS")
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getFfdheGroups")
     @Tag("new")
-    public void ffdheShareOutOfBounds(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void ffdheShareOutOfBounds(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         FFDHEGroup ffdheGroup = GroupFactory.getGroup(selectedGroup);
@@ -355,7 +342,8 @@ public class KeyShare extends Tls13Test {
         clientHello.getExtension(KeyShareExtensionMessage.class).setKeyShareList(keyShareList);
         worklfowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(worklfowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(worklfowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     public List<DerivationParameter<Config, NamedGroup>> getFfdheGroups(DerivationScope scope) {
@@ -369,9 +357,8 @@ public class KeyShare extends Tls13Test {
     @AnvilTest(id = "8446-sa4RjSVVNr")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
     @Tag("new")
-    public void abortsWhenSharedSecretIsZero(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void abortsWhenSharedSecretIsZero(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
@@ -397,20 +384,18 @@ public class KeyShare extends Tls13Test {
         workflowTrace.addTlsAction(new SendAction(clientHello));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            if (WorkflowTraceUtil.didReceiveMessage(
-                                    HandshakeMessageType.SERVER_HELLO, i.getWorkflowTrace())) {
-                                assertTrue(
-                                        "Server sent a Server Hello that is not a Hello Retry Request",
-                                        i.getWorkflowTrace()
-                                                .getLastReceivedMessage(ServerHelloMessage.class)
-                                                .isTls13HelloRetryRequest());
-                            } else {
-                                Validator.receivedFatalAlert(i);
-                            }
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        if (WorkflowTraceUtil.didReceiveMessage(
+                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace())) {
+            assertTrue(
+                    "Server sent a Server Hello that is not a Hello Retry Request",
+                    state.getWorkflowTrace()
+                            .getLastReceivedMessage(ServerHelloMessage.class)
+                            .isTls13HelloRetryRequest());
+        } else {
+            Validator.receivedFatalAlert(state, testCase);
+        }
     }
 
     public boolean isXCurve(NamedGroup group) {

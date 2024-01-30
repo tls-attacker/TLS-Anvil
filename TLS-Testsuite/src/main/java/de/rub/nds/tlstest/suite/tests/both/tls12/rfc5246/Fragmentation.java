@@ -13,6 +13,7 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -24,6 +25,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ChangeConnectionTimeoutAction;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
@@ -38,15 +40,13 @@ import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class Fragmentation extends Tls12Test {
 
     @AnvilTest(id = "5246-bXbN8uEo2c")
     @EnforcedSenderRestriction
-    public void sendZeroLengthRecord_CCS(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendZeroLengthRecord_CCS(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setUseAllProvidedRecords(true);
 
         Record r = new Record();
@@ -63,13 +63,13 @@ public class Fragmentation extends Tls12Test {
                 new SendAction(ActionOption.MAY_FAIL, new FinishedMessage()),
                 new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "5246-swjhCGVQMb")
-    public void sendZeroLengthApplicationRecord(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendZeroLengthApplicationRecord(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         ApplicationMessage appMsg = new ApplicationMessage();
 
@@ -91,35 +91,31 @@ public class Fragmentation extends Tls12Test {
                 new ChangeConnectionTimeoutAction(reducedTimeout);
         workflowTrace.addTlsActions(changeTimeoutAction, sendAction, new GenericReceiveAction());
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, trace.executedAsPlanned());
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                            i.addAdditionalResultInfo("Evaluated with timeout " + reducedTimeout);
-                            if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta()
-                                    > 0) {
-                                assertNull("Received alert message", msg);
-                                assertFalse("Socket was closed", Validator.socketClosed(i));
-                            } else {
-                                if (msg != null) {
-                                    assertEquals(
-                                            "SUT sent an alert that was not a Close Notify",
-                                            AlertDescription.CLOSE_NOTIFY.getValue(),
-                                            (byte) msg.getDescription().getValue());
-                                }
-                            }
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, trace.executedAsPlanned());
+
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        testCase.addAdditionalResultInfo("Evaluated with timeout " + reducedTimeout);
+        if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta() > 0) {
+            assertNull("Received alert message", msg);
+            assertFalse("Socket was closed", Validator.socketClosed(state));
+        } else {
+            if (msg != null) {
+                assertEquals(
+                        "SUT sent an alert that was not a Close Notify",
+                        AlertDescription.CLOSE_NOTIFY.getValue(),
+                        (byte) msg.getDescription().getValue());
+            }
+        }
     }
 
     @AnvilTest(id = "5246-q5y1zcoCCW")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("emptyRecord")
-    public void sendEmptyApplicationRecord(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendEmptyApplicationRecord(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         ApplicationMessage appMsg = new ApplicationMessage();
 
@@ -133,13 +129,14 @@ public class Fragmentation extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "5246-5JmcCtfFY3")
     @Tag("emptyRecord")
-    public void sendEmptyFinishedRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendEmptyFinishedRecord(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.HANDSHAKE);
@@ -153,15 +150,15 @@ public class Fragmentation extends Tls12Test {
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
         workflowTrace.addTlsActions(fin, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "5246-oqJiBwUXN8")
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExcludeParameter("RECORD_LENGTH")
-    public void sendRecordWithPlaintextOver2pow14(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendRecordWithPlaintextOver2pow14(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         ApplicationMessage msg = new ApplicationMessage();
         msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
@@ -180,23 +177,18 @@ public class Fragmentation extends Tls12Test {
                 sendOverflow,
                 new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.RECORD_OVERFLOW, alert);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW, alert);
     }
 
     @AnvilTest(id = "5246-6w2UjD5RGT")
     @ExcludeParameter("RECORD_LENGTH")
     public void sendRecordWithCiphertextOver2pow14plus2048(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         Record overflowRecord = new Record();
         overflowRecord.setProtocolMessageBytes(
@@ -212,16 +204,11 @@ public class Fragmentation extends Tls12Test {
                 sendOverflow,
                 new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.RECORD_OVERFLOW, alert);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW, alert);
     }
 
     @NonCombinatorialAnvilTest(id = "5246-M5X6WTePcK")

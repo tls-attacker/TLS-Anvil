@@ -15,6 +15,7 @@ import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -22,6 +23,7 @@ import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -32,7 +34,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class AlertProtocol extends Tls13Test {
 
@@ -40,9 +41,8 @@ public class AlertProtocol extends Tls13Test {
     @IncludeParameter("ALERT")
     @DynamicValueConstraints(affectedIdentifiers = "ALERT", methods = "isMeantToBeFatalLevel")
     @Tag("new")
-    public void treatsFatalAlertsAsFatalHandshake(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void treatsFatalAlertsAsFatalHandshake(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace trace =
                 runner.generateWorkflowTraceUntilSendingMessage(
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -55,8 +55,8 @@ public class AlertProtocol extends Tls13Test {
     @DynamicValueConstraints(affectedIdentifiers = "ALERT", methods = "isMeantToBeFatalLevel")
     @Tag("new")
     public void treatsFatalAlertsAsFatalPostHandshake(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         performFatalAlertWithWarningLevelTest(trace, runner, config);
     }
@@ -65,8 +65,8 @@ public class AlertProtocol extends Tls13Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void treatsUnknownWarningAlertsAsFatalHandshake(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace trace =
                 runner.generateWorkflowTraceUntilSendingMessage(
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -77,8 +77,8 @@ public class AlertProtocol extends Tls13Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void treatsUnknownWarningAlertsAsFatalPostHandshake(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         peformUnknownWarningAlertTest(trace, runner, config);
     }
@@ -87,8 +87,8 @@ public class AlertProtocol extends Tls13Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void treatsUnknownFatalAlertsAsFatalHandshake(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace trace =
                 runner.generateWorkflowTraceUntilSendingMessage(
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
@@ -99,8 +99,8 @@ public class AlertProtocol extends Tls13Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void treatsUnknownFatalAlertsAsFatalPostHandshake(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         peformUnknownFatalAlertTest(trace, runner, config);
     }
@@ -108,8 +108,8 @@ public class AlertProtocol extends Tls13Test {
     @AnvilTest(id = "8446-V9hFSg6hoE")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
-    public void sendsCloseNotify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void sendsCloseNotify(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         AlertMessage alert = new AlertMessage();
         alert.setConfig(AlertLevel.WARNING, AlertDescription.CLOSE_NOTIFY);
@@ -122,16 +122,13 @@ public class AlertProtocol extends Tls13Test {
         trace.addTlsAction(sendAlert);
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, config)
-                .validateFinal(
-                        i -> {
-                            AlertMessage receivedAlert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            assertNotNull("No alert has been received", receivedAlert);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.CLOSE_NOTIFY, receivedAlert);
-                        });
+        State state = runner.execute(trace, config);
+
+        AlertMessage receivedAlert =
+                state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        assertNotNull("No alert has been received", receivedAlert);
+        Validator.testAlertDescription(
+                state, testCase, AlertDescription.CLOSE_NOTIFY, receivedAlert);
     }
 
     private void peformUnknownFatalAlertTest(
@@ -143,13 +140,11 @@ public class AlertProtocol extends Tls13Test {
         trace.addTlsAction(new SendAction(alert));
         catchOptionalAlertResponse(trace, config);
 
-        runner.execute(trace, config)
-                .validateFinal(
-                        i -> {
-                            assertTrue(
-                                    "The socket has not been closed for an unknown alert with level fatal",
-                                    Validator.socketClosed(i));
-                        });
+        State state = runner.execute(trace, config);
+
+        assertTrue(
+                "The socket has not been closed for an unknown alert with level fatal",
+                Validator.socketClosed(state));
     }
 
     private void peformUnknownWarningAlertTest(
@@ -161,13 +156,11 @@ public class AlertProtocol extends Tls13Test {
         trace.addTlsAction(new SendAction(alert));
         catchOptionalAlertResponse(trace, config);
 
-        runner.execute(trace, config)
-                .validateFinal(
-                        i -> {
-                            assertTrue(
-                                    "The socket has not been closed for an unknown alert with level warning",
-                                    Validator.socketClosed(i));
-                        });
+        State state = runner.execute(trace, config);
+
+        assertTrue(
+                "The socket has not been closed for an unknown alert with level warning",
+                Validator.socketClosed(state));
     }
 
     public boolean isMeantToBeFatalLevel(AlertDescription alert) {
@@ -197,13 +190,11 @@ public class AlertProtocol extends Tls13Test {
         trace.addTlsAction(new SendAction(alert));
         catchOptionalAlertResponse(trace, config);
 
-        runner.execute(trace, config)
-                .validateFinal(
-                        i -> {
-                            assertTrue(
-                                    "The socket has not been closed for a fatal alert with level warning",
-                                    Validator.socketClosed(i));
-                        });
+        State state = runner.execute(trace, config);
+
+        assertTrue(
+                "The socket has not been closed for a fatal alert with level warning",
+                Validator.socketClosed(state));
     }
 
     private void catchOptionalPostHandshakeMessage(WorkflowTrace trace) {

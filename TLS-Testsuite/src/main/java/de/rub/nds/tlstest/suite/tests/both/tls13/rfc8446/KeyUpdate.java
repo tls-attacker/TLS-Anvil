@@ -11,6 +11,7 @@ import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -21,6 +22,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.KeyUpdateMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -30,16 +32,14 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class KeyUpdate extends Tls13Test {
 
     @AnvilTest(id = "8446-KAEXNq6tsi")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
-    public void sendKeyUpdateBeforeFinished(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void sendKeyUpdateBeforeFinished(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         config.setDefaultKeyUpdateRequestMode(KeyUpdateRequest.UPDATE_REQUESTED);
 
         WorkflowTrace workflowTrace =
@@ -48,18 +48,16 @@ public class KeyUpdate extends Tls13Test {
         workflowTrace.addTlsAction(new SendAction(new KeyUpdateMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE);
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.receivedFatalAlert(state, testCase);
+        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 
     @AnvilTest(id = "8446-Dy4H1oQ8bc")
     @Tag("new")
-    public void sendUnknownRequestMode(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void sendUnknownRequestMode(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         KeyUpdateMessage keyUpdate = new KeyUpdateMessage();
@@ -67,19 +65,16 @@ public class KeyUpdate extends Tls13Test {
         workflowTrace.addTlsAction(new SendAction(keyUpdate));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            Validator.testAlertDescription(i, AlertDescription.ILLEGAL_PARAMETER);
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.receivedFatalAlert(state, testCase);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "8446-J6tVdjJCzF")
     @Tag("new")
-    public void respondsWithValidKeyUpdate(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void respondsWithValidKeyUpdate(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         config.setDefaultKeyUpdateRequestMode(KeyUpdateRequest.UPDATE_REQUESTED);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -87,38 +82,28 @@ public class KeyUpdate extends Tls13Test {
         workflowTrace.addTlsAction(new SendAction(keyUpdate));
         workflowTrace.addTlsAction(new ReceiveAction(new KeyUpdateMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            KeyUpdateMessage receivedKeyUpdate =
-                                    i.getWorkflowTrace()
-                                            .getLastReceivedMessage(KeyUpdateMessage.class);
-                            assertNotNull(
-                                    "Did not receive a KeyUpdate response", receivedKeyUpdate);
-                            assertEquals(
-                                    "Peer did not set the correct KeyUpdate mode",
-                                    (byte) KeyUpdateRequest.UPDATE_NOT_REQUESTED.getValue(),
-                                    (byte) receivedKeyUpdate.getRequestMode().getValue());
-                            for (Record record :
-                                    workflowTrace.getLastReceivingAction().getReceivedRecords()) {
-                                if (record.getContentMessageType()
-                                        == ProtocolMessageType.HANDSHAKE) {
-                                    assertTrue(
-                                            "Invalid authentication tag for received KeyUpdateMessage",
-                                            ((Record) record)
-                                                    .getComputations()
-                                                    .getAuthenticationTagValid());
-                                }
-                            }
-                        });
+        State state = runner.execute(workflowTrace, config);
+        Validator.executedAsPlanned(state, testCase);
+        KeyUpdateMessage receivedKeyUpdate =
+                state.getWorkflowTrace().getLastReceivedMessage(KeyUpdateMessage.class);
+        assertNotNull("Did not receive a KeyUpdate response", receivedKeyUpdate);
+        assertEquals(
+                "Peer did not set the correct KeyUpdate mode",
+                (byte) KeyUpdateRequest.UPDATE_NOT_REQUESTED.getValue(),
+                (byte) receivedKeyUpdate.getRequestMode().getValue());
+        for (Record record : workflowTrace.getLastReceivingAction().getReceivedRecords()) {
+            if (record.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
+                assertTrue(
+                        "Invalid authentication tag for received KeyUpdateMessage",
+                        record.getComputations().getAuthenticationTagValid());
+            }
+        }
     }
 
     @AnvilTest(id = "8446-fFh7mHrXow")
     @Tag("new")
-    public void appDataUnderNewKeysSucceeds(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void appDataUnderNewKeysSucceeds(WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         config.setDefaultKeyUpdateRequestMode(KeyUpdateRequest.UPDATE_REQUESTED);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -127,17 +112,13 @@ public class KeyUpdate extends Tls13Test {
         workflowTrace.addTlsAction(new ReceiveAction(new KeyUpdateMessage()));
         workflowTrace.addTlsAction(new SendAction(new ApplicationMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            assertTrue(
-                                    "Did not receive a KeyUpdate in response",
-                                    WorkflowTraceUtil.didReceiveMessage(
-                                            HandshakeMessageType.KEY_UPDATE, trace));
-                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                            assertNull("Received alert message", msg);
-                            assertFalse("Socket was closed", Validator.socketClosed(i));
-                        });
+        State state = runner.execute(workflowTrace, config);
+        WorkflowTrace trace = state.getWorkflowTrace();
+        assertTrue(
+                "Did not receive a KeyUpdate in response",
+                WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.KEY_UPDATE, trace));
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        assertNull("Received alert message", msg);
+        assertFalse("Socket was closed", Validator.socketClosed(state));
     }
 }

@@ -13,12 +13,14 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -28,7 +30,6 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.InvalidCCSContentDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class ChangeCipherSpecProtocol extends Tls12Test {
 
@@ -43,8 +44,8 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     @IncludeParameter("INVALID_CCS_CONTENT")
-    public void ccsContentTest(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void ccsContentTest(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         byte[] content =
                 parameterCombination
@@ -61,18 +62,15 @@ public class ChangeCipherSpecProtocol extends Tls12Test {
                 new SendAction(ActionOption.MAY_FAIL, new FinishedMessage()),
                 new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            ChangeCipherSpecMessage msg =
-                                    trace.getFirstReceivedMessage(ChangeCipherSpecMessage.class);
-                            if (msg != null) {
-                                assertEquals(1, msg.getCcsProtocolType().getValue().length);
-                                assertEquals(1, msg.getCcsProtocolType().getValue()[0]);
-                            }
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+
+        ChangeCipherSpecMessage msg = trace.getFirstReceivedMessage(ChangeCipherSpecMessage.class);
+        if (msg != null) {
+            assertEquals(1, msg.getCcsProtocolType().getValue().length);
+            assertEquals(1, msg.getCcsProtocolType().getValue()[0]);
+        }
     }
 }

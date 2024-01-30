@@ -14,6 +14,7 @@ import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -29,6 +30,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -45,7 +47,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class KeyShare extends Tls13Test {
@@ -83,8 +84,8 @@ public class KeyShare extends Tls13Test {
     @AnvilTest(id = "8446-F9bWYMiB45")
     @ExcludeParameter("NAMED_GROUP")
     @ModelFromScope(modelType = "CERTIFICATE")
-    public void selectInvalidKeyshare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void selectInvalidKeyshare(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         List<NamedGroup> groups = context.getFeatureExtractionResult().getNamedGroups();
@@ -123,14 +124,15 @@ public class KeyShare extends Tls13Test {
             keyShareExt.setKeyShareListBytes(Modifiable.explicit(stream.toByteArray()));
         }
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8446-YMYRto48Jg")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
     @Tag("new")
-    public void rejectsPointsNotOnCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void rejectsPointsNotOnCurve(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
@@ -159,7 +161,8 @@ public class KeyShare extends Tls13Test {
 
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     public boolean isSecpCurve(NamedGroup group) {
@@ -170,9 +173,8 @@ public class KeyShare extends Tls13Test {
     @AnvilTest(id = "8446-h4RyAhoVZy")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
     @Tag("new")
-    public void abortsWhenSharedSecretIsZero(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void abortsWhenSharedSecretIsZero(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
@@ -197,7 +199,8 @@ public class KeyShare extends Tls13Test {
 
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     public boolean isXCurve(NamedGroup group) {
@@ -222,8 +225,8 @@ public class KeyShare extends Tls13Test {
     @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getFfdheGroups")
     @Tag("new")
-    public void ffdheShareOutOfBounds(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void ffdheShareOutOfBounds(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         FFDHEGroup ffdheGroup = GroupFactory.getGroup(selectedGroup);
@@ -261,7 +264,8 @@ public class KeyShare extends Tls13Test {
         serverHello.getExtension(KeyShareExtensionMessage.class).setKeyShareList(keyShareList);
         worklfowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(worklfowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(worklfowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     public List<DerivationParameter<Config, NamedGroup>> getFfdheGroups(DerivationScope scope) {

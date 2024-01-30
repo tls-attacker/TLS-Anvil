@@ -11,6 +11,7 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PaddingExtensionMessage;
@@ -20,7 +21,6 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class PaddingExtension extends TlsGenericTest {
@@ -31,11 +31,10 @@ public class PaddingExtension extends TlsGenericTest {
     @AnvilTest(id = "XLF-thAfdtNTPh")
     @ExcludeParameter("INCLUDE_PADDING_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void paddingExtensionLengthTLS12(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void paddingExtensionLengthTLS12(AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         config.setAddPaddingExtension(true);
-        genericExtensionLengthTest(runner, argumentAccessor, config, PaddingExtensionMessage.class);
+        genericExtensionLengthTest(runner, testCase, config, PaddingExtensionMessage.class);
     }
 
     @Tag("tls13")
@@ -44,10 +43,9 @@ public class PaddingExtension extends TlsGenericTest {
     @AnvilTest(id = "XLF-a56v24NnM5")
     @ExcludeParameter("INCLUDE_PADDING_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void paddingExtensionLengthTLS13(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void paddingExtensionLengthTLS13(AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddPaddingExtension(true);
-        genericExtensionLengthTest(runner, argumentAccessor, config, PaddingExtensionMessage.class);
+        genericExtensionLengthTest(runner, testCase, config, PaddingExtensionMessage.class);
     }
 }

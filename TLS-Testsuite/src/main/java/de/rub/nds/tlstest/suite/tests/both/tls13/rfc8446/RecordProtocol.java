@@ -12,6 +12,7 @@ import static org.junit.Assert.*;
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -23,6 +24,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.*;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -32,14 +34,12 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.AdditionalPaddingL
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolMessageTypeDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class RecordProtocol extends Tls13Test {
 
     @AnvilTest(id = "8446-vbFRZNusey")
-    public void invalidRecordContentType(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidRecordContentType(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace trace;
         Record record = new Record();
         record.setContentType(Modifiable.explicit((byte) 0xff));
@@ -51,27 +51,20 @@ public class RecordProtocol extends Tls13Test {
         }
 
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
-
         trace.getFirstAction(SendAction.class).setRecords(record);
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(trace, c);
 
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.UNEXPECTED_MESSAGE, alert);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, alert);
     }
 
     @AnvilTest(id = "8446-PN89HSERKp")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void invalidRecordContentTypeAfterEncryption(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(
@@ -83,24 +76,18 @@ public class RecordProtocol extends Tls13Test {
         sendFinished.setRecords(record);
         workflowTrace.addTlsActions(sendFinished, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
 
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.UNEXPECTED_MESSAGE, alert);
-                        });
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, alert);
     }
 
     @AnvilTest(id = "8446-GXAiyehrdF")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("AUTH_TAG_BITMASK")
-    public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidAuthTag(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
@@ -112,26 +99,19 @@ public class RecordProtocol extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         trace.addTlsActions(appData, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(trace, c);
+        Validator.receivedFatalAlert(state, testCase);
 
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.BAD_RECORD_MAC, alert);
-                        });
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, alert);
     }
 
     @AnvilTest(id = "8446-n1veCSRVjQ")
     // Note that the additional byte is the encoded content type, which we also add
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExcludeParameter("RECORD_LENGTH")
-    public void sendRecordWithPlaintextOver2pow14(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendRecordWithPlaintextOver2pow14(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         ApplicationMessage msg = new ApplicationMessage();
         Record overflowRecord = new Record();
@@ -149,16 +129,10 @@ public class RecordProtocol extends Tls13Test {
                 sendOverflow,
                 new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.RECORD_OVERFLOW, alert);
-                        });
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW, alert);
     }
 
     public boolean recordLengthAllowsModification(Integer lengthCandidate) {
@@ -174,8 +148,8 @@ public class RecordProtocol extends Tls13Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidCiphertext(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
@@ -187,17 +161,11 @@ public class RecordProtocol extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         trace.addTlsActions(appData, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(trace, c);
 
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.BAD_RECORD_MAC, alert);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, alert);
     }
 
     @AnvilTest(id = "8446-i9pq4Yt8pz")
@@ -206,8 +174,8 @@ public class RecordProtocol extends Tls13Test {
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "isReasonableRecordSize")
     @IncludeParameter("ADDITIONAL_PADDING_LENGTH")
-    public void acceptsOptionalPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void acceptsOptionalPadding(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         int selectedPaddingLength =
                 parameterCombination
                         .getParameter(AdditionalPaddingLengthDerivation.class)
@@ -217,11 +185,9 @@ public class RecordProtocol extends Tls13Test {
         }
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.executedAsPlanned(state, testCase);
     }
 
     public boolean isReasonableRecordSize(Integer recordSize) {
@@ -239,8 +205,8 @@ public class RecordProtocol extends Tls13Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @ExcludeParameter("RECORD_LENGTH")
     public void sendRecordWithCiphertextOver2pow14plus256(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         applyTimeoutMultiplier(c, 2.5);
 
@@ -254,24 +220,19 @@ public class RecordProtocol extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendOverflow, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.RECORD_OVERFLOW, alert);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW, alert);
     }
 
     @AnvilTest(id = "8446-aUT8tc8oYz")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("PROTOCOL_MESSAGE_TYPE")
     @Tag("emptyRecord")
-    public void sendEmptyRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendEmptyRecord(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         ProtocolMessageType selectedRecordContentType =
                 parameterCombination
                         .getParameter(ProtocolMessageTypeDerivation.class)
@@ -288,14 +249,14 @@ public class RecordProtocol extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8446-BSsVDoM82Z")
     @ModelFromScope(modelType = "CERTIFICATE")
-    public void sendZeroLengthApplicationRecord(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendZeroLengthApplicationRecord(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         ApplicationMessage appMsg = new ApplicationMessage();
 
         Record r = new Record();
@@ -316,35 +277,29 @@ public class RecordProtocol extends Tls13Test {
                 new ChangeConnectionTimeoutAction(reducedTimeout);
         workflowTrace.addTlsActions(changeTimeoutAction, sendAction, new GenericReceiveAction());
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        state -> {
-                            Validator.executedAsPlanned(state);
-                            AlertMessage msg =
-                                    state.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            state.addAdditionalResultInfo(
-                                    "Evaluated with timeout " + reducedTimeout);
-                            if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta()
-                                    > 0) {
-                                assertNull("Received alert message", msg);
-                                assertFalse("Socket was closed", Validator.socketClosed(state));
-                            } else {
-                                if (msg != null) {
-                                    assertEquals(
-                                            "SUT sent an alert that was not a Close Notify",
-                                            AlertDescription.CLOSE_NOTIFY.getValue(),
-                                            (byte) msg.getDescription().getValue());
-                                }
-                            }
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.executedAsPlanned(state, testCase);
+        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        testCase.addAdditionalResultInfo("Evaluated with timeout " + reducedTimeout);
+        if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta() > 0) {
+            assertNull("Received alert message", msg);
+            assertFalse("Socket was closed", Validator.socketClosed(state));
+        } else {
+            if (msg != null) {
+                assertEquals(
+                        "SUT sent an alert that was not a Close Notify",
+                        AlertDescription.CLOSE_NOTIFY.getValue(),
+                        (byte) msg.getDescription().getValue());
+            }
+        }
     }
 
     @AnvilTest(id = "8446-EmE5eWBxE7")
     @Tag("new")
     public void sendEncryptedHandshakeRecordWithNoNonZeroOctet(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         Record record = getRecordWithOnlyZeroOctets();
 
         WorkflowTrace trace =
@@ -355,20 +310,18 @@ public class RecordProtocol extends Tls13Test {
         // define modified record for finished
         ((SendAction) trace.getLastSendingAction()).setRecords(record);
 
-        runner.execute(trace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE);
-                        });
+        State state = runner.execute(trace, config);
+
+        Validator.receivedFatalAlert(state, testCase);
+        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 
     @AnvilTest(id = "8446-hKUhsUFCnx")
     @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("new")
     public void sendEncryptedAppRecordWithNoNonZeroOctet(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         Record record = getRecordWithOnlyZeroOctets();
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -377,26 +330,21 @@ public class RecordProtocol extends Tls13Test {
         // define modified record for finished
         ((SendAction) trace.getLastSendingAction()).setRecords(record);
 
-        runner.execute(trace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE);
-                        });
+        State state = runner.execute(trace, config);
+
+        Validator.receivedFatalAlert(state, testCase);
+        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 
     @AnvilTest(id = "8446-V3SF3rXAAW")
     @Tag("new")
-    public void checkMinimumRecordProtocolVersions(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void checkMinimumRecordProtocolVersions(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            testReceivedRecordVersions(i.getWorkflowTrace());
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        testReceivedRecordVersions(state.getWorkflowTrace());
     }
 
     private Record getRecordWithOnlyZeroOctets() {

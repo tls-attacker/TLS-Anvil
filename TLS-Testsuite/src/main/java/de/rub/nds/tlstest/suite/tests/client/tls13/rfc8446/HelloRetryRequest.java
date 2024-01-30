@@ -13,6 +13,7 @@ import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
@@ -25,6 +26,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionM
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -44,7 +46,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class HelloRetryRequest extends Tls13Test {
@@ -64,9 +65,8 @@ public class HelloRetryRequest extends Tls13Test {
 
     @AnvilTest(id = "8446-2L9AK4xSva")
     @ExplicitValues(affectedIdentifiers = "NAMED_GROUP", methods = "getUnofferedGroups")
-    public void helloRetryRequestsUnofferedGroup(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        performHelloRetryRequestTest(argumentAccessor, runner);
+    public void helloRetryRequestsUnofferedGroup(AnvilTestCase testCase, WorkflowRunner runner) {
+        performHelloRetryRequestTest(testCase, runner);
     }
 
     public List<DerivationParameter> getUnofferedTls13CipherSuites(DerivationScope scope) {
@@ -84,8 +84,8 @@ public class HelloRetryRequest extends Tls13Test {
     @AnvilTest(id = "8446-bfziReZMw4")
     @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getUnofferedTls13CipherSuites")
     public void helloRetryRequestsUnofferedTls13CipherSuite(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
@@ -94,19 +94,14 @@ public class HelloRetryRequest extends Tls13Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            // illegal parameter is not mentioned in the quote above but is
-                            // mandatory
-                            // for the ServerHello case
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        // illegal parameter is not mentioned in the quote above but is
+        // mandatory
+        // for the ServerHello case
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     public boolean isKeyShareInInitialHello(NamedGroup group) {
@@ -119,14 +114,12 @@ public class HelloRetryRequest extends Tls13Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isKeyShareInInitialHello")
-    public void helloRetryRequestResultsInNoChanges(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        performHelloRetryRequestTest(argumentAccessor, runner);
+    public void helloRetryRequestResultsInNoChanges(AnvilTestCase testCase, WorkflowRunner runner) {
+        performHelloRetryRequestTest(testCase, runner);
     }
 
-    private void performHelloRetryRequestTest(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    private void performHelloRetryRequestTest(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
@@ -135,16 +128,11 @@ public class HelloRetryRequest extends Tls13Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     public boolean isNotKeyShareInInitialHello(NamedGroup group) {
@@ -176,9 +164,8 @@ public class HelloRetryRequest extends Tls13Test {
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @MethodCondition(method = "supportsMultipleNamedGroups")
-    public void sendSecondHelloRetryRequest(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendSecondHelloRetryRequest(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
@@ -198,31 +185,23 @@ public class HelloRetryRequest extends Tls13Test {
                 new SendAction(secondHelloRetry),
                 new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            assertFalse(
-                                    "Client replied to second HelloRetryRequest with ClientHello",
-                                    WorkflowTraceUtil.getLastReceivedMessage(i.getWorkflowTrace())
-                                                    instanceof ClientHelloMessage
-                                            && i.getWorkflowTrace()
-                                                            .getLastReceivingAction()
-                                                            .getReceivedMessages()
-                                                    != null
-                                            && i.getWorkflowTrace()
-                                                    .getLastReceivingAction()
-                                                    .getReceivedMessages()
-                                                    .contains(
-                                                            WorkflowTraceUtil
-                                                                    .getLastReceivedMessage(
-                                                                            i.getWorkflowTrace())));
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.UNEXPECTED_MESSAGE, alert);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        assertFalse(
+                "Client replied to second HelloRetryRequest with ClientHello",
+                WorkflowTraceUtil.getLastReceivedMessage(state.getWorkflowTrace())
+                                instanceof ClientHelloMessage
+                        && state.getWorkflowTrace().getLastReceivingAction().getReceivedMessages()
+                                != null
+                        && state.getWorkflowTrace()
+                                .getLastReceivingAction()
+                                .getReceivedMessages()
+                                .contains(
+                                        WorkflowTraceUtil.getLastReceivedMessage(
+                                                state.getWorkflowTrace())));
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, alert);
     }
 
     private ConditionEvaluationResult supportsMultipleCipherSuites() {
@@ -240,8 +219,8 @@ public class HelloRetryRequest extends Tls13Test {
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @MethodCondition(method = "supportsMultipleCipherSuites")
-    public void cipherSuiteDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void cipherSuiteDisparity(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
@@ -263,16 +242,11 @@ public class HelloRetryRequest extends Tls13Test {
         helloRetryRequest.setSelectedCipherSuite(
                 Modifiable.explicit(helloRetryCipherSuite.getByteValue()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     @AnvilTest(id = "8446-KLkH56oYzC")
@@ -282,8 +256,8 @@ public class HelloRetryRequest extends Tls13Test {
             methods = "isNotKeyShareInInitialHello")
     @ManualConfig(identifiers = "NAMED_GROUP")
     @Tag("new")
-    public void namedGroupDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void namedGroupDisparity(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup actualHelloGroup =
                 ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
@@ -298,16 +272,11 @@ public class HelloRetryRequest extends Tls13Test {
         runner.insertHelloRetryRequest(workflowTrace, hrrNamedGroup);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     @AnvilTest(id = "8446-ncR52WSgGx")
@@ -316,8 +285,8 @@ public class HelloRetryRequest extends Tls13Test {
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @Tag("new")
-    public void versionDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void versionDisparity(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
@@ -334,36 +303,29 @@ public class HelloRetryRequest extends Tls13Test {
                 modifiedServerHello.getExtension(SupportedVersionsExtensionMessage.class);
         supportedVersions.setSupportedVersions(Modifiable.explicit(new byte[] {03, 05}));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     @AnvilTest(id = "8446-6X9hLRk9V4")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
-    public void helloRetryLegacySessionId(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
-        ServerHello.sharedSessionIdTest(workflowTrace, runner);
+    public void helloRetryLegacySessionId(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(runner);
+        ServerHello.sharedSessionIdTest(workflowTrace, runner, testCase);
     }
 
     @AnvilTest(id = "8446-dyTnCEsFo1")
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
-    public void helloRetryCompressionValue(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
-        ServerHello.sharedCompressionValueTest(workflowTrace, runner);
+    public void helloRetryCompressionValue(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(runner);
+        ServerHello.sharedCompressionValueTest(workflowTrace, runner, testCase);
     }
 
     @AnvilTest(id = "8446-qN6nNMX9Sx")
@@ -372,11 +334,10 @@ public class HelloRetryRequest extends Tls13Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
-    public void helloRetryGreaseCipherSuite(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
+    public void helloRetryGreaseCipherSuite(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(runner);
         ServerInitiatedExtensionPoints.sharedGreaseCipherSuiteTest(
-                workflowTrace, runner, parameterCombination);
+                workflowTrace, runner, parameterCombination, testCase);
     }
 
     @AnvilTest(id = "8446-TyCkZKkVMt")
@@ -385,11 +346,10 @@ public class HelloRetryRequest extends Tls13Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
-    public void helloRetryGreaseExtension(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
+    public void helloRetryGreaseExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(runner);
         ServerInitiatedExtensionPoints.sharedServerHelloGreaseExtensionTest(
-                workflowTrace, runner, parameterCombination);
+                workflowTrace, runner, parameterCombination, testCase);
     }
 
     @AnvilTest(id = "8446-vU6BQin9Eo")
@@ -398,16 +358,14 @@ public class HelloRetryRequest extends Tls13Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
-    public void helloRetryGreaseVersionSelected(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(argumentAccessor, runner);
+    public void helloRetryGreaseVersionSelected(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = getSharedTestWorkflowTrace(runner);
         ServerInitiatedExtensionPoints.sharedGreaseVersionTest(
-                workflowTrace, runner, parameterCombination);
+                workflowTrace, runner, parameterCombination, testCase);
     }
 
-    private WorkflowTrace getSharedTestWorkflowTrace(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    private WorkflowTrace getSharedTestWorkflowTrace(WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
@@ -423,37 +381,34 @@ public class HelloRetryRequest extends Tls13Test {
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @Tag("adjusted")
-    public void actsCorrectlyUponHelloRetryRequest(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void actsCorrectlyUponHelloRetryRequest(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace trace =
                 runner.generateWorkflowTraceUntilLastSendingMessage(
                         WorkflowTraceType.SHORT_HELLO, HandshakeMessageType.SERVER_HELLO);
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace executedTrace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(trace, c);
 
-                            ClientHelloMessage firstClientHello =
-                                    (ClientHelloMessage)
-                                            WorkflowTraceUtil.getFirstReceivedMessage(
-                                                    HandshakeMessageType.CLIENT_HELLO, trace);
-                            ClientHelloMessage retryClientHello =
-                                    (ClientHelloMessage)
-                                            WorkflowTraceUtil.getLastReceivedMessage(
-                                                    HandshakeMessageType.CLIENT_HELLO, trace);
-                            assertTrue(
-                                    "Did not receive two Client Hello messages",
-                                    firstClientHello != null
-                                            && retryClientHello != null
-                                            && firstClientHello != retryClientHello);
-                            testIfKeyShareWasUpdated(retryClientHello);
-                            testIfRecordVersionWasAdjusted(executedTrace);
-                            testIfExtensionsAreEqual(firstClientHello, retryClientHello);
-                            testIfClientHelloFieldsAreEqual(firstClientHello, retryClientHello);
-                        });
+        WorkflowTrace executedTrace = state.getWorkflowTrace();
+        Validator.executedAsPlanned(state, testCase);
+
+        ClientHelloMessage firstClientHello =
+                (ClientHelloMessage)
+                        WorkflowTraceUtil.getFirstReceivedMessage(
+                                HandshakeMessageType.CLIENT_HELLO, trace);
+        ClientHelloMessage retryClientHello =
+                (ClientHelloMessage)
+                        WorkflowTraceUtil.getLastReceivedMessage(
+                                HandshakeMessageType.CLIENT_HELLO, trace);
+        assertTrue(
+                "Did not receive two Client Hello messages",
+                firstClientHello != null
+                        && retryClientHello != null
+                        && firstClientHello != retryClientHello);
+        testIfKeyShareWasUpdated(retryClientHello);
+        testIfRecordVersionWasAdjusted(executedTrace);
+        testIfExtensionsAreEqual(firstClientHello, retryClientHello);
+        testIfClientHelloFieldsAreEqual(firstClientHello, retryClientHello);
     }
 
     private void testIfRecordVersionWasAdjusted(WorkflowTrace executedTrace) {
@@ -590,9 +545,8 @@ public class HelloRetryRequest extends Tls13Test {
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getTls12CipherSuites")
-    public void helloRetryRequestsTls12CipherSuite(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        performHelloRetryRequestTest(argumentAccessor, runner);
+    public void helloRetryRequestsTls12CipherSuite(AnvilTestCase testCase, WorkflowRunner runner) {
+        performHelloRetryRequestTest(testCase, runner);
     }
 
     @AnvilTest(id = "8446-2v6S87AwgY")
@@ -601,8 +555,8 @@ public class HelloRetryRequest extends Tls13Test {
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isNotKeyShareInInitialHello")
     @Tag("new")
-    public void copiesCookieValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void copiesCookieValue(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         config.setAddCookieExtension(true);
         runner.setAutoHelloRetryRequest(false);
         NamedGroup selectedGroup =
@@ -612,33 +566,26 @@ public class HelloRetryRequest extends Tls13Test {
         workflowTrace.addTlsAction(new ReceiveAction(new ClientHelloMessage()));
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            ClientHelloMessage secondClientHello =
-                                    (ClientHelloMessage)
-                                            WorkflowTraceUtil.getLastReceivedMessage(
-                                                    HandshakeMessageType.CLIENT_HELLO,
-                                                    workflowTrace);
-                            assertFalse(
-                                    "Did not receive two ClientHello messages",
-                                    secondClientHello
-                                            == WorkflowTraceUtil.getFirstReceivedMessage(
-                                                    HandshakeMessageType.CLIENT_HELLO,
-                                                    workflowTrace));
-                            assertTrue(
-                                    "Did not receive a Cookie Extension in updated ClientHello",
-                                    secondClientHello.containsExtension(ExtensionType.COOKIE));
-                            byte[] receivedCookie =
-                                    secondClientHello
-                                            .getExtension(CookieExtensionMessage.class)
-                                            .getCookie()
-                                            .getValue();
-                            assertArrayEquals(
-                                    "Client sent a wrong cookie value",
-                                    receivedCookie,
-                                    config.getDefaultExtensionCookie());
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        ClientHelloMessage secondClientHello =
+                (ClientHelloMessage)
+                        WorkflowTraceUtil.getLastReceivedMessage(
+                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+        assertFalse(
+                "Did not receive two ClientHello messages",
+                secondClientHello
+                        == WorkflowTraceUtil.getFirstReceivedMessage(
+                                HandshakeMessageType.CLIENT_HELLO, workflowTrace));
+        assertTrue(
+                "Did not receive a Cookie Extension in updated ClientHello",
+                secondClientHello.containsExtension(ExtensionType.COOKIE));
+        byte[] receivedCookie =
+                secondClientHello.getExtension(CookieExtensionMessage.class).getCookie().getValue();
+        assertArrayEquals(
+                "Client sent a wrong cookie value",
+                receivedCookie,
+                config.getDefaultExtensionCookie());
     }
 }

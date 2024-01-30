@@ -13,6 +13,7 @@ import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
@@ -26,7 +27,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class ExtendedMasterSecretExtension extends TlsGenericTest {
 
@@ -48,11 +48,11 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
     public void extendedMasterSecretExtensionLengthTLS12(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+            AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         config.setAddExtendedMasterSecretExtension(true);
         emptyExtensionLengthTest(
-                runner, argumentAccessor, config, ExtendedMasterSecretExtensionMessage.class);
+                runner, testCase, config, ExtendedMasterSecretExtensionMessage.class);
     }
 
     @Tag("tls13")
@@ -63,10 +63,10 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
     @ExcludeParameter("INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void extendedMasterSecretExtensionLengthTLS13(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+            AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddExtendedMasterSecretExtension(true);
         emptyExtensionLengthTest(
-                runner, argumentAccessor, config, ExtendedMasterSecretExtensionMessage.class);
+                runner, testCase, config, ExtendedMasterSecretExtensionMessage.class);
     }
 }

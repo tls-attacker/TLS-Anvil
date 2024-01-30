@@ -15,6 +15,7 @@ import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.bytearray.ModifiableByteArray;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -25,6 +26,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
@@ -37,15 +39,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
     @AnvilTest(id = "5246-1dbRcCn9si")
-    public void versionGreaterThanSupportedByServer(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void versionGreaterThanSupportedByServer(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         ModifiableByteArray protocolVersionSend = Modifiable.explicit(new byte[] {0x03, 0x0F});
 
@@ -57,19 +57,16 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         workflowTrace.addTlsActions(
                 sendAction, new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage msg =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertArrayEquals(
-                                    "Invalid ProtocolVersion negotiated",
-                                    ProtocolVersion.TLS12.getValue(),
-                                    msg.getProtocolVersion().getValue());
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.executedAsPlanned(state, testCase);
+
+        ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        assertArrayEquals(
+                "Invalid ProtocolVersion negotiated",
+                ProtocolVersion.TLS12.getValue(),
+                msg.getProtocolVersion().getValue());
     }
 
     public ConditionEvaluationResult doesSupportLegacyVersions() {
@@ -84,9 +81,8 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
     @AnvilTest(id = "5246-cBgzhL56ow")
     @MethodCondition(method = "doesSupportLegacyVersions")
-    public void versionLowerThanSupportedByServer(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void versionLowerThanSupportedByServer(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         ProtocolVersion version = ProtocolVersion.SSL3;
         Set<ProtocolVersion> versions = context.getFeatureExtractionResult().getSupportedVersions();
@@ -107,24 +103,18 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(cha, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(trace, c);
 
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.PROTOCOL_VERSION, alert);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.PROTOCOL_VERSION, alert);
     }
 
     @AnvilTest(id = "5246-YLok6XJr7R")
     @ExcludeParameter("RECORD_LENGTH")
-    public void acceptAnyRecordVersionNumber(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void acceptAnyRecordVersionNumber(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         Record record = new Record();
         record.setProtocolVersion(Modifiable.explicit(new byte[] {0x03, 0x05}));
@@ -135,7 +125,8 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         workflowTrace.addTlsActions(
                 sendAction, new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     public List<DerivationParameter<Config, byte[]>> getInvalidHighRecordVersion(

@@ -13,6 +13,7 @@ import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -20,6 +21,7 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -30,7 +32,6 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivat
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.*;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class SCSV extends Tls12Test {
@@ -83,8 +84,8 @@ public class SCSV extends Tls12Test {
     @AnvilTest(id = "7507-vRFeTtQWZU")
     @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
-    public void includeFallbackSCSV(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void includeFallbackSCSV(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         CipherSuite cipherSuite =
                 parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         c.setDefaultSelectedProtocolVersion(getVersionForCipherSuite(cipherSuite));
@@ -99,25 +100,20 @@ public class SCSV extends Tls12Test {
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(new SendAction(clientHello), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(trace, c);
+        Validator.receivedFatalAlert(state, testCase);
 
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.INAPPROPRIATE_FALLBACK, alert);
-                        });
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(
+                state, testCase, AlertDescription.INAPPROPRIATE_FALLBACK, alert);
     }
 
     @AnvilTest(id = "7507-tdAiQecjfD")
     @ExplicitValues(affectedIdentifiers = "CIPHER_SUITE", methods = "getOldCiphersuites")
     @MethodCondition(method = "supportsOtherTlsVersions")
     public void includeFallbackSCSV_nonRecommendedCipherSuiteOrder(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         CipherSuite cipherSuite =
                 parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         c.setDefaultSelectedProtocolVersion(getVersionForCipherSuite(cipherSuite));
@@ -132,16 +128,11 @@ public class SCSV extends Tls12Test {
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(new SendAction(clientHello), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(trace, c);
 
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.INAPPROPRIATE_FALLBACK, alert);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(
+                state, testCase, AlertDescription.INAPPROPRIATE_FALLBACK, alert);
     }
 }

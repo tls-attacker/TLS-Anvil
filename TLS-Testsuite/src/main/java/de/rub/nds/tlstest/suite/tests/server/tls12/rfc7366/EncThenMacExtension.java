@@ -16,13 +16,13 @@ import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class EncThenMacExtension extends Tls12Test {
@@ -59,42 +59,31 @@ public class EncThenMacExtension extends Tls12Test {
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isBlockCipher")
     @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @MethodCondition(method = "targetCanBeTested")
-    public void negotiatesEncThenMacExt(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void negotiatesEncThenMacExt(WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddEncryptThenMacExtension(true);
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            assertTrue(
-                                    "Encrypt then mac extension was not negotiated",
-                                    i.getState()
-                                            .getTlsContext()
-                                            .isExtensionNegotiated(ExtensionType.ENCRYPT_THEN_MAC));
-                        });
+        State state = runner.execute(trace, c);
+        assertTrue(
+                "Encrypt then mac extension was not negotiated",
+                state.getTlsContext().isExtensionNegotiated(ExtensionType.ENCRYPT_THEN_MAC));
     }
 
     @AnvilTest(id = "7366-HSEGiXELMF")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNotBlockCipher")
     @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @MethodCondition(method = "targetCanBeTested")
-    public void negotiatesEncThenMacExtOnlyWithBlockCiphers(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void negotiatesEncThenMacExtOnlyWithBlockCiphers(WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddEncryptThenMacExtension(true);
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            assertFalse(
-                                    "Encrypt then mac extension was negotiated, although the selected ciphersuite did not use a block cipher",
-                                    i.getState()
-                                            .getTlsContext()
-                                            .isExtensionNegotiated(ExtensionType.ENCRYPT_THEN_MAC));
-                        });
+        State state = runner.execute(trace, c);
+        assertFalse(
+                "Encrypt then mac extension was negotiated, although the selected ciphersuite did not use a block cipher",
+                state.getTlsContext().isExtensionNegotiated(ExtensionType.ENCRYPT_THEN_MAC));
     }
 }

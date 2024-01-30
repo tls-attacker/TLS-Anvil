@@ -13,6 +13,7 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -20,6 +21,7 @@ import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
@@ -33,7 +35,6 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @Tag("alert")
@@ -49,8 +50,8 @@ public class AlertProtocol extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    public void closeNotify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void closeNotify(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         AlertMessage alert = new AlertMessage();
         alert.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));
@@ -63,23 +64,20 @@ public class AlertProtocol extends Tls12Test {
                 new SendAction(alert),
                 new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.smartExecutedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
-                            if (message == null && Validator.socketClosed(i)) {
-                                i.addAdditionalResultInfo("No close_notify alert received.");
-                                i.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
-                                return;
-                            }
-                            assertTrue("Socket has not been closed", Validator.socketClosed(i));
-                            Validator.receivedWarningAlert(i);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.CLOSE_NOTIFY, message);
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.smartExecutedAsPlanned(state, testCase);
+
+        AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
+        if (message == null && Validator.socketClosed(state)) {
+            testCase.addAdditionalResultInfo("No close_notify alert received.");
+            testCase.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
+            return;
+        }
+        assertTrue("Socket has not been closed", Validator.socketClosed(state));
+        Validator.receivedWarningAlert(state, testCase);
+        Validator.testAlertDescription(state, testCase, AlertDescription.CLOSE_NOTIFY, message);
     }
 
     @AnvilTest(id = "5246-fGCWkS7TDf")
@@ -87,9 +85,8 @@ public class AlertProtocol extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    public void abortAfterFatalAlert_sendBeforeCCS(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void abortAfterFatalAlert_sendBeforeCCS(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(
                         WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
@@ -108,13 +105,11 @@ public class AlertProtocol extends Tls12Test {
                         new FinishedMessage()),
                 new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            if (Validator.socketClosed(i)) {
-                                i.setTestResult(TestResult.STRICTLY_SUCCEEDED);
-                            }
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        if (Validator.socketClosed(state)) {
+            testCase.setTestResult(TestResult.STRICTLY_SUCCEEDED);
+        } // TODO does that not always succeed? not set gets treated as succeeded
     }
 
     @AnvilTest(id = "5246-hD2QPXyAHw")
@@ -123,8 +118,8 @@ public class AlertProtocol extends Tls12Test {
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
     public void abortAfterFatalAlert_sendAfterServerHelloDone(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         AlertDescription alertDescr =
                 parameterCombination.getParameter(AlertDerivation.class).getSelectedValue();
@@ -135,12 +130,10 @@ public class AlertProtocol extends Tls12Test {
 
         workflowTrace.addTlsActions(new SendAction(alert), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            if (Validator.socketClosed(i)) {
-                                i.setTestResult(TestResult.STRICTLY_SUCCEEDED);
-                            }
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        if (Validator.socketClosed(state)) {
+            testCase.setTestResult(TestResult.STRICTLY_SUCCEEDED);
+        }
     }
 }

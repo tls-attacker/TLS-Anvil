@@ -8,7 +8,6 @@ import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rwth.swc.coffee4j.model.Combination;
 import java.util.LinkedList;
 import java.util.List;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class TlsParameterCombination extends ParameterCombination {
 

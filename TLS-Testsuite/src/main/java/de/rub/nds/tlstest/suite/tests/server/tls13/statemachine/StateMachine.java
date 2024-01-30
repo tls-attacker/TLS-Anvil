@@ -10,9 +10,11 @@ package de.rub.nds.tlstest.suite.tests.server.tls13.statemachine;
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -23,7 +25,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.tests.server.both.statemachine.SharedStateMachineTest;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /**
  * Contains tests to evaluate the target's state machine. Some test flows are based on results found
@@ -34,38 +35,38 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class StateMachine extends Tls13Test {
 
     @AnvilTest(id = "XSM-FeqjZ8aw4M")
-    public void secondClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
-        SharedStateMachineTest.sharedSecondClientHelloTest(config, runner);
+    public void secondClientHello(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
+        SharedStateMachineTest.sharedSecondClientHelloTest(config, runner, testCase);
     }
 
     @NonCombinatorialAnvilTest(id = "XSM-h4swiGTUoj")
-    public void beginWithApplicationData(WorkflowRunner runner) {
+    public void beginWithApplicationData(WorkflowRunner runner, AnvilTestCase testCase) {
         Config config = getConfig();
-        SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);
+        SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner, testCase);
     }
 
     @NonCombinatorialAnvilTest(id = "XSM-ttrqZTyAR7")
-    public void beginWithFinished(WorkflowRunner runner) {
+    public void beginWithFinished(WorkflowRunner runner, AnvilTestCase testCase) {
         Config config = getConfig();
-        SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
+        SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner, testCase);
     }
 
     @AnvilTest(id = "XSM-suejNj5yGF")
     public void sendLegacyChangeCipherSpecAfterFinished(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsAction(new SendAction(new ChangeCipherSpecMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "XSM-XKTmaWjbUn")
-    public void sendEncryptedChangeCipherSpec(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void sendEncryptedChangeCipherSpec(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsAction(new SetEncryptChangeCipherSpecConfigAction(true));
         SendAction sendActionCCS = new SendAction(new ChangeCipherSpecMessage());
@@ -73,60 +74,58 @@ public class StateMachine extends Tls13Test {
         workflowTrace.addTlsAction(sendActionCCS);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "XSM-nRMHLnST86")
-    public void sendLegacyFlowECDHClientKeyExchange(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void sendLegacyFlowECDHClientKeyExchange(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsAction(new SendAction(new ECDHClientKeyExchangeMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "XSM-fiTPAjuY4v")
-    public void sendLegacyFlowDHClientKeyExchange(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void sendLegacyFlowDHClientKeyExchange(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsAction(new SendAction(new DHClientKeyExchangeMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "XSM-jGhG25V2Jy")
-    public void sendLegacyFlowRSAClientKeyExchange(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void sendLegacyFlowRSAClientKeyExchange(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsAction(new SendAction(new RSAClientKeyExchangeMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "XSM-Q5G5Vrenab")
     public void sendClientHelloAfterFinishedHandshake(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         trace.addTlsActions(
                 new SendAction(new ClientHelloMessage(config)),
                 new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(trace, config);
 
-                            AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.UNEXPECTED_MESSAGE, alert);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, alert);
     }
 }

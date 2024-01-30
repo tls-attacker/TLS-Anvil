@@ -12,6 +12,7 @@ import static org.junit.Assert.assertArrayEquals;
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -21,6 +22,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -38,15 +40,14 @@ import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class RecordLayer extends Tls13Test {
 
     @AnvilTest(id = "8446-HWUJWNwjoA")
     @EnforcedSenderRestriction
-    public void zeroLengthRecord_CH(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void zeroLengthRecord_CH(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setUseAllProvidedRecords(true);
 
         SendAction clientHello = new SendAction(new ClientHelloMessage(c));
@@ -57,13 +58,13 @@ public class RecordLayer extends Tls13Test {
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(clientHello, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(trace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8446-orNs8sPcM8")
-    public void zeroLengthRecord_Finished(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void zeroLengthRecord_Finished(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setUseAllProvidedRecords(true);
 
         Record record = new Record();
@@ -80,17 +81,13 @@ public class RecordLayer extends Tls13Test {
                                 HandshakeMessageType.FINISHED, trace);
         finished.setRecords(record);
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace workflowtrace = i.getWorkflowTrace();
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(trace, c);
 
-                            AlertMessage msg =
-                                    workflowtrace.getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.UNEXPECTED_MESSAGE, msg);
-                        });
+        WorkflowTrace workflowtrace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage msg = workflowtrace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, msg);
     }
 
     public ConditionEvaluationResult supportsRecordFragmentation() {
@@ -107,8 +104,8 @@ public class RecordLayer extends Tls13Test {
     @IncludeParameter("ALERT")
     @MethodCondition(method = "supportsRecordFragmentation")
     @EnforcedSenderRestriction
-    public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void interleaveRecords(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         SendAction sendFinished =
                 (SendAction)
@@ -132,16 +129,16 @@ public class RecordLayer extends Tls13Test {
 
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(trace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8446-UCLQ6PhSyy")
     @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "getRecordProtocolVersions")
     @Tag("new")
-    public void ignoresInitialRecordVersion(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void ignoresInitialRecordVersion(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         byte[] selectedRecordVersion =
                 parameterCombination
                         .getParameter(ProtocolVersionDerivation.class)
@@ -159,7 +156,8 @@ public class RecordLayer extends Tls13Test {
         initialRecord.setProtocolVersion(Modifiable.explicit(selectedRecordVersion));
         ((SendAction) workflowTrace.getFirstSendingAction()).setRecords(initialRecord);
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, config);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     public List<DerivationParameter<Config, byte[]>> getRecordProtocolVersions(
@@ -176,31 +174,26 @@ public class RecordLayer extends Tls13Test {
 
     @AnvilTest(id = "8446-qrenZekKeD")
     @Tag("new")
-    public void checkRecordProtocolVersion(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void checkRecordProtocolVersion(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            for (ReceivingAction receiving :
-                                    i.getWorkflowTrace().getReceivingActions()) {
-                                ReceiveAction receiveAction = (ReceiveAction) receiving;
-                                if (receiveAction.getReceivedRecords() != null
-                                        && !receiveAction.getReceivedRecords().isEmpty()) {
-                                    for (Record record : receiveAction.getReceivedRecords()) {
-                                        if (record.getContentMessageType()
-                                                != ProtocolMessageType.CHANGE_CIPHER_SPEC) {
-                                            assertArrayEquals(
-                                                    "Record used wrong protocol version",
-                                                    record.getProtocolVersion().getValue(),
-                                                    ProtocolVersion.TLS12.getValue());
-                                        }
-                                    }
-                                }
-                            }
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        for (ReceivingAction receiving : state.getWorkflowTrace().getReceivingActions()) {
+            ReceiveAction receiveAction = (ReceiveAction) receiving;
+            if (receiveAction.getReceivedRecords() != null
+                    && !receiveAction.getReceivedRecords().isEmpty()) {
+                for (Record record : receiveAction.getReceivedRecords()) {
+                    if (record.getContentMessageType() != ProtocolMessageType.CHANGE_CIPHER_SPEC) {
+                        assertArrayEquals(
+                                "Record used wrong protocol version",
+                                record.getProtocolVersion().getValue(),
+                                ProtocolVersion.TLS12.getValue());
+                    }
+                }
+            }
+        }
     }
 }

@@ -13,6 +13,7 @@ import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
@@ -26,7 +27,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class HeartbeatExtension extends TlsGenericTest {
 
@@ -48,12 +48,10 @@ public class HeartbeatExtension extends TlsGenericTest {
     @ExcludeParameter("INCLUDE_HEARTBEAT_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
-    public void heartbeatExtensionLengthTLS12(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void heartbeatExtensionLengthTLS12(AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
         config.setAddHeartbeatExtension(true);
-        genericExtensionLengthTest(
-                runner, argumentAccessor, config, HeartbeatExtensionMessage.class);
+        genericExtensionLengthTest(runner, testCase, config, HeartbeatExtensionMessage.class);
     }
 
     @Tag("tls13")
@@ -63,11 +61,9 @@ public class HeartbeatExtension extends TlsGenericTest {
     @AnvilTest(id = "XLF-dQABdv21Am")
     @ExcludeParameter("INCLUDE_HEARTBEAT_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void heartbeatExtensionLengthTLS13(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void heartbeatExtensionLengthTLS13(AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddHeartbeatExtension(true);
-        genericExtensionLengthTest(
-                runner, argumentAccessor, config, HeartbeatExtensionMessage.class);
+        genericExtensionLengthTest(runner, testCase, config, HeartbeatExtensionMessage.class);
     }
 }

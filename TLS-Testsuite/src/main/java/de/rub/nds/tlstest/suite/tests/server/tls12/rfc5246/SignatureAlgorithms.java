@@ -13,6 +13,7 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -22,6 +23,7 @@ import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
@@ -33,7 +35,6 @@ import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class SignatureAlgorithms extends Tls12Test {
@@ -77,67 +78,53 @@ public class SignatureAlgorithms extends Tls12Test {
 
     @AnvilTest(id = "5246-ZdnCWL4k5G")
     @MethodCondition(method = "dssCiphersuitesSupported")
-    public void dssNoSignatureAlgorithmsExtension(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void dssNoSignatureAlgorithmsExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddSignatureAndHashAlgorithmsExtension(false);
 
         WorkflowTrace workflowTrace = getWorkflowFor(c);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            assertEquals(
-                                    SignatureAlgorithm.DSA,
-                                    i.getState()
-                                            .getTlsContext()
-                                            .getSelectedSignatureAndHashAlgorithm()
-                                            .getSignatureAlgorithm());
-                            assertEquals(
-                                    HashAlgorithm.SHA1,
-                                    i.getState()
-                                            .getTlsContext()
-                                            .getSelectedSignatureAndHashAlgorithm()
-                                            .getHashAlgorithm());
-                        });
+        Validator.executedAsPlanned(state, testCase);
+
+        assertEquals(
+                SignatureAlgorithm.DSA,
+                state.getTlsContext()
+                        .getSelectedSignatureAndHashAlgorithm()
+                        .getSignatureAlgorithm());
+        assertEquals(
+                HashAlgorithm.SHA1,
+                state.getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm());
     }
 
     @AnvilTest(id = "5246-MjFVuYUzfF")
     @MethodCondition(method = "ecdsaCiphersuitesSupported")
-    public void ecdsaNoSignatureAlgorithmsExtension(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void ecdsaNoSignatureAlgorithmsExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddSignatureAndHashAlgorithmsExtension(false);
 
         WorkflowTrace workflowTrace = getWorkflowFor(c);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            assertEquals(
-                                    SignatureAlgorithm.ECDSA,
-                                    i.getState()
-                                            .getTlsContext()
-                                            .getSelectedSignatureAndHashAlgorithm()
-                                            .getSignatureAlgorithm());
-                            assertEquals(
-                                    HashAlgorithm.SHA1,
-                                    i.getState()
-                                            .getTlsContext()
-                                            .getSelectedSignatureAndHashAlgorithm()
-                                            .getHashAlgorithm());
-                        });
+        Validator.executedAsPlanned(state, testCase);
+
+        assertEquals(
+                SignatureAlgorithm.ECDSA,
+                state.getTlsContext()
+                        .getSelectedSignatureAndHashAlgorithm()
+                        .getSignatureAlgorithm());
+        assertEquals(
+                HashAlgorithm.SHA1,
+                state.getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm());
     }
 
     @AnvilTest(id = "5246-gnRCzTtN6q")
     // This requirement also applies to older versions
     public void includeUnknownSignatureAndHashAlgorithm(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddSignatureAndHashAlgorithmsExtension(true);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -150,13 +137,14 @@ public class SignatureAlgorithms extends Tls12Test {
         algorithmsExtension.setSignatureAndHashAlgorithms(
                 Modifiable.insert(new byte[] {(byte) 0xfe, 0x44}, 0));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "5246-52fQFPB85j")
     @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
-    public void offerManyAlgorithms(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void offerManyAlgorithms(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         // add pseudo algorithms to reach 58 which is the number of all defined values
@@ -187,6 +175,7 @@ public class SignatureAlgorithms extends Tls12Test {
         clientHello
                 .getExtension(SignatureAndHashAlgorithmsExtensionMessage.class)
                 .setSignatureAndHashAlgorithms(Modifiable.explicit(explicitAlgorithms));
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 }

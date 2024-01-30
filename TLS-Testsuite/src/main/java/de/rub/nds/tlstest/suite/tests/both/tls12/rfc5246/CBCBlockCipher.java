@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -19,6 +20,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -28,7 +30,6 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class CBCBlockCipher extends Tls12Test {
 
@@ -45,8 +46,8 @@ public class CBCBlockCipher extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    public void invalidCBCPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidCBCPadding(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
@@ -62,15 +63,13 @@ public class CBCBlockCipher extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, msg);
     }
 
     @AnvilTest(id = "5246-VC1baM1Mn1")
@@ -82,8 +81,8 @@ public class CBCBlockCipher extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    public void invalidCipherText(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidCipherText(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
@@ -104,26 +103,23 @@ public class CBCBlockCipher extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
-                            if (msg != null
-                                    && msg.getDescription().getValue()
-                                            == AlertDescription.DECRYPTION_FAILED_RESERVED
-                                                    .getValue()) {
-                                // 7.2.2. Error Alerts - decryption_failed_RESERVED
-                                // This alert was used in some earlier versions of TLS, and may have
-                                // permitted certain attacks against the CBC mode [CBCATT]. It MUST
-                                // NOT be sent by compliant implementations.
-                                throw new AssertionError(
-                                        "Target sent deprecated decryption_failed_RESERVERD alert in response to invalid Ciphertext");
-                            }
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, msg);
+        if (msg != null
+                && msg.getDescription().getValue()
+                        == AlertDescription.DECRYPTION_FAILED_RESERVED.getValue()) {
+            // 7.2.2. Error Alerts - decryption_failed_RESERVED
+            // This alert was used in some earlier versions of TLS, and may have
+            // permitted certain attacks against the CBC mode [CBCATT]. It MUST
+            // NOT be sent by compliant implementations.
+            throw new AssertionError(
+                    "Target sent deprecated decryption_failed_RESERVERD alert in response to invalid Ciphertext");
+        }
     }
 
     @AnvilTest(id = "5246-JBqS2uGywY")
@@ -135,8 +131,8 @@ public class CBCBlockCipher extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    public void invalidMAC(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidMAC(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         byte[] bitmask = parameterCombination.buildBitmask();
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
@@ -151,15 +147,13 @@ public class CBCBlockCipher extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, msg);
     }
 
     @AnvilTest(id = "5246-BWb6uwVEte")
@@ -168,36 +162,29 @@ public class CBCBlockCipher extends Tls12Test {
         @ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC"),
     })
     @Tag("new")
-    public void checkReceivedMac(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void checkReceivedMac(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            boolean sawCCS = false;
-                            for (Record record :
-                                    WorkflowTraceUtil.getAllReceivedRecords(i.getWorkflowTrace())) {
-                                if (record.getContentMessageType()
-                                        == ProtocolMessageType.CHANGE_CIPHER_SPEC) {
-                                    sawCCS = true;
-                                }
-                                if (sawCCS
-                                        && record.getContentMessageType()
-                                                == ProtocolMessageType.HANDSHAKE) {
-                                    Record encryptedFin = record;
-                                    assertTrue(
-                                            "Finished record MAC invalid - is the SQN correct?",
-                                            encryptedFin.getComputations().getMacValid());
-                                } else if (sawCCS
-                                        && record.getContentMessageType()
-                                                == ProtocolMessageType.APPLICATION_DATA) {
-                                    Record encryptedFin = record;
-                                    assertTrue(
-                                            "App Data record MAC invalid",
-                                            encryptedFin.getComputations().getMacValid());
-                                }
-                            }
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        boolean sawCCS = false;
+        for (Record record : WorkflowTraceUtil.getAllReceivedRecords(state.getWorkflowTrace())) {
+            if (record.getContentMessageType() == ProtocolMessageType.CHANGE_CIPHER_SPEC) {
+                sawCCS = true;
+            }
+            if (sawCCS && record.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
+                Record encryptedFin = record;
+                assertTrue(
+                        "Finished record MAC invalid - is the SQN correct?",
+                        encryptedFin.getComputations().getMacValid());
+            } else if (sawCCS
+                    && record.getContentMessageType() == ProtocolMessageType.APPLICATION_DATA) {
+                Record encryptedFin = record;
+                assertTrue(
+                        "App Data record MAC invalid",
+                        encryptedFin.getComputations().getMacValid());
+            }
+        }
     }
 }

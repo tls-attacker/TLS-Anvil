@@ -14,6 +14,7 @@ import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -24,6 +25,7 @@ import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.computations.DHClientComputations;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -42,7 +44,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @Tag("dheshare")
@@ -73,8 +74,8 @@ public class FfDheShare extends Tls12Test {
     @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
     @ManualConfig(identifiers = "FFDHE_SHARE_OUT_OF_BOUNDS")
     @KeyExchange(supported = KeyExchangeType.DH)
-    public void shareOutOfBounds(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void shareOutOfBounds(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         DHClientKeyExchangeMessage cke = new DHClientKeyExchangeMessage();
         cke.prepareComputations();
@@ -110,34 +111,30 @@ public class FfDheShare extends Tls12Test {
                 new SendAction(ActionOption.MAY_FAIL, new ChangeCipherSpecMessage()),
                 new SendAction(ActionOption.MAY_FAIL, new FinishedMessage()),
                 new ReceiveAction(new AlertMessage()));
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.receivedFatalAlert(i);
 
-                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                            // accept both Illegal Parameter and Handshake Failure as RFC 8446 and
-                            // 7919 demand different alerts
-                            if (msg != null
-                                    && !msg.getDescription()
-                                            .getValue()
-                                            .equals(
-                                                    AlertDescription.ILLEGAL_PARAMETER
-                                                            .getValue())) {
-                                Validator.testAlertDescription(
-                                        i, AlertDescription.HANDSHAKE_FAILURE, msg);
-                            }
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        // accept both Illegal Parameter and Handshake Failure as RFC 8446 and
+        // 7919 demand different alerts
+        if (msg != null
+                && !msg.getDescription()
+                        .getValue()
+                        .equals(AlertDescription.ILLEGAL_PARAMETER.getValue())) {
+            Validator.testAlertDescription(
+                    state, testCase, AlertDescription.HANDSHAKE_FAILURE, msg);
+        }
     }
 
     @AnvilTest(id = "7919-pPnKVL1dfj")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     @MethodCondition(method = "supportsDheCipherSuiteAndNamedGroups")
     @Tag("new")
-    public void negotiatesNonFfdheIfNecessary(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void negotiatesNonFfdheIfNecessary(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         config.setAddEllipticCurveExtension(true);
         config.setDefaultClientNamedGroups(context.getFeatureExtractionResult().getNamedGroups());
         context.getFeatureExtractionResult()
@@ -159,17 +156,13 @@ public class FfDheShare extends Tls12Test {
                 .getExtension(EllipticCurvesExtensionMessage.class)
                 .setSupportedGroups(Modifiable.insert(getUnsupportedNamedGroup(), 0));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            assertNotEquals(
-                                    "Server negotiated DHE cipher suite",
-                                    parameterCombination
-                                            .getParameter(CipherSuiteDerivation.class)
-                                            .getSelectedValue(),
-                                    i.getState().getTlsContext().getSelectedCipherSuite());
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        assertNotEquals(
+                "Server negotiated DHE cipher suite",
+                parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue(),
+                state.getTlsContext().getSelectedCipherSuite());
     }
 
     @AnvilTest(id = "7919-5qMeS9hJ7K")
@@ -177,9 +170,8 @@ public class FfDheShare extends Tls12Test {
     @ExcludeParameter("NAMED_GROUP")
     @MethodCondition(method = "supportsNamedFfdheGroups")
     @Tag("new")
-    public void abortsWhenGroupsDontOverlap(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void abortsWhenGroupsDontOverlap(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         config.setAddEllipticCurveExtension(true);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -191,13 +183,9 @@ public class FfDheShare extends Tls12Test {
         workflowTrace.addTlsAction(new SendAction(clientHello));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.INSUFFICIENT_SECURITY);
-                        });
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
+        Validator.testAlertDescription(state, testCase, AlertDescription.INSUFFICIENT_SECURITY);
     }
 
     @AnvilTest(id = "7919-poUc9K3yfd")
@@ -208,8 +196,8 @@ public class FfDheShare extends Tls12Test {
             affectedIdentifiers = "NAMED_GROUP",
             methods = "getEmptyConstraintsList")
     @Tag("new")
-    public void respectsOfferedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void respectsOfferedGroups(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         NamedGroup ffdheGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         config.setDefaultClientNamedGroups(ffdheGroup);
@@ -217,23 +205,20 @@ public class FfDheShare extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            assertEquals(
-                                    "Server did not respect the offered group",
-                                    ffdheGroup,
-                                    i.getState().getTlsContext().getSelectedGroup());
-                        });
+        State state = runner.execute(workflowTrace, config);
+        Validator.executedAsPlanned(state, testCase);
+        assertEquals(
+                "Server did not respect the offered group",
+                ffdheGroup,
+                state.getTlsContext().getSelectedGroup());
     }
 
     @AnvilTest(id = "7919-stXkxYBEVU")
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @Tag("new")
     public void doesNotNegotiateDheCipherSuiteWhenNotOffered(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         ClientHelloMessage clientHello =
@@ -249,18 +234,14 @@ public class FfDheShare extends Tls12Test {
                 .getExtension(EllipticCurvesExtensionMessage.class)
                 .setSupportedGroups(Modifiable.insert(ffdheGroupBytes, 0));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            assertFalse(
-                                    "Server selected an FFDHE cipher suite",
-                                    AlgorithmResolver.getKeyExchangeAlgorithm(
-                                                    i.getState()
-                                                            .getTlsContext()
-                                                            .getSelectedCipherSuite())
-                                            .isKeyExchangeDh());
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        assertFalse(
+                "Server selected an FFDHE cipher suite",
+                AlgorithmResolver.getKeyExchangeAlgorithm(
+                                state.getTlsContext().getSelectedCipherSuite())
+                        .isKeyExchangeDh());
     }
 
     public List<DerivationParameter<Config, NamedGroup>> getSupportedFfdheNamedGroups(

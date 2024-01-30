@@ -7,10 +7,8 @@
  */
 package de.rub.nds.tlstest.framework.execution;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
-import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -57,8 +55,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -238,23 +234,21 @@ public class WorkflowRunner {
     }
 
     public void setServerTcpTransportHandler() throws IOException {
-        state
-            .getTlsContext()
-            .setTransportHandler(
-                    new ServerTcpTransportHandler(
-                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                            context.getConfig().getTestClientDelegate().getServerSocket()));
+        state.getTlsContext()
+                .setTransportHandler(
+                        new ServerTcpTransportHandler(
+                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                context.getConfig().getTestClientDelegate().getServerSocket()));
     }
 
     public void setServerUdpTransportHandler() {
-        state
-            .getTlsContext()
-            .setTransportHandler(
-                    new ServerUdpTransportHandler(
-                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                            context.getConfig().getTestClientDelegate().getPort()));
+        state.getTlsContext()
+                .setTransportHandler(
+                        new ServerUdpTransportHandler(
+                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                context.getConfig().getTestClientDelegate().getPort()));
     }
 
     /**

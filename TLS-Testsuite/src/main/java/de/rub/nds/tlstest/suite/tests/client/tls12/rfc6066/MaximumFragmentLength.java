@@ -13,6 +13,7 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -23,6 +24,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.MaxFragmentLengthExtensionMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
@@ -32,7 +34,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class MaximumFragmentLength extends Tls12Test {
@@ -58,9 +59,8 @@ public class MaximumFragmentLength extends Tls12Test {
     @AnvilTest(id = "6066-WpGEGtHscM")
     @MethodCondition(method = "sentMaximumFragmentLength")
     @ExcludeParameter("RECORD_LENGTH")
-    public void invalidMaximumFragmentLength(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidMaximumFragmentLength(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddMaxFragmentLengthExtension(true);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -72,24 +72,19 @@ public class MaximumFragmentLength extends Tls12Test {
                 .getExtension(MaxFragmentLengthExtensionMessage.class)
                 .setMaxFragmentLength(Modifiable.explicit(new byte[] {5}));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+        WorkflowTrace trace = state.getWorkflowTrace();
+        AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     @AnvilTest(id = "6066-ossqki78mA")
     @MethodCondition(method = "sentMaximumFragmentLength")
     @ExcludeParameter("RECORD_LENGTH")
-    public void unrequestedMaximumFragmentLength(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void unrequestedMaximumFragmentLength(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddMaxFragmentLengthExtension(true);
 
         MaxFragmentLength unreqLen =
@@ -106,61 +101,48 @@ public class MaximumFragmentLength extends Tls12Test {
                 .getExtension(MaxFragmentLengthExtensionMessage.class)
                 .setMaxFragmentLength(Modifiable.explicit(new byte[] {unreqLen.getValue()}));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+        WorkflowTrace trace = state.getWorkflowTrace();
+        AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     @AnvilTest(id = "6066-XXJU5VtxbB")
     @MethodCondition(method = "sentMaximumFragmentLength")
     @Tag("new")
-    public void respectsNegotiatedMaxFragmentLength(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void respectsNegotiatedMaxFragmentLength(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddMaxFragmentLengthExtension(true);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            ClientHelloMessage clientHello =
-                                    i.getWorkflowTrace()
-                                            .getFirstSendMessage(ClientHelloMessage.class);
-                            MaxFragmentLength selectedMaxFragment =
-                                    MaxFragmentLength.getMaxFragmentLength(
-                                            clientHello
-                                                    .getExtension(
-                                                            MaxFragmentLengthExtensionMessage.class)
-                                                    .getMaxFragmentLength()
-                                                    .getValue()[0]);
-                            int maxPlaintextFragmentSize =
-                                    MaxFragmentLength.getIntegerRepresentation(selectedMaxFragment);
+        State state = runner.execute(workflowTrace, c);
 
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            for (int j = 1; j < trace.getReceivingActions().size(); j++) {
-                                ReceivingAction receiveAction = trace.getReceivingActions().get(j);
-                                if (receiveAction.getReceivedRecords() != null) {
-                                    for (Record receivedRecord :
-                                            receiveAction.getReceivedRecords()) {
-                                        assertTrue(
-                                                "Plaintextbytes of record exceeded limit",
-                                                ((Record) receivedRecord)
-                                                                .getCleanProtocolMessageBytes()
-                                                                .getValue()
-                                                                .length
-                                                        <= maxPlaintextFragmentSize);
-                                    }
-                                }
-                            }
-                        });
+        Validator.executedAsPlanned(state, testCase);
+        ClientHelloMessage clientHello =
+                state.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
+        MaxFragmentLength selectedMaxFragment =
+                MaxFragmentLength.getMaxFragmentLength(
+                        clientHello
+                                .getExtension(MaxFragmentLengthExtensionMessage.class)
+                                .getMaxFragmentLength()
+                                .getValue()[0]);
+        int maxPlaintextFragmentSize =
+                MaxFragmentLength.getIntegerRepresentation(selectedMaxFragment);
+
+        WorkflowTrace trace = state.getWorkflowTrace();
+        for (int j = 1; j < trace.getReceivingActions().size(); j++) {
+            ReceivingAction receiveAction = trace.getReceivingActions().get(j);
+            if (receiveAction.getReceivedRecords() != null) {
+                for (Record receivedRecord : receiveAction.getReceivedRecords()) {
+                    assertTrue(
+                            "Plaintextbytes of record exceeded limit",
+                            receivedRecord.getCleanProtocolMessageBytes().getValue().length
+                                    <= maxPlaintextFragmentSize);
+                }
+            }
+        }
     }
 }

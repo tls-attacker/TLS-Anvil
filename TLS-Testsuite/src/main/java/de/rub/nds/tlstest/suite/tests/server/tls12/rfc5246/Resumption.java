@@ -20,6 +20,7 @@ import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ServerNameIndicationExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.ServerNamePair;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -34,7 +35,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class Resumption extends Tls12Test {
@@ -72,9 +72,8 @@ public class Resumption extends Tls12Test {
 
     @AnvilTest(id = "5246-Zs3yXnQzh6")
     @MethodCondition(method = "supportsResumptionAndSniActive")
-    public void rejectSniDisparityResumption(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void rejectSniDisparityResumption(WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastMessage(
                         WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
@@ -95,64 +94,50 @@ public class Resumption extends Tls12Test {
                     }
                 });
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        s -> {
-                            WorkflowTrace executedTrace = s.getWorkflowTrace();
-                            ServerHelloMessage sHello =
-                                    executedTrace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            ServerHelloMessage sHello2 =
-                                    executedTrace.getLastReceivedMessage(ServerHelloMessage.class);
-                            ClientHelloMessage cHello2 =
-                                    executedTrace.getLastSendMessage(ClientHelloMessage.class);
-                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
+        State state = runner.execute(workflowTrace, c);
 
-                            // only test if we can assume that the server accepted the SNI in
-                            // the initial handshake
-                            if (sHello.containsExtension(ExtensionType.SERVER_NAME_INDICATION)
-                                    && sHello2 != null
-                                    && sHello2 != sHello) {
-                                // server hello of resumption MUST NOT not contain this extension
-                                assertTrue(
-                                        "Server accepted resumption using different SNI",
-                                        !Arrays.equals(
-                                                cHello2.getSessionId().getValue(),
-                                                sHello2.getSessionId().getValue()));
-                            }
-                        });
+        WorkflowTrace executedTrace = state.getWorkflowTrace();
+        ServerHelloMessage sHello = executedTrace.getFirstReceivedMessage(ServerHelloMessage.class);
+        ServerHelloMessage sHello2 = executedTrace.getLastReceivedMessage(ServerHelloMessage.class);
+        ClientHelloMessage cHello2 = executedTrace.getLastSendMessage(ClientHelloMessage.class);
+        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
+
+        // only test if we can assume that the server accepted the SNI in
+        // the initial handshake
+        if (sHello.containsExtension(ExtensionType.SERVER_NAME_INDICATION)
+                && sHello2 != null
+                && sHello2 != sHello) {
+            // server hello of resumption MUST NOT not contain this extension
+            assertTrue(
+                    "Server accepted resumption using different SNI",
+                    !Arrays.equals(
+                            cHello2.getSessionId().getValue(), sHello2.getSessionId().getValue()));
+        }
     }
 
     @AnvilTest(id = "5246-JmGqP73yfy")
     @MethodCondition(method = "supportsResumptionAndSniActive")
-    public void serverHelloSniInResumption(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void serverHelloSniInResumption(WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastMessage(
                         WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        s -> {
-                            WorkflowTrace trace = s.getWorkflowTrace();
-                            ServerHelloMessage sHello =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            ServerHelloMessage sHello2 =
-                                    trace.getLastReceivedMessage(ServerHelloMessage.class);
-                            ClientHelloMessage cHello2 =
-                                    trace.getLastSendMessage(ClientHelloMessage.class);
-                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
+        State state = runner.execute(workflowTrace, c);
 
-                            if (sHello2 != null
-                                    && Arrays.equals(
-                                            cHello2.getSessionId().getValue(),
-                                            sHello2.getSessionId().getValue())) {
-                                assertFalse(
-                                        "Server included SNI extension in resumed session",
-                                        sHello2.containsExtension(
-                                                ExtensionType.SERVER_NAME_INDICATION));
-                            }
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        ServerHelloMessage sHello = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        ServerHelloMessage sHello2 = trace.getLastReceivedMessage(ServerHelloMessage.class);
+        ClientHelloMessage cHello2 = trace.getLastSendMessage(ClientHelloMessage.class);
+        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
+
+        if (sHello2 != null
+                && Arrays.equals(
+                        cHello2.getSessionId().getValue(), sHello2.getSessionId().getValue())) {
+            assertFalse(
+                    "Server included SNI extension in resumed session",
+                    sHello2.containsExtension(ExtensionType.SERVER_NAME_INDICATION));
+        }
     }
 
     @AnvilTest(id = "5246-5svSoN3NYm")
@@ -162,9 +147,8 @@ public class Resumption extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    public void rejectResumptionAfterFatalPostHandshake(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void rejectResumptionAfterFatalPostHandshake(WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastMessage(
                         WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
@@ -182,41 +166,38 @@ public class Resumption extends Tls12Test {
         finSend.getSendMessages().add(alert);
         workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        s -> {
-                            WorkflowTrace trace = s.getWorkflowTrace();
-                            ClientHelloMessage resumptionClientHello =
-                                    trace.getLastSendMessage(ClientHelloMessage.class);
-                            ServerHelloMessage firstServerHello =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            ServerHelloMessage secondServerHello =
-                                    trace.getLastReceivedMessage(ServerHelloMessage.class);
+        State state = runner.execute(workflowTrace, c);
 
-                            // for ticket-based resumption
-                            ChangeCipherSpecMessage firstCcs =
-                                    trace.getFirstReceivedMessage(ChangeCipherSpecMessage.class);
-                            ChangeCipherSpecMessage secondCcs =
-                                    trace.getLastReceivedMessage(ChangeCipherSpecMessage.class);
-                            assertTrue(
-                                    "Did not receive both expected Server Hello messages",
-                                    firstServerHello != null
-                                            && secondServerHello != null
-                                            && secondServerHello != firstServerHello);
-                            if (resumptionClientHello.getSessionIdLength().getValue() > 0) {
-                                ServerHelloMessage sHello =
-                                        trace.getLastReceivedMessage(ServerHelloMessage.class);
-                                assertTrue(
-                                        "Server accepted resumption via SessionID after Fatal Alert",
-                                        !Arrays.equals(
-                                                resumptionClientHello.getSessionId().getValue(),
-                                                sHello.getSessionId().getValue()));
-                            } else {
-                                assertTrue(
-                                        "Server accepted resumption via Tickets after Fatal Alert",
-                                        secondCcs == null || secondCcs == firstCcs);
-                            }
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        ClientHelloMessage resumptionClientHello =
+                trace.getLastSendMessage(ClientHelloMessage.class);
+        ServerHelloMessage firstServerHello =
+                trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        ServerHelloMessage secondServerHello =
+                trace.getLastReceivedMessage(ServerHelloMessage.class);
+
+        // for ticket-based resumption
+        ChangeCipherSpecMessage firstCcs =
+                trace.getFirstReceivedMessage(ChangeCipherSpecMessage.class);
+        ChangeCipherSpecMessage secondCcs =
+                trace.getLastReceivedMessage(ChangeCipherSpecMessage.class);
+        assertTrue(
+                "Did not receive both expected Server Hello messages",
+                firstServerHello != null
+                        && secondServerHello != null
+                        && secondServerHello != firstServerHello);
+        if (resumptionClientHello.getSessionIdLength().getValue() > 0) {
+            ServerHelloMessage sHello = trace.getLastReceivedMessage(ServerHelloMessage.class);
+            assertTrue(
+                    "Server accepted resumption via SessionID after Fatal Alert",
+                    !Arrays.equals(
+                            resumptionClientHello.getSessionId().getValue(),
+                            sHello.getSessionId().getValue()));
+        } else {
+            assertTrue(
+                    "Server accepted resumption via Tickets after Fatal Alert",
+                    secondCcs == null || secondCcs == firstCcs);
+        }
     }
 
     @AnvilTest(id = "5246-qXpKD7cBiC")
@@ -226,9 +207,8 @@ public class Resumption extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    public void rejectResumptionAfterInvalidFinished(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void rejectResumptionAfterInvalidFinished(WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastMessage(
                         WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
@@ -240,26 +220,20 @@ public class Resumption extends Tls12Test {
         fin.setVerifyData(Modifiable.xor(new byte[] {0x01}, 0));
         workflowTrace.addTlsAction(new ReceiveAction());
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        s -> {
-                            WorkflowTrace trace = s.getWorkflowTrace();
-                            ClientHelloMessage cHello =
-                                    trace.getLastSendMessage(ClientHelloMessage.class);
-                            if (WorkflowTraceUtil.didReceiveMessage(
-                                            HandshakeMessageType.SERVER_HELLO, trace)
-                                    && trace.getLastReceivedMessage(ServerHelloMessage.class)
-                                            != trace.getFirstReceivedMessage(
-                                                    ServerHelloMessage.class)) {
-                                ServerHelloMessage sHello =
-                                        trace.getLastReceivedMessage(ServerHelloMessage.class);
-                                assertTrue(
-                                        "Server accepted resumption after invalid Finished",
-                                        !Arrays.equals(
-                                                        cHello.getSessionId().getValue(),
-                                                        sHello.getSessionId().getValue())
-                                                && cHello.getSessionIdLength().getValue() > 0);
-                            }
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        WorkflowTrace trace = state.getWorkflowTrace();
+        ClientHelloMessage cHello = trace.getLastSendMessage(ClientHelloMessage.class);
+        if (WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.SERVER_HELLO, trace)
+                && trace.getLastReceivedMessage(ServerHelloMessage.class)
+                        != trace.getFirstReceivedMessage(ServerHelloMessage.class)) {
+            ServerHelloMessage sHello = trace.getLastReceivedMessage(ServerHelloMessage.class);
+            assertTrue(
+                    "Server accepted resumption after invalid Finished",
+                    !Arrays.equals(
+                                    cHello.getSessionId().getValue(),
+                                    sHello.getSessionId().getValue())
+                            && cHello.getSessionIdLength().getValue() > 0);
+        }
     }
 }

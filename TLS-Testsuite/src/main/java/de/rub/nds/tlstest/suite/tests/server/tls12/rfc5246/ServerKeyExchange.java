@@ -12,16 +12,17 @@ import static org.junit.Assert.assertTrue;
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -33,7 +34,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /** */
 @Tag("signature")
@@ -45,22 +45,19 @@ public class ServerKeyExchange extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "CIPHER_SUITE",
             methods = "isSupportedCipherSuite")
-    public void signatureIsValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void signatureIsValid(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            assertTrue(
-                                    "Server Key Exchange Message contained an invalid signature",
-                                    signatureValid(i));
-                        });
+        State state = runner.execute(workflowTrace, config);
+        Validator.executedAsPlanned(state, testCase);
+        assertTrue(
+                "Server Key Exchange Message contained an invalid signature",
+                signatureValid(state));
     }
 
-    private Boolean signatureValid(TlsTestCase annotatedState) {
-        WorkflowTrace executedTrace = annotatedState.getWorkflowTrace();
+    private Boolean signatureValid(State state) {
+        WorkflowTrace executedTrace = state.getWorkflowTrace();
         ClientHelloMessage clientHello =
                 (ClientHelloMessage)
                         WorkflowTraceUtil.getFirstSendMessage(
@@ -88,10 +85,7 @@ public class ServerKeyExchange extends Tls12Test {
 
         try {
             return SignatureValidation.validationSuccessful(
-                    selectedSignatureAndHashAlgo,
-                    annotatedState,
-                    completeSignedData,
-                    givenSignature);
+                    selectedSignatureAndHashAlgo, state, completeSignedData, givenSignature);
         } catch (SignatureException
                 | InvalidKeyException
                 | InvalidKeySpecException

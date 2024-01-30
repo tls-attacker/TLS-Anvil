@@ -12,11 +12,13 @@ import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.AlpnExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -26,7 +28,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class ALPNExtension extends TlsGenericTest {
@@ -60,11 +61,10 @@ public class ALPNExtension extends TlsGenericTest {
     @ExcludeParameter("INCLUDE_ALPN_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
-    public void alpnExtensionLengthTLS12(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void alpnExtensionLengthTLS12(WorkflowRunner runner, AnvilTestCase testCase) {
         Config config = context.getConfig().createConfig();
         config.setAddAlpnExtension(true);
-        genericExtensionLengthTest(runner, argumentAccessor, config, AlpnExtensionMessage.class);
+        genericExtensionLengthTest(runner, testCase, config, AlpnExtensionMessage.class);
     }
 
     @Tag("tls12")
@@ -75,9 +75,9 @@ public class ALPNExtension extends TlsGenericTest {
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "contentCanBeTested")
     public void alpnProposedAlpnProtocolsLengthTLS12(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+            AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = context.getConfig().createConfig();
-        alpnExtensionProposedAlpnProtocolsLengthTest(config, runner, argumentAccessor);
+        alpnExtensionProposedAlpnProtocolsLengthTest(config, runner, testCase);
     }
 
     @Tag("tls13")
@@ -87,11 +87,10 @@ public class ALPNExtension extends TlsGenericTest {
     @ExcludeParameter("INCLUDE_ALPN_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
-    public void alpnExtensionLengthTLS13(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void alpnExtensionLengthTLS13(AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddAlpnExtension(true);
-        genericExtensionLengthTest(runner, argumentAccessor, config, AlpnExtensionMessage.class);
+        genericExtensionLengthTest(runner, testCase, config, AlpnExtensionMessage.class);
     }
 
     @Tag("tls13")
@@ -102,20 +101,19 @@ public class ALPNExtension extends TlsGenericTest {
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "contentCanBeTested")
     public void alpnProposedAlpnProtocolsLengthTLS13(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+            AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
-        alpnExtensionProposedAlpnProtocolsLengthTest(config, runner, argumentAccessor);
+        alpnExtensionProposedAlpnProtocolsLengthTest(config, runner, testCase);
     }
 
     private void alpnExtensionProposedAlpnProtocolsLengthTest(
-            Config versionBasedConfig, WorkflowRunner runner, ArgumentsAccessor argumentAccessor) {
+            Config versionBasedConfig, WorkflowRunner runner, AnvilTestCase testCase) {
         versionBasedConfig.setAddAlpnExtension(true);
-        WorkflowTrace workflowTrace =
-                setupLengthFieldTestForConfig(versionBasedConfig, runner, argumentAccessor);
+        WorkflowTrace workflowTrace = setupLengthFieldTestForConfig(versionBasedConfig, runner);
         AlpnExtensionMessage alpnExtension =
                 getTargetedExtension(AlpnExtensionMessage.class, workflowTrace);
         alpnExtension.setProposedAlpnProtocolsLength(Modifiable.sub(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig())
-                .validateFinal(super::validateLengthTest);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        validateLengthTest(state, testCase);
     }
 }

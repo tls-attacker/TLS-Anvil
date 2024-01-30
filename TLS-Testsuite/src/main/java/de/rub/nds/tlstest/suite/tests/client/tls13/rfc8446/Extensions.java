@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -23,6 +24,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.AlpnExtensionMessa
 import de.rub.nds.tlsattacker.core.protocol.message.extension.HeartbeatExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.MaxFragmentLengthExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ServerNameIndicationExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -35,7 +37,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class Extensions extends Tls13Test {
@@ -64,8 +65,8 @@ public class Extensions extends Tls13Test {
     @IncludeParameter("EXTENSION")
     @ManualConfig(identifiers = "EXTENSION")
     @ExplicitValues(affectedIdentifiers = "EXTENSION", methods = "getUnrequestedExtensions")
-    public void sendAdditionalExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendAdditionalExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         ExtensionType selectedExtension =
                 parameterCombination.getParameter(ExtensionDerivation.class).getSelectedValue();
 
@@ -111,23 +112,17 @@ public class Extensions extends Tls13Test {
             throw new AssertionError("ClientHello already contains every extension");
         }
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage msg =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.UNSUPPORTED_EXTENSION, msg);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(
+                state, testCase, AlertDescription.UNSUPPORTED_EXTENSION, msg);
     }
 
     @AnvilTest(id = "8446-6dvAUhLdUW")
-    public void sendHeartBeatExtensionInSH(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendHeartBeatExtensionInSH(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -136,25 +131,22 @@ public class Extensions extends Tls13Test {
                 .getFirstSendMessage(ServerHelloMessage.class)
                 .addExtension(new HeartbeatExtensionMessage());
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, msg);
-                            if (msg != null
-                                    && msg.getDescription().getValue()
-                                            == AlertDescription.UNSUPPORTED_EXTENSION.getValue()
-                                    && !context.getReceivedClientHelloMessage()
-                                            .containsExtension(ExtensionType.HEARTBEAT)
-                                    && i.getTestResult() == TestResult.CONCEPTUALLY_SUCCEEDED) {
-                                i.setTestResult(TestResult.STRICTLY_SUCCEEDED);
-                                i.addAdditionalResultInfo(
-                                        "Description is acceptable as Heartbeat was not proposed by client");
-                            }
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, msg);
+        if (msg != null
+                && msg.getDescription().getValue()
+                        == AlertDescription.UNSUPPORTED_EXTENSION.getValue()
+                && !context.getReceivedClientHelloMessage()
+                        .containsExtension(ExtensionType.HEARTBEAT)
+                && testCase.getTestResult() == TestResult.CONCEPTUALLY_SUCCEEDED) {
+            testCase.setTestResult(TestResult.STRICTLY_SUCCEEDED);
+            testCase.addAdditionalResultInfo(
+                    "Description is acceptable as Heartbeat was not proposed by client");
+        }
     }
 }

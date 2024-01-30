@@ -13,6 +13,7 @@ import static org.junit.Assert.assertNotNull;
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -21,6 +22,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
@@ -32,15 +34,13 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolVersionDer
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
 import java.util.List;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class DoNotUseSSLVersion30 extends Tls12Test {
 
     @AnvilTest(id = "7568-SxJGaYDNfG")
-    public void sendClientHelloVersion0300(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void sendClientHelloVersion0300(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(config);
         clientHelloMessage.setProtocolVersion(Modifiable.explicit(new byte[] {0x03, 0x00}));
@@ -49,15 +49,12 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
         workflowTrace.addTlsActions(
                 new SendAction(clientHelloMessage), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.PROTOCOL_VERSION, msg);
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.PROTOCOL_VERSION, msg);
     }
 
     public List<DerivationParameter<Config, byte[]>> get03ProtocolVersions(DerivationScope scope) {
@@ -76,8 +73,8 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
     @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "get03ProtocolVersions")
     @ManualConfig(identifiers = "PROTOCOL_VERSION")
     public void sendClientHelloVersion0300DifferentRecordVersion(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         byte[] protocolVersionBytes =
                 parameterCombination
                         .getParameter(ProtocolVersionDerivation.class)
@@ -92,15 +89,12 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
         workflowTrace.addTlsActions(
                 new SendAction(clientHelloMessage), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.PROTOCOL_VERSION, msg);
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.PROTOCOL_VERSION, msg);
     }
 
     @AnvilTest(id = "7568-6CdJpT15w2")
@@ -111,8 +105,8 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
     @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "get03ProtocolVersions")
     @ManualConfig(identifiers = "PROTOCOL_VERSION")
     public void sendClientHelloVersion0300RecordVersion(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         byte[] protocolVersionBytes =
                 parameterCombination
                         .getParameter(ProtocolVersionDerivation.class)
@@ -129,20 +123,17 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
         workflowTrace.addTlsActions(
                 sendAction, new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, config);
 
-                            ServerHelloMessage shm =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, shm);
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.executedAsPlanned(state, testCase);
 
-                            assertArrayEquals(
-                                    "Invalid TLS version negotiated",
-                                    new byte[] {0x03, 0x03},
-                                    shm.getProtocolVersion().getValue());
-                        });
+        ServerHelloMessage shm = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, shm);
+
+        assertArrayEquals(
+                "Invalid TLS version negotiated",
+                new byte[] {0x03, 0x03},
+                shm.getProtocolVersion().getValue());
     }
 }

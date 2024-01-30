@@ -13,11 +13,13 @@ import static org.junit.Assert.assertFalse;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -27,66 +29,53 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class ServerHello extends Tls12Test {
 
     @AnvilTest(id = "5246-rjHUSd1Lnf")
-    public void serverRandom(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void serverRandom(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)),
                 new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage serverHello =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            ClientHelloMessage clientHello =
-                                    trace.getFirstSendMessage(ClientHelloMessage.class);
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.executedAsPlanned(state, testCase);
 
-                            assertFalse(
-                                    "ServerHello random equals ClienHello",
-                                    Arrays.equals(
-                                            clientHello.getRandom().getValue(),
-                                            serverHello.getRandom().getValue()));
-                        });
+        ServerHelloMessage serverHello = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        ClientHelloMessage clientHello = trace.getFirstSendMessage(ClientHelloMessage.class);
+
+        assertFalse(
+                "ServerHello random equals ClienHello",
+                Arrays.equals(
+                        clientHello.getRandom().getValue(), serverHello.getRandom().getValue()));
     }
 
     @AnvilTest(id = "5246-yM4KkM8m6m")
     @Tag("new")
-    public void checkExtensions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void checkExtensions(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            checkForUnproposedExtensions(
-                                    workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class),
-                                    workflowTrace.getFirstSendMessage(ClientHelloMessage.class));
-                            checkForDuplicateExtensions(
-                                    workflowTrace.getFirstReceivedMessage(
-                                            ServerHelloMessage.class));
-                            if (workflowTrace
-                                            .getFirstReceivedMessage(ServerHelloMessage.class)
-                                            .getExtensions()
-                                    != null) {
-                                assertFalse(
-                                        "Server sent a Signature Algorithms Extension",
-                                        workflowTrace
-                                                .getFirstReceivedMessage(ServerHelloMessage.class)
-                                                .containsExtension(
-                                                        ExtensionType
-                                                                .SIGNATURE_AND_HASH_ALGORITHMS));
-                            }
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        checkForUnproposedExtensions(
+                workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class),
+                workflowTrace.getFirstSendMessage(ClientHelloMessage.class));
+        checkForDuplicateExtensions(
+                workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class));
+        if (workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class).getExtensions()
+                != null) {
+            assertFalse(
+                    "Server sent a Signature Algorithms Extension",
+                    workflowTrace
+                            .getFirstReceivedMessage(ServerHelloMessage.class)
+                            .containsExtension(ExtensionType.SIGNATURE_AND_HASH_ALGORITHMS));
+        }
     }
 }

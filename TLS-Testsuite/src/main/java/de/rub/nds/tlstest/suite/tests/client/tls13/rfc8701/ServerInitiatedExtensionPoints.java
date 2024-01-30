@@ -12,6 +12,7 @@ import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -21,6 +22,7 @@ import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -33,7 +35,6 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseExtensionDer
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseSigHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class ServerInitiatedExtensionPoints extends Tls13Test {
@@ -42,8 +43,8 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_EXTENSION")
     public void advertiseGreaseExtensionsInSessionTicket(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         ExtensionType selectedGreaseExt =
                 parameterCombination
                         .getParameter(GreaseExtensionDerivation.class)
@@ -55,23 +56,25 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 workflowTrace.getFirstSendMessage(NewSessionTicketMessage.class);
         msg.addExtension(new GreaseExtensionMessage(selectedGreaseExt, 25));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "8701-q8vvYUsUCu")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_PROTOCOL_VERSION")
-    public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void selectGreaseVersion(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        sharedGreaseVersionTest(workflowTrace, runner, parameterCombination);
+        sharedGreaseVersionTest(workflowTrace, runner, parameterCombination, testCase);
     }
 
     public static void sharedGreaseVersionTest(
             WorkflowTrace workflowTrace,
             WorkflowRunner runner,
-            TlsParameterCombination externalTlsParameterCombination) {
+            TlsParameterCombination externalTlsParameterCombination,
+            AnvilTestCase testCase) {
         ProtocolVersion selectedGreaseVersion =
                 externalTlsParameterCombination
                         .getParameter(GreaseProtocolVersionDerivation.class)
@@ -82,25 +85,26 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 sh.getExtension(SupportedVersionsExtensionMessage.class);
         ext.setSupportedVersions(Modifiable.explicit(selectedGreaseVersion.getValue()));
 
-        runner.execute(workflowTrace, runner.getPreparedConfig())
-                .validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8701-xwVd59Y3Fq")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_CIPHERSUITE")
     @ExcludeParameter("CIPHER_SUITE")
-    public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void selectGreaseCipherSuite(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        sharedGreaseCipherSuiteTest(workflowTrace, runner, parameterCombination);
+        sharedGreaseCipherSuiteTest(workflowTrace, runner, parameterCombination, testCase);
     }
 
     public static void sharedGreaseCipherSuiteTest(
             WorkflowTrace workflowTrace,
             WorkflowRunner runner,
-            TlsParameterCombination externalTlsParameterCombination) {
+            TlsParameterCombination externalTlsParameterCombination,
+            AnvilTestCase testCase) {
         CipherSuite selectedGreaseCipherSuite =
                 externalTlsParameterCombination
                         .getParameter(GreaseCipherSuiteDerivation.class)
@@ -109,25 +113,25 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.setSelectedCipherSuite(Modifiable.explicit(selectedGreaseCipherSuite.getByteValue()));
 
-        runner.execute(workflowTrace, runner.getPreparedConfig())
-                .validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8701-NczJT3TSj4")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_EXTENSION")
-    public void sendServerHelloGreaseExtension(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendServerHelloGreaseExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        sharedServerHelloGreaseExtensionTest(workflowTrace, runner, parameterCombination);
+        sharedServerHelloGreaseExtensionTest(workflowTrace, runner, parameterCombination, testCase);
     }
 
     public static void sharedServerHelloGreaseExtensionTest(
             WorkflowTrace workflowTrace,
             WorkflowRunner runner,
-            TlsParameterCombination externalTlsParameterCombination) {
+            TlsParameterCombination externalTlsParameterCombination,
+            AnvilTestCase testCase) {
         ExtensionType selectedGreaseExt =
                 externalTlsParameterCombination
                         .getParameter(GreaseExtensionDerivation.class)
@@ -136,16 +140,16 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.addExtension(new GreaseExtensionMessage(selectedGreaseExt, 25));
 
-        runner.execute(workflowTrace, runner.getPreparedConfig())
-                .validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8701-pVCWxJraM8")
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("GREASE_EXTENSION")
     public void sendEncryptedExtensionsGreaseExtension(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         ExtensionType selectedGreaseExt =
@@ -157,14 +161,15 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
         sh.addExtension(new GreaseExtensionMessage(selectedGreaseExt, 25));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8701-9F3St2di12")
     @IncludeParameter("GREASE_SIG_HASH")
     public void sendCertificateVerifyGreaseSignatureAlgorithm(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
         SignatureAndHashAlgorithm selectedGreaseSigHash =
@@ -174,6 +179,7 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class);
         sh.setSignatureHashAlgorithm(Modifiable.explicit(selectedGreaseSigHash.getByteValue()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 }

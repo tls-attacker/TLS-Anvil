@@ -11,6 +11,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.*;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -23,6 +24,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -37,7 +39,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class HelloRetryRequest extends Tls13Test {
@@ -54,8 +55,8 @@ public class HelloRetryRequest extends Tls13Test {
     @AnvilTest(id = "8446-7STiGzfK9u")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     @Tag("adjusted")
-    public void helloRetryRequestValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void helloRetryRequestValid(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         CipherSuite selectedCipher =
                 parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
 
@@ -67,195 +68,158 @@ public class HelloRetryRequest extends Tls13Test {
                 runner.generateWorkflowTraceUntilReceivingMessage(
                         WorkflowTraceType.HELLO, HandshakeMessageType.ENCRYPTED_EXTENSIONS);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage sHello =
-                                    (ServerHelloMessage)
-                                            WorkflowTraceUtil.getFirstReceivedMessage(
-                                                    HandshakeMessageType.SERVER_HELLO,
-                                                    i.getWorkflowTrace());
-                            ClientHelloMessage cHello =
-                                    i.getWorkflowTrace()
-                                            .getFirstSendMessage(ClientHelloMessage.class);
-                            if (sHello != null) {
-                                assertTrue(
-                                        "Server did not send a HelloRetryRequest",
-                                        sHello.isTls13HelloRetryRequest());
-                                assertTrue(
-                                        "Server selected an unproposed CipherSuite",
-                                        Arrays.equals(
-                                                selectedCipher.getByteValue(),
-                                                sHello.getSelectedCipherSuite().getValue()));
-                                assertTrue(
-                                        "Server did not include a SupportedVersions Extension",
-                                        sHello.containsExtension(ExtensionType.SUPPORTED_VERSIONS));
-                                SharedExtensionTests.checkForDuplicateExtensions(sHello);
-                                ServerHello.checkForForbiddenExtensions(sHello);
-                                ServerHello.checkForUnproposedExtensions(sHello, cHello);
-                                KeyShareExtensionMessage ksExtension =
-                                        sHello.getExtension(KeyShareExtensionMessage.class);
-                                if (ksExtension != null) {
-                                    assertTrue(
-                                            "Server did not include exactly one NamedGroup in KeyShare Extension",
-                                            ksExtension.getKeyShareList().size() == 1);
-                                    assertTrue(
-                                            "Server included a public key in HelloRetryRequest",
-                                            ksExtension.getKeyShareList().get(0).getPublicKey()
-                                                    == null);
-                                    assertTrue(
-                                            "Server selected an unproposed NamedGroup",
-                                            c.getDefaultClientNamedGroups()
-                                                    .contains(
-                                                            ksExtension
-                                                                    .getKeyShareList()
-                                                                    .get(0)
-                                                                    .getGroupConfig()));
-                                }
-                            }
-                        });
+        Validator.executedAsPlanned(state, testCase);
+
+        ServerHelloMessage sHello =
+                (ServerHelloMessage)
+                        WorkflowTraceUtil.getFirstReceivedMessage(
+                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+        ClientHelloMessage cHello =
+                state.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
+        if (sHello != null) {
+            assertTrue(
+                    "Server did not send a HelloRetryRequest", sHello.isTls13HelloRetryRequest());
+            assertTrue(
+                    "Server selected an unproposed CipherSuite",
+                    Arrays.equals(
+                            selectedCipher.getByteValue(),
+                            sHello.getSelectedCipherSuite().getValue()));
+            assertTrue(
+                    "Server did not include a SupportedVersions Extension",
+                    sHello.containsExtension(ExtensionType.SUPPORTED_VERSIONS));
+            SharedExtensionTests.checkForDuplicateExtensions(sHello);
+            ServerHello.checkForForbiddenExtensions(sHello);
+            ServerHello.checkForUnproposedExtensions(sHello, cHello);
+            KeyShareExtensionMessage ksExtension =
+                    sHello.getExtension(KeyShareExtensionMessage.class);
+            if (ksExtension != null) {
+                assertTrue(
+                        "Server did not include exactly one NamedGroup in KeyShare Extension",
+                        ksExtension.getKeyShareList().size() == 1);
+                assertTrue(
+                        "Server included a public key in HelloRetryRequest",
+                        ksExtension.getKeyShareList().get(0).getPublicKey() == null);
+                assertTrue(
+                        "Server selected an unproposed NamedGroup",
+                        c.getDefaultClientNamedGroups()
+                                .contains(ksExtension.getKeyShareList().get(0).getGroupConfig()));
+            }
+        }
     }
 
     @AnvilTest(id = "8446-aVxixR6JLE")
     @ExcludeParameter("CIPHER_SUITE")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
-    public void selectsSameCipherSuiteAllAtOnce(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void selectsSameCipherSuiteAllAtOnce(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setDefaultClientSupportedCipherSuites(
                 new LinkedList<>(
                         context.getFeatureExtractionResult().getSupportedTls13CipherSuites()));
         WorkflowTrace workflowTrace = getHelloRetryWorkflowTrace(runner);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            checkForDuplicateCcs(workflowTrace);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage helloRetryRequest =
-                                    (ServerHelloMessage)
-                                            WorkflowTraceUtil.getFirstReceivedMessage(
-                                                    HandshakeMessageType.SERVER_HELLO,
-                                                    i.getWorkflowTrace());
-                            ServerHelloMessage actualServerHello =
-                                    (ServerHelloMessage)
-                                            WorkflowTraceUtil.getLastReceivedMessage(
-                                                    HandshakeMessageType.SERVER_HELLO,
-                                                    i.getWorkflowTrace());
-                            if (helloRetryRequest != null && actualServerHello != null) {
-                                assertTrue(
-                                        "Server selected an unproposed CipherSuite in HelloRetryRequest",
-                                        context.getFeatureExtractionResult()
-                                                .getSupportedTls13CipherSuites()
-                                                .contains(
-                                                        CipherSuite.getCipherSuite(
-                                                                helloRetryRequest
-                                                                        .getSelectedCipherSuite()
-                                                                        .getValue())));
-                                assertTrue(
-                                        "Server selected a different CipherSuite in ServerHello than in HelloRetryRequest",
-                                        Arrays.equals(
-                                                helloRetryRequest
-                                                        .getSelectedCipherSuite()
-                                                        .getValue(),
-                                                actualServerHello
-                                                        .getSelectedCipherSuite()
-                                                        .getValue()));
-                            }
-                        });
+        Validator.executedAsPlanned(state, testCase);
+        checkForDuplicateCcs(workflowTrace);
+
+        ServerHelloMessage helloRetryRequest =
+                (ServerHelloMessage)
+                        WorkflowTraceUtil.getFirstReceivedMessage(
+                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+        ServerHelloMessage actualServerHello =
+                (ServerHelloMessage)
+                        WorkflowTraceUtil.getLastReceivedMessage(
+                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+        if (helloRetryRequest != null && actualServerHello != null) {
+            assertTrue(
+                    "Server selected an unproposed CipherSuite in HelloRetryRequest",
+                    context.getFeatureExtractionResult()
+                            .getSupportedTls13CipherSuites()
+                            .contains(
+                                    CipherSuite.getCipherSuite(
+                                            helloRetryRequest
+                                                    .getSelectedCipherSuite()
+                                                    .getValue())));
+            assertTrue(
+                    "Server selected a different CipherSuite in ServerHello than in HelloRetryRequest",
+                    Arrays.equals(
+                            helloRetryRequest.getSelectedCipherSuite().getValue(),
+                            actualServerHello.getSelectedCipherSuite().getValue()));
+        }
     }
 
     @AnvilTest(id = "8446-PqtPy7dAY2")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
-    public void selectsSameCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void selectsSameCipherSuite(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         CipherSuite selectedCipherSuite =
                 parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = getHelloRetryWorkflowTrace(runner);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            checkForDuplicateCcs(workflowTrace);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage helloRetryRequest =
-                                    (ServerHelloMessage)
-                                            WorkflowTraceUtil.getFirstReceivedMessage(
-                                                    HandshakeMessageType.SERVER_HELLO,
-                                                    i.getWorkflowTrace());
-                            ServerHelloMessage actualServerHello =
-                                    (ServerHelloMessage)
-                                            WorkflowTraceUtil.getLastReceivedMessage(
-                                                    HandshakeMessageType.SERVER_HELLO,
-                                                    i.getWorkflowTrace());
-                            if (helloRetryRequest != null && actualServerHello != null) {
-                                assertTrue(
-                                        "Server selected an unproposed CipherSuite in HelloRetryRequest",
-                                        Arrays.equals(
-                                                helloRetryRequest
-                                                        .getSelectedCipherSuite()
-                                                        .getValue(),
-                                                selectedCipherSuite.getByteValue()));
-                                assertTrue(
-                                        "Server selected a different CipherSuite in ServerHello than in HelloRetryRequest",
-                                        Arrays.equals(
-                                                helloRetryRequest
-                                                        .getSelectedCipherSuite()
-                                                        .getValue(),
-                                                actualServerHello
-                                                        .getSelectedCipherSuite()
-                                                        .getValue()));
-                            }
-                        });
+        Validator.executedAsPlanned(state, testCase);
+        checkForDuplicateCcs(workflowTrace);
+
+        ServerHelloMessage helloRetryRequest =
+                (ServerHelloMessage)
+                        WorkflowTraceUtil.getFirstReceivedMessage(
+                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+        ServerHelloMessage actualServerHello =
+                (ServerHelloMessage)
+                        WorkflowTraceUtil.getLastReceivedMessage(
+                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+        if (helloRetryRequest != null && actualServerHello != null) {
+            assertTrue(
+                    "Server selected an unproposed CipherSuite in HelloRetryRequest",
+                    Arrays.equals(
+                            helloRetryRequest.getSelectedCipherSuite().getValue(),
+                            selectedCipherSuite.getByteValue()));
+            assertTrue(
+                    "Server selected a different CipherSuite in ServerHello than in HelloRetryRequest",
+                    Arrays.equals(
+                            helloRetryRequest.getSelectedCipherSuite().getValue(),
+                            actualServerHello.getSelectedCipherSuite().getValue()));
+        }
     }
 
     @AnvilTest(id = "8446-i5qA9bNwto")
     @MethodCondition(method = "sendsHelloRetryRequestForEmptyKeyShare")
     @Tag("new")
-    public void retainsProtocolVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void retainsProtocolVersion(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = getHelloRetryWorkflowTrace(runner);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            checkForDuplicateCcs(workflowTrace);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage helloRetryRequest =
-                                    (ServerHelloMessage)
-                                            WorkflowTraceUtil.getFirstReceivedMessage(
-                                                    HandshakeMessageType.SERVER_HELLO,
-                                                    i.getWorkflowTrace());
-                            ServerHelloMessage actualServerHello =
-                                    (ServerHelloMessage)
-                                            WorkflowTraceUtil.getLastReceivedMessage(
-                                                    HandshakeMessageType.SERVER_HELLO,
-                                                    i.getWorkflowTrace());
-                            if (helloRetryRequest != null && actualServerHello != null) {
-                                assertTrue(
-                                        "Server did not retain the selected Protocol Version in Supported Versions Extension",
-                                        Arrays.equals(
-                                                helloRetryRequest
-                                                        .getExtension(
-                                                                SupportedVersionsExtensionMessage
-                                                                        .class)
-                                                        .getSupportedVersions()
-                                                        .getValue(),
-                                                actualServerHello
-                                                        .getExtension(
-                                                                SupportedVersionsExtensionMessage
-                                                                        .class)
-                                                        .getSupportedVersions()
-                                                        .getValue()));
-                            }
-                        });
+        Validator.executedAsPlanned(state, testCase);
+        checkForDuplicateCcs(workflowTrace);
+
+        ServerHelloMessage helloRetryRequest =
+                (ServerHelloMessage)
+                        WorkflowTraceUtil.getFirstReceivedMessage(
+                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+        ServerHelloMessage actualServerHello =
+                (ServerHelloMessage)
+                        WorkflowTraceUtil.getLastReceivedMessage(
+                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+        if (helloRetryRequest != null && actualServerHello != null) {
+            assertTrue(
+                    "Server did not retain the selected Protocol Version in Supported Versions Extension",
+                    Arrays.equals(
+                            helloRetryRequest
+                                    .getExtension(SupportedVersionsExtensionMessage.class)
+                                    .getSupportedVersions()
+                                    .getValue(),
+                            actualServerHello
+                                    .getExtension(SupportedVersionsExtensionMessage.class)
+                                    .getSupportedVersions()
+                                    .getValue()));
+        }
     }
 
     @NonCombinatorialAnvilTest(id = "8446-FwJUHPJFYr")

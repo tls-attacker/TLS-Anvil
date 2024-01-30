@@ -11,12 +11,14 @@ import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.crypto.ec.*;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -37,7 +39,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class TLSExtensionForECC extends Tls12Test {
@@ -141,9 +142,8 @@ public class TLSExtensionForECC extends Tls12Test {
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
-    public void rejectsInvalidCurvePoints(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void rejectsInvalidCurvePoints(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
@@ -168,7 +168,8 @@ public class TLSExtensionForECC extends Tls12Test {
 
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8422-nGxjfcCt1i")
@@ -178,9 +179,8 @@ public class TLSExtensionForECC extends Tls12Test {
             requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
     @Tag("new")
-    public void abortsWhenSharedSecretIsZero(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void abortsWhenSharedSecretIsZero(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_KEY_EXCHANGE);
@@ -204,7 +204,8 @@ public class TLSExtensionForECC extends Tls12Test {
                 new SendAction(ActionOption.MAY_FAIL, new ServerHelloDoneMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8422-DknikJ9VC5")
@@ -214,25 +215,22 @@ public class TLSExtensionForECC extends Tls12Test {
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
     @Tag("new")
-    public void respectsPointFormat(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void respectsPointFormat(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         config.setDefaultServerSupportedPointFormats(ECPointFormat.UNCOMPRESSED);
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(
                         WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            ECDHClientKeyExchangeMessage clientKeyExchange =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(
-                                                    ECDHClientKeyExchangeMessage.class);
-                            assertEquals(
-                                    "Client did not respect our Point Format",
-                                    0x04,
-                                    clientKeyExchange.getPublicKey().getValue()[0]);
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        ECDHClientKeyExchangeMessage clientKeyExchange =
+                state.getWorkflowTrace()
+                        .getFirstReceivedMessage(ECDHClientKeyExchangeMessage.class);
+        assertEquals(
+                "Client did not respect our Point Format",
+                0x04,
+                clientKeyExchange.getPublicKey().getValue()[0]);
     }
 
     @NonCombinatorialAnvilTest(id = "8422-jJBYYpiKBH")

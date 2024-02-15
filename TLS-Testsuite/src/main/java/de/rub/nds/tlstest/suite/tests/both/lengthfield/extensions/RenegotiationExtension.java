@@ -20,15 +20,15 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
+import de.rub.nds.tlstest.framework.testClasses.TlsLengthfieldTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-public class RenegotiationExtension extends TlsGenericTest {
+public class RenegotiationExtension extends TlsLengthfieldTest {
 
     @Tag("tls12")
-    @TlsVersion(supported = ProtocolVersion.TLS12)
+    @TlsVersion(supported = {ProtocolVersion.TLS12, ProtocolVersion.DTLS12})
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @AnvilTest(id = "XLF-oU4NN7JA83")
     @ExcludeParameter("INCLUDE_RENEGOTIATION_EXTENSION")
@@ -56,7 +56,7 @@ public class RenegotiationExtension extends TlsGenericTest {
     }
 
     @Tag("tls12")
-    @TlsVersion(supported = ProtocolVersion.TLS12)
+    @TlsVersion(supported = {ProtocolVersion.TLS12, ProtocolVersion.DTLS12})
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @AnvilTest(id = "XLF-AxKvemiN6n")
     @ExcludeParameter("INCLUDE_RENEGOTIATION_EXTENSION")

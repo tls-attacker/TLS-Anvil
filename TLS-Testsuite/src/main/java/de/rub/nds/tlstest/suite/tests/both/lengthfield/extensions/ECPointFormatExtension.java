@@ -20,14 +20,14 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
+import de.rub.nds.tlstest.framework.testClasses.TlsLengthfieldTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @Tag("tls12")
-@TlsVersion(supported = ProtocolVersion.TLS12)
+@TlsVersion(supported = {ProtocolVersion.TLS12, ProtocolVersion.DTLS12})
 @KeyExchange(supported = KeyExchangeType.ECDH)
-public class ECPointFormatExtension extends TlsGenericTest {
+public class ECPointFormatExtension extends TlsLengthfieldTest {
 
     @AnvilTest(id = "XLF-mgWov7XYiw")
     @ModelFromScope(modelType = "LENGTHFIELD")

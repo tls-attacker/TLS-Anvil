@@ -106,10 +106,6 @@ public class TlsTestConfig extends TLSDelegateConfig {
         this.testClientDelegate = new TestClientDelegate();
         this.testExtractorDelegate = new TestExtractorDelegate();
         this.workerDelegate = new WorkerDelegate();
-        if (isUseDTLS()) {
-            testClientDelegate.setUseUDP(true);
-            cachedConfig.setAddRetransmissionsToWorkflowTraceInDtls(true);
-        }
     }
 
     /**
@@ -269,6 +265,10 @@ public class TlsTestConfig extends TLSDelegateConfig {
         } catch (Exception e) {
             throw new ParameterException(e);
         }
+
+        if (isUseDTLS()) {
+            testClientDelegate.setUseUDP(true);
+        }
         parsedArgs = true;
     }
 
@@ -376,10 +376,12 @@ public class TlsTestConfig extends TLSDelegateConfig {
             }
             if (useDTLS) {
                 boolean exists = false;
-                for (Delegate i : getDelegateList()) {
-                    if (i instanceof DtlsDelegate) {
+                for (Delegate delegate : getDelegateList()) {
+                    if (delegate instanceof DtlsDelegate) {
                         exists = true;
-                        i.applyDelegate(config);
+                        delegate.applyDelegate(config);
+                    } else if (delegate instanceof TestClientDelegate) {
+                        delegate.applyDelegate(config);
                     }
                 }
                 if (!exists) {
@@ -388,7 +390,6 @@ public class TlsTestConfig extends TLSDelegateConfig {
                     dtlsDelegate.applyDelegate(config);
                     addDelegate(dtlsDelegate);
                 }
-                config.setWorkflowExecutorType(WorkflowExecutorType.DTLS);
                 config.setSupportedVersions(ProtocolVersion.DTLS12);
             }
             return config;

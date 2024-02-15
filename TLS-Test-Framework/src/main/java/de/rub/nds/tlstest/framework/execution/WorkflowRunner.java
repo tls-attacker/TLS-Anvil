@@ -109,52 +109,66 @@ public class WorkflowRunner {
      * @return
      */
     public TlsTestCase execute(WorkflowTrace trace, Config config) {
+        tlsTestCase.setState(new State(config, trace));
+        tlsTestCase.setParameterCombination(parameterCombination);
         // don't run if testrun is already aborted
         if (context.isAborted()) {
-            tlsTestCase.setState(new State());
-            tlsTestCase.setParameterCombination(parameterCombination);
             return tlsTestCase;
         }
 
         if (preparedConfig == null) {
             LOGGER.warn(
-                    "Config was not set before execution - WorkflowTrace may me invalid for Test:"
+                    "Config was not set before execution - WorkflowTrace may be invalid for Test:"
                             + extensionContext.getRequiredTestMethod().getName());
             preparedConfig = config;
         }
 
         adaptWorkflowTrace(trace, config);
-        tlsTestCase.setState(new State(config, trace));
-        tlsTestCase.setParameterCombination(parameterCombination);
         StateExecutionTask task =
                 new StateExecutionTask(
                         tlsTestCase.getState(), context.getStateExecutor().getReexecutions());
         if (context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER) {
             prepareServerTask(task);
-
         } else {
             prepareClientTask(task);
         }
+        setPortCallback(task, tlsTestCase);
         context.getStateExecutor().bulkExecuteTasks(task);
-        postExecution();
-
+        postExecution(task, tlsTestCase);
         return tlsTestCase;
     }
 
-    public void postExecution() {
-        TransportHandler transportHandler =
-                tlsTestCase.getState().getTlsContext().getTransportHandler();
-        if (transportHandler instanceof UdpTransportHandler) {
-            UdpTransportHandler udpTransportHandler = (UdpTransportHandler) transportHandler;
-            tlsTestCase.setDstPort(udpTransportHandler.getDstPort());
-            tlsTestCase.setSrcPort(udpTransportHandler.getSrcPort());
-        } else {
-            tlsTestCase.setDstPort(((TcpTransportHandler) transportHandler).getDstPort());
-            tlsTestCase.setSrcPort(((TcpTransportHandler) transportHandler).getSrcPort());
-        }
-        if (transportHandler instanceof UdpTransportHandler) {
+    private void setPortCallback(StateExecutionTask task, TlsTestCase tlsTestCase) {
+        task.setAfterExecutionCallback(
+                (State state) -> {
+                    TransportHandler transportHandler =
+                            task.getState().getTlsContext().getTransportHandler();
+                    if (transportHandler instanceof UdpTransportHandler) {
+                        UdpTransportHandler udpTransportHandler =
+                                (UdpTransportHandler) transportHandler;
+                        tlsTestCase.setDstPort(udpTransportHandler.getDstPort());
+                        tlsTestCase.setSrcPort(udpTransportHandler.getSrcPort());
+                    } else {
+                        tlsTestCase.setDstPort(
+                                ((TcpTransportHandler) transportHandler).getDstPort());
+                        tlsTestCase.setSrcPort(
+                                ((TcpTransportHandler) transportHandler).getSrcPort());
+                    }
+                    if (transportHandler instanceof UdpTransportHandler) {
+                        try {
+                            transportHandler.closeConnection();
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    return 0;
+                });
+    }
+
+    private void postExecution(StateExecutionTask task, TlsTestCase tlsTestCase) {
+        // fallback to extract ports if WorkflowExecutor did not apply callback
+        if (tlsTestCase.getSrcPort() == null && tlsTestCase.getDstPort() == null) {
             try {
-                transportHandler.closeConnection();
+                task.getAfterExecutionCallback().apply(task.getState());
             } catch (Exception ignored) {
             }
         }
@@ -217,14 +231,41 @@ public class WorkflowRunner {
         try {
             if (context.getConfig().isUseDTLS()) {
                 setServerUdpTransportHandler();
+                setReexecutionCallback(task);
             } else {
                 setServerTcpTransportHandler();
             }
+
             task.setBeforeTransportInitCallback(
                     context.getConfig().getTestClientDelegate().getTriggerScript());
         } catch (IOException ex) {
             throw new RuntimeException("Failed to set TransportHandler");
         }
+    }
+
+    /**
+     * For UDP, WorkflowExecutionExceptions may cause the DatagramSocket to remain unclosed. Since
+     * we can not bind to the same port upon reexecution, we set a callback to close the socket if
+     * it is still open.
+     *
+     * @param task The StateExecutionTask in preparation for execution
+     */
+    private void setReexecutionCallback(StateExecutionTask task) {
+        task.setBeforeReexecutionCallback(
+                state -> {
+                    ServerUdpTransportHandler udpTransportHandler =
+                            (ServerUdpTransportHandler) state.getTlsContext().getTransportHandler();
+                    try {
+                        if (udpTransportHandler.isInitialized()
+                                && !udpTransportHandler.isClosed()) {
+                            udpTransportHandler.closeConnection();
+                        }
+                    } catch (IOException ex) {
+                        LOGGER.error(ex);
+                        return 1;
+                    }
+                    return 0;
+                });
     }
 
     public void setServerTcpTransportHandler() throws IOException {

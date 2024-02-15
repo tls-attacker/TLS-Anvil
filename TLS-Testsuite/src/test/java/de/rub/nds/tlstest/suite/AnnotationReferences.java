@@ -66,6 +66,24 @@ public class AnnotationReferences {
             annotationIdentifiers.addAll(
                     Arrays.asList(method.getAnnotation(ManualConfig.class).identifiers()));
         }
+        if (method.isAnnotationPresent(IncludeParameter.class)) {
+            annotationIdentifiers.add(method.getAnnotation(IncludeParameter.class).value());
+        }
+        if (method.isAnnotationPresent(IncludeParameters.class)) {
+            annotationIdentifiers.addAll(
+                    Arrays.asList(method.getAnnotation(IncludeParameters.class).value()).stream()
+                            .map(IncludeParameter::value)
+                            .collect(Collectors.toList()));
+        }
+        if (method.isAnnotationPresent(ExcludeParameter.class)) {
+            annotationIdentifiers.add(method.getAnnotation(ExcludeParameter.class).value());
+        }
+        if (method.isAnnotationPresent(ExcludeParameters.class)) {
+            annotationIdentifiers.addAll(
+                    Arrays.asList(method.getAnnotation(ExcludeParameters.class).value()).stream()
+                            .map(ExcludeParameter::value)
+                            .collect(Collectors.toList()));
+        }
         return annotationIdentifiers;
     }
 

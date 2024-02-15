@@ -33,9 +33,8 @@ public class TlsParameterCombination extends ParameterCombination {
         ParameterCombination parameterCombination =
                 ParameterCombination.fromArgumentsAccessor(argumentsAccessor, derivationScope);
         TlsParameterCombination tlsParameterCombination =
-                new TlsParameterCombination(parameterCombination.getParameterValues());
-        // set separately so we do not fetch static parameters twice
-        tlsParameterCombination.setDerivationScope(derivationScope);
+                new TlsParameterCombination(
+                        parameterCombination.getParameterValues(), derivationScope);
         return tlsParameterCombination;
     }
 

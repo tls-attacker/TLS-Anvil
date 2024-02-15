@@ -116,13 +116,21 @@ public class TlsTestCase extends AnvilTestCase {
 
     @Override
     public String getCaseSpecificPcapFilter() {
+        if (state == null) {
+            return super.getCaseSpecificPcapFilter();
+        }
         Integer relevantPort =
                 state.getContext().getConfig().getDefaultRunningMode() == RunningModeType.CLIENT
                         ? getSrcPort()
                         : getDstPort();
-        if (relevantPort != null) {
+        if (relevantPort != null && relevantPort != -1) {
             return String.format("port %d", relevantPort);
         } else {
+            LOGGER.warn(
+                    "Encountered invalid port for packet filter in test {} with combination {}: ",
+                    getAssociatedContainer().getTestMethodName(),
+                    getDisplayName(),
+                    (relevantPort != null) ? "Port is null" : "Port is -1");
             return super.getCaseSpecificPcapFilter();
         }
     }

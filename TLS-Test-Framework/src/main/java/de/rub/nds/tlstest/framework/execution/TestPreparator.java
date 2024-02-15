@@ -21,7 +21,6 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
-import de.rub.nds.tlsattacker.transport.udp.ServerUdpTransportHandler;
 import de.rub.nds.tlsscanner.clientscanner.config.ClientScannerConfig;
 import de.rub.nds.tlsscanner.clientscanner.execution.TlsClientScanner;
 import de.rub.nds.tlsscanner.core.constants.TlsProbeType;
@@ -41,7 +40,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.HashSet;
@@ -178,27 +176,23 @@ public class TestPreparator {
                 targetIsReady = true;
                 socket.close();
             } else {
-                try {
-                    DatagramSocket socket =
-                            new DatagramSocket(testConfig.getTestClientDelegate().getPort());
+                DatagramSocket socket =
+                        new DatagramSocket(testConfig.getTestClientDelegate().getPort());
 
-                    byte[] buf = new byte[256];
+                byte[] buf = new byte[256];
 
-                    while (!targetIsReady) {
-                        try {
-                            DatagramPacket packet = new DatagramPacket(buf, buf.length);
-                            socket.receive(packet);
-                            if (packet.getLength() > 0) {
-                                targetIsReady = true;
-                                socket.close();
-                            }
-
-                        } catch (Exception ignored) {
-                            ignored.printStackTrace();
+                while (!targetIsReady) {
+                    try {
+                        DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                        socket.receive(packet);
+                        if (packet.getLength() > 0) {
+                            targetIsReady = true;
+                            socket.close();
                         }
+
+                    } catch (Exception ignored) {
+                        ignored.printStackTrace();
                     }
-                } catch (SocketException e) {
-                    throw new RuntimeException(e);
                 }
             }
         } catch (Exception ex) {
@@ -351,7 +345,6 @@ public class TestPreparator {
         probes.add(TlsProbeType.CIPHER_SUITE);
         probes.add(TlsProbeType.PROTOCOL_VERSION);
         probes.add(TlsProbeType.NAMED_GROUPS);
-        probes.add(TlsProbeType.RECORD_FRAGMENTATION);
         probes.add(TlsProbeType.EC_POINT_FORMAT);
         probes.add(TlsProbeType.SERVER_CERTIFICATE_MINIMUM_KEY_SIZE);
         probes.add(TlsProbeType.CONNECTION_CLOSING_DELTA);
@@ -365,6 +358,9 @@ public class TestPreparator {
                 testConfig.getTestClientDelegate().getTriggerScript());
         if (testConfig.isUseDTLS()) {
             clientScannerConfig.getDtlsDelegate().setDTLS(true);
+            probes.add(TlsProbeType.DTLS_FRAGMENTATION);
+        } else {
+            probes.add(TlsProbeType.RECORD_FRAGMENTATION);
         }
 
         TlsClientScanner clientScanner =
@@ -411,9 +407,16 @@ public class TestPreparator {
         if (!testConfig.isParsedArgs()) {
             return false;
         }
+        if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT
+                && testConfig.isUseDTLS()
+                && testConfig.getAnvilTestConfig().getParallelTestCases() > 1) {
+            LOGGER.warn(
+                    "Restricting parallel test cases to 1 as TLS-Attacker does not support parallel UDP connections");
+            testConfig.getAnvilTestConfig().setParallelTestCases(1);
+        }
 
         ParallelExecutor executor =
-                new ParallelExecutor(testConfig.getAnvilTestConfig().getParallelTestCases(), 2);
+                new ParallelExecutor(testConfig.getAnvilTestConfig().getParallelTestCases(), 1);
         executor.setTimeoutAction(testConfig.getTimeoutActionScript());
         executor.armTimeoutAction(20000);
         testContext.setStateExecutor(executor);
@@ -560,14 +563,7 @@ public class TestPreparator {
     private Function<State, Integer> getSocketManagementCallback() {
         return (State state) -> {
             try {
-                if (testConfig.isUseDTLS()) {
-                    state.getTlsContext()
-                            .setTransportHandler(
-                                    new ServerUdpTransportHandler(
-                                            testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                                            testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                                            testConfig.getTestClientDelegate().getPort()));
-                } else {
+                if (!testConfig.isUseDTLS()) {
                     state.getTlsContext()
                             .setTransportHandler(
                                     new ServerTcpTransportHandler(

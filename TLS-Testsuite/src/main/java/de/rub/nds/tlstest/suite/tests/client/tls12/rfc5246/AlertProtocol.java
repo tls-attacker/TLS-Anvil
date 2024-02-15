@@ -27,6 +27,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -44,7 +45,7 @@ public class AlertProtocol extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    public void closeNotify(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void closeNotifyInHandshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         Config c = getPreparedConfig(argumentAccessor, runner);
 
         AlertMessage alert = new AlertMessage();
@@ -61,20 +62,47 @@ public class AlertProtocol extends Tls12Test {
         runner.execute(workflowTrace, c)
                 .validateFinal(
                         i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.smartExecutedAsPlanned(i);
-
-                            AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
-                            if (message == null && Validator.socketClosed(i)) {
-                                i.addAdditionalResultInfo("No CLOSE NOTIFY Alert received.");
-                                i.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
-                                return;
-                            }
-                            assertTrue("Socket has not been closed", Validator.socketClosed(i));
-                            Validator.receivedWarningAlert(i);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.CLOSE_NOTIFY, message);
+                            evaluateAlertTest(i);
                         });
+    }
+
+    @AnvilTest(id = "5246-e4Fsk3lp2z")
+    @DynamicValueConstraints(
+            affectedIdentifiers = "RECORD_LENGTH",
+            methods = "recordLengthAllowsModification")
+    public void closeNotifyPostHandshake(
+            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+        Config c = getPreparedConfig(argumentAccessor, runner);
+
+        AlertMessage alert = new AlertMessage();
+        alert.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));
+        alert.setDescription(Modifiable.explicit(AlertDescription.CLOSE_NOTIFY.getValue()));
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        workflowTrace.getLastSendingAction().getSendMessages().add(alert);
+
+        workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
+
+        runner.execute(workflowTrace, c)
+                .validateFinal(
+                        i -> {
+                            evaluateAlertTest(i);
+                        });
+    }
+
+    private void evaluateAlertTest(TlsTestCase i) {
+        WorkflowTrace trace = i.getWorkflowTrace();
+        Validator.smartExecutedAsPlanned(i);
+
+        AlertMessage message = trace.getLastReceivedMessage(AlertMessage.class);
+        if (message == null && Validator.socketClosed(i)) {
+            i.addAdditionalResultInfo("No CLOSE NOTIFY Alert received.");
+            i.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
+            return;
+        }
+        assertTrue("Socket has not been closed", Validator.socketClosed(i));
+        Validator.receivedWarningAlert(i);
+        Validator.testAlertDescription(i, AlertDescription.CLOSE_NOTIFY, message);
     }
 
     @AnvilTest(id = "5246-N8VwCXYaTF")

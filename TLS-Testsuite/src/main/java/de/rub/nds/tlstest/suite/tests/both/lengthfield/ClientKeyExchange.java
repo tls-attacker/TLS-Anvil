@@ -24,16 +24,20 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
+import de.rub.nds.tlstest.framework.testClasses.TlsLengthfieldTest;
 import org.junit.jupiter.api.Tag;
 
 @ServerTest
 @Tag("tls12")
-@TlsVersion(supported = ProtocolVersion.TLS12)
+@TlsVersion(supported = {ProtocolVersion.TLS12, ProtocolVersion.DTLS12})
 @KeyExchange(supported = KeyExchangeType.ALL12)
-public class ClientKeyExchange extends TlsGenericTest {
+public class ClientKeyExchange extends TlsLengthfieldTest {
 
     @AnvilTest(id = "XLF-4iPUuT51YH")
+    @TlsVersion(
+            supported =
+                    ProtocolVersion
+                            .TLS12) // TODO: adapt DTLS layer to retain message length modification
     @ModelFromScope(modelType = "LENGTHFIELD")
     public void clientKeyExchangeLength(AnvilTestCase testCase, WorkflowRunner runner) {
         WorkflowTrace workflowTrace = getWorkflowTraceSeparatedClientKeyExchange(runner);

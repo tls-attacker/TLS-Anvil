@@ -213,10 +213,18 @@ public class Fragmentation extends Tls12Test {
 
     @NonCombinatorialAnvilTest(id = "5246-M5X6WTePcK")
     public void recordFragmentationSupported() {
-        assertTrue(
-                "Record fragmentation support has not been detected",
-                context.getFeatureExtractionResult()
-                                .getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION)
-                        == TestResults.TRUE);
+        if (context.getConfig().isUseDTLS()) {
+            assertTrue(
+                    "DTLS record fragmentation support has not been detected",
+                    context.getFeatureExtractionResult()
+                                    .getResult(TlsAnalyzedProperty.SUPPORTS_DTLS_FRAGMENTATION)
+                            == TestResults.TRUE);
+        } else {
+            assertTrue(
+                    "Record fragmentation support has not been detected",
+                    context.getFeatureExtractionResult()
+                                    .getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION)
+                            == TestResults.TRUE);
+        }
     }
 }

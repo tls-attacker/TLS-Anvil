@@ -122,7 +122,6 @@ public class SupportedVersions extends Tls13Test {
         Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, msg);
     }
 
-    /*@AnvilTest.")*/
     @NonCombinatorialAnvilTest(id = "8446-o5uxfywWFS")
     public void supportedVersionContainsTls13() {
         SupportedVersionsExtensionMessage ext =
@@ -143,11 +142,13 @@ public class SupportedVersions extends Tls13Test {
                         .getReceivedClientHelloMessage()
                         .getExtension(SupportedVersionsExtensionMessage.class);
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        getUnsupportedTlsVersions(clientSupportedVersions)
-                .forEach(
-                        version ->
-                                parameterValues.add(
-                                        new ProtocolVersionDerivation(version.getValue())));
+        if (clientSupportedVersions != null) {
+            getUnsupportedTlsVersions(clientSupportedVersions)
+                    .forEach(
+                            version ->
+                                    parameterValues.add(
+                                            new ProtocolVersionDerivation(version.getValue())));
+        }
         return parameterValues;
     }
 

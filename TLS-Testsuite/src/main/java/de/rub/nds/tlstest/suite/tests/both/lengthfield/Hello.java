@@ -27,13 +27,13 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
+import de.rub.nds.tlstest.framework.testClasses.TlsLengthfieldTest;
 import org.junit.jupiter.api.Tag;
 
-public class Hello extends TlsGenericTest {
+public class Hello extends TlsLengthfieldTest {
 
     @Tag("tls12")
-    @TlsVersion(supported = ProtocolVersion.TLS12)
+    @TlsVersion(supported = {ProtocolVersion.TLS12, ProtocolVersion.DTLS12})
     @AnvilTest(id = "XLF-anjpbghN69")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
@@ -53,7 +53,10 @@ public class Hello extends TlsGenericTest {
     }
 
     @Tag("tls12")
-    @TlsVersion(supported = ProtocolVersion.TLS12)
+    @TlsVersion(
+            supported =
+                    ProtocolVersion
+                            .TLS12) // TODO: adapt DTLS layer to retain message length modification
     @AnvilTest(id = "XLF-7AdFFavtAd")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
@@ -73,7 +76,7 @@ public class Hello extends TlsGenericTest {
     }
 
     @Tag("tls12")
-    @TlsVersion(supported = ProtocolVersion.TLS12)
+    @TlsVersion(supported = {ProtocolVersion.TLS12, ProtocolVersion.DTLS12})
     @AnvilTest(id = "XLF-8NkdoEnnup")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
@@ -94,7 +97,7 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls12")
     @ServerTest
-    @TlsVersion(supported = ProtocolVersion.TLS12)
+    @TlsVersion(supported = {ProtocolVersion.TLS12, ProtocolVersion.DTLS12})
     @AnvilTest(id = "XLF-9XEqy2ZCoa")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")
@@ -116,7 +119,7 @@ public class Hello extends TlsGenericTest {
 
     @Tag("tls12")
     @ServerTest
-    @TlsVersion(supported = ProtocolVersion.TLS12)
+    @TlsVersion(supported = {ProtocolVersion.TLS12, ProtocolVersion.DTLS12})
     @AnvilTest(id = "XLF-2BCMFwzm2j")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @ModelFromScope(modelType = "LENGTHFIELD")

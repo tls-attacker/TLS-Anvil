@@ -26,10 +26,16 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
+import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
 @ClientTest
+@TlsVersion(
+        supported =
+                ProtocolVersion
+                        .TLS12) // explicitly exclude for DTLS as SSL2 versions are by definition
+// not applicable in a DTLS context
 public class ProhibitingSSLv2 extends Tls12Test {
 
     @AnvilTest(id = "6176-yZUPDLF21Z")

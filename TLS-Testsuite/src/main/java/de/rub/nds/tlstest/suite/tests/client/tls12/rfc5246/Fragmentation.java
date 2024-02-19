@@ -14,6 +14,7 @@ import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
@@ -24,6 +25,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
+import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
@@ -55,6 +57,11 @@ public class Fragmentation extends Tls12Test {
 
     @AnvilTest(id = "5246-FsvDkXCwAy")
     @ExcludeParameter("RECORD_LENGTH")
+    @TlsVersion(
+            supported =
+                    ProtocolVersion
+                            .TLS12) // explicitly exclude for DTLS (TODO: fix config flag for DTLS
+    // in TLS-Attacker)
     public void sendHandshakeMessagesWithinSingleRecord(
             AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);

@@ -45,7 +45,7 @@ public class AlertProtocol extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "RECORD_LENGTH",
             methods = "recordLengthAllowsModification")
-    public void closeNotify(AnvilTestCase testCase, WorkflowRunner runner) {
+    public void closeNotifyInHandshake(AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);
 
         AlertMessage alert = new AlertMessage();
@@ -60,7 +60,30 @@ public class AlertProtocol extends Tls12Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         State state = runner.execute(workflowTrace, c);
+        evaluateAlertTest(testCase, state);
+    }
 
+    @AnvilTest(id = "5246-e4Fsk3lp2z")
+    @DynamicValueConstraints(
+            affectedIdentifiers = "RECORD_LENGTH",
+            methods = "recordLengthAllowsModification")
+    public void closeNotifyPostHandshake(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
+
+        AlertMessage alert = new AlertMessage();
+        alert.setLevel(Modifiable.explicit(AlertLevel.WARNING.getValue()));
+        alert.setDescription(Modifiable.explicit(AlertDescription.CLOSE_NOTIFY.getValue()));
+
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+        workflowTrace.getLastSendingAction().getSendMessages().add(alert);
+
+        workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
+
+        State state = runner.execute(workflowTrace, c);
+        evaluateAlertTest(testCase, state);
+    }
+
+    private void evaluateAlertTest(AnvilTestCase testCase, State state) {
         WorkflowTrace trace = state.getWorkflowTrace();
         Validator.smartExecutedAsPlanned(state, testCase);
 

@@ -21,13 +21,13 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
+import de.rub.nds.tlstest.framework.testClasses.TlsLengthfieldTest;
 import org.junit.jupiter.api.Tag;
 
 @Tag("tls13")
 @TlsVersion(supported = ProtocolVersion.TLS13)
 @KeyExchange(supported = KeyExchangeType.ALL13)
-public class KeyShareExtension extends TlsGenericTest {
+public class KeyShareExtension extends TlsLengthfieldTest {
 
     @AnvilTest(id = "XLF-YEP4C4ruSR")
     @ModelFromScope(modelType = "LENGTHFIELD")

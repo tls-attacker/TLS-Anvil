@@ -112,7 +112,7 @@ public class WorkflowRunner {
 
         if (preparedConfig == null) {
             LOGGER.warn(
-                    "Config was not set before execution - WorkflowTrace may me invalid for Test:"
+                    "Config was not set before execution - WorkflowTrace may be invalid for Test:"
                             + extensionContext.getRequiredTestMethod().getName());
             preparedConfig = config;
         }
@@ -126,12 +126,13 @@ public class WorkflowRunner {
         } else {
             prepareClientTask(task);
         }
+        task.setAfterExecutionCallback(this::afterExecutionCallback);
         context.getStateExecutor().bulkExecuteTasks(task);
         postExecution();
         return state;
     }
 
-    public void postExecution() {
+    private Integer afterExecutionCallback(State state) {
         AnvilTestCase testCase = AnvilTestCase.fromExtensionContext(extensionContext);
 
         TransportHandler transportHandler = state.getTlsContext().getTransportHandler();
@@ -157,12 +158,32 @@ public class WorkflowRunner {
                 state.getContext().getConfig().getDefaultRunningMode() == RunningModeType.CLIENT
                         ? testCase.getSrcPort()
                         : testCase.getDstPort();
-        if (relevantPort != null) {
+        if (relevantPort != null && relevantPort != -1) {
             testCase.setCaseSpecificPcapFilter(String.format("port %d", relevantPort));
+        } else {
+            LOGGER.warn(
+                    "Encountered invalid port for packet filter in test {} with combination {}: {}",
+                    testCase.getAssociatedContainer().getTestMethodName(),
+                    testCase.getDisplayName(),
+                    (relevantPort != null) ? "Port is null" : "Port is -1");
         }
 
         if (state.getTlsContext().isReceivedTransportHandlerException()) {
             testCase.addAdditionalResultInfo("Received TransportHandler exception");
+        }
+
+        return 0;
+    }
+
+    public void postExecution() {
+        AnvilTestCase testCase = AnvilTestCase.fromExtensionContext(extensionContext);
+
+        // fallback to extract ports if WorkflowExecutor did not apply callback
+        if (testCase.getSrcPort() == null && testCase.getDstPort() == null) {
+            try {
+                afterExecutionCallback(state);
+            } catch (Exception ignored) {
+            }
         }
     }
 
@@ -223,14 +244,35 @@ public class WorkflowRunner {
         try {
             if (context.getConfig().isUseDTLS()) {
                 setServerUdpTransportHandler();
+                task.setBeforeReexecutionCallback(this::reexecutionCallback);
             } else {
                 setServerTcpTransportHandler();
             }
+
             task.setBeforeTransportInitCallback(
                     context.getConfig().getTestClientDelegate().getTriggerScript());
         } catch (IOException ex) {
             throw new RuntimeException("Failed to set TransportHandler");
         }
+    }
+
+    /**
+     * For UDP, WorkflowExecutionExceptions may cause the DatagramSocket to remain unclosed. Since
+     * we can not bind to the same port upon reexecution, we set a callback to close the socket if
+     * it is still open.
+     */
+    private Integer reexecutionCallback(State state) {
+        ServerUdpTransportHandler udpTransportHandler =
+                (ServerUdpTransportHandler) state.getTlsContext().getTransportHandler();
+        try {
+            if (udpTransportHandler.isInitialized() && !udpTransportHandler.isClosed()) {
+                udpTransportHandler.closeConnection();
+            }
+        } catch (IOException ex) {
+            LOGGER.error(ex);
+            return 1;
+        }
+        return 0;
     }
 
     public void setServerTcpTransportHandler() throws IOException {

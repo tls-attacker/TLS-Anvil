@@ -24,11 +24,11 @@ import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.testClasses.TlsGenericTest;
+import de.rub.nds.tlstest.framework.testClasses.TlsLengthfieldTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
-public class ExtendedMasterSecretExtension extends TlsGenericTest {
+public class ExtendedMasterSecretExtension extends TlsLengthfieldTest {
 
     public ConditionEvaluationResult targetCanBeTested() {
         if (TestContext.getInstance().getConfig().getTestEndpointMode() == TestEndpointType.SERVER
@@ -41,7 +41,7 @@ public class ExtendedMasterSecretExtension extends TlsGenericTest {
                 "Target is not a server and did not include the required Extension in Client Hello");
     }
 
-    @TlsVersion(supported = ProtocolVersion.TLS12)
+    @TlsVersion(supported = {ProtocolVersion.TLS12, ProtocolVersion.DTLS12})
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @AnvilTest(id = "XLF-FjfCZ7g3ZD")
     @ExcludeParameter("INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION")

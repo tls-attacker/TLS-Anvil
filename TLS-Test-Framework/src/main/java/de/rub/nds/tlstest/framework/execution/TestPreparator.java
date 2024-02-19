@@ -6,6 +6,7 @@ import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.context.AnvilContext;
 import de.rub.nds.anvilcore.junit.extension.EndpointConditionExtension;
 import de.rub.nds.scanner.core.probe.ProbeType;
+import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
@@ -23,6 +24,7 @@ import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlsscanner.clientscanner.config.ClientScannerConfig;
 import de.rub.nds.tlsscanner.clientscanner.execution.TlsClientScanner;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlsscanner.core.constants.TlsProbeType;
 import de.rub.nds.tlsscanner.serverscanner.config.ServerScannerConfig;
 import de.rub.nds.tlsscanner.serverscanner.execution.TlsServerScanner;
@@ -306,6 +308,7 @@ public class TestPreparator {
                 new TlsServerScanner(scannerConfig, testContext.getStateExecutor());
 
         ServerReport serverReport = scanner.scan();
+        serverReport.putResult(TlsAnalyzedProperty.HTTPS_HEADER, TestResults.ERROR_DURING_TEST);
         FeatureExtractionResult report =
                 ServerFeatureExtractionResult.fromServerScanReport(serverReport);
         saveToCache(report);

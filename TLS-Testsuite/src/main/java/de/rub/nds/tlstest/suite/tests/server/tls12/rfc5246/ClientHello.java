@@ -13,6 +13,7 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExcludeParameters;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -23,6 +24,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
@@ -36,14 +38,13 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivat
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class ClientHello extends Tls12Test {
 
     @AnvilTest(id = "5246-ST5MN96BuF")
-    public void unknownCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void unknownCipherSuite(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
         clientHelloMessage.setCipherSuites(Modifiable.insert(new byte[] {(byte) 0xfe, 0x00}, 0));
@@ -53,13 +54,13 @@ public class ClientHello extends Tls12Test {
                 new SendAction(clientHelloMessage),
                 new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "5246-P4AGQWTZsM")
-    public void unknownCompressionMethod(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void unknownCompressionMethod(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
         clientHelloMessage.setCompressions(Modifiable.explicit(new byte[] {0x00, 0x04}));
@@ -69,12 +70,13 @@ public class ClientHello extends Tls12Test {
                 new SendAction(clientHelloMessage),
                 new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "5246-YhZ7GJjrwk")
-    public void includeUnknownExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void includeUnknownExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         // we use a Grease Extension for which we modify the type
@@ -89,32 +91,28 @@ public class ClientHello extends Tls12Test {
                                 HandshakeMessageType.CLIENT_HELLO, workflowTrace);
         clientHello.addExtension(greaseHelperExtension);
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, config);
 
-                            ServerHelloMessage serverHello =
-                                    (ServerHelloMessage)
-                                            WorkflowTraceUtil.getFirstReceivedMessage(
-                                                    HandshakeMessageType.SERVER_HELLO,
-                                                    workflowTrace);
-                            if (serverHello.getExtensions() != null) {
-                                for (ExtensionMessage extension : serverHello.getExtensions()) {
-                                    assertFalse(
-                                            "Server negotiated the undefined Extension",
-                                            Arrays.equals(
-                                                    extension.getExtensionType().getValue(),
-                                                    greaseHelperExtension.getType().getValue()));
-                                }
-                            }
-                        });
+        Validator.executedAsPlanned(state, testCase);
+        ServerHelloMessage serverHello =
+                (ServerHelloMessage)
+                        WorkflowTraceUtil.getFirstReceivedMessage(
+                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+        if (serverHello.getExtensions() != null) {
+            for (ExtensionMessage extension : serverHello.getExtensions()) {
+                assertFalse(
+                        "Server negotiated the undefined Extension",
+                        Arrays.equals(
+                                extension.getExtensionType().getValue(),
+                                greaseHelperExtension.getType().getValue()));
+            }
+        }
     }
 
     @AnvilTest(id = "5246-RMehEjs346")
     @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES")
-    public void offerManyCipherSuites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void offerManyCipherSuites(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         // add pseudo cipher suites to reach 408, which is the sum of all
         // defined values and GREASE values
@@ -142,7 +140,8 @@ public class ClientHello extends Tls12Test {
                 new SendAction(clientHelloMessage),
                 new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "5246-LtPf1AMt7Y")
@@ -161,12 +160,13 @@ public class ClientHello extends Tls12Test {
     })
     @KeyExchange(supported = {KeyExchangeType.DH, KeyExchangeType.RSA})
     @Tag("new")
-    public void leaveOutExtensions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void leaveOutExtensions(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         ClientHelloMessage clientHello =
                 workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
         clientHello.setExtensionBytes(Modifiable.explicit(new byte[0]));
-        runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, config);
+        Validator.executedAsPlanned(state, testCase);
     }
 }

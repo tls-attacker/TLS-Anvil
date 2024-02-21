@@ -12,6 +12,7 @@ import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -19,6 +20,7 @@ import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PreSharedKeyExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -30,7 +32,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsLengthfieldTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 @Tag("tls13")
@@ -54,13 +55,12 @@ public class PreSharedKeyExtension extends TlsLengthfieldTest {
     @ExcludeParameter("INCLUDE_PSK_EXCHANGE_MODES_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "supportsPsk")
-    public void preSharedKeyExtensionLength(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
+    public void preSharedKeyExtensionLength(AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(runner);
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
         pskExtension.setExtensionLength(Modifiable.sub(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig())
-                .validateFinal(super::validateLengthTest);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        validateLengthTest(state, testCase);
     }
 
     @AnvilTest(id = "XLF-kwNxe25ef8")
@@ -68,12 +68,12 @@ public class PreSharedKeyExtension extends TlsLengthfieldTest {
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "supportsPsk")
     public void preSharedKeyExtensionIdentityListLength(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(runner);
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
         pskExtension.setIdentityListLength(Modifiable.sub(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig())
-                .validateFinal(super::validateLengthTest);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        validateLengthTest(state, testCase);
     }
 
     @AnvilTest(id = "XLF-4L65zmLyuG")
@@ -81,16 +81,15 @@ public class PreSharedKeyExtension extends TlsLengthfieldTest {
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "supportsPsk")
     public void preSharedKeyExtensionBinderListLength(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        WorkflowTrace workflowTrace = setupPreSharedKeyLengthFieldTest(runner);
         PreSharedKeyExtensionMessage pskExtension = getPSKExtension(workflowTrace);
         pskExtension.setBinderListLength(Modifiable.sub(1));
-        runner.execute(workflowTrace, runner.getPreparedConfig())
-                .validateFinal(super::validateLengthTest);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        validateLengthTest(state, testCase);
     }
 
-    private WorkflowTrace setupPreSharedKeyLengthFieldTest(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    private WorkflowTrace setupPreSharedKeyLengthFieldTest(WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddPSKKeyExchangeModesExtension(true);
         config.setAddPreSharedKeyExtension(true);
@@ -99,7 +98,7 @@ public class PreSharedKeyExtension extends TlsLengthfieldTest {
         // binder that corresponds to that PSK.
         config.setLimitPsksToOne(Boolean.TRUE);
         adjustPreSharedKeyModes(config);
-        prepareConfig(config, argumentAccessor, runner);
+        prepareConfig(config, runner);
         return runner.generateWorkflowTrace(WorkflowTraceType.FULL_TLS13_PSK);
     }
 

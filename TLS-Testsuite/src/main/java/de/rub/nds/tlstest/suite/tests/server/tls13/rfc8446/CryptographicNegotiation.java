@@ -11,6 +11,7 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ExcludeParameters;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -21,15 +22,14 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class CryptographicNegotiation extends Tls13Test {
@@ -40,8 +40,8 @@ public class CryptographicNegotiation extends Tls13Test {
         @ExcludeParameter("NAMED_GROUP")
     })
     // Todo: add 'Groups' to method name
-    public void noOverlappingParameters(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void noOverlappingParameters(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         ClientHelloMessage chm = new ClientHelloMessage(config);
 
@@ -56,11 +56,9 @@ public class CryptographicNegotiation extends Tls13Test {
 
         WorkflowTrace trace = buildWorkflowTrace(chm);
 
-        runner.execute(trace, config)
-                .validateFinal(
-                        i -> {
-                            validateResult(i, trace);
-                        });
+        State state = runner.execute(trace, config);
+
+        validateResult(state, testCase, trace);
     }
 
     @AnvilTest(id = "8446-QxURSJAYJj")
@@ -69,24 +67,20 @@ public class CryptographicNegotiation extends Tls13Test {
         @ExcludeParameter("CIPHER_SUITE")
     })
     @Tag("new")
-    public void noOverlappingParametersCipherSuite(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void noOverlappingParametersCipherSuite(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         ClientHelloMessage chm = new ClientHelloMessage(config);
         chm.setCipherSuites(Modifiable.explicit(CipherSuite.GREASE_00.getByteValue()));
 
         WorkflowTrace trace = buildWorkflowTrace(chm);
 
-        runner.execute(trace, config)
-                .validateFinal(
-                        i -> {
-                            validateResult(i, trace);
-                        });
+        State state = runner.execute(trace, config);
+        validateResult(state, testCase, trace);
     }
 
-    private void validateResult(TlsTestCase i, WorkflowTrace trace) {
-        Validator.receivedFatalAlert(i);
+    private void validateResult(State state, AnvilTestCase testCase, WorkflowTrace trace) {
+        Validator.receivedFatalAlert(state, testCase);
         AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
         if (alert == null) {
             return;
@@ -98,8 +92,9 @@ public class CryptographicNegotiation extends Tls13Test {
                 AlertDescription.getAlertDescription(alert.getDescription().getValue());
         if (description != AlertDescription.HANDSHAKE_FAILURE
                 && description != AlertDescription.INSUFFICIENT_SECURITY) {
-            i.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
-            i.addAdditionalResultInfo("Alert was not Handshake Failure or Insufficient Security");
+            testCase.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
+            testCase.addAdditionalResultInfo(
+                    "Alert was not Handshake Failure or Insufficient Security");
         }
     }
 

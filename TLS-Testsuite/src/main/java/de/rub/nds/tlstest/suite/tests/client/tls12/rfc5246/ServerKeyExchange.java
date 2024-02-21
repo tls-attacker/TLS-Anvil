@@ -12,6 +12,7 @@ import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
@@ -19,6 +20,7 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -36,7 +38,6 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivati
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
 import java.util.List;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class ServerKeyExchange extends Tls12Test {
@@ -47,9 +48,8 @@ public class ServerKeyExchange extends Tls12Test {
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
     @IncludeParameter("SIGNATURE_BITMASK")
-    public void invalidServerKeyExchangeSignature(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidServerKeyExchangeSignature(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         byte[] bitmask = parameterCombination.buildBitmask();
 
         WorkflowTrace workflowTrace =
@@ -63,19 +63,16 @@ public class ServerKeyExchange extends Tls12Test {
 
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            if (serverKeyExchangeMsg.getSignatureLength().getValue()
-                                    < bitmask.length) {
-                                // we can't determine the ECDSA signature length beforehand
-                                // as trailing zeros may be stripped - the manipulation won't be
-                                // applied in these cases which results in false positives
-                                i.addAdditionalResultInfo("Bitmask exceeded signature length");
-                                return;
-                            }
-                            Validator.receivedFatalAlert(i);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        if (serverKeyExchangeMsg.getSignatureLength().getValue() < bitmask.length) {
+            // we can't determine the ECDSA signature length beforehand
+            // as trailing zeros may be stripped - the manipulation won't be
+            // applied in these cases which results in false positives
+            testCase.addAdditionalResultInfo("Bitmask exceeded signature length");
+            return;
+        }
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     public List<DerivationParameter> getUnproposedNamedGroups(DerivationScope scope) {
@@ -109,20 +106,16 @@ public class ServerKeyExchange extends Tls12Test {
     @ExplicitValues(
             affectedIdentifiers = {"NAMED_GROUP", "CERTIFICATE"},
             methods = {"getUnproposedNamedGroups", "getCertsIncludingUnsupportedPkGroups"})
-    public void acceptsUnproposedNamedGroup(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void acceptsUnproposedNamedGroup(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilReceivingMessage(
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                        });
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     public boolean isStaticEcdhCipherSuite(CipherSuite cipherSuite) {
@@ -157,20 +150,16 @@ public class ServerKeyExchange extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "CIPHER_SUITE",
             methods = "isStaticEcdhCipherSuite")
-    public void acceptsUnproposedNamedGroupStatic(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void acceptsUnproposedNamedGroupStatic(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilReceivingMessage(
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                        });
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "5246-KAA9dJJg3h")
@@ -178,8 +167,8 @@ public class ServerKeyExchange extends Tls12Test {
     @KeyExchange(
             supported = {KeyExchangeType.ALL12},
             requiresServerKeyExchMsg = true)
-    public void acceptsMissingSignature(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void acceptsMissingSignature(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilReceivingMessage(
@@ -192,11 +181,8 @@ public class ServerKeyExchange extends Tls12Test {
                                 HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
         serverKeyExchange.setSignature(Modifiable.explicit(new byte[0]));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                        });
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     public boolean isNotAnonCipherSuite(CipherSuite cipherSuite) {
@@ -211,8 +197,8 @@ public class ServerKeyExchange extends Tls12Test {
             requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNotAnonCipherSuite")
     public void acceptsAnonSignatureForNonAnonymousCipherSuite(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilReceivingMessage(
@@ -237,11 +223,8 @@ public class ServerKeyExchange extends Tls12Test {
                 Modifiable.explicit(matchingAnon.getByteValue()));
         serverKeyExchange.setSignature(Modifiable.explicit(new byte[0]));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                        });
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(
@@ -272,19 +255,15 @@ public class ServerKeyExchange extends Tls12Test {
     @ExplicitValues(
             affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getUnproposedSignatureAndHashAlgorithms")
-    public void acceptsUnproposedSignatureAndHash(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void acceptsUnproposedSignatureAndHash(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilReceivingMessage(
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                        });
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 }

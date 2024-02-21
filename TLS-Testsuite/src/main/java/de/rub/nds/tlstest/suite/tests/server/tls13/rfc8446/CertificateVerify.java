@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CertificateVerifyConstants;
@@ -20,13 +21,13 @@ import de.rub.nds.tlsattacker.core.crypto.MessageDigestCollector;
 import de.rub.nds.tlsattacker.core.layer.context.TlsContext;
 import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.MessageAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.util.SignatureValidation;
@@ -37,7 +38,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 /** */
 @Tag("signature")
@@ -45,35 +45,31 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class CertificateVerify extends Tls13Test {
 
     @AnvilTest(id = "8446-qfG8mSV78A")
-    public void signatureIsValid(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void signatureIsValid(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            assertTrue(
-                                    "Certificate Verify Message contained an invalid signature",
-                                    signatureValid(i));
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        assertTrue(
+                "Certificate Verify Message contained an invalid signature", signatureValid(state));
     }
 
-    private boolean signatureValid(TlsTestCase annotatedState) {
+    private boolean signatureValid(State state) {
         CertificateVerifyMessage certificateVerify =
                 (CertificateVerifyMessage)
                         WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.CERTIFICATE_VERIFY,
-                                annotatedState.getWorkflowTrace());
+                                HandshakeMessageType.CERTIFICATE_VERIFY, state.getWorkflowTrace());
         SignatureAndHashAlgorithm selectedSignatureAndHashAlgo =
                 SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
                         certificateVerify.getSignatureHashAlgorithm().getValue());
         byte[] givenSignature = certificateVerify.getSignature().getValue();
-        byte[] signedData = getCompleteSignedData(annotatedState);
+        byte[] signedData = getCompleteSignedData(state);
 
         try {
             return SignatureValidation.validationSuccessful(
-                    selectedSignatureAndHashAlgo, annotatedState, signedData, givenSignature);
+                    selectedSignatureAndHashAlgo, state, signedData, givenSignature);
         } catch (SignatureException
                 | InvalidKeyException
                 | InvalidKeySpecException
@@ -84,9 +80,9 @@ public class CertificateVerify extends Tls13Test {
         }
     }
 
-    private byte[] getCompleteSignedData(TlsTestCase annotatedState) {
-        TlsContext postExecutionContext = annotatedState.getState().getTlsContext();
-        WorkflowTrace executedTrace = annotatedState.getWorkflowTrace();
+    private byte[] getCompleteSignedData(State state) {
+        TlsContext postExecutionContext = state.getTlsContext();
+        WorkflowTrace executedTrace = state.getWorkflowTrace();
 
         byte[] signedTranscript = getSignedTranscript(executedTrace);
         MessageDigestCollector digestCollector = new MessageDigestCollector();

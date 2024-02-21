@@ -9,7 +9,7 @@ package de.rub.nds.tlstest.framework.testClasses;
 
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.junit.AnvilTestBaseClass;
-import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.PskKeyExchangeMode;
@@ -27,7 +27,6 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ExtendWith({
     TlsVersionCondition.class,
@@ -50,16 +49,17 @@ public abstract class TlsBaseTest extends AnvilTestBaseClass {
         this.extensionContext = extensionContext;
     }
 
-    public Config getPreparedConfig(ArgumentsAccessor argAccessor, WorkflowRunner runner) {
+    public Config getPreparedConfig(WorkflowRunner runner) {
         Config toPrepare = getConfig();
-        return prepareConfig(toPrepare, argAccessor, runner);
+        return prepareConfig(toPrepare, runner);
     }
 
-    public Config prepareConfig(
-            Config config, ArgumentsAccessor argAccessor, WorkflowRunner runner) {
+    public Config prepareConfig(Config config, WorkflowRunner runner) {
+        AnvilTestCase testCase = AnvilTestCase.fromExtensionContext(extensionContext);
         parameterCombination =
-                TlsParameterCombination.fromArgumentsAccessor(
-                        argAccessor, new DerivationScope(extensionContext));
+                new TlsParameterCombination(
+                        testCase.getParameterCombination().getParameterValues(),
+                        testCase.getParameterCombination().getDerivationScope());
         parameterCombination.applyToConfig(config);
         runner.setPreparedConfig(config);
         runner.setTlsParameterCombination(parameterCombination);

@@ -9,27 +9,27 @@ package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.bytearray.ModifiableByteArray;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
     @AnvilTest(id = "5246-EMvcCVyKtv")
-    public void selectUnsupportedVersion(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void selectUnsupportedVersion(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         ModifiableByteArray protocolVersionSend = Modifiable.explicit(new byte[] {0x03, 0x0F});
 
@@ -40,14 +40,13 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
                 .getFirstSendMessage(ServerHelloMessage.class)
                 .setProtocolVersion(protocolVersionSend);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            Validator.testAlertDescription(
-                                    i,
-                                    AlertDescription.PROTOCOL_VERSION,
-                                    AlertDescription.ILLEGAL_PARAMETER);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        Validator.testAlertDescription(
+                state,
+                testCase,
+                AlertDescription.PROTOCOL_VERSION,
+                AlertDescription.ILLEGAL_PARAMETER);
     }
 }

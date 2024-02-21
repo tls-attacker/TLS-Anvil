@@ -11,6 +11,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import de.rub.nds.anvilcore.annotation.*;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -27,6 +28,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExte
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.alpn.AlpnEntry;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
@@ -40,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class ClientInitiatedExtensionPoints extends Tls13Test {
@@ -52,9 +53,8 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
         @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     })
-    public void advertiseGreaseCiphersuites(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void advertiseGreaseCiphersuites(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         CipherSuite selectedGrease =
                 parameterCombination
                         .getParameter(GreaseCipherSuiteDerivation.class)
@@ -63,16 +63,14 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         c.getDefaultClientSupportedCipherSuites().add(0, selectedGrease);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            assertEquals(
-                                    "Server selected wrong ciphersuite",
-                                    c.getDefaultSelectedCipherSuite(),
-                                    i.getState().getTlsContext().getSelectedCipherSuite());
-                        });
+        Validator.executedAsPlanned(state, testCase);
+
+        assertEquals(
+                "Server selected wrong ciphersuite",
+                c.getDefaultSelectedCipherSuite(),
+                state.getTlsContext().getSelectedCipherSuite());
     }
 
     @AnvilTest(id = "8701-PErDdQZt7u")
@@ -82,9 +80,8 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
         @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     })
-    public void advertiseGreaseExtensions(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void advertiseGreaseExtensions(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         ExtensionType selectedGrease =
                 parameterCombination
                         .getParameter(GreaseExtensionDerivation.class)
@@ -95,23 +92,19 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         ClientHelloMessage ch = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
         ch.addExtension(new GreaseExtensionMessage(selectedGrease, 25));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage msg =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(ServerHelloMessage.class);
-                            i.getState()
-                                    .getTlsContext()
-                                    .getNegotiatedExtensionSet()
-                                    .forEach(
-                                            j -> {
-                                                assertFalse(
-                                                        "Server negotiated GREASE extension",
-                                                        j.name().startsWith("GREASE"));
-                                            });
+        Validator.executedAsPlanned(state, testCase);
+
+        ServerHelloMessage msg =
+                state.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
+        state.getTlsContext()
+                .getNegotiatedExtensionSet()
+                .forEach(
+                        j -> {
+                            assertFalse(
+                                    "Server negotiated GREASE extension",
+                                    j.name().startsWith("GREASE"));
                         });
     }
 
@@ -122,9 +115,8 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
         @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     })
-    public void advertiseGreaseNamedGroup(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void advertiseGreaseNamedGroup(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         NamedGroup selectedGrease =
                 parameterCombination
                         .getParameter(GreaseNamedGroupDerivation.class)
@@ -145,26 +137,20 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
                 .getExtension(KeyShareExtensionMessage.class)
                 .setKeyShareListBytes(Modifiable.insert(completeGreaseKeyShareEntry, 0));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage msg =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(ServerHelloMessage.class);
-                            KeyShareExtensionMessage keyshares =
-                                    msg.getExtension(KeyShareExtensionMessage.class);
-                            keyshares
-                                    .getKeyShareList()
-                                    .forEach(
-                                            j -> {
-                                                assertFalse(
-                                                        "Server negotiated GREASE named group",
-                                                        NamedGroup.getNamedGroup(
-                                                                        j.getGroup().getValue())
-                                                                .isGrease());
-                                            });
+        Validator.executedAsPlanned(state, testCase);
+
+        ServerHelloMessage msg =
+                state.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
+        KeyShareExtensionMessage keyshares = msg.getExtension(KeyShareExtensionMessage.class);
+        keyshares
+                .getKeyShareList()
+                .forEach(
+                        j -> {
+                            assertFalse(
+                                    "Server negotiated GREASE named group",
+                                    NamedGroup.getNamedGroup(j.getGroup().getValue()).isGrease());
                         });
     }
 
@@ -175,31 +161,24 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
         @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     })
-    public void advertiseGreaseSignatureAlgorithms(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void advertiseGreaseSignatureAlgorithms(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         SignatureAndHashAlgorithm selectedGrease =
                 parameterCombination.getParameter(GreaseSigHashDerivation.class).getSelectedValue();
         c.getDefaultClientSupportedSignatureAndHashAlgorithms().add(0, selectedGrease);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            CertificateVerifyMessage msg =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(
-                                                    CertificateVerifyMessage.class);
-                            SignatureAndHashAlgorithm selected =
-                                    SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
-                                            msg.getSignatureHashAlgorithm().getValue());
-                            assertFalse(
-                                    "Server selected GREASE signature and hash algorithm",
-                                    selected.isGrease());
-                        });
+        Validator.executedAsPlanned(state, testCase);
+
+        CertificateVerifyMessage msg =
+                state.getWorkflowTrace().getFirstReceivedMessage(CertificateVerifyMessage.class);
+        SignatureAndHashAlgorithm selected =
+                SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
+                        msg.getSignatureHashAlgorithm().getValue());
+        assertFalse("Server selected GREASE signature and hash algorithm", selected.isGrease());
     }
 
     @AnvilTest(id = "8701-fe7Ev3bbiq")
@@ -208,9 +187,8 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
         @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
     })
-    public void advertiseGreaseALPNIdentifiers(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void advertiseGreaseALPNIdentifiers(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddAlpnExtension(true);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
@@ -226,31 +204,23 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         AlpnExtensionMessage ext = msg.getExtension(AlpnExtensionMessage.class);
         ext.setAlpnEntryList(alpnEntries);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            EncryptedExtensionsMessage emsg =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(
-                                                    EncryptedExtensionsMessage.class);
-                            AlpnExtensionMessage aext =
-                                    emsg.getExtension(AlpnExtensionMessage.class);
-                            if (aext == null) {
-                                return;
-                            }
+        Validator.executedAsPlanned(state, testCase);
 
-                            assertEquals(
-                                    "AlpnEntryExtension contains more or less than one protocol",
-                                    1,
-                                    aext.getAlpnEntryList().size());
-                            assertFalse(
-                                    "Server negotiated GREASE ALPN Identifier",
-                                    ext.getAlpnEntryList()
-                                            .get(0)
-                                            .getAlpnEntryConfig()
-                                            .contains("GREASE"));
-                        });
+        EncryptedExtensionsMessage emsg =
+                state.getWorkflowTrace().getFirstReceivedMessage(EncryptedExtensionsMessage.class);
+        AlpnExtensionMessage aext = emsg.getExtension(AlpnExtensionMessage.class);
+        if (aext == null) {
+            return;
+        }
+
+        assertEquals(
+                "AlpnEntryExtension contains more or less than one protocol",
+                1,
+                aext.getAlpnEntryList().size());
+        assertFalse(
+                "Server negotiated GREASE ALPN Identifier",
+                ext.getAlpnEntryList().get(0).getAlpnEntryConfig().contains("GREASE"));
     }
 }

@@ -5,11 +5,13 @@ import static org.junit.jupiter.api.Assertions.fail;
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
@@ -23,7 +25,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class AntiReplay extends Dtls12Test {
 
@@ -35,48 +36,33 @@ public class AntiReplay extends Dtls12Test {
      *
      * <p>The test is passed if each value occurs only once and no value was used twice.
      */
-    public void sequenceNumberNotDuplicated(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sequenceNumberNotDuplicated(WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            Map<Integer, List<Long>> epochSqnMap = new HashMap<>();
-                            for (ReceivingAction action :
-                                    i.getWorkflowTrace().getReceivingActions()) {
-                                if (action.getReceivedRecords() != null) {
-                                    for (Record record : action.getReceivedRecords()) {
-                                        if (epochSqnMap
-                                                .computeIfAbsent(
-                                                        record.getEpoch().getValue(),
-                                                        (epoch) -> {
-                                                            return new LinkedList<>();
-                                                        })
-                                                .contains(
-                                                        record.getSequenceNumber()
-                                                                .getValue()
-                                                                .longValue())) {
-                                            fail(
-                                                    "Peer sent pair epoch "
-                                                            + record.getEpoch().getValue()
-                                                            + " and sequence number "
-                                                            + record.getSequenceNumber()
-                                                                    .getValue()
-                                                                    .longValue()
-                                                            + " twice.");
-                                        }
-                                        epochSqnMap
-                                                .get(record.getEpoch().getValue())
-                                                .add(
-                                                        record.getSequenceNumber()
-                                                                .getValue()
-                                                                .longValue());
-                                    }
-                                }
-                            }
-                        });
+        State state = runner.execute(trace, config);
+
+        Map<Integer, List<Long>> epochSqnMap = new HashMap<>();
+        for (ReceivingAction action : state.getWorkflowTrace().getReceivingActions()) {
+            if (action.getReceivedRecords() != null) {
+                for (Record record : action.getReceivedRecords()) {
+                    if (epochSqnMap
+                            .computeIfAbsent(
+                                    record.getEpoch().getValue(), (epoch) -> new LinkedList<>())
+                            .contains(record.getSequenceNumber().getValue().longValue())) {
+                        fail(
+                                "Peer sent pair epoch "
+                                        + record.getEpoch().getValue()
+                                        + " and sequence number "
+                                        + record.getSequenceNumber().getValue().longValue()
+                                        + " twice.");
+                    }
+                    epochSqnMap
+                            .get(record.getEpoch().getValue())
+                            .add(record.getSequenceNumber().getValue().longValue());
+                }
+            }
+        }
     }
 
     @AnvilTest(id = "6347-rMf9lpA6G3")
@@ -86,8 +72,8 @@ public class AntiReplay extends Dtls12Test {
      * In this test, the behavior with an invalid MAC is tested. A message is sent with an invalid
      * MAC. This must be ignored by the communication partner.
      */
-    public void invalidMAC(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidMAC(WorkflowRunner runner, AnvilTestCase testCase) {
+        Config c = getPreparedConfig(runner);
 
         byte[] bitmask = parameterCombination.buildBitmask();
 
@@ -102,10 +88,7 @@ public class AntiReplay extends Dtls12Test {
 
         trace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                        });
+        State state = runner.execute(trace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 }

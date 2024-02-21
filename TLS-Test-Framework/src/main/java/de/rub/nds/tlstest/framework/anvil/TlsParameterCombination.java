@@ -8,7 +8,6 @@ import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rwth.swc.coffee4j.model.Combination;
 import java.util.LinkedList;
 import java.util.List;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class TlsParameterCombination extends ParameterCombination {
 
@@ -26,16 +25,6 @@ public class TlsParameterCombination extends ParameterCombination {
                 ParameterCombination.fromCombination(combination);
         return new TlsParameterCombination(
                 new LinkedList<>(parameterCombination.getParameterValues()));
-    }
-
-    public static TlsParameterCombination fromArgumentsAccessor(
-            ArgumentsAccessor argumentsAccessor, DerivationScope derivationScope) {
-        ParameterCombination parameterCombination =
-                ParameterCombination.fromArgumentsAccessor(argumentsAccessor, derivationScope);
-        TlsParameterCombination tlsParameterCombination =
-                new TlsParameterCombination(
-                        parameterCombination.getParameterValues(), derivationScope);
-        return tlsParameterCombination;
     }
 
     public byte[] buildBitmask() {

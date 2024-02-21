@@ -11,35 +11,32 @@ import static org.junit.Assert.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class Certificate extends Tls13Test {
 
     @AnvilTest(id = "8446-d9fcJKjSny")
     @Tag("new")
-    public void certificateListIsNotEmpty(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void certificateListIsNotEmpty(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            CertificateMessage cert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(CertificateMessage.class);
-                            assertTrue(
-                                    "Server's certificate list was emtpy",
-                                    cert.getCertificatesListLength().getValue() > 0);
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        CertificateMessage cert =
+                state.getWorkflowTrace().getFirstReceivedMessage(CertificateMessage.class);
+        assertTrue(
+                "Server's certificate list was emtpy",
+                cert.getCertificatesListLength().getValue() > 0);
     }
 }

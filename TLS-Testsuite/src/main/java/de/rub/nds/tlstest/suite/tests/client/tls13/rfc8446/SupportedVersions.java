@@ -14,6 +14,7 @@ import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -22,6 +23,7 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -38,7 +40,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class SupportedVersions extends Tls13Test {
@@ -65,8 +66,8 @@ public class SupportedVersions extends Tls13Test {
     @IncludeParameter("PROTOCOL_VERSION")
     @ManualConfig(identifiers = "PROTOCOL_VERSION")
     @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "getInvalidLegacyVersions")
-    public void invalidLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidLegacyVersion(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         byte[] chosenInvalidVersion =
                 parameterCombination
                         .getParameter(ProtocolVersionDerivation.class)
@@ -77,15 +78,15 @@ public class SupportedVersions extends Tls13Test {
                 .getFirstSendMessage(ServerHelloMessage.class)
                 .setProtocolVersion(Modifiable.explicit(chosenInvalidVersion));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "8446-w9k9gMLaeU")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    public void selectOlderTlsVersionInTls12(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+    public void selectOlderTlsVersionInTls12(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = prepareConfig(context.getConfig().createConfig(), runner);
 
         c.setAddSupportedVersionsExtension(true);
         c.setEnforceSettings(true);
@@ -96,22 +97,16 @@ public class SupportedVersions extends Tls13Test {
                 .getExtension(SupportedVersionsExtensionMessage.class)
                 .setSupportedVersions(Modifiable.explicit(new byte[] {0x03, 0x03}));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage msg =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, msg);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, msg);
     }
 
     @AnvilTest(id = "8446-YDjQAqZ2LM")
-    public void selectOlderTlsVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void selectOlderTlsVersion(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setEnforceSettings(true);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -120,17 +115,11 @@ public class SupportedVersions extends Tls13Test {
                 .getExtension(SupportedVersionsExtensionMessage.class)
                 .setSupportedVersions(Modifiable.explicit(new byte[] {0x03, 0x03}));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage msg =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, msg);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, msg);
     }
 
     @NonCombinatorialAnvilTest(id = "8446-o5uxfywWFS")
@@ -192,8 +181,8 @@ public class SupportedVersions extends Tls13Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @Tag("adjusted")
     public void negotiateUnproposedOldProtocolVersion(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = prepareConfig(context.getConfig().createConfig(), runner);
         byte[] oldProtocolVersion =
                 parameterCombination
                         .getParameter(ProtocolVersionDerivation.class)
@@ -207,12 +196,10 @@ public class SupportedVersions extends Tls13Test {
         workflowTrace.addTlsAction(new SendAction(serverHello));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            Validator.testAlertDescription(i, AlertDescription.PROTOCOL_VERSION);
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.receivedFatalAlert(state, testCase);
+        Validator.testAlertDescription(state, testCase, AlertDescription.PROTOCOL_VERSION);
     }
 
     @AnvilTest(id = "8446-eNP4DYhWjk")
@@ -223,8 +210,8 @@ public class SupportedVersions extends Tls13Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @Tag("new")
     public void legacyNegotiateUndefinedProtocolVersion(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = prepareConfig(context.getConfig().createConfig(), runner);
         byte[] oldProtocolVersion =
                 parameterCombination
                         .getParameter(ProtocolVersionDerivation.class)
@@ -238,7 +225,8 @@ public class SupportedVersions extends Tls13Test {
         workflowTrace.addTlsAction(new SendAction(serverHello));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     public List<DerivationParameter> getUndefinedProtocolVersions(DerivationScope scope) {

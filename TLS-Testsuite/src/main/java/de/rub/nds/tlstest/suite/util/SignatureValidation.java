@@ -11,7 +11,6 @@ import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.state.State;
-import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import java.io.IOException;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
@@ -20,12 +19,11 @@ import java.security.spec.X509EncodedKeySpec;
 public class SignatureValidation {
     public static Boolean validationSuccessful(
             SignatureAndHashAlgorithm selectedSignatureAndHashAlgo,
-            TlsTestCase annotatedState,
+            State sessionState,
             byte[] completeSignedData,
             byte[] givenSignature)
             throws SignatureException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
                     InvalidKeyException, IOException, InvalidKeySpecException {
-        State sessionState = annotatedState.getState();
         Signature signatureInstance =
                 Signature.getInstance(selectedSignatureAndHashAlgo.getJavaName());
         selectedSignatureAndHashAlgo.setupSignature(signatureInstance);

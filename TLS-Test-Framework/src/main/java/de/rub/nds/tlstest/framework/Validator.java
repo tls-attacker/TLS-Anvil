@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.framework;
 import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.anvilcore.teststate.TestResult;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -29,6 +30,7 @@ import de.rub.nds.tlsattacker.core.record.cipher.RecordCipherFactory;
 import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySet;
 import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySetGenerator;
 import de.rub.nds.tlsattacker.core.record.crypto.RecordDecryptor;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
@@ -39,7 +41,6 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
-import de.rub.nds.tlstest.framework.anvil.TlsTestCase;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.model.derivationParameter.TcpFragmentationDerivation;
 import java.io.ByteArrayInputStream;
@@ -61,21 +62,22 @@ public class Validator {
                 || socketState == SocketState.IO_EXCEPTION);
     }
 
-    public static boolean socketClosed(TlsTestCase i) {
-        SocketState socketState = getSocketState(i);
+    public static boolean socketClosed(State state) {
+        SocketState socketState = getSocketState(state);
         return socketClosed(socketState);
     }
 
-    public static void receivedFatalAlert(TlsTestCase i, boolean checkExecutedAsPlanned) {
-        WorkflowTrace trace = i.getWorkflowTrace();
-        SocketState socketState = getSocketState(i);
+    public static void receivedFatalAlert(
+            State state, AnvilTestCase testCase, boolean checkExecutedAsPlanned) {
+        WorkflowTrace trace = state.getWorkflowTrace();
+        SocketState socketState = getSocketState(state);
         boolean lastActionFailed = false;
         if (checkExecutedAsPlanned) {
             try {
-                Validator.smartExecutedAsPlanned(i);
+                smartExecutedAsPlanned(state, testCase);
             } catch (Throwable e) {
                 if (traceFailedBeforeAlertAction(trace)) {
-                    i.addAdditionalResultInfo(AssertMsgs.WORKFLOW_NOT_EXECUTED_BEFORE_ALERT);
+                    testCase.addAdditionalResultInfo(AssertMsgs.WORKFLOW_NOT_EXECUTED_BEFORE_ALERT);
                     throw e;
                 }
                 lastActionFailed = true;
@@ -83,16 +85,16 @@ public class Validator {
         }
 
         AlertMessage lastAlert = trace.getLastReceivedMessage(AlertMessage.class);
-        List<ProtocolMessage> lastMessagesReceived = getMessagesOfLastReceive(i);
+        List<ProtocolMessage> lastMessagesReceived = getMessagesOfLastReceive(state);
         String messageString =
                 lastMessagesReceived.stream()
                         .map(ProtocolMessage::toCompactString)
                         .collect(Collectors.joining(","));
-        boolean socketClosed = socketClosed(i);
+        boolean socketClosed = socketClosed(state);
         boolean receivedAlert = (lastAlert != null);
         boolean alertIsFatal = false;
         if (receivedAlert) {
-            checkReceivedMultipleAlerts(trace, i);
+            checkReceivedMultipleAlerts(testCase, trace);
             alertIsFatal = (lastAlert.getLevel().getValue() == AlertLevel.FATAL.getValue());
         }
         if (TestContext.getInstance().getConfig().isUseDTLS()) return;
@@ -117,41 +119,41 @@ public class Validator {
                     lastActionFailed && !lastMessagesReceived.isEmpty());
 
             if (!receivedAlert) {
-                if (mayOmitDueToTls13(i)) {
-                    i.addAdditionalResultInfo("SUT chose not to send an alert in TLS 1.3");
+                if (mayOmitDueToTls13(state)) {
+                    testCase.addAdditionalResultInfo("SUT chose not to send an alert in TLS 1.3");
                 } else {
-                    i.addAdditionalResultInfo("Only socket closed (" + socketState + ")");
-                    i.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
+                    testCase.addAdditionalResultInfo("Only socket closed (" + socketState + ")");
+                    testCase.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
                 }
             } else if (!alertIsFatal) {
                 AlertDescription alertDescription =
                         AlertDescription.getAlertDescription(lastAlert.getDescription().getValue());
-                i.addAdditionalResultInfo("Closed with warning alert (" + alertDescription + ")");
+                testCase.addAdditionalResultInfo(
+                        "Closed with warning alert (" + alertDescription + ")");
                 if (alertDescription == AlertDescription.CLOSE_NOTIFY) {
                     // close notify is the only warning alert that is expected to terminate
                     // connections
-                    i.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
+                    testCase.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
                 } else {
-                    i.setTestResult(TestResult.FULLY_FAILED);
+                    testCase.setTestResult(TestResult.FULLY_FAILED);
                 }
             }
         }
     }
 
-    private static boolean mayOmitDueToTls13(TlsTestCase annotatedState) {
-        return annotatedState.getState().getConfig().getHighestProtocolVersion()
-                        == ProtocolVersion.TLS13
+    private static boolean mayOmitDueToTls13(State state) {
+        return state.getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13
                 && !TestContext.getInstance().getConfig().isExpectTls13Alerts();
     }
 
-    private static SocketState getSocketState(TlsTestCase i) {
-        SocketState socketState = i.getState().getTcpContext().getFinalSocketState();
+    private static SocketState getSocketState(State state) {
+        SocketState socketState = state.getTcpContext().getFinalSocketState();
         return socketState;
     }
 
-    public static List<ProtocolMessage> getMessagesOfLastReceive(TlsTestCase annotatedState) {
+    public static List<ProtocolMessage> getMessagesOfLastReceive(State state) {
         List<ProtocolMessage> messagesReceived = new LinkedList<>();
-        WorkflowTrace trace = annotatedState.getWorkflowTrace();
+        WorkflowTrace trace = state.getWorkflowTrace();
         ReceivingAction lastReceive = trace.getLastReceivingAction();
         if (lastReceive == null) {
             throw new RuntimeException(
@@ -177,12 +179,11 @@ public class Validator {
         }
     }
 
-    public static void checkReceivedMultipleAlerts(
-            WorkflowTrace trace, TlsTestCase annotatedState) {
+    public static void checkReceivedMultipleAlerts(AnvilTestCase testCase, WorkflowTrace trace) {
         List<ProtocolMessage> receivedAlerts =
                 WorkflowTraceUtil.getAllReceivedMessages(trace, ProtocolMessageType.ALERT);
         if (receivedAlerts.size() > 1) {
-            annotatedState.addAdditionalResultInfo(
+            testCase.addAdditionalResultInfo(
                     "Received multiple Alerts while waiting for Fatal Alert ("
                             + receivedAlerts.stream()
                                     .map(alert -> ((ProtocolMessage) alert).toCompactString())
@@ -191,27 +192,28 @@ public class Validator {
         }
     }
 
-    public static void checkForUnknownMessage(TlsTestCase i) {
-        if (i.getWorkflowTrace().getFirstReceivedMessage(UnknownMessage.class) != null) {
-            i.addAdditionalResultInfo("Found unknown message");
-        } else if (WorkflowTraceUtil.hasUnreadBytes(i.getWorkflowTrace())) {
-            i.addAdditionalResultInfo("Found unread bytes in layer, this may be a parsing error");
+    public static void checkForUnknownMessage(State state, AnvilTestCase testCase) {
+        if (state.getWorkflowTrace().getFirstReceivedMessage(UnknownMessage.class) != null) {
+            testCase.addAdditionalResultInfo("Found unknown message");
+        } else if (WorkflowTraceUtil.hasUnreadBytes(state.getWorkflowTrace())) {
+            testCase.addAdditionalResultInfo(
+                    "Found unread bytes in layer, this may be a parsing error");
         }
     }
 
-    public static void receivedFatalAlert(TlsTestCase i) {
-        receivedFatalAlert(i, true);
+    public static void receivedFatalAlert(State state, AnvilTestCase testCase) {
+        receivedFatalAlert(state, testCase, true);
     }
 
-    public static void executedAsPlanned(TlsTestCase i) {
-        checkForUnknownMessage(i);
-        assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, i.getWorkflowTrace().executedAsPlanned());
+    public static void executedAsPlanned(State state, AnvilTestCase testCase) {
+        checkForUnknownMessage(state, testCase);
+        assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, state.getWorkflowTrace().executedAsPlanned());
     }
 
-    public static void receivedWarningAlert(TlsTestCase i) {
-        checkForUnknownMessage(i);
-        WorkflowTrace trace = i.getWorkflowTrace();
-        Validator.smartExecutedAsPlanned(i);
+    public static void receivedWarningAlert(State state, AnvilTestCase testCase) {
+        checkForUnknownMessage(state, testCase);
+        WorkflowTrace trace = state.getWorkflowTrace();
+        smartExecutedAsPlanned(state, testCase);
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
         assertNotNull(AssertMsgs.NO_WARNING_ALERT, msg);
@@ -222,21 +224,21 @@ public class Validator {
     }
 
     public static void testAlertDescription(
-            TlsTestCase i, AlertDescription expected, AlertMessage msg) {
-        testAlertDescription(i, new AlertDescription[] {expected}, msg);
+            State state, AnvilTestCase testCase, AlertDescription expected, AlertMessage msg) {
+        testAlertDescription(state, testCase, new AlertDescription[] {expected}, msg);
     }
 
     public static void testAlertDescription(
-            TlsTestCase i, AlertDescription[] expected, AlertMessage msg) {
+            State state, AnvilTestCase testCase, AlertDescription[] expected, AlertMessage msg) {
         if (msg == null) {
-            i.addAdditionalResultInfo("No alert received to test description for");
+            testCase.addAdditionalResultInfo("No alert received to test description for");
             return;
         }
 
         if (WorkflowTraceUtil.getLastReceivedMessage(
-                        ProtocolMessageType.ALERT, i.getWorkflowTrace())
+                        ProtocolMessageType.ALERT, state.getWorkflowTrace())
                 != msg) {
-            i.addAdditionalResultInfo(
+            testCase.addAdditionalResultInfo(
                     "Received multiple Alerts - description of first Alert was tested");
         }
 
@@ -244,40 +246,42 @@ public class Validator {
                 AlertDescription.getAlertDescription(msg.getDescription().getValue());
         List<AlertDescription> expectedList = Arrays.asList(expected);
         if (!expectedList.contains(received)) {
-            i.addAdditionalResultInfo("Unexpected Alert Description");
-            i.addAdditionalResultInfo(
+            testCase.addAdditionalResultInfo("Unexpected Alert Description");
+            testCase.addAdditionalResultInfo(
                     String.format(
                             "Expected: %s",
                             expectedList.stream()
                                     .map(AlertDescription::name)
                                     .collect(Collectors.joining(","))));
-            i.addAdditionalResultInfo(String.format("Received: %s", received));
-            i.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
-            LOGGER.debug(i.getAdditionalResultInformation());
+            testCase.addAdditionalResultInfo(String.format("Received: %s", received));
+            testCase.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
+            LOGGER.debug(testCase.getAdditionalResultInformation());
         }
     }
 
-    public static void testAlertDescription(TlsTestCase i, AlertDescription... expected) {
-        AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        testAlertDescription(i, expected, alert);
+    public static void testAlertDescription(
+            State state, AnvilTestCase testCase, AlertDescription... expected) {
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        testAlertDescription(state, testCase, expected, alert);
     }
 
-    public static void smartExecutedAsPlanned(TlsTestCase state) {
-        checkForUnknownMessage(state);
+    public static void smartExecutedAsPlanned(State state, AnvilTestCase testCase) {
+        checkForUnknownMessage(state, testCase);
         WorkflowTrace trace = state.getWorkflowTrace();
-        if (state.getState().getTlsContext().isReceivedMessageWithWrongTls13KeyType()
-                && state.getState().getTlsContext().getActiveKeySetTypeRead()
-                        != Tls13KeySetType.NONE) {
+        if (state.getTlsContext().isReceivedMessageWithWrongTls13KeyType()
+                && state.getTlsContext().getActiveKeySetTypeRead() != Tls13KeySetType.NONE) {
             throw new AssertionError("Peer used wrong TLS 1.3 KeySetType to protect records");
         }
         boolean executedAsPlanned = trace.executedAsPlanned();
         if (executedAsPlanned) return;
 
         TcpFragmentationDerivation tcpFragmentation = null;
-        if (state.getParameterCombination() != null
-                && state.getParameterCombination().hasParameter(TcpFragmentationDerivation.class)) {
+        if (testCase.getParameterCombination() != null
+                && testCase.getParameterCombination()
+                        .hasParameter(TcpFragmentationDerivation.class)) {
             tcpFragmentation =
-                    state.getParameterCombination().getParameter(TcpFragmentationDerivation.class);
+                    testCase.getParameterCombination()
+                            .getParameter(TcpFragmentationDerivation.class);
         }
         boolean onlyCheckActionsBeforeLastSendingFlight =
                 tcpFragmentation != null && tcpFragmentation.getSelectedValue();
@@ -347,7 +351,8 @@ public class Validator {
                                 || onlyValidAlertsAfterFatalAlert(action.getReceivedMessages())) {
                             return;
                         }
-                    } else if (lastMessagesAreTooEarlyEncryptedAlertsTls13(state, action)) {
+                    } else if (lastMessagesAreTooEarlyEncryptedAlertsTls13(
+                            state, testCase, action)) {
                         return;
                     }
                 }
@@ -417,7 +422,7 @@ public class Validator {
      * severity after receiving the first Fatal Alert (again to allow a Close Notify mostly)
      */
     private static boolean lastMessagesAreTooEarlyEncryptedAlertsTls13(
-            TlsTestCase state, ReceiveAction lastReceiveAction) {
+            State state, AnvilTestCase testCase, ReceiveAction lastReceiveAction) {
         ProtocolMessage lastReceivedMessage =
                 lastReceiveAction
                         .getReceivedMessages()
@@ -432,13 +437,12 @@ public class Validator {
             if (receivedMessages.get(0) instanceof ChangeCipherSpecMessage) {
                 expectedFirstEncryptedRecordIndex = 1;
             }
-            if (state.getState().getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13
+            if (state.getConfig().getHighestProtocolVersion() == ProtocolVersion.TLS13
                     && TestContext.getInstance().getConfig().getTestEndpointMode()
                             == TestEndpointType.CLIENT
-                    && state.getState().getTlsContext().getActiveClientKeySetType()
-                            == Tls13KeySetType.NONE
+                    && state.getTlsContext().getActiveClientKeySetType() == Tls13KeySetType.NONE
                     && lastReceivedMessage instanceof ApplicationMessage) {
-                state.addAdditionalResultInfo(
+                testCase.addAdditionalResultInfo(
                         "Received Application Message before decryption was set");
 
                 List<ProtocolMessage> decryptedAlerts = new LinkedList<>();
@@ -451,15 +455,16 @@ public class Validator {
                                     BigInteger.valueOf(i - expectedFirstEncryptedRecordIndex)));
                     potentialAlert =
                             tryToDecryptRecordWithHandshakeSecrets(
-                                    state.getState().getTlsContext(), lastReceivedRecord);
+                                    state.getTlsContext(), lastReceivedRecord);
 
                     if (potentialAlert != null) {
-                        state.addAdditionalResultInfo("Client encrypted Alert too early");
+                        testCase.addAdditionalResultInfo("Client encrypted Alert too early");
                         decryptedAlerts.add(potentialAlert);
                     } else if (decryptedAlerts.size() > 0) {
                         // chain of Alerts was interrupted by other message type
                         // or decryption failed
-                        state.addAdditionalResultInfo("Not all Application Messages were Alerts");
+                        testCase.addAdditionalResultInfo(
+                                "Not all Application Messages were Alerts");
                         return false;
                     }
                 }

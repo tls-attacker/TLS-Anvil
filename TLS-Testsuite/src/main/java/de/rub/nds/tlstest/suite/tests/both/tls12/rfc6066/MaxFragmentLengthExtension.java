@@ -11,6 +11,7 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -20,6 +21,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.MaxFragmentLengthExtensionMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -32,7 +34,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class MaxFragmentLengthExtension extends Tls12Test {
 
@@ -56,8 +57,8 @@ public class MaxFragmentLengthExtension extends Tls12Test {
     @ExcludeParameter("MAX_FRAGMENT_LENGTH")
     @MethodCondition(method = "supportsMaxFragmentLength")
     @Tag("new")
-    public void enforcesRecordLimit(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void enforcesRecordLimit(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         config.setDefaultMaxFragmentLength(MaxFragmentLength.TWO_9);
         config.setAddMaxFragmentLengthExtension(true);
         MaxFragmentLength maxLength = getNegotiatedMaxFragmentLength(config);
@@ -79,12 +80,10 @@ public class MaxFragmentLengthExtension extends Tls12Test {
         workflowTrace.addTlsAction(sendOverflowingRecord);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW);
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.receivedFatalAlert(state, testCase);
+        Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW);
     }
 
     private MaxFragmentLength getNegotiatedMaxFragmentLength(Config config) {

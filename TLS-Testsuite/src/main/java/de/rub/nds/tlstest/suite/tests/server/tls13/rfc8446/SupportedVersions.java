@@ -12,6 +12,7 @@ import static org.junit.Assert.*;
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -21,6 +22,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -37,7 +39,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class SupportedVersions extends Tls13Test {
@@ -54,8 +55,8 @@ public class SupportedVersions extends Tls13Test {
     @AnvilTest(id = "8446-UwCnJTWbmd")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    public void testVersionPreferrence(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+    public void testVersionPreferrence(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = prepareConfig(context.getConfig().createConfig(), runner);
 
         c.setSupportedVersions(ProtocolVersion.TLS12, ProtocolVersion.TLS13);
         c.getDefaultClientSupportedCipherSuites()
@@ -66,15 +67,15 @@ public class SupportedVersions extends Tls13Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "8446-ZiLwhbnp3y")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    public void omitSupportedVersionsExtension(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void omitSupportedVersionsExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         c.setAddSupportedVersionsExtension(false);
         c.setHighestProtocolVersion(ProtocolVersion.TLS12);
@@ -85,7 +86,8 @@ public class SupportedVersions extends Tls13Test {
                                 .collect(Collectors.toList()));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "8446-zCaAr5BmNR")
@@ -97,8 +99,8 @@ public class SupportedVersions extends Tls13Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @Tag("new")
     public void supportedVersionsAbsentOnlyUnsupportedLegacyVersion(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddSupportedVersionsExtension(false);
         c.setHighestProtocolVersion(ProtocolVersion.TLS12);
         byte[] chosenUnsupportedVersion =
@@ -111,12 +113,10 @@ public class SupportedVersions extends Tls13Test {
         clientHello.setProtocolVersion(Modifiable.explicit(chosenUnsupportedVersion));
         workflowTrace.addTlsAction(new SendAction(clientHello));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            Validator.testAlertDescription(i, AlertDescription.PROTOCOL_VERSION);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        Validator.testAlertDescription(state, testCase, AlertDescription.PROTOCOL_VERSION);
     }
 
     public List<DerivationParameter<Config, byte[]>> getUnsupportedProtocolVersions(
@@ -139,8 +139,8 @@ public class SupportedVersions extends Tls13Test {
     @AnvilTest(id = "8446-ihyps8KzBF")
     @MethodCondition(method = "supportsTls12")
     @ManualConfig(identifiers = "CIPHER_SUITE")
-    public void oldLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void oldLegacyVersion(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         CipherSuite tls13CipherSuite =
                 parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         c.setDefaultClientSupportedCipherSuites(
@@ -154,20 +154,18 @@ public class SupportedVersions extends Tls13Test {
                 .getFirstSendMessage(ClientHelloMessage.class)
                 .setProtocolVersion(Modifiable.explicit(new byte[] {3, 3}));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            assertEquals(
-                                    "Wrong TLS Version selected",
-                                    ProtocolVersion.TLS13,
-                                    i.getState().getTlsContext().getSelectedProtocolVersion());
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.executedAsPlanned(state, testCase);
+        assertEquals(
+                "Wrong TLS Version selected",
+                ProtocolVersion.TLS13,
+                state.getTlsContext().getSelectedProtocolVersion());
     }
 
     @AnvilTest(id = "8446-LoyBdjVUeE")
-    public void unknownVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void unknownVersion(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
@@ -176,75 +174,64 @@ public class SupportedVersions extends Tls13Test {
                 .getExtension(SupportedVersionsExtensionMessage.class)
                 .setSupportedVersions(Modifiable.explicit(new byte[] {0x05, 0x05, 0x03, 0x04}));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "8446-vdaMcxzYj2")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    public void supportedVersionsWithoutTls13(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+    public void supportedVersionsWithoutTls13(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = prepareConfig(context.getConfig().createConfig(), runner);
         c.setAddSupportedVersionsExtension(true);
         c.setSupportedVersions(ProtocolVersion.TLS12);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            ServerHelloMessage msg =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertArrayEquals(
-                                    "Invalid ProtocolVersion",
-                                    new byte[] {0x03, 0x03},
-                                    msg.getProtocolVersion().getValue());
-                            assertNull(
-                                    "Received supported_versions extension",
-                                    msg.getExtension(SupportedVersionsExtensionMessage.class));
-                        });
+        Validator.executedAsPlanned(state, testCase);
+
+        WorkflowTrace trace = state.getWorkflowTrace();
+        ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        assertArrayEquals(
+                "Invalid ProtocolVersion",
+                new byte[] {0x03, 0x03},
+                msg.getProtocolVersion().getValue());
+        assertNull(
+                "Received supported_versions extension",
+                msg.getExtension(SupportedVersionsExtensionMessage.class));
     }
 
     @AnvilTest(id = "8446-n5pojEqeaS")
-    public void tls13Handshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void tls13Handshake(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            ServerHelloMessage serverHello =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            SupportedVersionsExtensionMessage supportedVersions =
-                                    serverHello.getExtension(
-                                            SupportedVersionsExtensionMessage.class);
+        State state = runner.execute(workflowTrace, c);
 
-                            assertNotNull(
-                                    "No SupportedVersions extension received in ServerHello",
-                                    supportedVersions);
-                            assertArrayEquals(
-                                    "legacy_version must be 0x0303",
-                                    ProtocolVersion.TLS12.getValue(),
-                                    serverHello.getProtocolVersion().getValue());
-                            assertTrue(
-                                    "SupportedVersions extension does not contain 0x0304",
-                                    ProtocolVersion.getProtocolVersions(
-                                                    supportedVersions
-                                                            .getSupportedVersions()
-                                                            .getValue())
-                                            .contains(ProtocolVersion.TLS13));
-                        });
+        Validator.executedAsPlanned(state, testCase);
+        WorkflowTrace trace = state.getWorkflowTrace();
+        ServerHelloMessage serverHello = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        SupportedVersionsExtensionMessage supportedVersions =
+                serverHello.getExtension(SupportedVersionsExtensionMessage.class);
+
+        assertNotNull("No SupportedVersions extension received in ServerHello", supportedVersions);
+        assertArrayEquals(
+                "legacy_version must be 0x0303",
+                ProtocolVersion.TLS12.getValue(),
+                serverHello.getProtocolVersion().getValue());
+        assertTrue(
+                "SupportedVersions extension does not contain 0x0304",
+                ProtocolVersion.getProtocolVersions(
+                                supportedVersions.getSupportedVersions().getValue())
+                        .contains(ProtocolVersion.TLS13));
     }
 
     @AnvilTest(id = "8446-2NRWKXH1nX")
-    public void setLegacyVersionTo0304(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void setLegacyVersionTo0304(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
@@ -255,13 +242,13 @@ public class SupportedVersions extends Tls13Test {
         chm.getExtension(SupportedVersionsExtensionMessage.class)
                 .setSupportedVersions(Modifiable.explicit(ProtocolVersion.TLS12.getValue()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8446-WKMbKXKLH1")
-    public void setLegacyVersionTo0304WithoutSVExt(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void setLegacyVersionTo0304WithoutSVExt(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddSupportedVersionsExtension(false);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
@@ -273,6 +260,7 @@ public class SupportedVersions extends Tls13Test {
 
         // note that we only offer TLS 1.3 cipher suites, the server is hence
         // forced to abort the handshake
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 }

@@ -28,8 +28,8 @@ This template aims to test if the <Definition id="SUT" /> sends the correct TLS 
 @IncludeParameters({@IncludeParameter("APP_MSG_LENGHT"), @IncludeParameter("PADDING_BITMASK")})
 @ValueConstraints({@ValueConstraint(identifier = "CIPHER_SUITE", method = "isCBC")})
 @DynamicValueConstraints(affectedIdentifiers = "RECORD_LENGTH", methods = "recordLengthAllowsModification")
-public void invalidCBCPadding(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-    Config c = getPreparedConfig(argumentAccessor, runner);
+public void invalidCBCPadding(AnvilTestCase testCase, WorkflowRunner runner) {
+    Config c = getPreparedConfig(runner);
     byte[] modificationBitmask = parameterCombination.buildBitmask();
 
     Record record = new Record();

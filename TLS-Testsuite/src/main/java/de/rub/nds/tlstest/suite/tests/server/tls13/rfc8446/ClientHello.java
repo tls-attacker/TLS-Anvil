@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
 import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -23,6 +24,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -36,29 +38,27 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class ClientHello extends Tls13Test {
 
     @AnvilTest(id = "8446-Ruhj2eLN2t")
-    public void includeUnknownCipherSuite(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void includeUnknownCipherSuite(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(c);
         clientHelloMessage.setCipherSuites(Modifiable.insert(new byte[] {(byte) 0xfe, 0x00}, 0));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "8446-B41SD1Cnr6")
     @EnforcedSenderRestriction
-    public void invalidLegacyVersion_higher(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void invalidLegacyVersion_higher(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         ClientHelloMessage msg = new ClientHelloMessage(config);
         msg.setProtocolVersion(Modifiable.explicit(new byte[] {0x03, 0x04}));
@@ -66,14 +66,14 @@ public class ClientHello extends Tls13Test {
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(new SendAction(msg), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(trace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8446-fsDXt1hint")
     @EnforcedSenderRestriction
-    public void invalidLegacyVersion_lower(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void invalidLegacyVersion_lower(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         ClientHelloMessage msg = new ClientHelloMessage(config);
         msg.setProtocolVersion(Modifiable.explicit(new byte[] {0x03, 0x02}));
@@ -81,13 +81,13 @@ public class ClientHello extends Tls13Test {
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(new SendAction(msg), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(trace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8446-hsFoi24Gdh")
-    public void invalidLegacyVersion_ssl30(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void invalidLegacyVersion_ssl30(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         ClientHelloMessage msg = new ClientHelloMessage(config);
         msg.setProtocolVersion(Modifiable.explicit(new byte[] {0x03, 0x00}));
@@ -95,12 +95,13 @@ public class ClientHello extends Tls13Test {
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(new SendAction(msg), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(trace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8446-qgJEM4UoBe")
-    public void invalidCompression(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void invalidCompression(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         ClientHelloMessage msg = new ClientHelloMessage(config);
         msg.setCompressions(Modifiable.explicit(new byte[] {0x01}));
@@ -108,22 +109,17 @@ public class ClientHello extends Tls13Test {
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(new SendAction(msg), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(trace, config);
 
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     @AnvilTest(id = "8446-vtJcLUKtNv")
-    public void includeUnknownExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void includeUnknownExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         // we use a Grease Extension for which we modify the type
@@ -138,24 +134,21 @@ public class ClientHello extends Tls13Test {
                                 HandshakeMessageType.CLIENT_HELLO, workflowTrace);
         clientHello.addExtension(greaseHelperExtension);
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, config);
 
-                            ServerHelloMessage serverHello =
-                                    (ServerHelloMessage)
-                                            WorkflowTraceUtil.getFirstReceivedMessage(
-                                                    HandshakeMessageType.SERVER_HELLO,
-                                                    workflowTrace);
-                            for (ExtensionMessage extension : serverHello.getExtensions()) {
-                                assertFalse(
-                                        "Server negotiated the undefined Extension",
-                                        Arrays.equals(
-                                                extension.getExtensionType().getValue(),
-                                                greaseHelperExtension.getType().getValue()));
-                            }
-                        });
+        Validator.executedAsPlanned(state, testCase);
+
+        ServerHelloMessage serverHello =
+                (ServerHelloMessage)
+                        WorkflowTraceUtil.getFirstReceivedMessage(
+                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+        for (ExtensionMessage extension : serverHello.getExtensions()) {
+            assertFalse(
+                    "Server negotiated the undefined Extension",
+                    Arrays.equals(
+                            extension.getExtensionType().getValue(),
+                            greaseHelperExtension.getType().getValue()));
+        }
     }
 
     // there is an omitSignatureAlgorithms test in SignatureAlgorithms
@@ -163,56 +156,55 @@ public class ClientHello extends Tls13Test {
     @AnvilTest(id = "8446-GZpjQTKUD4")
     @ExcludeParameter("NAMED_GROUP")
     @Tag("new")
-    public void omitKeyShareAndSupportedGroups(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void omitKeyShareAndSupportedGroups(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         config.setAddKeyShareExtension(false);
         config.setAddEllipticCurveExtension(false);
 
-        performMissingExtensionTest(config, runner);
+        performMissingExtensionTest(config, runner, testCase);
     }
 
-    private void performMissingExtensionTest(Config config, WorkflowRunner runner) {
+    private void performMissingExtensionTest(
+            Config config, WorkflowRunner runner, AnvilTestCase testCase) {
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsAction(new SendAction(new ClientHelloMessage(config)));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            Validator.testAlertDescription(i, AlertDescription.MISSING_EXTENSION);
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.receivedFatalAlert(state, testCase);
+        Validator.testAlertDescription(state, testCase, AlertDescription.MISSING_EXTENSION);
     }
 
     @AnvilTest(id = "8446-jEEunwNUJ3")
     @ExcludeParameter("NAMED_GROUP")
     @Tag("new")
-    public void omitKeyShare(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void omitKeyShare(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         config.setAddKeyShareExtension(false);
 
-        performMissingExtensionTest(config, runner);
+        performMissingExtensionTest(config, runner, testCase);
     }
 
     @AnvilTest(id = "8446-KQn4u3Xj4M")
     @Tag("new")
-    public void omitSupportedGroups(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void omitSupportedGroups(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         config.setAddEllipticCurveExtension(false);
 
-        performMissingExtensionTest(config, runner);
+        performMissingExtensionTest(config, runner, testCase);
     }
 
     @AnvilTest(id = "8446-Uqrk3dnMz7")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @Tag("new")
     public void acceptsCompressionListForLegacyClient(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = prepareConfig(context.getConfig().createConfig(), runner);
         config.setDefaultClientSupportedCompressionMethods(
                 CompressionMethod.NULL, CompressionMethod.DEFLATE);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, config);
+        Validator.executedAsPlanned(state, testCase);
     }
 }

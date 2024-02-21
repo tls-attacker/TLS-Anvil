@@ -15,6 +15,7 @@ import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
@@ -24,6 +25,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -42,7 +44,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class ServerHello extends Tls13Test {
@@ -69,56 +70,50 @@ public class ServerHello extends Tls13Test {
     }
 
     @AnvilTest(id = "8446-8bcX8V9Zve")
-    public void testLegacyVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void testLegacyVersion(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)),
                 new ReceiveTillAction(new CertificateVerifyMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage msg =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
-                            assertArrayEquals(
-                                    "Invalid legacy version",
-                                    new byte[] {0x03, 0x03},
-                                    msg.getProtocolVersion().getValue());
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.executedAsPlanned(state, testCase);
+
+        ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
+        assertArrayEquals(
+                "Invalid legacy version",
+                new byte[] {0x03, 0x03},
+                msg.getProtocolVersion().getValue());
     }
 
     @AnvilTest(id = "8446-p17y8QGnbD")
     @MethodCondition(method = "supportsTls12")
     @KeyExchange(supported = KeyExchangeType.ALL12)
-    public void testServerRandomFor12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+    public void testServerRandomFor12(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = prepareConfig(context.getConfig().createConfig(), runner);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)),
                 new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage msg =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
-                            byte[] random = msg.getRandom().getValue();
-                            assertArrayEquals(
-                                    "Invalid random",
-                                    new byte[] {0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x01},
-                                    Arrays.copyOfRange(random, random.length - 8, random.length));
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.executedAsPlanned(state, testCase);
+
+        ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
+        byte[] random = msg.getRandom().getValue();
+        assertArrayEquals(
+                "Invalid random",
+                new byte[] {0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x01},
+                Arrays.copyOfRange(random, random.length - 8, random.length));
     }
 
     @AnvilTest(id = "8446-CyEBbGYnB5")
@@ -126,29 +121,26 @@ public class ServerHello extends Tls13Test {
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isTls11CipherSuite")
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @Tag("new")
-    public void testServerRandomFor11(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+    public void testServerRandomFor11(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = prepareConfig(context.getConfig().createConfig(), runner);
         config.setHighestProtocolVersion(ProtocolVersion.TLS11);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         ClientHelloMessage clientHello = new ClientHelloMessage(config);
         workflowTrace.addTlsActions(
                 new SendAction(clientHello), new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, config);
 
-                            ServerHelloMessage msg =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
-                            byte[] random = msg.getRandom().getValue();
-                            assertArrayEquals(
-                                    "Invalid random",
-                                    new byte[] {0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x00},
-                                    Arrays.copyOfRange(random, random.length - 8, random.length));
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.executedAsPlanned(state, testCase);
+
+        ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
+        byte[] random = msg.getRandom().getValue();
+        assertArrayEquals(
+                "Invalid random",
+                new byte[] {0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x00},
+                Arrays.copyOfRange(random, random.length - 8, random.length));
     }
 
     @AnvilTest(id = "8446-h8ESe4vrN3")
@@ -156,29 +148,26 @@ public class ServerHello extends Tls13Test {
     @KeyExchange(supported = KeyExchangeType.ALL12)
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isTls10CipherSuite")
     @Tag("new")
-    public void testServerRandomFor10(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+    public void testServerRandomFor10(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = prepareConfig(context.getConfig().createConfig(), runner);
         config.setHighestProtocolVersion(ProtocolVersion.TLS10);
         WorkflowTrace workflowTrace = new WorkflowTrace();
         ClientHelloMessage clientHello = new ClientHelloMessage(config);
         workflowTrace.addTlsActions(
                 new SendAction(clientHello), new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, config);
 
-                            ServerHelloMessage msg =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
-                            byte[] random = msg.getRandom().getValue();
-                            assertArrayEquals(
-                                    "Invalid random",
-                                    new byte[] {0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x00},
-                                    Arrays.copyOfRange(random, random.length - 8, random.length));
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.executedAsPlanned(state, testCase);
+
+        ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
+        byte[] random = msg.getRandom().getValue();
+        assertArrayEquals(
+                "Invalid random",
+                new byte[] {0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x00},
+                Arrays.copyOfRange(random, random.length - 8, random.length));
     }
 
     public boolean isTls10CipherSuite(CipherSuite cipherSuite) {
@@ -190,8 +179,8 @@ public class ServerHello extends Tls13Test {
     }
 
     @AnvilTest(id = "8446-3FhkMFZvbt")
-    public void testSessionIdEchoed(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void testSessionIdEchoed(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         byte[] sessionId = new byte[32];
         sessionId[0] = (byte) 0xFF;
@@ -204,27 +193,20 @@ public class ServerHello extends Tls13Test {
                 new SendAction(new ClientHelloMessage(c)),
                 new ReceiveTillAction(new CertificateVerifyMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage msg =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
-                            assertArrayEquals(
-                                    "Session ID not echoed",
-                                    sessionId,
-                                    msg.getSessionId().getValue());
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.executedAsPlanned(state, testCase);
+
+        ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
+        assertArrayEquals("Session ID not echoed", sessionId, msg.getSessionId().getValue());
     }
 
     @AnvilTest(id = "8446-aDiNwQZBTY")
     @Tag("new")
-    public void testShortSessionIdEchoed(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void testShortSessionIdEchoed(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         byte[] sessionId = new byte[8];
         sessionId[0] = (byte) 0xFF;
@@ -236,64 +218,51 @@ public class ServerHello extends Tls13Test {
                 new SendAction(new ClientHelloMessage(c)),
                 new ReceiveTillAction(new CertificateVerifyMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage msg =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
-                            assertArrayEquals(
-                                    "Session ID not echoed",
-                                    sessionId,
-                                    msg.getSessionId().getValue());
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.executedAsPlanned(state, testCase);
+
+        ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
+        assertArrayEquals("Session ID not echoed", sessionId, msg.getSessionId().getValue());
     }
 
     @AnvilTest(id = "8446-S1VjZrpD1J")
-    public void testCompressionValue(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void testCompressionValue(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            assertNotNull(
-                                    "No ServerHello has been sent",
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(ServerHelloMessage.class));
-                            assertEquals(
-                                    "invalid compression method",
-                                    0,
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(ServerHelloMessage.class)
-                                            .getSelectedCompressionMethod()
-                                            .getValue()
-                                            .byteValue());
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        assertNotNull(
+                "No ServerHello has been sent",
+                state.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class));
+        assertEquals(
+                "invalid compression method",
+                0,
+                state.getWorkflowTrace()
+                        .getFirstReceivedMessage(ServerHelloMessage.class)
+                        .getSelectedCompressionMethod()
+                        .getValue()
+                        .byteValue());
     }
 
     @AnvilTest(id = "8446-sm3XxXFjbr")
     @Tag("new")
-    public void testProvidedExtensions(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void testProvidedExtensions(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            ServerHelloMessage serverHello =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(ServerHelloMessage.class);
-                            ClientHelloMessage clientHello =
-                                    i.getWorkflowTrace()
-                                            .getFirstSendMessage(ClientHelloMessage.class);
-                            checkForForbiddenExtensions(serverHello);
-                            checkForUnproposedExtensions(serverHello, clientHello);
-                            SharedExtensionTests.checkForDuplicateExtensions(serverHello);
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        ServerHelloMessage serverHello =
+                state.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
+        ClientHelloMessage clientHello =
+                state.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
+        checkForForbiddenExtensions(serverHello);
+        checkForUnproposedExtensions(serverHello, clientHello);
+        SharedExtensionTests.checkForDuplicateExtensions(serverHello);
     }
 
     public static void checkForUnproposedExtensions(

@@ -11,12 +11,14 @@ import static org.junit.Assert.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.crypto.ec.*;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -39,7 +41,6 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class TLSExtensionForECC extends Tls12Test {
@@ -48,8 +49,8 @@ public class TLSExtensionForECC extends Tls12Test {
 
     @AnvilTest(id = "8422-rxF7z2tc5t")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    public void addUnknownEllipticCurve(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void addUnknownEllipticCurve(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
@@ -60,15 +61,15 @@ public class TLSExtensionForECC extends Tls12Test {
                 .getExtension(EllipticCurvesExtensionMessage.class)
                 .setSupportedGroups(Modifiable.insert(new byte[] {(byte) 123, 124}, 0));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "8422-Dk77D7HNBW")
     @ExcludeParameter("NAMED_GROUP")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    public void onlyInvalidEllipticCurve(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void onlyInvalidEllipticCurve(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
@@ -81,7 +82,9 @@ public class TLSExtensionForECC extends Tls12Test {
         chm.getExtension(EllipticCurvesExtensionMessage.class)
                 .setSupportedGroups(Modifiable.explicit(new byte[] {(byte) 123, 124}));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
+        ;
     }
 
     @AnvilTest(id = "8422-4G8mbkQ9LM")
@@ -89,8 +92,8 @@ public class TLSExtensionForECC extends Tls12Test {
     @ManualConfig(identifiers = "CIPHER_SUITE")
     @KeyExchange(supported = {KeyExchangeType.RSA, KeyExchangeType.DH})
     public void invalidEllipticCurve_WithNonECCCiphersuite(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
@@ -112,23 +115,20 @@ public class TLSExtensionForECC extends Tls12Test {
         chm.getExtension(EllipticCurvesExtensionMessage.class)
                 .setSupportedGroups(Modifiable.explicit(new byte[] {(byte) 123, 124}));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            ServerHelloMessage message =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, message);
-                            assertArrayEquals(
-                                    AssertMsgs.UNEXPECTED_CIPHER_SUITE,
-                                    parameterCombination
-                                            .getParameter(CipherSuiteDerivation.class)
-                                            .getSelectedValue()
-                                            .getByteValue(),
-                                    message.getSelectedCipherSuite().getValue());
-                        });
+        Validator.executedAsPlanned(state, testCase);
+
+        WorkflowTrace trace = state.getWorkflowTrace();
+        ServerHelloMessage message = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, message);
+        assertArrayEquals(
+                AssertMsgs.UNEXPECTED_CIPHER_SUITE,
+                parameterCombination
+                        .getParameter(CipherSuiteDerivation.class)
+                        .getSelectedValue()
+                        .getByteValue(),
+                message.getSelectedCipherSuite().getValue());
     }
 
     /*@AnvilTest for use in TLS.  Only three have\n" +
@@ -158,8 +158,8 @@ public class TLSExtensionForECC extends Tls12Test {
     @AnvilTest(id = "8422-PtimgKWxss")
     @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    public void manyGroupsOffered(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void manyGroupsOffered(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         c.setAddEllipticCurveExtension(true);
         c.setAddECPointFormatExtension(true);
@@ -184,7 +184,8 @@ public class TLSExtensionForECC extends Tls12Test {
                 .getExtension(EllipticCurvesExtensionMessage.class)
                 .setSupportedGroups(Modifiable.explicit(allExplicitGroups));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "8422-4MTo5xU82i")
@@ -196,9 +197,8 @@ public class TLSExtensionForECC extends Tls12Test {
             affectedIdentifiers = "NAMED_GROUP",
             methods = "isInvalidCurveApplicableNamedGroup")
     @Tag("new")
-    public void rejectsInvalidCurvePoints(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void rejectsInvalidCurvePoints(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
@@ -225,16 +225,16 @@ public class TLSExtensionForECC extends Tls12Test {
 
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8422-fV4R6XHPeJ")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
     @KeyExchange(supported = {KeyExchangeType.ECDH})
     @Tag("new")
-    public void abortsWhenSharedSecretIsZero(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void abortsWhenSharedSecretIsZero(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
@@ -258,7 +258,9 @@ public class TLSExtensionForECC extends Tls12Test {
         clientKeyExchangeMessage.setPublicKey(Modifiable.explicit(serializedPublicKey));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
+        ;
     }
 
     @AnvilTest(id = "8422-ymcrNp3RQw")
@@ -266,22 +268,18 @@ public class TLSExtensionForECC extends Tls12Test {
             affectedIdentifiers = "CIPHER_SUITE",
             methods = "isEcdheAnonCipherSuite")
     @Tag("new")
-    public void leavesPublicKeyUnsignedInAnon(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void leavesPublicKeyUnsignedInAnon(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            ECDHEServerKeyExchangeMessage serverKeyExchange =
-                                    workflowTrace.getFirstReceivedMessage(
-                                            ECDHEServerKeyExchangeMessage.class);
-                            assertEquals(
-                                    "Server provided a non-empty signature field in Server Key Exchange message",
-                                    (long) 0,
-                                    (long) serverKeyExchange.getSignatureLength().getValue());
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        ECDHEServerKeyExchangeMessage serverKeyExchange =
+                workflowTrace.getFirstReceivedMessage(ECDHEServerKeyExchangeMessage.class);
+        assertEquals(
+                "Server provided a non-empty signature field in Server Key Exchange message",
+                (long) 0,
+                (long) serverKeyExchange.getSignatureLength().getValue());
     }
 
     public boolean isEcdheAnonCipherSuite(CipherSuite cipherSuite) {

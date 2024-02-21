@@ -12,6 +12,7 @@ import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
@@ -20,6 +21,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.ServerNamePair;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -31,15 +33,14 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.CompressionMethodD
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class ServerHello extends Tls12Test {
 
     @AnvilTest(id = "5246-YnrTYxwh4n")
     @ModelFromScope(modelType = "CERTIFICATE")
-    public void sendAdditionalExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendAdditionalExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddRenegotiationInfoExtension(false);
 
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
@@ -89,17 +90,13 @@ public class ServerHello extends Tls12Test {
         ServerHelloMessage msg = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         msg.addExtension(extensionMessage);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
 
-                            AlertMessage alertMsg =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.UNSUPPORTED_EXTENSION, alertMsg);
-                        });
+        AlertMessage alertMsg =
+                state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(
+                state, testCase, AlertDescription.UNSUPPORTED_EXTENSION, alertMsg);
     }
 
     public boolean isUnproposedCompressionMethod(CompressionMethod compressionMethod) {
@@ -117,9 +114,8 @@ public class ServerHello extends Tls12Test {
     @DynamicValueConstraints(
             affectedIdentifiers = "COMPRESSION_METHOD",
             methods = "isUnproposedCompressionMethod")
-    public void selectUnproposedCompressionMethod(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void selectUnproposedCompressionMethod(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         CompressionMethod selectedCompressionMethod =
                 parameterCombination
                         .getParameter(CompressionMethodDerivation.class)
@@ -135,6 +131,7 @@ public class ServerHello extends Tls12Test {
         serverHello.setSelectedCompressionMethod(
                 Modifiable.explicit(selectedCompressionMethod.getValue()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 }

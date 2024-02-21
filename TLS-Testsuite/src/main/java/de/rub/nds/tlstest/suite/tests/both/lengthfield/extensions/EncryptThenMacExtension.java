@@ -13,6 +13,7 @@ import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
@@ -26,7 +27,6 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsLengthfieldTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class EncryptThenMacExtension extends TlsLengthfieldTest {
 
@@ -48,12 +48,10 @@ public class EncryptThenMacExtension extends TlsLengthfieldTest {
     @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
     @MethodCondition(method = "targetCanBeTested")
-    public void encryptThenMacExtensionLengthTLS12(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void encryptThenMacExtensionLengthTLS12(WorkflowRunner runner, AnvilTestCase testCase) {
         Config config = context.getConfig().createConfig();
         config.setAddEncryptThenMacExtension(true);
-        emptyExtensionLengthTest(
-                runner, argumentAccessor, config, EncryptThenMacExtensionMessage.class);
+        emptyExtensionLengthTest(runner, testCase, config, EncryptThenMacExtensionMessage.class);
     }
 
     @ServerTest
@@ -63,11 +61,9 @@ public class EncryptThenMacExtension extends TlsLengthfieldTest {
     @AnvilTest(id = "XLF-1y1FTzJRE5")
     @ExcludeParameter("INCLUDE_ENCRYPT_THEN_MAC_EXTENSION")
     @ModelFromScope(modelType = "LENGTHFIELD")
-    public void encryptThenMacExtensionLengthTLS13(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
+    public void encryptThenMacExtensionLengthTLS13(AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = context.getConfig().createTls13Config();
         config.setAddEncryptThenMacExtension(true);
-        emptyExtensionLengthTest(
-                runner, argumentAccessor, config, EncryptThenMacExtensionMessage.class);
+        emptyExtensionLengthTest(runner, testCase, config, EncryptThenMacExtensionMessage.class);
     }
 }

@@ -19,11 +19,10 @@ Since the client has to connect to TLS-Anvil the test suite container is started
 docker run \
     --rm \
     -it \
-    -v $(pwd):/output/ \
     --network tls-anvil \
     --name tls-anvil \
+    -v $(pwd):/output/ \
     ghcr.io/tls-attacker/tlsanvil:latest \
-    -outputFolder ./ \
     -parallelTestCases 3 \
     -parallelTests 3 \
     -strength 1 \
@@ -33,14 +32,15 @@ docker run \
     -triggerScript curl --connect-timeout 2 openssl-client:8090/trigger
 ```
 
-* Lines 2-6: Docker related command flags
+* Lines 2-5: Docker related command flags
+* Line 6: Set the output directory through a docker volume
 * Line 7: Specifies the TLS-Anvil docker image
-* Lines 9-10: Since the client can started multiple times, TLS-Anvil can run multiple tests and handshakes in parallel
-* Line 11: Defines the strength, i.e. the `t` for t-way combinatorial testing
-* Line 12: Defines an arbitrary name that is written to the report
-* Line 13: We want to test a client
-* Line 14: The port on which TLS-Anvil listens to accept requests from the client
-* Line 15: Specifies a script that is executed before each handshake, which the goal to trigger a connection from the client. See below how this works.
+* Lines 8-9: Since the client can started multiple times, TLS-Anvil can run multiple tests and handshakes in parallel
+* Line 10: Defines the strength, i.e. the `t` for t-way combinatorial testing
+* Line 11: Defines an arbitrary name that is written to the report
+* Line 12: We want to test a client
+* Line 13: The port on which TLS-Anvil listens to accept requests from the client
+* Line 14: Specifies a script that is executed before each handshake, which the goal to trigger a connection from the client. See below how this works.
 
 ### Starting the OpenSSL client container
 

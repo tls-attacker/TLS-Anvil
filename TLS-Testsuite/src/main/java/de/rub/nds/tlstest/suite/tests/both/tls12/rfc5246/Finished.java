@@ -11,11 +11,13 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -24,7 +26,6 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.util.DtlsTestConditions;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 public class Finished extends Tls12Test {
 
@@ -33,9 +34,8 @@ public class Finished extends Tls12Test {
     @IncludeParameter("PRF_BITMASK")
     // this test is applicable to DTLS but requires app data for client tests
     @MethodCondition(clazz = DtlsTestConditions.class, method = "isServerTestOrClientSendsAppData")
-    public void verifyFinishedMessageCorrect(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void verifyFinishedMessageCorrect(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         byte[] modificationBitmask = parameterCombination.buildBitmask();
         FinishedMessage finishedMessage = new FinishedMessage();
         finishedMessage.setVerifyData(Modifiable.xor(modificationBitmask, 0));
@@ -46,6 +46,7 @@ public class Finished extends Tls12Test {
         workflowTrace.addTlsActions(
                 new SendAction(finishedMessage), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 }

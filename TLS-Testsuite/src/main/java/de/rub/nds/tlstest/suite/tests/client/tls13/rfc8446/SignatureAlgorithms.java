@@ -14,9 +14,11 @@ import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
@@ -36,7 +38,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class SignatureAlgorithms extends Tls13Test {
@@ -61,12 +62,12 @@ public class SignatureAlgorithms extends Tls13Test {
             affectedIdentifiers = {"CIPHER_SUITE", "CERTIFICATE", "SIG_HASH_ALGORIHTM"},
             methods = {"isEcdsaCipherSuite", "isApplicableEcdsaCert", "isTls13SigHash"})
     @Tag("new")
-    public void acceptsMixedCurveHashLengthInTls12(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+    public void acceptsMixedCurveHashLengthInTls12(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = prepareConfig(context.getConfig().createConfig(), runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, config);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @AnvilTest(id = "8446-qNaBPZ4ofA")
@@ -77,11 +78,12 @@ public class SignatureAlgorithms extends Tls13Test {
             affectedIdentifiers = {"CIPHER_SUITE", "SIG_HASH_ALGORIHTM"},
             methods = {"isRsaSignatureCipherSuite", "isRsaPssAlgorithm"})
     @Tag("new")
-    public void supportsRsaPssInTls12(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = prepareConfig(context.getConfig().createConfig(), argumentAccessor, runner);
+    public void supportsRsaPssInTls12(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = prepareConfig(context.getConfig().createConfig(), runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        runner.execute(workflowTrace, config).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, config);
+        Validator.executedAsPlanned(state, testCase);
     }
 
     @NonCombinatorialAnvilTest(id = "8446-5E3CVBTFdt")

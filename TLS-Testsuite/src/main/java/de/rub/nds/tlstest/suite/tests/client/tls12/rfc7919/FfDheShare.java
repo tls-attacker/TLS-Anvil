@@ -15,6 +15,7 @@ import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.bytearray.ByteArrayExplicitValueModification;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -24,6 +25,7 @@ import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.DHEServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -41,7 +43,6 @@ import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 @Tag("dheshare")
@@ -65,8 +66,8 @@ public class FfDheShare extends Tls12Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     @IncludeParameter("FFDHE_SHARE_OUT_OF_BOUNDS")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
-    public void shareOutOfBounds(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void shareOutOfBounds(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_HELLO_DONE);
@@ -81,25 +82,21 @@ public class FfDheShare extends Tls12Test {
         SKE.setPublicKey(publicShare);
         SKE.getPublicKey().setModification(new ByteArrayExplicitValueModification(publicShare));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                            // accept both Illegal Parameter and Handshake Failure as RFC 8446 and
-                            // 7919 demand different alerts
-                            if (msg != null
-                                    && !msg.getDescription()
-                                            .getValue()
-                                            .equals(
-                                                    AlertDescription.ILLEGAL_PARAMETER
-                                                            .getValue())) {
-                                Validator.testAlertDescription(
-                                        i, AlertDescription.HANDSHAKE_FAILURE, msg);
-                            }
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        // accept both Illegal Parameter and Handshake Failure as RFC 8446 and
+        // 7919 demand different alerts
+        if (msg != null
+                && !msg.getDescription()
+                        .getValue()
+                        .equals(AlertDescription.ILLEGAL_PARAMETER.getValue())) {
+            Validator.testAlertDescription(
+                    state, testCase, AlertDescription.HANDSHAKE_FAILURE, msg);
+        }
     }
 
     @NonCombinatorialAnvilTest(id = "7919-D3SJNRC99x")
@@ -120,33 +117,29 @@ public class FfDheShare extends Tls12Test {
             methods = "getEmptyConstraintsList")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     @Tag("new")
-    public void supportsOfferedFfdheGroup(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void supportsOfferedFfdheGroup(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         NamedGroup ffdheGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         config.setDefaultServerNamedGroups(ffdheGroup);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
-                            assertEquals(
-                                    "Invalid NamedGroup set in context",
-                                    ffdheGroup,
-                                    i.getState().getTlsContext().getSelectedGroup());
-                        });
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        assertEquals(
+                "Invalid NamedGroup set in context",
+                ffdheGroup,
+                state.getTlsContext().getSelectedGroup());
     }
 
     @AnvilTest(id = "7919-64FAvRFA4A")
     @KeyExchange(supported = KeyExchangeType.DH, requiresServerKeyExchMsg = true)
     @ExcludeParameter("NAMED_GROUP")
     @Tag("new")
-    public void performsRequiredSecurityCheck(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void performsRequiredSecurityCheck(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         // 767 bits "safe prime"
         BigInteger unsafeSafePrime =
@@ -167,7 +160,8 @@ public class FfDheShare extends Tls12Test {
                 new SendAction(dheServerKeyExchange, new ServerHelloDoneMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     public List<DerivationParameter<Config, NamedGroup>> getSupportedFfdheNamedGroups(

@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -19,6 +20,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.MaxFragmentLengthExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PaddingExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -26,7 +28,6 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class EncryptedExtensions extends Tls13Test {
@@ -51,9 +52,8 @@ public class EncryptedExtensions extends Tls13Test {
     }
 
     @AnvilTest(id = "8446-X68SWFRBVS")
-    public void sendSupportedVersionsExtensionInEE(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendSupportedVersionsExtensionInEE(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -62,22 +62,15 @@ public class EncryptedExtensions extends Tls13Test {
                 workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
         ee.addExtension(new SupportedVersionsExtensionMessage());
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     @AnvilTest(id = "8446-U5uSdqYohP")
-    public void sendPaddingExtensionInEE(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendPaddingExtensionInEE(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -86,23 +79,17 @@ public class EncryptedExtensions extends Tls13Test {
                 workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
         ee.addExtension(new PaddingExtensionMessage());
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     @AnvilTest(id = "8446-34CYsV98Fs")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    public void invalidMaximumFragmentLength(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void invalidMaximumFragmentLength(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -113,23 +100,18 @@ public class EncryptedExtensions extends Tls13Test {
         malMaxFrag.setMaxFragmentLength(Modifiable.explicit(new byte[] {5}));
         encExt.addExtension(malMaxFrag);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
 
-                            WorkflowTrace wtrace = i.getWorkflowTrace();
-                            AlertMessage alert = wtrace.getLastReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 
     @AnvilTest(id = "8446-XDu7chdPTM")
     @MethodCondition(method = "sentMaximumFragmentLength")
-    public void unrequestedMaximumFragmentLength(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void unrequestedMaximumFragmentLength(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         MaxFragmentLength unreqLen =
                 getUnrequestedMaxFragLen(
@@ -145,15 +127,11 @@ public class EncryptedExtensions extends Tls13Test {
         malMaxFrag.setMaxFragmentLength(Modifiable.explicit(new byte[] {unreqLen.getValue()}));
         encExt.addExtension(malMaxFrag);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.ILLEGAL_PARAMETER, alert);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+        WorkflowTrace trace = state.getWorkflowTrace();
+        AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
     }
 }

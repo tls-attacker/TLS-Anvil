@@ -9,26 +9,27 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class Certificate extends Tls13Test {
 
     @AnvilTest(id = "8446-vN4oMaYkC6")
-    public void emptyCertificateMessage(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void emptyCertificateMessage(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -37,36 +38,26 @@ public class Certificate extends Tls13Test {
                         Modifiable.explicit(
                                 new byte[] {HandshakeMessageType.CERTIFICATE.getValue(), 0, 0, 0}));
 
-        runner.execute(trace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(trace, config);
 
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(i, AlertDescription.DECODE_ERROR, alert);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.DECODE_ERROR, alert);
     }
 
     @AnvilTest(id = "8446-cM4fvnBMce")
-    public void emptyCertificateList(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void emptyCertificateList(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(new ReceiveAction(new AlertMessage()));
         trace.getFirstSendMessage(CertificateMessage.class)
                 .setCertificatesListBytes(Modifiable.explicit(new byte[] {}));
 
-        runner.execute(trace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(trace, config);
 
-                            AlertMessage alert =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(i, AlertDescription.DECODE_ERROR, alert);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.DECODE_ERROR, alert);
     }
 }

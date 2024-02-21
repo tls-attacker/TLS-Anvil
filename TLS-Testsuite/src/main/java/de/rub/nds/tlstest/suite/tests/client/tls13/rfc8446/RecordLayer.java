@@ -10,6 +10,7 @@ package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -19,6 +20,7 @@ import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
@@ -37,16 +39,14 @@ import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
 public class RecordLayer extends Tls13Test {
 
     @AnvilTest(id = "8446-i8hwrTotPM")
     @EnforcedSenderRestriction
-    public void zeroLengthRecord_ServerHello(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void zeroLengthRecord_ServerHello(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         c.setUseAllProvidedRecords(true);
 
@@ -62,13 +62,13 @@ public class RecordLayer extends Tls13Test {
         trace.addTlsAction(1, serverHello);
         ((SendAction) trace.getTlsActions().get(2)).addActionOption(ActionOption.MAY_FAIL);
 
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(trace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8446-2R6GNvoUEs")
-    public void zeroLengthRecord_Finished(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void zeroLengthRecord_Finished(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         c.setUseAllProvidedRecords(true);
 
@@ -83,7 +83,8 @@ public class RecordLayer extends Tls13Test {
         finished.setRecords(record);
         trace.addTlsAction(2, finished);
 
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(trace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     public ConditionEvaluationResult supportsRecordFragmentation() {
@@ -100,8 +101,8 @@ public class RecordLayer extends Tls13Test {
     @IncludeParameter("ALERT")
     @MethodCondition(method = "supportsRecordFragmentation")
     @EnforcedSenderRestriction
-    public void interleaveRecords(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void interleaveRecords(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         SendAction sendServerHelloAction =
                 (SendAction)
@@ -131,7 +132,8 @@ public class RecordLayer extends Tls13Test {
 
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(trace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     public List<DerivationParameter> getModifiableHandshakeMessages(DerivationScope scope) {
@@ -153,9 +155,8 @@ public class RecordLayer extends Tls13Test {
             methods = "getModifiableHandshakeMessages")
     @ManualConfig(identifiers = "CHOSEN_HANDSHAKE_MSG")
     @Tag("emptyRecord")
-    public void sendEmptyZeroLengthRecords(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendEmptyZeroLengthRecords(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         HandshakeMessageType affectedMessage =
                 parameterCombination
                         .getParameter(ChosenHandshakeMessageDerivation.class)
@@ -194,15 +195,15 @@ public class RecordLayer extends Tls13Test {
             action.setRecords(r);
             trace.addTlsActions(action, new ReceiveAction(new AlertMessage()));
         }
-        runner.execute(trace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(trace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8446-VNQgpDNZVS")
     @ExcludeParameter("RECORD_LENGTH")
     @Tag("new")
-    public void incompleteCertVerifyBeforeFinished(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    public void incompleteCertVerifyBeforeFinished(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastSendingMessage(
                         WorkflowTraceType.HELLO, HandshakeMessageType.CERTIFICATE_VERIFY);
@@ -219,14 +220,9 @@ public class RecordLayer extends Tls13Test {
         workflowTrace.addTlsActions(sendCertVerifyPart, new SendAction(new FinishedMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
-                            // Depending on the parsing behavior, this might yield a different
-                            // alert
-                            // Validator.testAlertDescription(i,
-                            // AlertDescription.UNEXPECTED_MESSAGE);
-                        });
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
+        // Depending on the parsing behavior, this might yield a different alert
+        // Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 }

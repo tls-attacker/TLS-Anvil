@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
@@ -22,6 +23,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -34,32 +36,25 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class SignatureAlgorithms extends Tls13Test {
 
     @AnvilTest(id = "8446-kAJgkp7NBf")
-    public void omitSignatureAlgorithmsExtension(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void omitSignatureAlgorithmsExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddSignatureAndHashAlgorithmsExtension(false);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            AlertMessage msg =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(AlertMessage.class);
-                            Validator.testAlertDescription(
-                                    i, AlertDescription.MISSING_EXTENSION, msg);
-                        });
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.MISSING_EXTENSION, msg);
     }
 
     public List<DerivationParameter<Config, SignatureAndHashAlgorithm>> getLegacySigHashAlgoritms(
@@ -80,9 +75,8 @@ public class SignatureAlgorithms extends Tls13Test {
     @ExplicitValues(
             affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getLegacySigHashAlgoritms")
-    public void offerLegacySignatureAlgorithms(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void offerLegacySignatureAlgorithms(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         SignatureAndHashAlgorithm selectedSigHash =
                 parameterCombination.getParameter(SigAndHashDerivation.class).getSelectedValue();
 
@@ -96,23 +90,19 @@ public class SignatureAlgorithms extends Tls13Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            CertificateVerifyMessage certVerifyMsg =
-                                    i.getWorkflowTrace()
-                                            .getFirstReceivedMessage(
-                                                    CertificateVerifyMessage.class);
-                            assertNotNull(certVerifyMsg);
-                            SignatureAndHashAlgorithm sigHashAlg =
-                                    SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
-                                            certVerifyMsg.getSignatureHashAlgorithm().getValue());
-                            assertTrue(
-                                    "Invalid SignatureAndHashAlgorithm negotiated",
-                                    sigHashAlg.suitedForSigningTls13Messages());
-                        });
+        Validator.executedAsPlanned(state, testCase);
+
+        CertificateVerifyMessage certVerifyMsg =
+                state.getWorkflowTrace().getFirstReceivedMessage(CertificateVerifyMessage.class);
+        assertNotNull(certVerifyMsg);
+        SignatureAndHashAlgorithm sigHashAlg =
+                SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
+                        certVerifyMsg.getSignatureHashAlgorithm().getValue());
+        assertTrue(
+                "Invalid SignatureAndHashAlgorithm negotiated",
+                sigHashAlg.suitedForSigningTls13Messages());
     }
 
     @AnvilTest(id = "8446-3WqNtgoV2Z")
@@ -120,21 +110,21 @@ public class SignatureAlgorithms extends Tls13Test {
     @ExplicitValues(
             affectedIdentifiers = "SIG_HASH_ALGORIHTM",
             methods = "getLegacySigHashAlgoritms")
-    public void offerOnlyLegacySignatureAlgorithms(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void offerOnlyLegacySignatureAlgorithms(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
     @AnvilTest(id = "8446-5YCxveMdpt")
     public void includeUnknownSignatureAndHashAlgorithm(
-            ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddSignatureAndHashAlgorithmsExtension(true);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
@@ -147,6 +137,7 @@ public class SignatureAlgorithms extends Tls13Test {
         algorithmsExtension.setSignatureAndHashAlgorithms(
                 Modifiable.insert(new byte[] {(byte) 0xfe, 0x44}, 0));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 }

@@ -10,12 +10,14 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7465;
 import static org.junit.Assert.assertArrayEquals;
 
 import de.rub.nds.anvilcore.annotation.*;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
@@ -30,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
 public class RC4Ciphersuites extends Tls12Test {
@@ -57,8 +58,8 @@ public class RC4Ciphersuites extends Tls12Test {
     @ManualConfig(identifiers = "CIPHER_SUITE")
     @MethodCondition(method = "supportsRC4")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isNonRC4")
-    public void offerRC4AndOtherCiphers(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void offerRC4AndOtherCiphers(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         CipherSuite selectedCipherSuite =
                 parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
 
@@ -74,30 +75,29 @@ public class RC4Ciphersuites extends Tls12Test {
                 new SendAction(new ClientHelloMessage(c)),
                 new ReceiveTillAction(new ServerHelloDoneMessage()));
 
-        runner.execute(workflowTrace, c)
-                .validateFinal(
-                        i -> {
-                            WorkflowTrace trace = i.getWorkflowTrace();
-                            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-                            ServerHelloMessage msg =
-                                    trace.getFirstReceivedMessage(ServerHelloMessage.class);
-                            assertArrayEquals(
-                                    AssertMsgs.UNEXPECTED_CIPHER_SUITE,
-                                    selectedCipherSuite.getByteValue(),
-                                    msg.getSelectedCipherSuite().getValue());
-                        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.executedAsPlanned(state, testCase);
+
+        ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
+        assertArrayEquals(
+                AssertMsgs.UNEXPECTED_CIPHER_SUITE,
+                selectedCipherSuite.getByteValue(),
+                msg.getSelectedCipherSuite().getValue());
     }
 
     @AnvilTest(id = "7465-YNsMZJY6pa")
     @DynamicValueConstraints(affectedIdentifiers = "CIPHER_SUITE", methods = "isRC4")
-    public void onlyRC4Suites(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void onlyRC4Suites(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)), new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
+        ;
     }
 }

@@ -203,6 +203,11 @@ public class TlsTestConfig extends TLSDelegateConfig {
             } else {
                 LOGGER.error("Config must contain either client or server section.");
             }
+            this.getAnvilTestConfig().setEndpointMode(this.getTestEndpointMode());
+            this.getGeneralDelegate()
+                    .setKeylogfile(
+                            Path.of(getAnvilTestConfig().getOutputFolder(), "keyfile.log")
+                                    .toString());
             this.parsedArgs = true;
             return;
         } else if (argParser.getParsedCommand() == null) {
@@ -608,6 +613,14 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
     public void setTestServerDelegate(TestServerDelegate testServerDelegate) {
         this.testServerDelegate = testServerDelegate;
+    }
+
+    public void setParsedArgs(boolean parsedArgs) {
+        this.parsedArgs = parsedArgs;
+    }
+
+    public void setAnvilTestConfig(AnvilTestConfig anvilTestConfig) {
+        this.anvilTestConfig = anvilTestConfig;
     }
 
     public boolean isUseDTLS() {

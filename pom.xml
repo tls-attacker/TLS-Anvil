@@ -4,7 +4,7 @@
     <parent>
         <groupId>de.rub.nds</groupId>
         <artifactId>protocol-toolkit-bom</artifactId>
-        <version>3.5.17-anvilF</version>
+        <version>3.5.17-anvilH</version>
     </parent>
 
     <groupId>de.rub.nds.tls.anvil</groupId>
@@ -81,16 +81,21 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <configuration>
                         <trimStackTrace>false</trimStackTrace>
+                        <!-- By default we include all but integration tests during surefire execution -->
                         <includes>
                             <include>**/*.java</include>
                         </includes>
+                        <excludes>
+                            <exclude>**/IT*.java</exclude>
+                            <exclude>**/*IT.java</exclude>
+                            <exclude>**/*ITCase.java</exclude>
+                        </excludes>
                         <!-- Allow parallel execution of unit tests (execution in series within test classes) -->
                         <parallel>classes</parallel>
                         <!-- Can be adjusted depending on the local system, 3 should be a fair default value -->
                         <threadCount>3</threadCount>
                         <forkCount>3</forkCount>
                         <reuseForks>true</reuseForks>
-                        <!-- By default we include all but integration tests during surefire execution -->
                         <skipTests>${skip.surefire.tests}</skipTests>
                     </configuration>
                 </plugin>

@@ -43,6 +43,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -99,9 +101,11 @@ public class TestPreparator {
             mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker());
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-            mapper.writeValue(new File(fileName + ".json"), report);
+            Path cachePath = Paths.get("cache", fileName);
+            Files.createDirectories(Paths.get("cache"));
+            mapper.writeValue(new File(cachePath + ".json"), report);
 
-            FileOutputStream fos = new FileOutputStream(fileName + ".ser");
+            FileOutputStream fos = new FileOutputStream(cachePath + ".ser");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(report);
         } catch (Exception e) {
@@ -219,10 +223,10 @@ public class TestPreparator {
                 try {
                     if (testConfig.isUseDTLS()) {
                         String connectionEndpoint;
-                        if (connection.getHostname() != null) {
-                            connectionEndpoint = connection.getHostname();
-                        } else {
+                        if (connection.getIp() != null) {
                             connectionEndpoint = connection.getIp();
+                        } else {
+                            connectionEndpoint = connection.getHostname();
                         }
 
                         conTestDtls = new DatagramSocket();
@@ -231,10 +235,10 @@ public class TestPreparator {
                         targetIsReady = conTestDtls.isConnected(); // TODO always true
                     } else {
                         String connectionEndpoint;
-                        if (connection.getHostname() != null) {
-                            connectionEndpoint = connection.getHostname();
-                        } else {
+                        if (connection.getIp() != null) {
                             connectionEndpoint = connection.getIp();
+                        } else {
+                            connectionEndpoint = connection.getHostname();
                         }
                         conTest = new Socket(connectionEndpoint, connection.getPort());
                         targetIsReady = conTest.isConnected();
@@ -311,7 +315,9 @@ public class TestPreparator {
         serverReport.putResult(TlsAnalyzedProperty.HTTPS_HEADER, TestResults.ERROR_DURING_TEST);
         FeatureExtractionResult report =
                 ServerFeatureExtractionResult.fromServerScanReport(serverReport);
-        saveToCache(report);
+        if (!testConfig.getAnvilTestConfig().isIgnoreCache()) {
+            saveToCache(report);
+        }
 
         testContext.setFeatureExtractionResult(report);
         LOGGER.debug("TLS-Scanner finished!");
@@ -378,7 +384,9 @@ public class TestPreparator {
                         clientScanner.scan(), identifier);
 
         extractionResult.setReceivedClientHello(clientHello);
-        saveToCache(extractionResult);
+        if (!testConfig.getAnvilTestConfig().isIgnoreCache()) {
+            saveToCache(extractionResult);
+        }
         testContext.setReceivedClientHelloMessage(clientHello);
         testContext.setFeatureExtractionResult(extractionResult);
     }

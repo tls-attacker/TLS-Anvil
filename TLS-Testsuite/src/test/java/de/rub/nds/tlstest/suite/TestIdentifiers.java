@@ -15,6 +15,8 @@
  */
 package de.rub.nds.tlstest.suite;
 
+import static org.junit.Assert.*;
+
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.anvilcore.teststate.reporting.MetadataFetcher;
@@ -22,12 +24,13 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import org.junit.Assert;
 import org.junit.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 
 public class TestIdentifiers {
+
+    /** Checks whether any test ids are missing, duplicate or too much in the metadata file. */
     @Test
     public void idsRegistered() {
         Reflections reflections =
@@ -41,30 +44,47 @@ public class TestIdentifiers {
         for (Method combinatorialMethod : combinatorialMethods) {
             checkId(
                     combinatorialMethod.getAnnotation(AnvilTest.class).id(),
+                    combinatorialMethod,
                     registeredIds,
                     processedIds);
         }
         for (Method nonCombinatorialMethod : nonCombinatorialMethods) {
             checkId(
                     nonCombinatorialMethod.getAnnotation(NonCombinatorialAnvilTest.class).id(),
+                    nonCombinatorialMethod,
                     registeredIds,
                     processedIds);
         }
         for (String registeredId : registeredIds) {
-            Assert.assertTrue(
-                    "Test ID "
+            assertTrue(
+                    "TestId "
                             + registeredId
                             + " is registered in metadata but not referenced by any test",
                     processedIds.contains(registeredId));
         }
     }
 
-    private void checkId(String testId, Set<String> registeredIds, List<String> processedIds) {
-        Assert.assertTrue(
-                "TestID " + testId + " is not registered in metadata file.",
+    private void checkId(
+            String testId, Method method, Set<String> registeredIds, List<String> processedIds) {
+        assertNotNull(
+                "Test method "
+                        + method.getDeclaringClass()
+                        + "."
+                        + method
+                        + " has a TestId of null.",
+                testId);
+        assertFalse(
+                "Test method "
+                        + method.getDeclaringClass()
+                        + "."
+                        + method
+                        + " has an empty TestId.",
+                testId.isEmpty());
+        assertTrue(
+                "TestId " + testId + " is not registered in metadata file.",
                 registeredIds.contains(testId));
-        Assert.assertFalse(
-                "TestID " + testId + " appears twice in test suite.",
+        assertFalse(
+                "TestId " + testId + " appears twice in test suite.",
                 processedIds.contains(testId));
         processedIds.add(testId);
     }

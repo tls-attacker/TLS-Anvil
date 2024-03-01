@@ -1,0 +1,94 @@
+package de.rub.nds.tlstest.suite.integrationtests.abstracts;
+
+import com.github.dockerjava.api.command.InspectContainerCmd;
+import com.github.dockerjava.api.command.InspectContainerResponse;
+import com.github.dockerjava.api.model.*;
+import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.tls.subject.ConnectionRole;
+import de.rub.nds.tls.subject.TlsImplementationType;
+import de.rub.nds.tls.subject.constants.TransportType;
+import de.rub.nds.tls.subject.docker.DockerClientManager;
+import de.rub.nds.tls.subject.docker.DockerTlsInstance;
+import de.rub.nds.tls.subject.docker.DockerTlsManagerFactory;
+import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
+import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.Assume;
+
+public abstract class AbstractClientScanIT extends AbstractScanIT {
+
+    private static final Logger LOGGER = LogManager.getLogger();
+    protected String clientHostname;
+    protected Integer clientTriggerPort;
+    protected String serverHostname;
+    protected Integer serverPort;
+    protected TestClientDelegate testClientDelegate = new TestClientDelegate();
+
+    public AbstractClientScanIT(TlsImplementationType tlsImplementationType, String version) {
+        super(tlsImplementationType, ConnectionRole.CLIENT, version);
+        clientTriggerPort = 8090;
+        serverPort = 8443;
+        serverHostname = "172.17.0.1";
+    }
+
+    @Override
+    protected DockerTlsInstance startDockerContainer(
+            Image image,
+            TlsImplementationType implementation,
+            String version,
+            TransportType transportType) {
+        DockerTlsManagerFactory.TlsClientInstanceBuilder clientInstanceBuilder;
+        if (image != null) {
+            clientInstanceBuilder =
+                    new DockerTlsManagerFactory.TlsClientInstanceBuilder(image, transportType);
+
+        } else {
+            clientInstanceBuilder =
+                    new DockerTlsManagerFactory.TlsClientInstanceBuilder(
+                                    implementation, version, transportType)
+                            .pull();
+        }
+        try {
+            dockerInstance =
+                    clientInstanceBuilder
+                            .ip(serverHostname)
+                            .port(serverPort)
+                            .connectOnStartup(true)
+                            .build();
+            dockerInstance.start();
+            try (InspectContainerCmd cmd =
+                    DockerClientManager.getDockerClient()
+                            .inspectContainerCmd(this.dockerInstance.getId())) {
+                InspectContainerResponse response = cmd.exec();
+                this.clientHostname = response.getNetworkSettings().getIpAddress();
+            }
+            return dockerInstance;
+        } catch (InterruptedException e) {
+            LOGGER.error(String.format("Error while build or launching Docker container: %s", e));
+            Assume.assumeNoException(e);
+            return null;
+        }
+    }
+
+    @Override
+    protected void setUpTest() {
+        setUpClientDelegate(testClientDelegate);
+        tlsConfig.setTestClientDelegate(testClientDelegate);
+        tlsConfig.setTestEndpointMode(TestEndpointType.CLIENT);
+        anvilTestConfig.setEndpointMode(TestEndpointType.CLIENT);
+        super.setUpTest();
+    }
+
+    protected void setUpClientDelegate(TestClientDelegate testClientDelegate) {
+        testClientDelegate.setPort(serverPort);
+        testClientDelegate.setTriggerScriptCommand(
+                List.of(
+                        new String[] {
+                            "curl",
+                            "--connect-timeout",
+                            "4",
+                            clientHostname + ":" + clientTriggerPort + "/trigger"
+                        }));
+    }
+}

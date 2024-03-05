@@ -165,7 +165,7 @@ public class WorkflowRunner {
                     "Encountered invalid port for packet filter in test {} with combination {}: {}",
                     testCase.getAssociatedContainer().getTestMethodName(),
                     testCase.getDisplayName(),
-                    (relevantPort != null) ? "Port is null" : "Port is -1");
+                    (relevantPort != null) ? "Port is -1" : "Port is null");
         }
 
         if (state.getTlsContext().isReceivedTransportHandlerException()) {

@@ -131,10 +131,10 @@ public class TestPreparator {
                             + testConfig.getTestServerDelegate().getExtractedPort();
         }
         fileName = fileName + ".ser";
-        File f = new File(fileName);
-        if (f.exists() && !testConfig.getAnvilTestConfig().isIgnoreCache()) {
+        File cachedFile = new File(Paths.get("cache", fileName).toString());
+        if (cachedFile.exists() && !testConfig.getAnvilTestConfig().isIgnoreCache()) {
             try {
-                FileInputStream fis = new FileInputStream(fileName);
+                FileInputStream fis = new FileInputStream(cachedFile);
                 ObjectInputStream ois = new ObjectInputStream(fis);
                 LOGGER.info("Reading cached ScanReport");
                 return (FeatureExtractionResult) ois.readObject();
@@ -143,7 +143,7 @@ public class TestPreparator {
             } catch (Exception e) {
                 LOGGER.error("Failed to load cached ScanReport {}", fileName, e);
             }
-        } else if (f.exists() && testConfig.getAnvilTestConfig().isIgnoreCache()) {
+        } else if (cachedFile.exists() && testConfig.getAnvilTestConfig().isIgnoreCache()) {
             LOGGER.info("Ignoring cached ScanReport as configurated");
         } else {
             LOGGER.info("No matching ScanReport has been cached yet");

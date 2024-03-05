@@ -1,5 +1,7 @@
 package de.rub.nds.tlstest.suite.integrationtests.abstracts;
 
+import static org.junit.Assert.*;
+
 import com.github.dockerjava.api.command.InspectContainerCmd;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.*;
@@ -11,6 +13,8 @@ import de.rub.nds.tls.subject.docker.DockerClientManager;
 import de.rub.nds.tls.subject.docker.DockerTlsInstance;
 import de.rub.nds.tls.subject.docker.DockerTlsManagerFactory;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,8 +32,19 @@ public abstract class AbstractClientScanIT extends AbstractScanIT {
     public AbstractClientScanIT(TlsImplementationType tlsImplementationType, String version) {
         super(tlsImplementationType, ConnectionRole.CLIENT, version);
         clientTriggerPort = 8090;
-        serverPort = 8443;
+        serverPort = findPort();
         serverHostname = "172.17.0.1";
+    }
+
+    private Integer findPort() {
+        try (ServerSocket serverSocket = new ServerSocket(0)) {
+            assertNotNull(serverSocket);
+            assertTrue(serverSocket.getLocalPort() > 0);
+            return serverSocket.getLocalPort();
+        } catch (IOException e) {
+            fail("No port available");
+            return null;
+        }
     }
 
     @Override

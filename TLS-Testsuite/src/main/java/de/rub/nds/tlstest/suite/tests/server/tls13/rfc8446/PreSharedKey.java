@@ -49,6 +49,8 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 @ServerTest
 public class PreSharedKey extends Tls13Test {
 
+    public static final String PSK_HANDSHAKES_NOT_SUPPORTED = "SUT does not support PSK handshakes";
+
     public ConditionEvaluationResult supportsPsk() {
         if (context.getFeatureExtractionResult().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK)
                         == TestResults.TRUE
@@ -57,7 +59,7 @@ public class PreSharedKey extends Tls13Test {
                         == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
-            return ConditionEvaluationResult.disabled("Does not support PSK handshakes");
+            return ConditionEvaluationResult.disabled(PSK_HANDSHAKES_NOT_SUPPORTED);
         }
     }
 
@@ -84,7 +86,7 @@ public class PreSharedKey extends Tls13Test {
                 == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
-            return ConditionEvaluationResult.disabled("Does not support PSK handshakes");
+            return ConditionEvaluationResult.disabled(PSK_HANDSHAKES_NOT_SUPPORTED);
         }
     }
 
@@ -94,7 +96,7 @@ public class PreSharedKey extends Tls13Test {
                 == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
-            return ConditionEvaluationResult.disabled("Does not support PSK handshakes");
+            return ConditionEvaluationResult.disabled(PSK_HANDSHAKES_NOT_SUPPORTED);
         }
     }
 

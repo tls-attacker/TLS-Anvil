@@ -158,7 +158,7 @@ public abstract class AbstractScanIT {
             Assume.assumeNoException(e);
         }
 
-        Map<TestResult, Set<String>> results = AnvilContext.getInstance().getResultTestMap();
+        Map<TestResult, Set<String>> results = AnvilContext.getInstance().getResultsTestRuns();
         Map<String, TestResult> orderedActualResults = new HashMap<>();
         Map<String, TestResult> orderedExpectedResults = new HashMap<>();
         for (Map.Entry<TestResult, Set<String>> entry : results.entrySet()) {
@@ -212,7 +212,7 @@ public abstract class AbstractScanIT {
         String serializeResultsFileName =
                 "result_test_map_" + anvilTestConfig.getIdentifier() + version + ".json";
         File f = new File(anvilTestConfig.getOutputFolder(), serializeResultsFileName);
-        Map<TestResult, Set<String>> results = AnvilContext.getInstance().getResultTestMap();
+        Map<TestResult, Set<String>> results = AnvilContext.getInstance().getResultsTestRuns();
         try {
             mapper.writeValue(f, results);
         } catch (IOException e) {

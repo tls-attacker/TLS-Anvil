@@ -4,7 +4,7 @@
     <parent>
         <groupId>de.rub.nds</groupId>
         <artifactId>protocol-toolkit-bom</artifactId>
-        <version>3.5.17-anvilI</version>
+        <version>3.5.17-anvilJ</version>
     </parent>
 
     <groupId>de.rub.nds.tls.anvil</groupId>

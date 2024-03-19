@@ -30,6 +30,7 @@ import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.TlsLengthfieldTest;
+import de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446.PreSharedKey;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
@@ -47,7 +48,7 @@ public class PreSharedKeyExtension extends TlsLengthfieldTest {
                         == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
-            return ConditionEvaluationResult.disabled("Does not support PSK handshakes");
+            return ConditionEvaluationResult.disabled(PreSharedKey.PSK_HANDSHAKES_NOT_SUPPORTED);
         }
     }
 

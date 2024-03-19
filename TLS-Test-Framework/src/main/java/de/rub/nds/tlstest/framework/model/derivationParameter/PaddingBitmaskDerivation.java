@@ -18,8 +18,8 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -49,7 +49,7 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
     @Override
     public List<DerivationParameter<Config, Integer>> getParameterValues(
             DerivationScope derivationScope) {
-        if (ConstraintHelper.isTls13Test(derivationScope)) {
+        if (TlsParameterIdentifierProvider.isTls13Test(derivationScope)) {
             throw new RuntimeException(
                     "Padding bitmask is not configured for optional TLS 1.3 record padding");
         }
@@ -150,10 +150,11 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
     private int getResultingPaddingSize(
             boolean isEncryptThenMac,
             int applicationMessageContentLength,
-            CipherSuite cipherSuite,
-            ProtocolVersion targetVersion) {
+            CipherSuite cipherSuite) {
         int blockSize = AlgorithmResolver.getCipher(cipherSuite).getBlocksize();
-        int macSize = AlgorithmResolver.getMacAlgorithm(targetVersion, cipherSuite).getSize();
+        // always resolve using TLS 1.2 as the method only needs to check if it is not SSL
+        int macSize =
+                AlgorithmResolver.getMacAlgorithm(ProtocolVersion.TLS12, cipherSuite).getSize();
         if (isEncryptThenMac) {
             return blockSize - (applicationMessageContentLength % blockSize);
         } else {
@@ -218,11 +219,7 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
         int selectedBitPosition = bitPositionDerivation.getSelectedValue();
 
         int resultingPaddingSize =
-                getResultingPaddingSize(
-                        true,
-                        selectedAppMsgLength,
-                        selectedCipherSuite,
-                        ConstraintHelper.getTargetVersion(scope));
+                getResultingPaddingSize(true, selectedAppMsgLength, selectedCipherSuite);
         if ((selectedBitmaskBytePosition + 1) == resultingPaddingSize
                 && (1 << selectedBitPosition) == (resultingPaddingSize - 1)) {
             // padding appears to be only the lengthfield byte
@@ -247,10 +244,7 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
             boolean isEncryptThenMac) {
         int resultingPaddingSize =
                 getResultingPaddingSize(
-                        isEncryptThenMac,
-                        selectedAppMsgLength,
-                        selectedCipherSuite,
-                        ConstraintHelper.getTargetVersion(scope));
+                        isEncryptThenMac, selectedAppMsgLength, selectedCipherSuite);
         return resultingPaddingSize > selectedPaddingBitmaskBytePosition;
     }
 

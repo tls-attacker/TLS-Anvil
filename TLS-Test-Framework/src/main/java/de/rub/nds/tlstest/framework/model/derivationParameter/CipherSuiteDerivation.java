@@ -13,8 +13,8 @@ import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -48,7 +48,7 @@ public class CipherSuiteDerivation extends TlsDerivationParameter<CipherSuite> {
         cipherSuiteList.addAll(
                 context.getFeatureExtractionResult().getSupportedTls13CipherSuites());
         for (CipherSuite cipherSuite : cipherSuiteList) {
-            if (ConstraintHelper.getKeyExchangeRequirements(derivationScope)
+            if (TlsParameterIdentifierProvider.getKeyExchangeRequirements(derivationScope)
                     .compatibleWithCiphersuite(cipherSuite)) {
                 parameterValues.add(new CipherSuiteDerivation(cipherSuite));
             }

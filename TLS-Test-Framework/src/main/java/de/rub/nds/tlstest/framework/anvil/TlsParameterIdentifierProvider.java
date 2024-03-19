@@ -14,8 +14,9 @@ import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
+import de.rub.nds.tlstest.framework.constants.KeyX;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -103,7 +104,7 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
             derivationTypes.add(TlsParameterType.TCP_FRAGMENTATION);
         }
 
-        if (ConstraintHelper.isTls13Test(derivationScope)) {
+        if (isTls13Test(derivationScope)) {
             derivationTypes.add(TlsParameterType.INCLUDE_CHANGE_CIPHER_SPEC);
         }
 
@@ -133,7 +134,7 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
                 derivationTypes.add(TlsParameterType.INCLUDE_ENCRYPT_THEN_MAC_EXTENSION);
             }
 
-            if (ConstraintHelper.isTls13Test(derivationScope)) {
+            if (isTls13Test(derivationScope)) {
                 derivationTypes.add(TlsParameterType.INCLUDE_PSK_EXCHANGE_MODES_EXTENSION);
             }
         }
@@ -169,7 +170,7 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
         ClientFeatureExtractionResult extractionResult =
                 (ClientFeatureExtractionResult)
                         TestContext.getInstance().getFeatureExtractionResult();
-        if (!ConstraintHelper.isTls13Test(derivationScope)) {
+        if (!isTls13Test(derivationScope)) {
 
             if (extractionResult
                     .getReceivedClientHello()
@@ -187,5 +188,14 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
             derivationTypes.add(TlsParameterType.COOKIE_EXCHANGE);
         }
         return derivationTypes;
+    }
+
+    public static KeyX getKeyExchangeRequirements(DerivationScope scope) {
+        return (KeyX) KeyX.resolveKexAnnotation(scope.getExtensionContext());
+    }
+
+    public static boolean isTls13Test(DerivationScope scope) {
+        KeyX keyExchangeRequirements = getKeyExchangeRequirements(scope);
+        return keyExchangeRequirements.supports(KeyExchangeType.ALL13);
     }
 }

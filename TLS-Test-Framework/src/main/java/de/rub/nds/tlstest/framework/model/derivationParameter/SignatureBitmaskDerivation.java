@@ -23,7 +23,6 @@ import de.rub.nds.tlsattacker.core.crypto.keys.CustomDSAPrivateKey;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -235,9 +234,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
     public List<ConditionalConstraint> getDefaultConditionalConstraints(
             DerivationScope derivationScope) {
         List<ConditionalConstraint> conditionalConstraints = new LinkedList<>();
-        if (ConstraintHelper.signatureLengthConstraintApplicable(derivationScope)) {
-            conditionalConstraints.add(getMustBeWithinSignatureSizeConstraint());
-        }
+        conditionalConstraints.add(getMustBeWithinSignatureSizeConstraint());
         return conditionalConstraints;
     }
 

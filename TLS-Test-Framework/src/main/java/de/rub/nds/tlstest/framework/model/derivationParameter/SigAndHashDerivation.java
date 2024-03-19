@@ -23,8 +23,8 @@ import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -60,7 +60,7 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
         } else {
             parameterValues = getServerTestAlgorithms();
         }
-        if (!ConstraintHelper.isTls13Test(derivationScope)) {
+        if (!TlsParameterIdentifierProvider.isTls13Test(derivationScope)) {
             parameterValues.add(new SigAndHashDerivation(null));
         }
         return parameterValues;
@@ -111,7 +111,7 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                 .filter(
                         algo ->
                                 algo.suitedForSigningTls13Messages()
-                                        || !ConstraintHelper.isTls13Test(scope))
+                                        || !TlsParameterIdentifierProvider.isTls13Test(scope))
                 .filter(algo -> SignatureAndHashAlgorithm.getImplemented().contains(algo))
                 .forEach(algo -> parameterValues.add(new SigAndHashDerivation(algo)));
         return parameterValues;
@@ -143,7 +143,7 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
 
         condConstraints.addAll(getSharedDefaultConditionalConstraints(derivationScope));
 
-        if (!ConstraintHelper.isTls13Test(derivationScope)) {
+        if (!TlsParameterIdentifierProvider.isTls13Test(derivationScope)) {
             condConstraints.addAll(getDefaultPreTls13Constraints(derivationScope));
         } else {
             condConstraints.add(getHashSizeMustMatchEcdsaPkSizeConstraint());
@@ -156,43 +156,24 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
         TestContext context = TestContext.getInstance();
 
         if ((context.getFeatureExtractionResult().getSignatureAndHashAlgorithmsForDerivation()
-                                == null
-                        || context.getFeatureExtractionResult()
-                                .getSignatureAndHashAlgorithmsForDerivation()
-                                .isEmpty())
-                && ConstraintHelper.multipleSigAlgorithmRequiredKeyTypesModeled(scope)) {
+                        == null
+                || context.getFeatureExtractionResult()
+                        .getSignatureAndHashAlgorithmsForDerivation()
+                        .isEmpty())) {
             condConstraints.add(getDefaultAlgorithmMustMatchCipherSuite());
         }
 
-        if (ConstraintHelper.staticCipherSuiteModeled(scope)) {
-            condConstraints.add(getMustBeNullForStaticCipherSuite());
-        }
-
-        if (ConstraintHelper.ephemeralCipherSuiteModeled(scope)
-                && ConstraintHelper.nullSigHashModeled(scope)) {
-            condConstraints.add(getMustNotBeNullForEphemeralCipherSuite());
-        }
-
+        condConstraints.add(getMustBeNullForStaticCipherSuite());
+        condConstraints.add(getMustNotBeNullForEphemeralCipherSuite());
         return condConstraints;
     }
 
     public static List<ConditionalConstraint> getSharedDefaultConditionalConstraints(
             DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-        if (ConstraintHelper.pssSigAlgoModeled(scope)
-                && ConstraintHelper.rsaPkMightNotSufficeForPss(scope)) {
-            condConstraints.add(getMustNotBePSSWithShortRSAKeyConstraint());
-        }
-
-        if (ConstraintHelper.multipleCertPublicKeyTypesModeled(scope)
-                || ConstraintHelper.multipleSigAlgorithmRequiredKeyTypesModeled(scope)) {
-            condConstraints.add(getMustMatchPkOfCertificateConstraint());
-        }
-
-        if (ConstraintHelper.rsaPkBelow1024BitsModeled(scope)
-                && ConstraintHelper.rsaShaAlgLongerThan256BitsModeled(scope)) {
-            condConstraints.add(getMustNotBeRSA512withHashAbove256BitsConstraint());
-        }
+        condConstraints.add(getMustNotBePSSWithShortRSAKeyConstraint());
+        condConstraints.add(getMustMatchPkOfCertificateConstraint());
+        condConstraints.add(getMustNotBeRSA512withHashAbove256BitsConstraint());
         return condConstraints;
     }
 

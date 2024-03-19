@@ -15,9 +15,9 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.MacAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -41,9 +41,10 @@ public class MacBitmaskDerivation extends TlsDerivationParameter<Integer> {
         List<DerivationParameter<Config, Integer>> parameterValues = new LinkedList<>();
         int maxMacLenght = 0;
         for (CipherSuite cipherSuite : context.getFeatureExtractionResult().getCipherSuites()) {
+            // we always resolve the MAC using TLS 1.2, as the protocol version is only required to
+            // ensure that it is not SSL
             MacAlgorithm macAlg =
-                    AlgorithmResolver.getMacAlgorithm(
-                            ConstraintHelper.getTargetVersion(derivationScope), cipherSuite);
+                    AlgorithmResolver.getMacAlgorithm(ProtocolVersion.TLS12, cipherSuite);
             if (macAlg != MacAlgorithm.AEAD
                     && macAlg != MacAlgorithm.NULL
                     && maxMacLenght < macAlg.getSize()) {
@@ -63,10 +64,7 @@ public class MacBitmaskDerivation extends TlsDerivationParameter<Integer> {
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-
-        if (ConstraintHelper.multipleMacSizesModeled(scope)) {
-            condConstraints.add(getMustBeWithinMacSizeConstraint(scope));
-        }
+        condConstraints.add(getMustBeWithinMacSizeConstraint(scope));
         return condConstraints;
     }
 
@@ -88,8 +86,7 @@ public class MacBitmaskDerivation extends TlsDerivationParameter<Integer> {
                                             cipherSuiteDerivation.getSelectedValue();
 
                                     return AlgorithmResolver.getMacAlgorithm(
-                                                            ConstraintHelper.getTargetVersion(
-                                                                    scope),
+                                                            ProtocolVersion.TLS12,
                                                             selectedCipherSuite)
                                                     .getSize()
                                             > selectedBitmaskBytePosition;

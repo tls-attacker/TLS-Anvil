@@ -19,9 +19,9 @@ import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsscanner.serverscanner.probe.namedgroup.NamedGroupWitness;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -45,12 +45,12 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
             DerivationScope derivationScope) {
         List<DerivationParameter<Config, NamedGroup>> parameterValues = new LinkedList<>();
         List<NamedGroup> groupList = context.getFeatureExtractionResult().getTls13Groups();
-        if (!ConstraintHelper.isTls13Test(derivationScope)
-                || ConstraintHelper.getKeyExchangeRequirements(derivationScope)
+        if (!TlsParameterIdentifierProvider.isTls13Test(derivationScope)
+                || TlsParameterIdentifierProvider.getKeyExchangeRequirements(derivationScope)
                         .supports(KeyExchangeType.ECDH)) {
             groupList = context.getFeatureExtractionResult().getNamedGroups();
             parameterValues.add(new NamedGroupDerivation(null));
-        } else if (ConstraintHelper.isTls13Test(derivationScope)
+        } else if (TlsParameterIdentifierProvider.isTls13Test(derivationScope)
                 && context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
             groupList = context.getFeatureExtractionResult().getTls13Groups();
         }
@@ -106,21 +106,10 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-        if (!ConstraintHelper.isTls13Test(scope)) {
-            if (ConstraintHelper.ecdhCipherSuiteModeled(scope)
-                    && ConstraintHelper.nullModeled(
-                            scope,
-                            (TlsParameterType) getParameterIdentifier().getParameterType())) {
-                condConstraints.add(getMustNotBeNullForECDHConstraint());
-            }
-
-            if (ConstraintHelper.nonEcdhCipherSuiteModeled(scope)) {
-                condConstraints.add(getMustBeNullForNonECDHConstraint());
-            }
-
-            if (ConstraintHelper.staticEcdhCipherSuiteModeled(scope)) {
-                condConstraints.add(getMustBeNullForStaticECDH());
-            }
+        if (!TlsParameterIdentifierProvider.isTls13Test(scope)) {
+            condConstraints.add(getMustNotBeNullForECDHConstraint());
+            condConstraints.add(getMustBeNullForNonECDHConstraint());
+            condConstraints.add(getMustBeNullForStaticECDH());
         }
 
         return condConstraints;

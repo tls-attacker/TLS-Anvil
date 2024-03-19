@@ -22,8 +22,8 @@ import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -135,14 +135,14 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
 
     private boolean filterTls13Groups(CertificateKeyPair cert, DerivationScope scope) {
         return cert.getPublicKeyGroup() == null
-                || !ConstraintHelper.isTls13Test(scope)
+                || !TlsParameterIdentifierProvider.isTls13Test(scope)
                 || cert.getPublicKeyGroup().isTls13();
     }
 
     private boolean certMatchesAnySupportedCipherSuite(
             CertificateKeyPair cert, DerivationScope scope) {
         Set<CipherSuite> cipherSuites;
-        if (!ConstraintHelper.isTls13Test(scope)) {
+        if (!TlsParameterIdentifierProvider.isTls13Test(scope)) {
             cipherSuites = TestContext.getInstance().getFeatureExtractionResult().getCipherSuites();
             return cipherSuites.stream()
                     .anyMatch(
@@ -177,12 +177,8 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
-        if (!ConstraintHelper.isTls13Test(scope)) {
-            if (ConstraintHelper.multipleCertPublicKeyTypesModeled(scope)
-                    || ConstraintHelper.cipherSuitesWithDifferentCertPublicKeyRequirementsModeled(
-                            scope)) {
-                condConstraints.add(getCertPkTypeMustMatchCipherSuiteConstraint());
-            }
+        if (!TlsParameterIdentifierProvider.isTls13Test(scope)) {
+            condConstraints.add(getCertPkTypeMustMatchCipherSuiteConstraint());
         }
         return condConstraints;
     }

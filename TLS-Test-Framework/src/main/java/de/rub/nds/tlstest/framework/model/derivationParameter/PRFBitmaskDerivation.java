@@ -16,8 +16,8 @@ import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeByteLength;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.model.constraint.ConstraintHelper;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -42,7 +42,7 @@ public class PRFBitmaskDerivation extends TlsDerivationParameter<Integer> {
     @Override
     public List getParameterValues(DerivationScope scope) {
         List<DerivationParameter<Config, Integer>> parameterValues = new LinkedList<>();
-        if (ConstraintHelper.isTls13Test(scope)) {
+        if (TlsParameterIdentifierProvider.isTls13Test(scope)) {
             int maxHkdfSize = 0;
             for (CipherSuite cipherSuite :
                     context.getFeatureExtractionResult().getSupportedTls13CipherSuites()) {
@@ -66,8 +66,7 @@ public class PRFBitmaskDerivation extends TlsDerivationParameter<Integer> {
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-        if (ConstraintHelper.isTls13Test(scope)
-                && ConstraintHelper.multipleHkdfSizesModeled(scope)) {
+        if (TlsParameterIdentifierProvider.isTls13Test(scope)) {
             condConstraints.add(getMustBeWithinPRFSizeConstraint());
         }
         return condConstraints;

@@ -163,7 +163,7 @@ public class WorkflowRunner {
         } else {
             LOGGER.warn(
                     "Encountered invalid port for packet filter in test {} with combination {}: {}",
-                    testCase.getAssociatedContainer().getTestMethodName(),
+                    testCase.getAssociatedContainer().getName(),
                     testCase.getDisplayName(),
                     (relevantPort != null) ? "Port is -1" : "Port is null");
         }

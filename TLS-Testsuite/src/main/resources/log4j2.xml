@@ -5,7 +5,7 @@
     </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout pattern="%highlight{%d{HH:mm:ss} [%t] %-5level: %c{1}.%M(%F:%L) - %msg%n%throwable}"/>
+			<PatternLayout pattern="%highlight{%d{HH:mm:ss}: %msg%n%throwable}"/>
         </Console>
         <File name="FileTestsuite" fileName="logs/${filename}_testsuite.log">
             <PatternLayout pattern="%d{MM-dd-yyyy_HH:mm:ss} [%t] %-5level: %c{1}.%M(%F:%L) - %msg%n%throwable"/>

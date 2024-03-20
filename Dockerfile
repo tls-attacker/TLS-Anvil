@@ -7,8 +7,8 @@ RUN mvn install -DskipTests -Dspotless.apply.skip
 
 FROM openjdk:11
 RUN apt-get update && apt-get install -y tcpdump
-COPY --from=build-tlsanvil /src/TLS-Testsuite/apps /apps/
+COPY --from=build-tlsanvil /src/apps /apps/
 ENV DOCKER=1
 WORKDIR /output/
 VOLUME /output
-ENTRYPOINT ["java", "-jar", "/apps/TLS-Testsuite.jar"]
+ENTRYPOINT ["java", "-jar", "/apps/TLS-Anvil.jar"]

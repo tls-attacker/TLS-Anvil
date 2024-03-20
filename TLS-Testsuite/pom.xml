@@ -36,7 +36,7 @@
 
     </dependencies>
     <build>
-        <finalName>TLS-Testsuite</finalName>
+        <finalName>TLS-Anvil</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -57,7 +57,7 @@
                                     <destFileName>${project.build.finalName}.${project.packaging}</destFileName>
                                 </artifactItem>
                             </artifactItems>
-                            <outputDirectory>${basedir}/apps</outputDirectory>
+                            <outputDirectory>${project.parent.basedir}/apps</outputDirectory>
                         </configuration>
                     </execution>
                     <execution>
@@ -67,7 +67,7 @@
                         </goals>
                         <phase>package</phase>
                         <configuration>
-                            <outputDirectory>${basedir}/apps/lib</outputDirectory>
+                            <outputDirectory>${project.parent.basedir}/apps/lib</outputDirectory>
                             <!--Ensures only runnable dependencies are included-->
                             <includeScope>compile</includeScope>
                         </configuration>

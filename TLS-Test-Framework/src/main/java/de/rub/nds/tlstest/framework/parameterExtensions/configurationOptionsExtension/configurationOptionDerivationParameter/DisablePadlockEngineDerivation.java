@@ -14,12 +14,11 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-
 import java.util.LinkedList;
 import java.util.List;
 
 public class DisablePadlockEngineDerivation extends ConfigurationOptionDerivationParameter {
-    public DisablePadlockEngineDerivation(){
+    public DisablePadlockEngineDerivation() {
         super(ConfigOptionDerivationType.DisablePadlockEngine);
     }
 
@@ -31,7 +30,8 @@ public class DisablePadlockEngineDerivation extends ConfigurationOptionDerivatio
     @Override
     public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new DisablePadlockEngineDerivation(new ConfigurationOptionValue(false)));
+        parameterValues.add(
+                new DisablePadlockEngineDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(new DisablePadlockEngineDerivation(new ConfigurationOptionValue(true)));
 
         return parameterValues;

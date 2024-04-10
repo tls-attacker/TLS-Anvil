@@ -10,16 +10,15 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
+import java.util.LinkedList;
+import java.util.List;
 
 public class EnableWeakSslCiphersDerivation extends ConfigurationOptionDerivationParameter {
-    public EnableWeakSslCiphersDerivation(){
+    public EnableWeakSslCiphersDerivation() {
         super(ConfigOptionDerivationType.EnableWeakSslCiphers);
     }
 
@@ -32,8 +31,9 @@ public class EnableWeakSslCiphersDerivation extends ConfigurationOptionDerivatio
     public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         parameterValues.add(new EnableWeakSslCiphersDerivation(new ConfigurationOptionValue(true)));
-        parameterValues.add(new EnableWeakSslCiphersDerivation(new ConfigurationOptionValue(false)));
-        
+        parameterValues.add(
+                new EnableWeakSslCiphersDerivation(new ConfigurationOptionValue(false)));
+
         return parameterValues;
     }
 

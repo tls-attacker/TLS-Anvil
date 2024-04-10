@@ -14,12 +14,12 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-
 import java.util.LinkedList;
 import java.util.List;
 
-public class DisableCertificateTransparencyDerivation extends ConfigurationOptionDerivationParameter {
-    public DisableCertificateTransparencyDerivation(){
+public class DisableCertificateTransparencyDerivation
+        extends ConfigurationOptionDerivationParameter {
+    public DisableCertificateTransparencyDerivation() {
         super(ConfigOptionDerivationType.DisableCertificateTransparency);
     }
 
@@ -31,8 +31,10 @@ public class DisableCertificateTransparencyDerivation extends ConfigurationOptio
     @Override
     public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new DisableCertificateTransparencyDerivation(new ConfigurationOptionValue(false)));
-        parameterValues.add(new DisableCertificateTransparencyDerivation(new ConfigurationOptionValue(true)));
+        parameterValues.add(
+                new DisableCertificateTransparencyDerivation(new ConfigurationOptionValue(false)));
+        parameterValues.add(
+                new DisableCertificateTransparencyDerivation(new ConfigurationOptionValue(true)));
 
         return parameterValues;
     }

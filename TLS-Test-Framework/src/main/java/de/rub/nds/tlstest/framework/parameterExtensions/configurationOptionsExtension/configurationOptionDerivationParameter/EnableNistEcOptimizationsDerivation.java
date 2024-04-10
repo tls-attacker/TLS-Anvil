@@ -14,12 +14,11 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-
 import java.util.LinkedList;
 import java.util.List;
 
 public class EnableNistEcOptimizationsDerivation extends ConfigurationOptionDerivationParameter {
-    public EnableNistEcOptimizationsDerivation(){
+    public EnableNistEcOptimizationsDerivation() {
         super(ConfigOptionDerivationType.EnableNistEcOptimizations);
     }
 
@@ -31,8 +30,10 @@ public class EnableNistEcOptimizationsDerivation extends ConfigurationOptionDeri
     @Override
     public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new EnableNistEcOptimizationsDerivation(new ConfigurationOptionValue(false)));
-        parameterValues.add(new EnableNistEcOptimizationsDerivation(new ConfigurationOptionValue(true)));
+        parameterValues.add(
+                new EnableNistEcOptimizationsDerivation(new ConfigurationOptionValue(false)));
+        parameterValues.add(
+                new EnableNistEcOptimizationsDerivation(new ConfigurationOptionValue(true)));
 
         return parameterValues;
     }

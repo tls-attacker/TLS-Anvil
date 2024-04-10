@@ -14,16 +14,17 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-
 import java.util.LinkedList;
 import java.util.List;
 
-public class DisableExtensionForIpAddressesAndAsIdentifiersDerivation extends ConfigurationOptionDerivationParameter {
-    public DisableExtensionForIpAddressesAndAsIdentifiersDerivation(){
+public class DisableExtensionForIpAddressesAndAsIdentifiersDerivation
+        extends ConfigurationOptionDerivationParameter {
+    public DisableExtensionForIpAddressesAndAsIdentifiersDerivation() {
         super(ConfigOptionDerivationType.DisableExtensionForIpAddressesAndAsIdentifiers);
     }
 
-    public DisableExtensionForIpAddressesAndAsIdentifiersDerivation(ConfigurationOptionValue selectedValue) {
+    public DisableExtensionForIpAddressesAndAsIdentifiersDerivation(
+            ConfigurationOptionValue selectedValue) {
         this();
         setSelectedValue(selectedValue);
     }
@@ -31,8 +32,12 @@ public class DisableExtensionForIpAddressesAndAsIdentifiersDerivation extends Co
     @Override
     public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new DisableExtensionForIpAddressesAndAsIdentifiersDerivation(new ConfigurationOptionValue(false)));
-        parameterValues.add(new DisableExtensionForIpAddressesAndAsIdentifiersDerivation(new ConfigurationOptionValue(true)));
+        parameterValues.add(
+                new DisableExtensionForIpAddressesAndAsIdentifiersDerivation(
+                        new ConfigurationOptionValue(false)));
+        parameterValues.add(
+                new DisableExtensionForIpAddressesAndAsIdentifiersDerivation(
+                        new ConfigurationOptionValue(true)));
 
         return parameterValues;
     }

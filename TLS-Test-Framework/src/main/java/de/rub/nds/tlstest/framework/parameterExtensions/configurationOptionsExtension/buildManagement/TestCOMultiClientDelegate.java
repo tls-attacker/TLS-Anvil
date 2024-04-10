@@ -15,7 +15,6 @@ import de.rub.nds.tlsattacker.core.connection.InboundConnection;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerClientTestContainer;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.HashMap;
@@ -23,7 +22,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class TestCOMultiClientDelegate extends TestClientDelegate {
-    private final Map<Integer,ClientConnectionInfo> inboundPortToClientConnectionInfo;
+    private final Map<Integer, ClientConnectionInfo> inboundPortToClientConnectionInfo;
 
     private Integer defaultInboundPort;
 
@@ -31,14 +30,12 @@ public class TestCOMultiClientDelegate extends TestClientDelegate {
         DockerClientTestContainer clientContainer;
         private final ServerSocket serverSocket;
 
-
         public ClientConnectionInfo(DockerClientTestContainer clientContainer) {
             this.clientContainer = clientContainer;
 
             try {
                 this.serverSocket = new ServerSocket(clientContainer.getInboundConnectionPort());
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -50,42 +47,48 @@ public class TestCOMultiClientDelegate extends TestClientDelegate {
         public ServerSocket getServerSocket() {
             return serverSocket;
         }
-
     }
 
-    public TestCOMultiClientDelegate(){
+    public TestCOMultiClientDelegate() {
         super();
         inboundPortToClientConnectionInfo = new HashMap<>();
         defaultInboundPort = null;
 
-        Function<State, Integer> triggerScript = (State state) -> {
-            InboundConnection inboundConnection = state.getConfig().getDefaultServerConnection();
-            ClientConnectionInfo info = this.getClientConnectionForInboundConnection(inboundConnection);
-            info.getClientContainer().sendHttpRequestToManager("trigger");
+        Function<State, Integer> triggerScript =
+                (State state) -> {
+                    InboundConnection inboundConnection =
+                            state.getConfig().getDefaultServerConnection();
+                    ClientConnectionInfo info =
+                            this.getClientConnectionForInboundConnection(inboundConnection);
+                    info.getClientContainer().sendHttpRequestToManager("trigger");
 
-            return 0;
-        };
+                    return 0;
+                };
         this.setTriggerScript(triggerScript);
     }
 
     @Override
-    public void applyDelegate(Config config) {
-    }
+    public void applyDelegate(Config config) {}
 
-    public void registerNewConnection(DockerClientTestContainer clientContainer){
+    public void registerNewConnection(DockerClientTestContainer clientContainer) {
         Integer inboundConnectionPort = clientContainer.getInboundConnectionPort();
-        if(inboundPortToClientConnectionInfo.containsKey(inboundConnectionPort)){
-            throw new RuntimeException(String.format("InboundConnection Port %d was assigned multiple times!", inboundConnectionPort));
+        if (inboundPortToClientConnectionInfo.containsKey(inboundConnectionPort)) {
+            throw new RuntimeException(
+                    String.format(
+                            "InboundConnection Port %d was assigned multiple times!",
+                            inboundConnectionPort));
         }
-        inboundPortToClientConnectionInfo.put(inboundConnectionPort, new ClientConnectionInfo(clientContainer));
+        inboundPortToClientConnectionInfo.put(
+                inboundConnectionPort, new ClientConnectionInfo(clientContainer));
     }
 
     @Override
     public ServerSocket getServerSocket() {
-        throw new UnsupportedOperationException("TestCOMultiClientDelegate does not support getServerSocket without any arguments");
+        throw new UnsupportedOperationException(
+                "TestCOMultiClientDelegate does not support getServerSocket without any arguments");
     }
 
-    public ServerSocket getServerSocket(Config config){
+    public ServerSocket getServerSocket(Config config) {
         InboundConnection inboundConnection = config.getDefaultServerConnection();
         ClientConnectionInfo info = getClientConnectionForInboundConnection(inboundConnection);
         return info.getServerSocket();
@@ -101,20 +104,25 @@ public class TestCOMultiClientDelegate extends TestClientDelegate {
 
     @Override
     public void setServerSocket(ServerSocket serverSocket) {
-        throw new UnsupportedOperationException("TestCOMultiClientDelegate does not support setServerSocket");
+        throw new UnsupportedOperationException(
+                "TestCOMultiClientDelegate does not support setServerSocket");
     }
 
-    private ClientConnectionInfo getClientConnectionForInboundConnection(InboundConnection inboundConnection){
-        if(inboundConnection == null){
-            if(defaultInboundPort == null){
-                throw new RuntimeException("No InboundConnection is given and no default connection was configured.");
+    private ClientConnectionInfo getClientConnectionForInboundConnection(
+            InboundConnection inboundConnection) {
+        if (inboundConnection == null) {
+            if (defaultInboundPort == null) {
+                throw new RuntimeException(
+                        "No InboundConnection is given and no default connection was configured.");
             }
             return inboundPortToClientConnectionInfo.get(defaultInboundPort);
-        }
-        else{
+        } else {
             Integer inboundPort = inboundConnection.getPort();
-            if(!inboundPortToClientConnectionInfo.containsKey(inboundPort)){
-                throw new IllegalArgumentException(String.format("InboundConnection with port '%d' was not registered yet.", inboundPort));
+            if (!inboundPortToClientConnectionInfo.containsKey(inboundPort)) {
+                throw new IllegalArgumentException(
+                        String.format(
+                                "InboundConnection with port '%d' was not registered yet.",
+                                inboundPort));
             }
             return inboundPortToClientConnectionInfo.get(inboundPort);
         }

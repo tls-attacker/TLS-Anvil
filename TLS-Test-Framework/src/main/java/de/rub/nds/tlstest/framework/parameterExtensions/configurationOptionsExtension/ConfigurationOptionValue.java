@@ -15,8 +15,8 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Represents a value of a ConfigurationOptionDerivationParameter. This value can be a flag (option is set or not set),
- * or one or multiple Strings as option values.
+ * Represents a value of a ConfigurationOptionDerivationParameter. This value can be a flag (option
+ * is set or not set), or one or multiple Strings as option values.
  */
 public class ConfigurationOptionValue {
     private final boolean optionIsSet;
@@ -29,33 +29,33 @@ public class ConfigurationOptionValue {
      *
      * @param flagValue - Pass true if the respective flag should be set, false if not.
      */
-    public ConfigurationOptionValue(boolean flagValue){
+    public ConfigurationOptionValue(boolean flagValue) {
         this.isFlag = true;
         this.optionIsSet = flagValue;
     }
 
     /**
-     * Constructor for a single string value. Using this constructor represents that the respective option is set
-     * with the specified option string. (E.g. in 'InstallDir=/my/path/': '/my/path/' would be the string value
-     * for the option 'InstallDir'). The respective ConfigurationOptionBuildManager is responsible for interpreting
-     * the specified string.
+     * Constructor for a single string value. Using this constructor represents that the respective
+     * option is set with the specified option string. (E.g. in 'InstallDir=/my/path/': '/my/path/'
+     * would be the string value for the option 'InstallDir'). The respective
+     * ConfigurationOptionBuildManager is responsible for interpreting the specified string.
      *
      * @param optionValue - the option value
      */
-    public ConfigurationOptionValue(String optionValue){
+    public ConfigurationOptionValue(String optionValue) {
         this.isFlag = false;
         this.optionIsSet = true;
         stringValues = Collections.singletonList(optionValue);
     }
 
     /**
-     * Constructor for multiple string values. Using this constructor represents that the respective option is set
-     * with the specified option strings (in order). The respective ConfigurationOptionBuildManager is responsible for interpreting
-     * the specified strings.
+     * Constructor for multiple string values. Using this constructor represents that the respective
+     * option is set with the specified option strings (in order). The respective
+     * ConfigurationOptionBuildManager is responsible for interpreting the specified strings.
      *
      * @param optionValues - the option value
      */
-    public ConfigurationOptionValue(List<String> optionValues){
+    public ConfigurationOptionValue(List<String> optionValues) {
         this.isFlag = false;
         this.optionIsSet = true;
         stringValues = new ArrayList<>(optionValues);
@@ -66,7 +66,7 @@ public class ConfigurationOptionValue {
      *
      * @return true iff the value is a flag
      */
-    public boolean isFlag(){
+    public boolean isFlag() {
         return isFlag;
     }
 
@@ -75,38 +75,34 @@ public class ConfigurationOptionValue {
      *
      * @return true if the option is set
      */
-    public boolean isOptionSet(){
+    public boolean isOptionSet() {
         return optionIsSet;
     }
 
     /**
-     * Returns the list of passed option values. If the one-value constructor was called this function returns a
-     * list with one element. If the this Value is a flag an empty list is returned.
+     * Returns the list of passed option values. If the one-value constructor was called this
+     * function returns a list with one element. If the this Value is a flag an empty list is
+     * returned.
      *
      * @return the option values as a String List
      */
-    public List<String> getOptionValues(){
-        if(isFlag){
+    public List<String> getOptionValues() {
+        if (isFlag) {
             return new ArrayList<>();
-        }
-        else{
+        } else {
             return new ArrayList<>(stringValues);
         }
     }
 
-    public String toString(){
-        if(isFlag()){
-            if(isOptionSet()){
+    public String toString() {
+        if (isFlag()) {
+            if (isOptionSet()) {
                 return "FLAG_SET";
-            }
-            else{
+            } else {
                 return "FLAG_NOT_SET";
             }
-        }
-        else{
+        } else {
             return String.join(",", getOptionValues());
         }
     }
-
-
 }

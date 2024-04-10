@@ -10,26 +10,19 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter;
 
-import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.xbill.DNS.Compression;
-
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class EnableCompressionDerivation extends ConfigurationOptionDerivationParameter{
+public class EnableCompressionDerivation extends ConfigurationOptionDerivationParameter {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public EnableCompressionDerivation(){
+    public EnableCompressionDerivation() {
         super(ConfigOptionDerivationType.EnableCompression);
     }
 

@@ -9,24 +9,6 @@
  */
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.function.Supplier;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.TestSiteReport;
@@ -76,29 +58,47 @@ import de.rwth.swc.coffee4j.model.Parameter;
 import de.rwth.swc.coffee4j.model.Value;
 import de.rwth.swc.coffee4j.model.converter.IndexBasedModelConverter;
 import de.rwth.swc.coffee4j.model.converter.ModelConverter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.function.Supplier;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
- * The DerivationCategoryManager responsible for the ConfigOptionsDerivationType. It also contains the configured
- * ConfigurationOptionsConfig and knows the required ConfigurationOptionsBuildManager.
+ * The DerivationCategoryManager responsible for the ConfigOptionsDerivationType. It also contains
+ * the configured ConfigurationOptionsConfig and knows the required
+ * ConfigurationOptionsBuildManager.
  */
 public class ConfigurationOptionsDerivationManager implements DerivationCategoryManager {
     private static ConfigurationOptionsDerivationManager instance = null;
     private static final Logger LOGGER = LogManager.getLogger();
     private ConfigurationOptionsConfig config;
     private List<List<ConfigurationOptionDerivationParameter>> compoundSetupList;
-    private Map<List<ConfigurationOptionDerivationParameter>, TestSiteReport> compoundSetupToSiteReport;
+    private Map<List<ConfigurationOptionDerivationParameter>, TestSiteReport>
+            compoundSetupToSiteReport;
 
     private ExecutorService buildExecutor;
-    
 
     public static synchronized ConfigurationOptionsDerivationManager getInstance() {
         if (ConfigurationOptionsDerivationManager.instance == null) {
-            ConfigurationOptionsDerivationManager.instance = new ConfigurationOptionsDerivationManager();
+            ConfigurationOptionsDerivationManager.instance =
+                    new ConfigurationOptionsDerivationManager();
         }
         return ConfigurationOptionsDerivationManager.instance;
     }
 
-    private ConfigurationOptionsDerivationManager(){
+    private ConfigurationOptionsDerivationManager() {
         config = null;
         compoundSetupList = null;
         compoundSetupToSiteReport = null;
@@ -106,14 +106,18 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
 
     @Override
     public DerivationParameter getDerivationParameterInstance(DerivationType type) {
-        if(!(type instanceof ConfigOptionDerivationType)){
-            throw new IllegalArgumentException("This manager can only handle ConfigOptionDerivationType but type '"+type+"' was passed.");
+        if (!(type instanceof ConfigOptionDerivationType)) {
+            throw new IllegalArgumentException(
+                    "This manager can only handle ConfigOptionDerivationType but type '"
+                            + type
+                            + "' was passed.");
         }
         ConfigOptionDerivationType basicType = (ConfigOptionDerivationType) type;
-        switch(basicType) {
+        switch (basicType) {
             case ConfigurationOptionCompoundParameter:
-                if(compoundSetupList == null){
-                    throw new IllegalStateException("Cannot get ConfigurationOptionCompoundParameter before ConfigurationOptionsConfig was initialized.");
+                if (compoundSetupList == null) {
+                    throw new IllegalStateException(
+                            "Cannot get ConfigurationOptionCompoundParameter before ConfigurationOptionsConfig was initialized.");
                 }
                 return new ConfigurationOptionCompoundDerivation(compoundSetupList);
             case DisablePsk:
@@ -174,16 +178,22 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
     }
 
     @Override
-    public List<DerivationType> getDerivationsOfModel(DerivationScope derivationScope, ModelType baseModel) {
-        if(config == null){
-            throw new IllegalStateException("No ConfigurationOptionsConfig was set so far. Register it before calling this method.");
+    public List<DerivationType> getDerivationsOfModel(
+            DerivationScope derivationScope, ModelType baseModel) {
+        if (config == null) {
+            throw new IllegalStateException(
+                    "No ConfigurationOptionsConfig was set so far. Register it before calling this method.");
         }
-        return new LinkedList<>(Collections.singletonList(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter));
+        return new LinkedList<>(
+                Collections.singletonList(
+                        ConfigOptionDerivationType.ConfigurationOptionCompoundParameter));
     }
 
     @Override
     public List<DerivationType> getAllDerivations() {
-        return new LinkedList<>(Collections.singletonList(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter));
+        return new LinkedList<>(
+                Collections.singletonList(
+                        ConfigOptionDerivationType.ConfigurationOptionCompoundParameter));
     }
 
     public List<ConfigOptionDerivationType> getAllActivatedCOTypes() {
@@ -194,31 +204,33 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         return getDerivationsOfModel(null, baseModel);
     }
 
-    public void initializeConfigOptionsConfig(ConfigurationOptionsConfig optionsConfig){
+    public void initializeConfigOptionsConfig(ConfigurationOptionsConfig optionsConfig) {
         config = optionsConfig;
         initCompoundParameterSetup();
     }
 
-    public ConfigurationOptionsConfig getConfigurationOptionsConfig(){
+    public ConfigurationOptionsConfig getConfigurationOptionsConfig() {
         return config;
     }
 
-    public ConfigurationOptionsBuildManager getConfigurationOptionsBuildManager(){
-        if(config == null){
-            throw new IllegalStateException("No ConfigurationOptionsConfig was set so far. Register it before calling this method.");
+    public ConfigurationOptionsBuildManager getConfigurationOptionsBuildManager() {
+        if (config == null) {
+            throw new IllegalStateException(
+                    "No ConfigurationOptionsConfig was set so far. Register it before calling this method.");
         }
         return config.getBuildManager();
     }
 
-    public Map<List<ConfigurationOptionDerivationParameter>, TestSiteReport> getCompoundSetupToSiteReport(){
+    public Map<List<ConfigurationOptionDerivationParameter>, TestSiteReport>
+            getCompoundSetupToSiteReport() {
         return compoundSetupToSiteReport;
     }
 
-    public List<TestSiteReport> getAllCompondSiteReports(){
+    public List<TestSiteReport> getAllCompondSiteReports() {
         return new ArrayList<TestSiteReport>(compoundSetupToSiteReport.values());
     }
 
-    public static class LoggerReporter implements Reporter{
+    public static class LoggerReporter implements Reporter {
         @Override
         public void report(ReportLevel level, Report report) {
             LOGGER.warn("Generation Reporter ({}): {}", level.toString(), report);
@@ -230,30 +242,42 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         }
     }
 
-    private void initCompoundParameterSetup(){
+    private void initCompoundParameterSetup() {
         compoundSetupList = new LinkedList<>();
         int strength = config.getConfigOptionsIpmStrength();
 
         // -- Create the IPM of coffee4j
-        InputParameterModel.Builder builder = InputParameterModel.inputParameterModel("configuration-options-ipm");
+        InputParameterModel.Builder builder =
+                InputParameterModel.inputParameterModel("configuration-options-ipm");
         builder.strength(strength);
-        for(ConfigOptionDerivationType coType : config.getEnabledConfigOptionDerivations()){
-            ConfigurationOptionDerivationParameter coDerivationParameter = (ConfigurationOptionDerivationParameter)getDerivationParameterInstance(coType);
-            List<DerivationParameter> derivationParameterValues = coDerivationParameter.getAllParameterValues(TestContext.getInstance());
+        for (ConfigOptionDerivationType coType : config.getEnabledConfigOptionDerivations()) {
+            ConfigurationOptionDerivationParameter coDerivationParameter =
+                    (ConfigurationOptionDerivationParameter) getDerivationParameterInstance(coType);
+            List<DerivationParameter> derivationParameterValues =
+                    coDerivationParameter.getAllParameterValues(TestContext.getInstance());
             // - Add values
             List<Value> values = new LinkedList<>();
-            for(int idx = 0; idx < derivationParameterValues.size(); idx++){
+            for (int idx = 0; idx < derivationParameterValues.size(); idx++) {
                 values.add(new Value(idx, derivationParameterValues.get(idx)));
             }
             builder.parameter(new Parameter(coType.name(), values));
             // - Add constraints
-            List<ConditionalConstraint> constraints = coDerivationParameter.getStaticConditionalConstraints();
-            for(ConditionalConstraint condConstraint : constraints){
-                boolean allRequiredParametersAvailable = condConstraint.getRequiredDerivations().stream().allMatch(
-                        reqDerivation -> (reqDerivation instanceof ConfigOptionDerivationType) && config.getEnabledConfigOptionDerivations().contains((ConfigOptionDerivationType)reqDerivation));
+            List<ConditionalConstraint> constraints =
+                    coDerivationParameter.getStaticConditionalConstraints();
+            for (ConditionalConstraint condConstraint : constraints) {
+                boolean allRequiredParametersAvailable =
+                        condConstraint.getRequiredDerivations().stream()
+                                .allMatch(
+                                        reqDerivation ->
+                                                (reqDerivation
+                                                                instanceof
+                                                                ConfigOptionDerivationType)
+                                                        && config.getEnabledConfigOptionDerivations()
+                                                                .contains(
+                                                                        (ConfigOptionDerivationType)
+                                                                                reqDerivation));
 
-
-                if(allRequiredParametersAvailable){
+                if (allRequiredParametersAvailable) {
                     builder.exclusionConstraint(condConstraint.getConstraint());
                 }
             }
@@ -263,29 +287,34 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         final ModelConverter converter = new IndexBasedModelConverter(ipm);
         // -- Create the combinations for combinatorial testing in the converted model.
         Ipog ipog = new Ipog(new HardConstraintCheckerFactory());
-        Set<Supplier<TestInputGroup>> suppliers = ipog.generate(converter.getConvertedModel(), new LoggerReporter());
+        Set<Supplier<TestInputGroup>> suppliers =
+                ipog.generate(converter.getConvertedModel(), new LoggerReporter());
 
         TestInputGroup testInputGroup = null;
-        for(Supplier<TestInputGroup> s : suppliers){
+        for (Supplier<TestInputGroup> s : suppliers) {
             TestInputGroup group = s.get();
-            if(group.getIdentifier() == "Positive IpogAlgorithm Tests"){
+            if (group.getIdentifier() == "Positive IpogAlgorithm Tests") {
                 testInputGroup = group;
                 break;
             }
         }
-        if(testInputGroup == null){
+        if (testInputGroup == null) {
             throw new RuntimeException("Configuration option combination could not be created.");
         }
 
-        // -- Convert the computed combinations back to the model of the IPM and collect the derivation parameter combinations
-        for(int[] testInput : testInputGroup.getTestInputs()){
+        // -- Convert the computed combinations back to the model of the IPM and collect the
+        // derivation parameter combinations
+        for (int[] testInput : testInputGroup.getTestInputs()) {
             Combination convertedCombination = converter.convertCombination(testInput);
-            List<ConfigurationOptionDerivationParameter> parameterCombinationList = new LinkedList<>();
-            for (Value value : convertedCombination.getParameterValueMap().values()){
-                if(!(value.get() instanceof ConfigurationOptionDerivationParameter)){
-                    throw new RuntimeException("Value is no configuration option derivation parameter. This should never happen...");
+            List<ConfigurationOptionDerivationParameter> parameterCombinationList =
+                    new LinkedList<>();
+            for (Value value : convertedCombination.getParameterValueMap().values()) {
+                if (!(value.get() instanceof ConfigurationOptionDerivationParameter)) {
+                    throw new RuntimeException(
+                            "Value is no configuration option derivation parameter. This should never happen...");
                 }
-                ConfigurationOptionDerivationParameter codParameter = (ConfigurationOptionDerivationParameter)value.get();
+                ConfigurationOptionDerivationParameter codParameter =
+                        (ConfigurationOptionDerivationParameter) value.get();
                 parameterCombinationList.add(codParameter);
             }
             // Sort after type for consistent order (not necessary)
@@ -295,37 +324,43 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
 
         compoundSetupList = Collections.unmodifiableList(compoundSetupList);
 
-        LOGGER.debug("Testing configuration options with default combinations:\n{}", compoundSetupList);
+        LOGGER.debug(
+                "Testing configuration options with default combinations:\n{}", compoundSetupList);
     }
 
-    public void preBuildAndValidateAndFilterSetups(){
+    public void preBuildAndValidateAndFilterSetups() {
 
         LOGGER.info("== Precompute config options builds ==");
         int buildFailedSetupCount = 0;
 
         List<List<ConfigurationOptionDerivationParameter>> successfulSetups = new LinkedList<>();
-        HashMap<List<ConfigurationOptionDerivationParameter>, Future<Callable<TestSiteReport>>> compoundSetupToFuture 
-            = new HashMap<List<ConfigurationOptionDerivationParameter>, Future<Callable<TestSiteReport>>>();
-        compoundSetupToSiteReport = new HashMap<List<ConfigurationOptionDerivationParameter>, TestSiteReport>();
+        HashMap<List<ConfigurationOptionDerivationParameter>, Future<Callable<TestSiteReport>>>
+                compoundSetupToFuture =
+                        new HashMap<
+                                List<ConfigurationOptionDerivationParameter>,
+                                Future<Callable<TestSiteReport>>>();
+        compoundSetupToSiteReport =
+                new HashMap<List<ConfigurationOptionDerivationParameter>, TestSiteReport>();
         buildExecutor = Executors.newFixedThreadPool(config.getMaxSimultaneousBuilds());
 
         // Create all builds (with multiple threads if configured)
-        for(List<ConfigurationOptionDerivationParameter> setup : compoundSetupList){
+        for (List<ConfigurationOptionDerivationParameter> setup : compoundSetupList) {
             Set<ConfigurationOptionDerivationParameter> setupSet = new HashSet<>(setup);
             Config conf = Config.createEmptyConfig();
-            Future<Callable<TestSiteReport>> testSiteReportCallableFuture = createBuildAndGetSiteReportCallable(conf, TestContext.getInstance(), setupSet);
+            Future<Callable<TestSiteReport>> testSiteReportCallableFuture =
+                    createBuildAndGetSiteReportCallable(conf, TestContext.getInstance(), setupSet);
             compoundSetupToFuture.put(setup, testSiteReportCallableFuture);
         }
 
         // Wait until all builds are finished
-        for (Map.Entry<List<ConfigurationOptionDerivationParameter>, Future<Callable<TestSiteReport>>> setupToFuture : compoundSetupToFuture.entrySet()) {
-            while(!setupToFuture.getValue().isDone()){
-                try
-                {
+        for (Map.Entry<
+                        List<ConfigurationOptionDerivationParameter>,
+                        Future<Callable<TestSiteReport>>>
+                setupToFuture : compoundSetupToFuture.entrySet()) {
+            while (!setupToFuture.getValue().isDone()) {
+                try {
                     Thread.sleep(500);
-                }
-                catch(InterruptedException e)
-                {
+                } catch (InterruptedException e) {
                     LOGGER.error(e);
                 }
             }
@@ -334,33 +369,45 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         LOGGER.info("== Check builds and precompute site reports ==");
 
         // Create all site reports and check if the builds were successful
-        for (Map.Entry<List<ConfigurationOptionDerivationParameter>, Future<Callable<TestSiteReport>>> setupToFuture : compoundSetupToFuture.entrySet()) {
+        for (Map.Entry<
+                        List<ConfigurationOptionDerivationParameter>,
+                        Future<Callable<TestSiteReport>>>
+                setupToFuture : compoundSetupToFuture.entrySet()) {
             try {
                 TestSiteReport siteReport = setupToFuture.getValue().get().call();
 
                 compoundSetupToSiteReport.put(setupToFuture.getKey(), siteReport);
                 successfulSetups.add(setupToFuture.getKey());
-            }
-            catch(Exception e){
-                LOGGER.error("Exception occurred while pre-building container for setup with options {}. Exception: ", setupToFuture.getKey(), e);
+            } catch (Exception e) {
+                LOGGER.error(
+                        "Exception occurred while pre-building container for setup with options {}. Exception: ",
+                        setupToFuture.getKey(),
+                        e);
                 buildFailedSetupCount += 1;
             }
         }
 
         compoundSetupList = successfulSetups;
-        if(buildFailedSetupCount > 0){
-            LOGGER.warn("{} builds failed. Continuing with reduced setup (see below). Due to the reduced option set the " +
-                    "configured test strength cannot be guaranteed. Consider stopping and reconfiguring the tests or adding" +
-                    "constraints to prevent invalid combinations. " +
-                    "Reduced options set: {}",buildFailedSetupCount, compoundSetupList);
+        if (buildFailedSetupCount > 0) {
+            LOGGER.warn(
+                    "{} builds failed. Continuing with reduced setup (see below). Due to the reduced option set the "
+                            + "configured test strength cannot be guaranteed. Consider stopping and reconfiguring the tests or adding"
+                            + "constraints to prevent invalid combinations. "
+                            + "Reduced options set: {}",
+                    buildFailedSetupCount,
+                    compoundSetupList);
         }
-
     }
 
-    private Future<Callable<TestSiteReport>> createBuildAndGetSiteReportCallable(Config conf, TestContext context, Set<ConfigurationOptionDerivationParameter> setupSet) {        
-        return buildExecutor.submit(() -> {
-            return getConfigurationOptionsBuildManager().configureOptionSetAndReturnGetSiteReportCallable(conf, TestContext.getInstance(), setupSet);
-        });
+    private Future<Callable<TestSiteReport>> createBuildAndGetSiteReportCallable(
+            Config conf,
+            TestContext context,
+            Set<ConfigurationOptionDerivationParameter> setupSet) {
+        return buildExecutor.submit(
+                () -> {
+                    return getConfigurationOptionsBuildManager()
+                            .configureOptionSetAndReturnGetSiteReportCallable(
+                                    conf, TestContext.getInstance(), setupSet);
+                });
     }
-
 }

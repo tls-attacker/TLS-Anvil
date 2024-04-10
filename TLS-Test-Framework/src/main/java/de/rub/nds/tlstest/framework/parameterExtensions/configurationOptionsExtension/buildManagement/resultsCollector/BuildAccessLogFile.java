@@ -14,29 +14,30 @@ import java.nio.file.Path;
 import java.util.*;
 
 /**
- * LogFile to count how often  single library builds (identified by docker tags) are used by all ran tests.
+ * LogFile to count how often single library builds (identified by docker tags) are used by all ran
+ * tests.
  */
-public class BuildAccessLogFile extends LogFile{
+public class BuildAccessLogFile extends LogFile {
     Map<String, Integer> dockerTagToAccessCounter;
 
-
-    public BuildAccessLogFile(Path folderDirectoryPath, String fileName){
+    public BuildAccessLogFile(Path folderDirectoryPath, String fileName) {
         super(folderDirectoryPath, fileName);
         dockerTagToAccessCounter = new HashMap<>();
     }
 
-    public void increaseAccessCounter(String dockerTag){
-        if(dockerTagToAccessCounter.containsKey(dockerTag)){
-            dockerTagToAccessCounter.replace(dockerTag, dockerTagToAccessCounter.get(dockerTag) + 1);
-        }
-        else{
+    public void increaseAccessCounter(String dockerTag) {
+        if (dockerTagToAccessCounter.containsKey(dockerTag)) {
+            dockerTagToAccessCounter.replace(
+                    dockerTag, dockerTagToAccessCounter.get(dockerTag) + 1);
+        } else {
             dockerTagToAccessCounter.put(dockerTag, 1);
         }
     }
 
-    public void finalizeResults(){
+    public void finalizeResults() {
         StringBuilder resultsString;
-        List<Map.Entry<String, Integer>> entryList =  new ArrayList<>(dockerTagToAccessCounter.entrySet());
+        List<Map.Entry<String, Integer>> entryList =
+                new ArrayList<>(dockerTagToAccessCounter.entrySet());
 
         // Sort after occurences
         entryList.sort(Map.Entry.comparingByValue());
@@ -51,5 +52,4 @@ public class BuildAccessLogFile extends LogFile{
 
         log(resultsString.toString());
     }
-
 }

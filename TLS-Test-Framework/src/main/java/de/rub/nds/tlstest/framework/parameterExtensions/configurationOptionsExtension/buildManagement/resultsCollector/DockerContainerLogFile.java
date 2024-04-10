@@ -13,7 +13,6 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.model.Frame;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.*;
-
 import java.io.Closeable;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -22,15 +21,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Used to log the output of a docker container.
- */
-public class DockerContainerLogFile extends LogFile{
+/** Used to log the output of a docker container. */
+public class DockerContainerLogFile extends LogFile {
 
     private final DockerContainer dockerContainer;
     private boolean loggingIsActive;
 
-    public DockerContainerLogFile(Path folderDirectoryPath, String fileName, DockerContainer dockerContainer){
+    public DockerContainerLogFile(
+            Path folderDirectoryPath, String fileName, DockerContainer dockerContainer) {
         super(folderDirectoryPath, fileName, "%m");
         this.dockerContainer = dockerContainer;
         loggingIsActive = false;
@@ -38,63 +36,75 @@ public class DockerContainerLogFile extends LogFile{
     }
 
     /**
-     * Somehow the logging must be enabled after every container start. (Currently a docker bug (or so it seems))
+     * Somehow the logging must be enabled after every container start. (Currently a docker bug (or
+     * so it seems))
      */
-    public void notifyContainerStart(){
-        //startLogging();
+    public void notifyContainerStart() {
+        // startLogging();
     }
 
-    private void initContainerLogging(){
+    private void initContainerLogging() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
         String timeStamp = dtf.format(now);
 
-        List<String> infoFields = new ArrayList<>(Arrays.asList(
-                "Output Log of Docker Container",
-                String.format("Docker Tag: %s", dockerContainer.getDockerTag()),
-                String.format("Container Id: %s", dockerContainer.getContainerId()),
-                String.format("Log Started at: %s", timeStamp)
-        ));
+        List<String> infoFields =
+                new ArrayList<>(
+                        Arrays.asList(
+                                "Output Log of Docker Container",
+                                String.format("Docker Tag: %s", dockerContainer.getDockerTag()),
+                                String.format("Container Id: %s", dockerContainer.getContainerId()),
+                                String.format("Log Started at: %s", timeStamp)));
 
-        if(dockerContainer instanceof DockerTestContainer){
+        if (dockerContainer instanceof DockerTestContainer) {
             DockerTestContainer testContainerInfo = (DockerTestContainer) dockerContainer;
             infoFields.add(String.format("Docker Host: %s", testContainerInfo.getDockerHost()));
-            if(testContainerInfo instanceof DockerClientTestContainer){
-                DockerClientTestContainer clientTestContainerInfo = (DockerClientTestContainer) testContainerInfo;
+            if (testContainerInfo instanceof DockerClientTestContainer) {
+                DockerClientTestContainer clientTestContainerInfo =
+                        (DockerClientTestContainer) testContainerInfo;
                 infoFields.add("Type: Client Container");
-                infoFields.add(String.format("InboundConnectionPort: %d", clientTestContainerInfo.getInboundConnectionPort()));
-            }
-            else if(testContainerInfo instanceof DockerServerTestContainer){
-                DockerServerTestContainer serverTestContainerInfo = (DockerServerTestContainer) testContainerInfo;
+                infoFields.add(
+                        String.format(
+                                "InboundConnectionPort: %d",
+                                clientTestContainerInfo.getInboundConnectionPort()));
+            } else if (testContainerInfo instanceof DockerServerTestContainer) {
+                DockerServerTestContainer serverTestContainerInfo =
+                        (DockerServerTestContainer) testContainerInfo;
                 infoFields.add("Type: Server Container");
-                infoFields.add(String.format("TLS Server Port: %d", serverTestContainerInfo.getTlsServerPort()));
+                infoFields.add(
+                        String.format(
+                                "TLS Server Port: %d", serverTestContainerInfo.getTlsServerPort()));
             }
             infoFields.add(String.format("Manager Port: %d", testContainerInfo.getManagerPort()));
         }
 
-
-        String header = String.format(
-                "\n==================================\n" +
-                "%s\n" +
-                "==================================\n",
-                String.join("\n", infoFields) );
+        String header =
+                String.format(
+                        "\n==================================\n"
+                                + "%s\n"
+                                + "==================================\n",
+                        String.join("\n", infoFields));
 
         log(header);
         startLogging();
-
     }
 
-    private void startLogging(){
-        if(!loggingIsActive){
+    private void startLogging() {
+        if (!loggingIsActive) {
             ResultCallback<Frame> rc = getNewResultsCallback();
-            dockerContainer.getDockerClient().logContainerCmd(dockerContainer.getContainerId()).withStdOut(true).
-                    withStdErr(true).withFollowStream(true).withTimestamps(true).exec(rc);
+            dockerContainer
+                    .getDockerClient()
+                    .logContainerCmd(dockerContainer.getContainerId())
+                    .withStdOut(true)
+                    .withStdErr(true)
+                    .withFollowStream(true)
+                    .withTimestamps(true)
+                    .exec(rc);
             loggingIsActive = true;
         }
-
     }
 
-    private ResultCallback<Frame> getNewResultsCallback(){
+    private ResultCallback<Frame> getNewResultsCallback() {
         return new ResultCallback<Frame>() {
             @Override
             public void onStart(Closeable closeable) {
@@ -107,21 +117,16 @@ public class DockerContainerLogFile extends LogFile{
             }
 
             @Override
-            public void onError(Throwable throwable) {
-
-            }
+            public void onError(Throwable throwable) {}
 
             @Override
             public void onComplete() {
                 log("== Container stopped ==\n");
-                //loggingIsActive = false;
+                // loggingIsActive = false;
             }
 
             @Override
-            public void close() {
-
-            }
+            public void close() {}
         };
     }
-
 }

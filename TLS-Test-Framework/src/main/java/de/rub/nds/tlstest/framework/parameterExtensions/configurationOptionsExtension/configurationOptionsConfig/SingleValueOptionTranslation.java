@@ -10,24 +10,22 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 /**
- * Translation for an option with a single value, e.g. 'fruit=apple'. In this example 'fruit' is the identifier and 'apple'
- * a possible value. All values that can appear must be covered.
+ * Translation for an option with a single value, e.g. 'fruit=apple'. In this example 'fruit' is the
+ * identifier and 'apple' a possible value. All values that can appear must be covered.
  */
-public class SingleValueOptionTranslation extends ConfigOptionValueTranslation{
+public class SingleValueOptionTranslation extends ConfigOptionValueTranslation {
     private String identifier;
     private final Map<String, String> valueTranslationMap;
 
-    public SingleValueOptionTranslation(Element xmlElement)
-    {
+    public SingleValueOptionTranslation(Element xmlElement) {
         valueTranslationMap = new HashMap<>();
         this.setFromXmlElement(xmlElement);
     }
@@ -36,47 +34,55 @@ public class SingleValueOptionTranslation extends ConfigOptionValueTranslation{
         return identifier;
     }
 
-    public String getValueTranslation(String key){
-        if(!valueTranslationMap.containsKey(key)){
-            throw new IllegalArgumentException("Cannot get translation for key '%s'. It was not configured in the config file.");
+    public String getValueTranslation(String key) {
+        if (!valueTranslationMap.containsKey(key)) {
+            throw new IllegalArgumentException(
+                    "Cannot get translation for key '%s'. It was not configured in the config file.");
         }
         return valueTranslationMap.get(key);
     }
 
     @Override
     protected void setFromXmlElement(Element xmlElement) {
-        try{
+        try {
 
-            this.identifier = Objects.requireNonNull(XmlParseUtils.findElement(xmlElement, "identifier", true)).getTextContent();
+            this.identifier =
+                    Objects.requireNonNull(
+                                    XmlParseUtils.findElement(xmlElement, "identifier", true))
+                            .getTextContent();
             NodeList valueElementList = xmlElement.getElementsByTagName("value");
 
-            for (int optionEntryIdx = 0; optionEntryIdx < valueElementList.getLength(); optionEntryIdx++) {
+            for (int optionEntryIdx = 0;
+                    optionEntryIdx < valueElementList.getLength();
+                    optionEntryIdx++) {
                 Node valueNode = valueElementList.item(optionEntryIdx);
                 if (valueNode.getNodeType() == Node.ELEMENT_NODE) {
                     Element valueElement = (Element) valueNode;
                     addValueTranslationByElement(valueElement);
                 }
             }
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            throw new IllegalArgumentException("Error while parsing OptionWithSingleValueTranslation.");
+            throw new IllegalArgumentException(
+                    "Error while parsing OptionWithSingleValueTranslation.");
         }
     }
 
-    private void addValueTranslationByElement(Element valueElement){
+    private void addValueTranslationByElement(Element valueElement) {
         String key = valueElement.getAttribute("key");
-        if(key.equals("")){
-            throw new IllegalArgumentException(String.format("In OptionWithSingleValue translation with identifier '%s': <value> element does not contain required attribute 'key'.",
-                    identifier));
+        if (key.equals("")) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "In OptionWithSingleValue translation with identifier '%s': <value> element does not contain required attribute 'key'.",
+                            identifier));
         }
-        if(valueTranslationMap.containsKey(key)){
-            throw new IllegalArgumentException(String.format("In OptionWithSingleValue translation with identifier '%s': Key '%s' is defined multiple times.",
-                    identifier,
-                    key));
+        if (valueTranslationMap.containsKey(key)) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "In OptionWithSingleValue translation with identifier '%s': Key '%s' is defined multiple times.",
+                            identifier, key));
         }
         String value = valueElement.getTextContent();
         valueTranslationMap.put(key, value);
     }
-
 }

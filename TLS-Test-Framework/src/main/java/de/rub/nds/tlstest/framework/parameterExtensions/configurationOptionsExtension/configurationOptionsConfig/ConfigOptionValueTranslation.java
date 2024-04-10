@@ -12,20 +12,18 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import org.w3c.dom.Element;
 
 /**
- * Abstract class to represent how a value of a ConfigOptionDerivationParameter is translated to a library specific
- * configuration String (E.g. if the DerivationParameter for 'DisablePSK' is set OpenSSL needs to configure using
- * the option 'no_psk').
- * This translation is very library specific and the respective ConfigurationOptionsBuildManagers have to know how
- * to handle the translations and which translation objects are expected.
+ * Abstract class to represent how a value of a ConfigOptionDerivationParameter is translated to a
+ * library specific configuration String (E.g. if the DerivationParameter for 'DisablePSK' is set
+ * OpenSSL needs to configure using the option 'no_psk'). This translation is very library specific
+ * and the respective ConfigurationOptionsBuildManagers have to know how to handle the translations
+ * and which translation objects are expected.
  */
 public abstract class ConfigOptionValueTranslation {
-    public ConfigOptionValueTranslation(){
-    }
+    public ConfigOptionValueTranslation() {}
 
-    public ConfigOptionValueTranslation(Element xmlElement){
+    public ConfigOptionValueTranslation(Element xmlElement) {
         setFromXmlElement(xmlElement);
     }
 
-    abstract protected void setFromXmlElement(Element xmlElement);
-
+    protected abstract void setFromXmlElement(Element xmlElement);
 }

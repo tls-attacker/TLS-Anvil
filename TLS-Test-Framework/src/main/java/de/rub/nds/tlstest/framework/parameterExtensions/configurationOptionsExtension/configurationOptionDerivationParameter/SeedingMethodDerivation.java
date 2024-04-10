@@ -17,7 +17,6 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParamete
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
-
 import java.util.*;
 
 public class SeedingMethodDerivation extends ConfigurationOptionDerivationParameter {
@@ -27,12 +26,13 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
         OsEntropySource,
         GetRandom,
         DevRandom,
-        EntropyGeneratingDaemon, // <- build failure in OpenSSL without edg (also it seems, it does not work in docker containers)
+        EntropyGeneratingDaemon, // <- build failure in OpenSSL without edg (also it seems, it does
+        // not work in docker containers)
         CpuCommand, // <- fails (very) frequently
         None // <- cannot be used in environment. Therefore unused.
     }
 
-    public SeedingMethodDerivation(){
+    public SeedingMethodDerivation() {
         super(ConfigOptionDerivationType.SeedingMethod);
     }
 
@@ -44,18 +44,25 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
     @Override
     public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        List<SeedingMethodType> seedingMethodsToAdd = new LinkedList<>(Arrays.asList(
-                SeedingMethodType.OsEntropySource, SeedingMethodType.GetRandom,
-                SeedingMethodType.DevRandom));
+        List<SeedingMethodType> seedingMethodsToAdd =
+                new LinkedList<>(
+                        Arrays.asList(
+                                SeedingMethodType.OsEntropySource,
+                                SeedingMethodType.GetRandom,
+                                SeedingMethodType.DevRandom));
 
-        //List<DerivationType> activatedCODerivations = ConfigurationOptionsDerivationManager.getInstance().getDerivationsOfModel(scope, scope.getBaseModel());
-        //if(activatedCODerivations.contains(ConfigOptionDerivationType.EnableEntropyGatheringDaemon)){
-        //seedingMethodsToAdd.add(SeedingMethodType.EntropyGeneratingDaemon);
-        //}
-        //seedingMethodsToAdd.add(SeedingMethodType.CpuCommand);
+        // List<DerivationType> activatedCODerivations =
+        // ConfigurationOptionsDerivationManager.getInstance().getDerivationsOfModel(scope,
+        // scope.getBaseModel());
+        // if(activatedCODerivations.contains(ConfigOptionDerivationType.EnableEntropyGatheringDaemon)){
+        // seedingMethodsToAdd.add(SeedingMethodType.EntropyGeneratingDaemon);
+        // }
+        // seedingMethodsToAdd.add(SeedingMethodType.CpuCommand);
 
-        for(SeedingMethodType seedingMethodType : seedingMethodsToAdd){
-            parameterValues.add(new SeedingMethodDerivation(new ConfigurationOptionValue(seedingMethodType.name())));
+        for (SeedingMethodType seedingMethodType : seedingMethodsToAdd) {
+            parameterValues.add(
+                    new SeedingMethodDerivation(
+                            new ConfigurationOptionValue(seedingMethodType.name())));
         }
 
         return parameterValues;
@@ -64,8 +71,8 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
     @Override
     public List<ConditionalConstraint> getStaticConditionalConstraints() {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-        //condConstraints.add(getEntropyGeneratingDaemonEnabledConstraint());
-        //condConstraints.add(getDisableAssemblerCodeConstraint());
+        // condConstraints.add(getEntropyGeneratingDaemonEnabledConstraint());
+        // condConstraints.add(getDisableAssemblerCodeConstraint());
         return condConstraints;
     }
 
@@ -73,15 +80,28 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(ConfigOptionDerivationType.EnableEntropyGatheringDaemon);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), ConfigOptionDerivationType.EnableEntropyGatheringDaemon.name())
-            .by((SeedingMethodDerivation seedingMethodDerivation, EnableEntropyGatheringDaemonDerivation enableEgdDerivation) ->
-            {
-                ConfigurationOptionValue selectedSeedingMethod = seedingMethodDerivation.getSelectedValue();
-                ConfigurationOptionValue selectedEgdFlag = enableEgdDerivation.getSelectedValue();
+        return new ConditionalConstraint(
+                requiredDerivations,
+                ConstraintBuilder.constrain(
+                                getType().toString(),
+                                ConfigOptionDerivationType.EnableEntropyGatheringDaemon.name())
+                        .by(
+                                (SeedingMethodDerivation seedingMethodDerivation,
+                                        EnableEntropyGatheringDaemonDerivation
+                                                enableEgdDerivation) -> {
+                                    ConfigurationOptionValue selectedSeedingMethod =
+                                            seedingMethodDerivation.getSelectedValue();
+                                    ConfigurationOptionValue selectedEgdFlag =
+                                            enableEgdDerivation.getSelectedValue();
 
-                return !selectedSeedingMethod.getOptionValues().get(0).equals(SeedingMethodType.EntropyGeneratingDaemon.name()) ||
-                        selectedEgdFlag.isOptionSet();
-            }));
+                                    return !selectedSeedingMethod
+                                                    .getOptionValues()
+                                                    .get(0)
+                                                    .equals(
+                                                            SeedingMethodType
+                                                                    .EntropyGeneratingDaemon.name())
+                                            || selectedEgdFlag.isOptionSet();
+                                }));
     }
 
     // Build fails (tested in OpenSSL 1.1.1) when run with no-asm and --with-rand-seeds=rdcpu
@@ -89,15 +109,26 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(ConfigOptionDerivationType.DisableAssemblerCode);
 
-        return new ConditionalConstraint(requiredDerivations, ConstraintBuilder.constrain(getType().toString(), ConfigOptionDerivationType.DisableAssemblerCode.name())
-                .by((SeedingMethodDerivation seedingMethodDerivation, DisableAssemblerCodeDerivation disableAssemblerCodeDerivation) ->
-                {
-                    ConfigurationOptionValue selectedSeedingMethod = seedingMethodDerivation.getSelectedValue();
-                    ConfigurationOptionValue selectedAsmFlag = disableAssemblerCodeDerivation.getSelectedValue();
+        return new ConditionalConstraint(
+                requiredDerivations,
+                ConstraintBuilder.constrain(
+                                getType().toString(),
+                                ConfigOptionDerivationType.DisableAssemblerCode.name())
+                        .by(
+                                (SeedingMethodDerivation seedingMethodDerivation,
+                                        DisableAssemblerCodeDerivation
+                                                disableAssemblerCodeDerivation) -> {
+                                    ConfigurationOptionValue selectedSeedingMethod =
+                                            seedingMethodDerivation.getSelectedValue();
+                                    ConfigurationOptionValue selectedAsmFlag =
+                                            disableAssemblerCodeDerivation.getSelectedValue();
 
-                    return !selectedSeedingMethod.getOptionValues().get(0).equals(SeedingMethodType.CpuCommand.name()) ||
-                            selectedAsmFlag.isOptionSet();
-                }));
+                                    return !selectedSeedingMethod
+                                                    .getOptionValues()
+                                                    .get(0)
+                                                    .equals(SeedingMethodType.CpuCommand.name())
+                                            || selectedAsmFlag.isOptionSet();
+                                }));
     }
 
     @Override

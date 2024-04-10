@@ -14,12 +14,11 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-
 import java.util.LinkedList;
 import java.util.List;
 
 public class DisableBinaryEllipticCurvesDerivation extends ConfigurationOptionDerivationParameter {
-    public DisableBinaryEllipticCurvesDerivation(){
+    public DisableBinaryEllipticCurvesDerivation() {
         super(ConfigOptionDerivationType.DisableBinaryEllipticCurves);
     }
 
@@ -31,8 +30,10 @@ public class DisableBinaryEllipticCurvesDerivation extends ConfigurationOptionDe
     @Override
     public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new DisableBinaryEllipticCurvesDerivation(new ConfigurationOptionValue(false)));
-        parameterValues.add(new DisableBinaryEllipticCurvesDerivation(new ConfigurationOptionValue(true)));
+        parameterValues.add(
+                new DisableBinaryEllipticCurvesDerivation(new ConfigurationOptionValue(false)));
+        parameterValues.add(
+                new DisableBinaryEllipticCurvesDerivation(new ConfigurationOptionValue(true)));
 
         return parameterValues;
     }

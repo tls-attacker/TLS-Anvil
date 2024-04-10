@@ -13,20 +13,22 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import java.util.IllegalFormatException;
 
 /**
- * Represents a range of ports. The class can parse a string in form '[Min Port]-[Max Port]'. E.g. '123-456' represents
- * the ports 123,124,...,456.
+ * Represents a range of ports. The class can parse a string in form '[Min Port]-[Max Port]'. E.g.
+ * '123-456' represents the ports 123,124,...,456.
  */
-public class PortRange{
+public class PortRange {
     private final Integer minPort;
     private final Integer maxPort;
 
-    public PortRange(Integer minPort, Integer maxPort){
-        if(maxPort < minPort){
-            throw new IllegalArgumentException("Invalid PortRange. maxPort must not be smaller than minPort.");
+    public PortRange(Integer minPort, Integer maxPort) {
+        if (maxPort < minPort) {
+            throw new IllegalArgumentException(
+                    "Invalid PortRange. maxPort must not be smaller than minPort.");
         }
 
-        if(minPort < 0 || maxPort > 65535){
-            throw new IllegalArgumentException("Illegal port range. Ports can only be defined in between 0-65535");
+        if (minPort < 0 || maxPort > 65535) {
+            throw new IllegalArgumentException(
+                    "Illegal port range. Ports can only be defined in between 0-65535");
         }
 
         this.minPort = minPort;
@@ -41,38 +43,40 @@ public class PortRange{
         return maxPort;
     }
 
-    public boolean inRange(Integer port){
+    public boolean inRange(Integer port) {
         return (port >= minPort && port <= maxPort);
     }
 
     /**
-     * Parses a port range of format: '[Min Port]-[Max Port]', e.g. '4433-4444'.
-     * the column ':' is also an allowed separator.
+     * Parses a port range of format: '[Min Port]-[Max Port]', e.g. '4433-4444'. the column ':' is
+     * also an allowed separator.
      *
      * @param str - the string to parse
      * @return the port range
      */
-    public static PortRange fromString(String str){
-        str = str.replace(":","-");
+    public static PortRange fromString(String str) {
+        str = str.replace(":", "-");
         String[] splittedStr = str.split("-");
 
-        if(splittedStr.length != 2){
-            throw new IllegalArgumentException("Illegal port range format. Syntax is \"[Min Port]-[Max Port]\"");
+        if (splittedStr.length != 2) {
+            throw new IllegalArgumentException(
+                    "Illegal port range format. Syntax is \"[Min Port]-[Max Port]\"");
         }
         int minPort;
         int maxPort;
-        try{
+        try {
             minPort = Integer.parseInt(splittedStr[0]);
             maxPort = Integer.parseInt(splittedStr[1]);
-        }
-        catch(IllegalFormatException e){
-            throw new IllegalArgumentException("Illegal port range format. Syntax is \"[Min Port]-[Max Port]\". " +
-                    "Min and max port must be numbers.");
+        } catch (IllegalFormatException e) {
+            throw new IllegalArgumentException(
+                    "Illegal port range format. Syntax is \"[Min Port]-[Max Port]\". "
+                            + "Min and max port must be numbers.");
         }
 
-        if(maxPort < minPort){
-            throw new IllegalArgumentException("Illegal port range format. Syntax is \"[Min Port]-[Max Port]\". " +
-                    "Max port must not be smaller than min port.");
+        if (maxPort < minPort) {
+            throw new IllegalArgumentException(
+                    "Illegal port range format. Syntax is \"[Min Port]-[Max Port]\". "
+                            + "Max port must not be smaller than min port.");
         }
 
         return new PortRange(minPort, maxPort);
@@ -80,11 +84,10 @@ public class PortRange{
 
     @Override
     public boolean equals(Object o) {
-        if(o.getClass() != this.getClass()){
+        if (o.getClass() != this.getClass()) {
             return false;
         }
         PortRange other = (PortRange) o;
         return (this.minPort.equals(other.minPort) && this.maxPort.equals(other.maxPort));
     }
-
 }

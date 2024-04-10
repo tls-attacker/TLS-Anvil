@@ -12,15 +12,14 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import org.w3c.dom.Element;
 
 /**
- * A ConfigOptionValueTranslation that is used for flags. It contains data a String for a set and unset flag.
+ * A ConfigOptionValueTranslation that is used for flags. It contains data a String for a set and
+ * unset flag.
  */
-public class FlagTranslation extends ConfigOptionValueTranslation
-{
+public class FlagTranslation extends ConfigOptionValueTranslation {
     private String dataIfSet;
     private String dataIfNotSet;
 
-    public FlagTranslation(Element xmlElement)
-    {
+    public FlagTranslation(Element xmlElement) {
         super(xmlElement);
     }
 
@@ -30,12 +29,11 @@ public class FlagTranslation extends ConfigOptionValueTranslation
         dataIfNotSet = xmlElement.getElementsByTagName("false").item(0).getTextContent();
     }
 
-    public String getDataIfSet(){
+    public String getDataIfSet() {
         return dataIfSet;
     }
 
-    public String getDataIfNotSet(){
+    public String getDataIfNotSet() {
         return dataIfNotSet;
     }
 }
-

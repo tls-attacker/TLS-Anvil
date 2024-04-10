@@ -11,25 +11,23 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector;
 
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
-
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- * LogFile used for general information
- */
-public class GeneralInfoLogFile extends LogFile{
+/** LogFile used for general information */
+public class GeneralInfoLogFile extends LogFile {
 
     private final ConfigurationOptionsConfig config;
 
-    public GeneralInfoLogFile(Path folderDirectoryPath, String fileName, ConfigurationOptionsConfig config){
+    public GeneralInfoLogFile(
+            Path folderDirectoryPath, String fileName, ConfigurationOptionsConfig config) {
         super(folderDirectoryPath, fileName);
         this.config = config;
         init();
     }
 
-    private void init(){
+    private void init() {
         String data = "";
         data += String.format("Library Name,%s\n", config.getTlsLibraryName());
         data += String.format("Library Version,%s\n", config.getTlsVersionName());
@@ -39,7 +37,6 @@ public class GeneralInfoLogFile extends LogFile{
 
         data += String.format("Timestamp,%s\n", dtf.format(now));
 
-        log(data+"\n");
+        log(data + "\n");
     }
-
 }

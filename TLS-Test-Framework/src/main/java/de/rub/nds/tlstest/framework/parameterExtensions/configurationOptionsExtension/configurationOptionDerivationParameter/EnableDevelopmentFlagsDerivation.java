@@ -14,12 +14,11 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-
 import java.util.LinkedList;
 import java.util.List;
 
 public class EnableDevelopmentFlagsDerivation extends ConfigurationOptionDerivationParameter {
-    public EnableDevelopmentFlagsDerivation(){
+    public EnableDevelopmentFlagsDerivation() {
         super(ConfigOptionDerivationType.EnableDevelopmentFlags);
     }
 
@@ -31,8 +30,10 @@ public class EnableDevelopmentFlagsDerivation extends ConfigurationOptionDerivat
     @Override
     public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new EnableDevelopmentFlagsDerivation(new ConfigurationOptionValue(false)));
-        parameterValues.add(new EnableDevelopmentFlagsDerivation(new ConfigurationOptionValue(true)));
+        parameterValues.add(
+                new EnableDevelopmentFlagsDerivation(new ConfigurationOptionValue(false)));
+        parameterValues.add(
+                new EnableDevelopmentFlagsDerivation(new ConfigurationOptionValue(true)));
 
         return parameterValues;
     }

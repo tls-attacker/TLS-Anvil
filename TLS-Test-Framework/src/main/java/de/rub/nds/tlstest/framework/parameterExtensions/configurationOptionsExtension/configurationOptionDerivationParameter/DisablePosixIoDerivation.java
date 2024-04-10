@@ -14,12 +14,11 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-
 import java.util.LinkedList;
 import java.util.List;
 
 public class DisablePosixIoDerivation extends ConfigurationOptionDerivationParameter {
-    public DisablePosixIoDerivation(){
+    public DisablePosixIoDerivation() {
         super(ConfigOptionDerivationType.DisablePosixIo);
     }
 

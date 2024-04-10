@@ -14,12 +14,11 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-
 import java.util.LinkedList;
 import java.util.List;
 
 public class EnableEntropyGatheringDaemonDerivation extends ConfigurationOptionDerivationParameter {
-    public EnableEntropyGatheringDaemonDerivation(){
+    public EnableEntropyGatheringDaemonDerivation() {
         super(ConfigOptionDerivationType.EnableEntropyGatheringDaemon);
     }
 
@@ -31,8 +30,10 @@ public class EnableEntropyGatheringDaemonDerivation extends ConfigurationOptionD
     @Override
     public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new EnableEntropyGatheringDaemonDerivation(new ConfigurationOptionValue(false)));
-        parameterValues.add(new EnableEntropyGatheringDaemonDerivation(new ConfigurationOptionValue(true)));
+        parameterValues.add(
+                new EnableEntropyGatheringDaemonDerivation(new ConfigurationOptionValue(false)));
+        parameterValues.add(
+                new EnableEntropyGatheringDaemonDerivation(new ConfigurationOptionValue(true)));
 
         return parameterValues;
     }

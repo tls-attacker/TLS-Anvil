@@ -14,12 +14,11 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-
 import java.util.LinkedList;
 import java.util.List;
 
 public class DisableSrpCiphersuitesDerivation extends ConfigurationOptionDerivationParameter {
-    public DisableSrpCiphersuitesDerivation(){
+    public DisableSrpCiphersuitesDerivation() {
         super(ConfigOptionDerivationType.DisableSrpCiphersuites);
     }
 
@@ -31,8 +30,10 @@ public class DisableSrpCiphersuitesDerivation extends ConfigurationOptionDerivat
     @Override
     public List<DerivationParameter> getAllParameterValues(TestContext context) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
-        parameterValues.add(new DisableSrpCiphersuitesDerivation(new ConfigurationOptionValue(false)));
-        parameterValues.add(new DisableSrpCiphersuitesDerivation(new ConfigurationOptionValue(true)));
+        parameterValues.add(
+                new DisableSrpCiphersuitesDerivation(new ConfigurationOptionValue(false)));
+        parameterValues.add(
+                new DisableSrpCiphersuitesDerivation(new ConfigurationOptionValue(true)));
 
         return parameterValues;
     }

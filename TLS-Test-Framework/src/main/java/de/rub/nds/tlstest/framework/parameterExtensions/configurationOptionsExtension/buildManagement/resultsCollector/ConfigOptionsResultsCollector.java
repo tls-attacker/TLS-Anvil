@@ -14,18 +14,17 @@ import com.github.dockerjava.api.DockerClient;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerContainer;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.*;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
- * This class is used to collect additional data (and metadata) about the test execution of config option tests and the
- * build procedure of the different required docker images.
+ * This class is used to collect additional data (and metadata) about the test execution of config
+ * option tests and the build procedure of the different required docker images.
  */
 public class ConfigOptionsResultsCollector {
 
@@ -50,11 +49,13 @@ public class ConfigOptionsResultsCollector {
     /**
      * Constructor.
      *
-     * @param directory - defines the directory the results should be stored in (new directory is created within)
+     * @param directory - defines the directory the results should be stored in (new directory is
+     *     created within)
      * @param config - the configuration options config used
      * @param dockerClient - the docker client
      */
-    public ConfigOptionsResultsCollector(Path directory, ConfigurationOptionsConfig config, DockerClient dockerClient){
+    public ConfigOptionsResultsCollector(
+            Path directory, ConfigurationOptionsConfig config, DockerClient dockerClient) {
         containerIdToLogger = new HashMap<>();
         this.dockerClient = dockerClient;
 
@@ -66,10 +67,12 @@ public class ConfigOptionsResultsCollector {
         containerLogDirectoryPath = folderDirectoryPath.resolve(CONTAINER_LOG_FOLDER_NAME);
         prepareDirectory(containerLogDirectoryPath);
 
-        buildContainerLogDirectoryPath = folderDirectoryPath.resolve(BUILD_CONTAINER_LOG_FOLDER_NAME);
+        buildContainerLogDirectoryPath =
+                folderDirectoryPath.resolve(BUILD_CONTAINER_LOG_FOLDER_NAME);
         prepareDirectory(buildContainerLogDirectoryPath);
 
-        buildOverviewLogFile = new BuildOverviewLogFile(folderDirectoryPath, "buildsOverview.csv", config);
+        buildOverviewLogFile =
+                new BuildOverviewLogFile(folderDirectoryPath, "buildsOverview.csv", config);
         generalInfoLogFile = new GeneralInfoLogFile(folderDirectoryPath, "generalInfo.csv", config);
         buildAccessLogFile = new BuildAccessLogFile(folderDirectoryPath, "buildAccesses.csv");
     }
@@ -81,8 +84,11 @@ public class ConfigOptionsResultsCollector {
      * @param dockerTag - the docker image tag of the build
      * @param buildTime - the time it took for building the build
      */
-    public synchronized void logNewBuildCreated(Set<ConfigurationOptionDerivationParameter> optionSet, String dockerTag, long buildTime, boolean success)
-    {
+    public synchronized void logNewBuildCreated(
+            Set<ConfigurationOptionDerivationParameter> optionSet,
+            String dockerTag,
+            long buildTime,
+            boolean success) {
         buildOverviewLogFile.logBuild(optionSet, dockerTag, buildTime, success);
     }
 
@@ -92,7 +98,8 @@ public class ConfigOptionsResultsCollector {
      * @param optionSet - The option set of the accessed implementation
      * @param dockerTag - The docker image tag of the accessed implementation
      */
-    public synchronized void logBuildAccess(Set<ConfigurationOptionDerivationParameter> optionSet, String dockerTag){
+    public synchronized void logBuildAccess(
+            Set<ConfigurationOptionDerivationParameter> optionSet, String dockerTag) {
         buildAccessLogFile.increaseAccessCounter(dockerTag);
         buildOverviewLogFile.logBuild(optionSet, dockerTag, -1, true);
     }
@@ -100,7 +107,7 @@ public class ConfigOptionsResultsCollector {
     /**
      * Finalized all results that are only evaluated in the end (e.g. the total build access count)
      */
-    public synchronized void finalizeResults(){
+    public synchronized void finalizeResults() {
         buildAccessLogFile.finalizeResults();
     }
 
@@ -109,28 +116,30 @@ public class ConfigOptionsResultsCollector {
      *
      * @param container - The container to log
      */
-    public synchronized DockerContainerLogFile logContainer(DockerContainer container, String category, String name){
-        Path logDirectoryPath = folderDirectoryPath.resolve(category+"/");
+    public synchronized DockerContainerLogFile logContainer(
+            DockerContainer container, String category, String name) {
+        Path logDirectoryPath = folderDirectoryPath.resolve(category + "/");
         prepareDirectory(logDirectoryPath);
         return logDockerContainer(container, logDirectoryPath, name);
     }
 
-
-    private synchronized DockerContainerLogFile logDockerContainer(DockerContainer container, Path path, String name) {
+    private synchronized DockerContainerLogFile logDockerContainer(
+            DockerContainer container, Path path, String name) {
         String containerId = container.getContainerId();
-        if(containerIdToLogger.containsKey(containerId)){
+        if (containerIdToLogger.containsKey(containerId)) {
             // Logger does already exist
-            throw new  RuntimeException("Cannot log non-existing container!");
+            throw new RuntimeException("Cannot log non-existing container!");
         }
-        DockerContainerLogFile containerLogger = new DockerContainerLogFile(path, "Log_"+name+".log", container);
+        DockerContainerLogFile containerLogger =
+                new DockerContainerLogFile(path, "Log_" + name + ".log", container);
         containerIdToLogger.put(containerId, containerLogger);
         return containerLogger;
     }
 
-    private void prepareDirectory(Path directoryPath){
+    private void prepareDirectory(Path directoryPath) {
         File directory = directoryPath.toFile();
 
-        if(!directory.exists()){
+        if (!directory.exists()) {
             boolean success = directory.mkdirs();
             if (!success) {
                 LOGGER.error("Cannot create directories '{}'", directory);
@@ -138,5 +147,4 @@ public class ConfigOptionsResultsCollector {
             }
         }
     }
-
 }

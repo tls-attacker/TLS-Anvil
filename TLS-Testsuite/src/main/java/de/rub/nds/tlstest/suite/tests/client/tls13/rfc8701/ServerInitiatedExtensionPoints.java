@@ -1,199 +1,185 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2020 Ruhr University Bochum and
- * TÜV Informationstechnik GmbH
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8701;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CertificateCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.DerivationContainer;
-import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseCipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseExtensionDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseProtocolVersionDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.GreaseSigHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-
 @ClientTest
-@RFC(number = 8701, section = "4. Server-Initiated Extension Points")
 public class ServerInitiatedExtensionPoints extends Tls13Test {
 
-    @TlsTest(description = "When sending a NewSessionTicket message in TLS 1.3, a server "
-            + "MAY select one or more GREASE extension values and advertise them as extensions "
-            + "with varying length and contents. "
-            + "When processing a CertiﬁcateRequest or NewSessionTicket, "
-            + "clients MUST NOT treat GREASE values diﬀerently from any unknown value.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions("BasicDerivationType.GREASE_EXTENSION")
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    public void advertiseGreaseExtensionsInSessionTicket(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-        ExtensionType selectedGreaseExt = derivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
+    @AnvilTest(id = "8701-91tcbyhyNk")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @IncludeParameter("GREASE_EXTENSION")
+    public void advertiseGreaseExtensionsInSessionTicket(
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
+        ExtensionType selectedGreaseExt =
+                parameterCombination
+                        .getParameter(GreaseExtensionDerivation.class)
+                        .getSelectedValue();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace.addTlsActions(new SendAction(new NewSessionTicketMessage(c)));
+        workflowTrace.addTlsActions(new SendAction(new NewSessionTicketMessage()));
 
-        NewSessionTicketMessage msg = workflowTrace.getFirstSendMessage(NewSessionTicketMessage.class);
+        NewSessionTicketMessage msg =
+                workflowTrace.getFirstSendMessage(NewSessionTicketMessage.class);
         msg.addExtension(new GreaseExtensionMessage(selectedGreaseExt, 25));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
-            + "In particular, the client MUST fail the connection "
-            + "if a GREASE value appears in any of the following: "
-            + "The \"version\" value in a ServerHello or HelloRetryRequest")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions("BasicDerivationType.GREASE_PROTOCOL_VERSION")
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    public void selectGreaseVersion(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "8701-q8vvYUsUCu")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @IncludeParameter("GREASE_PROTOCOL_VERSION")
+    public void selectGreaseVersion(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        sharedGreaseVersionTest(workflowTrace, runner, derivationContainer);
+        sharedGreaseVersionTest(workflowTrace, runner, parameterCombination, testCase);
     }
 
-    public static void sharedGreaseVersionTest(WorkflowTrace workflowTrace, WorkflowRunner runner, DerivationContainer externalDerivationContainer) {
-        ProtocolVersion selectedGreaseVersion = externalDerivationContainer.getDerivation(GreaseProtocolVersionDerivation.class).getSelectedValue();
+    public static void sharedGreaseVersionTest(
+            WorkflowTrace workflowTrace,
+            WorkflowRunner runner,
+            TlsParameterCombination externalTlsParameterCombination,
+            AnvilTestCase testCase) {
+        ProtocolVersion selectedGreaseVersion =
+                externalTlsParameterCombination
+                        .getParameter(GreaseProtocolVersionDerivation.class)
+                        .getSelectedValue();
 
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
-        SupportedVersionsExtensionMessage ext = sh.getExtension(SupportedVersionsExtensionMessage.class);
+        SupportedVersionsExtensionMessage ext =
+                sh.getExtension(SupportedVersionsExtensionMessage.class);
         ext.setSupportedVersions(Modifiable.explicit(selectedGreaseVersion.getValue()));
 
-        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        Validator.receivedFatalAlert(state, testCase);
     }
 
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
-            + "In particular, the client MUST fail the connection "
-            + "if a GREASE value appears in any of the following: "
-            + "The \"cipher_suite\" value in a ServerHello")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions("BasicDerivationType.GREASE_CIPHERSUITE")
-    @ScopeLimitations("BasicDerivationType.CIPHERSUITE")
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    public void selectGreaseCipherSuite(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "8701-xwVd59Y3Fq")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @IncludeParameter("GREASE_CIPHERSUITE")
+    @ExcludeParameter("CIPHER_SUITE")
+    public void selectGreaseCipherSuite(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        sharedGreaseCipherSuiteTest(workflowTrace, runner, derivationContainer);
+        sharedGreaseCipherSuiteTest(workflowTrace, runner, parameterCombination, testCase);
     }
 
-    public static void sharedGreaseCipherSuiteTest(WorkflowTrace workflowTrace, WorkflowRunner runner, DerivationContainer externalDerivationContainer) {
-        CipherSuite selectedGreaseCipherSuite = externalDerivationContainer.getDerivation(GreaseCipherSuiteDerivation.class).getSelectedValue();
+    public static void sharedGreaseCipherSuiteTest(
+            WorkflowTrace workflowTrace,
+            WorkflowRunner runner,
+            TlsParameterCombination externalTlsParameterCombination,
+            AnvilTestCase testCase) {
+        CipherSuite selectedGreaseCipherSuite =
+                externalTlsParameterCombination
+                        .getParameter(GreaseCipherSuiteDerivation.class)
+                        .getSelectedValue();
 
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.setSelectedCipherSuite(Modifiable.explicit(selectedGreaseCipherSuite.getByteValue()));
 
-        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        Validator.receivedFatalAlert(state, testCase);
     }
 
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
-            + "In particular, the client MUST fail the connection "
-            + "if a GREASE value appears in any of the following: "
-            + "Any ServerHello extension")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ScopeExtensions("BasicDerivationType.GREASE_EXTENSION")
-    @AlertCategory(SeverityLevel.MEDIUM)
-    public void sendServerHelloGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "8701-NczJT3TSj4")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @IncludeParameter("GREASE_EXTENSION")
+    public void sendServerHelloGreaseExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        sharedServerHelloGreaseExtensionTest(workflowTrace, runner, derivationContainer);
+        sharedServerHelloGreaseExtensionTest(workflowTrace, runner, parameterCombination, testCase);
     }
 
-    public static void sharedServerHelloGreaseExtensionTest(WorkflowTrace workflowTrace, WorkflowRunner runner, DerivationContainer externalDerivationContainer) {
-        ExtensionType selectedGreaseExt = externalDerivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
+    public static void sharedServerHelloGreaseExtensionTest(
+            WorkflowTrace workflowTrace,
+            WorkflowRunner runner,
+            TlsParameterCombination externalTlsParameterCombination,
+            AnvilTestCase testCase) {
+        ExtensionType selectedGreaseExt =
+                externalTlsParameterCombination
+                        .getParameter(GreaseExtensionDerivation.class)
+                        .getSelectedValue();
 
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         sh.addExtension(new GreaseExtensionMessage(selectedGreaseExt, 25));
 
-        runner.execute(workflowTrace, runner.getPreparedConfig()).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, runner.getPreparedConfig());
+        Validator.receivedFatalAlert(state, testCase);
     }
 
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
-            + "In particular, the client MUST fail the connection "
-            + "if a GREASE value appears in any of the following: "
-            + "Any EncryptedExtensions extension")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeExtensions("BasicDerivationType.GREASE_EXTENSION")
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    public void sendEncryptedExtensionsGreaseExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "8701-pVCWxJraM8")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @IncludeParameter("GREASE_EXTENSION")
+    public void sendEncryptedExtensionsGreaseExtension(
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        ExtensionType selectedGreaseExt = derivationContainer.getDerivation(GreaseExtensionDerivation.class).getSelectedValue();
+        ExtensionType selectedGreaseExt =
+                parameterCombination
+                        .getParameter(GreaseExtensionDerivation.class)
+                        .getSelectedValue();
 
-        EncryptedExtensionsMessage sh = workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
+        EncryptedExtensionsMessage sh =
+                workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
         sh.addExtension(new GreaseExtensionMessage(selectedGreaseExt, 25));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
-    @TlsTest(description = "Clients MUST reject GREASE values when negotiated by the server. "
-            + "In particular, the client MUST fail the connection "
-            + "if a GREASE value appears in any of the following: "
-            + "The signature algorithm in a server CertiﬁcateVerify signature in TLS 1.3")
-    @ScopeExtensions("BasicDerivationType.GREASE_SIG_HASH")
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.CRITICAL)
-    @CryptoCategory(SeverityLevel.CRITICAL)
-    @CertificateCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
-    public void sendCertificateVerifyGreaseSignatureAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "8701-9F3St2di12")
+    @IncludeParameter("GREASE_SIG_HASH")
+    public void sendCertificateVerifyGreaseSignatureAlgorithm(
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        SignatureAndHashAlgorithm selectedGreaseSigHash = derivationContainer.getDerivation(GreaseSigHashDerivation.class).getSelectedValue();
+        SignatureAndHashAlgorithm selectedGreaseSigHash =
+                parameterCombination.getParameter(GreaseSigHashDerivation.class).getSelectedValue();
 
-        CertificateVerifyMessage sh = workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class);
+        CertificateVerifyMessage sh =
+                workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class);
         sh.setSignatureHashAlgorithm(Modifiable.explicit(selectedGreaseSigHash.getByteValue()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 }

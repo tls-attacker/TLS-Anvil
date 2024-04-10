@@ -1,0 +1,19 @@
+Alerts MUST now be sent in many cases.
+
+After a certificate_request, if no certificates are available, clients now MUST send an empty certificate list.
+
+New cipher suites MUST explicitly specify a PRF and, in general, SHOULD use the TLS PRF with SHA-256 or a stronger standard hash function.
+
+The padding length MUST be such that the total size of the GenericBlockCipher structure is a multiple of the cipher's block length.
+
+Each AEAD cipher suite MUST specify how the nonce supplied to the AEAD operation is constructed, and what is the length of the GenericAEADCipher.nonce_explicit part.
+
+Each AEAD cipher MUST NOT produce an expansion of greater than 1024 bytes.
+
+New key exchange methods can be created by specifying a format for these messages and by defining the use of the messages to allow the client and server to agree upon a shared secret.  This secret MUST be quite long; currently defined key exchange methods exchange secrets that range from 46 bytes upwards.
+
+ Other key exchange algorithms, such as those defined in [TLSECC], MUST specify whether the ServerKeyExchange message is sent or not; and if the message is sent, its contents.
+ 
+For the PRF defined in Section 5, the Hash MUST be the Hash used as the basis for the PRF.  Any cipher suite which defines a different PRF MUST also define the Hash to use in the Finished computation.
+
+Future cipher suites MAY specify other lengths but such length MUST be at least 12 bytes.

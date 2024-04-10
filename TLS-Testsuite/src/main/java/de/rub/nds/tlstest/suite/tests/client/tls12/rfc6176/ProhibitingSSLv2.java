@@ -1,14 +1,18 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2020 Ruhr University Bochum and
- * TÜV Informationstechnik GmbH
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc6176;
 
+import static org.junit.Assert.assertFalse;
+
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
@@ -16,82 +20,56 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.SSL2ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
+import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 
-import static org.junit.Assert.assertFalse;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-
-@RFC(number = 6176, section = "3")
 @ClientTest
+@TlsVersion(
+        supported =
+                ProtocolVersion
+                        .TLS12) // explicitly exclude for DTLS as SSL2 versions are by definition
+// not applicable in a DTLS context
 public class ProhibitingSSLv2 extends Tls12Test {
 
-    
-    @TlsTest(description = "TLS clients MUST NOT send the SSL version 2.0 compatible CLIENT-"
-            + "HELLO message format.")
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    public void sendSSL2CompatibleClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "6176-yZUPDLF21Z")
+    public void sendSSL2CompatibleClientHello(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
-        workflowTrace.addTlsActions(
-                new ReceiveAction(new SSL2ClientHelloMessage())
-        );
+        workflowTrace.addTlsActions(new ReceiveAction(new SSL2ClientHelloMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            assertFalse("Client sent SSLv2 ClientHello", i.getWorkflowTrace().executedAsPlanned());
-        });
+        State state = runner.execute(workflowTrace, c);
+        assertFalse("Client sent SSLv2 ClientHello", state.getWorkflowTrace().executedAsPlanned());
     }
 
-    @TlsTest(description = "TLS servers MUST NOT reply with an SSL 2.0 SERVER-HELLO with a"
-            + "protocol version that is less than { 0x03, 0x00 } and instead MUST"
-            + "abort the connection")
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "6176-GVZT3xHaGE")
     @EnforcedSenderRestriction
-    public void sendServerHelloVersionLower0300(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendServerHelloVersionLower0300(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.addTlsActions(
-                new ReceiveAction(new AlertMessage())
-        );
+        workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        workflowTrace.getFirstSendMessage(ServerHelloMessage.class)
+        workflowTrace
+                .getFirstSendMessage(ServerHelloMessage.class)
                 .setProtocolVersion(Modifiable.explicit(ProtocolVersion.SSL2.getValue()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
-    @Test
-    @TestDescription("Clients MUST NOT send any ClientHello message that specifies a protocol version less than { 0x03, 0x00 }.")
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @DeprecatedFeatureCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
+    @NonCombinatorialAnvilTest(id = "6176-1zkQSbX7Qy")
     public void testClientHelloProtocolVersion() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
-        assertFalse("ClientHello protocol version is less than 0x0300", msg.getProtocolVersion().getValue()[0] < 3);
+        assertFalse(
+                "ClientHello protocol version is less than 0x0300",
+                msg.getProtocolVersion().getValue()[0] < 3);
     }
-
 }

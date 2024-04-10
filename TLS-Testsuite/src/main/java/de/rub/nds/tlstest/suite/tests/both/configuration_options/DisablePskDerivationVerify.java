@@ -1,24 +1,13 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2020 Ruhr University Bochum and
- * TÜV Informationstechnik GmbH
+ * <p>Copyright 2020 Ruhr University Bochum and TÜV Informationstechnik GmbH
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.both.configuration_options;
 
-
 import static org.junit.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
 import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
@@ -35,16 +24,25 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePskDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @Tag("co")
 public class DisablePskDerivationVerify extends Tls12Test {
 
     public ConditionEvaluationResult disablePskOptionTested() {
-        if (ParameterExtensionManager.getInstance().getLoadedExtensions().contains("ConfigurationOptionsExtension")) {
-            if (ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes().contains(ConfigOptionDerivationType.DisablePsk)){
+        if (ParameterExtensionManager.getInstance()
+                .getLoadedExtensions()
+                .contains("ConfigurationOptionsExtension")) {
+            if (ConfigurationOptionsDerivationManager.getInstance()
+                    .getAllActivatedCOTypes()
+                    .contains(ConfigOptionDerivationType.DisablePsk)) {
                 return ConditionEvaluationResult.enabled("");
-            }
-            else {
+            } else {
                 return ConditionEvaluationResult.disabled("The DisablePsk option is not tested.");
             }
         } else {
@@ -59,29 +57,32 @@ public class DisablePskDerivationVerify extends Tls12Test {
     public void pskCiphersuitesDisabled(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         getPreparedConfig(argumentAccessor, runner);
         TestSiteReport report = this.derivationContainer.getAssociatedSiteReport();
-        ConfigurationOptionCompoundDerivation compoundParameter = this.derivationContainer.getDerivation(ConfigurationOptionCompoundDerivation.class);
-        DisablePskDerivation disablePskDerivation = compoundParameter.getDerivation(DisablePskDerivation.class);
+        ConfigurationOptionCompoundDerivation compoundParameter =
+                this.derivationContainer.getDerivation(ConfigurationOptionCompoundDerivation.class);
+        DisablePskDerivation disablePskDerivation =
+                compoundParameter.getDerivation(DisablePskDerivation.class);
 
-        if(!disablePskDerivation.getSelectedValue().isOptionSet()){
+        if (!disablePskDerivation.getSelectedValue().isOptionSet()) {
             return;
         }
 
-        List<AnalyzedProperty> expectedDisabledProperties = Arrays.asList(
-                AnalyzedProperty.SUPPORTS_PSK_PLAIN,
-                AnalyzedProperty.SUPPORTS_PSK_RSA,
-                AnalyzedProperty.SUPPORTS_PSK_DHE,
-                AnalyzedProperty.SUPPORTS_PSK_ECDHE
-        );
+        List<AnalyzedProperty> expectedDisabledProperties =
+                Arrays.asList(
+                        AnalyzedProperty.SUPPORTS_PSK_PLAIN,
+                        AnalyzedProperty.SUPPORTS_PSK_RSA,
+                        AnalyzedProperty.SUPPORTS_PSK_DHE,
+                        AnalyzedProperty.SUPPORTS_PSK_ECDHE);
 
         List<AnalyzedProperty> nonDisabledProperties = new LinkedList<>();
-        for(AnalyzedProperty expectedDisabledProperty : expectedDisabledProperties){
-            if(report.getResult(expectedDisabledProperty) == TestResult.TRUE){
+        for (AnalyzedProperty expectedDisabledProperty : expectedDisabledProperties) {
+            if (report.getResult(expectedDisabledProperty) == TestResult.TRUE) {
                 // Unexpectedly enabled.
                 nonDisabledProperties.add(expectedDisabledProperty);
             }
         }
-        assertEquals("Unexpectedly supported features: " + nonDisabledProperties.toString(), 0, nonDisabledProperties.size());
+        assertEquals(
+                "Unexpectedly supported features: " + nonDisabledProperties.toString(),
+                0,
+                nonDisabledProperties.size());
     }
-
-
 }

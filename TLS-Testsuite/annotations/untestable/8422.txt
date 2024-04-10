@@ -1,0 +1,3 @@
+All ECDSA computations MUST be performed according to ANSI X9.62 or its successors.
+
+All EdDSA computations MUST be performed according to [RFC8032] or its successors.

@@ -1,56 +1,42 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2020 Ruhr University Bochum and
- * TÜV Informationstechnik GmbH
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
+import static org.junit.Assert.assertEquals;
+
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
-import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 @ServerTest
-@RFC(number = 5246, section = "7.4.1.4.1. Signature Algorithms")
 public class SignatureAlgorithms extends Tls12Test {
 
     private WorkflowTrace getWorkflowFor(Config c) {
@@ -58,13 +44,13 @@ public class SignatureAlgorithms extends Tls12Test {
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)),
-                new ReceiveTillAction(new ServerHelloDoneMessage())
-        );
+                new ReceiveTillAction(new ServerHelloDoneMessage()));
         return workflowTrace;
     }
 
     private boolean supported(String filter) {
-        List<CipherSuite> cipherSuites = new ArrayList<>(context.getSiteReport().getCipherSuites());
+        List<CipherSuite> cipherSuites =
+                new ArrayList<>(context.getFeatureExtractionResult().getCipherSuites());
         cipherSuites.removeIf(i -> !i.toString().contains(filter));
         return cipherSuites.size() > 0;
     }
@@ -90,91 +76,106 @@ public class SignatureAlgorithms extends Tls12Test {
         return ConditionEvaluationResult.disabled("No ECDSA signature ciphersuites supported");
     }
 
-    @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
-            "If the negotiated key exchange algorithm is one of (DHE_DSS, DH_DSS), " +
-            "behave as if the client had sent the value {sha1,dsa}.")
+    @AnvilTest(id = "5246-ZdnCWL4k5G")
     @MethodCondition(method = "dssCiphersuitesSupported")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    public void dssNoSignatureAlgorithmsExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void dssNoSignatureAlgorithmsExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddSignatureAndHashAlgorithmsExtension(false);
 
         WorkflowTrace workflowTrace = getWorkflowFor(c);
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-            assertEquals(SignatureAlgorithm.DSA, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getSignatureAlgorithm());
-            assertEquals(HashAlgorithm.SHA1, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm());
-        });
+        Validator.executedAsPlanned(state, testCase);
+
+        assertEquals(
+                SignatureAlgorithm.DSA,
+                state.getTlsContext()
+                        .getSelectedSignatureAndHashAlgorithm()
+                        .getSignatureAlgorithm());
+        assertEquals(
+                HashAlgorithm.SHA1,
+                state.getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm());
     }
 
-    @TlsTest(description = "If the client does not send the signature_algorithms extension, the server MUST do the following:\n" +
-            "If the negotiated key exchange algorithm is one of (ECDH_ECDSA, ECDHE_ECDSA), " +
-            "behave as if the client had sent value {sha1,ecdsa}.")
+    @AnvilTest(id = "5246-MjFVuYUzfF")
     @MethodCondition(method = "ecdsaCiphersuitesSupported")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    public void ecdsaNoSignatureAlgorithmsExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void ecdsaNoSignatureAlgorithmsExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddSignatureAndHashAlgorithmsExtension(false);
 
         WorkflowTrace workflowTrace = getWorkflowFor(c);
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.executedAsPlanned(i);
+        State state = runner.execute(workflowTrace, c);
 
-            assertEquals(SignatureAlgorithm.ECDSA, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getSignatureAlgorithm());
-            assertEquals(HashAlgorithm.SHA1, i.getState().getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm());
-        });
+        Validator.executedAsPlanned(state, testCase);
+
+        assertEquals(
+                SignatureAlgorithm.ECDSA,
+                state.getTlsContext()
+                        .getSelectedSignatureAndHashAlgorithm()
+                        .getSignatureAlgorithm());
+        assertEquals(
+                HashAlgorithm.SHA1,
+                state.getTlsContext().getSelectedSignatureAndHashAlgorithm().getHashAlgorithm());
     }
-    
-    @TlsTest(description = "Perform a Handshake where the Signature and Hash Algorithms Extension contains an additional, undefined algorithm")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    public void includeUnknownSignatureAndHashAlgorithm(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+
+    @AnvilTest(id = "5246-gnRCzTtN6q")
+    // This requirement also applies to older versions
+    public void includeUnknownSignatureAndHashAlgorithm(
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddSignatureAndHashAlgorithmsExtension(true);
-        
+
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        ClientHelloMessage clientHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
-        SignatureAndHashAlgorithmsExtensionMessage algorithmsExtension = clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
-        algorithmsExtension.setSignatureAndHashAlgorithms(Modifiable.insert(new byte[]{(byte)0xfe, 0x44}, 0));
-        
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        ClientHelloMessage clientHello =
+                (ClientHelloMessage)
+                        WorkflowTraceUtil.getFirstSendMessage(
+                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+        SignatureAndHashAlgorithmsExtensionMessage algorithmsExtension =
+                clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
+        algorithmsExtension.setSignatureAndHashAlgorithms(
+                Modifiable.insert(new byte[] {(byte) 0xfe, 0x44}, 0));
+
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
-    
-    @TlsTest(description = "Send a ClientHello that offers many SignatureAndHash algorithms")
-    @ScopeLimitations("BasicDerivationType.INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    public void offerManyAlgorithms(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+
+    @AnvilTest(id = "5246-52fQFPB85j")
+    @ExcludeParameter("INCLUDE_GREASE_SIG_HASH_ALGORITHMS")
+    public void offerManyAlgorithms(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        
-        //add pseudo algorithms to reach 58 which is the number of all defined values
-        //and grease values
+
+        // add pseudo algorithms to reach 58 which is the number of all defined values
+        // and grease values
         int realAlgorithms = c.getDefaultClientSupportedSignatureAndHashAlgorithms().size();
         byte[] explicitAlgorithms = new byte[58 * 2];
         int y = 0;
-        for(int i = 0; i < 58 * 2; i = i + 2) {
-            if(i < (58 - realAlgorithms) * 2) {
+        for (int i = 0; i < 58 * 2; i = i + 2) {
+            if (i < (58 - realAlgorithms) * 2) {
                 explicitAlgorithms[i] = (byte) 0x0A;
-                explicitAlgorithms[i+1] = (byte) i;
+                explicitAlgorithms[i + 1] = (byte) i;
             } else {
-                explicitAlgorithms[i] = c.getDefaultClientSupportedSignatureAndHashAlgorithms().get(y).getByteValue()[0];
-                explicitAlgorithms[i + 1] = c.getDefaultClientSupportedSignatureAndHashAlgorithms().get(y).getByteValue()[1];
+                explicitAlgorithms[i] =
+                        c.getDefaultClientSupportedSignatureAndHashAlgorithms()
+                                .get(y)
+                                .getByteValue()[0];
+                explicitAlgorithms[i + 1] =
+                        c.getDefaultClientSupportedSignatureAndHashAlgorithms()
+                                .get(y)
+                                .getByteValue()[1];
                 y++;
             }
-            
         }
-        ClientHelloMessage clientHello = (ClientHelloMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.CLIENT_HELLO, workflowTrace);
-        clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class).setSignatureAndHashAlgorithms(Modifiable.explicit(explicitAlgorithms));
-        runner.execute(workflowTrace, c).validateFinal(Validator::executedAsPlanned);
+        ClientHelloMessage clientHello =
+                (ClientHelloMessage)
+                        WorkflowTraceUtil.getFirstSendMessage(
+                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+        clientHello
+                .getExtension(SignatureAndHashAlgorithmsExtensionMessage.class)
+                .setSignatureAndHashAlgorithms(Modifiable.explicit(explicitAlgorithms));
+        State state = runner.execute(workflowTrace, c);
+        Validator.executedAsPlanned(state, testCase);
     }
 }

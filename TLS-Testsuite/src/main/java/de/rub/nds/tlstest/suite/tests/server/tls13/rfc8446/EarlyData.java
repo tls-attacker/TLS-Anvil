@@ -1,22 +1,24 @@
+/**
+ * TLS-Testsuite - A testsuite for the TLS protocol
+ *
+ * <p>Copyright 2022 Ruhr University Bochum
+ *
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
+ */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
+import static org.junit.Assert.assertTrue;
+
+import de.rub.nds.anvilcore.annotation.*;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.AlertDescription;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.ExtensionType;
-import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsattacker.core.constants.Tls13KeySetType;
-import de.rub.nds.tlsattacker.core.protocol.handler.AlertHandler;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
+import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.layer.context.TlsContext;
 import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PreSharedKeyExtensionMessage;
-import de.rub.nds.tlsattacker.core.record.AbstractRecord;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipher;
@@ -24,39 +26,26 @@ import de.rub.nds.tlsattacker.core.record.cipher.RecordCipherFactory;
 import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySet;
 import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySetGenerator;
 import de.rub.nds.tlsattacker.core.record.crypto.RecordDecryptor;
-import de.rub.nds.tlsattacker.core.state.TlsContext;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import java.io.ByteArrayInputStream;
 import java.util.List;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ServerTest
-@RFC(number = 8446, section = "4.2.10 Early Data Indication")
 public class EarlyData extends Tls13Test {
 
     public ConditionEvaluationResult supports0rtt() {
-        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS13_0_RTT) == TestResult.TRUE) {
+        if (context.getFeatureExtractionResult().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_0_RTT)
+                == TestResults.TRUE) {
             return ConditionEvaluationResult.enabled("");
         } else {
             return ConditionEvaluationResult.disabled("Does not support 0-RTT early data");
@@ -64,15 +53,21 @@ public class EarlyData extends Tls13Test {
     }
 
     public ConditionEvaluationResult tls13multipleCipherSuites() {
-        if (context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_TLS13_0_RTT) == TestResult.TRUE && context.getSiteReport().getSupportedTls13CipherSuites() != null && context.getSiteReport().getSupportedTls13CipherSuites().size() > 1) {
+        if (context.getFeatureExtractionResult().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_0_RTT)
+                        == TestResults.TRUE
+                && context.getFeatureExtractionResult().getSupportedTls13CipherSuites() != null
+                && context.getFeatureExtractionResult().getSupportedTls13CipherSuites().size()
+                        > 1) {
             return ConditionEvaluationResult.enabled("");
         } else {
-            return ConditionEvaluationResult.disabled("Does not support 0-RTT early data or only offers one Cipher Suite");
+            return ConditionEvaluationResult.disabled(
+                    "Does not support 0-RTT early data or only offers one Cipher Suite");
         }
     }
 
     private CipherSuite getOtherSupportedCiphersuite(CipherSuite toTest) {
-        for (CipherSuite cipherSuite : context.getSiteReport().getSupportedTls13CipherSuites()) {
+        for (CipherSuite cipherSuite :
+                context.getFeatureExtractionResult().getSupportedTls13CipherSuites()) {
             if (cipherSuite != toTest) {
                 return cipherSuite;
             }
@@ -80,129 +75,129 @@ public class EarlyData extends Tls13Test {
         return null;
     }
 
-    @TlsTest(description = "If the server supplies an \"early_data\" extension, the client MUST"
-            + "verify that the server's selected_identity is 0.") 
-    @RFC(number = 8446, section = "4.2.10 Early Data Indication")
+    @AnvilTest(id = "8446-3tUPL8K9nh")
     @MethodCondition(method = "supports0rtt")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    public void selectedFirstIdentity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @Disabled
+    public void selectedFirstIdentity(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddPSKKeyExchangeModesExtension(true);
         c.setAddPreSharedKeyExtension(true);
         c.setAddEarlyDataExtension(true);
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilLastReceivingMessage(
+                        WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction());
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            if (trace.getLastReceivedMessage(EncryptedExtensionsMessage.class).containsExtension(ExtensionType.EARLY_DATA)) {
-                assertTrue(trace.getLastReceivedMessage(ServerHelloMessage.class).containsExtension(ExtensionType.PRE_SHARED_KEY));
-                if (trace.getLastReceivedMessage(ServerHelloMessage.class).containsExtension(ExtensionType.PRE_SHARED_KEY) == true) {
-                    assertTrue(trace.getLastReceivedMessage(ServerHelloMessage.class).getExtension(PreSharedKeyExtensionMessage.class).getSelectedIdentity().getValue().equals(0));
-                }
-            }
+        State state = runner.execute(workflowTrace, c);
 
-        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        if (trace.getLastReceivedMessage(EncryptedExtensionsMessage.class)
+                .containsExtension(ExtensionType.EARLY_DATA)) {
+            assertTrue(
+                    trace.getLastReceivedMessage(ServerHelloMessage.class)
+                            .containsExtension(ExtensionType.PRE_SHARED_KEY));
+            if (trace.getLastReceivedMessage(ServerHelloMessage.class)
+                            .containsExtension(ExtensionType.PRE_SHARED_KEY)
+                    == true) {
+                assertTrue(
+                        trace.getLastReceivedMessage(ServerHelloMessage.class)
+                                .getExtension(PreSharedKeyExtensionMessage.class)
+                                .getSelectedIdentity()
+                                .getValue()
+                                .equals(0));
+            }
+        }
     }
 
-    @TlsTest(description = "[The server] MUST verify that the"
-            + "following values are the same as those associated with the"
-            + "selected PSK: [...] The selected cipher suite [...]"
-            + "If any of these checks fail, the server MUST NOT respond with the"
-            + "extension")
-    @RFC(number = 8446, section = "4.2.10 Early Data Indication")
+    @AnvilTest(id = "8446-QX4UnMXsbP")
     @MethodCondition(method = "tls13multipleCipherSuites")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    public void cipherSuiteDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @Disabled
+    public void cipherSuiteDisparity(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddPSKKeyExchangeModesExtension(true);
         c.setAddPreSharedKeyExtension(true);
         c.setAddEarlyDataExtension(true);
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilLastReceivingMessage(
+                        WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction());
 
         ClientHelloMessage secondHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
-        CipherSuite otherCipherSuite = getOtherSupportedCiphersuite(c.getDefaultSelectedCipherSuite());
+        CipherSuite otherCipherSuite =
+                getOtherSupportedCiphersuite(c.getDefaultSelectedCipherSuite());
         secondHello.setCipherSuites(Modifiable.explicit(otherCipherSuite.getByteValue()));
-        secondHello.setCipherSuiteLength(Modifiable.explicit(otherCipherSuite.getByteValue().length));
+        secondHello.setCipherSuiteLength(
+                Modifiable.explicit(otherCipherSuite.getByteValue().length));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            if (trace.getLastReceivedMessage(EncryptedExtensionsMessage.class) != null) {
-                assertTrue(!trace.getLastReceivedMessage(EncryptedExtensionsMessage.class).containsExtension(ExtensionType.EARLY_DATA));
-            }
-        });
+        State state = runner.execute(workflowTrace, c);
+
+        WorkflowTrace trace = state.getWorkflowTrace();
+        if (trace.getLastReceivedMessage(EncryptedExtensionsMessage.class) != null) {
+            assertTrue(
+                    !trace.getLastReceivedMessage(EncryptedExtensionsMessage.class)
+                            .containsExtension(ExtensionType.EARLY_DATA));
+        }
     }
 
-    @TlsTest(description = "[The server] MUST verify that the"
-            + "following values are the same as those associated with the"
-            + "selected PSK: [...] The TLS version number [...]"
-            + "If any of these checks fail, the server MUST NOT respond with the"
-            + "extension")
-    @RFC(number = 8446, section = "4.2.10 Early Data Indication")
+    @AnvilTest(id = "8446-wiNRa3novJ")
     @MethodCondition(method = "supports0rtt")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    public void tlsVersionDisparity(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @Disabled
+    public void tlsVersionDisparity(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddPSKKeyExchangeModesExtension(true);
         c.setAddPreSharedKeyExtension(true);
         c.setAddEarlyDataExtension(true);
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilLastReceivingMessage(
+                        WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction());
 
         ClientHelloMessage secondHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
         secondHello.setProtocolVersion(Modifiable.explicit(ProtocolVersion.TLS11.getValue()));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            if (trace.getLastReceivedMessage(EncryptedExtensionsMessage.class) != null) {
-                assertTrue(!trace.getLastReceivedMessage(EncryptedExtensionsMessage.class).containsExtension(ExtensionType.EARLY_DATA));
-            }
-        });
+        State state = runner.execute(workflowTrace, c);
+
+        WorkflowTrace trace = state.getWorkflowTrace();
+        if (trace.getLastReceivedMessage(EncryptedExtensionsMessage.class) != null) {
+            assertTrue(
+                    !trace.getLastReceivedMessage(EncryptedExtensionsMessage.class)
+                            .containsExtension(ExtensionType.EARLY_DATA));
+        }
     }
 
     public boolean recordLengthAllowsModification(Integer lengthCandidate) {
         return lengthCandidate >= 50;
     }
 
-    @TlsTest(description = "If the server chooses to accept the \"early_data\" extension, then it"
-            + "MUST comply with the same error-handling requirements specified for"
-            + "all records when processing early data records.  Specifically, if the\n"
-            + "server fails to decrypt a 0-RTT record following an accepted\n"
-            + "\"early_data\" extension, it MUST terminate the connection with a\n"
-            + "\"bad_record_mac\" alert as per Section 5.2.")
-    @RFC(number = 8446, section = "4.2.10 Early Data Indication")
+    @AnvilTest(id = "8446-LSEXdVf1sN")
     @MethodCondition(method = "supports0rtt")
-    @ScopeExtensions({"BasicDerivationType.APP_MSG_LENGHT", "BasicDerivationType.CIPHERTEXT_BITMASK"})
-    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.RECORD_LENGTH", methods = "recordLengthAllowsModification")
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @CryptoCategory(SeverityLevel.HIGH)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @IncludeParameters({
+        @IncludeParameter("APP_MSG_LENGHT"),
+        @IncludeParameter("CIPHERTEXT_BITMASK")
+    })
+    @DynamicValueConstraints(
+            affectedIdentifiers = "RECORD_LENGTH",
+            methods = "recordLengthAllowsModification")
+    @Disabled
+    public void invalidCiphertext(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddPSKKeyExchangeModesExtension(true);
         c.setAddPreSharedKeyExtension(true);
         c.setAddEarlyDataExtension(true);
         c.setPreserveMessageRecordRelation(true);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilLastReceivingMessage(
+                        WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction());
 
         SendAction cHello = (SendAction) workflowTrace.getLastSendingAction();
-        cHello.getSendMessages().remove(workflowTrace.getFirstSendMessage(ApplicationMessage.class));
+        cHello.getSendMessages()
+                .remove(workflowTrace.getFirstSendMessage(ApplicationMessage.class));
 
         Record helloRecord = new Record();
         Record ccsCompatibilityRecord = new Record();
@@ -220,50 +215,44 @@ public class EarlyData extends Tls13Test {
         }
         workflowTrace.getLastSendingAction().getSendRecords().add(earlyRecord);
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            List<AbstractRecord> records = trace.getLastReceivingAction().getReceivedRecords();
-            List<ProtocolMessage> msgs = trace.getLastReceivingAction().getReceivedMessages();
-            if (records.size() > msgs.size()) {
-                AlertMessage decAlert = tryToDecryptWithAppSecrets(i.getState().getTlsContext(), records.get(msgs.size()));
-                if (decAlert != null) {
-                    msgs.add(decAlert);
-                }
-            }
+        State state = runner.execute(workflowTrace, c);
 
-            Validator.receivedFatalAlert(i, false);
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, alert);
-        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        List<Record> records = trace.getLastReceivingAction().getReceivedRecords();
+        List<ProtocolMessage> msgs = trace.getLastReceivingAction().getReceivedMessages();
+        if (records.size() > msgs.size()) {
+            AlertMessage decAlert =
+                    tryToDecryptWithAppSecrets(state.getTlsContext(), records.get(msgs.size()));
+            if (decAlert != null) {
+                msgs.add(decAlert);
+            }
+        }
+
+        Validator.receivedFatalAlert(state, testCase, false);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, alert);
     }
 
-    @TlsTest(description = "If the server chooses to accept the \"early_data\" extension, then it"
-            + "MUST comply with the same error-handling requirements specified for"
-            + "all records when processing early data records.  Specifically, if the\n"
-            + "server fails to decrypt a 0-RTT record following an accepted\n"
-            + "\"early_data\" extension, it MUST terminate the connection with a\n"
-            + "\"bad_record_mac\" alert as per Section 5.2.")
-    @RFC(number = 8446, section = "4.2.10 Early Data Indication")
-    @ScopeExtensions("BasicDerivationType.AUTH_TAG_BITMASK")
+    @AnvilTest(id = "8446-QSom3GGTZ1")
+    @IncludeParameter("AUTH_TAG_BITMASK")
     @MethodCondition(method = "supports0rtt")
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @CryptoCategory(SeverityLevel.HIGH)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @Disabled
+    public void invalidAuthTag(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setAddPSKKeyExchangeModesExtension(true);
         c.setAddPreSharedKeyExtension(true);
         c.setAddEarlyDataExtension(true);
         c.setPreserveMessageRecordRelation(true);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
-        
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilLastReceivingMessage(WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
+
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilLastReceivingMessage(
+                        WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction());
 
         SendAction cHello = (SendAction) workflowTrace.getLastSendingAction();
-        cHello.getSendMessages().remove(workflowTrace.getFirstSendMessage(ApplicationMessage.class));
+        cHello.getSendMessages()
+                .remove(workflowTrace.getFirstSendMessage(ApplicationMessage.class));
 
         Record helloRecord = new Record();
         Record ccsCompatibilityRecord = new Record();
@@ -281,31 +270,41 @@ public class EarlyData extends Tls13Test {
         }
         workflowTrace.getLastSendingAction().getSendRecords().add(earlyRecord);
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            List<AbstractRecord> records = trace.getLastReceivingAction().getReceivedRecords();
-            List<ProtocolMessage> msgs = trace.getLastReceivingAction().getReceivedMessages();
-            if (records.size() > msgs.size()) {
-                AlertMessage decAlert = tryToDecryptWithAppSecrets(i.getState().getTlsContext(), records.get(msgs.size()));
-                if (decAlert != null) {
-                    msgs.add(decAlert);
-                }
-            }
+        State state = runner.execute(workflowTrace, c);
 
-            Validator.receivedFatalAlert(i, false);
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, alert);
-        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        List<Record> records = trace.getLastReceivingAction().getReceivedRecords();
+        List<ProtocolMessage> msgs = trace.getLastReceivingAction().getReceivedMessages();
+        if (records.size() > msgs.size()) {
+            AlertMessage decAlert =
+                    tryToDecryptWithAppSecrets(state.getTlsContext(), records.get(msgs.size()));
+            if (decAlert != null) {
+                msgs.add(decAlert);
+            }
+        }
+
+        Validator.receivedFatalAlert(state, testCase, false);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, alert);
     }
 
-    private AlertMessage tryToDecryptWithAppSecrets(TlsContext context, AbstractRecord record) {
+    private AlertMessage tryToDecryptWithAppSecrets(TlsContext context, Record record) {
         try {
-            KeySet keySet = KeySetGenerator.generateKeySet(context, ProtocolVersion.TLS13, Tls13KeySetType.APPLICATION_TRAFFIC_SECRETS);
-            RecordCipher recordCipher = RecordCipherFactory.getRecordCipher(context, keySet, context.getSelectedCipherSuite());
+            KeySet keySet =
+                    KeySetGenerator.generateKeySet(
+                            context,
+                            ProtocolVersion.TLS13,
+                            Tls13KeySetType.APPLICATION_TRAFFIC_SECRETS);
+            RecordCipher recordCipher = RecordCipherFactory.getRecordCipher(context, keySet, false);
             RecordDecryptor dec = new RecordDecryptor(recordCipher, context);
             dec.decrypt(record);
-            AlertHandler handler = new AlertHandler(context);
-            AlertMessage alert = handler.getParser(record.getCleanProtocolMessageBytes().getValue(), 0).parse();
+            AlertMessage alert = new AlertMessage();
+            alert.getParser(
+                            context,
+                            new ByteArrayInputStream(
+                                    record.getCleanProtocolMessageBytes().getValue()))
+                    .parse(alert);
+
             return alert;
         } catch (Exception ex) {
             return null;

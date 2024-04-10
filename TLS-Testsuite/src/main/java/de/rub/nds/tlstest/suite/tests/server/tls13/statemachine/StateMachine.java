@@ -1,111 +1,72 @@
+/**
+ * TLS-Testsuite - A testsuite for the TLS protocol
+ *
+ * <p>Copyright 2022 Ruhr University Bochum
+ *
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
+ */
 package de.rub.nds.tlstest.suite.tests.server.tls13.statemachine;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
+import de.rub.nds.anvilcore.annotation.ServerTest;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
-import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.DHClientKeyExchangeMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ECDHClientKeyExchangeMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.RSAClientKeyExchangeMessage;
-import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SetEncryptChangeCipherSpecConfigAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.ServerTest;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.tests.server.both.statemachine.SharedStateMachineTest;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
 
 /**
- * Contains tests to evaluate the target's state machine. Some test flows are
- * based on results found for TLS 1.2 servers in "Protocol State Fuzzing of TLS
- * Implementations" (de Ruiter et al.)
+ * Contains tests to evaluate the target's state machine. Some test flows are based on results found
+ * for TLS 1.2 servers in "Protocol State Fuzzing of TLS Implementations" (de Ruiter et al.)
  */
 @Tag("statemachine")
 @ServerTest
 public class StateMachine extends Tls13Test {
 
-    @TlsTest(description = "Send two Client Hello Messages at the beginning of the Handshake")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    public void secondClientHello(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
-        SharedStateMachineTest.sharedSecondClientHelloTest(config, runner);
+    @AnvilTest(id = "XSM-FeqjZ8aw4M")
+    public void secondClientHello(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
+        SharedStateMachineTest.sharedSecondClientHelloTest(config, runner, testCase);
     }
 
-    @Test
-    @TestDescription("Begin the Handshake with Application Data")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    public void beginWithApplicationData(WorkflowRunner runner) {
+    @NonCombinatorialAnvilTest(id = "XSM-h4swiGTUoj")
+    public void beginWithApplicationData(WorkflowRunner runner, AnvilTestCase testCase) {
         Config config = getConfig();
-        SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner);
+        SharedStateMachineTest.sharedBeginWithApplicationDataTest(config, runner, testCase);
     }
 
-    @Test
-    @TestDescription("Begin the Handshake with a Finished Message")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    public void beginWithFinished(WorkflowRunner runner) {
+    @NonCombinatorialAnvilTest(id = "XSM-ttrqZTyAR7")
+    public void beginWithFinished(WorkflowRunner runner, AnvilTestCase testCase) {
         Config config = getConfig();
-        SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner);
+        SharedStateMachineTest.sharedBeginWithFinishedTest(config, runner, testCase);
     }
 
-    @TlsTest(description = "If an implementation "
-            + "detects a change_cipher_spec record received before the first "
-            + "ClientHello message or after the peer's Finished message, it MUST be "
-            + "treated as an unexpected record type (though stateless servers may "
-            + "not be able to distinguish these cases from allowed cases).")
-    @RFC(number = 8446, section = "5. Record Protocol")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    public void sendLegacyChangeCipherSpecAfterFinished(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "XSM-suejNj5yGF")
+    public void sendLegacyChangeCipherSpecAfterFinished(
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsAction(new SendAction(new ChangeCipherSpecMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
-    @TlsTest(description = "An"
-            + "implementation which receives any other change_cipher_spec value or "
-            + "which receives a protected change_cipher_spec record MUST abort the "
-            + "handshake with an \"unexpected_message\" alert.")
-    @RFC(number = 8446, section = "5. Record Protocol")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    public void sendEncryptedChangeCipherSpec(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "XSM-XKTmaWjbUn")
+    public void sendEncryptedChangeCipherSpec(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsAction(new SetEncryptChangeCipherSpecConfigAction(true));
         SendAction sendActionCCS = new SendAction(new ChangeCipherSpecMessage());
@@ -113,69 +74,58 @@ public class StateMachine extends Tls13Test {
         workflowTrace.addTlsAction(sendActionCCS);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
-    @TlsTest(description = "Send a legacy ECDH Client Key Exchange Message instead of just a Finished")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    public void sendLegacyFlowECDHClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "XSM-nRMHLnST86")
+    public void sendLegacyFlowECDHClientKeyExchange(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.addTlsAction(new SendAction(new ECDHClientKeyExchangeMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(new ECDHClientKeyExchangeMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
-    @TlsTest(description = "Send a legacy DH Client Key Exchange Message instead of just a Finished")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    public void sendLegacyFlowDHClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "XSM-fiTPAjuY4v")
+    public void sendLegacyFlowDHClientKeyExchange(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.addTlsAction(new SendAction(new DHClientKeyExchangeMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(new DHClientKeyExchangeMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
-    @TlsTest(description = "Send a legacy RSA Client Key Exchange Message instead of just a Finished")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    public void sendLegacyFlowRSAClientKeyExchange(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "XSM-jGhG25V2Jy")
+    public void sendLegacyFlowRSAClientKeyExchange(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        workflowTrace.addTlsAction(new SendAction(new RSAClientKeyExchangeMessage(config)));
+        workflowTrace.addTlsAction(new SendAction(new RSAClientKeyExchangeMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, config).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
     }
-    
-    @RFC(number = 8446, section = "4.1.2 Client Hello")
-    @TlsTest(description = "Because TLS 1.3 forbids renegotiation, if a server has negotiated "
-            + "TLS 1.3 and receives a ClientHello at any other time, it MUST terminate the "
-            + "connection with an \"unexpected_message\" alert.")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    public void sendClientHelloAfterFinishedHandshake(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config config = getPreparedConfig(argumentAccessor, runner);
+
+    @AnvilTest(id = "XSM-Q5G5Vrenab")
+    public void sendClientHelloAfterFinishedHandshake(
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         trace.addTlsActions(
                 new SendAction(new ClientHelloMessage(config)),
-                new ReceiveAction(new AlertMessage())
-        );
+                new ReceiveAction(new AlertMessage()));
 
-        runner.execute(trace, config).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
+        State state = runner.execute(trace, config);
 
-            AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.UNEXPECTED_MESSAGE, alert);
-        });
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, alert);
     }
 }

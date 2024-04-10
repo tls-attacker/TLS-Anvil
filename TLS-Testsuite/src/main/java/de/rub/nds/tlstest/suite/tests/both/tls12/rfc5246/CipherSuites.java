@@ -1,68 +1,43 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2020 Ruhr University Bochum and
- * TÜV Informationstechnik GmbH
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
+import static org.junit.Assert.assertEquals;
+
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsscanner.serverscanner.report.result.VersionSuiteListPair;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
-
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.jupiter.api.Test;
-
-@RFC(number = 5264, section = "1.2 Major Differences from TLS 1.1")
 public class CipherSuites extends Tls12Test {
 
-    //@TlsTest(description = "Removed IDEA and DES cipher suites. They are now deprecated and will be documented in a separate document.", )
-    // Fails when testing with the EanbleWeakSSLCiphers config option, since the global cite report then contains deprecated cipher suites 
-    @Test
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @TestDescription("IDEA and DES cipher suites must not be used for TLS 1.2")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
+    @NonCombinatorialAnvilTest(id = "5246-jxPrq1MPSR")
     public void supportOfDeprecatedCipherSuites() {
-        List<VersionSuiteListPair> versionSuiteListPairList = context.getSiteReport().getVersionSuitePairs();
-        List<CipherSuite> suites = versionSuiteListPairList.stream()
-                .filter(i -> i.getVersion() == ProtocolVersion.TLS12)
-                .flatMap(i -> i.getCipherSuiteList().stream())
-                .collect(Collectors.toList());
+        List<CipherSuite> suites =
+                new LinkedList<>(context.getFeatureExtractionResult().getCipherSuites());
 
         List<String> badSuites = new ArrayList<>();
         for (CipherSuite i : suites) {
             if (AlgorithmResolver.getCipher(i).toString().contains("IDEA")) {
                 badSuites.add(i.toString());
-            }
-            else if (AlgorithmResolver.getCipher(i).toString().contains("_DES")) {
+            } else if (AlgorithmResolver.getCipher(i).toString().contains("_DES")) {
                 badSuites.add(i.toString());
-            }
-            else if (AlgorithmResolver.getCipher(i).toString().contains("RC4")) {
+            } else if (AlgorithmResolver.getCipher(i).toString().contains("RC4")) {
                 badSuites.add(i.toString());
             }
         }
 
-        assertEquals("Deprecated Ciphersuites supported: " + String.join(", ", badSuites), 0, badSuites.size());
+        assertEquals(
+                "Deprecated Ciphersuites supported: " + String.join(", ", badSuites),
+                0,
+                badSuites.size());
     }
 }

@@ -1,100 +1,81 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2020 Ruhr University Bochum and
- * TÜV Informationstechnik GmbH
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8422;
 
+import static org.junit.Assert.*;
+
+import de.rub.nds.anvilcore.annotation.*;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
-import de.rub.nds.tlsattacker.attacks.ec.InvalidCurvePoint;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.ECPointFormat;
-import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlsattacker.core.crypto.ec.CurveFactory;
-import de.rub.nds.tlsattacker.core.crypto.ec.EllipticCurve;
-import de.rub.nds.tlsattacker.core.crypto.ec.FieldElementFp;
-import de.rub.nds.tlsattacker.core.crypto.ec.Point;
-import de.rub.nds.tlsattacker.core.crypto.ec.PointFormatter;
-import de.rub.nds.tlsattacker.core.crypto.ec.RFC7748Curve;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ECDHEServerKeyExchangeMessage;
+import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.crypto.ec.*;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.InvalidCurvePoint;
+import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.TwistedCurvePoint;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.DynamicValueConstraints;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
 import java.util.List;
-
-import java.util.Set;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
-import static org.junit.Assert.*;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-
-
-@RFC(number = 8422, section = "4. TLS Extensions for ECC")
 @ClientTest
 public class TLSExtensionForECC extends Tls12Test {
 
-    @Test
+    public ConditionEvaluationResult doesNotOfferEccCipherSuite() {
+        if (context.getFeatureExtractionResult().getCipherSuites() == null
+                || context.getFeatureExtractionResult().getCipherSuites().stream()
+                        .anyMatch(
+                                cipherSuite -> {
+                                    return AlgorithmResolver.getKeyExchangeAlgorithm(cipherSuite)
+                                            .isEC();
+                                })) {
+            return ConditionEvaluationResult.disabled("Client supports ECC cipher suite");
+        }
+        return ConditionEvaluationResult.enabled("");
+    }
+
+    @NonCombinatorialAnvilTest(id = "8422-exVPmQoGGM")
     @KeyExchange(supported = KeyExchangeType.ECDH)
-    @TestDescription("Implementations of this document MUST support the" +
-            "uncompressed format for all of their supported curves and MUST NOT" +
-            "support other formats for curves defined in this specification.  For" +
-            "backwards compatibility purposes, the point format list extension MAY" +
-            "still be included and contain exactly one value: the uncompressed" +
-            "point format (0).")
-    @InteroperabilityCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
+    @Tag("adjusted")
     public void invalidPointFormat() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
-        assertNotNull(AssertMsgs.ClientHelloNotReceived, msg);
-        ECPointFormatExtensionMessage poinfmtExt = msg.getExtension(ECPointFormatExtensionMessage.class);
-        
+        assertNotNull(AssertMsgs.CLIENT_HELLO_NOT_RECEIVED, msg);
+        ECPointFormatExtensionMessage poinfmtExt =
+                msg.getExtension(ECPointFormatExtensionMessage.class);
+
         boolean rfc8422curves = false;
-        for(NamedGroup group: context.getSiteReport().getSupportedNamedGroups()) {
-            if(isRfc8422Curve(group)) {
+        boolean nonRfc8422curve = false;
+        for (NamedGroup group : context.getFeatureExtractionResult().getNamedGroups()) {
+            if (isRfc8422Curve(group)) {
                 rfc8422curves = true;
-                break;
+            } else {
+                nonRfc8422curve = true;
             }
         }
-        
-        if(poinfmtExt != null) {
+
+        if (poinfmtExt != null) {
             boolean contains_zero = false;
             boolean contains_other = false;
             for (byte b : poinfmtExt.getPointFormats().getValue()) {
@@ -104,40 +85,38 @@ public class TLSExtensionForECC extends Tls12Test {
                     contains_other = true;
                 }
             }
-            assertTrue("ECPointFormatExtension does not contain uncompressed format", contains_zero);
-            if(rfc8422curves) {
-                assertFalse("ECPointFormatExtension contains compressed or invalid format", contains_other);
+            assertTrue(
+                    "ECPointFormatExtension does not contain uncompressed format", contains_zero);
+            if (rfc8422curves && !nonRfc8422curve) {
+                assertFalse(
+                        "ECPointFormatExtension contains compressed or invalid format",
+                        contains_other);
             }
         }
     }
-    
-    /*@TlsTest(description = " RFC 4492 defined 25 different curves in the NamedCurve registry (now\n" +
-            "renamed the \"TLS Supported Groups\" registry, although the enumeration\n" +
-            "below is still named NamedCurve) for use in TLS.  Only three have\n" +
-            "seen much use.  This specification is deprecating the rest (with\n" +
-            "numbers 1-22).  This specification also deprecates the explicit " +
-            "curves with identifiers 0xFF01 and 0xFF02.  It also adds the new\n" +
-            "curves defined in [RFC7748]", securitySeverity = SeverityLevel.LOW)*/
-    @Test
+
+    @NonCombinatorialAnvilTest(id = "8422-zPzy3N3kzG")
     @KeyExchange(supported = {KeyExchangeType.ECDH})
-    @TestDescription("Deprecated groups should not be offered by a client")
-    @CryptoCategory(SeverityLevel.MEDIUM)
-    @SecurityCategory(SeverityLevel.MEDIUM)
-    @DeprecatedFeatureCategory(SeverityLevel.MEDIUM)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
     public void offeredDeprecatedGroup() {
         boolean deprecated = false;
         List<NamedGroup> deprecatedFound = new LinkedList<>();
-        for(NamedGroup group : context.getSiteReport().getSupportedNamedGroups()) {
-            if(group.getIntValue() < NamedGroup.SECP256R1.getIntValue() || group == NamedGroup.EXPLICIT_CHAR2 || group == NamedGroup.EXPLICIT_PRIME) {
+        for (NamedGroup group : context.getFeatureExtractionResult().getNamedGroups()) {
+            if (group.getIntValue() < NamedGroup.SECP256R1.getIntValue()
+                    || group == NamedGroup.EXPLICIT_CHAR2
+                    || group == NamedGroup.EXPLICIT_PRIME) {
                 deprecatedFound.add(group);
             }
         }
-        assertTrue("Found deprecated group: " + deprecatedFound.stream().map(NamedGroup::name).collect(Collectors.joining(",")), deprecatedFound.isEmpty());
+        assertTrue(
+                "Found deprecated group: "
+                        + deprecatedFound.stream()
+                                .map(NamedGroup::name)
+                                .collect(Collectors.joining(",")),
+                deprecatedFound.isEmpty());
     }
-    
+
     private boolean isRfc8422Curve(NamedGroup group) {
-        if(group == NamedGroup.SECP256R1 
+        if (group == NamedGroup.SECP256R1
                 || group == NamedGroup.SECP384R1
                 || group == NamedGroup.SECP521R1
                 || group == NamedGroup.ECDH_X25519
@@ -146,39 +125,127 @@ public class TLSExtensionForECC extends Tls12Test {
         }
         return false;
     }
-    
-    public boolean isInvalidCurveApplicableNamedGroup(NamedGroup group) {
-        if(group != null && group.isCurve() && !group.isGost() && !(CurveFactory.getCurve(group) instanceof RFC7748Curve)) {
+
+    public boolean isSecpCurve(NamedGroup group) {
+        if (group != null
+                && group.isCurve()
+                && !group.isGost()
+                && !(CurveFactory.getCurve(group) instanceof RFC7748Curve)) {
             return true;
         }
         return false;
     }
-    
-    @TlsTest(description = "A lack of point validation might enable Invalid Curve Attacks")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @KeyExchange(supported = {KeyExchangeType.ECDH}, requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.NAMED_GROUP", methods = "isInvalidCurveApplicableNamedGroup")
-    @CryptoCategory(SeverityLevel.HIGH)
-    @SecurityCategory(SeverityLevel.HIGH)
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @AlertCategory(SeverityLevel.LOW)
-    public void rejectsInvalidCurvePoints(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
 
-        NamedGroup selectedGroup = derivationContainer.getDerivation(NamedGroupDerivation.class).getSelectedValue();
+    @AnvilTest(id = "8422-A5SiH3AcVB")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @KeyExchange(
+            supported = {KeyExchangeType.ECDH},
+            requiresServerKeyExchMsg = true)
+    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
+    public void rejectsInvalidCurvePoints(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
+
+        NamedGroup selectedGroup =
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
         InvalidCurvePoint invalidCurvePoint = InvalidCurvePoint.smallOrder(selectedGroup);
         Point serializablePoint =
-            new Point(new FieldElementFp(invalidCurvePoint.getPublicPointBaseX(), curve.getModulus()), new FieldElementFp(
-                invalidCurvePoint.getPublicPointBaseY(), curve.getModulus()));
-        byte[] serializedPoint = PointFormatter.formatToByteArray(selectedGroup, serializablePoint, ECPointFormat.UNCOMPRESSED);
-        
+                new Point(
+                        new FieldElementFp(
+                                invalidCurvePoint.getPublicPointBaseX(), curve.getModulus()),
+                        new FieldElementFp(
+                                invalidCurvePoint.getPublicPointBaseY(), curve.getModulus()));
+        byte[] serializedPoint =
+                PointFormatter.formatToByteArray(
+                        selectedGroup, serializablePoint, ECPointFormat.UNCOMPRESSED);
+
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        ECDHEServerKeyExchangeMessage serverKeyExchangeMessage = (ECDHEServerKeyExchangeMessage) WorkflowTraceUtil.getFirstSendMessage(HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
+        ECDHEServerKeyExchangeMessage serverKeyExchangeMessage =
+                (ECDHEServerKeyExchangeMessage)
+                        WorkflowTraceUtil.getFirstSendMessage(
+                                HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
         serverKeyExchangeMessage.setPublicKey(Modifiable.explicit(serializedPoint));
-        
+
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
+    }
+
+    @AnvilTest(id = "8422-nGxjfcCt1i")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @KeyExchange(
+            supported = {KeyExchangeType.ECDH},
+            requiresServerKeyExchMsg = true)
+    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
+    @Tag("new")
+    public void abortsWhenSharedSecretIsZero(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilSendingMessage(
+                        WorkflowTraceType.HANDSHAKE, HandshakeMessageType.SERVER_KEY_EXCHANGE);
+        NamedGroup selectedGroup =
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
+
+        TwistedCurvePoint groupSpecificPoint = TwistedCurvePoint.smallOrder(selectedGroup);
+        RFC7748Curve curve = (RFC7748Curve) CurveFactory.getCurve(selectedGroup);
+        Point invalidPoint =
+                new Point(
+                        new FieldElementFp(
+                                groupSpecificPoint.getPublicPointBaseX(), curve.getModulus()),
+                        new FieldElementFp(
+                                groupSpecificPoint.getPublicPointBaseY(), curve.getModulus()));
+
+        ECDHEServerKeyExchangeMessage serverKeyExchange = new ECDHEServerKeyExchangeMessage();
+        byte[] serializedPublicKey = curve.encodeCoordinate(invalidPoint.getFieldX().getData());
+        serverKeyExchange.setPublicKey(Modifiable.explicit(serializedPublicKey));
+        workflowTrace.addTlsAction(new SendAction(serverKeyExchange));
+        workflowTrace.addTlsAction(
+                new SendAction(ActionOption.MAY_FAIL, new ServerHelloDoneMessage()));
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+
+        State state = runner.execute(workflowTrace, config);
+        Validator.receivedFatalAlert(state, testCase);
+    }
+
+    @AnvilTest(id = "8422-DknikJ9VC5")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
+    @KeyExchange(
+            supported = {KeyExchangeType.ECDH},
+            requiresServerKeyExchMsg = true)
+    @Tag("new")
+    public void respectsPointFormat(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
+        config.setDefaultServerSupportedPointFormats(ECPointFormat.UNCOMPRESSED);
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilSendingMessage(
+                        WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        ECDHClientKeyExchangeMessage clientKeyExchange =
+                state.getWorkflowTrace()
+                        .getFirstReceivedMessage(ECDHClientKeyExchangeMessage.class);
+        assertEquals(
+                "Client did not respect our Point Format",
+                0x04,
+                clientKeyExchange.getPublicKey().getValue()[0]);
+    }
+
+    @NonCombinatorialAnvilTest(id = "8422-jJBYYpiKBH")
+    @MethodCondition(method = "doesNotOfferEccCipherSuite")
+    @Tag("new")
+    public void offersExtensionsWithoutCipher() {
+        ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
+        assertFalse(
+                "Client offered EC Point Formats without an ECC Cipher Suite",
+                clientHello.containsExtension(ExtensionType.EC_POINT_FORMATS));
+        // testing for Elliptic Curves Extension is not sensible as the extension
+        // is now called Named Groups Extension and also negotiates FFDHE groups
+    }
+
+    public boolean isXCurve(NamedGroup group) {
+        return group != null && group.name().contains("ECDH_X");
     }
 }

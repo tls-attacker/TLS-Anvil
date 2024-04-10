@@ -1,0 +1,3 @@
+As an exception to the above, when a client intends to resume a session and sets ClientHello.client_version to the protocol version negotiated for that session, it MUST NOT include TLS_FALLBACK_SCSV in ClientHello.cipher_suites.
+
+If a client keeps track of the highest protocol version apparently supported by a particular server for use in ClientHello.client_version later, then if the client receives an inappropriate_fallback alert from that server, it MUST clear the memorized highest supported protocol version.

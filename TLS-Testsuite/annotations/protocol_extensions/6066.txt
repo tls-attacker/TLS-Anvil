@@ -1,0 +1,1 @@
+For backward compatibility, all future data structures associated with new NameTypes MUST begin with a 16-bit length field.

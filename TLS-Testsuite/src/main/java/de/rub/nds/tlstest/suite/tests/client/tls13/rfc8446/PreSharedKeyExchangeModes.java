@@ -1,59 +1,46 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2020 Ruhr University Bochum and
- * TÜV Informationstechnik GmbH
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PSKKeyExchangeModesExtensionMessage;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.ClientTest;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.DeprecatedFeatureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.MessageStructureCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 
 @ClientTest
-@RFC(number = 8446, section = "4.2.9 Pre-Shared Key Exchane Modes")
 public class PreSharedKeyExchangeModes extends Tls13Test {
 
     public ConditionEvaluationResult supportsPSKModeExtension() {
-        if (context.getReceivedClientHelloMessage().getExtension(PSKKeyExchangeModesExtensionMessage.class) != null) {
+        if (context.getReceivedClientHelloMessage()
+                        .getExtension(PSKKeyExchangeModesExtensionMessage.class)
+                != null) {
             return ConditionEvaluationResult.enabled("");
         }
         return ConditionEvaluationResult.disabled("PSKModeExtension is not supported");
     }
 
-    @TlsTest(description = "The server MUST NOT send a \"psk_key_exchange_modes\" extension.")
+    @AnvilTest(id = "8446-t4AtKzmU9J")
     @MethodCondition(method = "supportsPSKModeExtension")
-    @HandshakeCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
-    public void sendPSKModeExtension(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendPSKModeExtension(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         c.setAddPSKKeyExchangeModesExtension(true);
 
@@ -62,10 +49,15 @@ public class PreSharedKeyExchangeModes extends Tls13Test {
 
         ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
         PSKKeyExchangeModesExtensionMessage ext = new PSKKeyExchangeModesExtensionMessage();
-        ext.setExtensionBytes(Modifiable.explicit(context.getReceivedClientHelloMessage().getExtension(PSKKeyExchangeModesExtensionMessage.class).getExtensionBytes().getValue()));
+        ext.setExtensionBytes(
+                Modifiable.explicit(
+                        context.getReceivedClientHelloMessage()
+                                .getExtension(PSKKeyExchangeModesExtensionMessage.class)
+                                .getExtensionBytes()
+                                .getValue()));
         sh.addExtension(ext);
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
-
 }

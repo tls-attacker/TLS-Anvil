@@ -1,63 +1,42 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2020 Ruhr University Bochum and
- * TÜV Informationstechnik GmbH
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
+import de.rub.nds.anvilcore.annotation.*;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
-import de.rub.nds.tlstest.framework.annotations.*;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
-import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-import de.rub.nds.tlstest.framework.annotations.categories.CryptoCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-
-
-@RFC(number = 5264, section = "6.2.3.3 AEAD Ciphers")
 public class AEADCiphers extends Tls12Test {
 
-    @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions({"BasicDerivationType.AUTH_TAG_BITMASK"})
-    @ValueConstraints(affectedTypes = "BasicDerivationType.CIPHERSUITE", methods="isAEAD")
-    @CryptoCategory(SeverityLevel.CRITICAL)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    public void invalidAuthTag(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+    @AnvilTest(id = "5246-7JhgKXeTXv")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @IncludeParameter("AUTH_TAG_BITMASK")
+    @ValueConstraints({
+        @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
+    })
+    public void invalidAuthTag(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
@@ -67,37 +46,36 @@ public class AEADCiphers extends Tls12Test {
         sendAction.setRecords(record);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace.addTlsActions(
-                sendAction,
-                new ReceiveAction(new AlertMessage())
-        );
+        workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
-        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, msg);
     }
 
     public boolean recordLengthAllowsModification(Integer lengthCandidate) {
         return lengthCandidate >= 50;
     }
 
-    @TlsTest(description = "If the decryption fails, a fatal bad_record_mac alert MUST be generated.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @ScopeExtensions({"BasicDerivationType.CIPHERTEXT_BITMASK", "BasicDerivationType.APP_MSG_LENGHT"})
-    @ValueConstraints(affectedTypes = "BasicDerivationType.CIPHERSUITE", methods="isAEAD")
-    @DynamicValueConstraints(affectedTypes = "BasicDerivationType.RECORD_LENGTH", methods = "recordLengthAllowsModification")
-    @CryptoCategory(SeverityLevel.CRITICAL)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    @ComplianceCategory(SeverityLevel.MEDIUM)
-    public void invalidCiphertext(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-        byte[] modificationBitmask = derivationContainer.buildBitmask();
+    @AnvilTest(id = "5246-sYXZ8a3B4C")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @IncludeParameters({
+        @IncludeParameter("CIPHERTEXT_BITMASK"),
+        @IncludeParameter("APP_MSG_LENGHT")
+    })
+    @ValueConstraints({
+        @ValueConstraint(identifier = "CIPHER_SUITE", method = "isAEAD"),
+    })
+    @DynamicValueConstraints(
+            affectedIdentifiers = "RECORD_LENGTH",
+            methods = "recordLengthAllowsModification")
+    public void invalidCiphertext(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
+        byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         Record record = new Record();
         record.setComputations(new RecordCryptoComputations());
@@ -110,19 +88,14 @@ public class AEADCiphers extends Tls12Test {
         sendAction.setRecords(record);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace.addTlsActions(
-                sendAction,
-                new ReceiveAction(new AlertMessage())
-        );
+        workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            Validator.receivedFatalAlert(i);
+        State state = runner.execute(workflowTrace, c);
 
-            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.BAD_RECORD_MAC, msg);
-        });
+        WorkflowTrace trace = state.getWorkflowTrace();
+        Validator.receivedFatalAlert(state, testCase);
+
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, msg);
     }
-
-
 }

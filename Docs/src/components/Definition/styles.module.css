@@ -1,0 +1,7 @@
+
+
+.tag {
+    color: var(--ifm-link-color);
+    text-decoration: var(--ifm-link-decoration);
+    transition: color var(--ifm-transition-fast) var(--ifm-transition-timing-default);
+}

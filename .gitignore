@@ -1,6 +1,8 @@
-*.code-workspace
-.vscode/
-logs/
-
-TestSuiteResults_*
-localhost:*
+.DS_Store
+*.iml
+.idea
+*.log
+_containerResult.json
+summary.json
+dump.pcap
+/TLS-Test-Framework/nbproject/

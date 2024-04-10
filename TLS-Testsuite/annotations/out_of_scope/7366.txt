@@ -1,0 +1,3 @@
+For DTLS, the record MUST be discarded, and a fatal bad_record_mac MAY be generated [4].  
+
+As the above table points out, implementations MUST NOT renegotiate a downgrade from encrypt-then-MAC to MAC-then-encrypt.

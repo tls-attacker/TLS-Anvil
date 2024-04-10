@@ -1,20 +1,23 @@
 /**
  * TLS-Testsuite - A testsuite for the TLS protocol
  *
- * Copyright 2020 Ruhr University Bochum and
- * TÜV Informationstechnik GmbH
+ * <p>Copyright 2022 Ruhr University Bochum
  *
- * Licensed under Apache License 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>Licensed under Apache License 2.0 http://www.apache.org/licenses/LICENSE-2.0
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
+import static org.junit.Assert.*;
+
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
-import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.CipherType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
@@ -22,83 +25,53 @@ import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ChangeCipherSpecMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.action.ChangeConnectionTimeoutAction;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
-import de.rub.nds.tlstest.framework.annotations.RFC;
-import de.rub.nds.tlstest.framework.annotations.ScopeLimitations;
-import de.rub.nds.tlstest.framework.annotations.TestDescription;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.annotations.categories.AlertCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.ComplianceCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.HandshakeCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.InteroperabilityCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.RecordLayerCategory;
-import de.rub.nds.tlstest.framework.annotations.categories.SecurityCategory;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
-import de.rub.nds.tlstest.framework.constants.SeverityLevel;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import org.junit.jupiter.api.Tag;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
-import org.junit.jupiter.api.Test;
-
-@RFC(number = 5246, section = "6.2.1 Fragmentation")
 public class Fragmentation extends Tls12Test {
-    
-    @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, "
-            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
-            + "Application data MAY be sent as they are potentially useful as a "
-            + "traffic analysis countermeasure.")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.LOW)
+
+    @AnvilTest(id = "5246-bXbN8uEo2c")
     @EnforcedSenderRestriction
-    public void sendZeroLengthRecord_CCS(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendZeroLengthRecord_CCS(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
         c.setUseAllProvidedRecords(true);
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.CHANGE_CIPHER_SPEC);
         r.setMaxRecordLengthConfig(0);
-        SendAction sendAction = new SendAction(new ChangeCipherSpecMessage(c));
+        SendAction sendAction = new SendAction(new ChangeCipherSpecMessage());
         sendAction.setRecords(r);
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilSendingMessage(
+                        WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         workflowTrace.addTlsActions(
                 sendAction,
                 new SendAction(ActionOption.MAY_FAIL, new FinishedMessage()),
-                new ReceiveAction(new AlertMessage())
-        );
+                new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
-    @TlsTest(description = "Implementations MUST NOT send zero-length fragments of Handshake, "
-            + "Alert, or ChangeCipherSpec content types. Zero-length fragments of "
-            + "Application data MAY be sent as they are potentially useful as a "
-            + "traffic analysis countermeasure.")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    public void sendZeroLengthApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "5246-swjhCGVQMb")
+    public void sendZeroLengthApplicationRecord(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
-        ApplicationMessage appMsg = new ApplicationMessage(c);
+        ApplicationMessage appMsg = new ApplicationMessage();
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
@@ -107,32 +80,44 @@ public class Fragmentation extends Tls12Test {
         sendAction.setRecords(r);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace.addTlsActions(
-                sendAction,
-                new GenericReceiveAction()
-        );
+        int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();
+        if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta() > 0
+                && context.getFeatureExtractionResult().getClosedAfterAppDataDelta()
+                        < context.getConfig().getAnvilTestConfig().getConnectionTimeout()) {
+            baseTimeout = (int) context.getFeatureExtractionResult().getClosedAfterAppDataDelta();
+        }
+        final int reducedTimeout = baseTimeout / 2;
+        ChangeConnectionTimeoutAction changeTimeoutAction =
+                new ChangeConnectionTimeoutAction(reducedTimeout);
+        workflowTrace.addTlsActions(changeTimeoutAction, sendAction, new GenericReceiveAction());
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            WorkflowTrace trace = i.getWorkflowTrace();
-            assertTrue(AssertMsgs.WorkflowNotExecuted, trace.executedAsPlanned());
+        State state = runner.execute(workflowTrace, c);
 
-            AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        WorkflowTrace trace = state.getWorkflowTrace();
+        assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, trace.executedAsPlanned());
+
+        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
+        testCase.addAdditionalResultInfo("Evaluated with timeout " + reducedTimeout);
+        if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta() > 0) {
             assertNull("Received alert message", msg);
-            assertFalse("Socket was closed", Validator.socketClosed(i));
-        });
+            assertFalse("Socket was closed", Validator.socketClosed(state));
+        } else {
+            if (msg != null) {
+                assertEquals(
+                        "SUT sent an alert that was not a Close Notify",
+                        AlertDescription.CLOSE_NOTIFY.getValue(),
+                        (byte) msg.getDescription().getValue());
+            }
+        }
     }
 
-    @TlsTest(description = "Send a record without any content with Content Type Application Data. "
-            + " The former record increases the sequencenumber, which should not be allowed")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
+    @AnvilTest(id = "5246-q5y1zcoCCW")
+    @ModelFromScope(modelType = "CERTIFICATE")
     @Tag("emptyRecord")
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
-    public void sendEmptyApplicationRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendEmptyApplicationRecord(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
-        ApplicationMessage appMsg = new ApplicationMessage(c);
+        ApplicationMessage appMsg = new ApplicationMessage();
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
@@ -142,23 +127,16 @@ public class Fragmentation extends Tls12Test {
         sendAction.setRecords(r);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace.addTlsActions(
-                sendAction,
-                new ReceiveAction(new AlertMessage())
-        );
+        workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
-    @TlsTest(description = "Send a record without any content with Content Type Handshake followed by an encrypted record. "
-            + " The former record increases the sequencenumber, which should not be allowed")
-    @SecurityCategory(SeverityLevel.CRITICAL)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @RecordLayerCategory(SeverityLevel.CRITICAL)
-    @AlertCategory(SeverityLevel.LOW)
+    @AnvilTest(id = "5246-5JmcCtfFY3")
     @Tag("emptyRecord")
-    public void sendEmptyFinishedRecord(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    public void sendEmptyFinishedRecord(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         Record r = new Record();
         r.setContentMessageType(ProtocolMessageType.HANDSHAKE);
@@ -167,88 +145,86 @@ public class Fragmentation extends Tls12Test {
         SendAction fin = new SendAction(new FinishedMessage());
         fin.setRecords(r);
 
-        WorkflowTrace workflowTrace = runner.generateWorkflowTraceUntilSendingMessage(WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
-        workflowTrace.addTlsActions(
-                fin,
-                new ReceiveAction(new AlertMessage())
-        );
+        WorkflowTrace workflowTrace =
+                runner.generateWorkflowTraceUntilSendingMessage(
+                        WorkflowTraceType.HANDSHAKE, HandshakeMessageType.FINISHED);
+        workflowTrace.addTlsActions(fin, new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(Validator::receivedFatalAlert);
+        State state = runner.execute(workflowTrace, c);
+        Validator.receivedFatalAlert(state, testCase);
     }
 
-    @TlsTest(description = "The length (in bytes) of the following TLSPlaintext.fragment. "
-            + "The length MUST NOT exceed 2^14.")
-    @ModelFromScope(baseModel = ModelType.CERTIFICATE)
-    @ScopeLimitations("BasicDerivationType.RECORD_LENGTH")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    public void sendRecordWithPlaintextOver2pow14(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
+    @AnvilTest(id = "5246-oqJiBwUXN8")
+    @ModelFromScope(modelType = "CERTIFICATE")
+    @ExcludeParameter("RECORD_LENGTH")
+    public void sendRecordWithPlaintextOver2pow14(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
-        c.getDefaultClientConnection().setTimeout(2000);
-        c.getDefaultServerConnection().setTimeout(2000);
-
-        ApplicationMessage msg = new ApplicationMessage(c);
+        ApplicationMessage msg = new ApplicationMessage();
         msg.setData(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
 
         Record overflowRecord = new Record();
-        overflowRecord.setCleanProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
-        //add dummy Application Message
-        SendAction sendOverflow = new SendAction(new ApplicationMessage(c));
+        overflowRecord.setCleanProtocolMessageBytes(
+                Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
+        // add dummy Application Message
+        SendAction sendOverflow = new SendAction(new ApplicationMessage());
         sendOverflow.setRecords(overflowRecord);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
+                new ChangeConnectionTimeoutAction(
+                        context.getConfig().getAnvilTestConfig().getConnectionTimeout() * 3),
                 sendOverflow,
-                new ReceiveAction(new AlertMessage())
-        );
+                new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW, alert);
-        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW, alert);
     }
 
-    @TlsTest(description = "The length (in bytes) of the following TLSCiphertext.fragment. "
-            + "The length MUST NOT exceed 2^14 + 2048.")
-    @ScopeLimitations("BasicDerivationType.RECORD_LENGTH")
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.HIGH)
-    @AlertCategory(SeverityLevel.MEDIUM)
-    public void sendRecordWithCiphertextOver2pow14plus2048(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        Config c = getPreparedConfig(argumentAccessor, runner);
-
-        c.getDefaultClientConnection().setTimeout(2000);
-        c.getDefaultServerConnection().setTimeout(2000);
+    @AnvilTest(id = "5246-6w2UjD5RGT")
+    @ExcludeParameter("RECORD_LENGTH")
+    public void sendRecordWithCiphertextOver2pow14plus2048(
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config c = getPreparedConfig(runner);
 
         Record overflowRecord = new Record();
-        overflowRecord.setProtocolMessageBytes(Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 2049]));
-        //add dummy Application Message
-        SendAction sendOverflow = new SendAction(new ApplicationMessage(c));
+        overflowRecord.setProtocolMessageBytes(
+                Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 2049]));
+        // add dummy Application Message
+        SendAction sendOverflow = new SendAction(new ApplicationMessage());
         sendOverflow.setRecords(overflowRecord);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
+                new ChangeConnectionTimeoutAction(
+                        context.getConfig().getAnvilTestConfig().getConnectionTimeout() * 2),
                 sendOverflow,
-                new ReceiveAction(new AlertMessage())
-        );
+                new ReceiveAction(new AlertMessage()));
 
-        runner.execute(workflowTrace, c).validateFinal(i -> {
-            Validator.receivedFatalAlert(i);
-            AlertMessage alert = i.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-            Validator.testAlertDescription(i, AlertDescription.RECORD_OVERFLOW, alert);
-        });
+        State state = runner.execute(workflowTrace, c);
+
+        Validator.receivedFatalAlert(state, testCase);
+        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW, alert);
     }
-    
-    @Test
-    @TestDescription("Evaluate if the preparation phase detected that the target is able to process fragmented Records")
-    @InteroperabilityCategory(SeverityLevel.HIGH)
-    @RecordLayerCategory(SeverityLevel.HIGH)
-    @ComplianceCategory(SeverityLevel.CRITICAL)
-    @HandshakeCategory(SeverityLevel.HIGH)
+
+    @NonCombinatorialAnvilTest(id = "5246-M5X6WTePcK")
     public void recordFragmentationSupported() {
-        assertTrue("Record fragmentation support has not been detected", context.getSiteReport().getResult(AnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION) == TestResult.TRUE);
+        if (context.getConfig().isUseDTLS()) {
+            assertTrue(
+                    "DTLS record fragmentation support has not been detected",
+                    context.getFeatureExtractionResult()
+                                    .getResult(TlsAnalyzedProperty.SUPPORTS_DTLS_FRAGMENTATION)
+                            == TestResults.TRUE);
+        } else {
+            assertTrue(
+                    "Record fragmentation support has not been detected",
+                    context.getFeatureExtractionResult()
+                                    .getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION)
+                            == TestResults.TRUE);
+        }
     }
 }

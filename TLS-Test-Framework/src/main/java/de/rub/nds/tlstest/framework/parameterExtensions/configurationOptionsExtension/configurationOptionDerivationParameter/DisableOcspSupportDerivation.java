@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DisableOcspSupportDerivation extends ConfigurationOptionDerivationParameter {
     public DisableOcspSupportDerivation() {
-        super(ConfigOptionDerivationType.DisableOcspSupport);
+        super(ConfigOptionDerivationType.DISABLE_OCSP_SUPPORT);
     }
 
     public DisableOcspSupportDerivation(ConfigurationOptionValue selectedValue) {

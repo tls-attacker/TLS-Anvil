@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DisableAssemblerCodeDerivation extends ConfigurationOptionDerivationParameter {
     public DisableAssemblerCodeDerivation() {
-        super(ConfigOptionDerivationType.DisableAssemblerCode);
+        super(ConfigOptionDerivationType.DISABLE_ASSEMBLER_CODE);
     }
 
     public DisableAssemblerCodeDerivation(ConfigurationOptionValue selectedValue) {

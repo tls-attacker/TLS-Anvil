@@ -19,7 +19,7 @@ import java.util.List;
 
 public class EnableDevelopmentFlagsDerivation extends ConfigurationOptionDerivationParameter {
     public EnableDevelopmentFlagsDerivation() {
-        super(ConfigOptionDerivationType.EnableDevelopmentFlags);
+        super(ConfigOptionDerivationType.ENABLE_DEVELOPMENT_FLAGS);
     }
 
     public EnableDevelopmentFlagsDerivation(ConfigurationOptionValue selectedValue) {

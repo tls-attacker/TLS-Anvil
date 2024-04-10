@@ -39,7 +39,7 @@ public class ConfigurationOptionCompoundDerivation
     public ConfigurationOptionCompoundDerivation(
             List<List<ConfigurationOptionDerivationParameter>> setupsList) {
         super(
-                ConfigOptionDerivationType.ConfigurationOptionCompoundParameter,
+                ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER,
                 (Class<List<ConfigurationOptionDerivationParameter>>) (Object) List.class);
         configOptionsSetupsList = setupsList;
     }
@@ -140,7 +140,7 @@ public class ConfigurationOptionCompoundDerivation
         if (testHasWeakCipherSuites
                 && ConfigurationOptionsDerivationManager.getInstance()
                         .getAllActivatedCOTypes()
-                        .contains(ConfigOptionDerivationType.EnableWeakSslCiphers)) {
+                        .contains(ConfigOptionDerivationType.ENABLE_WEAK_SSL_CIPHERS)) {
             condConstraints.add(getWeakCipherSuitesMustBeEnabledToBeUsedConstraint());
         }
 
@@ -172,12 +172,11 @@ public class ConfigurationOptionCompoundDerivation
     private ConditionalConstraint getWeakCipherSuitesMustBeEnabledToBeUsedConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
         requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
-        requiredDerivations.add(ConfigOptionDerivationType.ConfigurationOptionCompoundParameter);
+        requiredDerivations.add(ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER);
         return new ConditionalConstraint(
                 requiredDerivations,
                 ConstraintBuilder.constrain(
-                                ConfigOptionDerivationType.ConfigurationOptionCompoundParameter
-                                        .name(),
+                                ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER.name(),
                                 BasicDerivationType.CIPHERSUITE.name())
                         .withName("WeakCipherSuitesMustBeEnabledToBeUsed")
                         .by(

@@ -19,7 +19,7 @@ import java.util.List;
 
 public class EnableMemoryDebuggingSupportDerivation extends ConfigurationOptionDerivationParameter {
     public EnableMemoryDebuggingSupportDerivation() {
-        super(ConfigOptionDerivationType.EnableMemoryDebuggingSupport);
+        super(ConfigOptionDerivationType.ENABLE_MEMORY_DEBUGGING_SUPPORT);
     }
 
     public EnableMemoryDebuggingSupportDerivation(ConfigurationOptionValue selectedValue) {

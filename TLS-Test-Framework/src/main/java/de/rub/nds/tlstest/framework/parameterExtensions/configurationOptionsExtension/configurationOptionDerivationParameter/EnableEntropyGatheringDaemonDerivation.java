@@ -19,7 +19,7 @@ import java.util.List;
 
 public class EnableEntropyGatheringDaemonDerivation extends ConfigurationOptionDerivationParameter {
     public EnableEntropyGatheringDaemonDerivation() {
-        super(ConfigOptionDerivationType.EnableEntropyGatheringDaemon);
+        super(ConfigOptionDerivationType.ENABLE_ENTROPY_GATHERING_DAEMON);
     }
 
     public EnableEntropyGatheringDaemonDerivation(ConfigurationOptionValue selectedValue) {

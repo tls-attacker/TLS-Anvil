@@ -19,7 +19,7 @@ import java.util.List;
 
 public class EnableNistEcOptimizationsDerivation extends ConfigurationOptionDerivationParameter {
     public EnableNistEcOptimizationsDerivation() {
-        super(ConfigOptionDerivationType.EnableNistEcOptimizations);
+        super(ConfigOptionDerivationType.ENABLE_NIST_EC_OPTIMIZATIONS);
     }
 
     public EnableNistEcOptimizationsDerivation(ConfigurationOptionValue selectedValue) {

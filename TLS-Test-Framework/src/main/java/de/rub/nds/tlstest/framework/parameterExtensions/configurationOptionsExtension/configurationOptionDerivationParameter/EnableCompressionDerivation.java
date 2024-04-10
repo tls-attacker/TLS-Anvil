@@ -23,7 +23,7 @@ public class EnableCompressionDerivation extends ConfigurationOptionDerivationPa
     private static final Logger LOGGER = LogManager.getLogger();
 
     public EnableCompressionDerivation() {
-        super(ConfigOptionDerivationType.EnableCompression);
+        super(ConfigOptionDerivationType.ENABLE_COMPRESSION);
     }
 
     public EnableCompressionDerivation(ConfigurationOptionValue selectedValue) {

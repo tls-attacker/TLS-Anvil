@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DisableErrorStringsDerivation extends ConfigurationOptionDerivationParameter {
     public DisableErrorStringsDerivation() {
-        super(ConfigOptionDerivationType.DisableErrorStrings);
+        super(ConfigOptionDerivationType.DISABLE_ERROR_STRINGS);
     }
 
     public DisableErrorStringsDerivation(ConfigurationOptionValue selectedValue) {

@@ -24,7 +24,7 @@ public class DisablePskDerivation extends ConfigurationOptionDerivationParameter
     private static final Logger LOGGER = LogManager.getLogger();
 
     public DisablePskDerivation() {
-        super(ConfigOptionDerivationType.DisablePsk);
+        super(ConfigOptionDerivationType.DISABLE_PSK);
     }
 
     public DisablePskDerivation(ConfigurationOptionValue selectedValue) {

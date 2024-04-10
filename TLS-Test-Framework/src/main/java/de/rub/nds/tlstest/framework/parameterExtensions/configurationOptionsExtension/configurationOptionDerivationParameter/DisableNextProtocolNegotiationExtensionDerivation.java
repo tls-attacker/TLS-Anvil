@@ -20,7 +20,7 @@ import java.util.List;
 public class DisableNextProtocolNegotiationExtensionDerivation
         extends ConfigurationOptionDerivationParameter {
     public DisableNextProtocolNegotiationExtensionDerivation() {
-        super(ConfigOptionDerivationType.DisableNextProtocolNegotiationExtension);
+        super(ConfigOptionDerivationType.DISABLE_NEXT_PROTOCOL_NEGOTIATION);
     }
 
     public DisableNextProtocolNegotiationExtensionDerivation(

@@ -114,61 +114,61 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         }
         ConfigOptionDerivationType basicType = (ConfigOptionDerivationType) type;
         switch (basicType) {
-            case ConfigurationOptionCompoundParameter:
+            case CONFIG_OPTION_COMPOUND_PARAMETER:
                 if (compoundSetupList == null) {
                     throw new IllegalStateException(
                             "Cannot get ConfigurationOptionCompoundParameter before ConfigurationOptionsConfig was initialized.");
                 }
                 return new ConfigurationOptionCompoundDerivation(compoundSetupList);
-            case DisablePsk:
+            case DISABLE_PSK:
                 return new DisablePskDerivation();
-            case SeedingMethod:
+            case SEEDING_METHOD:
                 return new SeedingMethodDerivation();
-            case EnableNistEcOptimizations:
+            case ENABLE_NIST_EC_OPTIMIZATIONS:
                 return new EnableNistEcOptimizationsDerivation();
-            case DisableSse2:
+            case DISABLE_SSE2:
                 return new DisableSse2Derivation();
-            case DisableBinaryEllipticCurves:
+            case DISABLE_BINARY_ELLIPTIC_CURVES:
                 return new DisableBinaryEllipticCurvesDerivation();
-            case DisableMultiblock:
+            case DISABLE_MULTIBLOCK:
                 return new DisableMultiblockDerivation();
-            case EnableCompression:
+            case ENABLE_COMPRESSION:
                 return new EnableCompressionDerivation();
 
-            case DisableAfalgEngine:
+            case DISABLE_AFALG_ENGINE:
                 return new DisableAfalgEngineDerivation();
-            case EnableEntropyGatheringDaemon:
+            case ENABLE_ENTROPY_GATHERING_DAEMON:
                 return new EnableEntropyGatheringDaemonDerivation();
-            case DisableRdrand:
+            case DISABLE_RDRAND:
                 return new DisableRdrandDerivation();
-            case DisableCertificateTransparency:
+            case DISABLE_CERTIFICATE_TRANSPARENCY:
                 return new DisableCertificateTransparencyDerivation();
-            case DisableNextProtocolNegotiationExtension:
+            case DISABLE_NEXT_PROTOCOL_NEGOTIATION:
                 return new DisableNextProtocolNegotiationExtensionDerivation();
-            case DisableOcspSupport:
+            case DISABLE_OCSP_SUPPORT:
                 return new DisableOcspSupportDerivation();
-            case EnableWeakSslCiphers:
+            case ENABLE_WEAK_SSL_CIPHERS:
                 return new EnableWeakSslCiphersDerivation();
-            case EnableMd2:
+            case ENABLE_MD2:
                 return new EnableMd2Derivation();
-            case EnableRc5:
+            case ENABLE_RC5:
                 return new EnableRc5Derivation();
-            case DisableAssemblerCode:
+            case DISABLE_ASSEMBLER_CODE:
                 return new DisableAssemblerCodeDerivation();
 
-            case DisablePadlockEngine:
+            case DISABLE_PADLOCK_ENGINE:
                 return new DisablePadlockEngineDerivation();
-            case DisablePosixIo:
+            case DISABLE_POSIX_IO:
                 return new DisablePosixIoDerivation();
-            case DisableExtensionForIpAddressesAndAsIdentifiers:
+            case DISABLE__EXTENSION_FOR_IP_ADRESSES_AND_AS_IDENTIFIERS:
                 return new DisableExtensionForIpAddressesAndAsIdentifiersDerivation();
-            case DisableSrpCiphersuites:
+            case DISABLE_SRP_CIPHER_SUITES:
                 return new DisableSrpCiphersuitesDerivation();
-            case EnableDevelopmentFlags:
+            case ENABLE_DEVELOPMENT_FLAGS:
                 return new EnableDevelopmentFlagsDerivation();
-            case EnableMemoryDebuggingSupport:
+            case ENABLE_MEMORY_DEBUGGING_SUPPORT:
                 return new EnableMemoryDebuggingSupportDerivation();
-            case DisableErrorStrings:
+            case DISABLE_ERROR_STRINGS:
                 return new DisableErrorStringsDerivation();
 
             default:
@@ -186,14 +186,14 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         }
         return new LinkedList<>(
                 Collections.singletonList(
-                        ConfigOptionDerivationType.ConfigurationOptionCompoundParameter));
+                        ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER));
     }
 
     @Override
     public List<DerivationType> getAllDerivations() {
         return new LinkedList<>(
                 Collections.singletonList(
-                        ConfigOptionDerivationType.ConfigurationOptionCompoundParameter));
+                        ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER));
     }
 
     public List<ConfigOptionDerivationType> getAllActivatedCOTypes() {

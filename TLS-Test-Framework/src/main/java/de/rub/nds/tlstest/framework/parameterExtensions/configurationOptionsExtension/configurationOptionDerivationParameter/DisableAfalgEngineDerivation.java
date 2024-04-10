@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DisableAfalgEngineDerivation extends ConfigurationOptionDerivationParameter {
     public DisableAfalgEngineDerivation() {
-        super(ConfigOptionDerivationType.DisableAfalgEngine);
+        super(ConfigOptionDerivationType.DISABLE_AFALG_ENGINE);
     }
 
     public DisableAfalgEngineDerivation(ConfigurationOptionValue selectedValue) {

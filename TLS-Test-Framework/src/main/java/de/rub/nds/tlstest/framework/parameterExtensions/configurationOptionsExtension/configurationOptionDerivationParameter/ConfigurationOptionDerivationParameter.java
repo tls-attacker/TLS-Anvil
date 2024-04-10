@@ -10,43 +10,20 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter;
 
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
-import java.util.*;
 
-public abstract class ConfigurationOptionDerivationParameter
-        extends DerivationParameter<ConfigurationOptionValue> {
-    public ConfigurationOptionDerivationParameter(ConfigOptionDerivationType type) {
-        super(type, ConfigurationOptionValue.class);
-    }
+public abstract class ConfigurationOptionDerivationParameter<TypeT>
+        extends DerivationParameter<Config, TypeT> {
 
-    @Override
-    public void applyToConfig(Config config, TestContext context) {}
-
-    @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        return getAllParameterValues(context);
-    }
-
-    public abstract List<DerivationParameter> getAllParameterValues(TestContext context);
-
-    @Override
-    public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
-        return getStaticConditionalConstraints();
-    }
-
-    /**
-     * @return a list of conditional constraints independent of the the derivation scope
-     *     (constraints applied to the precomputed IPM)
-     */
-    public List<ConditionalConstraint> getStaticConditionalConstraints() {
-        return new LinkedList<>();
+    // We use Config.class throughout these parameters allthough they are applied when building the
+    // containers and do not affect the config.
+    public ConfigurationOptionDerivationParameter(
+            ConfigOptionDerivationType type, Class<TypeT> valueClass) {
+        super(valueClass, Config.class, new ParameterIdentifier(type));
     }
 
     /**

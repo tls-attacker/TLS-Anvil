@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DisableBinaryEllipticCurvesDerivation extends ConfigurationOptionDerivationParameter {
     public DisableBinaryEllipticCurvesDerivation() {
-        super(ConfigOptionDerivationType.DisableBinaryEllipticCurves);
+        super(ConfigOptionDerivationType.DISABLE_BINARY_ELLIPTIC_CURVES);
     }
 
     public DisableBinaryEllipticCurvesDerivation(ConfigurationOptionValue selectedValue) {

@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DisableSrpCiphersuitesDerivation extends ConfigurationOptionDerivationParameter {
     public DisableSrpCiphersuitesDerivation() {
-        super(ConfigOptionDerivationType.DisableSrpCiphersuites);
+        super(ConfigOptionDerivationType.DISABLE_SRP_CIPHER_SUITES);
     }
 
     public DisableSrpCiphersuitesDerivation(ConfigurationOptionValue selectedValue) {

@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DisableSse2Derivation extends ConfigurationOptionDerivationParameter {
     public DisableSse2Derivation() {
-        super(ConfigOptionDerivationType.DisableSse2);
+        super(ConfigOptionDerivationType.DISABLE_SSE2);
     }
 
     public DisableSse2Derivation(ConfigurationOptionValue selectedValue) {

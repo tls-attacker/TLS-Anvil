@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DisablePadlockEngineDerivation extends ConfigurationOptionDerivationParameter {
     public DisablePadlockEngineDerivation() {
-        super(ConfigOptionDerivationType.DisablePadlockEngine);
+        super(ConfigOptionDerivationType.DISABLE_PADLOCK_ENGINE);
     }
 
     public DisablePadlockEngineDerivation(ConfigurationOptionValue selectedValue) {

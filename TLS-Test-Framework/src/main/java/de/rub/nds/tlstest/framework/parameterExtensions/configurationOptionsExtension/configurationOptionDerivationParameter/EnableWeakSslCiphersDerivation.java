@@ -19,7 +19,7 @@ import java.util.List;
 
 public class EnableWeakSslCiphersDerivation extends ConfigurationOptionDerivationParameter {
     public EnableWeakSslCiphersDerivation() {
-        super(ConfigOptionDerivationType.EnableWeakSslCiphers);
+        super(ConfigOptionDerivationType.ENABLE_WEAK_SSL_CIPHERS);
     }
 
     public EnableWeakSslCiphersDerivation(ConfigurationOptionValue selectedValue) {

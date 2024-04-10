@@ -19,7 +19,7 @@ import java.util.List;
 
 public class EnableMd2Derivation extends ConfigurationOptionDerivationParameter {
     public EnableMd2Derivation() {
-        super(ConfigOptionDerivationType.EnableMd2);
+        super(ConfigOptionDerivationType.ENABLE_MD2);
     }
 
     public EnableMd2Derivation(ConfigurationOptionValue selectedValue) {

@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DisablePosixIoDerivation extends ConfigurationOptionDerivationParameter {
     public DisablePosixIoDerivation() {
-        super(ConfigOptionDerivationType.DisablePosixIo);
+        super(ConfigOptionDerivationType.DISABLE_POSIX_IO);
     }
 
     public DisablePosixIoDerivation(ConfigurationOptionValue selectedValue) {

@@ -19,7 +19,7 @@ import java.util.List;
 
 public class EnableRc5Derivation extends ConfigurationOptionDerivationParameter {
     public EnableRc5Derivation() {
-        super(ConfigOptionDerivationType.EnableRc5);
+        super(ConfigOptionDerivationType.ENABLE_RC5);
     }
 
     public EnableRc5Derivation(ConfigurationOptionValue selectedValue) {

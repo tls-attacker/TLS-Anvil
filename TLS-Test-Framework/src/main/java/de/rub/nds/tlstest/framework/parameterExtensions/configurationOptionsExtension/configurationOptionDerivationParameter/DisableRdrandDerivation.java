@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DisableRdrandDerivation extends ConfigurationOptionDerivationParameter {
     public DisableRdrandDerivation() {
-        super(ConfigOptionDerivationType.DisableRdrand);
+        super(ConfigOptionDerivationType.DISABLE_RDRAND);
     }
 
     public DisableRdrandDerivation(ConfigurationOptionValue selectedValue) {

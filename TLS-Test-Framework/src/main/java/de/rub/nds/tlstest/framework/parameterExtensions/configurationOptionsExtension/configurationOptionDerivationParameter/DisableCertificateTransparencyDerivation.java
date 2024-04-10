@@ -20,7 +20,7 @@ import java.util.List;
 public class DisableCertificateTransparencyDerivation
         extends ConfigurationOptionDerivationParameter {
     public DisableCertificateTransparencyDerivation() {
-        super(ConfigOptionDerivationType.DisableCertificateTransparency);
+        super(ConfigOptionDerivationType.DISABLE_CERTIFICATE_TRANSPARENCY);
     }
 
     public DisableCertificateTransparencyDerivation(ConfigurationOptionValue selectedValue) {

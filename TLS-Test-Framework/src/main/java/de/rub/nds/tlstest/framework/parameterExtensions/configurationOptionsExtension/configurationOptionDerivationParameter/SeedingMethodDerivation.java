@@ -33,7 +33,7 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
     }
 
     public SeedingMethodDerivation() {
-        super(ConfigOptionDerivationType.SeedingMethod);
+        super(ConfigOptionDerivationType.SEEDING_METHOD);
     }
 
     public SeedingMethodDerivation(ConfigurationOptionValue selectedValue) {
@@ -54,7 +54,7 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
         // List<DerivationType> activatedCODerivations =
         // ConfigurationOptionsDerivationManager.getInstance().getDerivationsOfModel(scope,
         // scope.getBaseModel());
-        // if(activatedCODerivations.contains(ConfigOptionDerivationType.EnableEntropyGatheringDaemon)){
+        // if(activatedCODerivations.contains(ConfigOptionDerivationType.ENABLE_ENTROPY_GATHERING_DAEMON)){
         // seedingMethodsToAdd.add(SeedingMethodType.EntropyGeneratingDaemon);
         // }
         // seedingMethodsToAdd.add(SeedingMethodType.CpuCommand);
@@ -78,13 +78,13 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
 
     private ConditionalConstraint getEntropyGeneratingDaemonEnabledConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(ConfigOptionDerivationType.EnableEntropyGatheringDaemon);
+        requiredDerivations.add(ConfigOptionDerivationType.ENABLE_ENTROPY_GATHERING_DAEMON);
 
         return new ConditionalConstraint(
                 requiredDerivations,
                 ConstraintBuilder.constrain(
                                 getType().toString(),
-                                ConfigOptionDerivationType.EnableEntropyGatheringDaemon.name())
+                                ConfigOptionDerivationType.ENABLE_ENTROPY_GATHERING_DAEMON.name())
                         .by(
                                 (SeedingMethodDerivation seedingMethodDerivation,
                                         EnableEntropyGatheringDaemonDerivation
@@ -107,13 +107,13 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
     // Build fails (tested in OpenSSL 1.1.1) when run with no-asm and --with-rand-seeds=rdcpu
     private ConditionalConstraint getDisableAssemblerCodeConstraint() {
         Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(ConfigOptionDerivationType.DisableAssemblerCode);
+        requiredDerivations.add(ConfigOptionDerivationType.DISABLE_ASSEMBLER_CODE);
 
         return new ConditionalConstraint(
                 requiredDerivations,
                 ConstraintBuilder.constrain(
                                 getType().toString(),
-                                ConfigOptionDerivationType.DisableAssemblerCode.name())
+                                ConfigOptionDerivationType.DISABLE_ASSEMBLER_CODE.name())
                         .by(
                                 (SeedingMethodDerivation seedingMethodDerivation,
                                         DisableAssemblerCodeDerivation

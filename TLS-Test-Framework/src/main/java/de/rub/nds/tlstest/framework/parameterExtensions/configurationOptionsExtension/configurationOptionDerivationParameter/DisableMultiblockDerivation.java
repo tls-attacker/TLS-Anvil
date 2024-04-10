@@ -19,7 +19,7 @@ import java.util.List;
 
 public class DisableMultiblockDerivation extends ConfigurationOptionDerivationParameter {
     public DisableMultiblockDerivation() {
-        super(ConfigOptionDerivationType.DisableMultiblock);
+        super(ConfigOptionDerivationType.DISABLE_MULTIBLOCK);
     }
 
     public DisableMultiblockDerivation(ConfigurationOptionValue selectedValue) {

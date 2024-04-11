@@ -10,28 +10,25 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter;
 
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.anvilcore.model.parameter.ParameterType;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
-import de.rub.nds.tlstest.framework.model.DerivationContainer;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
-import de.rub.nds.tlstest.framework.model.derivationParameter.BasicDerivationType;
+import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 public class ConfigurationOptionCompoundDerivation
-        extends DerivationParameter<List<ConfigurationOptionDerivationParameter>> {
+        extends DerivationParameter<Config, List<ConfigurationOptionDerivationParameter>> {
 
     private final List<List<ConfigurationOptionDerivationParameter>> configOptionsSetupsList;
 
@@ -39,8 +36,10 @@ public class ConfigurationOptionCompoundDerivation
     public ConfigurationOptionCompoundDerivation(
             List<List<ConfigurationOptionDerivationParameter>> setupsList) {
         super(
-                ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER,
-                (Class<List<ConfigurationOptionDerivationParameter>>) (Object) List.class);
+                (Class<List<ConfigurationOptionDerivationParameter>>) (Object) List.class,
+                Config.class,
+                new ParameterIdentifier(
+                        ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER));
         configOptionsSetupsList = setupsList;
     }
 
@@ -49,36 +48,6 @@ public class ConfigurationOptionCompoundDerivation
             List<ConfigurationOptionDerivationParameter> selectedValue) {
         this(setupsList);
         setSelectedValue(selectedValue);
-    }
-
-    @Override
-    public List<DerivationParameter> getParameterValues(
-            TestContext context, DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
-
-        Set<DerivationType> scopeLimitations = new HashSet<>(scope.getScopeLimits());
-        for (List<ConfigurationOptionDerivationParameter> setup : this.configOptionsSetupsList) {
-            List<ConfigurationOptionDerivationParameter> constrainedSetupList =
-                    new LinkedList<>(setup);
-            // Scope Limitations (Set respective parameters to their default value)
-            for (int i = 0; i < constrainedSetupList.size(); i++) {
-                DerivationType type = constrainedSetupList.get(i).getType();
-                if (scopeLimitations.contains(type)) {
-                    ConfigurationOptionDerivationParameter defaultParam =
-                            (ConfigurationOptionDerivationParameter)
-                                    ConfigurationOptionsDerivationManager.getInstance()
-                                            .getDerivationParameterInstance(type);
-
-                    defaultParam.setSelectedValue(defaultParam.getDefaultValue());
-                    constrainedSetupList.set(i, defaultParam);
-                }
-            }
-            parameterValues.add(
-                    new ConfigurationOptionCompoundDerivation(
-                            this.configOptionsSetupsList, constrainedSetupList));
-        }
-
-        return parameterValues;
     }
 
     public <T extends ConfigurationOptionDerivationParameter> T getDerivation(Class<T> clazz) {
@@ -92,9 +61,10 @@ public class ConfigurationOptionCompoundDerivation
         return null;
     }
 
-    @Override
+    // TODO: refactor
+    /*@Override
     public void configureParameterDependencies(
-            Config config, TestContext context, DerivationContainer container) {
+            Config config, TestContext context, ParameterCombination container) {
         Set<ConfigurationOptionDerivationParameter> configOptionDerivations =
                 new HashSet<>(getSelectedValue());
 
@@ -116,34 +86,12 @@ public class ConfigurationOptionCompoundDerivation
         ConfigurationOptionsDerivationManager.getInstance()
                 .getConfigurationOptionsBuildManager()
                 .onTestFinished(configOptionDerivations);
-    }
-
-    @Override
-    public void applyToConfig(Config config, TestContext context) {}
+    }*/
 
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
         List<ConditionalConstraint> condConstraints = new LinkedList<>();
-
-        // The constraint for weak cipher suites must not be added if there is no weak cipher suite
-        boolean testHasWeakCipherSuites = false;
-        if (!scope.isTls13Test()) {
-            for (CipherSuite cipherSuite :
-                    TestContext.getInstance().getSiteReport().getCipherSuites()) {
-                if (this.isWeakCiphersuite(cipherSuite)) {
-                    testHasWeakCipherSuites = true;
-                    break;
-                }
-            }
-        }
-
-        if (testHasWeakCipherSuites
-                && ConfigurationOptionsDerivationManager.getInstance()
-                        .getAllActivatedCOTypes()
-                        .contains(ConfigOptionDerivationType.ENABLE_WEAK_SSL_CIPHERS)) {
-            condConstraints.add(getWeakCipherSuitesMustBeEnabledToBeUsedConstraint());
-        }
-
+        condConstraints.add(getWeakCipherSuitesMustBeEnabledToBeUsedConstraint());
         return condConstraints;
     }
 
@@ -170,15 +118,16 @@ public class ConfigurationOptionCompoundDerivation
      * @return the constraint.
      */
     private ConditionalConstraint getWeakCipherSuitesMustBeEnabledToBeUsedConstraint() {
-        Set<DerivationType> requiredDerivations = new HashSet<>();
-        requiredDerivations.add(BasicDerivationType.CIPHERSUITE);
-        requiredDerivations.add(ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER);
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
+        requiredDerivations.add(
+                new ParameterIdentifier(
+                        ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER));
         return new ConditionalConstraint(
                 requiredDerivations,
                 ConstraintBuilder.constrain(
-                                ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER.name(),
-                                BasicDerivationType.CIPHERSUITE.name())
-                        .withName("WeakCipherSuitesMustBeEnabledToBeUsed")
+                                getParameterIdentifier().name(),
+                                TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (ConfigurationOptionCompoundDerivation coCompoundDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {
@@ -202,5 +151,45 @@ public class ConfigurationOptionCompoundDerivation
 
                                     return !isWeakCiphersuite(selectedCipherSuite);
                                 }));
+    }
+
+    @Override
+    public void applyToConfig(Config config, DerivationScope derivationScope) {}
+
+    @Override
+    public List<DerivationParameter<Config, List<ConfigurationOptionDerivationParameter>>>
+            getParameterValues(DerivationScope derivationScope) {
+        List<DerivationParameter<Config, List<ConfigurationOptionDerivationParameter>>>
+                parameterValues = new LinkedList<>();
+
+        Set<ParameterType> scopeLimitations =
+                derivationScope.getIpmLimitations().stream()
+                        .map(ParameterIdentifier::getParameterType)
+                        .collect(Collectors.toSet());
+        for (List<ConfigurationOptionDerivationParameter> setup : this.configOptionsSetupsList) {
+            List<ConfigurationOptionDerivationParameter> constrainedSetupList =
+                    new LinkedList<>(setup);
+            // Scope Limitations (Set respective parameters to their default value)
+            for (int i = 0; i < constrainedSetupList.size(); i++) {
+                ParameterType type =
+                        constrainedSetupList.get(i).getParameterIdentifier().getParameterType();
+                if (scopeLimitations.contains(type)) {
+                    constrainedSetupList.set(
+                            i, constrainedSetupList.get(i).getDefaultValueParameter());
+                }
+            }
+            parameterValues.add(
+                    new ConfigurationOptionCompoundDerivation(
+                            this.configOptionsSetupsList, constrainedSetupList));
+        }
+
+        return parameterValues;
+    }
+
+    @Override
+    protected DerivationParameter<Config, List<ConfigurationOptionDerivationParameter>>
+            generateValue(List<ConfigurationOptionDerivationParameter> selectedValue) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from
+        // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

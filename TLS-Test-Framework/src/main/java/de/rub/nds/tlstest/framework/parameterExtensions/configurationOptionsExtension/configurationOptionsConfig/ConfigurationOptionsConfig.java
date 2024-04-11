@@ -9,8 +9,8 @@
  */
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig;
 
+import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.openSSL.OpenSSLBuildManager;
@@ -204,7 +204,10 @@ public class ConfigurationOptionsConfig {
                     Integer.parseInt(configOptionsIpmStrengthElement.getTextContent());
         } else {
             configOptionsIpmStrength =
-                    TestContext.getInstance().getConfig().getStrength(); // default
+                    TestContext.getInstance()
+                            .getConfig()
+                            .getAnvilTestConfig()
+                            .getStrength(); // default
         }
     }
 

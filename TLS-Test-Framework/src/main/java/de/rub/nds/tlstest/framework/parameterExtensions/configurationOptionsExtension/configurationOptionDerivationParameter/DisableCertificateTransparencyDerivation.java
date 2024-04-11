@@ -10,8 +10,9 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter;
 
-import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 import java.util.LinkedList;
@@ -29,8 +30,18 @@ public class DisableCertificateTransparencyDerivation
     }
 
     @Override
-    public List<DerivationParameter> getAllParameterValues(TestContext context) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
+    public ConfigurationOptionValue getMaxFeatureValue() {
+        return new ConfigurationOptionValue(false);
+    }
+
+    @Override
+    public void applyToConfig(Config config, DerivationScope derivationScope) {}
+
+    @Override
+    public List<DerivationParameter<Config, ConfigurationOptionValue>> getParameterValues(
+            DerivationScope derivationScope) {
+        List<DerivationParameter<Config, ConfigurationOptionValue>> parameterValues =
+                new LinkedList<>();
         parameterValues.add(
                 new DisableCertificateTransparencyDerivation(new ConfigurationOptionValue(false)));
         parameterValues.add(
@@ -40,7 +51,8 @@ public class DisableCertificateTransparencyDerivation
     }
 
     @Override
-    public ConfigurationOptionValue getMaxFeatureValue() {
-        return new ConfigurationOptionValue(false);
+    protected DerivationParameter<Config, ConfigurationOptionValue> generateValue(
+            ConfigurationOptionValue selectedValue) {
+        return new DisableCertificateTransparencyDerivation(selectedValue);
     }
 }

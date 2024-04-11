@@ -16,14 +16,13 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 
-public abstract class ConfigurationOptionDerivationParameter<TypeT>
-        extends DerivationParameter<Config, TypeT> {
+public abstract class ConfigurationOptionDerivationParameter
+        extends DerivationParameter<Config, ConfigurationOptionValue> {
 
     // We use Config.class throughout these parameters allthough they are applied when building the
     // containers and do not affect the config.
-    public ConfigurationOptionDerivationParameter(
-            ConfigOptionDerivationType type, Class<TypeT> valueClass) {
-        super(valueClass, Config.class, new ParameterIdentifier(type));
+    public ConfigurationOptionDerivationParameter(ConfigOptionDerivationType type) {
+        super(ConfigurationOptionValue.class, Config.class, new ParameterIdentifier(type));
     }
 
     /**
@@ -46,5 +45,9 @@ public abstract class ConfigurationOptionDerivationParameter<TypeT>
     public ConfigurationOptionValue getDefaultValue() {
         // Default (Override for non-flag values)
         return new ConfigurationOptionValue(false);
+    }
+
+    public ConfigurationOptionDerivationParameter getDefaultValueParameter() {
+        return (ConfigurationOptionDerivationParameter) generateValue(getDefaultValue());
     }
 }

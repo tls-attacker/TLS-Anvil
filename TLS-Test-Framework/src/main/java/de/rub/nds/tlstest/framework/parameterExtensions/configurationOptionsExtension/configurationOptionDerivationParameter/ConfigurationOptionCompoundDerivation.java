@@ -189,7 +189,6 @@ public class ConfigurationOptionCompoundDerivation
     @Override
     protected DerivationParameter<Config, List<ConfigurationOptionDerivationParameter>>
             generateValue(List<ConfigurationOptionDerivationParameter> selectedValue) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from
-        // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        throw new UnsupportedOperationException("CompoundDerivation also requires a setup list");
     }
 }

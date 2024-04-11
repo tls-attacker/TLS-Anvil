@@ -9,9 +9,8 @@
  */
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
-import de.rub.nds.tlstest.framework.model.*;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
@@ -25,7 +24,7 @@ import org.apache.logging.log4j.Logger;
  * IPM. The DerivationParameters were selected by a config file; Its path must be passed using a
  * String.
  */
-public class ConfigurationOptionsExtension implements ParameterExtension {
+public class ConfigurationOptionsExtension {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -41,7 +40,6 @@ public class ConfigurationOptionsExtension implements ParameterExtension {
 
     private ConfigurationOptionsExtension() {}
 
-    @Override
     public void load(Object initData) {
         if (!(initData instanceof String)) {
             throw new IllegalArgumentException(
@@ -72,24 +70,8 @@ public class ConfigurationOptionsExtension implements ParameterExtension {
         config.getBuildManager().init();
         ConfigurationOptionsDerivationManager.getInstance().preBuildAndValidateAndFilterSetups();
 
-        DerivationManager.getInstance()
-                .registerCategoryManager(
-                        ConfigOptionDerivationType.class,
-                        ConfigurationOptionsDerivationManager.getInstance());
-
-        TestSiteReport maxSiteReport = config.getBuildManager().getMaximalFeatureSiteReport();
-        TestContext.getInstance().setSiteReport(maxSiteReport);
-    }
-
-    @Override
-    public void unload() {
-        config.getBuildManager().onShutdown();
-        DerivationManager.getInstance().unregisterCategoryManager(ConfigOptionDerivationType.class);
-        config = null;
-    }
-
-    @Override
-    public String getIdentifier() {
-        return "ConfigurationOptionsExtension";
+        FeatureExtractionResult maxFeatureExtractionResult =
+                config.getBuildManager().getMaximalFeatureSiteReport();
+        TestContext.getInstance().setFeatureExtractionResult(maxFeatureExtractionResult);
     }
 }

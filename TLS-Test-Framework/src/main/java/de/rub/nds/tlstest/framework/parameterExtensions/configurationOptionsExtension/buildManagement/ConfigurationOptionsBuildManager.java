@@ -10,8 +10,8 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement;
 
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigOptionValueTranslation;
@@ -39,10 +39,11 @@ public abstract class ConfigurationOptionsBuildManager {
      *     values.
      * @return the TestSiteReport of the provided library build.
      */
-    public abstract Callable<TestSiteReport> configureOptionSetAndReturnGetSiteReportCallable(
-            Config config,
-            TestContext context,
-            Set<ConfigurationOptionDerivationParameter> optionSet);
+    public abstract Callable<FeatureExtractionResult>
+            configureOptionSetAndReturnGetSiteReportCallable(
+                    Config config,
+                    TestContext context,
+                    Set<ConfigurationOptionDerivationParameter> optionSet);
 
     /**
      * Get the SiteReport for the tls library built that has the most possible available features
@@ -50,7 +51,7 @@ public abstract class ConfigurationOptionsBuildManager {
      *
      * @return the TestSiteReport of the maximal build
      */
-    public abstract TestSiteReport getMaximalFeatureSiteReport();
+    public abstract FeatureExtractionResult getMaximalFeatureSiteReport();
 
     /**
      * Method that should be called on the end of each test. Can be used to let the manager know

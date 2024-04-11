@@ -9,42 +9,14 @@
  */
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
+import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
-import de.rub.nds.tlstest.framework.model.DerivationCategoryManager;
-import de.rub.nds.tlstest.framework.model.DerivationScope;
-import de.rub.nds.tlstest.framework.model.DerivationType;
-import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.constraint.ConditionalConstraint;
-import de.rub.nds.tlstest.framework.model.derivationParameter.DerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableAfalgEngineDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableAssemblerCodeDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableBinaryEllipticCurvesDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableCertificateTransparencyDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableErrorStringsDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableExtensionForIpAddressesAndAsIdentifiersDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableMultiblockDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableNextProtocolNegotiationExtensionDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableOcspSupportDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePadlockEngineDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePosixIoDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePskDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableRdrandDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableSrpCiphersuitesDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableSse2Derivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableCompressionDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableDevelopmentFlagsDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableEntropyGatheringDaemonDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableMd2Derivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableMemoryDebuggingSupportDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableNistEcOptimizationsDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableRc5Derivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableWeakSslCiphersDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.SeedingMethodDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import de.rwth.swc.coffee4j.engine.constraint.HardConstraintCheckerFactory;
 import de.rwth.swc.coffee4j.engine.generator.TestInputGroup;
@@ -80,13 +52,13 @@ import org.apache.logging.log4j.Logger;
  * the configured ConfigurationOptionsConfig and knows the required
  * ConfigurationOptionsBuildManager.
  */
-public class ConfigurationOptionsDerivationManager implements DerivationCategoryManager {
+public class ConfigurationOptionsDerivationManager {
     private static ConfigurationOptionsDerivationManager instance = null;
     private static final Logger LOGGER = LogManager.getLogger();
     private ConfigurationOptionsConfig config;
     private List<List<ConfigurationOptionDerivationParameter>> compoundSetupList;
-    private Map<List<ConfigurationOptionDerivationParameter>, TestSiteReport>
-            compoundSetupToSiteReport;
+    private Map<List<ConfigurationOptionDerivationParameter>, FeatureExtractionResult>
+            compoundFeatureExtractionResult;
 
     private ExecutorService buildExecutor;
 
@@ -101,107 +73,11 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
     private ConfigurationOptionsDerivationManager() {
         config = null;
         compoundSetupList = null;
-        compoundSetupToSiteReport = null;
-    }
-
-    @Override
-    public DerivationParameter getDerivationParameterInstance(DerivationType type) {
-        if (!(type instanceof ConfigOptionDerivationType)) {
-            throw new IllegalArgumentException(
-                    "This manager can only handle ConfigOptionDerivationType but type '"
-                            + type
-                            + "' was passed.");
-        }
-        ConfigOptionDerivationType basicType = (ConfigOptionDerivationType) type;
-        switch (basicType) {
-            case CONFIG_OPTION_COMPOUND_PARAMETER:
-                if (compoundSetupList == null) {
-                    throw new IllegalStateException(
-                            "Cannot get ConfigurationOptionCompoundParameter before ConfigurationOptionsConfig was initialized.");
-                }
-                return new ConfigurationOptionCompoundDerivation(compoundSetupList);
-            case DISABLE_PSK:
-                return new DisablePskDerivation();
-            case SEEDING_METHOD:
-                return new SeedingMethodDerivation();
-            case ENABLE_NIST_EC_OPTIMIZATIONS:
-                return new EnableNistEcOptimizationsDerivation();
-            case DISABLE_SSE2:
-                return new DisableSse2Derivation();
-            case DISABLE_BINARY_ELLIPTIC_CURVES:
-                return new DisableBinaryEllipticCurvesDerivation();
-            case DISABLE_MULTIBLOCK:
-                return new DisableMultiblockDerivation();
-            case ENABLE_COMPRESSION:
-                return new EnableCompressionDerivation();
-
-            case DISABLE_AFALG_ENGINE:
-                return new DisableAfalgEngineDerivation();
-            case ENABLE_ENTROPY_GATHERING_DAEMON:
-                return new EnableEntropyGatheringDaemonDerivation();
-            case DISABLE_RDRAND:
-                return new DisableRdrandDerivation();
-            case DISABLE_CERTIFICATE_TRANSPARENCY:
-                return new DisableCertificateTransparencyDerivation();
-            case DISABLE_NEXT_PROTOCOL_NEGOTIATION:
-                return new DisableNextProtocolNegotiationExtensionDerivation();
-            case DISABLE_OCSP_SUPPORT:
-                return new DisableOcspSupportDerivation();
-            case ENABLE_WEAK_SSL_CIPHERS:
-                return new EnableWeakSslCiphersDerivation();
-            case ENABLE_MD2:
-                return new EnableMd2Derivation();
-            case ENABLE_RC5:
-                return new EnableRc5Derivation();
-            case DISABLE_ASSEMBLER_CODE:
-                return new DisableAssemblerCodeDerivation();
-
-            case DISABLE_PADLOCK_ENGINE:
-                return new DisablePadlockEngineDerivation();
-            case DISABLE_POSIX_IO:
-                return new DisablePosixIoDerivation();
-            case DISABLE__EXTENSION_FOR_IP_ADRESSES_AND_AS_IDENTIFIERS:
-                return new DisableExtensionForIpAddressesAndAsIdentifiersDerivation();
-            case DISABLE_SRP_CIPHER_SUITES:
-                return new DisableSrpCiphersuitesDerivation();
-            case ENABLE_DEVELOPMENT_FLAGS:
-                return new EnableDevelopmentFlagsDerivation();
-            case ENABLE_MEMORY_DEBUGGING_SUPPORT:
-                return new EnableMemoryDebuggingSupportDerivation();
-            case DISABLE_ERROR_STRINGS:
-                return new DisableErrorStringsDerivation();
-
-            default:
-                LOGGER.error("Derivation Type {} not implemented", type);
-                throw new UnsupportedOperationException("Derivation Type not implemented");
-        }
-    }
-
-    @Override
-    public List<DerivationType> getDerivationsOfModel(
-            DerivationScope derivationScope, ModelType baseModel) {
-        if (config == null) {
-            throw new IllegalStateException(
-                    "No ConfigurationOptionsConfig was set so far. Register it before calling this method.");
-        }
-        return new LinkedList<>(
-                Collections.singletonList(
-                        ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER));
-    }
-
-    @Override
-    public List<DerivationType> getAllDerivations() {
-        return new LinkedList<>(
-                Collections.singletonList(
-                        ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER));
+        compoundFeatureExtractionResult = null;
     }
 
     public List<ConfigOptionDerivationType> getAllActivatedCOTypes() {
         return new LinkedList<>(config.getEnabledConfigOptionDerivations());
-    }
-
-    public List<DerivationType> getDerivationsOfModel(ModelType baseModel) {
-        return getDerivationsOfModel(null, baseModel);
     }
 
     public void initializeConfigOptionsConfig(ConfigurationOptionsConfig optionsConfig) {
@@ -221,13 +97,13 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         return config.getBuildManager();
     }
 
-    public Map<List<ConfigurationOptionDerivationParameter>, TestSiteReport>
-            getCompoundSetupToSiteReport() {
-        return compoundSetupToSiteReport;
+    public Map<List<ConfigurationOptionDerivationParameter>, FeatureExtractionResult>
+            getCompoundFeatureExtractionResult() {
+        return compoundFeatureExtractionResult;
     }
 
-    public List<TestSiteReport> getAllCompondSiteReports() {
-        return new ArrayList<TestSiteReport>(compoundSetupToSiteReport.values());
+    public List<FeatureExtractionResult> getAllCompondSiteReports() {
+        return new ArrayList<FeatureExtractionResult>(compoundFeatureExtractionResult.values());
     }
 
     public static class LoggerReporter implements Reporter {
@@ -252,9 +128,12 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         builder.strength(strength);
         for (ConfigOptionDerivationType coType : config.getEnabledConfigOptionDerivations()) {
             ConfigurationOptionDerivationParameter coDerivationParameter =
-                    (ConfigurationOptionDerivationParameter) getDerivationParameterInstance(coType);
-            List<DerivationParameter> derivationParameterValues =
-                    coDerivationParameter.getAllParameterValues(TestContext.getInstance());
+                    (ConfigurationOptionDerivationParameter)
+                            coType.getInstance(ParameterScope.NO_SCOPE);
+            // DerivationScopes are bound to test templates but this selection happens idependently
+            // of any test template so we use null
+            List<DerivationParameter<Config, ConfigurationOptionValue>> derivationParameterValues =
+                    coDerivationParameter.getParameterValues(null);
             // - Add values
             List<Value> values = new LinkedList<>();
             for (int idx = 0; idx < derivationParameterValues.size(); idx++) {
@@ -263,19 +142,20 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
             builder.parameter(new Parameter(coType.name(), values));
             // - Add constraints
             List<ConditionalConstraint> constraints =
-                    coDerivationParameter.getStaticConditionalConstraints();
+                    coDerivationParameter.getDefaultConditionalConstraints(null);
             for (ConditionalConstraint condConstraint : constraints) {
                 boolean allRequiredParametersAvailable =
-                        condConstraint.getRequiredDerivations().stream()
+                        condConstraint.getRequiredParameters().stream()
                                 .allMatch(
-                                        reqDerivation ->
-                                                (reqDerivation
+                                        reqParameter ->
+                                                (reqParameter.getParameterType()
                                                                 instanceof
                                                                 ConfigOptionDerivationType)
                                                         && config.getEnabledConfigOptionDerivations()
                                                                 .contains(
                                                                         (ConfigOptionDerivationType)
-                                                                                reqDerivation));
+                                                                                reqParameter
+                                                                                        .getParameterType()));
 
                 if (allRequiredParametersAvailable) {
                     builder.exclusionConstraint(condConstraint.getConstraint());
@@ -318,7 +198,9 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
                 parameterCombinationList.add(codParameter);
             }
             // Sort after type for consistent order (not necessary)
-            parameterCombinationList.sort(Comparator.comparing(e -> e.getType().toString()));
+            parameterCombinationList.sort(
+                    Comparator.comparing(
+                            e -> e.getParameterIdentifier().getParameterType().toString()));
             compoundSetupList.add(Collections.unmodifiableList(parameterCombinationList));
         }
 
@@ -334,20 +216,23 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         int buildFailedSetupCount = 0;
 
         List<List<ConfigurationOptionDerivationParameter>> successfulSetups = new LinkedList<>();
-        HashMap<List<ConfigurationOptionDerivationParameter>, Future<Callable<TestSiteReport>>>
+        HashMap<
+                        List<ConfigurationOptionDerivationParameter>,
+                        Future<Callable<FeatureExtractionResult>>>
                 compoundSetupToFuture =
                         new HashMap<
                                 List<ConfigurationOptionDerivationParameter>,
-                                Future<Callable<TestSiteReport>>>();
-        compoundSetupToSiteReport =
-                new HashMap<List<ConfigurationOptionDerivationParameter>, TestSiteReport>();
+                                Future<Callable<FeatureExtractionResult>>>();
+        compoundFeatureExtractionResult =
+                new HashMap<
+                        List<ConfigurationOptionDerivationParameter>, FeatureExtractionResult>();
         buildExecutor = Executors.newFixedThreadPool(config.getMaxSimultaneousBuilds());
 
         // Create all builds (with multiple threads if configured)
         for (List<ConfigurationOptionDerivationParameter> setup : compoundSetupList) {
             Set<ConfigurationOptionDerivationParameter> setupSet = new HashSet<>(setup);
             Config conf = Config.createEmptyConfig();
-            Future<Callable<TestSiteReport>> testSiteReportCallableFuture =
+            Future<Callable<FeatureExtractionResult>> testSiteReportCallableFuture =
                     createBuildAndGetSiteReportCallable(conf, TestContext.getInstance(), setupSet);
             compoundSetupToFuture.put(setup, testSiteReportCallableFuture);
         }
@@ -355,7 +240,7 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         // Wait until all builds are finished
         for (Map.Entry<
                         List<ConfigurationOptionDerivationParameter>,
-                        Future<Callable<TestSiteReport>>>
+                        Future<Callable<FeatureExtractionResult>>>
                 setupToFuture : compoundSetupToFuture.entrySet()) {
             while (!setupToFuture.getValue().isDone()) {
                 try {
@@ -371,12 +256,14 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         // Create all site reports and check if the builds were successful
         for (Map.Entry<
                         List<ConfigurationOptionDerivationParameter>,
-                        Future<Callable<TestSiteReport>>>
+                        Future<Callable<FeatureExtractionResult>>>
                 setupToFuture : compoundSetupToFuture.entrySet()) {
             try {
-                TestSiteReport siteReport = setupToFuture.getValue().get().call();
+                FeatureExtractionResult featureExtractionResult =
+                        setupToFuture.getValue().get().call();
 
-                compoundSetupToSiteReport.put(setupToFuture.getKey(), siteReport);
+                compoundFeatureExtractionResult.put(
+                        setupToFuture.getKey(), featureExtractionResult);
                 successfulSetups.add(setupToFuture.getKey());
             } catch (Exception e) {
                 LOGGER.error(
@@ -399,7 +286,7 @@ public class ConfigurationOptionsDerivationManager implements DerivationCategory
         }
     }
 
-    private Future<Callable<TestSiteReport>> createBuildAndGetSiteReportCallable(
+    private Future<Callable<FeatureExtractionResult>> createBuildAndGetSiteReportCallable(
             Config conf,
             TestContext context,
             Set<ConfigurationOptionDerivationParameter> setupSet) {

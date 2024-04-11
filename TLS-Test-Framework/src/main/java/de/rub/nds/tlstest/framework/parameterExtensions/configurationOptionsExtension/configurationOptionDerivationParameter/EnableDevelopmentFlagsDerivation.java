@@ -34,10 +34,7 @@ public class EnableDevelopmentFlagsDerivation extends ConfigurationOptionDerivat
     }
 
     @Override
-    public void applyToConfig(Config config, DerivationScope derivationScope) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from
-        // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    public void applyToConfig(Config config, DerivationScope derivationScope) {}
 
     @Override
     public List<DerivationParameter<Config, ConfigurationOptionValue>> getParameterValues(

@@ -10,7 +10,7 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.openSSL;
 
-import de.rub.nds.tlstest.framework.model.DerivationType;
+import de.rub.nds.anvilcore.model.parameter.ParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.*;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerBasedBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
@@ -37,12 +37,12 @@ public class OpenSSLBuildManager extends DockerBasedBuildManager {
             throw new IllegalArgumentException(
                     "Passed option parameter has no selected value yet.");
         }
-        DerivationType derivationType = optionParameter.getType();
-        if (!(derivationType instanceof ConfigOptionDerivationType)) {
+        ParameterType parameterType = optionParameter.getParameterIdentifier().getParameterType();
+        if (!(parameterType instanceof ConfigOptionDerivationType)) {
             throw new IllegalArgumentException(
                     "Passed derivation parameter is not of type ConfigOptionDerivationType.");
         }
-        ConfigOptionDerivationType optionType = (ConfigOptionDerivationType) derivationType;
+        ConfigOptionDerivationType optionType = (ConfigOptionDerivationType) parameterType;
 
         if (!optionsToTranslationMap.containsKey(optionType)) {
             throw new IllegalStateException(

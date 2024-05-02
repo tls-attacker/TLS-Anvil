@@ -202,8 +202,12 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
                                     CertificateKeyType requiredCertKeyType =
                                             AlgorithmResolver.getCertificateKeyType(
                                                     selectedCipherSuite);
-                                    return selectedCertKeyPair.getCertPublicKeyType()
-                                            == requiredCertKeyType;
+                                    CertificateKeyType actualCertKeyType = selectedCertKeyPair.getCertPublicKeyType();
+                                    if (actualCertKeyType == CertificateKeyType.ECDH) {
+                                        return requiredCertKeyType == CertificateKeyType.ECDH || requiredCertKeyType == CertificateKeyType.ECDSA;
+                                    } else {
+                                        return actualCertKeyType == requiredCertKeyType;
+                                    }
                                 }));
     }
 

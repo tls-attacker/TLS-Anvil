@@ -38,6 +38,7 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivati
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ClientTest
 public class ServerKeyExchange extends Tls12Test {
@@ -95,7 +96,18 @@ public class ServerKeyExchange extends Tls12Test {
         CertificateDerivation certDerivation =
                 (CertificateDerivation)
                         TlsParameterType.CERTIFICATE.getInstance(ParameterScope.NO_SCOPE);
-        return certDerivation.getApplicableCertificates(context, scope, true);
+        List<DerivationParameter<Config, CertificateKeyPair>> parameterList =
+                certDerivation.getApplicableCertificates(context, scope, true);
+        // TLS Attacker can currently not use CURVE_SM2 for signature
+        // filter as temporary fix until x509 attacker gets implemented which should fix it
+        parameterList =
+                parameterList.stream()
+                        .filter(
+                                p ->
+                                        p.getSelectedValue().getSignatureGroup()
+                                                != NamedGroup.CURVE_SM2)
+                        .collect(Collectors.toList());
+        return parameterList;
     }
 
     @AnvilTest(id = "5246-wPU1BxUpeu")

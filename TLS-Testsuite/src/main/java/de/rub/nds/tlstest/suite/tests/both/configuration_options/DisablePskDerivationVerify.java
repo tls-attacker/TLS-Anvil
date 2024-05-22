@@ -9,16 +9,14 @@ package de.rub.nds.tlstest.suite.tests.both.configuration_options;
 
 import static org.junit.Assert.assertEquals;
 
-import de.rub.nds.tlsscanner.serverscanner.rating.TestResult;
-import de.rub.nds.tlsscanner.serverscanner.report.AnalyzedProperty;
-import de.rub.nds.tlstest.framework.TestSiteReport;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.scanner.core.probe.result.TestResults;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.ParameterExtensionManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundDerivation;
@@ -35,30 +33,25 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class DisablePskDerivationVerify extends Tls12Test {
 
     public ConditionEvaluationResult disablePskOptionTested() {
-        if (ParameterExtensionManager.getInstance()
-                .getLoadedExtensions()
-                .contains("ConfigurationOptionsExtension")) {
-            if (ConfigurationOptionsDerivationManager.getInstance()
-                    .getAllActivatedCOTypes()
-                    .contains(ConfigOptionDerivationType.DisablePsk)) {
-                return ConditionEvaluationResult.enabled("");
-            } else {
-                return ConditionEvaluationResult.disabled("The DisablePsk option is not tested.");
-            }
+        if (ConfigurationOptionsDerivationManager.getInstance()
+                .getAllActivatedCOTypes()
+                .contains(ConfigOptionDerivationType.DISABLE_PSK)) {
+            return ConditionEvaluationResult.enabled("");
         } else {
-            return ConditionEvaluationResult.disabled("Configuration options are not tested.");
+            return ConditionEvaluationResult.disabled("The DisablePsk option is not tested.");
         }
     }
 
-    @TlsTest(description = "The configuration option disablePsk disables all PSK ciphersuites.")
+    @AnvilTest(id = "todo")
     @MethodCondition(method = "disablePskOptionTested")
-    @ModelFromScope(baseModel = ModelType.EMPTY)
-    @ScopeExtensions("ConfigOptionDerivationType.ConfigurationOptionCompoundParameter")
+    @ModelFromScope(modelType = "EMPTY")
+    @IncludeParameter("ConfigOptionDerivationType.ConfigurationOptionCompoundParameter")
     public void pskCiphersuitesDisabled(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        getPreparedConfig(argumentAccessor, runner);
-        TestSiteReport report = this.derivationContainer.getAssociatedSiteReport();
+        getPreparedConfig(runner);
+        // todo: implement access to container-specific extraction result
+        FeatureExtractionResult extractionResult = context.getFeatureExtractionResult();
         ConfigurationOptionCompoundDerivation compoundParameter =
-                this.derivationContainer.getDerivation(ConfigurationOptionCompoundDerivation.class);
+                this.parameterCombination.getParameter(ConfigurationOptionCompoundDerivation.class);
         DisablePskDerivation disablePskDerivation =
                 compoundParameter.getDerivation(DisablePskDerivation.class);
 
@@ -66,16 +59,16 @@ public class DisablePskDerivationVerify extends Tls12Test {
             return;
         }
 
-        List<AnalyzedProperty> expectedDisabledProperties =
+        List<TlsAnalyzedProperty> expectedDisabledProperties =
                 Arrays.asList(
-                        AnalyzedProperty.SUPPORTS_PSK_PLAIN,
-                        AnalyzedProperty.SUPPORTS_PSK_RSA,
-                        AnalyzedProperty.SUPPORTS_PSK_DHE,
-                        AnalyzedProperty.SUPPORTS_PSK_ECDHE);
+                        TlsAnalyzedProperty.SUPPORTS_PSK_PLAIN,
+                        TlsAnalyzedProperty.SUPPORTS_PSK_RSA,
+                        TlsAnalyzedProperty.SUPPORTS_PSK_DHE,
+                        TlsAnalyzedProperty.SUPPORTS_PSK_ECDHE);
 
-        List<AnalyzedProperty> nonDisabledProperties = new LinkedList<>();
-        for (AnalyzedProperty expectedDisabledProperty : expectedDisabledProperties) {
-            if (report.getResult(expectedDisabledProperty) == TestResult.TRUE) {
+        List<TlsAnalyzedProperty> nonDisabledProperties = new LinkedList<>();
+        for (TlsAnalyzedProperty expectedDisabledProperty : expectedDisabledProperties) {
+            if (extractionResult.getResult(expectedDisabledProperty) == TestResults.TRUE) {
                 // Unexpectedly enabled.
                 nonDisabledProperties.add(expectedDisabledProperty);
             }

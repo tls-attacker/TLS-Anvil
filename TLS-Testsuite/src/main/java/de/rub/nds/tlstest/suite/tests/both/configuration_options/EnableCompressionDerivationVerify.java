@@ -9,15 +9,15 @@ package de.rub.nds.tlstest.suite.tests.both.configuration_options;
 
 import static org.junit.Assert.assertTrue;
 
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.scanner.core.probe.result.ListResult;
 import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
-import de.rub.nds.tlstest.framework.TestSiteReport;
-import de.rub.nds.tlstest.framework.annotations.MethodCondition;
-import de.rub.nds.tlstest.framework.annotations.ScopeExtensions;
-import de.rub.nds.tlstest.framework.annotations.TlsTest;
-import de.rub.nds.tlstest.framework.coffee4j.model.ModelFromScope;
+import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.model.ModelType;
-import de.rub.nds.tlstest.framework.model.ParameterExtensionManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundDerivation;
@@ -33,32 +33,28 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class EnableCompressionDerivationVerify extends Tls12Test {
 
     public ConditionEvaluationResult enableCompressionOptionTested() {
-        if (ParameterExtensionManager.getInstance()
-                .getLoadedExtensions()
-                .contains("ConfigurationOptionsExtension")) {
-            if (ConfigurationOptionsDerivationManager.getInstance()
-                    .getAllActivatedCOTypes()
-                    .contains(ConfigOptionDerivationType.EnableCompression)) {
-                return ConditionEvaluationResult.enabled("");
-            } else {
-                return ConditionEvaluationResult.disabled(
-                        "The EnableCompression option is not tested.");
-            }
+
+        if (ConfigurationOptionsDerivationManager.getInstance()
+                .getAllActivatedCOTypes()
+                .contains(ConfigOptionDerivationType.ENABLE_COMPRESSION)) {
+            return ConditionEvaluationResult.enabled("");
         } else {
-            return ConditionEvaluationResult.disabled("Configuration options are not tested.");
+            return ConditionEvaluationResult.disabled(
+                    "The EnableCompression option is not tested.");
         }
     }
 
-    @TlsTest(description = "The configuration option EnableCompression enables compression.")
+    @AnvilTest(id = "todo")
     @MethodCondition(method = "enableCompressionOptionTested")
-    @ModelFromScope(baseModel = ModelType.EMPTY)
-    @ScopeExtensions("ConfigOptionDerivationType.ConfigurationOptionCompoundParameter")
+    @ModelFromScope(modelType = "EMPTY")
+    @IncludeParameter("ConfigOptionDerivationType.ConfigurationOptionCompoundParameter")
     public void compressionDisabledByOption(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
-        getPreparedConfig(argumentAccessor, runner);
-        TestSiteReport report = this.derivationContainer.getAssociatedSiteReport();
+        getPreparedConfig(runner);
+        // todo: implement access to container-specific extraction result
+        FeatureExtractionResult extractionResult = context.getFeatureExtractionResult();
         ConfigurationOptionCompoundDerivation compoundParameter =
-                this.derivationContainer.getDerivation(ConfigurationOptionCompoundDerivation.class);
+                this.parameterCombination.getParameter(ConfigurationOptionCompoundDerivation.class);
         EnableCompressionDerivation enableCompressionDerivation =
                 compoundParameter.getDerivation(EnableCompressionDerivation.class);
 
@@ -66,19 +62,20 @@ public class EnableCompressionDerivationVerify extends Tls12Test {
             return;
         }
         List<CompressionMethod> supportedNonNullCompressionMethods = new LinkedList<>();
-        List<CompressionMethod> supportedCompressionMethods =
-                report.getSupportedCompressionMethods();
-        if (supportedCompressionMethods == null) {
+        if (!(extractionResult.getResult(TlsAnalyzedProperty.SUPPORTED_COMPRESSION_METHODS)
+                instanceof ListResult)) {
             // Currently not scanned in client tests
             return;
         }
 
-        for (CompressionMethod compressionMethod : report.getSupportedCompressionMethods()) {
-            if (compressionMethod != CompressionMethod.NULL) {
-                supportedNonNullCompressionMethods.add(compressionMethod);
-            }
-        }
+        ListResult<CompressionMethod> compressionsList =
+                (ListResult<CompressionMethod>)
+                        extractionResult.getResult(
+                                TlsAnalyzedProperty.SUPPORTED_COMPRESSION_METHODS);
 
+        compressionsList.getCollection().stream()
+                .filter(compression -> compression != CompressionMethod.NULL)
+                .forEach(supportedNonNullCompressionMethods::add);
         assertTrue(
                 "No compression method was enabled using the EnableCompressionDerivation.",
                 supportedNonNullCompressionMethods.size() > 0);

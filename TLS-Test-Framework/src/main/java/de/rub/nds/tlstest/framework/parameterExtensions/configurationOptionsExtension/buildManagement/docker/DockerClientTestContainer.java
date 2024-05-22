@@ -11,10 +11,12 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
 
 import com.github.dockerjava.api.DockerClient;
-import de.rub.nds.tlsattacker.core.connection.InboundConnection;
+import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
+import de.rub.nds.tlsscanner.clientscanner.execution.TlsClientScanner;
+import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.TestSiteReportFactory;
+import de.rub.nds.tlstest.framework.execution.TestPreparator;
 
 /** Represents a DockerContainer that runs tls clients for testing purposes. */
 public class DockerClientTestContainer extends DockerTestContainer {
@@ -53,10 +55,19 @@ public class DockerClientTestContainer extends DockerTestContainer {
     }
 
     @Override
-    protected synchronized TestSiteReport createSiteReport() {
-        InboundConnection inboundConnection =
-                new InboundConnection(inboundConnectionPort, inboundConnectionHost);
-        return TestSiteReportFactory.createClientSiteReport(
-                TestContext.getInstance().getConfig(), inboundConnection, false);
+    protected synchronized FeatureExtractionResult createFeatureExtractionResult(
+            ParallelExecutor parallelExecutor) {
+        TlsClientScanner clientScanner =
+                TestPreparator.getClientScanner(
+                        inboundConnectionPort,
+                        parallelExecutor,
+                        TestContext.getInstance()
+                                .getConfig()
+                                .getAnvilTestConfig()
+                                .getConnectionTimeout(),
+                        null,
+                        false);
+        // todo: determine which name to use for report
+        return ClientFeatureExtractionResult.fromClientScanReport(clientScanner.scan(), dockerTag);
     }
 }

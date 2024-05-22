@@ -89,7 +89,8 @@ public class BuildOverviewLogFile extends LogFile {
                 new HashMap<>();
         for (ConfigurationOptionDerivationParameter configOptionDervivation : optionSet) {
             ConfigOptionDerivationType type =
-                    (ConfigOptionDerivationType) configOptionDervivation.getType();
+                    (ConfigOptionDerivationType)
+                            configOptionDervivation.getParameterIdentifier().getParameterType();
             optionTypeToValue.put(type, configOptionDervivation.getSelectedValue());
         }
 

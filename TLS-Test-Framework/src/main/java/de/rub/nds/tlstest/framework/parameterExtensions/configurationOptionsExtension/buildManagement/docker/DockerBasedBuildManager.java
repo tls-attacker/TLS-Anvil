@@ -10,14 +10,15 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
 
+import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.model.parameter.ParameterScope;
+import de.rub.nds.anvilcore.model.parameter.ParameterType;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.connection.InboundConnection;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.TestSiteReport;
-import de.rub.nds.tlstest.framework.constants.TestEndpointType;
-import de.rub.nds.tlstest.framework.model.DerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
@@ -57,7 +58,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     private String maximalFeatureContainerDockerTag;
 
     /** Callable to create/get site reports. */
-    public static class SiteReportCallback implements Callable<TestSiteReport> {
+    public static class SiteReportCallback implements Callable<FeatureExtractionResult> {
         DockerTestContainer container;
 
         private SiteReportCallback(DockerTestContainer container) {
@@ -65,8 +66,8 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
         }
 
         @Override
-        public TestSiteReport call() {
-            return container.getSiteReport();
+        public FeatureExtractionResult call() {
+            return container.getFeatureExtractionResult();
         }
     }
 
@@ -92,12 +93,21 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
 
         ParallelExecutor executor =
                 new ParallelExecutorWithTimeout(
-                        TestContext.getInstance().getConfig().getParallelHandshakes(), 2, 600);
+                        TestContext.getInstance()
+                                .getConfig()
+                                .getAnvilTestConfig()
+                                .getParallelTestCases(),
+                        2,
+                        600);
         TestContext.getInstance().setStateExecutor(executor);
 
         resultsCollector =
                 new ConfigOptionsResultsCollector(
-                        Paths.get(TestContext.getInstance().getConfig().getOutputFolder()),
+                        Paths.get(
+                                TestContext.getInstance()
+                                        .getConfig()
+                                        .getAnvilTestConfig()
+                                        .getOutputFolder()),
                         configOptionsConfig,
                         dockerFactory.getDockerClient());
 
@@ -117,7 +127,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * @return the site report of the built for the passed option set
      */
     @Override
-    public Callable<TestSiteReport> configureOptionSetAndReturnGetSiteReportCallable(
+    public Callable<FeatureExtractionResult> configureOptionSetAndReturnGetSiteReportCallable(
             Config config,
             TestContext context,
             Set<ConfigurationOptionDerivationParameter> optionSet) {
@@ -127,7 +137,8 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
             containerInfo.startUsage();
             stopRarelyUsedContainers();
 
-            Callable<TestSiteReport> siteReportCallback = new SiteReportCallback(containerInfo);
+            Callable<FeatureExtractionResult> siteReportCallback =
+                    new SiteReportCallback(containerInfo);
 
             // Configure the port in the config
             if (TestContext.getInstance().getConfig().getTestEndpointMode()
@@ -231,7 +242,6 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
                 }
                 runContainer(providedContainer);
 
-                // resultsCollector.logContainer(providedContainer);
                 providedContainer.enableContainerLogging(
                         resultsCollector, "ContainerLog", dockerTag);
                 dockerTagToContainerInfo.put(dockerTag, providedContainer);
@@ -254,13 +264,11 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
         List<ConfigOptionDerivationType> derivationTypes =
                 ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes();
         Set<ConfigurationOptionDerivationParameter> optionSet = new HashSet<>();
-        for (DerivationType type : derivationTypes) {
+        for (ParameterType type : derivationTypes) {
             ConfigurationOptionDerivationParameter configOptionDerivation =
                     (ConfigurationOptionDerivationParameter)
-                            ConfigurationOptionsDerivationManager.getInstance()
-                                    .getDerivationParameterInstance(type);
-            configOptionDerivation.setSelectedValue(configOptionDerivation.getMaxFeatureValue());
-            optionSet.add(configOptionDerivation);
+                            type.getInstance(ParameterScope.NO_SCOPE);
+            optionSet.add(configOptionDerivation.getMaxFeatureValueParameter());
         }
         return optionSet;
     }
@@ -275,14 +283,14 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
 
     /* === Site Report Management === */
     @Override
-    public synchronized TestSiteReport getMaximalFeatureSiteReport() {
+    public synchronized FeatureExtractionResult getMaximalFeatureExtractionResult() {
         if (maximalFeatureContainerDockerTag == null) {
             Set<ConfigurationOptionDerivationParameter> optionSet = getMaxFeatureOptionSet();
             maximalFeatureContainerDockerTag = provideDockerContainer(optionSet);
         }
         DockerTestContainer container =
                 dockerTagToContainerInfo.get(maximalFeatureContainerDockerTag);
-        return container.getSiteReport();
+        return container.getFeatureExtractionResult();
     }
 
     /**
@@ -453,8 +461,6 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
         } else {
             throw new IllegalStateException("TestEndpointMode is invalid.");
         }
-        // Used to override host and port in the next execution of get createConfig
-        TestContext.getInstance().getConfig().clearConfigCache();
 
         // Assure that the max implementation is never paused
         dockerTagToContainerInfo.get(maximalFeatureContainerDockerTag).startUsage();

@@ -11,7 +11,8 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
 
 import com.github.dockerjava.api.DockerClient;
-import de.rub.nds.tlstest.framework.TestSiteReport;
+import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -34,7 +35,7 @@ import org.apache.logging.log4j.Logger;
 public abstract class DockerTestContainer extends DockerContainer {
     private static final Logger LOGGER = LogManager.getLogger();
     protected Integer managerPort;
-    protected TestSiteReport siteReport;
+    protected FeatureExtractionResult feaureExtractionResult;
     protected String dockerHost;
     protected int inUseCount;
 
@@ -57,7 +58,7 @@ public abstract class DockerTestContainer extends DockerContainer {
         super(dockerTag, containerId, dockerClient);
         this.dockerHost = dockerHost;
         this.managerPort = managerPort;
-        this.siteReport = null;
+        this.feaureExtractionResult = null;
         this.inUseCount = 0;
     }
 
@@ -179,22 +180,24 @@ public abstract class DockerTestContainer extends DockerContainer {
      *
      * @return the containers TestSiteReport
      */
-    public TestSiteReport getSiteReport() {
-        if (siteReport == null) {
+    public FeatureExtractionResult getFeatureExtractionResult() {
+        if (feaureExtractionResult == null) {
             LOGGER.info("Create site report for container with tag '{}'...", this.dockerTag);
             DockerContainerState state = getContainerState();
             startUsage();
+            // todo: use one parallelExecutor
+            ParallelExecutor parallelExecutor = new ParallelExecutor(1, 2);
             try {
                 if (state == DockerContainerState.PAUSED) {
                     unpauseAndWait();
-                    siteReport = createSiteReport();
+                    feaureExtractionResult = createFeatureExtractionResult(parallelExecutor);
                     pause();
                 } else if (state == DockerContainerState.NOT_RUNNING) {
                     startAndWait();
-                    siteReport = createSiteReport();
+                    feaureExtractionResult = createFeatureExtractionResult(parallelExecutor);
                     stop();
                 } else if (state == DockerContainerState.RUNNING) {
-                    siteReport = createSiteReport();
+                    feaureExtractionResult = createFeatureExtractionResult(parallelExecutor);
                 } else {
                     throw new RuntimeException(
                             "Can't create SiteReport in invalid container state.");
@@ -206,14 +209,15 @@ public abstract class DockerTestContainer extends DockerContainer {
             }
             endUsage();
         }
-        return siteReport;
+        return feaureExtractionResult;
     }
 
     /**
      * Abstract method to create a site report. Note that while this method is called the usage is
      * already registered, and the container is already running.
      *
-     * @return the created TestSiteReport
+     * @return the created FeatureExtractionResult
      */
-    protected abstract TestSiteReport createSiteReport();
+    protected abstract FeatureExtractionResult createFeatureExtractionResult(
+            ParallelExecutor parallelExecutor);
 }

@@ -50,4 +50,8 @@ public abstract class ConfigurationOptionDerivationParameter
     public ConfigurationOptionDerivationParameter getDefaultValueParameter() {
         return (ConfigurationOptionDerivationParameter) generateValue(getDefaultValue());
     }
+
+    public ConfigurationOptionDerivationParameter getMaxFeatureValueParameter() {
+        return (ConfigurationOptionDerivationParameter) generateValue(getMaxFeatureValue());
+    }
 }

@@ -71,7 +71,7 @@ public class ConfigurationOptionsExtension {
         ConfigurationOptionsDerivationManager.getInstance().preBuildAndValidateAndFilterSetups();
 
         FeatureExtractionResult maxFeatureExtractionResult =
-                config.getBuildManager().getMaximalFeatureSiteReport();
+                config.getBuildManager().getMaximalFeatureExtractionResult();
         TestContext.getInstance().setFeatureExtractionResult(maxFeatureExtractionResult);
     }
 }

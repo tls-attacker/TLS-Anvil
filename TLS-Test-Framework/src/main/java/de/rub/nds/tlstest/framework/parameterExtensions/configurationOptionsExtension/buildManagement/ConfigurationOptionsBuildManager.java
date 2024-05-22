@@ -51,7 +51,7 @@ public abstract class ConfigurationOptionsBuildManager {
      *
      * @return the TestSiteReport of the maximal build
      */
-    public abstract FeatureExtractionResult getMaximalFeatureSiteReport();
+    public abstract FeatureExtractionResult getMaximalFeatureExtractionResult();
 
     /**
      * Method that should be called on the end of each test. Can be used to let the manager know

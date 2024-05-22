@@ -280,7 +280,10 @@ public class TestPreparator {
                 getServerScanner(
                         testConfig.getGeneralDelegate(),
                         testConfig.getTestServerDelegate(),
-                        testContext.getStateExecutor());
+                        testContext.getStateExecutor(),
+                        testConfig.getAnvilTestConfig().getConnectionTimeout(),
+                        testConfig.isUseDTLS(),
+                        testConfig.createConfig().isAddServerNameIndicationExtension());
 
         ServerReport serverReport = scanner.scan();
         serverReport.putResult(TlsAnalyzedProperty.HTTPS_HEADER, TestResults.ERROR_DURING_TEST);
@@ -303,18 +306,20 @@ public class TestPreparator {
      * @param executor - the ParallelExecutor to use
      * @return TlsServerScanner the object ready for execution
      */
-    public TlsServerScanner getServerScanner(
+    public static TlsServerScanner getServerScanner(
             GeneralDelegate generalDelegate,
             TestServerDelegate testServerDelegate,
-            ParallelExecutor executor) {
+            ParallelExecutor executor,
+            int timeout,
+            boolean dtls,
+            boolean addSni) {
         ServerScannerConfig scannerConfig =
                 new ServerScannerConfig(generalDelegate, testServerDelegate);
-        scannerConfig.setTimeout(testConfig.getAnvilTestConfig().getConnectionTimeout());
+        scannerConfig.setTimeout(timeout);
         Config config = scannerConfig.createConfig();
-        config.setAddServerNameIndicationExtension(
-                testConfig.createConfig().isAddServerNameIndicationExtension());
+        config.setAddServerNameIndicationExtension(addSni);
         config.getDefaultClientConnection().setConnectionTimeout(0);
-        if (testConfig.isUseDTLS()) {
+        if (dtls) {
             scannerConfig.getDtlsDelegate().setDTLS(true);
         }
         scannerConfig
@@ -369,7 +374,10 @@ public class TestPreparator {
         TlsClientScanner clientScanner =
                 getClientScanner(
                         testConfig.getDelegate(TestClientDelegate.class).getPort(),
-                        preparedExecutor);
+                        preparedExecutor,
+                        testConfig.getAnvilTestConfig().getConnectionTimeout(),
+                        testConfig.getTestClientDelegate().getTriggerScript(),
+                        testConfig.isUseDTLS());
 
         String identifier =
                 testConfig.getAnvilTestConfig().getIdentifier() == null
@@ -395,7 +403,12 @@ public class TestPreparator {
      * @param preparedExecutor the ParallelExecutor to use
      * @return TlsClientScanner the object ready for execution
      */
-    private TlsClientScanner getClientScanner(Integer port, ParallelExecutor preparedExecutor) {
+    public static TlsClientScanner getClientScanner(
+            Integer port,
+            ParallelExecutor preparedExecutor,
+            int timeout,
+            Function<State, Integer> externalRunCallback,
+            boolean dtls) {
         ClientScannerConfig clientScannerConfig = new ClientScannerConfig(new GeneralDelegate());
         List<ProbeType> probes = new LinkedList<>();
         probes.add(TlsProbeType.BASIC);
@@ -407,11 +420,10 @@ public class TestPreparator {
         probes.add(TlsProbeType.CONNECTION_CLOSING_DELTA);
         probes.add(TlsProbeType.APPLICATION_MESSAGE);
         clientScannerConfig.getServerDelegate().setPort(port);
-        clientScannerConfig.setTimeout(testConfig.getAnvilTestConfig().getConnectionTimeout());
+        clientScannerConfig.setTimeout(timeout);
         clientScannerConfig.getExecutorConfig().setProbes(probes);
-        clientScannerConfig.setExternalRunCallback(
-                testConfig.getTestClientDelegate().getTriggerScript());
-        if (testConfig.isUseDTLS()) {
+        clientScannerConfig.setExternalRunCallback(externalRunCallback);
+        if (dtls) {
             clientScannerConfig.getDtlsDelegate().setDTLS(true);
             probes.add(TlsProbeType.DTLS_FRAGMENTATION);
         } else {

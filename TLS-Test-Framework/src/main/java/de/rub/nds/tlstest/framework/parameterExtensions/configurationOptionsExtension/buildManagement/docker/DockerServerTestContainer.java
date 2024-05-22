@@ -11,8 +11,14 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
 
 import com.github.dockerjava.api.DockerClient;
-import de.rub.nds.tlstest.framework.TestSiteReport;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.TestSiteReportFactory;
+import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
+import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
+import de.rub.nds.tlsscanner.serverscanner.execution.TlsServerScanner;
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
+import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
+import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
+import de.rub.nds.tlstest.framework.execution.TestPreparator;
 
 /** Represents a DockerContainer that runs a tls server for testing purposes. */
 public class DockerServerTestContainer extends DockerTestContainer {
@@ -44,7 +50,19 @@ public class DockerServerTestContainer extends DockerTestContainer {
         return tlsServerPort;
     }
 
-    public synchronized TestSiteReport createSiteReport() {
-        return TestSiteReportFactory.createServerSiteReport(dockerHost, tlsServerPort, false);
+    public synchronized FeatureExtractionResult createFeatureExtractionResult(
+            ParallelExecutor parallelExecutor) {
+        TlsServerScanner scanner =
+                TestPreparator.getServerScanner(
+                        new GeneralDelegate(),
+                        new TestServerDelegate(),
+                        parallelExecutor,
+                        TestContext.getInstance()
+                                .getConfig()
+                                .getAnvilTestConfig()
+                                .getConnectionTimeout(),
+                        false,
+                        false);
+        return ServerFeatureExtractionResult.fromServerScanReport(scanner.scan());
     }
 }

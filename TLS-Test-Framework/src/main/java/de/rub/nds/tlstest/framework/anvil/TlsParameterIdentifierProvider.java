@@ -8,6 +8,7 @@ import de.rub.nds.anvilcore.model.DefaultModelTypes;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.ParameterIdentifierProvider;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
@@ -17,6 +18,8 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.constants.KeyX;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterScope;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -47,6 +50,17 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
                 }
             }
         }
+
+        for (ConfigOptionParameterType listed : ConfigOptionParameterType.values()) {
+            if (listed == ConfigOptionParameterType.CONFIG_OPTION_COMPOUND_PARAMETER) {
+                identifiers.add(new ParameterIdentifier(listed, ParameterScope.NO_SCOPE));
+            } else {
+                // all CO types except for the compound parameter are used in a separate IPM
+                identifiers.add(
+                        new ParameterIdentifier(listed, ConfigOptionParameterScope.DEFAULT));
+            }
+        }
+
         return identifiers;
     }
 

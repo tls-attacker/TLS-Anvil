@@ -19,7 +19,7 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -39,7 +39,7 @@ public class ConfigurationOptionCompoundDerivation
                 (Class<List<ConfigurationOptionDerivationParameter>>) (Object) List.class,
                 Config.class,
                 new ParameterIdentifier(
-                        ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER));
+                        ConfigOptionParameterType.CONFIG_OPTION_COMPOUND_PARAMETER));
         configOptionsSetupsList = setupsList;
     }
 
@@ -122,7 +122,7 @@ public class ConfigurationOptionCompoundDerivation
         requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
         requiredDerivations.add(
                 new ParameterIdentifier(
-                        ConfigOptionDerivationType.CONFIG_OPTION_COMPOUND_PARAMETER));
+                        ConfigOptionParameterType.CONFIG_OPTION_COMPOUND_PARAMETER));
         return new ConditionalConstraint(
                 requiredDerivations,
                 ConstraintBuilder.constrain(

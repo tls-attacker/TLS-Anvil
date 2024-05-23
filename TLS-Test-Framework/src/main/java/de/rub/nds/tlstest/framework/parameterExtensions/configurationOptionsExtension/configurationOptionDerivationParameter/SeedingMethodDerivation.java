@@ -13,7 +13,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 import java.util.*;
 
@@ -32,7 +32,7 @@ public class SeedingMethodDerivation extends ConfigurationOptionDerivationParame
     }
 
     public SeedingMethodDerivation() {
-        super(ConfigOptionDerivationType.SEEDING_METHOD);
+        super(ConfigOptionParameterType.SEEDING_METHOD);
     }
 
     public SeedingMethodDerivation(ConfigurationOptionValue selectedValue) {

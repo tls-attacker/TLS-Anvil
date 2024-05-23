@@ -76,7 +76,7 @@ public class ConfigurationOptionsDerivationManager {
         compoundFeatureExtractionResult = null;
     }
 
-    public List<ConfigOptionDerivationType> getAllActivatedCOTypes() {
+    public List<ConfigOptionParameterType> getAllActivatedCOTypes() {
         return new LinkedList<>(config.getEnabledConfigOptionDerivations());
     }
 
@@ -126,7 +126,7 @@ public class ConfigurationOptionsDerivationManager {
         InputParameterModel.Builder builder =
                 InputParameterModel.inputParameterModel("configuration-options-ipm");
         builder.strength(strength);
-        for (ConfigOptionDerivationType coType : config.getEnabledConfigOptionDerivations()) {
+        for (ConfigOptionParameterType coType : config.getEnabledConfigOptionDerivations()) {
             ConfigurationOptionDerivationParameter coDerivationParameter =
                     (ConfigurationOptionDerivationParameter)
                             coType.getInstance(ParameterScope.NO_SCOPE);
@@ -150,10 +150,10 @@ public class ConfigurationOptionsDerivationManager {
                                         reqParameter ->
                                                 (reqParameter.getParameterType()
                                                                 instanceof
-                                                                ConfigOptionDerivationType)
+                                                                ConfigOptionParameterType)
                                                         && config.getEnabledConfigOptionDerivations()
                                                                 .contains(
-                                                                        (ConfigOptionDerivationType)
+                                                                        (ConfigOptionParameterType)
                                                                                 reqParameter
                                                                                         .getParameterType()));
 

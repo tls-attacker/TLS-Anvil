@@ -38,7 +38,10 @@ public class AnnotationReferences {
                                     "Found unknown ParameterIdentifier '"
                                             + identifier
                                             + "' for test "
-                                            + method.getName(),
+                                            + method.getName()
+                                            + " known values are "
+                                            + knownIdentifierStrings.stream()
+                                                    .collect(Collectors.joining(",")),
                                     knownIdentifierStrings.contains(identifier)));
         }
     }

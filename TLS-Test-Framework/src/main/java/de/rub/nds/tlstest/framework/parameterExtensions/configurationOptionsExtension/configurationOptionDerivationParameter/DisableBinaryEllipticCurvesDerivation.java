@@ -13,14 +13,14 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 import java.util.LinkedList;
 import java.util.List;
 
 public class DisableBinaryEllipticCurvesDerivation extends ConfigurationOptionDerivationParameter {
     public DisableBinaryEllipticCurvesDerivation() {
-        super(ConfigOptionDerivationType.DISABLE_BINARY_ELLIPTIC_CURVES);
+        super(ConfigOptionParameterType.DISABLE_BINARY_ELLIPTIC_CURVES);
     }
 
     public DisableBinaryEllipticCurvesDerivation(ConfigurationOptionValue selectedValue) {

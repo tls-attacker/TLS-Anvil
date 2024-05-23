@@ -19,7 +19,7 @@ import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ParallelExecutorWithTimeout;
@@ -261,7 +261,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * @return the option set
      */
     protected Set<ConfigurationOptionDerivationParameter> getMaxFeatureOptionSet() {
-        List<ConfigOptionDerivationType> derivationTypes =
+        List<ConfigOptionParameterType> derivationTypes =
                 ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes();
         Set<ConfigurationOptionDerivationParameter> optionSet = new HashSet<>();
         for (ParameterType type : derivationTypes) {
@@ -608,7 +608,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      */
     protected List<String> createConfigOptionCliList(
             Set<ConfigurationOptionDerivationParameter> optionSet) {
-        Map<ConfigOptionDerivationType, ConfigOptionValueTranslation> optionsToTranslationMap =
+        Map<ConfigOptionParameterType, ConfigOptionValueTranslation> optionsToTranslationMap =
                 configOptionsConfig.getOptionsToTranslationMap();
         List<String> optionsCliList = new ArrayList<>();
         for (ConfigurationOptionDerivationParameter optionParameter : optionSet) {

@@ -11,7 +11,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.openSSL.OpenSSLBuildManager;
 import java.io.FileInputStream;
@@ -44,8 +44,7 @@ public class ConfigurationOptionsConfig {
     private String tlsLibraryName;
     private String tlsVersionName;
     private ConfigurationOptionsBuildManager buildManager;
-    private final Map<ConfigOptionDerivationType, ConfigOptionValueTranslation>
-            optionsToTranslation;
+    private final Map<ConfigOptionParameterType, ConfigOptionValueTranslation> optionsToTranslation;
 
     private int configOptionsIpmStrength; // default: strength of main IPM
 
@@ -123,12 +122,12 @@ public class ConfigurationOptionsConfig {
         return dockerClientDestinationHostName;
     }
 
-    public Map<ConfigOptionDerivationType, ConfigOptionValueTranslation>
+    public Map<ConfigOptionParameterType, ConfigOptionValueTranslation>
             getOptionsToTranslationMap() {
         return new HashMap<>(optionsToTranslation);
     }
 
-    public Set<ConfigOptionDerivationType> getEnabledConfigOptionDerivations() {
+    public Set<ConfigOptionParameterType> getEnabledConfigOptionDerivations() {
         return new HashSet<>(optionsToTranslation.keySet());
     }
 
@@ -309,7 +308,7 @@ public class ConfigurationOptionsConfig {
                 }
 
                 // Parse derivation type
-                ConfigOptionDerivationType derivationType =
+                ConfigOptionParameterType derivationType =
                         derivationTypeFromString(
                                 Objects.requireNonNull(
                                                 XmlParseUtils.findElement(
@@ -341,7 +340,7 @@ public class ConfigurationOptionsConfig {
                         str));
     }
 
-    private ConfigOptionDerivationType derivationTypeFromString(String str)
+    private ConfigOptionParameterType derivationTypeFromString(String str)
             throws IllegalArgumentException {
         String[] splittedStr = str.split("\\.");
 
@@ -350,9 +349,9 @@ public class ConfigurationOptionsConfig {
                     "Illegal derivation type string format. Syntax is \"[Enum].[Value]\"");
         }
 
-        ConfigOptionDerivationType res;
+        ConfigOptionParameterType res;
         if ("ConfigOptionDerivationType".equals(splittedStr[0])) {
-            res = ConfigOptionDerivationType.valueOf(splittedStr[1]);
+            res = ConfigOptionParameterType.valueOf(splittedStr[1]);
         } else {
             throw new IllegalArgumentException(
                     "Unsupported derivation type '" + splittedStr[0] + "'");

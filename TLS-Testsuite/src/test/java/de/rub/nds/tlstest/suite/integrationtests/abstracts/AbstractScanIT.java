@@ -178,7 +178,10 @@ public abstract class AbstractScanIT {
         builder.append("---------------------+---------------------+---------------------\n");
         for (String s :
                 Sets.union(orderedActualResults.keySet(), orderedExpectedResults.keySet())) {
-            String shortName = s.substring(31);
+            String shortName = s;
+            if (s.length() > 31) {
+                shortName = s.substring(31);
+            }
             if (!orderedActualResults.containsKey(s)) {
                 builder.append(
                         String.format(

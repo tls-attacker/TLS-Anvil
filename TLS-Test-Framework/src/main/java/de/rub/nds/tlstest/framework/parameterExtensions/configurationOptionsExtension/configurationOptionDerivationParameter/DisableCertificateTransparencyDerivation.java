@@ -13,7 +13,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.List;
 public class DisableCertificateTransparencyDerivation
         extends ConfigurationOptionDerivationParameter {
     public DisableCertificateTransparencyDerivation() {
-        super(ConfigOptionDerivationType.DISABLE_CERTIFICATE_TRANSPARENCY);
+        super(ConfigOptionParameterType.DISABLE_CERTIFICATE_TRANSPARENCY);
     }
 
     public DisableCertificateTransparencyDerivation(ConfigurationOptionValue selectedValue) {

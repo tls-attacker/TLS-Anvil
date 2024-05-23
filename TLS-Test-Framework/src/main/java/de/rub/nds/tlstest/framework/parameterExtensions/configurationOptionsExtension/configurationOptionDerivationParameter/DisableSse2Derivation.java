@@ -13,14 +13,14 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 import java.util.LinkedList;
 import java.util.List;
 
 public class DisableSse2Derivation extends ConfigurationOptionDerivationParameter {
     public DisableSse2Derivation() {
-        super(ConfigOptionDerivationType.DISABLE_SSE2);
+        super(ConfigOptionParameterType.DISABLE_SSE2);
     }
 
     public DisableSse2Derivation(ConfigurationOptionValue selectedValue) {

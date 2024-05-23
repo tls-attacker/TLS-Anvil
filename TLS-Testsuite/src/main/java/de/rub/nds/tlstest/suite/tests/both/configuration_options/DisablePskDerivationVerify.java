@@ -17,7 +17,7 @@ import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisablePskDerivation;
@@ -33,19 +33,21 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 public class DisablePskDerivationVerify extends Tls12Test {
 
     public ConditionEvaluationResult disablePskOptionTested() {
-        if (ConfigurationOptionsDerivationManager.getInstance()
-                .getAllActivatedCOTypes()
-                .contains(ConfigOptionDerivationType.DISABLE_PSK)) {
+        if (ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes() != null
+                && ConfigurationOptionsDerivationManager.getInstance()
+                        .getAllActivatedCOTypes()
+                        .contains(ConfigOptionParameterType.DISABLE_PSK)) {
             return ConditionEvaluationResult.enabled("");
         } else {
-            return ConditionEvaluationResult.disabled("The DisablePsk option is not tested.");
+            return ConditionEvaluationResult.disabled(
+                    "The DisablePsk config option is not tested.");
         }
     }
 
-    @AnvilTest(id = "todo")
+    @AnvilTest(id = "XCO-B6aDKr3y8P")
     @MethodCondition(method = "disablePskOptionTested")
     @ModelFromScope(modelType = "EMPTY")
-    @IncludeParameter("ConfigOptionDerivationType.ConfigurationOptionCompoundParameter")
+    @IncludeParameter("ConfigOptionParameter:DISABLE_PSK")
     public void pskCiphersuitesDisabled(ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         getPreparedConfig(runner);
         // todo: implement access to container-specific extraction result

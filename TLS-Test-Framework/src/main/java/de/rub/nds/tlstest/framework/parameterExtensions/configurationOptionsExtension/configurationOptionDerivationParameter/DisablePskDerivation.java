@@ -13,7 +13,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class DisablePskDerivation extends ConfigurationOptionDerivationParameter
     private static final Logger LOGGER = LogManager.getLogger();
 
     public DisablePskDerivation() {
-        super(ConfigOptionDerivationType.DISABLE_PSK);
+        super(ConfigOptionParameterType.DISABLE_PSK);
     }
 
     public DisablePskDerivation(ConfigurationOptionValue selectedValue) {

@@ -13,14 +13,14 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 import java.util.LinkedList;
 import java.util.List;
 
 public class DisableErrorStringsDerivation extends ConfigurationOptionDerivationParameter {
     public DisableErrorStringsDerivation() {
-        super(ConfigOptionDerivationType.DISABLE_ERROR_STRINGS);
+        super(ConfigOptionParameterType.DISABLE_ERROR_STRINGS);
     }
 
     public DisableErrorStringsDerivation(ConfigurationOptionValue selectedValue) {

@@ -18,7 +18,7 @@ import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.EnableCompressionDerivation;
@@ -34,21 +34,22 @@ public class EnableCompressionDerivationVerify extends Tls12Test {
 
     public ConditionEvaluationResult enableCompressionOptionTested() {
 
-        if (ConfigurationOptionsDerivationManager.getInstance()
-                .getAllActivatedCOTypes()
-                .contains(ConfigOptionDerivationType.ENABLE_COMPRESSION)) {
+        if (ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes() != null
+                && ConfigurationOptionsDerivationManager.getInstance()
+                        .getAllActivatedCOTypes()
+                        .contains(ConfigOptionParameterType.ENABLE_COMPRESSION)) {
             return ConditionEvaluationResult.enabled("");
         } else {
             return ConditionEvaluationResult.disabled(
-                    "The EnableCompression option is not tested.");
+                    "The EnableCompression config option is not tested.");
         }
     }
 
-    @AnvilTest(id = "todo")
+    @AnvilTest(id = "XCO-s74Cw9S5dF")
     @MethodCondition(method = "enableCompressionOptionTested")
     @ModelFromScope(modelType = "EMPTY")
-    @IncludeParameter("ConfigOptionDerivationType.ConfigurationOptionCompoundParameter")
-    public void compressionDisabledByOption(
+    @IncludeParameter("ConfigOptionParameter:ENABLE_COMPRESSION")
+    public void compressionEnabledByOption(
             ArgumentsAccessor argumentAccessor, WorkflowRunner runner) {
         getPreparedConfig(runner);
         // todo: implement access to container-specific extraction result

@@ -31,18 +31,18 @@ public class OpenSSLBuildManager extends DockerBasedBuildManager {
     @Override
     protected String translateOptionValue(
             ConfigurationOptionDerivationParameter optionParameter,
-            Map<ConfigOptionDerivationType, ConfigOptionValueTranslation> optionsToTranslationMap) {
+            Map<ConfigOptionParameterType, ConfigOptionValueTranslation> optionsToTranslationMap) {
         ConfigurationOptionValue value = optionParameter.getSelectedValue();
         if (value == null) {
             throw new IllegalArgumentException(
                     "Passed option parameter has no selected value yet.");
         }
         ParameterType parameterType = optionParameter.getParameterIdentifier().getParameterType();
-        if (!(parameterType instanceof ConfigOptionDerivationType)) {
+        if (!(parameterType instanceof ConfigOptionParameterType)) {
             throw new IllegalArgumentException(
                     "Passed derivation parameter is not of type ConfigOptionDerivationType.");
         }
-        ConfigOptionDerivationType optionType = (ConfigOptionDerivationType) parameterType;
+        ConfigOptionParameterType optionType = (ConfigOptionParameterType) parameterType;
 
         if (!optionsToTranslationMap.containsKey(optionType)) {
             throw new IllegalStateException(

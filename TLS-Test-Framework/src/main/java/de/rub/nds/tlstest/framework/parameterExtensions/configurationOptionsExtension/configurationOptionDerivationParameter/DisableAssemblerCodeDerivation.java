@@ -13,14 +13,14 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 import java.util.LinkedList;
 import java.util.List;
 
 public class DisableAssemblerCodeDerivation extends ConfigurationOptionDerivationParameter {
     public DisableAssemblerCodeDerivation() {
-        super(ConfigOptionDerivationType.DISABLE_ASSEMBLER_CODE);
+        super(ConfigOptionParameterType.DISABLE_ASSEMBLER_CODE);
     }
 
     public DisableAssemblerCodeDerivation(ConfigurationOptionValue selectedValue) {

@@ -7943,5 +7943,25 @@
       "DoS",
       "invalidClientHelloCookie"
     ]
+  },
+  "XCO-B6aDKr3y8P": {
+    "description": "Test if PSK Cipher Suites are disabled as expected for the configuration option",
+    "severityLevels": {
+    },
+    "tags": [
+      "server",
+      "configurationoptions",
+      "pskCiphersuitesDisabled"
+    ]
+  },
+  "XCO-s74Cw9S5dF": {
+    "description": "Test if compression has been enabled as expected for the configuration option",
+    "severityLevels": {
+    },
+    "tags": [
+      "server",
+      "configurationoptions",
+      "compressionEnabledByOption"
+    ]
   }
 }

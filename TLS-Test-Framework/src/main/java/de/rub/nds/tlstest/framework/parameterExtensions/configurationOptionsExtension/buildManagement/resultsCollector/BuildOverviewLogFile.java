@@ -10,7 +10,7 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector;
 
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class BuildOverviewLogFile extends LogFile {
     private final ConfigurationOptionsConfig config;
-    private List<ConfigOptionDerivationType> optionHeaders;
+    private List<ConfigOptionParameterType> optionHeaders;
 
     private final Set<String> loggedDockerTags;
 
@@ -46,7 +46,7 @@ public class BuildOverviewLogFile extends LogFile {
         header.add("No");
         header.add("Docker Tag");
         header.add("Build Time (in sec)");
-        for (ConfigOptionDerivationType optionHeaderEntry : optionHeaders) {
+        for (ConfigOptionParameterType optionHeaderEntry : optionHeaders) {
             header.add(optionHeaderEntry.name());
         }
         log(String.join(",", header) + "\n");
@@ -85,16 +85,16 @@ public class BuildOverviewLogFile extends LogFile {
             line.add("FAILED");
         }
 
-        Map<ConfigOptionDerivationType, ConfigurationOptionValue> optionTypeToValue =
+        Map<ConfigOptionParameterType, ConfigurationOptionValue> optionTypeToValue =
                 new HashMap<>();
         for (ConfigurationOptionDerivationParameter configOptionDervivation : optionSet) {
-            ConfigOptionDerivationType type =
-                    (ConfigOptionDerivationType)
+            ConfigOptionParameterType type =
+                    (ConfigOptionParameterType)
                             configOptionDervivation.getParameterIdentifier().getParameterType();
             optionTypeToValue.put(type, configOptionDervivation.getSelectedValue());
         }
 
-        for (ConfigOptionDerivationType headerField : optionHeaders) {
+        for (ConfigOptionParameterType headerField : optionHeaders) {
             if (optionTypeToValue.containsKey(headerField)) {
                 line.add(optionTypeToValue.get(headerField).toString());
             } else {

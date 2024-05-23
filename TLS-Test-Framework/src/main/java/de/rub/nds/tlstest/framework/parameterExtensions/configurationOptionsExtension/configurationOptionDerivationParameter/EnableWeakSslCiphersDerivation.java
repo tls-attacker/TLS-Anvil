@@ -13,14 +13,14 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 import java.util.LinkedList;
 import java.util.List;
 
 public class EnableWeakSslCiphersDerivation extends ConfigurationOptionDerivationParameter {
     public EnableWeakSslCiphersDerivation() {
-        super(ConfigOptionDerivationType.ENABLE_WEAK_SSL_CIPHERS);
+        super(ConfigOptionParameterType.ENABLE_WEAK_SSL_CIPHERS);
     }
 
     public EnableWeakSslCiphersDerivation(ConfigurationOptionValue selectedValue) {

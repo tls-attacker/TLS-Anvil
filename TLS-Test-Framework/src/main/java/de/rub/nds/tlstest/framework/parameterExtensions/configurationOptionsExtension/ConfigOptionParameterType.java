@@ -54,7 +54,7 @@ import java.lang.reflect.InvocationTargetException;
  * respective translation) 5) If required: Add constraints regarding your new option to the required
  * tests in your testsuite.
  */
-public enum ConfigOptionDerivationType implements ParameterType {
+public enum ConfigOptionParameterType implements ParameterType {
     CONFIG_OPTION_COMPOUND_PARAMETER(ConfigurationOptionDerivationParameter.class),
 
     // 1st Priority
@@ -95,7 +95,7 @@ public enum ConfigOptionDerivationType implements ParameterType {
     ENABLE_MEMORY_DEBUGGING_SUPPORT(EnableMemoryDebuggingSupportDerivation.class),
     DISABLE_ERROR_STRINGS(DisableErrorStringsDerivation.class);
 
-    ConfigOptionDerivationType(Class<? extends DerivationParameter> derivationClass) {
+    ConfigOptionParameterType(Class<? extends DerivationParameter> derivationClass) {
         this.derivationClass = derivationClass;
     }
 

@@ -12,7 +12,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigOptionValueTranslation;
 import java.util.Map;
@@ -76,5 +76,5 @@ public abstract class ConfigurationOptionsBuildManager {
      */
     protected abstract String translateOptionValue(
             ConfigurationOptionDerivationParameter optionParameter,
-            Map<ConfigOptionDerivationType, ConfigOptionValueTranslation> optionsToTranslationMap);
+            Map<ConfigOptionParameterType, ConfigOptionValueTranslation> optionsToTranslationMap);
 }

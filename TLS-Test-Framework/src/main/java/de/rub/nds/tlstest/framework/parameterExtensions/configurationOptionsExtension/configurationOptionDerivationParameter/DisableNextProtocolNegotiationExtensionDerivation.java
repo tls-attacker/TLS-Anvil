@@ -13,7 +13,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionValue;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.List;
 public class DisableNextProtocolNegotiationExtensionDerivation
         extends ConfigurationOptionDerivationParameter {
     public DisableNextProtocolNegotiationExtensionDerivation() {
-        super(ConfigOptionDerivationType.DISABLE_NEXT_PROTOCOL_NEGOTIATION);
+        super(ConfigOptionParameterType.DISABLE_NEXT_PROTOCOL_NEGOTIATION);
     }
 
     public DisableNextProtocolNegotiationExtensionDerivation(

@@ -176,31 +176,27 @@ public abstract class AbstractScanIT {
         StringBuilder builder = new StringBuilder();
         builder.append(String.format(" %-20s| %-20s| %-20s\n", "Actual", "Expected", "Test"));
         builder.append("---------------------+---------------------+---------------------\n");
-        for (String s :
+        for (String testId :
                 Sets.union(orderedActualResults.keySet(), orderedExpectedResults.keySet())) {
-            String shortName = s;
-            if (s.length() > 31) {
-                shortName = s.substring(31);
-            }
-            if (!orderedActualResults.containsKey(s)) {
+            if (!orderedActualResults.containsKey(testId)) {
                 builder.append(
                         String.format(
                                 " %-20s| %-20s| %-20s\n",
-                                "missing", orderedExpectedResults.get(s), shortName));
+                                "missing", orderedExpectedResults.get(testId), testId));
                 fail = true;
-            } else if (!orderedExpectedResults.containsKey(s)) {
+            } else if (!orderedExpectedResults.containsKey(testId)) {
                 builder.append(
                         String.format(
                                 " %-20s| %-20s| %-20s\n",
-                                orderedActualResults.get(s), "not present", shortName));
+                                orderedActualResults.get(testId), "not present", testId));
                 fail = true;
-            } else if (orderedActualResults.get(s) != orderedExpectedResults.get(s)) {
+            } else if (orderedActualResults.get(testId) != orderedExpectedResults.get(testId)) {
                 builder.append(
                         String.format(
                                 " %-20s| %-20s| %-20s\n",
-                                orderedActualResults.get(s),
-                                orderedExpectedResults.get(s),
-                                shortName));
+                                orderedActualResults.get(testId),
+                                orderedExpectedResults.get(testId),
+                                testId));
                 fail = true;
             }
         }

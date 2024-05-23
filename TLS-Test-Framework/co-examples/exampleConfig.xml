@@ -22,7 +22,7 @@
     <!-- Config for working with docker  -->
     <dockerConfig>
         <!-- The path to the docker library  -->
-        <dockerLibraryPath>/path/to/TLS-Docker-Library</dockerLibraryPath>
+        <dockerLibraryPath>/home/marcel/NetBeansProjects/TLS-Docker-Library-Development</dockerLibraryPath>
         <!-- The host address all built containers are bind to.  -->
         <dockerHostBinding>127.0.0.42</dockerHostBinding>
         <!-- The address the docker container can be reached (May differ from dockerHostBinding when using docker with WSL on windows) -->
@@ -62,12 +62,12 @@
                 <!-- Single option values are options that have an identifier and a single value like: '- -with-rand-seed=<seeding_method>' -->
                 <identifier>--with-rand-seed</identifier>
                 <!-- Every possible value must appear here. It is translated to a value that can be parsed by the tls library -->
-                <value key="OsEntropySource">os</value>
-                <value key="GetRandom">getrandom</value>
-                <value key="DevRandom">devrandom</value>
-                <value key="EntropyGeneratingDaemon">egd</value>
-                <value key="CpuCommand">rdcpu</value>
-                <value key="None">none</value>
+                <value key="OS_ENTROPY_SOURCE">os</value>
+                <value key="GET_RANDOM">getrandom</value>
+                <value key="DEV_RANDOM">devrandom</value>
+                <value key="ENTROPY_GENERATING_DAEMON">egd</value>
+                <value key="CPU_COMMAND">rdcpu</value>
+                <value key="NONE">none</value>
             </valueTranslation>
         </optionEntry>
         <optionEntry>
@@ -82,7 +82,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionParameter:ENABLE_NIST_EC_OPERATIO</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_SSE2</derivationType>
             <enabled>true</enabled>
             <valueTranslation type="Flag">
                 <true>no-sse2</true>

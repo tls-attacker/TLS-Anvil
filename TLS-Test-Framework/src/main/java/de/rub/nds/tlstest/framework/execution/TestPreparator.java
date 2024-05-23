@@ -37,6 +37,7 @@ import de.rub.nds.tlstest.framework.config.TlsTestConfig;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsExtension;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.DatagramPacket;
@@ -476,6 +477,12 @@ public class TestPreparator {
         testContext.setStateExecutor(executor);
 
         LOGGER.info("Starting preparation phase");
+        String configurationOptionsConfigFile = testConfig.getConfigOptionsConfigFile();
+        if (!configurationOptionsConfigFile.isEmpty()) {
+            LOGGER.info("Preparing configuration options environment");
+            ConfigurationOptionsExtension.getInstance().load(configurationOptionsConfigFile);
+        }
+
         this.testConfig.createConfig();
 
         if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {

@@ -13,6 +13,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -37,7 +38,11 @@ public class SingleValueOptionTranslation extends ConfigOptionValueTranslation {
     public String getValueTranslation(String key) {
         if (!valueTranslationMap.containsKey(key)) {
             throw new IllegalArgumentException(
-                    "Cannot get translation for key '%s'. It was not configured in the config file.");
+                    "Cannot get translation for key '"
+                            + key
+                            + "'. It was not configured in the config file. Found: "
+                            + valueTranslationMap.keySet().stream()
+                                    .collect(Collectors.joining(",")));
         }
         return valueTranslationMap.get(key);
     }

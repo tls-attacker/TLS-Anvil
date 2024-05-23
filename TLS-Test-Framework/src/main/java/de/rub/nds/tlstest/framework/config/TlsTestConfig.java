@@ -96,6 +96,12 @@ public class TlsTestConfig extends TLSDelegateConfig {
     @Parameter(names = "-dtls", description = "Set DTLS as default for the test-suite.")
     private boolean useDTLS = false;
 
+    @Parameter(
+            names = "-configOptionsConfigFile",
+            description =
+                    "Defines the path of the configuration option config file to enable configuration option tests.")
+    private String configOptionsConfigFile = "";
+
     // we might want to turn these into CLI parameters in the future
     private boolean expectTls13Alerts = false;
     private boolean enforceSenderRestrictions = false;
@@ -629,5 +635,13 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
     public void setUseDTLS(boolean useDTLS) {
         this.useDTLS = useDTLS;
+    }
+
+    public String getConfigOptionsConfigFile() {
+        return this.configOptionsConfigFile;
+    }
+
+    public void setConfigOptionsConfigFile(String configOptionsConfigFile) {
+        this.configOptionsConfigFile = configOptionsConfigFile;
     }
 }

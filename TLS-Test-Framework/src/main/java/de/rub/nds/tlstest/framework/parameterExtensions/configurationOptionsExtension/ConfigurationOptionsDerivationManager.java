@@ -206,8 +206,10 @@ public class ConfigurationOptionsDerivationManager {
 
         compoundSetupList = Collections.unmodifiableList(compoundSetupList);
 
-        LOGGER.debug(
-                "Testing configuration options with default combinations:\n{}", compoundSetupList);
+        LOGGER.info(
+                "Testing configuration options with {} default combinations:\n{}",
+                compoundSetupList.size(),
+                compoundSetupList);
     }
 
     public void preBuildAndValidateAndFilterSetups() {

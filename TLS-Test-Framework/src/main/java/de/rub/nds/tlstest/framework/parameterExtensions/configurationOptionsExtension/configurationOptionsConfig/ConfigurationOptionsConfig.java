@@ -10,7 +10,10 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig;
 
 import de.rub.nds.anvilcore.constants.TestEndpointType;
+import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterScope;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.openSSL.OpenSSLBuildManager;
@@ -21,6 +24,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -342,22 +346,19 @@ public class ConfigurationOptionsConfig {
 
     private ConfigOptionParameterType derivationTypeFromString(String str)
             throws IllegalArgumentException {
-        String[] splittedStr = str.split("\\.");
-
-        if (splittedStr.length != 2) {
-            throw new IllegalArgumentException(
-                    "Illegal derivation type string format. Syntax is \"[Enum].[Value]\"");
+        List<ParameterIdentifier> configOptionIdentifiers =
+                TlsParameterIdentifierProvider.getAllParameterIdentifiers().stream()
+                        .filter(
+                                identifier ->
+                                        identifier.getParameterScope()
+                                                == ConfigOptionParameterScope.DEFAULT)
+                        .collect(Collectors.toList());
+        for (ParameterIdentifier identifier : configOptionIdentifiers) {
+            if (str.equals(identifier.name())) {
+                return (ConfigOptionParameterType) identifier.getParameterType();
+            }
         }
-
-        ConfigOptionParameterType res;
-        if ("ConfigOptionDerivationType".equals(splittedStr[0])) {
-            res = ConfigOptionParameterType.valueOf(splittedStr[1]);
-        } else {
-            throw new IllegalArgumentException(
-                    "Unsupported derivation type '" + splittedStr[0] + "'");
-        }
-
-        return res;
+        throw new IllegalArgumentException("Unsupported derivation type '" + str + "'");
     }
 
     private ConfigOptionValueTranslation getTranslationFromElement(Element translationElement)

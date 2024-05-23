@@ -21,7 +21,7 @@ import java.util.List;
 public class DisableExtensionForIpAddressesAndAsIdentifiersDerivation
         extends ConfigurationOptionDerivationParameter {
     public DisableExtensionForIpAddressesAndAsIdentifiersDerivation() {
-        super(ConfigOptionParameterType.DISABLE__EXTENSION_FOR_IP_ADRESSES_AND_AS_IDENTIFIERS);
+        super(ConfigOptionParameterType.DISABLE_EXTENSION_FOR_IP_ADRESSES_AND_AS_IDENTIFIERS);
     }
 
     public DisableExtensionForIpAddressesAndAsIdentifiersDerivation(

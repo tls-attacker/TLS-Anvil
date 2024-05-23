@@ -53,7 +53,7 @@
         <optionEntry>
             <!-- The derivation type exactly like in the enum:
                  de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionDerivationType -->
-            <derivationType>ConfigOptionDerivationType.SeedingMethod</derivationType>
+            <derivationType>ConfigOptionParameter:SEEDING_METHOD</derivationType>
             <!-- Optional: Enables or disables the respective option. Disabled options are ignored. Default: true  -->
             <enabled>true</enabled>
             <!-- Defines how option values are translated to library specific build flags/values. How to process these
@@ -71,7 +71,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.EnableNistEcOptimizations</derivationType>
+            <derivationType>ConfigOptionParameter:ENABLE_NIST_EC_OPTIMIZATIONS</derivationType>
             <enabled>true</enabled>
             <valueTranslation type="Flag">
                 <!-- Translations of type flag only have two values. Either the flag is set or not.
@@ -82,7 +82,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableSse2</derivationType>
+            <derivationType>ConfigOptionParameter:ENABLE_NIST_EC_OPERATIO</derivationType>
             <enabled>true</enabled>
             <valueTranslation type="Flag">
                 <true>no-sse2</true>
@@ -90,7 +90,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableBinaryEllipticCurves</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_BINARY_ELLIPTIC_CURVES</derivationType>
             <enabled>true</enabled>
             <valueTranslation type="Flag">
                 <true>no-ec2m</true>
@@ -98,7 +98,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableMultiblock</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_MULTIBLOCK</derivationType>
             <enabled>true</enabled>
             <valueTranslation type="Flag">
                 <true>no-multiblock</true>
@@ -106,7 +106,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisablePsk</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_PSK</derivationType>
             <enabled>true</enabled>
             <valueTranslation type="Flag">
                 <true>no-psk</true>
@@ -114,7 +114,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.EnableCompression</derivationType>
+            <derivationType>ConfigOptionParameter:ENABLE_COMPRESSION</derivationType>
             <enabled>true</enabled>
             <valueTranslation type="Flag">
                 <true>zlib</true>
@@ -122,7 +122,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableAssemblerCode</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_ASSEMBLER_CODE</derivationType>
             <enabled>true</enabled>
             <valueTranslation type="Flag">
                 <true>no-asm</true>
@@ -136,7 +136,7 @@
         <!-- In this example file we only enable the 7 options with the highest priority. However we can
              easily reuse config files for other option sets. We only need to toggle the <enabled> field.-->
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableAfalgEngine</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_AFALG_ENGINE</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>no-afalgeng</true>
@@ -144,7 +144,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.EnableEntropyGatheringDaemon</derivationType>
+            <derivationType>ConfigOptionParameter:ENABLE_ENTROPY_GATHERING_DAEMON</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>enable-egd</true>
@@ -152,7 +152,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableRdrand</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_RDRAND</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>no-rdrand</true>
@@ -160,7 +160,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableCertificateTransparency</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_CERTIFICATE_TRANSPARENCY</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>no-ct</true>
@@ -168,7 +168,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableNextProtocolNegotiationExtension</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_NEXT_PROTOCOL_NEGOTIATION</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>no-nextprotoneg</true>
@@ -176,7 +176,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableOcspSupport</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_OCSP_SUPPORT</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>no-ocsp</true>
@@ -184,7 +184,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.EnableWeakSslCiphers</derivationType>
+            <derivationType>ConfigOptionParameter:ENABLE_WEAK_SSL_CIPHERS</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>enable-weak-ssl-ciphers</true>
@@ -192,7 +192,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.EnableMd2</derivationType>
+            <derivationType>ConfigOptionParameter:ENABLE_MD2</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>enable-md2</true>
@@ -200,7 +200,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.EnableRc5</derivationType>
+            <derivationType>ConfigOptionParameter:ENABLE_RC5</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>enable-rc5</true>
@@ -212,7 +212,7 @@
 
         <!-- 3rd Priority Options -->
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisablePadlockEngine</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_PADLOCK_ENGINE</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>no-hw-padlock</true>
@@ -220,7 +220,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisablePosixIo</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_POSIX_IO</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>no-posix-io</true>
@@ -228,7 +228,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableExtensionForIpAddressesAndAsIdentifiers</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_EXTENSION_FOR_IP_ADRESSES_AND_AS_IDENTIFIERS</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>no-rfc3779</true>
@@ -236,7 +236,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableSrpCiphersuites</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_SRP_CIPHER_SUITES</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>no-srp</true>
@@ -244,7 +244,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.EnableMemoryDebuggingSupport</derivationType>
+            <derivationType>ConfigOptionParameter:ENABLE_MEMORY_DEBUGGING_SUPPORT</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>enable-crypto-mdebug</true>
@@ -252,7 +252,7 @@
             </valueTranslation>
         </optionEntry>
         <optionEntry>
-            <derivationType>ConfigOptionDerivationType.DisableErrorStrings</derivationType>
+            <derivationType>ConfigOptionParameter:DISABLE_ERROR_STRINGS</derivationType>
             <enabled>false</enabled>
             <valueTranslation type="Flag">
                 <true>no-err</true>

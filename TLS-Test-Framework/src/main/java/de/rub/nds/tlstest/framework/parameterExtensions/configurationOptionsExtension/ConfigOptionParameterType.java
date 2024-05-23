@@ -87,7 +87,7 @@ public enum ConfigOptionParameterType implements ParameterType {
     DISABLE_PADLOCK_ENGINE(DisablePadlockEngineDerivation.class),
     DISABLE_POSIX_IO(DisablePosixIoDerivation.class),
 
-    DISABLE__EXTENSION_FOR_IP_ADRESSES_AND_AS_IDENTIFIERS(
+    DISABLE_EXTENSION_FOR_IP_ADRESSES_AND_AS_IDENTIFIERS(
             DisableExtensionForIpAddressesAndAsIdentifiersDerivation.class),
     DISABLE_SRP_CIPHER_SUITES(DisableSrpCiphersuitesDerivation.class),
 

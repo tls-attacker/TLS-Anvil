@@ -15,6 +15,7 @@ import de.rub.nds.anvilcore.worker.WorkerClient;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.extractor.TestCaseExtractor;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,7 +35,6 @@ public class Main {
      * @param args supplied command line arguments
      */
     public static void main(String[] args) {
-
         // create the TLS-Anvil test context singleton
         TestContext testContext = TestContext.getInstance();
 
@@ -119,6 +119,11 @@ public class Main {
         runner.setListener(testContext);
 
         runner.runTests();
+        if (!testContext.getConfig().getConfigOptionsConfigFile().isEmpty()) {
+            ConfigurationOptionsDerivationManager.getInstance()
+                    .getConfigurationOptionsBuildManager()
+                    .onShutdown();
+        }
         System.exit(0);
     }
 

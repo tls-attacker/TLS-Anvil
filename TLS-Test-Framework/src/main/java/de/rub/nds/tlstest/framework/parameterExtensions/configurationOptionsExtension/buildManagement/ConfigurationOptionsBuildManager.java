@@ -17,7 +17,6 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigOptionValueTranslation;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 /**
  * A ConfigurationOptionsBuildManager knows how to build a specific TLS library in a specific
@@ -37,13 +36,12 @@ public abstract class ConfigurationOptionsBuildManager {
      * @param context - the test context
      * @param optionSet - the set of configurationOptionDerivationParameters that contain selected
      *     values.
-     * @return the TestSiteReport of the provided library build.
+     * @return
      */
-    public abstract Callable<FeatureExtractionResult>
-            configureOptionSetAndReturnGetSiteReportCallable(
-                    Config config,
-                    TestContext context,
-                    Set<ConfigurationOptionDerivationParameter> optionSet);
+    public abstract String preparePeerConnection(
+            Config config,
+            TestContext context,
+            Set<ConfigurationOptionDerivationParameter> optionSet);
 
     /**
      * Get the SiteReport for the tls library built that has the most possible available features

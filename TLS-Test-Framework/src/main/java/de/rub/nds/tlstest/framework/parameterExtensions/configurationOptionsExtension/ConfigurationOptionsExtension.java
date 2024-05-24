@@ -74,4 +74,8 @@ public class ConfigurationOptionsExtension {
                 config.getBuildManager().getMaximalFeatureExtractionResult();
         TestContext.getInstance().setFeatureExtractionResult(maxFeatureExtractionResult);
     }
+
+    public void shutdown() {
+        config.getBuildManager().onShutdown();
+    }
 }

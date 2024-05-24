@@ -13,6 +13,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import com.github.dockerjava.api.DockerClient;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
+import de.rub.nds.tlstest.framework.TestContext;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -185,8 +186,7 @@ public abstract class DockerTestContainer extends DockerContainer {
             LOGGER.info("Create site report for container with tag '{}'...", this.dockerTag);
             DockerContainerState state = getContainerState();
             startUsage();
-            // todo: use one parallelExecutor
-            ParallelExecutor parallelExecutor = new ParallelExecutor(1, 2);
+            ParallelExecutor parallelExecutor = TestContext.getInstance().getStateExecutor();
             try {
                 if (state == DockerContainerState.PAUSED) {
                     unpauseAndWait();

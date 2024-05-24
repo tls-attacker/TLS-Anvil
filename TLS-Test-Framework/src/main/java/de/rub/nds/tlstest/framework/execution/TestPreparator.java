@@ -44,7 +44,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,7 +51,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -110,6 +108,7 @@ public class TestPreparator {
             FileOutputStream fos = new FileOutputStream(cachePath + ".ser");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(report);
+            oos.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -481,21 +480,20 @@ public class TestPreparator {
         if (!configurationOptionsConfigFile.isEmpty()) {
             LOGGER.info("Preparing configuration options environment");
             ConfigurationOptionsExtension.getInstance().load(configurationOptionsConfigFile);
+        } else {
+            this.testConfig.createConfig();
+            if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
+                clientTestPreparation();
+            } else if (this.testConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
+                serverTestPreparation();
+                ServerFeatureExtractionResult featureExtractionResult =
+                        (ServerFeatureExtractionResult) testContext.getFeatureExtractionResult();
+                AnvilContext.getInstance()
+                        .getMapper()
+                        .saveExtraFileToPath(
+                                featureExtractionResult.getGuidelineChecks(), "guidelines");
+            } else throw new RuntimeException("Invalid TestEndpointMode");
         }
-
-        this.testConfig.createConfig();
-
-        if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
-            clientTestPreparation();
-        } else if (this.testConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
-            serverTestPreparation();
-            ServerFeatureExtractionResult featureExtractionResult =
-                    (ServerFeatureExtractionResult) testContext.getFeatureExtractionResult();
-            AnvilContext.getInstance()
-                    .getMapper()
-                    .saveExtraFileToPath(
-                            featureExtractionResult.getGuidelineChecks(), "guidelines");
-        } else throw new RuntimeException("Invalid TestEndpointMode");
 
         if (testContext.getFeatureExtractionResult() == null) {
             throw new RuntimeException(
@@ -533,56 +531,6 @@ public class TestPreparator {
 
         LOGGER.info("Prepartion finished!");
         return startTestSuite;
-    }
-
-    // TODO tcp dump for every test?
-    private void startTcpDump() {
-        if (tcpdumpProcess != null) {
-            LOGGER.warn("This should not happen...");
-            return;
-        }
-
-        String networkInterface = testConfig.getAnvilTestConfig().getNetworkInterface();
-
-        if (networkInterface.equals("any")) {
-            LOGGER.warn(
-                    "Tcpdump will capture on all interfaces. Use -networkInterface to reduce amount of collected data.");
-        }
-
-        ProcessBuilder tcpdump =
-                new ProcessBuilder(
-                        "tcpdump",
-                        "-i",
-                        networkInterface,
-                        "-w",
-                        Paths.get(testConfig.getAnvilTestConfig().getOutputFolder(), "dump.pcap")
-                                .toString());
-
-        try {
-            tcpdumpProcess = tcpdump.start();
-            boolean isFinished = tcpdumpProcess.waitFor(2, TimeUnit.SECONDS);
-            if (!isFinished) throw new IllegalStateException();
-            String out =
-                    new String(
-                            tcpdumpProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-            out +=
-                    new String(
-                            tcpdumpProcess.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
-            throw new RuntimeException(out);
-        } catch (IllegalStateException ignored) {
-
-        } catch (Exception e) {
-            LOGGER.error("Starting tcpdump failed", e.getMessage());
-        }
-    }
-
-    private void stopTcpDump() {
-        if (tcpdumpProcess != null) {
-            try {
-                tcpdumpProcess.destroy();
-            } catch (Exception ignored) {
-            }
-        }
     }
 
     private void logCommonDerivationValues() {

@@ -52,10 +52,12 @@ public class DockerServerTestContainer extends DockerTestContainer {
 
     public synchronized FeatureExtractionResult createFeatureExtractionResult(
             ParallelExecutor parallelExecutor) {
+        TestServerDelegate testServerDelegate = new TestServerDelegate();
+        testServerDelegate.setHost(dockerHost + ":" + tlsServerPort);
         TlsServerScanner scanner =
                 TestPreparator.getServerScanner(
                         new GeneralDelegate(),
-                        new TestServerDelegate(),
+                        testServerDelegate,
                         parallelExecutor,
                         TestContext.getInstance()
                                 .getConfig()

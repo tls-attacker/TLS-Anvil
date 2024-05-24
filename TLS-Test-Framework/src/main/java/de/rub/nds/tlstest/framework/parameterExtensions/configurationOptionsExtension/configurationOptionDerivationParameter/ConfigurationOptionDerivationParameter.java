@@ -10,6 +10,7 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -53,5 +54,10 @@ public abstract class ConfigurationOptionDerivationParameter
 
     public ConfigurationOptionDerivationParameter getMaxFeatureValueParameter() {
         return (ConfigurationOptionDerivationParameter) generateValue(getMaxFeatureValue());
+    }
+
+    @JsonValue
+    public String jsonValue() {
+        return getSelectedValue().toString();
     }
 }

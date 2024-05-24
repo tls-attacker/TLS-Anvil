@@ -16,6 +16,8 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerBasedBuildManager;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerTestContainer;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import de.rwth.swc.coffee4j.engine.constraint.HardConstraintCheckerFactory;
@@ -206,10 +208,7 @@ public class ConfigurationOptionsDerivationManager {
 
         compoundSetupList = Collections.unmodifiableList(compoundSetupList);
 
-        LOGGER.info(
-                "Testing configuration options with {} default combinations:\n{}",
-                compoundSetupList.size(),
-                compoundSetupList);
+        LOGGER.info("Compiled {} configuration option combinations", compoundSetupList.size());
     }
 
     public void preBuildAndValidateAndFilterSetups() {
@@ -235,7 +234,7 @@ public class ConfigurationOptionsDerivationManager {
             Set<ConfigurationOptionDerivationParameter> setupSet = new HashSet<>(setup);
             Config conf = Config.createEmptyConfig();
             Future<Callable<FeatureExtractionResult>> testSiteReportCallableFuture =
-                    createBuildAndGetSiteReportCallable(conf, TestContext.getInstance(), setupSet);
+                    getFeatureExtractionFuture(conf, TestContext.getInstance(), setupSet);
             compoundSetupToFuture.put(setup, testSiteReportCallableFuture);
         }
 
@@ -288,15 +287,25 @@ public class ConfigurationOptionsDerivationManager {
         }
     }
 
-    private Future<Callable<FeatureExtractionResult>> createBuildAndGetSiteReportCallable(
+    private Future<Callable<FeatureExtractionResult>> getFeatureExtractionFuture(
             Config conf,
             TestContext context,
             Set<ConfigurationOptionDerivationParameter> setupSet) {
         return buildExecutor.submit(
                 () -> {
-                    return getConfigurationOptionsBuildManager()
-                            .configureOptionSetAndReturnGetSiteReportCallable(
-                                    conf, TestContext.getInstance(), setupSet);
+                    ConfigurationOptionsBuildManager coBuildManager =
+                            getConfigurationOptionsBuildManager();
+                    String containerTag =
+                            coBuildManager.preparePeerConnection(conf, context, setupSet);
+                    DockerTestContainer testContainer =
+                            ((DockerBasedBuildManager) coBuildManager)
+                                    .getDockerTagToContainerInfoMap()
+                                    .get(containerTag);
+                    return new DockerBasedBuildManager.FeatureExtractionCallback(testContainer);
                 });
+    }
+
+    public List<List<ConfigurationOptionDerivationParameter>> getCompoundSetupList() {
+        return compoundSetupList;
     }
 }

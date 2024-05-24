@@ -1,13 +1,3 @@
-<!--
-  ~  TLS-Test-Framework - A framework for modeling TLS tests
-  ~
-  ~  Copyright 2020 Ruhr University Bochum and
-  ~  TÜV Informationstechnik GmbH
-  ~
-  ~  Licensed under Apache License 2.0
-  ~  http://www.apache.org/licenses/LICENSE-2.0
-  -->
-
 <!-- This is an example for a configuration options config file. It shows which fields can/must be used and how. -->
 <!-- Fields marked as 'Optional' can be left out without parsing errors. -->
 
@@ -22,7 +12,7 @@
     <!-- Config for working with docker  -->
     <dockerConfig>
         <!-- The path to the docker library  -->
-        <dockerLibraryPath>/home/marcel/NetBeansProjects/TLS-Docker-Library-Development</dockerLibraryPath>
+        <dockerLibraryPath>path/to/docker-lib</dockerLibraryPath>
         <!-- The host address all built containers are bind to.  -->
         <dockerHostBinding>127.0.0.42</dockerHostBinding>
         <!-- The address the docker container can be reached (May differ from dockerHostBinding when using docker with WSL on windows) -->
@@ -37,7 +27,7 @@
     <!-- Optional: Configures how many containers are running simultaneously. Rarely used containers are paused meanwhile. Default: 16 -->
     <maxRunningContainers>6</maxRunningContainers>
     <!-- Optional: Configures how many TLS library builds are created simultaneously. Default: 1 -->
-    <maxSimultaneousBuilds>1</maxSimultaneousBuilds>
+    <maxSimultaneousBuilds>5</maxSimultaneousBuilds>
     <!-- Optional: Configures how many containers are shutdown simultaneously. Note that for coverage mode the coverage is
          collected during the final shutdown. Therefore it takes much more CPU than the non coverage version. When this value
          is to high it may happen that some containers are not shutdown properly and the coverage data is not correctly collected.

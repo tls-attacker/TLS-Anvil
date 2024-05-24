@@ -10,6 +10,7 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
@@ -17,9 +18,12 @@ import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.anvilcore.model.parameter.ParameterType;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlstest.framework.FeatureExtractionResult;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -43,6 +47,15 @@ public class ConfigurationOptionCompoundDerivation
         configOptionsSetupsList = setupsList;
     }
 
+    public ConfigurationOptionCompoundDerivation() {
+        super(
+                (Class<List<ConfigurationOptionDerivationParameter>>) (Object) List.class,
+                Config.class,
+                new ParameterIdentifier(
+                        ConfigOptionParameterType.CONFIG_OPTION_COMPOUND_PARAMETER));
+        configOptionsSetupsList = new LinkedList<>();
+    }
+
     private ConfigurationOptionCompoundDerivation(
             List<List<ConfigurationOptionDerivationParameter>> setupsList,
             List<ConfigurationOptionDerivationParameter> selectedValue) {
@@ -61,32 +74,20 @@ public class ConfigurationOptionCompoundDerivation
         return null;
     }
 
-    // TODO: refactor
-    /*@Override
-    public void configureParameterDependencies(
-            Config config, TestContext context, ParameterCombination container) {
-        Set<ConfigurationOptionDerivationParameter> configOptionDerivations =
-                new HashSet<>(getSelectedValue());
-
-        Callable<TestSiteReport> reportCallable =
-                ConfigurationOptionsDerivationManager.getInstance()
-                        .getConfigurationOptionsBuildManager()
-                        .configureOptionSetAndReturnGetSiteReportCallable(
-                                config, context, configOptionDerivations);
-
-        container.configureGetAssociatedSiteReportCallable(reportCallable);
-    }
-
-    @Override
-    public void onContainerFinalized(DerivationContainer container) {
-        super.onContainerFinalized(container);
-
+    /** Signal end of current test to allow the docker container to go to sleep */
+    public void containerUsageEnded() {
         Set<ConfigurationOptionDerivationParameter> configOptionDerivations =
                 new HashSet<>(getSelectedValue());
         ConfigurationOptionsDerivationManager.getInstance()
                 .getConfigurationOptionsBuildManager()
                 .onTestFinished(configOptionDerivations);
-    }*/
+    }
+
+    public FeatureExtractionResult getAssociatedFeatureExtractionResult() {
+        return ConfigurationOptionsDerivationManager.getInstance()
+                .getCompoundFeatureExtractionResult()
+                .get(getSelectedValue());
+    }
 
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(DerivationScope scope) {
@@ -154,7 +155,14 @@ public class ConfigurationOptionCompoundDerivation
     }
 
     @Override
-    public void applyToConfig(Config config, DerivationScope derivationScope) {}
+    public void applyToConfig(Config config, DerivationScope derivationScope) {
+        // set connection for container in config and ensure container is running
+        Set<ConfigurationOptionDerivationParameter> configOptionDerivations =
+                new HashSet<>(getSelectedValue());
+        ConfigurationOptionsDerivationManager.getInstance()
+                .getConfigurationOptionsBuildManager()
+                .preparePeerConnection(config, TestContext.getInstance(), configOptionDerivations);
+    }
 
     @Override
     public List<DerivationParameter<Config, List<ConfigurationOptionDerivationParameter>>>
@@ -166,7 +174,8 @@ public class ConfigurationOptionCompoundDerivation
                 derivationScope.getIpmLimitations().stream()
                         .map(ParameterIdentifier::getParameterType)
                         .collect(Collectors.toSet());
-        for (List<ConfigurationOptionDerivationParameter> setup : this.configOptionsSetupsList) {
+        for (List<ConfigurationOptionDerivationParameter> setup :
+                ConfigurationOptionsDerivationManager.getInstance().getCompoundSetupList()) {
             List<ConfigurationOptionDerivationParameter> constrainedSetupList =
                     new LinkedList<>(setup);
             // Scope Limitations (Set respective parameters to their default value)
@@ -182,7 +191,6 @@ public class ConfigurationOptionCompoundDerivation
                     new ConfigurationOptionCompoundDerivation(
                             this.configOptionsSetupsList, constrainedSetupList));
         }
-
         return parameterValues;
     }
 
@@ -190,5 +198,18 @@ public class ConfigurationOptionCompoundDerivation
     protected DerivationParameter<Config, List<ConfigurationOptionDerivationParameter>>
             generateValue(List<ConfigurationOptionDerivationParameter> selectedValue) {
         throw new UnsupportedOperationException("CompoundDerivation also requires a setup list");
+    }
+
+    @JsonValue
+    public String jsonValue() {
+        StringBuilder stringBuilder = new StringBuilder();
+        return getSelectedValue().stream()
+                .map(
+                        parameter -> {
+                            return parameter.getParameterIdentifier().getParameterType()
+                                    + ":"
+                                    + parameter.getSelectedValue().toString();
+                        })
+                .collect(Collectors.joining(","));
     }
 }

@@ -57,17 +57,20 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     protected Set<Integer> usedPorts;
     private String maximalFeatureContainerDockerTag;
 
-    /** Callable to create/get site reports. */
-    public static class SiteReportCallback implements Callable<FeatureExtractionResult> {
-        DockerTestContainer container;
+    /**
+     * Callable to provide the container and obtain the feature extraction result during setup
+     * phase.
+     */
+    public static class FeatureExtractionCallback implements Callable<FeatureExtractionResult> {
+        private final DockerTestContainer testContainer;
 
-        private SiteReportCallback(DockerTestContainer container) {
-            this.container = container;
+        public FeatureExtractionCallback(DockerTestContainer testContainer) {
+            this.testContainer = testContainer;
         }
 
         @Override
         public FeatureExtractionResult call() {
-            return container.getFeatureExtractionResult();
+            return testContainer.getFeatureExtractionResult();
         }
     }
 
@@ -97,7 +100,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
                                 .getConfig()
                                 .getAnvilTestConfig()
                                 .getParallelTestCases(),
-                        2,
+                        1,
                         600);
         TestContext.getInstance().setStateExecutor(executor);
 
@@ -123,28 +126,24 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * @param config the specified Config
      * @param context the test context
      * @param optionSet the set of configurationOptionDerivationParameters that contain selected
-     *     values.
-     * @return the site report of the built for the passed option set
+     *     values. pr * @return the build tag used to reference the container
      */
     @Override
-    public Callable<FeatureExtractionResult> configureOptionSetAndReturnGetSiteReportCallable(
+    public String preparePeerConnection(
             Config config,
             TestContext context,
             Set<ConfigurationOptionDerivationParameter> optionSet) {
         String buildTag = provideDockerContainer(optionSet);
         synchronized (this) {
-            DockerTestContainer containerInfo = dockerTagToContainerInfo.get(buildTag);
-            containerInfo.startUsage();
+            DockerTestContainer dockerTestContainer = dockerTagToContainerInfo.get(buildTag);
+            dockerTestContainer.startUsage();
             stopRarelyUsedContainers();
-
-            Callable<FeatureExtractionResult> siteReportCallback =
-                    new SiteReportCallback(containerInfo);
 
             // Configure the port in the config
             if (TestContext.getInstance().getConfig().getTestEndpointMode()
                     == TestEndpointType.SERVER) {
                 DockerServerTestContainer serverContainerInfo =
-                        (DockerServerTestContainer) containerInfo;
+                        (DockerServerTestContainer) dockerTestContainer;
                 OutboundConnection connection =
                         new OutboundConnection(
                                 serverContainerInfo.getTlsServerPort(),
@@ -153,7 +152,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
             } else if (TestContext.getInstance().getConfig().getTestEndpointMode()
                     == TestEndpointType.CLIENT) {
                 DockerClientTestContainer clientContainerInfo =
-                        (DockerClientTestContainer) containerInfo;
+                        (DockerClientTestContainer) dockerTestContainer;
 
                 InboundConnection inboundConnection =
                         createInboundConnectionForContainer(clientContainerInfo);
@@ -161,9 +160,8 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
             } else {
                 throw new IllegalStateException("TestEndpointMode is invalid.");
             }
-
-            return siteReportCallback;
         }
+        return buildTag;
     }
 
     /**
@@ -488,7 +486,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
             }
         }
 
-        // Devide all containers in subsets of <maxRunningContainer> containers for simultaneous
+        // Divide all containers in subsets of <maxRunningContainer> containers for simultaneous
         // shutdown.
         List<Set<String>> containersSubsets = new LinkedList<>();
         containersSubsets.add(new HashSet<>());
@@ -649,5 +647,9 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
                             "Cannot start/unpause container with tag '%s'.",
                             container.getDockerTag()));
         }
+    }
+
+    public Map<String, DockerTestContainer> getDockerTagToContainerInfoMap() {
+        return dockerTagToContainerInfo;
     }
 }

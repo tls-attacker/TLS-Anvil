@@ -12,7 +12,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.anvilcore.model.parameter.ParameterType;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableAfalgEngineDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableAssemblerCodeDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.DisableBinaryEllipticCurvesDerivation;
@@ -55,7 +55,7 @@ import java.lang.reflect.InvocationTargetException;
  * tests in your testsuite.
  */
 public enum ConfigOptionParameterType implements ParameterType {
-    CONFIG_OPTION_COMPOUND_PARAMETER(ConfigurationOptionDerivationParameter.class),
+    CONFIG_OPTION_COMPOUND_PARAMETER(ConfigurationOptionCompoundDerivation.class),
 
     // 1st Priority
     SEEDING_METHOD(SeedingMethodDerivation.class),

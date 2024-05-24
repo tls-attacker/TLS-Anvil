@@ -29,8 +29,9 @@ public class TlsParameterCombination extends ParameterCombination {
 
     public byte[] buildBitmask() {
         for (DerivationParameter listed : getParameterValues()) {
-            if (((TlsParameterType) listed.getParameterIdentifier().getParameterType())
-                    .isBitmaskDerivation()) {
+            if (listed.getParameterIdentifier().getParameterType() instanceof TlsParameterType
+                    && ((TlsParameterType) listed.getParameterIdentifier().getParameterType())
+                            .isBitmaskDerivation()) {
                 return buildBitmask(listed.getParameterIdentifier());
             }
         }

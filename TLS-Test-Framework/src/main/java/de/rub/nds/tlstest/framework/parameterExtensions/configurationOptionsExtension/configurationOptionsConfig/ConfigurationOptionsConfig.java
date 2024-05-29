@@ -75,6 +75,9 @@ public class ConfigurationOptionsConfig {
 
     private PortRange dockerPortRange;
     private String dockerClientDestinationHostName;
+    private static final int DEFAULT_SIMULTANEOUS_BUILDS = 1;
+    private static final int DEFAULT_MAX_RUNNING_CONTAINERS = 16;
+    private static final int DEFAULT_MAX_RUNNING_SHUTDOWN_CONTAINERS = 8;
 
     public ConfigurationOptionsConfig(Path configFilePath) throws FileNotFoundException {
         optionsToTranslation = new HashMap<>();
@@ -220,7 +223,7 @@ public class ConfigurationOptionsConfig {
         if (maxSimultaneousBuildsElement != null) {
             maxSimultaneousBuilds = Integer.parseInt(maxSimultaneousBuildsElement.getTextContent());
         } else {
-            maxSimultaneousBuilds = 1; // default
+            maxSimultaneousBuilds = DEFAULT_SIMULTANEOUS_BUILDS;
         }
     }
 
@@ -230,7 +233,7 @@ public class ConfigurationOptionsConfig {
         if (maxRunningContainersElement != null) {
             maxRunningContainers = Integer.parseInt(maxRunningContainersElement.getTextContent());
         } else {
-            maxRunningContainers = 16; // default
+            maxRunningContainers = DEFAULT_MAX_RUNNING_CONTAINERS;
         }
     }
 
@@ -242,7 +245,7 @@ public class ConfigurationOptionsConfig {
             maxRunningContainerShutdowns =
                     Integer.parseInt(maxRunningContainersElement.getTextContent());
         } else {
-            maxRunningContainerShutdowns = 8; // default
+            maxRunningContainerShutdowns = DEFAULT_MAX_RUNNING_SHUTDOWN_CONTAINERS;
         }
     }
 

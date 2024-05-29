@@ -36,9 +36,9 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private final String FACTORY_REPRO_NAME;
-    private final String TEMP_CONTAINER_PREFIX;
-    private final String TEMP_REPRO_NAME;
+    private final String factoryRepoName;
+    private final String tempContainerPrefix;
+    private final String tempRepoName;
 
     // Required by the docker library
     private final Volume targetVolumeCcache = new Volume("/src/ccache/");
@@ -47,9 +47,9 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
     private final String volumeNameCoverage = "coverage";
 
-    private final String COVERAGE_DIRECTORY_NAME;
+    private final String coverageDirectoryName;
 
-    private final String CCACHE_VOLUME_NAME = "ccache-cache";
+    private static final String CCACHE_VOLUME_NAME = "ccache-cache";
 
     private Path dockerfileMinPath;
 
@@ -58,13 +58,13 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
         String coverageSuffix = "-cov";
 
-        FACTORY_REPRO_NAME = "openssl-factory" + coverageSuffix;
-        TEMP_CONTAINER_PREFIX = "temp-openssl-container" + coverageSuffix;
-        TEMP_REPRO_NAME = "temp_openssl_img" + coverageSuffix;
+        factoryRepoName = "openssl-factory" + coverageSuffix;
+        tempContainerPrefix = "temp-openssl-container" + coverageSuffix;
+        tempRepoName = "temp_openssl_img" + coverageSuffix;
         BUILD_REPRO_NAME = "openssl_img" + coverageSuffix;
         CONTAINER_NAME_PREFIX = "container" + coverageSuffix;
 
-        COVERAGE_DIRECTORY_NAME = "CoverageReport_" + Utils.DateToISO8601UTC(new Date());
+        coverageDirectoryName = "CoverageReport_" + Utils.DateToISO8601UTC(new Date());
     }
 
     @Override
@@ -119,7 +119,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
     }
 
     public String getFactoryImageNameAndTag(String openSSLBranchName) {
-        return String.format("%s:%s", FACTORY_REPRO_NAME, openSSLBranchName);
+        return String.format("%s:%s", factoryRepoName, openSSLBranchName);
     }
 
     @Override
@@ -130,7 +130,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
             ConfigOptionsResultsCollector resultsCollector) {
         DockerContainer factoryContainer;
         CreateContainerResponse tempContainer;
-        String tempContainerName = String.format("%s_%s", TEMP_CONTAINER_PREFIX, dockerTag);
+        String tempContainerName = String.format("%s_%s", tempContainerPrefix, dockerTag);
         synchronized (this) {
             if (resultsCollector == null) {
                 throw new NullPointerException("resultsCollector is null.");
@@ -140,7 +140,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
 
             // Create the docker factory image for the respective OpenSSL version, if it does not
             // exist so far
-            String factoryImageTag = String.format("%s:%s", FACTORY_REPRO_NAME, openSSLBranchName);
+            String factoryImageTag = String.format("%s:%s", factoryRepoName, openSSLBranchName);
 
             // Remove old containers (Only needs to be done if something went wrong) TODO
             Optional<Container> oldTempContainer = containerByName(tempContainerName);
@@ -213,11 +213,11 @@ public class OpenSSLDockerFactory extends DockerFactory {
             String tempImageId =
                     dockerClient
                             .commitCmd(tempContainer.getId())
-                            .withRepository(TEMP_REPRO_NAME)
+                            .withRepository(tempRepoName)
                             .withTag(dockerTag)
                             .exec();
 
-            String buildArg = String.format("%s:%s", TEMP_REPRO_NAME, dockerTag);
+            String buildArg = String.format("%s:%s", tempRepoName, dockerTag);
             String finalImageTag = getBuildImageNameAndTag(dockerTag);
             dockerClient
                     .buildImageCmd()
@@ -243,7 +243,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
         final int CONTAINER_MANAGER_PORT = 8090;
         List<String> entrypoint;
 
-        final String coverageOutDir = String.format("%s/%s", COVERAGE_DIRECTORY_NAME, dockerTag);
+        final String coverageOutDir = String.format("%s/%s", coverageDirectoryName, dockerTag);
         entrypoint = Arrays.asList("/usr/opensslEntrypoint.sh", "-d", coverageOutDir, "server");
 
         List<PortBinding> portBindings = new LinkedList<>();
@@ -298,7 +298,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
         String connectionDest = String.format("%s:%d", tlsServerHost, tlsServerPort);
         List<String> entrypoint;
 
-        final String coverageOutDir = String.format("%s/%s", COVERAGE_DIRECTORY_NAME, dockerTag);
+        final String coverageOutDir = String.format("%s/%s", coverageDirectoryName, dockerTag);
         entrypoint =
                 Arrays.asList(
                         "/usr/opensslEntrypoint.sh",
@@ -341,7 +341,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
             Path dockerfileFactoryPath, String openSSLBranchName) {
         // Create the docker factory image for the respective OpenSSL version, if it does not exist
         // so far
-        String factoryImageTag = String.format("%s:%s", FACTORY_REPRO_NAME, openSSLBranchName);
+        String factoryImageTag = String.format("%s:%s", factoryRepoName, openSSLBranchName);
         LOGGER.debug("Build factory image.");
         dockerClient
                 .buildImageCmd()

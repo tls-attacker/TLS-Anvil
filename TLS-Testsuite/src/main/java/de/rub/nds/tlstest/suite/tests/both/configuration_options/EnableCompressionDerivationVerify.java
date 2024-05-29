@@ -34,7 +34,13 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 public class EnableCompressionDerivationVerify extends Tls12Test {
 
     public ConditionEvaluationResult enableCompressionOptionTested() {
-
+        if (!(context.getFeatureExtractionResult()
+                        .getResult(TlsAnalyzedProperty.SUPPORTED_COMPRESSION_METHODS)
+                instanceof ListResult)) {
+            // Currently not scanned in client tests
+            return ConditionEvaluationResult.disabled(
+                    "Compression support could not be evaluated by feature extraction");
+        }
         if (ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes() != null
                 && ConfigurationOptionsDerivationManager.getInstance()
                         .getAllActivatedCOTypes()
@@ -92,12 +98,6 @@ public class EnableCompressionDerivationVerify extends Tls12Test {
             FeatureExtractionResult extractionResult =
                     compoundFeatureExtractionResults.get(configOptionSet);
             List<CompressionMethod> supportedNonNullCompressionMethods = new LinkedList<>();
-            if (!(extractionResult.getResult(TlsAnalyzedProperty.SUPPORTED_COMPRESSION_METHODS)
-                    instanceof ListResult)) {
-                // Currently not scanned in client tests
-                return;
-            }
-
             ListResult<CompressionMethod> compressionsList =
                     (ListResult<CompressionMethod>)
                             extractionResult.getResult(

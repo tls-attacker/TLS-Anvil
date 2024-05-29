@@ -21,9 +21,11 @@ import de.rub.nds.tlstest.framework.junitExtensions.EnforcedSenderRestrictionCon
 import de.rub.nds.tlstest.framework.junitExtensions.KexCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
 import de.rub.nds.tlstest.framework.junitExtensions.WorkflowRunnerResolver;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionCompoundDerivation;
 import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -87,6 +89,16 @@ public abstract class TlsBaseTest extends AnvilTestBaseClass {
 
     public TestContext getTestContext() {
         return context;
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (parameterCombination != null
+                && parameterCombination.hasParameter(ConfigurationOptionCompoundDerivation.class)) {
+            ConfigurationOptionCompoundDerivation compoundParameter =
+                    parameterCombination.getParameter(ConfigurationOptionCompoundDerivation.class);
+            compoundParameter.containerUsageEnded();
+        }
     }
 
     public abstract Config getConfig();

@@ -57,9 +57,9 @@ public class TestIdentifiers {
         }
         for (String registeredId : registeredIds) {
             assertTrue(
-                    "TestId "
+                    "TestId '"
                             + registeredId
-                            + " is registered in metadata but not referenced by any test",
+                            + "' is registered in metadata but not referenced by any test",
                     processedIds.contains(registeredId));
         }
     }
@@ -81,10 +81,10 @@ public class TestIdentifiers {
                         + " has an empty TestId.",
                 testId.isEmpty());
         assertTrue(
-                "TestId " + testId + " is not registered in metadata file.",
+                "TestId '" + testId + "' is not registered in metadata file.",
                 registeredIds.contains(testId));
         assertFalse(
-                "TestId " + testId + " appears twice in test suite.",
+                "TestId '" + testId + "' appears twice in test suite.",
                 processedIds.contains(testId));
         processedIds.add(testId);
     }

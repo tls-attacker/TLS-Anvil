@@ -9,6 +9,7 @@ import de.rub.nds.scanner.core.probe.ProbeType;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
+import de.rub.nds.tlsattacker.core.connection.InboundConnection;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
@@ -35,14 +36,16 @@ import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.config.TlsTestConfig;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
+import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsExtension;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -50,7 +53,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -108,6 +110,7 @@ public class TestPreparator {
             FileOutputStream fos = new FileOutputStream(cachePath + ".ser");
             ObjectOutputStream oos = new ObjectOutputStream(fos);
             oos.writeObject(report);
+            oos.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -274,19 +277,53 @@ public class TestPreparator {
         }
 
         LOGGER.info("Server available, starting TLS-Scanner");
-        ServerScannerConfig scannerConfig =
-                new ServerScannerConfig(
-                        testConfig.getGeneralDelegate(), testConfig.getTestServerDelegate());
-        scannerConfig.setTimeout(testConfig.getAnvilTestConfig().getConnectionTimeout());
-        Config config = scannerConfig.createConfig();
-        config.setAddServerNameIndicationExtension(
-                testConfig.createConfig().isAddServerNameIndicationExtension());
-        config.getDefaultClientConnection().setConnectionTimeout(0);
 
-        if (testConfig.isUseDTLS()) {
-            scannerConfig.getDtlsDelegate().setDTLS(true);
+        TlsServerScanner scanner =
+                getServerScanner(
+                        testConfig.getGeneralDelegate(),
+                        testConfig.getTestServerDelegate(),
+                        testContext.getStateExecutor(),
+                        testConfig.getAnvilTestConfig().getConnectionTimeout(),
+                        testConfig.isUseDTLS(),
+                        testConfig.createConfig().isAddServerNameIndicationExtension());
+
+        ServerReport serverReport = scanner.scan();
+        serverReport.putResult(TlsAnalyzedProperty.HTTPS_HEADER, TestResults.ERROR_DURING_TEST);
+        FeatureExtractionResult report =
+                ServerFeatureExtractionResult.fromServerScanReport(serverReport);
+        if (!testConfig.getAnvilTestConfig().isIgnoreCache()) {
+            saveToCache(report);
         }
 
+        testContext.setFeatureExtractionResult(report);
+        LOGGER.debug("TLS-Scanner finished!");
+    }
+
+    /**
+     * Creates a scanner object to perform the feature extraction. The code is used both for a
+     * single given server and for configuration option tests against self-built docker containers.
+     *
+     * @param generalDelegate - the general delegate to use
+     * @param testServerDelegate - the TestServerDelegate to use
+     * @param executor - the ParallelExecutor to use
+     * @return TlsServerScanner the object ready for execution
+     */
+    public static TlsServerScanner getServerScanner(
+            GeneralDelegate generalDelegate,
+            TestServerDelegate testServerDelegate,
+            ParallelExecutor executor,
+            int timeout,
+            boolean dtls,
+            boolean addSni) {
+        ServerScannerConfig scannerConfig =
+                new ServerScannerConfig(generalDelegate, testServerDelegate);
+        scannerConfig.setTimeout(timeout);
+        Config config = scannerConfig.createConfig();
+        config.setAddServerNameIndicationExtension(addSni);
+        config.getDefaultClientConnection().setConnectionTimeout(0);
+        if (dtls) {
+            scannerConfig.getDtlsDelegate().setDTLS(true);
+        }
         scannerConfig
                 .getExecutorConfig()
                 .setProbes(
@@ -307,20 +344,8 @@ public class TestPreparator {
         scannerConfig.getExecutorConfig().setOverallThreads(1);
         scannerConfig.getExecutorConfig().setParallelProbes(1);
         scannerConfig.setConfigSearchCooldown(true);
-
-        TlsServerScanner scanner =
-                new TlsServerScanner(scannerConfig, testContext.getStateExecutor());
-
-        ServerReport serverReport = scanner.scan();
-        serverReport.putResult(TlsAnalyzedProperty.HTTPS_HEADER, TestResults.ERROR_DURING_TEST);
-        FeatureExtractionResult report =
-                ServerFeatureExtractionResult.fromServerScanReport(serverReport);
-        if (!testConfig.getAnvilTestConfig().isIgnoreCache()) {
-            saveToCache(report);
-        }
-
-        testContext.setFeatureExtractionResult(report);
-        LOGGER.debug("TLS-Scanner finished!");
+        TlsServerScanner scanner = new TlsServerScanner(scannerConfig, executor);
+        return scanner;
     }
 
     /**
@@ -340,7 +365,9 @@ public class TestPreparator {
 
         ParallelExecutor preparedExecutor =
                 new ParallelExecutor(testConfig.getAnvilTestConfig().getParallelTestCases(), 2);
-        preparedExecutor.setDefaultBeforeTransportPreInitCallback(getSocketManagementCallback());
+        preparedExecutor.setDefaultBeforeTransportPreInitCallback(
+                getSocketManagementCallback(
+                        testConfig, testConfig.getTestClientDelegate().getServerSocket()));
 
         ClientHelloMessage clientHello = catchClientHello(preparedExecutor);
         if (clientHello == null) {
@@ -348,32 +375,13 @@ public class TestPreparator {
         }
         LOGGER.info("Received Client Hello. Starting Client-Scanner for feature extraction.");
 
-        ClientScannerConfig clientScannerConfig = new ClientScannerConfig(new GeneralDelegate());
-        List<ProbeType> probes = new LinkedList<>();
-        probes.add(TlsProbeType.BASIC);
-        probes.add(TlsProbeType.CIPHER_SUITE);
-        probes.add(TlsProbeType.PROTOCOL_VERSION);
-        probes.add(TlsProbeType.NAMED_GROUPS);
-        probes.add(TlsProbeType.EC_POINT_FORMAT);
-        probes.add(TlsProbeType.SERVER_CERTIFICATE_MINIMUM_KEY_SIZE);
-        probes.add(TlsProbeType.CONNECTION_CLOSING_DELTA);
-        probes.add(TlsProbeType.APPLICATION_MESSAGE);
-        clientScannerConfig
-                .getServerDelegate()
-                .setPort(testConfig.getDelegate(TestClientDelegate.class).getPort());
-        clientScannerConfig.setTimeout(testConfig.getAnvilTestConfig().getConnectionTimeout());
-        clientScannerConfig.getExecutorConfig().setProbes(probes);
-        clientScannerConfig.setExternalRunCallback(
-                testConfig.getTestClientDelegate().getTriggerScript());
-        if (testConfig.isUseDTLS()) {
-            clientScannerConfig.getDtlsDelegate().setDTLS(true);
-            probes.add(TlsProbeType.DTLS_FRAGMENTATION);
-        } else {
-            probes.add(TlsProbeType.RECORD_FRAGMENTATION);
-        }
-
         TlsClientScanner clientScanner =
-                new TlsClientScanner(clientScannerConfig, preparedExecutor);
+                getClientScanner(
+                        testConfig.getDelegate(TestClientDelegate.class).getPort(),
+                        preparedExecutor,
+                        testConfig.getAnvilTestConfig().getConnectionTimeout(),
+                        testConfig.getTestClientDelegate().getTriggerScript(),
+                        testConfig.isUseDTLS());
 
         String identifier =
                 testConfig.getAnvilTestConfig().getIdentifier() == null
@@ -391,16 +399,87 @@ public class TestPreparator {
         testContext.setFeatureExtractionResult(extractionResult);
     }
 
+    /**
+     * Creates a scanner object to perform the feature extraction. The code is used both for a
+     * single given client and for configuration option tests against self-built docker containers.
+     *
+     * @param port the port to listen on
+     * @param preparedExecutor the ParallelExecutor to use
+     * @return TlsClientScanner the object ready for execution
+     */
+    public static TlsClientScanner getClientScanner(
+            Integer port,
+            ParallelExecutor preparedExecutor,
+            int timeout,
+            Function<State, Integer> externalRunCallback,
+            boolean dtls) {
+
+        TlsClientScanner clientScanner =
+                new TlsClientScanner(
+                        getClientScannerConfig(port, timeout, externalRunCallback, dtls),
+                        preparedExecutor);
+        return clientScanner;
+    }
+
+    public static ClientScannerConfig getClientScannerConfig(
+            Integer port, int timeout, Function<State, Integer> externalRunCallback, boolean dtls) {
+        ClientScannerConfig clientScannerConfig = new ClientScannerConfig(new GeneralDelegate());
+        List<ProbeType> probes = new LinkedList<>();
+        probes.add(TlsProbeType.BASIC);
+        probes.add(TlsProbeType.CIPHER_SUITE);
+        probes.add(TlsProbeType.PROTOCOL_VERSION);
+        probes.add(TlsProbeType.NAMED_GROUPS);
+        probes.add(TlsProbeType.EC_POINT_FORMAT);
+        probes.add(TlsProbeType.SERVER_CERTIFICATE_MINIMUM_KEY_SIZE);
+        probes.add(TlsProbeType.CONNECTION_CLOSING_DELTA);
+        probes.add(TlsProbeType.APPLICATION_MESSAGE);
+        clientScannerConfig.getServerDelegate().setPort(port);
+        clientScannerConfig.setTimeout(timeout);
+        clientScannerConfig.getExecutorConfig().setProbes(probes);
+        clientScannerConfig.setExternalRunCallback(externalRunCallback);
+        if (dtls) {
+            clientScannerConfig.getDtlsDelegate().setDTLS(true);
+            probes.add(TlsProbeType.DTLS_FRAGMENTATION);
+        } else {
+            probes.add(TlsProbeType.RECORD_FRAGMENTATION);
+        }
+        return clientScannerConfig;
+    }
+
+    /**
+     * Catches a ClientHello to perform non-combinatorial client tests. We assume that the client
+     * always sends the same ClientHello (except for configuration option tests)
+     *
+     * @param testConfig
+     * @param executor
+     * @return
+     */
     private ClientHelloMessage catchClientHello(ParallelExecutor executor) {
         LOGGER.info("Attempting to receive a Client Hello");
+        return catchClientHello(
+                executor,
+                testConfig.getTestClientDelegate().getPort(),
+                getSocketManagementCallback(
+                        testConfig, testConfig.getTestClientDelegate().getServerSocket()));
+    }
+
+    public static ClientHelloMessage catchClientHello(
+            ParallelExecutor executor, int port, Function<State, Integer> preInitCallback) {
+
+        TlsTestConfig testConfig = TestContext.getInstance().getConfig();
         Config config = testConfig.createConfig();
+        config.setDefaultServerConnection(new InboundConnection(port));
         WorkflowTrace catchHelloWorkflowTrace = new WorkflowTrace();
         catchHelloWorkflowTrace.addTlsAction(new ReceiveAction(new ClientHelloMessage()));
         State catchHelloState = new State(config, catchHelloWorkflowTrace);
         StateExecutionTask catchHelloTask = new StateExecutionTask(catchHelloState, 2);
         catchHelloTask.setBeforeTransportInitCallback(
                 testConfig.getTestClientDelegate().getTriggerScript());
-        catchHelloTask.setBeforeTransportPreInitCallback(getSocketManagementCallback());
+        if (preInitCallback != null) {
+            // for configuration option testing, we always set the callback using the
+            // ParallelExecutor
+            catchHelloTask.setBeforeTransportPreInitCallback(preInitCallback);
+        }
         executor.bulkExecuteTasks(catchHelloTask);
 
         return (ClientHelloMessage)
@@ -433,19 +512,24 @@ public class TestPreparator {
         testContext.setStateExecutor(executor);
 
         LOGGER.info("Starting preparation phase");
-        this.testConfig.createConfig();
-
-        if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
-            clientTestPreparation();
-        } else if (this.testConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
-            serverTestPreparation();
-            ServerFeatureExtractionResult featureExtractionResult =
-                    (ServerFeatureExtractionResult) testContext.getFeatureExtractionResult();
-            AnvilContext.getInstance()
-                    .getMapper()
-                    .saveExtraFileToPath(
-                            featureExtractionResult.getGuidelineChecks(), "guidelines");
-        } else throw new RuntimeException("Invalid TestEndpointMode");
+        String configurationOptionsConfigFile = testConfig.getConfigOptionsConfigFile();
+        if (!configurationOptionsConfigFile.isEmpty()) {
+            LOGGER.info("Preparing configuration options environment");
+            ConfigurationOptionsExtension.getInstance().load(configurationOptionsConfigFile);
+        } else {
+            this.testConfig.createConfig();
+            if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
+                clientTestPreparation();
+            } else if (this.testConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
+                serverTestPreparation();
+                ServerFeatureExtractionResult featureExtractionResult =
+                        (ServerFeatureExtractionResult) testContext.getFeatureExtractionResult();
+                AnvilContext.getInstance()
+                        .getMapper()
+                        .saveExtraFileToPath(
+                                featureExtractionResult.getGuidelineChecks(), "guidelines");
+            } else throw new RuntimeException("Invalid TestEndpointMode");
+        }
 
         if (testContext.getFeatureExtractionResult() == null) {
             throw new RuntimeException(
@@ -485,56 +569,6 @@ public class TestPreparator {
         return startTestSuite;
     }
 
-    // TODO tcp dump for every test?
-    private void startTcpDump() {
-        if (tcpdumpProcess != null) {
-            LOGGER.warn("This should not happen...");
-            return;
-        }
-
-        String networkInterface = testConfig.getAnvilTestConfig().getNetworkInterface();
-
-        if (networkInterface.equals("any")) {
-            LOGGER.warn(
-                    "Tcpdump will capture on all interfaces. Use -networkInterface to reduce amount of collected data.");
-        }
-
-        ProcessBuilder tcpdump =
-                new ProcessBuilder(
-                        "tcpdump",
-                        "-i",
-                        networkInterface,
-                        "-w",
-                        Paths.get(testConfig.getAnvilTestConfig().getOutputFolder(), "dump.pcap")
-                                .toString());
-
-        try {
-            tcpdumpProcess = tcpdump.start();
-            boolean isFinished = tcpdumpProcess.waitFor(2, TimeUnit.SECONDS);
-            if (!isFinished) throw new IllegalStateException();
-            String out =
-                    new String(
-                            tcpdumpProcess.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-            out +=
-                    new String(
-                            tcpdumpProcess.getErrorStream().readAllBytes(), StandardCharsets.UTF_8);
-            throw new RuntimeException(out);
-        } catch (IllegalStateException ignored) {
-
-        } catch (Exception e) {
-            LOGGER.error("Starting tcpdump failed", e.getMessage());
-        }
-    }
-
-    private void stopTcpDump() {
-        if (tcpdumpProcess != null) {
-            try {
-                tcpdumpProcess.destroy();
-            } catch (Exception ignored) {
-            }
-        }
-    }
-
     private void logCommonDerivationValues() {
         FeatureExtractionResult featureExtractionResult =
                 TestContext.getInstance().getFeatureExtractionResult();
@@ -571,7 +605,8 @@ public class TestPreparator {
      *
      * @return Function to set socket in created state
      */
-    private Function<State, Integer> getSocketManagementCallback() {
+    public static Function<State, Integer> getSocketManagementCallback(
+            TlsTestConfig testConfig, ServerSocket serverSocket) {
         return (State state) -> {
             try {
                 if (!testConfig.isUseDTLS()) {
@@ -580,7 +615,7 @@ public class TestPreparator {
                                     new ServerTcpTransportHandler(
                                             testConfig.getAnvilTestConfig().getConnectionTimeout(),
                                             testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                                            testConfig.getTestClientDelegate().getServerSocket()));
+                                            serverSocket));
                 }
                 return 0;
             } catch (IOException ex) {

@@ -406,18 +406,19 @@ public class TlsTestConfig extends TLSDelegateConfig {
             return config;
         }
 
+        Config config = super.createConfig();
         switch (this.testEndpointMode) {
             case CLIENT:
                 addDelegate(this.testClientDelegate);
+                testClientDelegate.applyDelegate(config);
                 break;
             case SERVER:
                 addDelegate(this.testServerDelegate);
+                testServerDelegate.applyDelegate(config);
                 break;
             default:
                 throw new RuntimeException("Invalid testEndpointMode");
         }
-
-        Config config = super.createConfig();
         config.setAddRenegotiationInfoExtension(checkRenegotiationInfoOffer());
         config.setChooserType(ChooserType.SMART_RECORD_SIZE);
 

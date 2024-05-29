@@ -15,7 +15,7 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.*;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.*;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.ConfigOptionsResultsCollector;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.ConfigOptionsMetadataResultsCollector;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.DockerContainerLogFile;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import de.rub.nds.tlstest.framework.utils.Utils;
@@ -52,6 +52,10 @@ public class OpenSSLDockerFactory extends DockerFactory {
     private static final String CCACHE_VOLUME_NAME = "ccache-cache";
 
     private Path dockerfileMinPath;
+
+    private static final int DEFAULT_BUILD_TIMEOUT = 1800000;
+    private static final int CONTAINER_PORT_TLS_SERVER = 4433;
+    private static final int CONTAINER_MANAGER_PORT = 8090;
 
     public OpenSSLDockerFactory(ConfigurationOptionsConfig configurationOptionsConfig) {
         super(configurationOptionsConfig, "openssl_img");
@@ -127,7 +131,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
             List<String> cliOptions,
             String dockerTag,
             String openSSLBranchName,
-            ConfigOptionsResultsCollector resultsCollector) {
+            ConfigOptionsMetadataResultsCollector resultsCollector) {
         DockerContainer factoryContainer;
         CreateContainerResponse tempContainer;
         String tempContainerName = String.format("%s_%s", tempContainerPrefix, dockerTag);
@@ -175,10 +179,9 @@ public class OpenSSLDockerFactory extends DockerFactory {
                 factoryContainer.enableContainerLogging(resultsCollector, "BuildLog", dockerTag);
 
         LOGGER.debug("Factory Container started.");
-        final int timeoutMs = 1800000; // 30 min
+        final int timeoutMs = DEFAULT_BUILD_TIMEOUT;
         try {
-            factoryContainer.waitForState(
-                    DockerContainerState.NOT_RUNNING, timeoutMs); // Building timeout 30 min
+            factoryContainer.waitForState(DockerContainerState.NOT_RUNNING, timeoutMs);
         } catch (TimeoutException e) {
             factoryContainer.remove();
             LOGGER.error(
@@ -232,15 +235,12 @@ public class OpenSSLDockerFactory extends DockerFactory {
             // Remove the temporary image and container
             dockerClient.removeImageCmd(tempImageId).exec();
             factoryContainer.remove();
-            // dockerClient.removeContainerCmd(tempContainer.getId()).exec();
             return true;
         }
     }
 
     public DockerServerTestContainer createDockerServer(
             String dockerTag, String dockerHost, Integer dockerManagerPort, Integer dockerTlsPort) {
-        final int CONTAINER_PORT_TLS_SERVER = 4433;
-        final int CONTAINER_MANAGER_PORT = 8090;
         List<String> entrypoint;
 
         final String coverageOutDir = String.format("%s/%s", coverageDirectoryName, dockerTag);
@@ -293,7 +293,6 @@ public class OpenSSLDockerFactory extends DockerFactory {
             Integer dockerManagerPort,
             String tlsServerHost,
             Integer tlsServerPort) {
-        final int CONTAINER_PORT_MANAGER = 8090;
 
         String connectionDest = String.format("%s:%d", tlsServerHost, tlsServerPort);
         List<String> entrypoint;
@@ -310,7 +309,7 @@ public class OpenSSLDockerFactory extends DockerFactory {
         List<PortBinding> portBindings = new LinkedList<>();
         List<Bind> volumeBindings = new LinkedList<>();
 
-        ExposedPort exposedManagerPort = ExposedPort.tcp(CONTAINER_PORT_MANAGER);
+        ExposedPort exposedManagerPort = ExposedPort.tcp(CONTAINER_MANAGER_PORT);
         portBindings.add(
                 new PortBinding(
                         Ports.Binding.bindIpAndPort(

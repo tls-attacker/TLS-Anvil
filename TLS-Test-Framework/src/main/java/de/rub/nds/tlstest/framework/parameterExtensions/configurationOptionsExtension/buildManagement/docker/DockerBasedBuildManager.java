@@ -26,7 +26,7 @@ import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExte
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ParallelExecutorWithTimeout;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.TestCOMultiClientDelegate;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.ConfigOptionsResultsCollector;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.ConfigOptionsMetadataResultsCollector;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigOptionValueTranslation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
@@ -52,7 +52,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     private static final Logger LOGGER = LogManager.getLogger();
 
     protected DockerFactory dockerFactory;
-    protected ConfigOptionsResultsCollector resultsCollector;
+    protected ConfigOptionsMetadataResultsCollector resultsCollector;
     protected ConfigurationOptionsConfig configOptionsConfig;
     protected Map<String, DockerTestContainer> dockerTagToContainerInfo;
     protected Map<String, Integer> dockerTagToAccessCount;
@@ -109,7 +109,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
         setSocketCallback(executor);
 
         resultsCollector =
-                new ConfigOptionsResultsCollector(
+                new ConfigOptionsMetadataResultsCollector(
                         Paths.get(
                                 TestContext.getInstance()
                                         .getConfig()

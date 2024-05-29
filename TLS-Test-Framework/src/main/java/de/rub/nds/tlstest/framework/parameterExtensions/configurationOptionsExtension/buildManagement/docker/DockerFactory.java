@@ -16,7 +16,7 @@ import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.transport.DockerHttpClient;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.ConfigOptionsResultsCollector;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.ConfigOptionsMetadataResultsCollector;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -73,7 +73,7 @@ public abstract class DockerFactory {
             List<String> cliOptions,
             String dockerTag,
             String libraryVersionName,
-            ConfigOptionsResultsCollector resultsCollector) {
+            ConfigOptionsMetadataResultsCollector resultsCollector) {
         boolean success =
                 buildDockerImage(cliOptions, dockerTag, libraryVersionName, resultsCollector);
         String dockerNameWithTag = this.getBuildImageNameAndTag(dockerTag);
@@ -102,7 +102,7 @@ public abstract class DockerFactory {
             List<String> cliOptions,
             String dockerTag,
             String libraryVersionName,
-            ConfigOptionsResultsCollector resultsCollector);
+            ConfigOptionsMetadataResultsCollector resultsCollector);
 
     /**
      * Create a DockerClientTestContainer using the respective configurations. An image for the

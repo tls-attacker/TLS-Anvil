@@ -16,9 +16,11 @@ import de.rub.nds.anvilcore.model.parameter.ParameterType;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.connection.InboundConnection;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
+import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
+import de.rub.nds.tlstest.framework.execution.TestPreparator;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
@@ -104,6 +106,8 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
                         600);
         TestContext.getInstance().setStateExecutor(executor);
 
+        setSocketCallback(executor);
+
         resultsCollector =
                 new ConfigOptionsResultsCollector(
                         Paths.get(
@@ -115,6 +119,32 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
                         dockerFactory.getDockerClient());
 
         configDefaultConnection();
+    }
+
+    /**
+     * We first attempt to find an open port. This port is then passed to the client docker
+     * container. To ensure that the port remains available to us, we immediately bind the socket to
+     * the port. Hence, all connections must fetch their pre-initialized server socket to avoid
+     * 'address alread in use' errors.
+     *
+     * @param executor The parallel executor to use
+     */
+    private void setSocketCallback(ParallelExecutor executor) {
+        if (TestContext.getInstance().getConfig().getTestEndpointMode()
+                == TestEndpointType.CLIENT) {
+            executor.setDefaultBeforeTransportPreInitCallback(
+                    (State state) -> {
+                        ServerSocket socket =
+                                ((TestCOMultiClientDelegate)
+                                                TestContext.getInstance()
+                                                        .getConfig()
+                                                        .getTestClientDelegate())
+                                        .getServerSocket(state.getConfig());
+                        return TestPreparator.getSocketManagementCallback(
+                                        TestContext.getInstance().getConfig(), socket)
+                                .apply(state);
+                    });
+        }
     }
 
     /**
@@ -382,19 +412,27 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
 
         ServerSocket ss = null;
         DatagramSocket ds = null;
+        boolean bound = false;
         try {
-            ss = new ServerSocket(port);
-            ss.setReuseAddress(true);
-            ds = new DatagramSocket(port);
-            ds.setReuseAddress(true);
+            if (TestContext.getInstance().getConfig().isUseDTLS()) {
+                ds = new DatagramSocket();
+                ds.setReuseAddress(true);
+                ds.bind(new InetSocketAddress(port));
+                bound = true;
+            } else {
+                ss = new ServerSocket();
+                ss.setReuseAddress(true);
+                ss.bind(new InetSocketAddress(port));
+                bound = true;
+            }
             return true;
         } catch (IOException ignored) {
         } finally {
-            if (ds != null) {
+            if (ds != null && bound) {
                 ds.close();
             }
 
-            if (ss != null) {
+            if (ss != null && bound) {
                 try {
                     ss.close();
                 } catch (IOException e) {

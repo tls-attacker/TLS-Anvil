@@ -11,7 +11,9 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
 
 import com.github.dockerjava.api.DockerClient;
+import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
+import de.rub.nds.tlsscanner.clientscanner.config.ClientScannerConfig;
 import de.rub.nds.tlsscanner.clientscanner.execution.TlsClientScanner;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
@@ -57,17 +59,27 @@ public class DockerClientTestContainer extends DockerTestContainer {
     @Override
     protected synchronized FeatureExtractionResult createFeatureExtractionResult(
             ParallelExecutor parallelExecutor) {
-        TlsClientScanner clientScanner =
-                TestPreparator.getClientScanner(
+        ClientScannerConfig scannerConfig =
+                TestPreparator.getClientScannerConfig(
                         inboundConnectionPort,
-                        parallelExecutor,
                         TestContext.getInstance()
                                 .getConfig()
                                 .getAnvilTestConfig()
                                 .getConnectionTimeout(),
-                        null,
-                        false);
-        // todo: determine which name to use for report
-        return ClientFeatureExtractionResult.fromClientScanReport(clientScanner.scan(), dockerTag);
+                        TestContext.getInstance()
+                                .getConfig()
+                                .getTestClientDelegate()
+                                .getTriggerScript(),
+                        TestContext.getInstance().getConfig().isUseDTLS());
+        TlsClientScanner clientScanner = new TlsClientScanner(scannerConfig, parallelExecutor);
+        ClientHelloMessage clientHello =
+                TestPreparator.catchClientHello(parallelExecutor, inboundConnectionPort, null);
+        ClientFeatureExtractionResult clientFeatureExtractionResult =
+                ClientFeatureExtractionResult.fromClientScanReport(clientScanner.scan(), dockerTag);
+        clientFeatureExtractionResult.setReceivedClientHello(clientHello);
+        if (TestContext.getInstance().getReceivedClientHelloMessage() == null) {
+            TestContext.getInstance().setReceivedClientHelloMessage(clientHello);
+        }
+        return clientFeatureExtractionResult;
     }
 }

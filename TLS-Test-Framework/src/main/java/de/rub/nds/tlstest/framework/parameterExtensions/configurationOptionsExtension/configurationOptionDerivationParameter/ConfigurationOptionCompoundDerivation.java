@@ -127,7 +127,7 @@ public class ConfigurationOptionCompoundDerivation
         return new ConditionalConstraint(
                 requiredDerivations,
                 ConstraintBuilder.constrain(
-                                getParameterIdentifier().name(),
+                                ConfigOptionParameterType.CONFIG_OPTION_COMPOUND_PARAMETER.name(),
                                 TlsParameterType.CIPHER_SUITE.name())
                         .by(
                                 (ConfigurationOptionCompoundDerivation coCompoundDerivation,

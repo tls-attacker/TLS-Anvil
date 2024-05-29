@@ -12,6 +12,7 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.connection.InboundConnection;
+import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerClientTestContainer;
@@ -53,7 +54,6 @@ public class TestCOMultiClientDelegate extends TestClientDelegate {
         super();
         inboundPortToClientConnectionInfo = new HashMap<>();
         defaultInboundPort = null;
-
         Function<State, Integer> triggerScript =
                 (State state) -> {
                     InboundConnection inboundConnection =
@@ -61,14 +61,15 @@ public class TestCOMultiClientDelegate extends TestClientDelegate {
                     ClientConnectionInfo info =
                             this.getClientConnectionForInboundConnection(inboundConnection);
                     info.getClientContainer().sendHttpRequestToManager("trigger");
-
                     return 0;
                 };
         this.setTriggerScript(triggerScript);
     }
 
     @Override
-    public void applyDelegate(Config config) {}
+    public void applyDelegate(Config config) {
+        config.setDefaultRunningMode(RunningModeType.SERVER);
+    }
 
     public void registerNewConnection(DockerClientTestContainer clientContainer) {
         Integer inboundConnectionPort = clientContainer.getInboundConnectionPort();
@@ -92,6 +93,10 @@ public class TestCOMultiClientDelegate extends TestClientDelegate {
         InboundConnection inboundConnection = config.getDefaultServerConnection();
         ClientConnectionInfo info = getClientConnectionForInboundConnection(inboundConnection);
         return info.getServerSocket();
+    }
+
+    public ServerSocket getServerSocket(int port) {
+        return inboundPortToClientConnectionInfo.get(port).getServerSocket();
     }
 
     public void configureDefaultInboundPort(Integer defaultInboundPort) {

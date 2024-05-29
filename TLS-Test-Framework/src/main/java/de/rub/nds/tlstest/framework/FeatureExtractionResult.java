@@ -60,7 +60,13 @@ public abstract class FeatureExtractionResult implements Serializable {
                 TlsAnalyzedProperty.SUPPORTED_NAMED_GROUPS,
                 TlsAnalyzedProperty.SUPPORTED_TLS13_GROUPS);
         setResultMap(siteReport.getResultMap());
-        getSupportedCipherSuites().addAll(siteReport.getSupportedCipherSuites());
+        for (VersionSuiteListPair versionSuiteListPair : siteReport.getVersionSuitePairs()) {
+            if (versionSuiteListPair.getVersion() == ProtocolVersion.TLS12
+                    || versionSuiteListPair.getVersion() == ProtocolVersion.TLS13
+                    || versionSuiteListPair.getVersion() == ProtocolVersion.DTLS12) {
+                getSupportedCipherSuites().addAll(versionSuiteListPair.getCipherSuiteList());
+            }
+        }
         getSupportedVersions().addAll(siteReport.getSupportedProtocolVersions());
         getVersionSuitePairs().addAll(siteReport.getVersionSuitePairs());
         getSupportedNamedGroups().addAll(siteReport.getSupportedNamedGroups());

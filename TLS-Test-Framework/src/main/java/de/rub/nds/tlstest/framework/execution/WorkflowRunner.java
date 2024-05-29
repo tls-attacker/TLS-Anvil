@@ -50,7 +50,10 @@ import de.rub.nds.tlsattacker.transport.udp.UdpTransportHandler;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
+import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.TestCOMultiClientDelegate;
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -242,11 +245,9 @@ public class WorkflowRunner {
 
     public void prepareClientTask(StateExecutionTask task) throws RuntimeException {
         try {
+            setServerTransportHandler();
             if (context.getConfig().isUseDTLS()) {
-                setServerUdpTransportHandler();
                 task.setBeforeReexecutionCallback(this::reexecutionCallback);
-            } else {
-                setServerTcpTransportHandler();
             }
 
             task.setBeforeTransportInitCallback(
@@ -275,22 +276,32 @@ public class WorkflowRunner {
         return 0;
     }
 
-    public void setServerTcpTransportHandler() throws IOException {
-        state.getTlsContext()
-                .setTransportHandler(
-                        new ServerTcpTransportHandler(
-                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                                context.getConfig().getTestClientDelegate().getServerSocket()));
-    }
-
-    public void setServerUdpTransportHandler() {
-        state.getTlsContext()
-                .setTransportHandler(
-                        new ServerUdpTransportHandler(
-                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                                context.getConfig().getTestClientDelegate().getPort()));
+    public void setServerTransportHandler() throws IOException {
+        TransportHandler transportHandler;
+        TestClientDelegate testClientDelegate = context.getConfig().getTestClientDelegate();
+        if (context.getConfig().isUseDTLS()) {
+            transportHandler =
+                    new ServerUdpTransportHandler(
+                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                            testClientDelegate.getPort());
+        } else {
+            ServerSocket socket;
+            if (testClientDelegate instanceof TestCOMultiClientDelegate) {
+                // the parallel executor will handle the socket management via transport handler
+                // callbacks as we need a set of multiple ports when we initialize the docker
+                // containers
+                return;
+            } else {
+                socket = testClientDelegate.getServerSocket();
+            }
+            transportHandler =
+                    new ServerTcpTransportHandler(
+                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                            socket);
+        }
+        state.getTlsContext().setTransportHandler(transportHandler);
     }
 
     /**

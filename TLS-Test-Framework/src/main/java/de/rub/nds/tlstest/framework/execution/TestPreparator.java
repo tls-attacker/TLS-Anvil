@@ -9,6 +9,7 @@ import de.rub.nds.scanner.core.probe.ProbeType;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
+import de.rub.nds.tlsattacker.core.connection.InboundConnection;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
@@ -43,6 +44,7 @@ import java.lang.reflect.Method;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -363,7 +365,9 @@ public class TestPreparator {
 
         ParallelExecutor preparedExecutor =
                 new ParallelExecutor(testConfig.getAnvilTestConfig().getParallelTestCases(), 2);
-        preparedExecutor.setDefaultBeforeTransportPreInitCallback(getSocketManagementCallback());
+        preparedExecutor.setDefaultBeforeTransportPreInitCallback(
+                getSocketManagementCallback(
+                        testConfig, testConfig.getTestClientDelegate().getServerSocket()));
 
         ClientHelloMessage clientHello = catchClientHello(preparedExecutor);
         if (clientHello == null) {
@@ -409,6 +413,16 @@ public class TestPreparator {
             int timeout,
             Function<State, Integer> externalRunCallback,
             boolean dtls) {
+
+        TlsClientScanner clientScanner =
+                new TlsClientScanner(
+                        getClientScannerConfig(port, timeout, externalRunCallback, dtls),
+                        preparedExecutor);
+        return clientScanner;
+    }
+
+    public static ClientScannerConfig getClientScannerConfig(
+            Integer port, int timeout, Function<State, Integer> externalRunCallback, boolean dtls) {
         ClientScannerConfig clientScannerConfig = new ClientScannerConfig(new GeneralDelegate());
         List<ProbeType> probes = new LinkedList<>();
         probes.add(TlsProbeType.BASIC);
@@ -429,21 +443,43 @@ public class TestPreparator {
         } else {
             probes.add(TlsProbeType.RECORD_FRAGMENTATION);
         }
-        TlsClientScanner clientScanner =
-                new TlsClientScanner(clientScannerConfig, preparedExecutor);
-        return clientScanner;
+        return clientScannerConfig;
     }
 
+    /**
+     * Catches a ClientHello to perform non-combinatorial client tests. We assume that the client
+     * always sends the same ClientHello (except for configuration option tests)
+     *
+     * @param testConfig
+     * @param executor
+     * @return
+     */
     private ClientHelloMessage catchClientHello(ParallelExecutor executor) {
         LOGGER.info("Attempting to receive a Client Hello");
+        return catchClientHello(
+                executor,
+                testConfig.getTestClientDelegate().getPort(),
+                getSocketManagementCallback(
+                        testConfig, testConfig.getTestClientDelegate().getServerSocket()));
+    }
+
+    public static ClientHelloMessage catchClientHello(
+            ParallelExecutor executor, int port, Function<State, Integer> preInitCallback) {
+
+        TlsTestConfig testConfig = TestContext.getInstance().getConfig();
         Config config = testConfig.createConfig();
+        config.setDefaultServerConnection(new InboundConnection(port));
         WorkflowTrace catchHelloWorkflowTrace = new WorkflowTrace();
         catchHelloWorkflowTrace.addTlsAction(new ReceiveAction(new ClientHelloMessage()));
         State catchHelloState = new State(config, catchHelloWorkflowTrace);
         StateExecutionTask catchHelloTask = new StateExecutionTask(catchHelloState, 2);
         catchHelloTask.setBeforeTransportInitCallback(
                 testConfig.getTestClientDelegate().getTriggerScript());
-        catchHelloTask.setBeforeTransportPreInitCallback(getSocketManagementCallback());
+        if (preInitCallback != null) {
+            // for configuration option testing, we always set the callback using the
+            // ParallelExecutor
+            catchHelloTask.setBeforeTransportPreInitCallback(preInitCallback);
+        }
         executor.bulkExecuteTasks(catchHelloTask);
 
         return (ClientHelloMessage)
@@ -569,7 +605,8 @@ public class TestPreparator {
      *
      * @return Function to set socket in created state
      */
-    private Function<State, Integer> getSocketManagementCallback() {
+    public static Function<State, Integer> getSocketManagementCallback(
+            TlsTestConfig testConfig, ServerSocket serverSocket) {
         return (State state) -> {
             try {
                 if (!testConfig.isUseDTLS()) {
@@ -578,7 +615,7 @@ public class TestPreparator {
                                     new ServerTcpTransportHandler(
                                             testConfig.getAnvilTestConfig().getConnectionTimeout(),
                                             testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                                            testConfig.getTestClientDelegate().getServerSocket()));
+                                            serverSocket));
                 }
                 return 0;
             } catch (IOException ex) {

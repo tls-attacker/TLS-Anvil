@@ -41,7 +41,9 @@ public class EnableCompressionDerivationVerify extends Tls12Test {
             return ConditionEvaluationResult.disabled(
                     "Compression support could not be evaluated by feature extraction");
         }
-        if (ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes() != null
+        if (!context.getConfig().getConfigOptionsConfigFile().isEmpty()
+                && ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes()
+                        != null
                 && ConfigurationOptionsDerivationManager.getInstance()
                         .getAllActivatedCOTypes()
                         .contains(ConfigOptionParameterType.ENABLE_COMPRESSION)) {

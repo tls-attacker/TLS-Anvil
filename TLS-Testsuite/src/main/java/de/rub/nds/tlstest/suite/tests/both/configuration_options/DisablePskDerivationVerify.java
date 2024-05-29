@@ -32,7 +32,9 @@ import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 public class DisablePskDerivationVerify extends Tls12Test {
 
     public ConditionEvaluationResult disablePskOptionTested() {
-        if (ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes() != null
+        if (!context.getConfig().getConfigOptionsConfigFile().isEmpty()
+                && ConfigurationOptionsDerivationManager.getInstance().getAllActivatedCOTypes()
+                        != null
                 && ConfigurationOptionsDerivationManager.getInstance()
                         .getAllActivatedCOTypes()
                         .contains(ConfigOptionParameterType.DISABLE_PSK)) {

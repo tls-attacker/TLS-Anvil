@@ -22,7 +22,6 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.execution.TestPreparator;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ParallelExecutorWithTimeout;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.TestCOMultiClientDelegate;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.ConfigOptionsMetadataResultsCollector;
@@ -40,14 +39,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * An abstract ConfigurationOptionsBuildManager that works with docker to create and manage builds.
- * It uses a specific DockerFactory for build creation. Each tls library build container runs an
- * http server for management that can be accessed using a separate port that is assigned to each
- * container.
+ * An abstract BuildManager that works with docker to create and manage builds. It uses a specific
+ * DockerFactory for build creation. Each tls library build container runs an http server for
+ * management that can be accessed using a separate port that is assigned to each container.
  *
  * <p>Unused containers with the lowest usage are stopped and only reactivated if used again.
  */
-public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildManager {
+public abstract class DockerBasedBuildManager {
     private static final Logger LOGGER = LogManager.getLogger();
 
     protected DockerFactory dockerFactory;
@@ -91,7 +89,6 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
         usedPorts = new HashSet<>();
     }
 
-    @Override
     public synchronized void init() {
         this.dockerFactory.init();
 
@@ -152,7 +149,6 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * @param optionSet the set of configurationOptionDerivationParameters that contain selected
      *     values. pr * @return the build tag used to reference the container
      */
-    @Override
     public String preparePeerConnection(
             Config config,
             TestContext context,
@@ -295,7 +291,6 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
         return optionSet;
     }
 
-    @Override
     public synchronized void onTestFinished(Set<ConfigurationOptionDerivationParameter> optionSet) {
         String dockerTag = getDockerTagFromOptionSet(optionSet);
         if (dockerTagToContainerInfo.containsKey(dockerTag)) {
@@ -304,7 +299,6 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     }
 
     /* === Site Report Management === */
-    @Override
     public synchronized FeatureExtractionResult getMaximalFeatureExtractionResult() {
         if (maximalFeatureContainerDockerTag == null) {
             Set<ConfigurationOptionDerivationParameter> optionSet = getMaxFeatureOptionSet();
@@ -507,7 +501,6 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      * Finalizes the result logs and properly shutdown all created containers. The amount of
      * containers shutdown simultaneously is defined in the config options config
      */
-    @Override
     public synchronized void onShutdown() {
         resultsCollector.finalizeResults();
 
@@ -684,4 +677,15 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
     public Map<String, DockerTestContainer> getDockerTagToContainerInfoMap() {
         return dockerTagToContainerInfo;
     }
+
+    /**
+     * Translates a given configuration option to a tls library specific string.
+     *
+     * @param optionParameter - the configuration option to translate (including its set value)
+     * @param optionsToTranslationMap - the translation map of the configuration options config
+     * @return the translated string
+     */
+    protected abstract String translateOptionValue(
+            ConfigurationOptionDerivationParameter optionParameter,
+            Map<ConfigOptionParameterType, ConfigOptionValueTranslation> optionsToTranslationMap);
 }

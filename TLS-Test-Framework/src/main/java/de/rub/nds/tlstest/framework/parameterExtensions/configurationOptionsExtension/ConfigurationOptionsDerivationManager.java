@@ -15,7 +15,6 @@ import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerBasedBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerTestContainer;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.ConfigurationOptionDerivationParameter;
@@ -91,7 +90,7 @@ public class ConfigurationOptionsDerivationManager {
         return config;
     }
 
-    public ConfigurationOptionsBuildManager getConfigurationOptionsBuildManager() {
+    public DockerBasedBuildManager getConfigurationOptionsBuildManager() {
         if (config == null) {
             throw new IllegalStateException(
                     "No ConfigurationOptionsConfig was set so far. Register it before calling this method.");
@@ -293,14 +292,11 @@ public class ConfigurationOptionsDerivationManager {
             Set<ConfigurationOptionDerivationParameter> setupSet) {
         return buildExecutor.submit(
                 () -> {
-                    ConfigurationOptionsBuildManager coBuildManager =
-                            getConfigurationOptionsBuildManager();
+                    DockerBasedBuildManager coBuildManager = getConfigurationOptionsBuildManager();
                     String containerTag =
                             coBuildManager.preparePeerConnection(conf, context, setupSet);
                     DockerTestContainer testContainer =
-                            ((DockerBasedBuildManager) coBuildManager)
-                                    .getDockerTagToContainerInfoMap()
-                                    .get(containerTag);
+                            coBuildManager.getDockerTagToContainerInfoMap().get(containerTag);
                     return new DockerBasedBuildManager.FeatureExtractionCallback(testContainer);
                 });
     }

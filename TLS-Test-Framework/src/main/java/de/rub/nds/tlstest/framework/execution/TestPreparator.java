@@ -72,7 +72,6 @@ public class TestPreparator {
 
     private final TlsTestConfig testConfig;
     private final TestContext testContext;
-    private Process tcpdumpProcess;
 
     private boolean targetIsReady = false;
 
@@ -456,15 +455,10 @@ public class TestPreparator {
      */
     private ClientHelloMessage catchClientHello(ParallelExecutor executor) {
         LOGGER.info("Attempting to receive a Client Hello");
-        return catchClientHello(
-                executor,
-                testConfig.getTestClientDelegate().getPort(),
-                getSocketManagementCallback(
-                        testConfig, testConfig.getTestClientDelegate().getServerSocket()));
+        return catchClientHello(executor, testConfig.getTestClientDelegate().getPort());
     }
 
-    public static ClientHelloMessage catchClientHello(
-            ParallelExecutor executor, int port, Function<State, Integer> preInitCallback) {
+    public static ClientHelloMessage catchClientHello(ParallelExecutor executor, int port) {
 
         TlsTestConfig testConfig = TestContext.getInstance().getConfig();
         Config config = testConfig.createConfig();
@@ -475,11 +469,6 @@ public class TestPreparator {
         StateExecutionTask catchHelloTask = new StateExecutionTask(catchHelloState, 2);
         catchHelloTask.setBeforeTransportInitCallback(
                 testConfig.getTestClientDelegate().getTriggerScript());
-        if (preInitCallback != null) {
-            // for configuration option testing, we always set the callback using the
-            // ParallelExecutor
-            catchHelloTask.setBeforeTransportPreInitCallback(preInitCallback);
-        }
         executor.bulkExecuteTasks(catchHelloTask);
 
         return (ClientHelloMessage)

@@ -22,7 +22,9 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
+import de.rub.nds.tlsattacker.transport.TransportHandler;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
+import de.rub.nds.tlsattacker.transport.udp.ServerUdpTransportHandler;
 import de.rub.nds.tlsscanner.clientscanner.config.ClientScannerConfig;
 import de.rub.nds.tlsscanner.clientscanner.execution.TlsClientScanner;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
@@ -39,6 +41,7 @@ import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsExtension;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.TestCOMultiClientDelegate;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.DatagramPacket;
@@ -353,6 +356,8 @@ public class TestPreparator {
      */
     private void clientTestPreparation() {
         waitForClient();
+        ParallelExecutor preparedExecutor = testContext.getStateExecutor();
+        setGlobalClientTestCallbacks(preparedExecutor);
 
         ClientFeatureExtractionResult cachedReport =
                 (ClientFeatureExtractionResult) loadFromCache();
@@ -362,24 +367,20 @@ public class TestPreparator {
             return;
         }
 
-        ParallelExecutor preparedExecutor =
-                new ParallelExecutor(testConfig.getAnvilTestConfig().getParallelTestCases(), 2);
-        preparedExecutor.setDefaultBeforeTransportPreInitCallback(
-                getSocketManagementCallback(
-                        testConfig, testConfig.getTestClientDelegate().getServerSocket()));
-
         ClientHelloMessage clientHello = catchClientHello(preparedExecutor);
         if (clientHello == null) {
             throw new RuntimeException("Failed to receive a ClientHello in test preparation");
         }
         LOGGER.info("Received Client Hello. Starting Client-Scanner for feature extraction.");
 
+        // Initialize Client Scanner with null trigger script as our externally managed
+        // ParallelExecutor handles the trigger script for the entire execution
         TlsClientScanner clientScanner =
                 getClientScanner(
                         testConfig.getDelegate(TestClientDelegate.class).getPort(),
                         preparedExecutor,
                         testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                        testConfig.getTestClientDelegate().getTriggerScript(),
+                        null,
                         testConfig.isUseDTLS());
 
         String identifier =
@@ -396,6 +397,22 @@ public class TestPreparator {
         }
         testContext.setReceivedClientHelloMessage(clientHello);
         testContext.setFeatureExtractionResult(extractionResult);
+    }
+
+    /**
+     * Sets the callbacks required for all TLS sessions to be established with the tested client.
+     *
+     * @param preparedExecutor The ParallelExecutor instance used by the feature extraction and the
+     *     tests
+     */
+    private void setGlobalClientTestCallbacks(ParallelExecutor preparedExecutor) {
+        // Ensure we always retain our external socket
+        preparedExecutor.setDefaultBeforeTransportPreInitCallback(
+                getSocketManagementCallback(
+                        testConfig, testConfig.getTestClientDelegate().getServerSocket()));
+        // Ensure we always trigger the client
+        preparedExecutor.setDefaultBeforeTransportInitCallback(
+                testConfig.getTestClientDelegate().getTriggerScript());
     }
 
     /**
@@ -598,14 +615,28 @@ public class TestPreparator {
             TlsTestConfig testConfig, ServerSocket serverSocket) {
         return (State state) -> {
             try {
-                if (!testConfig.isUseDTLS()) {
-                    state.getTlsContext()
-                            .setTransportHandler(
-                                    new ServerTcpTransportHandler(
-                                            testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                                            testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                                            serverSocket));
+                TransportHandler transportHandler;
+                TestContext context = TestContext.getInstance();
+                TestClientDelegate testClientDelegate = context.getConfig().getTestClientDelegate();
+                if (testClientDelegate instanceof TestCOMultiClientDelegate) {
+                    throw new RuntimeException(
+                            "Callback for build configuration option tests must be set by build manager.");
                 }
+                if (context.getConfig().isUseDTLS()) {
+                    transportHandler =
+                            new ServerUdpTransportHandler(
+                                    context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                    context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                    testClientDelegate.getPort());
+                } else {
+                    ServerSocket socket = testClientDelegate.getServerSocket();
+                    transportHandler =
+                            new ServerTcpTransportHandler(
+                                    context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                    context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                    socket);
+                }
+                state.getTlsContext().setTransportHandler(transportHandler);
                 return 0;
             } catch (IOException ex) {
                 LOGGER.error("Failed to set server socket", ex);

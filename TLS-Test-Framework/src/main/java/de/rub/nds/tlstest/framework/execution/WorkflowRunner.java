@@ -43,17 +43,13 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.transport.TransportHandler;
-import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
 import de.rub.nds.tlsattacker.transport.tcp.TcpTransportHandler;
 import de.rub.nds.tlsattacker.transport.udp.ServerUdpTransportHandler;
 import de.rub.nds.tlsattacker.transport.udp.UdpTransportHandler;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
-import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.TestCOMultiClientDelegate;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -244,16 +240,8 @@ public class WorkflowRunner {
     }
 
     public void prepareClientTask(StateExecutionTask task) throws RuntimeException {
-        try {
-            setServerTransportHandler();
-            if (context.getConfig().isUseDTLS()) {
-                task.setBeforeReexecutionCallback(this::reexecutionCallback);
-            }
-
-            task.setBeforeTransportInitCallback(
-                    context.getConfig().getTestClientDelegate().getTriggerScript());
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to set TransportHandler");
+        if (context.getConfig().isUseDTLS()) {
+            task.setBeforeReexecutionCallback(this::reexecutionCallback);
         }
     }
 
@@ -274,34 +262,6 @@ public class WorkflowRunner {
             return 1;
         }
         return 0;
-    }
-
-    public void setServerTransportHandler() throws IOException {
-        TransportHandler transportHandler;
-        TestClientDelegate testClientDelegate = context.getConfig().getTestClientDelegate();
-        if (context.getConfig().isUseDTLS()) {
-            transportHandler =
-                    new ServerUdpTransportHandler(
-                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                            testClientDelegate.getPort());
-        } else {
-            ServerSocket socket;
-            if (testClientDelegate instanceof TestCOMultiClientDelegate) {
-                // the parallel executor will handle the socket management via transport handler
-                // callbacks as we need a set of multiple ports when we initialize the docker
-                // containers
-                return;
-            } else {
-                socket = testClientDelegate.getServerSocket();
-            }
-            transportHandler =
-                    new ServerTcpTransportHandler(
-                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                            context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                            socket);
-        }
-        state.getTlsContext().setTransportHandler(transportHandler);
     }
 
     /**

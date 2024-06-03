@@ -73,7 +73,7 @@ public class DockerClientTestContainer extends DockerTestContainer {
                         TestContext.getInstance().getConfig().isUseDTLS());
         TlsClientScanner clientScanner = new TlsClientScanner(scannerConfig, parallelExecutor);
         ClientHelloMessage clientHello =
-                TestPreparator.catchClientHello(parallelExecutor, inboundConnectionPort, null);
+                TestPreparator.catchClientHello(parallelExecutor, inboundConnectionPort);
         ClientFeatureExtractionResult clientFeatureExtractionResult =
                 ClientFeatureExtractionResult.fromClientScanReport(clientScanner.scan(), dockerTag);
         clientFeatureExtractionResult.setReceivedClientHello(clientHello);

@@ -22,7 +22,9 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
+import de.rub.nds.tlsattacker.transport.TransportHandler;
 import de.rub.nds.tlsattacker.transport.tcp.ServerTcpTransportHandler;
+import de.rub.nds.tlsattacker.transport.udp.ServerUdpTransportHandler;
 import de.rub.nds.tlsscanner.clientscanner.config.ClientScannerConfig;
 import de.rub.nds.tlsscanner.clientscanner.execution.TlsClientScanner;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
@@ -39,6 +41,7 @@ import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsExtension;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.TestCOMultiClientDelegate;
 import java.io.*;
 import java.lang.reflect.Method;
 import java.net.DatagramPacket;
@@ -72,7 +75,6 @@ public class TestPreparator {
 
     private final TlsTestConfig testConfig;
     private final TestContext testContext;
-    private Process tcpdumpProcess;
 
     private boolean targetIsReady = false;
 
@@ -354,6 +356,8 @@ public class TestPreparator {
      */
     private void clientTestPreparation() {
         waitForClient();
+        ParallelExecutor preparedExecutor = testContext.getStateExecutor();
+        setGlobalClientTestCallbacks(preparedExecutor);
 
         ClientFeatureExtractionResult cachedReport =
                 (ClientFeatureExtractionResult) loadFromCache();
@@ -363,24 +367,20 @@ public class TestPreparator {
             return;
         }
 
-        ParallelExecutor preparedExecutor =
-                new ParallelExecutor(testConfig.getAnvilTestConfig().getParallelTestCases(), 2);
-        preparedExecutor.setDefaultBeforeTransportPreInitCallback(
-                getSocketManagementCallback(
-                        testConfig, testConfig.getTestClientDelegate().getServerSocket()));
-
         ClientHelloMessage clientHello = catchClientHello(preparedExecutor);
         if (clientHello == null) {
             throw new RuntimeException("Failed to receive a ClientHello in test preparation");
         }
         LOGGER.info("Received Client Hello. Starting Client-Scanner for feature extraction.");
 
+        // Initialize Client Scanner with null trigger script as our externally managed
+        // ParallelExecutor handles the trigger script for the entire execution
         TlsClientScanner clientScanner =
                 getClientScanner(
                         testConfig.getDelegate(TestClientDelegate.class).getPort(),
                         preparedExecutor,
                         testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                        testConfig.getTestClientDelegate().getTriggerScript(),
+                        null,
                         testConfig.isUseDTLS());
 
         String identifier =
@@ -397,6 +397,24 @@ public class TestPreparator {
         }
         testContext.setReceivedClientHelloMessage(clientHello);
         testContext.setFeatureExtractionResult(extractionResult);
+    }
+
+    /**
+     * Sets the callbacks required for all TLS sessions to be established with the tested client.
+     *
+     * @param preparedExecutor The ParallelExecutor instance used by the feature extraction and the
+     *     tests
+     */
+    private void setGlobalClientTestCallbacks(ParallelExecutor preparedExecutor) {
+        // Ensure we always retain our external socket
+        preparedExecutor.setDefaultBeforeTransportPreInitCallback(getSocketManagementCallback());
+        // Ensure we always trigger the client
+        preparedExecutor.setDefaultBeforeTransportInitCallback(
+                testConfig.getTestClientDelegate().getTriggerScript());
+
+        if (testConfig.isUseDTLS()) {
+            // todo: set reexecution callback for dtls in parallel executor once it is updated
+        }
     }
 
     /**
@@ -456,15 +474,10 @@ public class TestPreparator {
      */
     private ClientHelloMessage catchClientHello(ParallelExecutor executor) {
         LOGGER.info("Attempting to receive a Client Hello");
-        return catchClientHello(
-                executor,
-                testConfig.getTestClientDelegate().getPort(),
-                getSocketManagementCallback(
-                        testConfig, testConfig.getTestClientDelegate().getServerSocket()));
+        return catchClientHello(executor, testConfig.getTestClientDelegate().getPort());
     }
 
-    public static ClientHelloMessage catchClientHello(
-            ParallelExecutor executor, int port, Function<State, Integer> preInitCallback) {
+    public static ClientHelloMessage catchClientHello(ParallelExecutor executor, int port) {
 
         TlsTestConfig testConfig = TestContext.getInstance().getConfig();
         Config config = testConfig.createConfig();
@@ -473,13 +486,6 @@ public class TestPreparator {
         catchHelloWorkflowTrace.addTlsAction(new ReceiveAction(new ClientHelloMessage()));
         State catchHelloState = new State(config, catchHelloWorkflowTrace);
         StateExecutionTask catchHelloTask = new StateExecutionTask(catchHelloState, 2);
-        catchHelloTask.setBeforeTransportInitCallback(
-                testConfig.getTestClientDelegate().getTriggerScript());
-        if (preInitCallback != null) {
-            // for configuration option testing, we always set the callback using the
-            // ParallelExecutor
-            catchHelloTask.setBeforeTransportPreInitCallback(preInitCallback);
-        }
         executor.bulkExecuteTasks(catchHelloTask);
 
         return (ClientHelloMessage)
@@ -605,23 +611,61 @@ public class TestPreparator {
      *
      * @return Function to set socket in created state
      */
-    public static Function<State, Integer> getSocketManagementCallback(
-            TlsTestConfig testConfig, ServerSocket serverSocket) {
+    public static Function<State, Integer> getSocketManagementCallback() {
         return (State state) -> {
             try {
-                if (!testConfig.isUseDTLS()) {
-                    state.getTlsContext()
-                            .setTransportHandler(
-                                    new ServerTcpTransportHandler(
-                                            testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                                            testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                                            serverSocket));
+                TransportHandler transportHandler;
+                TestContext context = TestContext.getInstance();
+                TestClientDelegate testClientDelegate = context.getConfig().getTestClientDelegate();
+                if (context.getConfig().isUseDTLS()) {
+                    transportHandler =
+                            new ServerUdpTransportHandler(
+                                    context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                    context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                    testClientDelegate.getPort());
+                } else {
+                    ServerSocket socket;
+                    if (testClientDelegate instanceof TestCOMultiClientDelegate) {
+                        socket =
+                                ((TestCOMultiClientDelegate)
+                                                TestContext.getInstance()
+                                                        .getConfig()
+                                                        .getTestClientDelegate())
+                                        .getServerSocket(state.getConfig());
+                    } else {
+                        socket = testClientDelegate.getServerSocket();
+                    }
+                    transportHandler =
+                            new ServerTcpTransportHandler(
+                                    context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                    context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                    socket);
                 }
+                state.getTlsContext().setTransportHandler(transportHandler);
                 return 0;
             } catch (IOException ex) {
                 LOGGER.error("Failed to set server socket", ex);
                 return 1;
             }
+        };
+    }
+
+    // This method is supposed to replace the callback set in the WorkflowRunner as we also want to
+    // apply it to the DTLS client scanner.
+    // However, the ParallelExecutor does not except a default reexecution callback yet.
+    private static Function<State, Integer> getDtlsClientTestReexecutionCallback() {
+        return (State state) -> {
+            ServerUdpTransportHandler udpTransportHandler =
+                    (ServerUdpTransportHandler) state.getTlsContext().getTransportHandler();
+            try {
+                if (udpTransportHandler.isInitialized() && !udpTransportHandler.isClosed()) {
+                    udpTransportHandler.closeConnection();
+                }
+            } catch (IOException ex) {
+                LOGGER.error(ex);
+                return 1;
+            }
+            return 0;
         };
     }
 

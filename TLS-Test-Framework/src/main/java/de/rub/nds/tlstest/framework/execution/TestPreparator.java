@@ -486,8 +486,6 @@ public class TestPreparator {
         catchHelloWorkflowTrace.addTlsAction(new ReceiveAction(new ClientHelloMessage()));
         State catchHelloState = new State(config, catchHelloWorkflowTrace);
         StateExecutionTask catchHelloTask = new StateExecutionTask(catchHelloState, 2);
-        catchHelloTask.setBeforeTransportInitCallback(
-                testConfig.getTestClientDelegate().getTriggerScript());
         executor.bulkExecuteTasks(catchHelloTask);
 
         return (ClientHelloMessage)
@@ -619,10 +617,6 @@ public class TestPreparator {
                 TransportHandler transportHandler;
                 TestContext context = TestContext.getInstance();
                 TestClientDelegate testClientDelegate = context.getConfig().getTestClientDelegate();
-                if (testClientDelegate instanceof TestCOMultiClientDelegate) {
-                    throw new RuntimeException(
-                            "Callback for build configuration option tests must be set by build manager.");
-                }
                 if (context.getConfig().isUseDTLS()) {
                     transportHandler =
                             new ServerUdpTransportHandler(
@@ -630,7 +624,17 @@ public class TestPreparator {
                                     context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
                                     testClientDelegate.getPort());
                 } else {
-                    ServerSocket socket = testClientDelegate.getServerSocket();
+                    ServerSocket socket;
+                    if (testClientDelegate instanceof TestCOMultiClientDelegate) {
+                        socket =
+                                ((TestCOMultiClientDelegate)
+                                                TestContext.getInstance()
+                                                        .getConfig()
+                                                        .getTestClientDelegate())
+                                        .getServerSocket(state.getConfig());
+                    } else {
+                        socket = testClientDelegate.getServerSocket();
+                    }
                     transportHandler =
                             new ServerTcpTransportHandler(
                                     context.getConfig().getAnvilTestConfig().getConnectionTimeout(),

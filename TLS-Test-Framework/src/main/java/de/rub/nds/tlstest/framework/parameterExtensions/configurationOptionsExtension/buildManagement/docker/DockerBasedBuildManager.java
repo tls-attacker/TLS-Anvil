@@ -16,7 +16,6 @@ import de.rub.nds.anvilcore.model.parameter.ParameterType;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.connection.InboundConnection;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
-import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
@@ -106,7 +105,7 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
                         600);
         TestContext.getInstance().setStateExecutor(executor);
 
-        setSocketCallback(executor);
+        setBuildConfigClientTestCallbacks(executor);
 
         resultsCollector =
                 new ConfigOptionsMetadataResultsCollector(
@@ -129,21 +128,16 @@ public abstract class DockerBasedBuildManager extends ConfigurationOptionsBuildM
      *
      * @param executor The parallel executor to use
      */
-    private void setSocketCallback(ParallelExecutor executor) {
+    private void setBuildConfigClientTestCallbacks(ParallelExecutor executor) {
         if (TestContext.getInstance().getConfig().getTestEndpointMode()
                 == TestEndpointType.CLIENT) {
             executor.setDefaultBeforeTransportPreInitCallback(
-                    (State state) -> {
-                        ServerSocket socket =
-                                ((TestCOMultiClientDelegate)
-                                                TestContext.getInstance()
-                                                        .getConfig()
-                                                        .getTestClientDelegate())
-                                        .getServerSocket(state.getConfig());
-                        return TestPreparator.getSocketManagementCallback(
-                                        TestContext.getInstance().getConfig(), socket)
-                                .apply(state);
-                    });
+                    TestPreparator.getSocketManagementCallback());
+            executor.setDefaultBeforeTransportInitCallback(
+                    TestContext.getInstance()
+                            .getConfig()
+                            .getTestClientDelegate()
+                            .getTriggerScript());
         }
     }
 

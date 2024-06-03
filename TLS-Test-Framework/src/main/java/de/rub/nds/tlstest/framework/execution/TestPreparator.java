@@ -407,12 +407,14 @@ public class TestPreparator {
      */
     private void setGlobalClientTestCallbacks(ParallelExecutor preparedExecutor) {
         // Ensure we always retain our external socket
-        preparedExecutor.setDefaultBeforeTransportPreInitCallback(
-                getSocketManagementCallback(
-                        testConfig, testConfig.getTestClientDelegate().getServerSocket()));
+        preparedExecutor.setDefaultBeforeTransportPreInitCallback(getSocketManagementCallback());
         // Ensure we always trigger the client
         preparedExecutor.setDefaultBeforeTransportInitCallback(
                 testConfig.getTestClientDelegate().getTriggerScript());
+
+        if (testConfig.isUseDTLS()) {
+            // todo: set reexecution callback for dtls in parallel executor once it is updated
+        }
     }
 
     /**
@@ -611,8 +613,7 @@ public class TestPreparator {
      *
      * @return Function to set socket in created state
      */
-    public static Function<State, Integer> getSocketManagementCallback(
-            TlsTestConfig testConfig, ServerSocket serverSocket) {
+    public static Function<State, Integer> getSocketManagementCallback() {
         return (State state) -> {
             try {
                 TransportHandler transportHandler;
@@ -642,6 +643,25 @@ public class TestPreparator {
                 LOGGER.error("Failed to set server socket", ex);
                 return 1;
             }
+        };
+    }
+
+    // This method is supposed to replace the callback set in the WorkflowRunner as we also want to
+    // apply it to the DTLS client scanner.
+    // However, the ParallelExecutor does not except a default reexecution callback yet.
+    private static Function<State, Integer> getDtlsClientTestReexecutionCallback() {
+        return (State state) -> {
+            ServerUdpTransportHandler udpTransportHandler =
+                    (ServerUdpTransportHandler) state.getTlsContext().getTransportHandler();
+            try {
+                if (udpTransportHandler.isInitialized() && !udpTransportHandler.isClosed()) {
+                    udpTransportHandler.closeConnection();
+                }
+            } catch (IOException ex) {
+                LOGGER.error(ex);
+                return 1;
+            }
+            return 0;
         };
     }
 

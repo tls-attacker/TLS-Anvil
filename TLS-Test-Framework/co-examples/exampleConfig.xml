@@ -12,7 +12,7 @@
     <!-- Config for working with docker  -->
     <dockerConfig>
         <!-- The path to the docker library  -->
-        <dockerLibraryPath>/home/marcel/NetBeansProjects/TLS-Docker-Library-Development</dockerLibraryPath>
+        <dockerLibraryPath>path/to/docker-lib</dockerLibraryPath>
         <!-- The host address all built containers are bind to.  -->
         <dockerHostBinding>127.0.0.42</dockerHostBinding>
         <!-- The address the docker container can be reached (May differ from dockerHostBinding when using docker with WSL on windows) -->

@@ -16,7 +16,7 @@ import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterScope;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerBasedBuildManager;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.openSSL.OpenSSLBuildManager;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.openSSL.OpenSSLDockerFactory;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -339,7 +339,7 @@ public class ConfigurationOptionsConfig {
                 throw new RuntimeException(
                         "dockerConfig field is required for using the OpenSSLBuildManager");
             }
-            return new OpenSSLBuildManager(this);
+            return new DockerBasedBuildManager(this, new OpenSSLDockerFactory(this));
         }
         throw new UnsupportedOperationException(
                 String.format(

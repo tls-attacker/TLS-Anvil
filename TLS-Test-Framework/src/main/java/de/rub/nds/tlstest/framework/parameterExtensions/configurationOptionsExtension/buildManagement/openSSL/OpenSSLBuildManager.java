@@ -28,7 +28,6 @@ public class OpenSSLBuildManager extends DockerBasedBuildManager {
         super(configurationOptionsConfig, new OpenSSLDockerFactory(configurationOptionsConfig));
     }
 
-    @Override
     protected String translateOptionValue(
             ConfigurationOptionDerivationParameter optionParameter,
             Map<ConfigOptionParameterType, ConfigOptionValueTranslation> optionsToTranslationMap) {

@@ -15,7 +15,7 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterScope;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigOptionParameterType;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.ConfigurationOptionsBuildManager;
+import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.DockerBasedBuildManager;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.openSSL.OpenSSLBuildManager;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -47,7 +47,7 @@ public class ConfigurationOptionsConfig {
 
     private String tlsLibraryName;
     private String tlsVersionName;
-    private ConfigurationOptionsBuildManager buildManager;
+    private DockerBasedBuildManager buildManager;
     private final Map<ConfigOptionParameterType, ConfigOptionValueTranslation> optionsToTranslation;
 
     private int configOptionsIpmStrength; // default: strength of main IPM
@@ -97,7 +97,7 @@ public class ConfigurationOptionsConfig {
         return tlsVersionName;
     }
 
-    public ConfigurationOptionsBuildManager getBuildManager() { // temporary a String
+    public DockerBasedBuildManager getBuildManager() {
         return buildManager;
     }
 
@@ -333,7 +333,7 @@ public class ConfigurationOptionsConfig {
         }
     }
 
-    private ConfigurationOptionsBuildManager getBuildManagerFromString(String str) {
+    private DockerBasedBuildManager getBuildManagerFromString(String str) {
         if ("OpenSSLBuildManager".equals(str)) {
             if (!dockerConfigPresent) {
                 throw new RuntimeException(

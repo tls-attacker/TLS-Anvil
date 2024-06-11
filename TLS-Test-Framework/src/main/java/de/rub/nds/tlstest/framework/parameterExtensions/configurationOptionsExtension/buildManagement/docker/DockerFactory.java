@@ -11,13 +11,15 @@
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
 
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.transport.DockerHttpClient;
 import de.rub.nds.tls.subject.ConnectionRole;
 import de.rub.nds.tls.subject.TlsImplementationType;
+import de.rub.nds.tls.subject.docker.DockerTlsInstance;
+import de.rub.nds.tls.subject.docker.DockerTlsManagerFactory.TlsInstanceBuilder;
 import de.rub.nds.tls.subject.docker.build.DockerBuilder;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import java.util.*;
@@ -130,7 +132,9 @@ public abstract class DockerFactory {
      * @return the DockerClientTestContainer of the already built docker container
      */
     public abstract DockerClientTestContainer createDockerClient(
-            String dockerTag,
+            TlsImplementationType tlsImplementationType,
+            String version,
+            String buildFlags,
             String dockerManagerHost,
             Integer dockerManagerPort,
             String tlsServerHost,
@@ -148,7 +152,9 @@ public abstract class DockerFactory {
      * @return the DockerServerTestContainer of the already built docker container
      */
     public abstract DockerServerTestContainer createDockerServer(
-            String dockerTag,
+            TlsImplementationType tlsImplementationType,
+            String version,
+            String buildFlags,
             String dockerManagerHost,
             Integer dockerManagerPort,
             Integer dockerTlsPort);
@@ -211,10 +217,8 @@ public abstract class DockerFactory {
      * @return the container id
      */
     public synchronized String createDockerContainer(
-            String dockerImageTag,
-            String target,
+            TlsInstanceBuilder tlsInstanceBuilder,
             List<PortBinding> portBindings,
-            List<Bind> volumeBindings,
             String containerName) {
 
         Optional<Container> oldContainer = containerByName(containerName);
@@ -223,40 +227,34 @@ public abstract class DockerFactory {
             LOGGER.debug("Old Container Removed");
         }
 
-        HostConfig hostConfig =
-                HostConfig.newHostConfig()
-                        .withPortBindings(portBindings)
-                        .withDns(new ArrayList<>())
-                        .withDnsOptions(new ArrayList<>())
-                        .withDnsSearch(new ArrayList<>())
-                        .withBlkioWeightDevice(new ArrayList<>())
-                        .withDevices(new ArrayList<>())
-                        .withExtraHosts("host.docker.internal:host-gateway")
-                        .withBinds(volumeBindings);
-
         List<ExposedPort> exposedPorts = new LinkedList<>();
         for (PortBinding portBinding : portBindings) {
             exposedPorts.add(portBinding.getExposedPort());
         }
-
-        CreateContainerResponse createContainerCmd =
-                dockerClient
-                        .createContainerCmd(dockerImageTag)
-                        .withName(containerName)
-                        // Some of these options lead to (very undetectable and annoying) errors if
-                        // they aren't set.
-                        .withAttachStdout(true)
-                        .withAttachStdin(true)
-                        .withAttachStderr(true)
-                        .withTty(true)
-                        .withStdinOpen(true)
-                        .withStdInOnce(true)
-                        .withHostConfig(hostConfig)
-                        .withExposedPorts(exposedPorts)
-                        .withCmd("-connect", target)
-                        .exec();
-
-        return createContainerCmd.getId();
+        try {
+            DockerTlsInstance dockerTlsInstance =
+                    tlsInstanceBuilder
+                            .hostConfigHook(
+                                    config -> {
+                                        return ((HostConfig) config)
+                                                .withPortBindings(portBindings)
+                                                .withDns(new ArrayList<>())
+                                                .withDnsOptions(new ArrayList<>())
+                                                .withDnsSearch(new ArrayList<>())
+                                                .withBlkioWeightDevice(new ArrayList<>())
+                                                .withDevices(new ArrayList<>())
+                                                .withExtraHosts(
+                                                        "host.docker.internal:host-gateway");
+                                    })
+                            .containerName(containerName)
+                            .containerExposedPorts(exposedPorts)
+                            .build();
+            dockerTlsInstance.ensureContainerExists();
+            return dockerTlsInstance.getId();
+        } catch (DockerException | InterruptedException e) {
+            LOGGER.error(e);
+            return null;
+        }
     }
 
     public boolean buildFailedForRepoTag(String repoTag) {

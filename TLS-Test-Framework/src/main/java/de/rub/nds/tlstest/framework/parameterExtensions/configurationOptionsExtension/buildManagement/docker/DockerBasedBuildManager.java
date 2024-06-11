@@ -258,7 +258,9 @@ public class DockerBasedBuildManager {
                         == TestEndpointType.CLIENT) {
                     DockerClientTestContainer container =
                             dockerFactory.createDockerClient(
-                                    dockerTag,
+                                    dockerTlsImplementation,
+                                    libraryVersion,
+                                    cliOptions,
                                     configOptionsConfig.getDockerHostName(),
                                     occupyNextPort(),
                                     configOptionsConfig.getDockerClientDestinationHostName(),
@@ -272,7 +274,9 @@ public class DockerBasedBuildManager {
                         == TestEndpointType.SERVER) {
                     providedContainer =
                             dockerFactory.createDockerServer(
-                                    dockerTag,
+                                    dockerTlsImplementation,
+                                    libraryVersion,
+                                    cliOptions,
                                     configOptionsConfig.getDockerHostName(),
                                     occupyNextPort(),
                                     occupyNextPort());

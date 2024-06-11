@@ -13,8 +13,12 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 import com.github.dockerjava.api.model.*;
 import de.rub.nds.tls.subject.ConnectionRole;
 import de.rub.nds.tls.subject.TlsImplementationType;
+import de.rub.nds.tls.subject.constants.TransportType;
+import de.rub.nds.tls.subject.docker.DockerTlsManagerFactory.TlsClientInstanceBuilder;
+import de.rub.nds.tls.subject.docker.DockerTlsManagerFactory.TlsServerInstanceBuilder;
 import de.rub.nds.tls.subject.docker.build.DockerBuilder;
 import de.rub.nds.tls.subject.exceptions.CertVolumeNotFoundException;
+import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker.*;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
 import java.util.*;
@@ -67,10 +71,17 @@ public class OpenSSLDockerFactory extends DockerFactory {
     }
 
     public DockerServerTestContainer createDockerServer(
-            String dockerTag, String dockerHost, Integer dockerManagerPort, Integer dockerTlsPort) {
+            TlsImplementationType tlsImplementationType,
+            String version,
+            String buildFlags,
+            String dockerHost,
+            Integer dockerManagerPort,
+            Integer dockerTlsPort) {
         List<PortBinding> portBindings = new LinkedList<>();
-        List<Bind> volumeBindings = new LinkedList<>();
 
+        String dockerTag =
+                DockerBuilder.getDefaultTag(
+                        tlsImplementationType, version, ConnectionRole.SERVER, buildFlags);
         ExposedPort exposedTlsServerPort = ExposedPort.tcp(CONTAINER_PORT_TLS_SERVER);
         portBindings.add(
                 new PortBinding(
@@ -84,27 +95,21 @@ public class OpenSSLDockerFactory extends DockerFactory {
                         Ports.Binding.bindIpAndPort(
                                 configOptionsConfig.getDockerHostBinding(), dockerManagerPort),
                         exposedManagerPort));
-
-        volumeBindings.add(
-                new Bind(
-                        DockerBuilder.CERTIFICATE_VOLUME_NAME,
-                        targetVolumeCert,
-                        AccessMode.ro,
-                        SELContext.DEFAULT,
-                        true));
-        volumeBindings.add(new Bind(volumeNameCoverage, targetVolumeCoverage));
+        TransportType serverTransportType;
+        if (TestContext.getInstance().getConfig().isUseDTLS()) {
+            serverTransportType = TransportType.UDP;
+        } else {
+            serverTransportType = TransportType.TCP;
+        }
+        TlsServerInstanceBuilder tlsServerInstanceBuilder =
+                new TlsServerInstanceBuilder(tlsImplementationType, version, serverTransportType)
+                        .hostname(dockerHost)
+                        .port(dockerTlsPort)
+                        .additionalBuildFlags(dockerHost);
 
         String containerName = String.format("%s_server_%s", CONTAINER_NAME_PREFIX, dockerTag);
         String dockerContainerId =
-                createDockerContainer(
-                        DockerBuilder.getDefaultRepo(
-                                        TlsImplementationType.OPENSSL, ConnectionRole.SERVER)
-                                + ":"
-                                + dockerTag,
-                        "NOT_IMPLEMENTED",
-                        portBindings,
-                        volumeBindings,
-                        containerName);
+                createDockerContainer(tlsServerInstanceBuilder, portBindings, containerName);
 
         return new DockerServerTestContainer(
                 dockerClient,
@@ -116,15 +121,18 @@ public class OpenSSLDockerFactory extends DockerFactory {
     }
 
     public DockerClientTestContainer createDockerClient(
-            String dockerTag,
+            TlsImplementationType tlsImplementationType,
+            String version,
+            String buildFlags,
             String dockerManagerHost,
             Integer dockerManagerPort,
             String tlsServerHost,
             Integer tlsServerPort) {
 
-        String connectionDest = String.format("%s:%d", tlsServerHost, tlsServerPort);
+        String dockerTag =
+                DockerBuilder.getDefaultTag(
+                        tlsImplementationType, version, ConnectionRole.CLIENT, buildFlags);
         List<PortBinding> portBindings = new LinkedList<>();
-        List<Bind> volumeBindings = new LinkedList<>();
 
         ExposedPort exposedManagerPort = ExposedPort.tcp(CONTAINER_MANAGER_PORT);
         portBindings.add(
@@ -132,19 +140,22 @@ public class OpenSSLDockerFactory extends DockerFactory {
                         Ports.Binding.bindIpAndPort(
                                 configOptionsConfig.getDockerHostBinding(), dockerManagerPort),
                         exposedManagerPort));
-        volumeBindings.add(new Bind(volumeNameCoverage, targetVolumeCoverage));
 
         String containerName = String.format("%s_client_%s", CONTAINER_NAME_PREFIX, dockerTag);
+        TransportType clientTransportType;
+        if (TestContext.getInstance().getConfig().isUseDTLS()) {
+            clientTransportType = TransportType.UDP;
+        } else {
+            clientTransportType = TransportType.TCP;
+        }
+        TlsClientInstanceBuilder clientInstanceBuilder =
+                new TlsClientInstanceBuilder(tlsImplementationType, version, clientTransportType)
+                        .hostname(tlsServerHost)
+                        .port(tlsServerPort)
+                        .additionalBuildFlags(buildFlags);
+
         String dockerContainerId =
-                createDockerContainer(
-                        DockerBuilder.getDefaultRepo(
-                                        TlsImplementationType.OPENSSL, ConnectionRole.CLIENT)
-                                + ":"
-                                + dockerTag,
-                        connectionDest,
-                        portBindings,
-                        volumeBindings,
-                        containerName);
+                createDockerContainer(clientInstanceBuilder, portBindings, containerName);
 
         return new DockerClientTestContainer(
                 dockerClient,

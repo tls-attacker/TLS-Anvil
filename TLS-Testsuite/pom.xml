@@ -21,17 +21,16 @@
             <artifactId>tls-test-framework</artifactId>
         </dependency>
         <dependency>
+            <groupId>de.rub.nds.tls.dockerlib</groupId>
+            <artifactId>tls-docker-library</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.rub.nds.tls.dockerlib</groupId>
-            <artifactId>tls-docker-library</artifactId>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>

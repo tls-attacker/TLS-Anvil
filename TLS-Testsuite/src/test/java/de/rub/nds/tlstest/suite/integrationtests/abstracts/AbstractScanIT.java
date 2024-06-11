@@ -16,6 +16,7 @@ import de.rub.nds.tls.subject.constants.TransportType;
 import de.rub.nds.tls.subject.docker.DockerClientManager;
 import de.rub.nds.tls.subject.docker.DockerTlsInstance;
 import de.rub.nds.tls.subject.docker.DockerTlsManagerFactory;
+import de.rub.nds.tls.subject.docker.build.DockerBuilder;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.config.TlsTestConfig;
@@ -92,7 +93,11 @@ public abstract class AbstractScanIT {
 
     private Image setupDockerImage(List<Image> images) {
         return DockerTlsManagerFactory.getMatchingImage(
-                images, implementation, version, dockerConnectionRole);
+                images,
+                implementation,
+                version,
+                DockerBuilder.NO_ADDITIONAL_BUILDFLAGS,
+                dockerConnectionRole);
     }
 
     protected abstract DockerTlsInstance startDockerContainer(

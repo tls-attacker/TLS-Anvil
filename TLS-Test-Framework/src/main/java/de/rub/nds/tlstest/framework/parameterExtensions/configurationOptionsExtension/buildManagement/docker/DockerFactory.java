@@ -16,15 +16,12 @@ import com.github.dockerjava.api.model.*;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.transport.DockerHttpClient;
-import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.resultsCollector.ConfigOptionsMetadataResultsCollector;
+import de.rub.nds.tls.subject.ConnectionRole;
+import de.rub.nds.tls.subject.TlsImplementationType;
+import de.rub.nds.tls.subject.docker.build.DockerBuilder;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.ConfigurationOptionsConfig;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Predicate;
-import javax.xml.bind.DatatypeConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,6 +40,8 @@ public abstract class DockerFactory {
     protected Set<String> existingDockerImageNameWithTags;
 
     protected ConfigurationOptionsConfig configOptionsConfig;
+
+    protected DockerBuilder dockerBuilder = new DockerBuilder();
 
     /**
      * Constructor.
@@ -70,13 +69,15 @@ public abstract class DockerFactory {
      * @param resultsCollector - The result collector to log build and container information
      */
     public boolean buildTlsLibraryDockerImage(
-            List<String> cliOptions,
-            String dockerTag,
-            String libraryVersionName,
-            ConfigOptionsMetadataResultsCollector resultsCollector) {
+            TlsImplementationType tlsLibrary,
+            String version,
+            ConnectionRole connectionEndPointToBuild,
+            String buildFlags) {
         boolean success =
-                buildDockerImage(cliOptions, dockerTag, libraryVersionName, resultsCollector);
-        String dockerNameWithTag = this.getBuildImageNameAndTag(dockerTag);
+                buildDockerImage(tlsLibrary, version, connectionEndPointToBuild, buildFlags);
+        String dockerNameWithTag =
+                DockerBuilder.getDefaultRepoAndTag(
+                        tlsLibrary, version, connectionEndPointToBuild, buildFlags);
         if (success) {
             existingDockerImageNameWithTags.add(dockerNameWithTag);
         } else {
@@ -86,23 +87,35 @@ public abstract class DockerFactory {
     }
 
     /**
-     * Given a set of cliOptions this function builds a build image that utilized the cliOptions for
-     * building. The actual procedure is up to the subclasses.
+     * Builds a docker image using the TLS-Docker-Library
      *
-     * @param cliOptions - The list of cliOptions to compile the tls library
-     * @param dockerTag - The docker tag the image should have (should be derived from the
-     *     cliOptions and the version)
-     * @param libraryVersionName - The version of the tls library (e.g. the respective git branch
-     *     tag)
-     * @param resultsCollector - The result collector to log build and container information
-     * @return true iff the image was successfully built. If false is returned no image was created
-     *     (not even an invalid one)
+     * @param tlsLibrary The TLS library to build. Must be listed in the docker library's json
+     *     files.
+     * @param version The version to build. Must be listed in the docker library's json files.
+     * @param connectionEndPointToBuild The connection end point of the image.
+     * @param buildFlags The build flags to apply during build. Must be supported by the respective
+     *     dockerfile in the docker library.
+     * @return true if successfull, false otherwise
      */
-    protected abstract boolean buildDockerImage(
-            List<String> cliOptions,
-            String dockerTag,
-            String libraryVersionName,
-            ConfigOptionsMetadataResultsCollector resultsCollector);
+    protected boolean buildDockerImage(
+            TlsImplementationType tlsLibrary,
+            String version,
+            ConnectionRole connectionEndPointToBuild,
+            String buildFlags) {
+        try {
+            dockerBuilder.buildLibraryImage(
+                    tlsLibrary, version, connectionEndPointToBuild, buildFlags);
+        } catch (Exception ex) {
+            LOGGER.error(ex);
+            return false;
+        }
+        if (DockerBuilder.getBuiltImage(tlsLibrary, version, connectionEndPointToBuild, buildFlags)
+                != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /**
      * Create a DockerClientTestContainer using the respective configurations. An image for the
@@ -186,58 +199,6 @@ public abstract class DockerFactory {
                 throw new RuntimeException("Failed to get current docker images.");
             }
         }
-
-        // Find dockerfile paths
-        Path dockerLibraryPath = configOptionsConfig.getDockerLibraryPath();
-        if (!Files.exists(dockerLibraryPath)) {
-            throw new RuntimeException(
-                    String.format(
-                            "Docker library path '%s' does not exist. Have you configured the right Docker Library path?",
-                            dockerLibraryPath.toAbsolutePath()));
-        }
-    }
-
-    /*--------------------
-       Utility Functions
-    ---------------------*/
-    public String getBuildImageNameAndTag(String dockerTag) {
-        return String.format("%s:%s", BUILD_REPRO_NAME, dockerTag);
-    }
-
-    /**
-     * Creates a docker tag. This tag is different, if the library name, the library version, or the
-     * cli option string is different. The docker tags looks like: _[LIB NAME]_[LIB VERSION]_[CLI
-     * OPTION HASH]
-     *
-     * <p>the CLI_OPTION HASH is an hex string of the hash value over the cli option input string
-     * (required, because the docker tag has a maximal length). Also, both LIB NAME and LIB VERSION
-     * are cut after the 20th character and illegal docker tag characters are eliminated.
-     *
-     * @param cliOptions - The command line string that is passed the buildscript
-     * @param libraryNameAndVersion - The library's version (e.g. '1.1.1e')
-     * @return the resulting docker tag
-     */
-    public String computeDockerTag(List<String> cliOptions, String libraryNameAndVersion) {
-        String cliString = String.join("", cliOptions);
-        String libraryVersionPart =
-                libraryNameAndVersion.substring(0, Math.min(20, libraryNameAndVersion.length()));
-        String cliStringHashString;
-        try {
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            messageDigest.update(cliString.getBytes());
-            cliStringHashString =
-                    DatatypeConverter.printHexBinary(messageDigest.digest()).toLowerCase();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            throw new UnsupportedOperationException("Cannot create a docker tag.");
-        }
-
-        cliStringHashString =
-                cliStringHashString.substring(0, Math.min(16, cliStringHashString.length()));
-
-        String res = String.format("_%s_%s", libraryVersionPart, cliStringHashString);
-        res = res.replaceAll("[^a-zA-Z0-9_.\\-]", "");
-        return res;
     }
 
     /**
@@ -251,7 +212,7 @@ public abstract class DockerFactory {
      */
     public synchronized String createDockerContainer(
             String dockerImageTag,
-            List<String> entrypoint,
+            String target,
             List<PortBinding> portBindings,
             List<Bind> volumeBindings,
             String containerName) {
@@ -292,19 +253,18 @@ public abstract class DockerFactory {
                         .withStdInOnce(true)
                         .withHostConfig(hostConfig)
                         .withExposedPorts(exposedPorts)
-                        .withEntrypoint(entrypoint)
+                        .withCmd("-connect", target)
                         .exec();
 
         return createContainerCmd.getId();
     }
 
-    public boolean buildFailedForTag(String dockerTag) {
-        String dockerNameWithTag = this.getBuildImageNameAndTag(dockerTag);
-        return this.failedBuildDockerTags.contains(dockerNameWithTag);
+    public boolean buildFailedForRepoTag(String repoTag) {
+        return this.failedBuildDockerTags.contains(repoTag);
     }
 
     /**
-     * Gets the dockerClient this factory has uses (created automatically in init).
+     * Gets the dockerClient this factory uses (created automatically in init).
      *
      * @return the DockerClient
      */

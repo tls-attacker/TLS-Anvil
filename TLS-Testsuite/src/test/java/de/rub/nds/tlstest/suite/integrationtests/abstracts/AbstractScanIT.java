@@ -92,12 +92,13 @@ public abstract class AbstractScanIT {
     }
 
     private Image setupDockerImage(List<Image> images) {
-        return DockerTlsManagerFactory.getMatchingImage(
-                images,
-                implementation,
-                version,
-                DockerBuilder.NO_ADDITIONAL_BUILDFLAGS,
-                dockerConnectionRole);
+        Map<String, String> labels =
+                DockerBuilder.getImageLabels(
+                        implementation,
+                        version,
+                        dockerConnectionRole,
+                        DockerBuilder.NO_ADDITIONAL_BUILDFLAGS);
+        return DockerBuilder.getImageWithLabels(labels, true);
     }
 
     protected abstract DockerTlsInstance startDockerContainer(

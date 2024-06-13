@@ -63,6 +63,10 @@ public class ConfigurationOptionsExtension {
                             configPath));
         }
         LOGGER.info(
+                "Configured library: {} with version {}",
+                config.getTlsLibraryName(),
+                config.getTlsVersionName());
+        LOGGER.info(
                 "Testing with configuration options: {}",
                 config.getEnabledConfigOptionDerivations());
 

@@ -10,9 +10,13 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.buildManagement.docker;
 
+import com.beust.jcommander.Strings;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.anvilcore.model.parameter.ParameterType;
+import de.rub.nds.tls.subject.ConnectionRole;
+import de.rub.nds.tls.subject.TlsImplementationType;
+import de.rub.nds.tls.subject.docker.build.DockerBuilder;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.connection.InboundConnection;
 import de.rub.nds.tlsattacker.core.connection.OutboundConnection;
@@ -42,8 +46,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * An abstract BuildManager that works with docker to create and manage builds. It uses a specific
- * DockerFactory for build creation. Each tls library build container runs an http server for
+ * A build manager that works with docker to create and manage builds. It uses a specific
+ * DockerFactory for build creation. Each TLS library build container runs an http server for
  * management that can be accessed using a separate port that is assigned to each container.
  *
  * <p>Unused containers with the lowest usage are stopped and only reactivated if used again.
@@ -57,6 +61,9 @@ public class DockerBasedBuildManager {
     protected Map<String, DockerTestContainer> dockerTagToContainerInfo;
     protected Map<String, Integer> dockerTagToAccessCount;
     protected Set<Integer> usedPorts;
+    protected TlsImplementationType dockerTlsImplementation;
+    protected ConnectionRole libraryConnectionRole;
+    protected String libraryVersion;
     private String maximalFeatureContainerDockerTag;
 
     /**
@@ -90,6 +97,15 @@ public class DockerBasedBuildManager {
         dockerTagToContainerInfo = new HashMap<>();
         dockerTagToAccessCount = new HashMap<>();
         usedPorts = new HashSet<>();
+        this.dockerTlsImplementation =
+                TlsImplementationType.valueOf(configurationOptionsConfig.getTlsLibraryName());
+        this.libraryVersion = configurationOptionsConfig.getTlsVersionName();
+        if (TestContext.getInstance().getConfig().getTestEndpointMode()
+                == TestEndpointType.CLIENT) {
+            this.libraryConnectionRole = ConnectionRole.CLIENT;
+        } else {
+            this.libraryConnectionRole = ConnectionRole.SERVER;
+        }
     }
 
     public synchronized void init() {
@@ -196,12 +212,14 @@ public class DockerBasedBuildManager {
      *     container and the TestSiteReport.
      */
     protected String provideDockerContainer(Set<ConfigurationOptionDerivationParameter> optionSet) {
-        List<String> cliOptions = createConfigOptionCliList(optionSet);
+        String cliOptions = createConfigOptionCliString(optionSet);
         String dockerTag =
-                dockerFactory.computeDockerTag(cliOptions, configOptionsConfig.getTlsVersionName());
-        String dockerNameWithTag = dockerFactory.getBuildImageNameAndTag(dockerTag);
+                DockerBuilder.getDefaultTag(
+                        dockerTlsImplementation, libraryVersion, libraryConnectionRole, cliOptions);
+        String dockerNameWithTag =
+                DockerBuilder.getDefaultRepoAndTag(
+                        dockerTlsImplementation, libraryVersion, libraryConnectionRole, cliOptions);
         DockerTestContainer providedContainer;
-
         // Case: A docker container already exists
         if (dockerTagToContainerInfo.containsKey(dockerTag)) {
             providedContainer = dockerTagToContainerInfo.get(dockerTag);
@@ -209,7 +227,7 @@ public class DockerBasedBuildManager {
         }
         // Case: A new container has to be created
         else {
-            if (dockerFactory.buildFailedForTag(dockerTag)) {
+            if (dockerFactory.buildFailedForRepoTag(dockerNameWithTag)) {
                 throw new RuntimeException(
                         String.format(
                                 "Cannot create docker container for tag '%s'. Building has already failed.",
@@ -222,10 +240,10 @@ public class DockerBasedBuildManager {
                 long timer = System.currentTimeMillis();
                 boolean success =
                         dockerFactory.buildTlsLibraryDockerImage(
-                                cliOptions,
-                                dockerTag,
-                                configOptionsConfig.getTlsVersionName(),
-                                resultsCollector);
+                                dockerTlsImplementation,
+                                libraryVersion,
+                                libraryConnectionRole,
+                                cliOptions);
                 resultsCollector.logNewBuildCreated(
                         optionSet, dockerTag, System.currentTimeMillis() - timer, success);
                 if (!success) {
@@ -240,7 +258,9 @@ public class DockerBasedBuildManager {
                         == TestEndpointType.CLIENT) {
                     DockerClientTestContainer container =
                             dockerFactory.createDockerClient(
-                                    dockerTag,
+                                    dockerTlsImplementation,
+                                    libraryVersion,
+                                    cliOptions,
                                     configOptionsConfig.getDockerHostName(),
                                     occupyNextPort(),
                                     configOptionsConfig.getDockerClientDestinationHostName(),
@@ -254,7 +274,9 @@ public class DockerBasedBuildManager {
                         == TestEndpointType.SERVER) {
                     providedContainer =
                             dockerFactory.createDockerServer(
-                                    dockerTag,
+                                    dockerTlsImplementation,
+                                    libraryVersion,
+                                    cliOptions,
                                     configOptionsConfig.getDockerHostName(),
                                     occupyNextPort(),
                                     occupyNextPort());
@@ -617,8 +639,9 @@ public class DockerBasedBuildManager {
      */
     protected String getDockerTagFromOptionSet(
             Set<ConfigurationOptionDerivationParameter> optionSet) {
-        List<String> cliOptions = createConfigOptionCliList(optionSet);
-        return dockerFactory.computeDockerTag(cliOptions, configOptionsConfig.getTlsVersionName());
+        String cliOptions = createConfigOptionCliString(optionSet);
+        return DockerBuilder.getDefaultTag(
+                dockerTlsImplementation, libraryVersion, libraryConnectionRole, cliOptions);
     }
 
     /**
@@ -632,7 +655,7 @@ public class DockerBasedBuildManager {
      * @param optionSet - the set of configuration options.
      * @return the sorted list of command line options
      */
-    protected List<String> createConfigOptionCliList(
+    protected String createConfigOptionCliString(
             Set<ConfigurationOptionDerivationParameter> optionSet) {
         Map<ConfigOptionParameterType, ConfigOptionValueTranslation> optionsToTranslationMap =
                 configOptionsConfig.getOptionsToTranslationMap();
@@ -648,7 +671,7 @@ public class DockerBasedBuildManager {
         // of the Set's iteration order.
         optionsCliList.sort(Comparator.comparing(String::toString));
 
-        return optionsCliList;
+        return Strings.join(" ", optionsCliList);
     }
 
     /**

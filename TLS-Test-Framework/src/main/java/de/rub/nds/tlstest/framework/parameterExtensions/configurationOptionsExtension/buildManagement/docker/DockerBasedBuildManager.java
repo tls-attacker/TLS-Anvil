@@ -46,8 +46,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * An abstract BuildManager that works with docker to create and manage builds. It uses a specific
- * DockerFactory for build creation. Each tls library build container runs an http server for
+ * A build manager that works with docker to create and manage builds. It uses a specific
+ * DockerFactory for build creation. Each TLS library build container runs an http server for
  * management that can be accessed using a separate port that is assigned to each container.
  *
  * <p>Unused containers with the lowest usage are stopped and only reactivated if used again.

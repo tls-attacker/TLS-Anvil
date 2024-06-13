@@ -22,11 +22,10 @@ public class ConfigurationOptionsConfigTest {
     public static ConfigurationOptionsConfig createTestConfig() {
         String testFileContent =
                 "<config>\n"
-                        + "    <tlsLibraryName>OpenSSL</tlsLibraryName>\n"
-                        + "    <tlsVersionName>OpenSSL_1_1_1</tlsVersionName>\n"
+                        + "    <tlsLibraryName>OPENSSL</tlsLibraryName>\n"
+                        + "    <tlsVersionName>1.1.1.i</tlsVersionName>\n"
                         + "    <buildManager>OpenSSLBuildManager</buildManager>\n"
                         + "    <dockerConfig>\n"
-                        + "        <dockerLibraryPath>/Path/to/dockerLib/</dockerLibraryPath>\n"
                         + "        <dockerHostBinding>127.0.0.41</dockerHostBinding>\n"
                         + "        <dockerHostName>127.0.0.42</dockerHostName>\n"
                         + "        <portRange>4433-5433</portRange>\n"
@@ -80,7 +79,6 @@ public class ConfigurationOptionsConfigTest {
 
         // Check docker stuff
         assertTrue(config.isDockerConfigPresent());
-        assertTrue(config.getDockerLibraryPath().endsWith("Path/to/dockerLib/"));
         assertEquals("127.0.0.41", config.getDockerHostBinding());
         assertEquals("127.0.0.42", config.getDockerHostName());
         assertEquals(PortRange.fromString("4433-5433"), config.getDockerPortRange());

@@ -22,7 +22,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.XMLConstants;
@@ -48,6 +47,7 @@ public class ConfigurationOptionsConfig {
     private String tlsLibraryName;
     private String tlsVersionName;
     private DockerBasedBuildManager buildManager;
+
     private final Map<ConfigOptionParameterType, ConfigOptionValueTranslation> optionsToTranslation;
 
     private int configOptionsIpmStrength; // default: strength of main IPM
@@ -64,7 +64,6 @@ public class ConfigurationOptionsConfig {
     // Docker Config (not required, but necessary for build managers that work with docker)
     private boolean dockerConfigPresent;
 
-    private Path dockerLibraryPath;
     /** The address the docker host is bound to (e.g. 127.0.0.1, or 0.0.0.0) */
     private String dockerHostBinding;
     /**
@@ -82,11 +81,13 @@ public class ConfigurationOptionsConfig {
     public ConfigurationOptionsConfig(Path configFilePath) throws FileNotFoundException {
         optionsToTranslation = new HashMap<>();
         parseConfigFile(new FileInputStream(configFilePath.toFile()));
+        buildManager = new DockerBasedBuildManager(this, new DockerFactory(this));
     }
 
     public ConfigurationOptionsConfig(InputStream inputStream) {
         optionsToTranslation = new HashMap<>();
         parseConfigFile(inputStream);
+        buildManager = new DockerBasedBuildManager(this, new DockerFactory(this));
     }
 
     public String getTlsLibraryName() {
@@ -97,20 +98,12 @@ public class ConfigurationOptionsConfig {
         return tlsVersionName;
     }
 
-    public DockerBasedBuildManager getBuildManager() {
-        return buildManager;
-    }
-
     public int getConfigOptionsIpmStrength() {
         return configOptionsIpmStrength;
     }
 
     public boolean isDockerConfigPresent() {
         return dockerConfigPresent;
-    }
-
-    public Path getDockerLibraryPath() {
-        return dockerLibraryPath;
     }
 
     public String getDockerHostBinding() {
@@ -171,8 +164,6 @@ public class ConfigurationOptionsConfig {
             parseAndConfigureMaxSimultaneousBuilds(rootElement);
             parseAndConfigureMaxRunningContainerShutdowns(rootElement);
             parseAndConfigureOptionsToTest(rootElement);
-            parseAndConfigureBuildManager(rootElement);
-
         } catch (IOException | SAXException | ParserConfigurationException e) {
             e.printStackTrace();
             throw new RuntimeException("Parsing failure.");
@@ -191,15 +182,6 @@ public class ConfigurationOptionsConfig {
                 Objects.requireNonNull(
                                 XmlParseUtils.findElement(rootElement, "tlsVersionName", true))
                         .getTextContent();
-    }
-
-    private void parseAndConfigureBuildManager(Element rootElement) {
-        buildManager =
-                getBuildManagerFromString(
-                        Objects.requireNonNull(
-                                        XmlParseUtils.findElement(
-                                                rootElement, "buildManager", true))
-                                .getTextContent());
     }
 
     private void parseAndConfigureConfigOptionsIpmStrength(Element rootElement) {
@@ -253,12 +235,6 @@ public class ConfigurationOptionsConfig {
         NodeList dockerConfigList = rootElement.getElementsByTagName("dockerConfig");
         if (dockerConfigList.getLength() > 0) {
             Element dockerConfigElement = (Element) dockerConfigList.item(0);
-            dockerLibraryPath =
-                    Paths.get(
-                            Objects.requireNonNull(
-                                            XmlParseUtils.findElement(
-                                                    dockerConfigElement, "dockerLibraryPath", true))
-                                    .getTextContent());
             dockerHostName =
                     Objects.requireNonNull(
                                     XmlParseUtils.findElement(
@@ -375,5 +351,9 @@ public class ConfigurationOptionsConfig {
             default:
                 throw new IllegalArgumentException("Unsupported translation type '" + type + "'");
         }
+    }
+
+    public DockerBasedBuildManager getBuildManager() {
+        return buildManager;
     }
 }

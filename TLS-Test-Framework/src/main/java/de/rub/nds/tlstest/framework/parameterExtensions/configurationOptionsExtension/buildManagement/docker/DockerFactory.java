@@ -33,9 +33,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Abstract factory to create DockerServerTestContainer%s and DockerClientTestContainer%s. Which
- * Dockerfiles of the TLS docker library are used and how and with which arguments the images and
- * containers are created is up to the sub class implementations.
+ * Factory class to provide a @DockerClientTestContainer or @DockerServerTestContainer by using
+ * pre-built images or building the image using the TLS-Docker-Library.
  */
 public class DockerFactory {
     private static final int CONTAINER_PORT_TLS_SERVER = 4433;

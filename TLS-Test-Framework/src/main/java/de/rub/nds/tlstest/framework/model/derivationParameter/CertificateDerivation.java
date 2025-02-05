@@ -11,28 +11,28 @@ import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
+import de.rub.nds.protocol.constants.FfdhGroupParameters;
+import de.rub.nds.protocol.constants.SignatureAlgorithm;
 import de.rub.nds.scanner.core.probe.result.IntegerResult;
 import de.rub.nds.scanner.core.probe.result.TestResults;
-import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
-import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
-import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.utils.X509CertificateConfigContainer;
+import de.rub.nds.x509attacker.config.X509CertificateConfig;
+import de.rub.nds.x509attacker.constants.X509PublicKeyType;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /** Selects CertificateKeyPairs for the IPM */
-public class CertificateDerivation extends TlsDerivationParameter<CertificateKeyPair> {
+public class CertificateDerivation extends TlsDerivationParameter<X509CertificateConfig> {
 
     private final int MIN_RSA_SIG_KEY_LEN;
     private final int MIN_RSA_KEY_LEN;
@@ -40,7 +40,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
     private final boolean ALLOW_DSS = true;
 
     public CertificateDerivation() {
-        super(TlsParameterType.CERTIFICATE, CertificateKeyPair.class);
+        super(TlsParameterType.CERTIFICATE, X509CertificateConfig.class);
         if (TestContext.getInstance()
                         .getFeatureExtractionResult()
                         .getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_RSA_SIG)
@@ -90,70 +90,103 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
         }
     }
 
-    public CertificateDerivation(CertificateKeyPair certKeyPair) {
+    public CertificateDerivation(X509CertificateConfig certChainConfig) {
         this();
-        setSelectedValue(certKeyPair);
+        setSelectedValue(certChainConfig);
     }
 
-    public List<DerivationParameter<Config, CertificateKeyPair>> getApplicableCertificates(
+    public List<DerivationParameter<Config, X509CertificateConfig>> getApplicableCertificateConfigs(
             TestContext context, DerivationScope scope, boolean allowUnsupportedPkGroups) {
-        List<DerivationParameter<Config, CertificateKeyPair>> parameterValues = new LinkedList<>();
-        CertificateByteChooser.getInstance().getCertificateKeyPairList().stream()
-                .filter(cert -> certMatchesAnySupportedCipherSuite(cert, scope))
-                .filter(cert -> filterRsaKeySize(cert))
-                .filter(cert -> filterDssKeySize(cert))
-                .filter(cert -> filterDssSignedCerts(cert))
-                .filter(cert -> filterEcdsaPublicKeyGroups(cert, context, allowUnsupportedPkGroups))
-                .filter(cert -> filterTls13Groups(cert, scope))
-                .forEach(cert -> parameterValues.add(new CertificateDerivation(cert)));
-        return parameterValues;
+        // TODO: Make X509CertificateConfigContainer return certificate chain configs rather than
+        // certificate configs
+        return X509CertificateConfigContainer.getInstance().getCertConfigs().stream()
+                .filter(
+                        certChainConfig ->
+                                certMatchesAnySupportedCipherSuite(certChainConfig, scope))
+                .filter(this::filterRsaKeySize)
+                .filter(this::filterDssKeySize)
+                .filter(this::filterDssSignedCerts)
+                .filter(
+                        certChainConfig ->
+                                filterEcdsaPublicKeyGroups(
+                                        certChainConfig, context, allowUnsupportedPkGroups))
+                .filter(certChainConfig -> filterTls13Groups(certChainConfig, scope))
+                // TODO: Make X509CertificateConfigContainer return certificate chain configs rather
+                // than certificate configs
+                .map(CertificateDerivation::new)
+                .collect(Collectors.toList());
     }
 
-    private boolean filterRsaKeySize(CertificateKeyPair cert) {
-        return cert.getCertPublicKeyType() != CertificateKeyType.RSA
-                || (cert.getPublicKey().keySize() >= MIN_RSA_KEY_LEN
-                        && cert.getPublicKey().keySize() >= MIN_RSA_SIG_KEY_LEN);
+    private boolean filterRsaKeySize(X509CertificateConfig config) {
+        return config.getPublicKeyType() != X509PublicKeyType.RSA
+                || (config.getRsaModulus().bitLength() >= MIN_RSA_KEY_LEN
+                        && config.getRsaModulus().bitLength() >= MIN_RSA_SIG_KEY_LEN);
     }
 
-    private boolean filterDssSignedCerts(CertificateKeyPair cert) {
-        return cert.getCertSignatureType() != CertificateKeyType.DSS || ALLOW_DSS;
+    private boolean filterDssSignedCerts(X509CertificateConfig config) {
+        return config.getDefaultSignatureAlgorithm().getSignatureAlgorithm()
+                        != SignatureAlgorithm.DSA
+                || ALLOW_DSS;
     }
 
-    private boolean filterDssKeySize(CertificateKeyPair cert) {
-        return cert.getCertPublicKeyType() != CertificateKeyType.DSS
-                || cert.getPublicKey().keySize() >= MIN_DSS_KEY_LEN;
+    private boolean filterDssKeySize(X509CertificateConfig config) {
+        return config.getPublicKeyType() != X509PublicKeyType.DSA
+                || config.getDsaPrimeQ().bitLength() >= MIN_DSS_KEY_LEN;
     }
 
     private boolean filterEcdsaPublicKeyGroups(
-            CertificateKeyPair cert, TestContext context, boolean allowUnsupportedPkGroups) {
-        return (cert.getPublicKeyGroup() == null
-                        || context.getFeatureExtractionResult()
-                                .getNamedGroups()
-                                .contains(cert.getPublicKeyGroup()))
+            X509CertificateConfig config, TestContext context, boolean allowUnsupportedPkGroups) {
+        return !config.getPublicKeyType().isEc()
+                || context.getFeatureExtractionResult()
+                        .getNamedGroups()
+                        .contains(
+                                NamedGroup.convertFromX509NamedCurve(
+                                        config.getDefaultSubjectNamedCurve()))
                 || allowUnsupportedPkGroups;
     }
 
-    private boolean filterTls13Groups(CertificateKeyPair cert, DerivationScope scope) {
-        return cert.getPublicKeyGroup() == null
-                || !TlsParameterIdentifierProvider.isTls13Test(scope)
-                || cert.getPublicKeyGroup().isTls13();
+    private boolean filterTls13Groups(X509CertificateConfig config, DerivationScope scope) {
+        if (!TlsParameterIdentifierProvider.isTls13Test(scope)) {
+            return true;
+        }
+        if (config.getPublicKeyType().isEc()) {
+            return NamedGroup.convertFromX509NamedCurve(config.getDefaultSubjectNamedCurve())
+                    .isTls13();
+        }
+        if (config.getPublicKeyType() == X509PublicKeyType.DH) {
+            // TODO: Find a nicer way to retrieve the named group from the DH parameters
+            return Arrays.stream(NamedGroup.values())
+                    .filter(NamedGroup::isDhGroup)
+                    .filter(candidate -> Objects.nonNull(candidate.getGroupParameters()))
+                    .filter(
+                            candidate ->
+                                    ((FfdhGroupParameters) candidate.getGroupParameters())
+                                                    .getModulus()
+                                                    .equals(config.getDhModulus())
+                                            && ((FfdhGroupParameters)
+                                                            candidate.getGroupParameters())
+                                                    .getGenerator()
+                                                    .equals(config.getDhGenerator()))
+                    .findFirst()
+                    .map(NamedGroup::isTls13)
+                    .orElse(true);
+        }
+        return true;
     }
 
     private boolean certMatchesAnySupportedCipherSuite(
-            CertificateKeyPair cert, DerivationScope scope) {
+            X509CertificateConfig config, DerivationScope scope) {
         Set<CipherSuite> cipherSuites;
         if (!TlsParameterIdentifierProvider.isTls13Test(scope)) {
             cipherSuites = TestContext.getInstance().getFeatureExtractionResult().getCipherSuites();
             return cipherSuites.stream()
-                    .anyMatch(
-                            cipherSuite ->
-                                    AlgorithmResolver.getCertificateKeyType(cipherSuite)
-                                                    == cert.getCertPublicKeyType()
-                                            || isEcdhEcdsaAmbiguity(cipherSuite, cert));
+                    .map(AlgorithmResolver::getSuiteableLeafCertificateKeyType)
+                    .flatMap(Arrays::stream)
+                    .anyMatch(kt -> Objects.equals(kt, config.getPublicKeyType()));
         } else {
-            switch (cert.getCertPublicKeyType()) {
-                case ECDH:
-                case ECDSA:
+            switch (config.getPublicKeyType()) {
+                case ECDH_ONLY:
+                case ECDH_ECDSA:
                 case RSA:
                     return true;
                 default:
@@ -162,15 +195,10 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
         }
     }
 
-    private static boolean isEcdhEcdsaAmbiguity(CipherSuite cipherSuite, CertificateKeyPair cert) {
-        return cert.getCertPublicKeyType() == CertificateKeyType.ECDH
-                && AlgorithmResolver.getCertificateKeyType(cipherSuite) == CertificateKeyType.ECDSA;
-    }
-
     @Override
     public void applyToConfig(Config config, DerivationScope derivationScope) {
-        config.setAutoSelectCertificate(false);
-        config.setDefaultExplicitCertificateKeyPair(getSelectedValue());
+        config.setAutoAdjustCertificate(false);
+        config.setCertificateChainConfig(List.of(getSelectedValue()));
     }
 
     @Override
@@ -194,50 +222,40 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateKey
                         .by(
                                 (CertificateDerivation certificateDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {
-                                    CertificateKeyPair selectedCertKeyPair =
+                                    X509CertificateConfig selectedCertConfig =
                                             certificateDerivation.getSelectedValue();
                                     CipherSuite selectedCipherSuite =
                                             cipherSuiteDerivation.getSelectedValue();
 
-                                    CertificateKeyType requiredCertKeyType =
-                                            AlgorithmResolver.getCertificateKeyType(
+                                    X509PublicKeyType[] requiredCertKeyTypes =
+                                            AlgorithmResolver.getSuiteableLeafCertificateKeyType(
                                                     selectedCipherSuite);
-                                    CertificateKeyType actualCertKeyType =
-                                            selectedCertKeyPair.getCertPublicKeyType();
-                                    if (actualCertKeyType == CertificateKeyType.ECDH) {
-                                        return requiredCertKeyType == CertificateKeyType.ECDH
-                                                || requiredCertKeyType == CertificateKeyType.ECDSA;
-                                    } else {
-                                        return actualCertKeyType == requiredCertKeyType;
-                                    }
+                                    X509PublicKeyType actualCertKeyType =
+                                            selectedCertConfig.getPublicKeyType();
+                                    return Arrays.stream(requiredCertKeyTypes)
+                                            .anyMatch(kt -> kt == actualCertKeyType);
                                 }));
     }
 
     @Override
     public String toString() {
-        CertificateKeyPair certKeyPair = getSelectedValue();
+        X509CertificateConfig certConfig = getSelectedValue();
         StringJoiner joiner = new StringJoiner(",");
-        joiner.add("Public Key Type: " + certKeyPair.getCertPublicKeyType().name());
-        joiner.add("Public Key Size: " + certKeyPair.getPublicKey().keySize());
-        if (certKeyPair.getPublicKeyGroup() != null) {
-            joiner.add("Public Key Group: " + certKeyPair.getPublicKeyGroup());
-        }
-        joiner.add("Certificate Signature Type: " + certKeyPair.getCertSignatureType().name());
-        if (certKeyPair.getSignatureGroup() != null) {
-            joiner.add("Signature Key Group: " + certKeyPair.getSignatureGroup());
-        }
+        joiner.add("Public Key Type: " + certConfig.getPublicKeyType().name());
+        joiner.add(
+                "Certificate Signature Type: " + certConfig.getDefaultSignatureAlgorithm().name());
         return joiner.toString();
     }
 
     @Override
-    public List<DerivationParameter<Config, CertificateKeyPair>> getParameterValues(
+    public List<DerivationParameter<Config, X509CertificateConfig>> getParameterValues(
             DerivationScope derivationScope) {
-        return getApplicableCertificates(context, derivationScope, false);
+        return getApplicableCertificateConfigs(context, derivationScope, false);
     }
 
     @Override
-    protected TlsDerivationParameter<CertificateKeyPair> generateValue(
-            CertificateKeyPair selectedValue) {
+    protected TlsDerivationParameter<X509CertificateConfig> generateValue(
+            X509CertificateConfig selectedValue) {
         return new CertificateDerivation(selectedValue);
     }
 }

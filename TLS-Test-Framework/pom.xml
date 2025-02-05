@@ -40,6 +40,10 @@
             <artifactId>anvil-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>de.rub.nds</groupId>
+            <artifactId>protocol-attacker</artifactId>
+        </dependency>
+        <dependency>
             <groupId>de.rub.nds.tls</groupId>
             <artifactId>coffee4j-anvil-engine</artifactId>
         </dependency>
@@ -58,7 +62,6 @@
         <dependency>
             <groupId>de.rub.nds.tls.dockerlib</groupId>
             <artifactId>tls-docker-library</artifactId>
-            <version>2.3.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls.scanner</groupId>

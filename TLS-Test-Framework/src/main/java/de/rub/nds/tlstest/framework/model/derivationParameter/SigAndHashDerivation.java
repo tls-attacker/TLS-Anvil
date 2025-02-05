@@ -12,19 +12,20 @@ import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
-import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
+import de.rub.nds.protocol.constants.HashAlgorithm;
+import de.rub.nds.protocol.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
-import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
-import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.x509attacker.config.X509CertificateConfig;
+import de.rub.nds.x509attacker.constants.X509PublicKeyType;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -94,13 +95,13 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
     private boolean supportsAnyECDSA() {
         TestContext testContext = TestContext.getInstance();
         return testContext.getFeatureExtractionResult().getCipherSuites().stream()
-                .anyMatch(cipherSuite -> cipherSuite.isECDSA());
+                .anyMatch(CipherSuite::isECDSA);
     }
 
     private boolean supportsAnyDSA() {
         TestContext testContext = TestContext.getInstance();
         return testContext.getFeatureExtractionResult().getCipherSuites().stream()
-                .anyMatch(cipherSuite -> cipherSuite.isDSS());
+                .anyMatch(CipherSuite::isDSS);
     }
 
     private List<DerivationParameter<Config, SignatureAndHashAlgorithm>> getClientTestAlgorithms(
@@ -139,9 +140,9 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
     @Override
     public List<ConditionalConstraint> getDefaultConditionalConstraints(
             DerivationScope derivationScope) {
-        List<ConditionalConstraint> condConstraints = new LinkedList<>();
 
-        condConstraints.addAll(getSharedDefaultConditionalConstraints(derivationScope));
+        List<ConditionalConstraint> condConstraints =
+                new LinkedList<>(getSharedDefaultConditionalConstraints(derivationScope));
 
         if (!TlsParameterIdentifierProvider.isTls13Test(derivationScope)) {
             condConstraints.addAll(getDefaultPreTls13Constraints(derivationScope));
@@ -192,23 +193,24 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                 (SigAndHashDerivation sigAndHashDerivation,
                                         CertificateDerivation certificateDerivation) -> {
                                     if (sigAndHashDerivation.getSelectedValue() != null) {
-                                        CertificateKeyPair certKeyPair =
+                                        X509CertificateConfig certConfig =
                                                 certificateDerivation.getSelectedValue();
                                         HashAlgorithm hashAlgo =
                                                 sigAndHashDerivation
                                                         .getSelectedValue()
                                                         .getHashAlgorithm();
-
-                                        if ((certKeyPair.getPublicKeyGroup() == NamedGroup.SECP256R1
-                                                        && hashAlgo != HashAlgorithm.SHA256)
-                                                || (certKeyPair.getPublicKeyGroup()
-                                                                == NamedGroup.SECP384R1
-                                                        && hashAlgo != HashAlgorithm.SHA384)
-                                                || (certKeyPair.getPublicKeyGroup()
-                                                                == NamedGroup.SECP521R1
-                                                        && hashAlgo != HashAlgorithm.SHA512)) {
-                                            return false;
+                                        if (!certConfig.getPublicKeyType().isEc()) {
+                                            return true;
                                         }
+                                        NamedGroup namedGroup =
+                                                NamedGroup.convertFromX509NamedCurve(
+                                                        certConfig.getDefaultSubjectNamedCurve());
+                                        return (namedGroup != NamedGroup.SECP256R1
+                                                        || hashAlgo == HashAlgorithm.SHA256)
+                                                && (namedGroup != NamedGroup.SECP384R1
+                                                        || hashAlgo == HashAlgorithm.SHA384)
+                                                && (namedGroup != NamedGroup.SECP521R1
+                                                        || hashAlgo == HashAlgorithm.SHA512);
                                     }
                                     return true;
                                 }));
@@ -228,29 +230,35 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                 (SigAndHashDerivation sigAndHashDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {
                                     if (sigAndHashDerivation.getSelectedValue() != null) {
-                                        CertificateKeyType requiredCertKeyType =
-                                                AlgorithmResolver.getCertificateKeyType(
-                                                        cipherSuiteDerivation.getSelectedValue());
+                                        X509PublicKeyType[] requiredCertKeyTypes =
+                                                AlgorithmResolver
+                                                        .getSuiteableLeafCertificateKeyType(
+                                                                cipherSuiteDerivation
+                                                                        .getSelectedValue());
 
-                                        switch (requiredCertKeyType) {
-                                            case RSA:
-                                                if (sigAndHashDerivation.getSelectedValue()
-                                                        != SignatureAndHashAlgorithm.RSA_SHA1) {
-                                                    return false;
-                                                }
-                                                break;
-                                            case DSS:
-                                                if (sigAndHashDerivation.getSelectedValue()
-                                                        != SignatureAndHashAlgorithm.DSA_SHA1) {
-                                                    return false;
-                                                }
-                                                break;
-                                            case ECDSA:
-                                                if (sigAndHashDerivation.getSelectedValue()
-                                                        != SignatureAndHashAlgorithm.ECDSA_SHA1) {
-                                                    return false;
-                                                }
-                                                break;
+                                        for (X509PublicKeyType requiredCertKeyType :
+                                                requiredCertKeyTypes) {
+                                            switch (requiredCertKeyType) {
+                                                case RSA:
+                                                    if (sigAndHashDerivation.getSelectedValue()
+                                                            != SignatureAndHashAlgorithm.RSA_SHA1) {
+                                                        return false;
+                                                    }
+                                                    break;
+                                                case DSA:
+                                                    if (sigAndHashDerivation.getSelectedValue()
+                                                            != SignatureAndHashAlgorithm.DSA_SHA1) {
+                                                        return false;
+                                                    }
+                                                    break;
+                                                case ECDH_ECDSA:
+                                                    if (sigAndHashDerivation.getSelectedValue()
+                                                            != SignatureAndHashAlgorithm
+                                                                    .ECDSA_SHA1) {
+                                                        return false;
+                                                    }
+                                                    break;
+                                            }
                                         }
                                     }
                                     return true;
@@ -322,9 +330,9 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                                         .getSignatureAlgorithm();
                                         switch (certificateDerivation
                                                 .getSelectedValue()
-                                                .getCertPublicKeyType()) {
-                                            case ECDH:
-                                            case ECDSA:
+                                                .getPublicKeyType()) {
+                                            case ECDH_ONLY:
+                                            case ECDH_ECDSA:
                                                 if (sigAlg != SignatureAlgorithm.ECDSA) {
                                                     return false;
                                                 }
@@ -334,17 +342,17 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                                     return false;
                                                 }
                                                 break;
-                                            case DSS:
+                                            case DSA:
                                                 if (sigAlg != SignatureAlgorithm.DSA) {
                                                     return false;
                                                 }
                                                 break;
-                                            case GOST01:
+                                            case GOST_R3411_2001:
                                                 if (sigAlg != SignatureAlgorithm.GOSTR34102001) {
                                                     return false;
                                                 }
                                                 break;
-                                            case GOST12:
+                                            case GOST_R3411_2012:
                                                 if (sigAlg != SignatureAlgorithm.GOSTR34102012_256
                                                         && sigAlg
                                                                 != SignatureAlgorithm
@@ -380,18 +388,19 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                                 sigAndHashDerivation
                                                         .getSelectedValue()
                                                         .getHashAlgorithm();
-                                        CertificateKeyPair selectedCertKeyPair =
+                                        X509CertificateConfig selectCertConfig =
                                                 certificateDerivation.getSelectedValue();
 
                                         if (sigAlg.name().contains("PSS")) {
-                                            if (selectedCertKeyPair.getPublicKey().keySize()
+                                            if (selectCertConfig.getRsaModulus().bitLength()
                                                     < 1024) {
                                                 return false;
-                                            } else if (hashAlgo == HashAlgorithm.SHA512
-                                                    && selectedCertKeyPair.getPublicKey().keySize()
-                                                            < 2048) {
-                                                return false;
-                                            }
+                                            } else
+                                                return hashAlgo != HashAlgorithm.SHA512
+                                                        || selectCertConfig
+                                                                        .getRsaModulus()
+                                                                        .bitLength()
+                                                                >= 2048;
                                         }
                                     }
                                     return true;
@@ -420,14 +429,13 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                                 sigAndHashDerivation
                                                         .getSelectedValue()
                                                         .getHashAlgorithm();
-                                        CertificateKeyPair selectedCertKeyPair =
+                                        X509CertificateConfig selectedCertConfig =
                                                 certificateDerivation.getSelectedValue();
 
-                                        if (selectedCertKeyPair.getPublicKey().keySize() < 1024
-                                                && sigAlg.name().contains("RSA")
-                                                && isSHAHashLongerThan256Bits(hashAlgo)) {
-                                            return false;
-                                        }
+                                        return selectedCertConfig.getRsaModulus().bitLength()
+                                                        >= 1024
+                                                || !sigAlg.name().contains("RSA")
+                                                || !isSHAHashLongerThan256Bits(hashAlgo);
                                     }
                                     return true;
                                 }));

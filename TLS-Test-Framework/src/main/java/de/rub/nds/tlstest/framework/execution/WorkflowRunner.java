@@ -559,7 +559,8 @@ public class WorkflowRunner {
             }
 
             // we never have to add anything if we do not even send a CH
-            return WorkflowTraceResultUtil.getLastSentMessage(trace, HandshakeMessageType.CLIENT_HELLO)
+            return WorkflowTraceResultUtil.getLastSentMessage(
+                                    trace, HandshakeMessageType.CLIENT_HELLO)
                             != null
                     && (lastActionIsGenericReceive || isExpectingAlert);
         }

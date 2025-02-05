@@ -20,7 +20,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -178,7 +178,7 @@ public class TLSExtensionForECC extends Tls12Test {
         allExplicitGroups[105] = selectedGroup.getValue()[1];
         ClientHelloMessage clientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         clientHello
                 .getExtension(EllipticCurvesExtensionMessage.class)
@@ -219,7 +219,7 @@ public class TLSExtensionForECC extends Tls12Test {
                         WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         ECDHClientKeyExchangeMessage clientKeyExchangeMessage =
                 (ECDHClientKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         clientKeyExchangeMessage.setPublicKey(Modifiable.explicit(serializedPoint));
 
@@ -253,7 +253,7 @@ public class TLSExtensionForECC extends Tls12Test {
                         WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         ECDHClientKeyExchangeMessage clientKeyExchangeMessage =
                 (ECDHClientKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         clientKeyExchangeMessage.setPublicKey(Modifiable.explicit(serializedPublicKey));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));

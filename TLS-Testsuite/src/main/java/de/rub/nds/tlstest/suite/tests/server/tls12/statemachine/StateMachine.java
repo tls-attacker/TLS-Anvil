@@ -316,7 +316,8 @@ public class StateMachine extends Tls12Test {
         State state = runner.execute(workflowTrace, config);
 
         WorkflowTrace executedTrace = state.getWorkflowTrace();
-        if (WorkflowTraceResultUtil.didReceiveMessage(executedTrace, ProtocolMessageType.HEARTBEAT)) {
+        if (WorkflowTraceResultUtil.didReceiveMessage(
+                executedTrace, ProtocolMessageType.HEARTBEAT)) {
             return;
         } else if (executedTrace.executedAsPlanned() && !Validator.socketClosed(state)) {
             testCase.addAdditionalResultInfo("SUT chose to silently discard Heartbeat Request");

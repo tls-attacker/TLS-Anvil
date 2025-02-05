@@ -154,7 +154,8 @@ public class PaddingBitmaskDerivation extends TlsDerivationParameter<Integer> {
         int blockSize = AlgorithmResolver.getCipher(cipherSuite).getBlocksize();
         // always resolve using TLS 1.2 as the method only needs to check if it is not SSL
         int macSize =
-                AlgorithmResolver.getMacAlgorithm(ProtocolVersion.TLS12, cipherSuite).getSize();
+                AlgorithmResolver.getMacAlgorithm(ProtocolVersion.TLS12, cipherSuite)
+                        .getMacLength();
         if (isEncryptThenMac) {
             return blockSize - (applicationMessageContentLength % blockSize);
         } else {

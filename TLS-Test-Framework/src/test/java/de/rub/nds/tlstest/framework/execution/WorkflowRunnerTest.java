@@ -7,7 +7,7 @@ import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.action.SendingAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import java.util.LinkedList;
@@ -27,7 +27,7 @@ public class WorkflowRunnerTest {
     public WorkflowRunnerTest() {}
 
     @BeforeAll
-    private static void setupClass() {
+    public static void setupClass() {
         sharedConfig = new Config();
         sharedConfig.setDefaultSelectedCipherSuite(
                 CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256);
@@ -80,9 +80,12 @@ public class WorkflowRunnerTest {
             WorkflowTrace workflowTrace,
             TestEndpointType endpointType,
             List<Arguments> testArguments) {
-        SendingAction messageFlight =
-                workflowTrace.getSendingActions().get(workflowTrace.getSendingActions().size() - 1);
-        for (int i = 1; i < messageFlight.getSendMessages().size(); i++) {
+        SendAction messageFlight =
+                (SendAction)
+                        workflowTrace
+                                .getSendingActions()
+                                .get(workflowTrace.getSendingActions().size() - 1);
+        for (int i = 1; i < messageFlight.getConfiguredMessages().size(); i++) {
             WorkflowTrace modifiedTrace = WorkflowTrace.copy(workflowTrace);
             List<ProtocolMessage> removedMessages = removeTrailingFlightMessages(modifiedTrace, i);
             testArguments.add(
@@ -94,18 +97,24 @@ public class WorkflowRunnerTest {
         WorkflowTrace firstMessageSkippedIntentionally =
                 workflowFactory.createWorkflowTrace(
                         WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER);
-        firstMessageSkippedIntentionally
-                .getSendingActions()
-                .get(firstMessageSkippedIntentionally.getSendingActions().size() - 1)
-                .getSendMessages()
+        ((SendAction)
+                        firstMessageSkippedIntentionally
+                                .getSendingActions()
+                                .get(
+                                        firstMessageSkippedIntentionally.getSendingActions().size()
+                                                - 1))
+                .getConfiguredMessages()
                 .remove(0);
         WorkflowTrace secondMessageSkippedIntentionally =
                 workflowFactory.createWorkflowTrace(
                         WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER);
-        secondMessageSkippedIntentionally
-                .getSendingActions()
-                .get(secondMessageSkippedIntentionally.getSendingActions().size() - 1)
-                .getSendMessages()
+        ((SendAction)
+                        secondMessageSkippedIntentionally
+                                .getSendingActions()
+                                .get(
+                                        secondMessageSkippedIntentionally.getSendingActions().size()
+                                                - 1))
+                .getConfiguredMessages()
                 .remove(0);
 
         return Stream.of(
@@ -133,10 +142,11 @@ public class WorkflowRunnerTest {
     private static List<ProtocolMessage> removeTrailingFlightMessages(
             WorkflowTrace modifiedTrace, int messagesToRemove) {
         List<ProtocolMessage> baseList =
-                modifiedTrace
-                        .getSendingActions()
-                        .get(modifiedTrace.getSendingActions().size() - 1)
-                        .getSendMessages();
+                ((SendAction)
+                                modifiedTrace
+                                        .getSendingActions()
+                                        .get(modifiedTrace.getSendingActions().size() - 1))
+                        .getConfiguredMessages();
         List<ProtocolMessage> removedMessages = new LinkedList<>();
         for (int i = 0; i < messagesToRemove; i++) {
             removedMessages.add(baseList.remove(baseList.size() - 1));

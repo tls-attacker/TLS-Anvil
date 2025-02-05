@@ -26,6 +26,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionM
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -242,7 +243,7 @@ public class HelloRetryRequest extends Tls13Test {
                         WorkflowTraceType.HELLO, HandshakeMessageType.ENCRYPTED_EXTENSIONS);
         ClientHelloMessage initialHello =
                 (ClientHelloMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         KeyShareExtensionMessage ksExt = initialHello.getExtension(KeyShareExtensionMessage.class);
         ksExt.setKeyShareListBytes(Modifiable.explicit(new byte[0]));
@@ -260,8 +261,9 @@ public class HelloRetryRequest extends Tls13Test {
         // after an HRR must retain the random value from before
         byte[] fixedRandom = runner.getPreparedConfig().getDefaultClientRandom();
         initialHello.setRandom(Modifiable.explicit(fixedRandom));
-        secondHelloTrace
-                .getFirstSentMessage(ClientHelloMessage.class)
+        ((ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                secondHelloTrace, HandshakeMessageType.CLIENT_HELLO))
                 .setRandom(Modifiable.explicit(fixedRandom));
 
         // In middlebox compatibility mode, a CCS message is sent

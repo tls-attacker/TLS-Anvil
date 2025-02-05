@@ -17,7 +17,7 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -80,7 +80,7 @@ public class Certificate extends TlsLengthfieldTest {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(runner);
         CertificateMessage certificateMessage =
                 (CertificateMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CERTIFICATE);
         certificateMessage.setRequestContextLength(Modifiable.add(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
@@ -91,7 +91,7 @@ public class Certificate extends TlsLengthfieldTest {
             WorkflowTrace workflowTrace, WorkflowRunner runner, AnvilTestCase testCase) {
         CertificateMessage certificateMessage =
                 (CertificateMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CERTIFICATE);
         certificateMessage.setLength(Modifiable.sub(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
@@ -102,7 +102,7 @@ public class Certificate extends TlsLengthfieldTest {
             WorkflowTrace workflowTrace, WorkflowRunner runner, AnvilTestCase testCase) {
         CertificateMessage certificateMessage =
                 (CertificateMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CERTIFICATE);
         certificateMessage.setCertificatesListLength(Modifiable.sub(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());

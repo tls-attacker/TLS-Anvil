@@ -22,8 +22,8 @@ import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
@@ -58,7 +58,7 @@ public class RecordLayer extends Tls13Test {
 
         WorkflowTraceMutator.deleteSendingMessage(trace, HandshakeMessageType.SERVER_HELLO);
         SendAction serverHello = new SendAction(new ServerHelloMessage(c));
-        serverHello.setRecords(record);
+        serverHello.setConfiguredRecords(List.of(record));
         trace.addTlsAction(1, serverHello);
         ((SendAction) trace.getTlsActions().get(2)).addActionOption(ActionOption.MAY_FAIL);
 
@@ -80,7 +80,7 @@ public class RecordLayer extends Tls13Test {
 
         WorkflowTraceMutator.deleteSendingMessage(trace, HandshakeMessageType.FINISHED);
         SendAction finished = new SendAction(new FinishedMessage());
-        finished.setRecords(record);
+        finished.setConfiguredRecords(List.of(record));
         trace.addTlsAction(2, finished);
 
         State state = runner.execute(trace, c);
@@ -106,7 +106,7 @@ public class RecordLayer extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         SendAction sendServerHelloAction =
                 (SendAction)
-                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
                                 trace, HandshakeMessageType.SERVER_HELLO);
         AlertDescription selectedAlert =
                 parameterCombination.getParameter(AlertDerivation.class).getSelectedValue();
@@ -124,11 +124,12 @@ public class RecordLayer extends Tls13Test {
         byte[] alertContent = new byte[] {AlertLevel.WARNING.getValue(), selectedAlert.getValue()};
         alertRecord.setProtocolMessageBytes(Modifiable.explicit(alertContent));
 
-        sendServerHelloAction.setRecords(
-                unmodifiedServerHelloRecord,
-                unmodifiedEncryptedExtensionsRecord,
-                certificateRecordFragment,
-                alertRecord);
+        sendServerHelloAction.setConfiguredRecords(
+                List.of(
+                        unmodifiedServerHelloRecord,
+                        unmodifiedEncryptedExtensionsRecord,
+                        certificateRecordFragment,
+                        alertRecord));
 
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
@@ -178,21 +179,21 @@ public class RecordLayer extends Tls13Test {
                             new EncryptedExtensionsMessage(),
                             new CertificateMessage(),
                             new CertificateVerifyMessage());
-            action.setRecords(r);
+            action.setConfiguredRecords(List.of(r));
             trace.addTlsActions(action, new ReceiveAction(new AlertMessage()));
         } else if (affectedMessage == HandshakeMessageType.CERTIFICATE) {
             trace =
                     runner.generateWorkflowTraceUntilSendingMessage(
                             WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CERTIFICATE);
             action = new SendAction(new CertificateMessage(), new CertificateVerifyMessage());
-            action.setRecords(r);
+            action.setConfiguredRecords(List.of(r));
             trace.addTlsActions(action, new ReceiveAction(new AlertMessage()));
         } else if (affectedMessage == HandshakeMessageType.CERTIFICATE_VERIFY) {
             trace =
                     runner.generateWorkflowTraceUntilSendingMessage(
                             WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CERTIFICATE_VERIFY);
             action = new SendAction(new CertificateVerifyMessage());
-            action.setRecords(r);
+            action.setConfiguredRecords(List.of(r));
             trace.addTlsActions(action, new ReceiveAction(new AlertMessage()));
         }
         State state = runner.execute(trace, c);
@@ -215,7 +216,7 @@ public class RecordLayer extends Tls13Test {
         // to the wire
         Record dummyRecord = new Record();
         dummyRecord.setCompleteRecordBytes(Modifiable.explicit(new byte[0]));
-        sendCertVerifyPart.setRecords(certVerifyPart, dummyRecord);
+        sendCertVerifyPart.setConfiguredRecords(List.of(certVerifyPart, dummyRecord));
 
         workflowTrace.addTlsActions(sendCertVerifyPart, new SendAction(new FinishedMessage()));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));

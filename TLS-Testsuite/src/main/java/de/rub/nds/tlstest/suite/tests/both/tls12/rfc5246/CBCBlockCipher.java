@@ -240,7 +240,8 @@ public class CBCBlockCipher extends Tls12Test {
 
         Validator.executedAsPlanned(state, testCase);
         boolean sawCCS = false;
-        for (Record record : WorkflowTraceResultUtil.getAllReceivedRecords(state.getWorkflowTrace())) {
+        for (Record record :
+                WorkflowTraceResultUtil.getAllReceivedRecords(state.getWorkflowTrace())) {
             if (record.getContentMessageType() == ProtocolMessageType.CHANGE_CIPHER_SPEC) {
                 sawCCS = true;
             }

@@ -17,7 +17,7 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -43,7 +43,7 @@ public class ClientKeyExchange extends TlsLengthfieldTest {
         WorkflowTrace workflowTrace = getWorkflowTraceSeparatedClientKeyExchange(runner);
         ClientKeyExchangeMessage clientKeyExchange =
                 (ClientKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         clientKeyExchange.setLength(Modifiable.sub(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
@@ -56,7 +56,7 @@ public class ClientKeyExchange extends TlsLengthfieldTest {
         WorkflowTrace workflowTrace = getWorkflowTraceSeparatedClientKeyExchange(runner);
         ClientKeyExchangeMessage clientKeyExchange =
                 (ClientKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         clientKeyExchange.setPublicKeyLength(Modifiable.sub(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
@@ -67,13 +67,13 @@ public class ClientKeyExchange extends TlsLengthfieldTest {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(runner);
         SendAction sendCkeCcsFin =
                 (SendAction)
-                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
                                 workflowTrace, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         ClientKeyExchangeMessage clientKeyExchange =
                 (ClientKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
-        sendCkeCcsFin.getSendMessages().remove(clientKeyExchange);
+        sendCkeCcsFin.getConfiguredMessages().remove(clientKeyExchange);
         sendCkeCcsFin.addActionOption(ActionOption.MAY_FAIL);
         workflowTrace
                 .getTlsActions()

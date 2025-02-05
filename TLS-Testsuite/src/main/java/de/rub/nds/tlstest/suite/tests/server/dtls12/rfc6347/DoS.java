@@ -18,11 +18,11 @@ import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
-import de.rub.nds.tlsattacker.core.workflow.action.SendingAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -89,9 +89,8 @@ public class DoS extends Dtls12Test {
         HelloVerifyRequestMessage hvrMsg =
                 executedTrace.getLastReceivedMessage(HelloVerifyRequestMessage.class);
         ReceivingAction receivingAction =
-                (ReceivingAction)
-                        WorkflowTraceResultUtil.getLastReceivingActionForMessage(
-                                executedTrace, HandshakeMessageType.HELLO_VERIFY_REQUEST);
+                WorkflowTraceResultUtil.getLastReceivingActionForMessage(
+                        executedTrace, HandshakeMessageType.HELLO_VERIFY_REQUEST);
         assertNotNull(hvrMsg, "Did not receive a HelloVerifyRequest");
         // potential retransmission also use the explicitly modified sequence
         // number, hence, the HVR should also have this sequence number
@@ -127,9 +126,8 @@ public class DoS extends Dtls12Test {
         ServerHelloMessage serverHello =
                 executedTrace.getLastReceivedMessage(ServerHelloMessage.class);
         ReceivingAction receivingAction =
-                (ReceivingAction)
-                        WorkflowTraceResultUtil.getLastReceivingActionForMessage(
-                                executedTrace, HandshakeMessageType.SERVER_HELLO);
+                WorkflowTraceResultUtil.getLastReceivingActionForMessage(
+                        executedTrace, HandshakeMessageType.SERVER_HELLO);
         assertNotNull(serverHello, "Did not receive a HelloVerifyRequest");
         // potential retransmission also use the explicitly modified sequence
         // number, hence, the HVR should also have this sequence number
@@ -181,17 +179,17 @@ public class DoS extends Dtls12Test {
         Record preparedRecord1 = new Record();
         Record preparedRecord2 = new Record();
         preparedRecord1.setProtocolVersion(Modifiable.explicit(ProtocolVersion.DTLS12.getValue()));
-        ((SendingAction)
-                        WorkflowTraceResultUtil.getFirstActionThatSent(
+        ((SendAction)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
                                 trace, HandshakeMessageType.CLIENT_HELLO))
-                .getSendRecords()
+                .getConfiguredRecords()
                 .add(preparedRecord1);
         // when server does not require a HVR cycle, this will only overwrite the previous record
         preparedRecord2.setProtocolVersion(Modifiable.explicit(ProtocolVersion.DTLS12.getValue()));
-        ((SendingAction)
-                        WorkflowTraceResultUtil.getLastActionThatSent(
+        ((SendAction)
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendAction(
                                 trace, HandshakeMessageType.CLIENT_HELLO))
-                .getSendRecords()
+                .getConfiguredRecords()
                 .add(preparedRecord2);
 
         State state = runner.execute(trace, config);

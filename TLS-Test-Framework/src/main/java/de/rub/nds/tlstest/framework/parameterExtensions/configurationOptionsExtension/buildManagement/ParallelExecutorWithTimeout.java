@@ -19,17 +19,18 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 public class ParallelExecutorWithTimeout extends ParallelExecutor {
 
     private final long timeoutAfter;
 
     public ParallelExecutorWithTimeout(int size, int reexecutions, long timeoutSec) {
-        super(size, reexecutions);
+        super(
+                size,
+                reexecutions,
+                new ThreadPoolExecutor(
+                        size, size, 10L, TimeUnit.DAYS, new LinkedBlockingDeque<>()));
         this.timeoutAfter = timeoutSec;
     }
 

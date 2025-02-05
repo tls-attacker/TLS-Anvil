@@ -23,7 +23,6 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
 import de.rub.nds.tlsattacker.core.config.delegate.Delegate;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
-import de.rub.nds.tlsattacker.core.constants.ChooserType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
@@ -420,7 +419,6 @@ public class TlsTestConfig extends TLSDelegateConfig {
                 throw new RuntimeException("Invalid testEndpointMode");
         }
         config.setAddRenegotiationInfoExtension(checkRenegotiationInfoOffer());
-        config.setChooserType(ChooserType.SMART_RECORD_SIZE);
 
         // Server test -> TLS-Attacker acts as Client
         config.getDefaultClientConnection().setTimeout(getAnvilTestConfig().getConnectionTimeout());
@@ -515,7 +513,7 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
         config.setDefaultServerSupportedCipherSuites(
                 CipherSuite.getImplemented().stream()
-                        .filter(CipherSuite::isTLS13)
+                        .filter(CipherSuite::isTls13)
                         .collect(Collectors.toList()));
         config.setDefaultClientSupportedCipherSuites(
                 config.getDefaultServerSupportedCipherSuites());

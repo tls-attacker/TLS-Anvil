@@ -177,7 +177,7 @@ public class KeyX implements KeyExchange {
     }
 
     public boolean compatibleWithCiphersuite(CipherSuite cipherSuite) {
-        if (cipherSuite.isTLS13()) {
+        if (cipherSuite.isTls13()) {
             return Arrays.asList(this.supported()).contains(KeyExchangeType.ALL13);
         }
         if (cipherSuiteSkeCache == null) {

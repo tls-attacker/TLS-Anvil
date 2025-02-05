@@ -28,6 +28,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareE
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -237,7 +238,7 @@ public class HelloRetryRequest extends Tls13Test {
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
         ServerHelloMessage helloRetryRequest =
                 (ServerHelloMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.SERVER_HELLO);
         helloRetryRequest.setSelectedCipherSuite(
                 Modifiable.explicit(helloRetryCipherSuite.getByteValue()));

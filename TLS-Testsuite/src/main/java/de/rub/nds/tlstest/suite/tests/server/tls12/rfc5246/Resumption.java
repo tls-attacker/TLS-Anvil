@@ -22,6 +22,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.ServerNameIndicati
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.ServerNamePair;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -78,7 +79,10 @@ public class Resumption extends Tls12Test {
                 runner.generateWorkflowTraceUntilLastMessage(
                         WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
 
-        ClientHelloMessage cHello = workflowTrace.getLastSentMessage(ClientHelloMessage.class);
+        ClientHelloMessage cHello =
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         ServerNameIndicationExtensionMessage sni2 =
                 cHello.getExtension(ServerNameIndicationExtensionMessage.class);
 
@@ -161,9 +165,9 @@ public class Resumption extends Tls12Test {
 
         SendAction finSend =
                 (SendAction)
-                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
                                 workflowTrace, HandshakeMessageType.FINISHED);
-        finSend.getSentMessages().add(alert);
+        finSend.getConfiguredMessages().add(alert);
         workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         State state = runner.execute(workflowTrace, c);
@@ -215,7 +219,7 @@ public class Resumption extends Tls12Test {
 
         FinishedMessage fin =
                 (FinishedMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.FINISHED);
         fin.setVerifyData(Modifiable.xor(new byte[] {0x01}, 0));
         workflowTrace.addTlsAction(new ReceiveAction());

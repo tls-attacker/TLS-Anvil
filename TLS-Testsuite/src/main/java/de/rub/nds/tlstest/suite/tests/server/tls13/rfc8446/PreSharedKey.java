@@ -30,6 +30,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.PSKKeyExchangeMode
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PreSharedKeyExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -120,7 +121,9 @@ public class PreSharedKey extends Tls13Test {
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
         ClientHelloMessage resumingHello =
-                workflowTrace.getLastSentMessage(ClientHelloMessage.class);
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         resumingHello
                 .getExtensions()
                 .add(
@@ -214,7 +217,10 @@ public class PreSharedKey extends Tls13Test {
         workflowTrace.addTlsAction(new ReceiveAction());
         byte[] modificationBitmask = parameterCombination.buildBitmask();
 
-        ClientHelloMessage cHello = workflowTrace.getLastSentMessage(ClientHelloMessage.class);
+        ClientHelloMessage cHello =
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendAction(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         PreSharedKeyExtensionMessage pskExt =
                 cHello.getExtension(PreSharedKeyExtensionMessage.class);
         pskExt.setBinderListBytes(
@@ -238,7 +244,10 @@ public class PreSharedKey extends Tls13Test {
                         WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction());
 
-        ClientHelloMessage cHello = workflowTrace.getLastSentMessage(ClientHelloMessage.class);
+        ClientHelloMessage cHello =
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendAction(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         PreSharedKeyExtensionMessage pskExt =
                 cHello.getExtension(PreSharedKeyExtensionMessage.class);
         pskExt.setBinderListBytes(Modifiable.explicit(new byte[0]));
@@ -313,7 +322,9 @@ public class PreSharedKey extends Tls13Test {
                 runner.generateWorkflowTraceUntilLastSendingMessage(
                         WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.FINISHED);
         ClientHelloMessage modifiedClientHello =
-                workflowTrace.getLastSentMessage(ClientHelloMessage.class);
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendAction(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
 
         CipherSuite selectedCipher =
                 parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();

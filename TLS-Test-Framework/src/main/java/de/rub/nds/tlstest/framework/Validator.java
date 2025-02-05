@@ -32,6 +32,7 @@ import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySet;
 import de.rub.nds.tlsattacker.core.record.crypto.RecordDecryptor;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.MessageAction;
@@ -161,7 +162,7 @@ public class Validator {
         } else {
             ReceivingAction alertReceivingAction =
                     (ReceivingAction)
-                            WorkflowTraceResultUtil.getFirstActionThatReceived(
+                            WorkflowTraceConfigurationUtil.getFirstStaticConfiguredReceiveAction(
                                     trace, ProtocolMessageType.ALERT);
             ReceivingAction receiveToExtractFrom;
             if (alertReceivingAction != null && lastReceive != alertReceivingAction) {

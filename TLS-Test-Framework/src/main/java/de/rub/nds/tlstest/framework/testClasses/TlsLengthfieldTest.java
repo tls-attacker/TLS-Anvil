@@ -19,7 +19,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.HandshakeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
@@ -115,7 +115,7 @@ public class TlsLengthfieldTest extends TlsBaseTest {
             Class<? extends ExtensionMessage> clazz, WorkflowTrace workflowTrace) {
         EncryptedExtensionsMessage encryptedExtensionsMessage =
                 (EncryptedExtensionsMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS);
         return (T) encryptedExtensionsMessage.getExtension(clazz);
     }
@@ -125,12 +125,14 @@ public class TlsLengthfieldTest extends TlsBaseTest {
         HandshakeMessage requiredHelloMessage;
         if (isClientTest()) {
             requiredHelloMessage =
-                    WorkflowTraceResultUtil.getFirstSentMessage(
-                            workflowTrace, HandshakeMessageType.SERVER_HELLO);
+                    (HandshakeMessage)
+                            WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                    workflowTrace, HandshakeMessageType.SERVER_HELLO);
         } else {
             requiredHelloMessage =
-                    WorkflowTraceResultUtil.getFirstSentMessage(
-                            workflowTrace, HandshakeMessageType.CLIENT_HELLO);
+                    (HandshakeMessage)
+                            WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                    workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         }
         return (T) requiredHelloMessage.getExtension(clazz);
     }

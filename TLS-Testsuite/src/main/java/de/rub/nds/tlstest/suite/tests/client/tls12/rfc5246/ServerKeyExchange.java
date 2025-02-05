@@ -17,7 +17,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
@@ -45,7 +45,7 @@ public class ServerKeyExchange extends Tls12Test {
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         ServerKeyExchangeMessage serverKeyExchangeMsg =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchangeMsg.setSignature(Modifiable.xor(bitmask, 0));
 
@@ -120,7 +120,7 @@ public class ServerKeyExchange extends Tls12Test {
 
         ServerKeyExchangeMessage serverKeyExchange =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchange.setSignature(Modifiable.explicit(new byte[0]));
 
@@ -160,7 +160,7 @@ public class ServerKeyExchange extends Tls12Test {
                 SignatureAndHashAlgorithm.valueOf("ANONYMOUS_" + digestName);
         ServerKeyExchangeMessage serverKeyExchange =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchange.setSignatureAndHashAlgorithm(
                 Modifiable.explicit(matchingAnon.getByteValue()));

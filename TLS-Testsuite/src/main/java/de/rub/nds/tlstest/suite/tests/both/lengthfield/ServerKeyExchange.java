@@ -20,7 +20,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.DHEServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -44,7 +44,7 @@ public class ServerKeyExchange extends TlsLengthfieldTest {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(runner);
         ServerKeyExchangeMessage serverKeyExchange =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchange.setLength(Modifiable.sub(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
@@ -60,7 +60,7 @@ public class ServerKeyExchange extends TlsLengthfieldTest {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(runner);
         ServerKeyExchangeMessage serverKeyExchange =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchange.setSignatureLength(Modifiable.sub(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
@@ -73,7 +73,7 @@ public class ServerKeyExchange extends TlsLengthfieldTest {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(runner);
         ServerKeyExchangeMessage serverKeyExchange =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchange.setPublicKeyLength(Modifiable.sub(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
@@ -87,7 +87,7 @@ public class ServerKeyExchange extends TlsLengthfieldTest {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(runner);
         DHEServerKeyExchangeMessage serverKeyExchange =
                 (DHEServerKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchange.setModulusLength(Modifiable.sub(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
@@ -101,7 +101,7 @@ public class ServerKeyExchange extends TlsLengthfieldTest {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(runner);
         DHEServerKeyExchangeMessage serverKeyExchange =
                 (DHEServerKeyExchangeMessage)
-                        WorkflowTraceResultUtil.getFirstSentMessage(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchange.setGeneratorLength(Modifiable.sub(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());

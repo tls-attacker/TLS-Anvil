@@ -24,7 +24,7 @@ import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -53,7 +53,7 @@ public class RecordLayer extends Tls13Test {
         SendAction clientHello = new SendAction(new ClientHelloMessage(c));
         Record record = new Record();
         record.setMaxRecordLengthConfig(0);
-        clientHello.setRecords(record);
+        clientHello.setConfiguredRecords(List.of(record));
 
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(clientHello, new ReceiveAction(new AlertMessage()));
@@ -77,9 +77,9 @@ public class RecordLayer extends Tls13Test {
 
         SendAction finished =
                 (SendAction)
-                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
                                 trace, HandshakeMessageType.FINISHED);
-        finished.setRecords(record);
+        finished.setConfiguredRecords(List.of(record));
 
         State state = runner.execute(trace, c);
 
@@ -109,7 +109,7 @@ public class RecordLayer extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         SendAction sendFinished =
                 (SendAction)
-                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
                                 trace, HandshakeMessageType.FINISHED);
         AlertDescription selectedAlert =
                 parameterCombination.getParameter(AlertDerivation.class).getSelectedValue();
@@ -125,7 +125,7 @@ public class RecordLayer extends Tls13Test {
         byte[] alertContent = new byte[] {AlertLevel.WARNING.getValue(), selectedAlert.getValue()};
         alertRecord.setProtocolMessageBytes(Modifiable.explicit(alertContent));
 
-        sendFinished.setRecords(finishedFragmentRecord, alertRecord);
+        sendFinished.setConfiguredRecords(List.of(finishedFragmentRecord, alertRecord));
 
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
@@ -154,7 +154,8 @@ public class RecordLayer extends Tls13Test {
         Record initialRecord = new Record();
         initialRecord.setComputations(new RecordCryptoComputations());
         initialRecord.setProtocolVersion(Modifiable.explicit(selectedRecordVersion));
-        ((SendAction) workflowTrace.getFirstSendingAction()).setRecords(initialRecord);
+        ((SendAction) workflowTrace.getFirstSendingAction())
+                .setConfiguredRecords(List.of(initialRecord));
 
         State state = runner.execute(workflowTrace, config);
         Validator.executedAsPlanned(state, testCase);

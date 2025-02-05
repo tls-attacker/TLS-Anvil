@@ -21,13 +21,14 @@ import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.List;
 
 @ClientTest
 public class TLSRecordProtocol extends Tls12Test {
@@ -45,9 +46,9 @@ public class TLSRecordProtocol extends Tls12Test {
 
         SendAction serverHello =
                 (SendAction)
-                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
                                 workflowTrace, HandshakeMessageType.SERVER_HELLO);
-        serverHello.setRecords(record);
+        serverHello.setConfiguredRecords(List.of(record));
 
         State state = runner.execute(workflowTrace, c);
 
@@ -66,7 +67,7 @@ public class TLSRecordProtocol extends Tls12Test {
 
         SendAction sendActionWithBadRecord =
                 new SendAction(new ChangeCipherSpecMessage(), new FinishedMessage());
-        sendActionWithBadRecord.setRecords(record);
+        sendActionWithBadRecord.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(

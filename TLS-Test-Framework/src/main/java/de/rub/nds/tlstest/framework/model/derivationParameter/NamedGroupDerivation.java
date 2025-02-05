@@ -90,6 +90,8 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
             NamedGroupWitness witness =
                     extractionResult.getNamedGroupWitnesses().get(selectedGroup);
             groups.add(selectedGroup);
+            // TODO: Still required?
+            /*
             if (witness != null) {
                 if (config.getDefaultSelectedCipherSuite().isEphemeral()) {
                     groups.add(witness.getEcdsaPkGroupEphemeral());
@@ -98,6 +100,7 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
                     groups.add(witness.getEcdsaSigGroupStatic());
                 }
             }
+             */
             groups.remove(null);
             config.setDefaultClientNamedGroups(new LinkedList<>(groups));
         }

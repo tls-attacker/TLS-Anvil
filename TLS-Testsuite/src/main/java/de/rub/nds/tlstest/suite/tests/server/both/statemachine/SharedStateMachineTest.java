@@ -70,7 +70,7 @@ public class SharedStateMachineTest {
         additionalClientHello.setIncludeInDigest(Modifiable.explicit(false));
         additionalClientHello.setAdjustContext(Modifiable.explicit(false));
         SendAction initialSendAction = (SendAction) workflowTrace.getFirstSendingAction();
-        initialSendAction.getMessages().add(additionalClientHello);
+        initialSendAction.getConfiguredMessages().add(additionalClientHello);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         // only check for alert + closed but not asExpected() since there
         // may be a race condition based on when the server processes the

@@ -48,7 +48,7 @@ public class ServerHello extends Tls12Test {
         Validator.executedAsPlanned(state, testCase);
 
         ServerHelloMessage serverHello = trace.getFirstReceivedMessage(ServerHelloMessage.class);
-        ClientHelloMessage clientHello = trace.getFirstSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage clientHello = trace.getFirstSentMessage(ClientHelloMessage.class);
 
         assertFalse(
                 "ServerHello random equals ClienHello",
@@ -66,7 +66,7 @@ public class ServerHello extends Tls12Test {
         Validator.executedAsPlanned(state, testCase);
         checkForUnproposedExtensions(
                 workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class),
-                workflowTrace.getFirstSendMessage(ClientHelloMessage.class));
+                workflowTrace.getFirstSentMessage(ClientHelloMessage.class));
         checkForDuplicateExtensions(
                 workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class));
         if (workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class).getExtensions()

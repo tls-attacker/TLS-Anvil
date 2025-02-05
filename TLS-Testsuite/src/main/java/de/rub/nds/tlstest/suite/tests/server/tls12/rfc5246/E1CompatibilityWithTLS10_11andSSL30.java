@@ -98,7 +98,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         Record record = new Record();
         record.setProtocolVersion(Modifiable.explicit(version.getValue()));
         SendAction cha = new SendAction(new ClientHelloMessage(c));
-        cha.setRecords(record);
+        cha.setConfiguredRecords(List.of(record));
 
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(cha, new ReceiveAction(new AlertMessage()));
@@ -119,7 +119,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         Record record = new Record();
         record.setProtocolVersion(Modifiable.explicit(new byte[] {0x03, 0x05}));
         SendAction sendAction = new SendAction(new ClientHelloMessage(c));
-        sendAction.setRecords(record);
+        sendAction.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(

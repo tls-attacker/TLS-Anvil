@@ -24,19 +24,13 @@ import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
-import de.rub.nds.tlsattacker.core.workflow.action.MessageAction;
-import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
+import de.rub.nds.tlsattacker.core.workflow.action.*;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.util.SignatureValidation;
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 
 /** */
@@ -67,17 +61,8 @@ public class CertificateVerify extends Tls13Test {
         byte[] givenSignature = certificateVerify.getSignature().getValue();
         byte[] signedData = getCompleteSignedData(state);
 
-        try {
-            return SignatureValidation.validationSuccessful(
-                    selectedSignatureAndHashAlgo, state, signedData, givenSignature);
-        } catch (SignatureException
-                | InvalidKeyException
-                | InvalidKeySpecException
-                | IOException
-                | InvalidAlgorithmParameterException
-                | NoSuchAlgorithmException ex) {
-            throw new AssertionError("Was unable to process signature for validation: " + ex);
-        }
+        return SignatureValidation.validationSuccessful(
+                selectedSignatureAndHashAlgo, state, signedData, givenSignature);
     }
 
     private byte[] getCompleteSignedData(State state) {
@@ -104,7 +89,11 @@ public class CertificateVerify extends Tls13Test {
         for (TlsAction workflowAction : executedTrace.getTlsActions()) {
             if (workflowAction instanceof MessageAction) {
                 MessageAction messageAction = (MessageAction) workflowAction;
-                for (ProtocolMessage message : messageAction.getMessages()) {
+                List<ProtocolMessage> messages =
+                        messageAction.isReceivingAction()
+                                ? ((ReceivingAction) messageAction).getReceivedMessages()
+                                : ((SendingAction) messageAction).getSentMessages();
+                for (ProtocolMessage message : messages) {
                     if (message instanceof CertificateVerifyMessage) {
                         return transcript;
                     } else {

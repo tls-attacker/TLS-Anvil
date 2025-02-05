@@ -81,7 +81,7 @@ public class RespectClientExtensions extends Tls12Test {
                 trace.getFirstReceivedMessage(ECDHEServerKeyExchangeMessage.class);
         assertNotNull(AssertMsgs.SERVER_KEY_EXCHANGE_NOT_RECEIVED, message);
 
-        ClientHelloMessage sentChm = trace.getFirstSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage sentChm = workflowTrace.getFirstSentMessage(ClientHelloMessage.class);
         byte[] allSentCurves =
                 sentChm.getExtension(EllipticCurvesExtensionMessage.class)
                         .getSupportedGroups()

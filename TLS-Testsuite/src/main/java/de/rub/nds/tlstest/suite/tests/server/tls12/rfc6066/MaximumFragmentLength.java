@@ -98,8 +98,7 @@ public class MaximumFragmentLength extends Tls12Test {
                                 .getExtension(MaxFragmentLengthExtensionMessage.class)
                                 .getMaxFragmentLength()
                                 .getValue()[0]);
-        int maxPlaintextFragmentSize =
-                MaxFragmentLength.getIntegerRepresentation(selectedMaxFragment);
+        int maxPlaintextFragmentSize = selectedMaxFragment.getReceiveLimit();
 
         WorkflowTrace trace = state.getWorkflowTrace();
         for (int j = 1; j < WorkflowTraceResultUtil.getAllReceivedRecords(trace).size(); j++) {

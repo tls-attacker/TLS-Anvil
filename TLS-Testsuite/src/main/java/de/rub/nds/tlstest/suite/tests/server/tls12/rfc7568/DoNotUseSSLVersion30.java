@@ -117,7 +117,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(config);
 
         SendAction sendAction = new SendAction(clientHelloMessage);
-        sendAction.setRecords(record);
+        sendAction.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(

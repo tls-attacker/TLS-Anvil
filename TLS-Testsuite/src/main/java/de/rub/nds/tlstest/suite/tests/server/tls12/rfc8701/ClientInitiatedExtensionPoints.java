@@ -13,10 +13,7 @@ import static org.junit.Assert.assertFalse;
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.ExtensionType;
-import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
@@ -25,6 +22,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMes
 import de.rub.nds.tlsattacker.core.protocol.message.extension.alpn.AlpnEntry;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -86,7 +84,10 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                         .getSelectedValue();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
-        ClientHelloMessage ch = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage ch =
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         ch.addExtension(new GreaseExtensionMessage(greaseExtension, 25));
 
         State state = runner.execute(workflowTrace, c);
@@ -177,7 +178,10 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
             alpnEntries.add(new AlpnEntry(i.name()));
         }
 
-        ClientHelloMessage msg = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage msg =
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         AlpnExtensionMessage ext = msg.getExtension(AlpnExtensionMessage.class);
         ext.setAlpnEntryList(alpnEntries);
 

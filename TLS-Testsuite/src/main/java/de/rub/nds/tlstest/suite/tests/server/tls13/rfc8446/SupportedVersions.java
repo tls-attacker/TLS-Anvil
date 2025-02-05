@@ -17,6 +17,7 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
@@ -24,6 +25,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -62,7 +64,7 @@ public class SupportedVersions extends Tls13Test {
         c.getDefaultClientSupportedCipherSuites()
                 .addAll(
                         CipherSuite.getImplemented().stream()
-                                .filter(CipherSuite::isTLS13)
+                                .filter(CipherSuite::isTls13)
                                 .collect(Collectors.toList()));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -82,7 +84,7 @@ public class SupportedVersions extends Tls13Test {
         c.getDefaultClientSupportedCipherSuites()
                 .addAll(
                         CipherSuite.getImplemented().stream()
-                                .filter(CipherSuite::isTLS13)
+                                .filter(CipherSuite::isTls13)
                                 .collect(Collectors.toList()));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -145,13 +147,14 @@ public class SupportedVersions extends Tls13Test {
                 parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
         c.setDefaultClientSupportedCipherSuites(
                 context.getFeatureExtractionResult().getCipherSuites().stream()
-                        .filter(i -> !i.isTLS13())
+                        .filter(i -> !i.isTls13())
                         .collect(Collectors.toList()));
         c.getDefaultClientSupportedCipherSuites().add(tls13CipherSuite);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace
-                .getFirstSendMessage(ClientHelloMessage.class)
+        ((ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO))
                 .setProtocolVersion(Modifiable.explicit(new byte[] {3, 3}));
 
         State state = runner.execute(workflowTrace, c);
@@ -169,8 +172,9 @@ public class SupportedVersions extends Tls13Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
-        workflowTrace
-                .getFirstSendMessage(ClientHelloMessage.class)
+        ((ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO))
                 .getExtension(SupportedVersionsExtensionMessage.class)
                 .setSupportedVersions(Modifiable.explicit(new byte[] {0x05, 0x05, 0x03, 0x04}));
 
@@ -237,7 +241,10 @@ public class SupportedVersions extends Tls13Test {
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)), new ReceiveAction(new AlertMessage()));
 
-        ClientHelloMessage chm = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage chm =
+                ((ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO));
         chm.setProtocolVersion(Modifiable.explicit(ProtocolVersion.TLS13.getValue()));
         chm.getExtension(SupportedVersionsExtensionMessage.class)
                 .setSupportedVersions(Modifiable.explicit(ProtocolVersion.TLS12.getValue()));
@@ -255,7 +262,10 @@ public class SupportedVersions extends Tls13Test {
         workflowTrace.addTlsActions(
                 new SendAction(new ClientHelloMessage(c)), new ReceiveAction(new AlertMessage()));
 
-        ClientHelloMessage chm = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage chm =
+                ((ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO));
         chm.setProtocolVersion(Modifiable.explicit(ProtocolVersion.TLS13.getValue()));
 
         // note that we only offer TLS 1.3 cipher suites, the server is hence

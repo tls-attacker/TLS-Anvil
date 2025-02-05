@@ -39,6 +39,7 @@ import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 
 public class Fragmentation extends Tls12Test {
@@ -53,7 +54,7 @@ public class Fragmentation extends Tls12Test {
         r.setContentMessageType(ProtocolMessageType.CHANGE_CIPHER_SPEC);
         r.setMaxRecordLengthConfig(0);
         SendAction sendAction = new SendAction(new ChangeCipherSpecMessage());
-        sendAction.setRecords(r);
+        sendAction.setConfiguredRecords(List.of(r));
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(
@@ -77,7 +78,7 @@ public class Fragmentation extends Tls12Test {
         r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
         r.setMaxRecordLengthConfig(0);
         SendAction sendAction = new SendAction(appMsg);
-        sendAction.setRecords(r);
+        sendAction.setConfiguredRecords(List.of(r));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();
@@ -124,7 +125,7 @@ public class Fragmentation extends Tls12Test {
         r.setMaxRecordLengthConfig(0);
         r.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
         SendAction sendAction = new SendAction(appMsg);
-        sendAction.setRecords(r);
+        sendAction.setConfiguredRecords(List.of(r));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
@@ -143,7 +144,7 @@ public class Fragmentation extends Tls12Test {
         r.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
         r.setMaxRecordLengthConfig(0);
         SendAction fin = new SendAction(new FinishedMessage());
-        fin.setRecords(r);
+        fin.setConfiguredRecords(List.of(r));
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(
@@ -168,7 +169,7 @@ public class Fragmentation extends Tls12Test {
                 Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
         // add dummy Application Message
         SendAction sendOverflow = new SendAction(new ApplicationMessage());
-        sendOverflow.setRecords(overflowRecord);
+        sendOverflow.setConfiguredRecords(List.of(overflowRecord));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
@@ -195,7 +196,7 @@ public class Fragmentation extends Tls12Test {
                 Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 2049]));
         // add dummy Application Message
         SendAction sendOverflow = new SendAction(new ApplicationMessage());
-        sendOverflow.setRecords(overflowRecord);
+        sendOverflow.setConfiguredRecords(List.of(overflowRecord));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(

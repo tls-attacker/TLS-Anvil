@@ -25,6 +25,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -74,8 +75,9 @@ public class SupportedVersions extends Tls13Test {
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace
-                .getFirstSendMessage(ServerHelloMessage.class)
+        ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO))
                 .setProtocolVersion(Modifiable.explicit(chosenInvalidVersion));
 
         State state = runner.execute(workflowTrace, c);
@@ -92,8 +94,9 @@ public class SupportedVersions extends Tls13Test {
         c.setEnforceSettings(true);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        workflowTrace
-                .getFirstSendMessage(ServerHelloMessage.class)
+        ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO))
                 .getExtension(SupportedVersionsExtensionMessage.class)
                 .setSupportedVersions(Modifiable.explicit(new byte[] {0x03, 0x03}));
 
@@ -110,8 +113,9 @@ public class SupportedVersions extends Tls13Test {
         c.setEnforceSettings(true);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        workflowTrace
-                .getFirstSendMessage(ServerHelloMessage.class)
+        ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO))
                 .getExtension(SupportedVersionsExtensionMessage.class)
                 .setSupportedVersions(Modifiable.explicit(new byte[] {0x03, 0x03}));
 

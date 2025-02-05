@@ -30,6 +30,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.*;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 
 public class CBCBlockCipher extends Tls12Test {
@@ -46,7 +47,7 @@ public class CBCBlockCipher extends Tls12Test {
             CipherSuite cipherSuite,
             ProtocolVersion targetVersion) {
         int blockSize = AlgorithmResolver.getCipher(cipherSuite).getBlocksize();
-        int macSize = AlgorithmResolver.getMacAlgorithm(targetVersion, cipherSuite).getSize();
+        int macSize = AlgorithmResolver.getMacAlgorithm(targetVersion, cipherSuite).getMacLength();
         if (isEncryptThenMac) {
             return blockSize - (applicationMessageContentLength % blockSize);
         } else {
@@ -116,7 +117,7 @@ public class CBCBlockCipher extends Tls12Test {
                         Modifiable.explicit(c.getDefaultApplicationMessageData().getBytes()));
 
                 SendAction sendAction = new SendAction(appData);
-                sendAction.setRecords(record);
+                sendAction.setConfiguredRecords(List.of(record));
 
                 WorkflowTrace workflowTrace =
                         runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -169,7 +170,7 @@ public class CBCBlockCipher extends Tls12Test {
         appData.setData(Modifiable.explicit("test".getBytes()));
 
         SendAction sendAction = new SendAction(appData);
-        sendAction.setRecords(record);
+        sendAction.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
@@ -213,7 +214,7 @@ public class CBCBlockCipher extends Tls12Test {
         appData.setData(Modifiable.explicit("test".getBytes()));
 
         SendAction sendAction = new SendAction(appData);
-        sendAction.setRecords(record);
+        sendAction.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));

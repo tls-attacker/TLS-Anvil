@@ -49,7 +49,7 @@ public class SupportedCiphersuites extends Tls13Test {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
         List<CipherSuite> advertised =
                 CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue()).stream()
-                        .filter(CipherSuite::isTLS13)
+                        .filter(CipherSuite::isTls13)
                         .collect(Collectors.toList());
         List<CipherSuite> supported =
                 new ArrayList<>(

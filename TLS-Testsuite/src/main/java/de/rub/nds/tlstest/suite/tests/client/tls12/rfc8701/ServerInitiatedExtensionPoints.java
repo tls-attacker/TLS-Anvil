@@ -25,6 +25,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
@@ -49,7 +50,10 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
                 parameterCombination
                         .getParameter(GreaseProtocolVersionDerivation.class)
                         .getSelectedValue();
-        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        ServerHelloMessage sh =
+                (ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         sh.setProtocolVersion(Modifiable.explicit(greaseVersion.getValue()));
 
         State state = runner.execute(workflowTrace, c);
@@ -77,7 +81,10 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        ServerHelloMessage sh =
+                (ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         sh.setSelectedCipherSuite(Modifiable.explicit(greaseCipher.getByteValue()));
 
         State state = runner.execute(workflowTrace, c);
@@ -96,7 +103,10 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        ServerHelloMessage sh =
+                (ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         sh.addExtension(new GreaseExtensionMessage(greaseExtension, 25));
 
         State state = runner.execute(workflowTrace, c);
@@ -117,7 +127,9 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
                         .getParameter(GreaseNamedGroupDerivation.class)
                         .getSelectedValue();
         ECDHEServerKeyExchangeMessage skx =
-                workflowTrace.getFirstSendMessage(ECDHEServerKeyExchangeMessage.class);
+                (ECDHEServerKeyExchangeMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         skx.setNamedGroup(Modifiable.explicit(greaseGroup.getValue()));
 
         State state = runner.execute(workflowTrace, c);
@@ -135,7 +147,9 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
         SignatureAndHashAlgorithm greaseSigHash =
                 parameterCombination.getParameter(GreaseSigHashDerivation.class).getSelectedValue();
         ServerKeyExchangeMessage skx =
-                workflowTrace.getFirstSendMessage(ServerKeyExchangeMessage.class);
+                (ServerKeyExchangeMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         skx.setSignatureAndHashAlgorithm(Modifiable.explicit(greaseSigHash.getByteValue()));
 
         State state = runner.execute(workflowTrace, c);

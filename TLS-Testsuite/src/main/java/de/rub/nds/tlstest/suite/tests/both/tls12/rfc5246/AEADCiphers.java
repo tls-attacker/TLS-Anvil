@@ -25,6 +25,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.List;
 
 public class AEADCiphers extends Tls12Test {
 
@@ -43,7 +44,7 @@ public class AEADCiphers extends Tls12Test {
         record.getComputations().setAuthenticationTag(Modifiable.xor(modificationBitmask, 0));
 
         SendAction sendAction = new SendAction(new ApplicationMessage());
-        sendAction.setRecords(record);
+        sendAction.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
@@ -85,7 +86,7 @@ public class AEADCiphers extends Tls12Test {
         appData.setData(Modifiable.explicit(c.getDefaultApplicationMessageData().getBytes()));
 
         SendAction sendAction = new SendAction(appData);
-        sendAction.setRecords(record);
+        sendAction.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));

@@ -15,11 +15,11 @@ import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.protocol.constants.PointFormat;
+import de.rub.nds.protocol.crypto.ec.*;
+import de.rub.nds.protocol.crypto.ffdh.FfdhGroup;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
-import de.rub.nds.tlsattacker.core.crypto.ec.*;
-import de.rub.nds.tlsattacker.core.crypto.ffdh.FFDHEGroup;
-import de.rub.nds.tlsattacker.core.crypto.ffdh.GroupFactory;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
@@ -262,7 +262,7 @@ public class KeyShare extends Tls13Test {
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         InvalidCurvePoint groupSpecificPoint = InvalidCurvePoint.largeOrder(selectedGroup);
-        EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
+        EllipticCurve curve = (EllipticCurve) selectedGroup.getGroupParameters().getGroup();
         Point invalidPoint =
                 new Point(
                         new FieldElementFp(
@@ -273,11 +273,12 @@ public class KeyShare extends Tls13Test {
         // x coordinate can be valid for a point on both curves
         byte[] serializedPublicKey =
                 PointFormatter.formatToByteArray(
-                        selectedGroup, invalidPoint, ECPointFormat.UNCOMPRESSED);
+                        selectedGroup.getGroupParameters(), invalidPoint, PointFormat.UNCOMPRESSED);
         ClientHelloMessage clientHello = new ClientHelloMessage(config);
         List<KeyShareEntry> preparedEntryList = new LinkedList<>();
         KeyShareEntry maliciousKeyShare =
-                new KeyShareEntry(selectedGroup, config.getKeySharePrivate());
+                new KeyShareEntry(
+                        selectedGroup, config.getDefaultKeySharePrivateKey(selectedGroup));
         maliciousKeyShare.setPublicKey(Modifiable.explicit(serializedPublicKey));
         preparedEntryList.add(maliciousKeyShare);
         clientHello.getExtension(KeyShareExtensionMessage.class).setKeyShareList(preparedEntryList);
@@ -308,7 +309,7 @@ public class KeyShare extends Tls13Test {
         Config config = getPreparedConfig(runner);
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
-        FFDHEGroup ffdheGroup = GroupFactory.getGroup(selectedGroup);
+        FfdhGroup ffdheGroup = (FfdhGroup) selectedGroup.getGroupParameters().getGroup();
         ShareOutOfBoundsDerivation.OutOfBoundsType type =
                 parameterCombination
                         .getParameter(ShareOutOfBoundsDerivation.class)
@@ -320,7 +321,8 @@ public class KeyShare extends Tls13Test {
 
         List<KeyShareEntry> keyShareList = new LinkedList<>();
         KeyShareEntry invalidEntry =
-                new KeyShareEntry(selectedGroup, config.getDefaultKeySharePrivateKey());
+                new KeyShareEntry(
+                        selectedGroup, config.getDefaultKeySharePrivateKey(selectedGroup));
 
         BigInteger publicKey = null;
         switch (type) {
@@ -331,14 +333,14 @@ public class KeyShare extends Tls13Test {
                 publicKey = BigInteger.ONE;
                 break;
             case SHARE_PLUS_P:
-                publicKey = ffdheGroup.getP().add(BigInteger.ONE);
+                publicKey = ffdheGroup.getModulus().add(BigInteger.ONE);
                 break;
         }
 
         invalidEntry.setPublicKey(
                 Modifiable.explicit(
                         ArrayConverter.bigIntegerToNullPaddedByteArray(
-                                publicKey, ffdheGroup.getP().bitLength() / Bits.IN_A_BYTE)));
+                                publicKey, ffdheGroup.getModulus().bitLength() / Bits.IN_A_BYTE)));
         keyShareList.add(invalidEntry);
         clientHello.getExtension(KeyShareExtensionMessage.class).setKeyShareList(keyShareList);
         worklfowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
@@ -365,7 +367,7 @@ public class KeyShare extends Tls13Test {
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         TwistedCurvePoint groupSpecificPoint = TwistedCurvePoint.smallOrder(selectedGroup);
-        RFC7748Curve curve = (RFC7748Curve) CurveFactory.getCurve(selectedGroup);
+        RFC7748Curve curve = (RFC7748Curve) selectedGroup.getGroupParameters().getGroup();
         Point invalidPoint =
                 new Point(
                         new FieldElementFp(
@@ -377,7 +379,8 @@ public class KeyShare extends Tls13Test {
         ClientHelloMessage clientHello = new ClientHelloMessage(config);
         List<KeyShareEntry> preparedEntryList = new LinkedList<>();
         KeyShareEntry maliciousKeyShare =
-                new KeyShareEntry(selectedGroup, config.getKeySharePrivate());
+                new KeyShareEntry(
+                        selectedGroup, config.getDefaultKeySharePrivateKey(selectedGroup));
         maliciousKeyShare.setPublicKey(Modifiable.explicit(serializedPublicKey));
         preparedEntryList.add(maliciousKeyShare);
         clientHello.getExtension(KeyShareExtensionMessage.class).setKeyShareList(preparedEntryList);

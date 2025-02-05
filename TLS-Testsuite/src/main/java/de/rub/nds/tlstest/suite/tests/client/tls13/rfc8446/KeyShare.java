@@ -17,13 +17,13 @@ import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.protocol.constants.PointFormat;
+import de.rub.nds.protocol.crypto.ec.*;
+import de.rub.nds.protocol.crypto.ffdh.FfdhGroup;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.Bits;
-import de.rub.nds.tlsattacker.core.constants.ECPointFormat;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlsattacker.core.crypto.ec.*;
-import de.rub.nds.tlsattacker.core.crypto.ffdh.FFDHEGroup;
-import de.rub.nds.tlsattacker.core.crypto.ffdh.GroupFactory;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
@@ -32,6 +32,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionM
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.InvalidCurvePoint;
@@ -97,15 +98,19 @@ public class KeyShare extends Tls13Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        if (groups.size() == 0) {
+        if (groups.isEmpty()) {
             KeyShareExtensionMessage keyShareExt =
-                    workflowTrace
-                            .getFirstSendMessage(ServerHelloMessage.class)
+                    ((ServerHelloMessage)
+                                    WorkflowTraceConfigurationUtil
+                                            .getFirstStaticConfiguredSendMessage(
+                                                    workflowTrace,
+                                                    HandshakeMessageType.SERVER_HELLO))
                             .getExtension(KeyShareExtensionMessage.class);
             keyShareExt.setKeyShareListBytes(Modifiable.explicit(new byte[] {0x50, 0x50, 0, 1, 1}));
         } else {
-            EllipticCurve curve = CurveFactory.getCurve(groups.get(0));
-            Point pubKey = curve.mult(c.getDefaultServerEcPrivateKey(), curve.getBasePoint());
+            EllipticCurve curve = (EllipticCurve) groups.get(0).getGroupParameters().getGroup();
+            Point pubKey =
+                    curve.mult(c.getDefaultKeySharePrivateKey(groups.get(0)), curve.getBasePoint());
             byte[] key = PointFormatter.toRawFormat(pubKey);
 
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -118,8 +123,11 @@ public class KeyShare extends Tls13Test {
             }
 
             KeyShareExtensionMessage keyShareExt =
-                    workflowTrace
-                            .getFirstSendMessage(ServerHelloMessage.class)
+                    ((ServerHelloMessage)
+                                    WorkflowTraceConfigurationUtil
+                                            .getFirstStaticConfiguredSendMessage(
+                                                    workflowTrace,
+                                                    HandshakeMessageType.SERVER_HELLO))
                             .getExtension(KeyShareExtensionMessage.class);
             keyShareExt.setKeyShareListBytes(Modifiable.explicit(stream.toByteArray()));
         }
@@ -138,7 +146,7 @@ public class KeyShare extends Tls13Test {
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         InvalidCurvePoint groupSpecificPoint = InvalidCurvePoint.largeOrder(selectedGroup);
-        EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
+        EllipticCurve curve = (EllipticCurve) selectedGroup.getGroupParameters().getGroup();
         Point invalidPoint =
                 new Point(
                         new FieldElementFp(
@@ -149,12 +157,16 @@ public class KeyShare extends Tls13Test {
         // x coordinate can be valid for a point on both curves
         byte[] serializedPublicKey =
                 PointFormatter.formatToByteArray(
-                        selectedGroup, invalidPoint, ECPointFormat.UNCOMPRESSED);
+                        selectedGroup.getGroupParameters(), invalidPoint, PointFormat.UNCOMPRESSED);
 
-        ServerHelloMessage serverHello = workflowTrace.getLastSendMessage(ServerHelloMessage.class);
+        ServerHelloMessage serverHello =
+                (ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         List<KeyShareEntry> preparedEntryList = new LinkedList<>();
         KeyShareEntry maliciousKeyShare =
-                new KeyShareEntry(selectedGroup, config.getKeySharePrivate());
+                new KeyShareEntry(
+                        selectedGroup, config.getDefaultKeySharePrivateKey(selectedGroup));
         maliciousKeyShare.setPublicKey(Modifiable.explicit(serializedPublicKey));
         preparedEntryList.add(maliciousKeyShare);
         serverHello.getExtension(KeyShareExtensionMessage.class).setKeyShareList(preparedEntryList);
@@ -181,7 +193,7 @@ public class KeyShare extends Tls13Test {
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         TwistedCurvePoint groupSpecificPoint = TwistedCurvePoint.smallOrder(selectedGroup);
-        RFC7748Curve curve = (RFC7748Curve) CurveFactory.getCurve(selectedGroup);
+        RFC7748Curve curve = (RFC7748Curve) selectedGroup.getGroupParameters().getGroup();
         Point invalidPoint =
                 new Point(
                         new FieldElementFp(
@@ -190,10 +202,14 @@ public class KeyShare extends Tls13Test {
                                 groupSpecificPoint.getPublicPointBaseY(), curve.getModulus()));
 
         byte[] serializedPublicKey = curve.encodeCoordinate(invalidPoint.getFieldX().getData());
-        ServerHelloMessage serverHello = workflowTrace.getLastSendMessage(ServerHelloMessage.class);
+        ServerHelloMessage serverHello =
+                (ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         List<KeyShareEntry> preparedEntryList = new LinkedList<>();
         KeyShareEntry maliciousKeyShare =
-                new KeyShareEntry(selectedGroup, config.getKeySharePrivate());
+                new KeyShareEntry(
+                        selectedGroup, config.getDefaultKeySharePrivateKey(selectedGroup));
         maliciousKeyShare.setPublicKey(Modifiable.explicit(serializedPublicKey));
         preparedEntryList.add(maliciousKeyShare);
         serverHello.getExtension(KeyShareExtensionMessage.class).setKeyShareList(preparedEntryList);
@@ -231,19 +247,22 @@ public class KeyShare extends Tls13Test {
         Config config = getPreparedConfig(runner);
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
-        FFDHEGroup ffdheGroup = GroupFactory.getGroup(selectedGroup);
+        FfdhGroup ffdheGroup = (FfdhGroup) selectedGroup.getGroupParameters().getGroup();
         ShareOutOfBoundsDerivation.OutOfBoundsType type =
                 parameterCombination
                         .getParameter(ShareOutOfBoundsDerivation.class)
                         .getSelectedValue();
 
-        WorkflowTrace worklfowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
         ServerHelloMessage serverHello =
-                worklfowTrace.getFirstSendMessage(ServerHelloMessage.class);
+                (ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
 
         List<KeyShareEntry> keyShareList = new LinkedList<>();
         KeyShareEntry invalidEntry =
-                new KeyShareEntry(selectedGroup, config.getDefaultKeySharePrivateKey());
+                new KeyShareEntry(
+                        selectedGroup, config.getDefaultKeySharePrivateKey(selectedGroup));
 
         BigInteger publicKey = null;
         switch (type) {
@@ -254,19 +273,19 @@ public class KeyShare extends Tls13Test {
                 publicKey = BigInteger.ONE;
                 break;
             case SHARE_PLUS_P:
-                publicKey = ffdheGroup.getP().add(BigInteger.ONE);
+                publicKey = ffdheGroup.getModulus().add(BigInteger.ONE);
                 break;
         }
 
         invalidEntry.setPublicKey(
                 Modifiable.explicit(
                         ArrayConverter.bigIntegerToNullPaddedByteArray(
-                                publicKey, ffdheGroup.getP().bitLength() / Bits.IN_A_BYTE)));
+                                publicKey, ffdheGroup.getModulus().bitLength() / Bits.IN_A_BYTE)));
         keyShareList.add(invalidEntry);
         serverHello.getExtension(KeyShareExtensionMessage.class).setKeyShareList(keyShareList);
-        worklfowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
-        State state = runner.execute(worklfowTrace, config);
+        State state = runner.execute(workflowTrace, config);
         Validator.receivedFatalAlert(state, testCase);
     }
 

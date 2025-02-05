@@ -78,7 +78,7 @@ public class DoS extends Dtls12Test {
         Record preparedRecord = new Record();
         preparedRecord.setSequenceNumber(
                 Modifiable.explicit(BigInteger.valueOf(MODIFIED_SEQUENCE_NUMBER)));
-        trace.getFirstSendingAction().getSendRecords().add(preparedRecord);
+        ((SendAction) trace.getFirstSendingAction()).getConfiguredRecords().add(preparedRecord);
         trace.addTlsActions(new ReceiveAction(new HelloVerifyRequestMessage()));
 
         State state = runner.execute(trace, c);
@@ -116,7 +116,7 @@ public class DoS extends Dtls12Test {
         Record preparedRecord = new Record();
         preparedRecord.setSequenceNumber(
                 Modifiable.explicit(BigInteger.valueOf(MODIFIED_SEQUENCE_NUMBER)));
-        trace.getLastSendingAction().getSendRecords().add(preparedRecord);
+        ((SendAction) trace.getLastSendingAction()).getConfiguredRecords().add(preparedRecord);
 
         State state = runner.execute(trace, c);
 
@@ -172,9 +172,13 @@ public class DoS extends Dtls12Test {
     public void negotiateDtls12viaRecordHeader(AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = getPreparedConfig(runner);
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
-        trace.getFirstSendMessage(ClientHelloMessage.class)
+        ((ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                trace, HandshakeMessageType.CLIENT_HELLO))
                 .setProtocolVersion(Modifiable.explicit(ProtocolVersion.DTLS10.getValue()));
-        trace.getLastSendMessage(ClientHelloMessage.class)
+        ((ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
+                                trace, HandshakeMessageType.CLIENT_HELLO))
                 .setProtocolVersion(Modifiable.explicit(ProtocolVersion.DTLS10.getValue()));
         Record preparedRecord1 = new Record();
         Record preparedRecord2 = new Record();

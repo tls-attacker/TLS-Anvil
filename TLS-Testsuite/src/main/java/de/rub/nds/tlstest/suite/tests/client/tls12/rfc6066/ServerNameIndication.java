@@ -12,7 +12,7 @@ import static org.junit.Assert.assertFalse;
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
-import de.rub.nds.tlsattacker.core.constants.NameType;
+import de.rub.nds.tlsattacker.core.constants.SniType;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ServerNameIndicationExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.ServerNamePair;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
@@ -40,9 +40,9 @@ public class ServerNameIndication extends Tls12Test {
                         .getExtension(ServerNameIndicationExtensionMessage.class);
         List<ServerNamePair> snis = ext.getServerNameList();
 
-        List<NameType> nameTypes = new ArrayList<>();
+        List<SniType> nameTypes = new ArrayList<>();
         for (ServerNamePair i : snis) {
-            NameType name = NameType.getNameType(i.getServerNameType().getValue());
+            SniType name = SniType.getNameType(i.getServerNameType().getValue());
             assertFalse("More than one name of the same name_type", nameTypes.contains(name));
             nameTypes.add(name);
         }

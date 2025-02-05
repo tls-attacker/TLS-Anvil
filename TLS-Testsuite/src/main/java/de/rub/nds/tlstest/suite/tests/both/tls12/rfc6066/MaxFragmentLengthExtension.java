@@ -32,6 +32,7 @@ import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
@@ -64,18 +65,14 @@ public class MaxFragmentLengthExtension extends Tls12Test {
         MaxFragmentLength maxLength = getNegotiatedMaxFragmentLength(config);
         ApplicationMessage overflowingAppData = new ApplicationMessage();
         overflowingAppData.setData(
-                Modifiable.explicit(
-                        new byte
-                                [MaxFragmentLength.getIntegerRepresentation(maxLength)
-                                        + 256
-                                        + 32]));
+                Modifiable.explicit(new byte[maxLength.getReceiveLimit() + 256 + 32]));
 
         SendAction sendOverflowingRecord = new SendAction(overflowingAppData);
 
         // use a record that ignores the extension's limitations
         Record fullRecord = new Record();
         fullRecord.setMaxRecordLengthConfig(16384);
-        sendOverflowingRecord.setRecords(fullRecord);
+        sendOverflowingRecord.setConfiguredRecords(List.of(fullRecord));
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsAction(sendOverflowingRecord);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));

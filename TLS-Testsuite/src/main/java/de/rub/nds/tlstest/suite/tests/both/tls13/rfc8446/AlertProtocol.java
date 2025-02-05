@@ -33,6 +33,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AlertDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 
 public class AlertProtocol extends Tls13Test {
@@ -118,7 +119,7 @@ public class AlertProtocol extends Tls13Test {
         Record unfragmentedRecord = new Record();
         unfragmentedRecord.setMaxRecordLengthConfig(2);
         SendAction sendAlert = new SendAction(alert);
-        sendAlert.setRecords(unfragmentedRecord);
+        sendAlert.setConfiguredRecords(List.of(unfragmentedRecord));
         trace.addTlsAction(sendAlert);
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
 

@@ -18,6 +18,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.RSAClientKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
@@ -45,7 +46,9 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
                 new ReceiveAction(new AlertMessage()));
 
         RSAClientKeyExchangeMessage cke =
-                workflowTrace.getFirstSendMessage(RSAClientKeyExchangeMessage.class);
+                (RSAClientKeyExchangeMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         cke.prepareComputations();
         // changes "0x03 0x03" to "0x03 0x02" (TLS1.2 to TLS1.1)
         cke.getComputations().setPremasterSecret(Modifiable.xor(new byte[] {0x00, 0x01}, 0));
@@ -69,7 +72,9 @@ public class RSAEncryptedPremasterSecretMessage extends Tls12Test {
                 new ReceiveAction(new AlertMessage()));
 
         RSAClientKeyExchangeMessage cke =
-                workflowTrace.getFirstSendMessage(RSAClientKeyExchangeMessage.class);
+                (RSAClientKeyExchangeMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         cke.prepareComputations();
         // changes "0x00 0x02 random 0x00" to "0x00 0x03 random 0x00"
         cke.getComputations().setPlainPaddedPremasterSecret(Modifiable.xor(new byte[] {0x01}, 1));

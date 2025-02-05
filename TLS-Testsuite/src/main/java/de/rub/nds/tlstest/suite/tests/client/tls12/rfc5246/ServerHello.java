@@ -58,7 +58,7 @@ public class ServerHello extends Tls12Test {
         } else if (!types.contains(ExtensionType.SERVER_NAME_INDICATION)) {
             ServerNameIndicationExtensionMessage sni = new ServerNameIndicationExtensionMessage();
             ServerNamePair sniPair =
-                    new ServerNamePair(NameType.HOST_NAME.getValue(), "localhost".getBytes());
+                    new ServerNamePair(SniType.HOST_NAME.getValue(), "localhost".getBytes());
             sni.setServerNameList(
                     new ArrayList<ServerNamePair>() {
                         {

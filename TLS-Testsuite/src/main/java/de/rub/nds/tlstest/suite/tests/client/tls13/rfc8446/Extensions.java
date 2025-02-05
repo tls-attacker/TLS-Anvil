@@ -16,6 +16,7 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.MaxFragmentLength;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
@@ -26,6 +27,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.MaxFragmentLengthE
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ServerNameIndicationExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
@@ -85,7 +87,10 @@ public class Extensions extends Tls13Test {
             ext.setMaxFragmentLength(
                     Modifiable.explicit(new byte[] {MaxFragmentLength.TWO_11.getValue()}));
 
-            workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class).addExtension(ext);
+            ((EncryptedExtensionsMessage)
+                            WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                    workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS))
+                    .addExtension(ext);
         } else if (selectedExtension == ExtensionType.ALPN) {
             c.setDefaultProposedAlpnProtocols(
                     "http/1.1",
@@ -103,10 +108,16 @@ public class Extensions extends Tls13Test {
                     "pop3",
                     "managesieve");
             AlpnExtensionMessage ext = new AlpnExtensionMessage();
-            workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class).addExtension(ext);
+            ((EncryptedExtensionsMessage)
+                            WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                    workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS))
+                    .addExtension(ext);
         } else if (selectedExtension == ExtensionType.SERVER_NAME_INDICATION) {
             ServerNameIndicationExtensionMessage ext = new ServerNameIndicationExtensionMessage();
-            workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class).addExtension(ext);
+            ((EncryptedExtensionsMessage)
+                            WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                    workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS))
+                    .addExtension(ext);
         } else {
             LOGGER.warn("ClientHello already contains every extension");
             throw new AssertionError("ClientHello already contains every extension");
@@ -127,8 +138,9 @@ public class Extensions extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        workflowTrace
-                .getFirstSendMessage(ServerHelloMessage.class)
+        ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO))
                 .addExtension(new HeartbeatExtensionMessage());
 
         State state = runner.execute(workflowTrace, c);

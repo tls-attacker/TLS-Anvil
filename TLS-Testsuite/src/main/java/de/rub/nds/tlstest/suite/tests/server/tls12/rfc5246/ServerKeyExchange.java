@@ -27,12 +27,6 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.util.SignatureValidation;
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
 import org.junit.jupiter.api.Tag;
 
 /** */
@@ -83,17 +77,8 @@ public class ServerKeyExchange extends Tls12Test {
                 SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
                         serverKeyExchange.getSignatureAndHashAlgorithm().getValue());
 
-        try {
-            return SignatureValidation.validationSuccessful(
-                    selectedSignatureAndHashAlgo, state, completeSignedData, givenSignature);
-        } catch (SignatureException
-                | InvalidKeyException
-                | InvalidKeySpecException
-                | IOException
-                | InvalidAlgorithmParameterException
-                | NoSuchAlgorithmException ex) {
-            throw new AssertionError("Was unable to process signature for validation: " + ex);
-        }
+        return SignatureValidation.validationSuccessful(
+                selectedSignatureAndHashAlgo, state, completeSignedData, givenSignature);
     }
 
     private byte[] getSignedDataFromKeyExchangeMessage(ServerKeyExchangeMessage serverKeyExchange) {
@@ -129,17 +114,5 @@ public class ServerKeyExchange extends Tls12Test {
         } else {
             throw new AssertionError("Unsupported ServerKeyExchange type");
         }
-    }
-
-    public boolean isSupportedCipherSuite(CipherSuite cipherSuiteCandidate) {
-        return cipherSuiteCandidate.isRealCipherSuite()
-                && !cipherSuiteCandidate.isTLS13()
-                && cipherSuiteCandidate.isEphemeral()
-                && (AlgorithmResolver.getCertificateKeyType(cipherSuiteCandidate)
-                                == CertificateKeyType.ECDSA
-                        || AlgorithmResolver.getCertificateKeyType(cipherSuiteCandidate)
-                                == CertificateKeyType.RSA
-                        || AlgorithmResolver.getCertificateKeyType(cipherSuiteCandidate)
-                                == CertificateKeyType.DSS);
     }
 }

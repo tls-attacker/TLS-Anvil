@@ -33,6 +33,7 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AdditionalPaddingLengthDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolMessageTypeDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 
 public class RecordProtocol extends Tls13Test {
@@ -51,7 +52,7 @@ public class RecordProtocol extends Tls13Test {
         }
 
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
-        trace.getFirstAction(SendAction.class).setRecords(record);
+        trace.getFirstAction(SendAction.class).setConfiguredRecords(List.of(record));
 
         State state = runner.execute(trace, c);
 
@@ -73,7 +74,7 @@ public class RecordProtocol extends Tls13Test {
         record.setContentType(Modifiable.explicit((byte) 0xff));
         FinishedMessage finished = new FinishedMessage();
         SendAction sendFinished = new SendAction(finished);
-        sendFinished.setRecords(record);
+        sendFinished.setConfiguredRecords(List.of(record));
         workflowTrace.addTlsActions(sendFinished, new ReceiveAction(new AlertMessage()));
 
         State state = runner.execute(workflowTrace, c);
@@ -95,7 +96,7 @@ public class RecordProtocol extends Tls13Test {
         record.getComputations().setAuthenticationTag(Modifiable.xor(modificationBitmask, 0));
 
         SendAction appData = new SendAction(new ApplicationMessage());
-        appData.setRecords(record);
+        appData.setConfiguredRecords(List.of(record));
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         trace.addTlsActions(appData, new ReceiveAction(new AlertMessage()));
 
@@ -118,7 +119,7 @@ public class RecordProtocol extends Tls13Test {
         overflowRecord.setCleanProtocolMessageBytes(
                 Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
         SendAction sendOverflow = new SendAction(msg);
-        sendOverflow.setRecords(overflowRecord);
+        sendOverflow.setConfiguredRecords(List.of(overflowRecord));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
@@ -157,7 +158,7 @@ public class RecordProtocol extends Tls13Test {
         record.getComputations().setCiphertext(Modifiable.xor(modificationBitmask, 0));
 
         SendAction appData = new SendAction(new ApplicationMessage());
-        appData.setRecords(record);
+        appData.setConfiguredRecords(List.of(record));
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         trace.addTlsActions(appData, new ReceiveAction(new AlertMessage()));
 
@@ -215,7 +216,7 @@ public class RecordProtocol extends Tls13Test {
                 Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 257]));
         // add dummy Application Message
         SendAction sendOverflow = new SendAction(new ApplicationMessage());
-        sendOverflow.setRecords(overflowRecord);
+        sendOverflow.setConfiguredRecords(List.of(overflowRecord));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendOverflow, new ReceiveAction(new AlertMessage()));
@@ -244,7 +245,7 @@ public class RecordProtocol extends Tls13Test {
         r.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
         r.setMaxRecordLengthConfig(0);
         SendAction sendAction = new SendAction(appMsg);
-        sendAction.setRecords(r);
+        sendAction.setConfiguredRecords(List.of(r));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
@@ -263,7 +264,7 @@ public class RecordProtocol extends Tls13Test {
         r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
         r.setMaxRecordLengthConfig(0);
         SendAction sendAction = new SendAction(appMsg);
-        sendAction.setRecords(r);
+        sendAction.setConfiguredRecords(List.of(r));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();
@@ -308,7 +309,7 @@ public class RecordProtocol extends Tls13Test {
         trace.addTlsAction(new SendAction(new FinishedMessage()));
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
         // define modified record for finished
-        ((SendAction) trace.getLastSendingAction()).setRecords(record);
+        ((SendAction) trace.getLastSendingAction()).setConfiguredRecords(List.of(record));
 
         State state = runner.execute(trace, config);
 
@@ -328,7 +329,7 @@ public class RecordProtocol extends Tls13Test {
         trace.addTlsAction(new SendAction(new ApplicationMessage()));
         trace.addTlsAction(new ReceiveAction(new AlertMessage()));
         // define modified record for finished
-        ((SendAction) trace.getLastSendingAction()).setRecords(record);
+        ((SendAction) trace.getLastSendingAction()).setConfiguredRecords(List.of(record));
 
         State state = runner.execute(trace, config);
 

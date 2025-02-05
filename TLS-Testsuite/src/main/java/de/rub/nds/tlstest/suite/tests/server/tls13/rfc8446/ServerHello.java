@@ -19,14 +19,13 @@ import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -259,7 +258,9 @@ public class ServerHello extends Tls13Test {
         ServerHelloMessage serverHello =
                 state.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
         ClientHelloMessage clientHello =
-                state.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
+                (ClientHelloMessage)
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.CLIENT_HELLO);
         checkForForbiddenExtensions(serverHello);
         checkForUnproposedExtensions(serverHello, clientHello);
         SharedExtensionTests.checkForDuplicateExtensions(serverHello);

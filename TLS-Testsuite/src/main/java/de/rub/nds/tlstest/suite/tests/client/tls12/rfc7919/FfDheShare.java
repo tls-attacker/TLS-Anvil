@@ -78,7 +78,7 @@ public class FfDheShare extends Tls12Test {
                 (DHEServerKeyExchangeMessage)
                         WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
-        byte[] publicShare = c.getDefaultServerDhPublicKey().toByteArray();
+        byte[] publicShare = c.getDefaultServerEphemeralDhPublicKey().toByteArray();
         SKE.setPublicKey(publicShare);
         SKE.getPublicKey().setModification(new ByteArrayExplicitValueModification(publicShare));
 
@@ -149,8 +149,8 @@ public class FfDheShare extends Tls12Test {
         BigInteger generator = new BigInteger("2", 16);
 
         config.setDefaultServerNamedGroups(new LinkedList<>());
-        config.setDefaultServerDhGenerator(generator);
-        config.setDefaultServerDhModulus(unsafeSafePrime);
+        config.setDefaultServerEphemeralDhGenerator(generator);
+        config.setDefaultServerEphemeralDhModulus(unsafeSafePrime);
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(

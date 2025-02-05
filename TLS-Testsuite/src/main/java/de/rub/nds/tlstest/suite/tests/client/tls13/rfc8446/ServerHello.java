@@ -17,12 +17,10 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
@@ -49,7 +47,10 @@ public class ServerHello extends Tls13Test {
 
     public static void sharedSessionIdTest(
             WorkflowTrace workflowTrace, WorkflowRunner runner, AnvilTestCase testCase) {
-        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        ServerHelloMessage sh =
+                ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO));
 
         // WolfSSL expects 32 bytes - to be determined if this is correct behavior
         byte[] dummySessionId = new byte[32];
@@ -82,7 +83,10 @@ public class ServerHello extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        ServerHelloMessage sh =
+                ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO));
         sh.setSelectedCipherSuite(Modifiable.explicit(CipherSuite.GREASE_00.getByteValue()));
 
         State state = runner.execute(workflowTrace, c);
@@ -101,7 +105,10 @@ public class ServerHello extends Tls13Test {
 
     public static void sharedCompressionValueTest(
             WorkflowTrace workflowTrace, WorkflowRunner runner, AnvilTestCase testCase) {
-        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        ServerHelloMessage sh =
+                ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO));
         sh.setSelectedCompressionMethod(Modifiable.explicit((byte) 0x01));
 
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
@@ -128,8 +135,9 @@ public class ServerHello extends Tls13Test {
                 new SendAction(ActionOption.MAY_FAIL, new ServerHelloDoneMessage()),
                 new ReceiveAction(new AlertMessage()));
 
-        workflowTrace
-                .getFirstSendMessage(ServerHelloMessage.class)
+        ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO))
                 .setRandom(Modifiable.explicit(serverRandom));
 
         State state = runner.execute(workflowTrace, c);

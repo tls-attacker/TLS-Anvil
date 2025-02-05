@@ -22,7 +22,7 @@ import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -240,7 +240,7 @@ public class CBCBlockCipher extends Tls12Test {
 
         Validator.executedAsPlanned(state, testCase);
         boolean sawCCS = false;
-        for (Record record : WorkflowTraceUtil.getAllReceivedRecords(state.getWorkflowTrace())) {
+        for (Record record : WorkflowTraceResultUtil.getAllReceivedRecords(state.getWorkflowTrace())) {
             if (record.getContentMessageType() == ProtocolMessageType.CHANGE_CIPHER_SPEC) {
                 sawCCS = true;
             }

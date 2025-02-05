@@ -19,7 +19,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.HandshakeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
@@ -115,8 +115,8 @@ public class TlsLengthfieldTest extends TlsBaseTest {
             Class<? extends ExtensionMessage> clazz, WorkflowTrace workflowTrace) {
         EncryptedExtensionsMessage encryptedExtensionsMessage =
                 (EncryptedExtensionsMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS);
         return (T) encryptedExtensionsMessage.getExtension(clazz);
     }
 
@@ -125,12 +125,12 @@ public class TlsLengthfieldTest extends TlsBaseTest {
         HandshakeMessage requiredHelloMessage;
         if (isClientTest()) {
             requiredHelloMessage =
-                    WorkflowTraceUtil.getFirstSendMessage(
-                            HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                    WorkflowTraceResultUtil.getFirstSentMessage(
+                            workflowTrace, HandshakeMessageType.SERVER_HELLO);
         } else {
             requiredHelloMessage =
-                    WorkflowTraceUtil.getFirstSendMessage(
-                            HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                    WorkflowTraceResultUtil.getFirstSentMessage(
+                            workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         }
         return (T) requiredHelloMessage.getExtension(clazz);
     }

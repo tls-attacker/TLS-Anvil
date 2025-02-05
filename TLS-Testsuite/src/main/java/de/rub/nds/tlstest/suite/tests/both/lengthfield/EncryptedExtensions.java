@@ -17,7 +17,7 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -37,8 +37,8 @@ public class EncryptedExtensions extends TlsLengthfieldTest {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(runner);
         EncryptedExtensionsMessage encryptedExtensions =
                 (EncryptedExtensionsMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS);
         encryptedExtensions.setLength(Modifiable.sub(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
         validateLengthTest(state, testCase);
@@ -50,8 +50,8 @@ public class EncryptedExtensions extends TlsLengthfieldTest {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(runner);
         EncryptedExtensionsMessage encryptedExtensions =
                 (EncryptedExtensionsMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS);
         encryptedExtensions.setExtensionsLength(Modifiable.add(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
         validateLengthTest(state, testCase);

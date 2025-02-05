@@ -22,7 +22,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PreSharedKeyExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -106,8 +106,8 @@ public class PreSharedKeyExtension extends TlsLengthfieldTest {
     private PreSharedKeyExtensionMessage getPSKExtension(WorkflowTrace workflowTrace) {
         ClientHelloMessage secondClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getLastSendMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getLastSentMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         return (PreSharedKeyExtensionMessage)
                 secondClientHello.getExtension(PreSharedKeyExtensionMessage.class);
     }

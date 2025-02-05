@@ -19,7 +19,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.transport.TransportHandler;
@@ -489,8 +489,8 @@ public class TestPreparator {
         executor.bulkExecuteTasks(catchHelloTask);
 
         return (ClientHelloMessage)
-                WorkflowTraceUtil.getFirstReceivedMessage(
-                        HandshakeMessageType.CLIENT_HELLO, catchHelloWorkflowTrace);
+                WorkflowTraceResultUtil.getFirstReceivedMessage(
+                        catchHelloWorkflowTrace, HandshakeMessageType.CLIENT_HELLO);
     }
 
     /**

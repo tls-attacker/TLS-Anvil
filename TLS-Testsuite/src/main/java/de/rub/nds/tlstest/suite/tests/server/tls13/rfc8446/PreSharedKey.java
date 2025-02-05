@@ -30,7 +30,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.PSKKeyExchangeMode
 import de.rub.nds.tlsattacker.core.protocol.message.extension.PreSharedKeyExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -120,7 +120,7 @@ public class PreSharedKey extends Tls13Test {
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
         ClientHelloMessage resumingHello =
-                workflowTrace.getLastSendMessage(ClientHelloMessage.class);
+                workflowTrace.getLastSentMessage(ClientHelloMessage.class);
         resumingHello
                 .getExtensions()
                 .add(
@@ -164,8 +164,8 @@ public class PreSharedKey extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
         ServerHelloMessage secondServerHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         if (secondServerHello.containsExtension(ExtensionType.PRE_SHARED_KEY)) {
             assertFalse(
                     "Server ignored Key Exchange Mode and sent a Key Share Extension",
@@ -192,8 +192,8 @@ public class PreSharedKey extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
         ServerHelloMessage secondServerHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         if (secondServerHello.containsExtension(ExtensionType.PRE_SHARED_KEY)) {
             assertTrue(
                     "Server ignored Key Exchange Mode and did not send a Key Share Extension",
@@ -214,7 +214,7 @@ public class PreSharedKey extends Tls13Test {
         workflowTrace.addTlsAction(new ReceiveAction());
         byte[] modificationBitmask = parameterCombination.buildBitmask();
 
-        ClientHelloMessage cHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage cHello = workflowTrace.getLastSentMessage(ClientHelloMessage.class);
         PreSharedKeyExtensionMessage pskExt =
                 cHello.getExtension(PreSharedKeyExtensionMessage.class);
         pskExt.setBinderListBytes(
@@ -238,7 +238,7 @@ public class PreSharedKey extends Tls13Test {
                         WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
         workflowTrace.addTlsAction(new ReceiveAction());
 
-        ClientHelloMessage cHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage cHello = workflowTrace.getLastSentMessage(ClientHelloMessage.class);
         PreSharedKeyExtensionMessage pskExt =
                 cHello.getExtension(PreSharedKeyExtensionMessage.class);
         pskExt.setBinderListBytes(Modifiable.explicit(new byte[0]));
@@ -275,16 +275,16 @@ public class PreSharedKey extends Tls13Test {
 
         ClientHelloMessage pskClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getLastSendMessage(
-                                HandshakeMessageType.CLIENT_HELLO, trace);
+                        WorkflowTraceResultUtil.getLastSentMessage(
+                                trace, HandshakeMessageType.CLIENT_HELLO);
         PreSharedKeyExtensionMessage pskExtension =
                 pskClientHello.getExtension(PreSharedKeyExtensionMessage.class);
         int offeredPSKs = pskExtension.getIdentities().size();
 
         ServerHelloMessage pskServerHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, trace);
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                trace, HandshakeMessageType.SERVER_HELLO);
         assertTrue(
                 "PSK Handshake failed - Server did not select as PSK",
                 pskServerHello.containsExtension(ExtensionType.PRE_SHARED_KEY));
@@ -313,7 +313,7 @@ public class PreSharedKey extends Tls13Test {
                 runner.generateWorkflowTraceUntilLastSendingMessage(
                         WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.FINISHED);
         ClientHelloMessage modifiedClientHello =
-                workflowTrace.getLastSendMessage(ClientHelloMessage.class);
+                workflowTrace.getLastSentMessage(ClientHelloMessage.class);
 
         CipherSuite selectedCipher =
                 parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue();
@@ -360,8 +360,8 @@ public class PreSharedKey extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        if (WorkflowTraceUtil.didReceiveMessage(
-                HandshakeMessageType.NEW_SESSION_TICKET, state.getWorkflowTrace())) {
+        if (WorkflowTraceResultUtil.didReceiveMessage(
+                state.getWorkflowTrace(), HandshakeMessageType.NEW_SESSION_TICKET)) {
             Validator.receivedFatalAlert(state, testCase);
         }
     }

@@ -22,7 +22,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
@@ -58,8 +58,8 @@ public class ServerKeyExchange extends Tls12Test {
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         ServerKeyExchangeMessage serverKeyExchangeMsg =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchangeMsg.setSignature(Modifiable.xor(bitmask, 0));
 
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
@@ -189,8 +189,8 @@ public class ServerKeyExchange extends Tls12Test {
 
         ServerKeyExchangeMessage serverKeyExchange =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchange.setSignature(Modifiable.explicit(new byte[0]));
 
         State state = runner.execute(workflowTrace, c);
@@ -229,8 +229,8 @@ public class ServerKeyExchange extends Tls12Test {
                 SignatureAndHashAlgorithm.valueOf("ANONYMOUS_" + digestName);
         ServerKeyExchangeMessage serverKeyExchange =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchange.setSignatureAndHashAlgorithm(
                 Modifiable.explicit(matchingAnon.getByteValue()));
         serverKeyExchange.setSignature(Modifiable.explicit(new byte[0]));

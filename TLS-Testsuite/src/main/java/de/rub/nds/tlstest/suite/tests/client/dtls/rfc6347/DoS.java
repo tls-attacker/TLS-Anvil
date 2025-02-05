@@ -10,7 +10,7 @@ import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -40,16 +40,16 @@ public class DoS extends Dtls12Test {
 
         ClientHelloMessage firstClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.CLIENT_HELLO, trace);
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                trace, HandshakeMessageType.CLIENT_HELLO);
         HelloVerifyRequestMessage helloVerifyRequest =
                 (HelloVerifyRequestMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.HELLO_VERIFY_REQUEST, trace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                trace, HandshakeMessageType.HELLO_VERIFY_REQUEST);
         ClientHelloMessage secondClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.CLIENT_HELLO, trace);
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                trace, HandshakeMessageType.CLIENT_HELLO);
         assertTrue("Did not receive first Client Hello messages", firstClientHello != null);
         assertTrue("Did not receive second Client Hello messages", secondClientHello != null);
 

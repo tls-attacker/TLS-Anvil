@@ -28,7 +28,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionM
 import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareEntry;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -199,7 +199,7 @@ public class KeyShare extends Tls13Test {
         State state = runner.execute(workflowTrace, c);
 
         WorkflowTrace trace = state.getWorkflowTrace();
-        if (WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.SERVER_HELLO, trace)
+        if (WorkflowTraceResultUtil.didReceiveMessage(trace, HandshakeMessageType.SERVER_HELLO)
                 && trace.getFirstReceivedMessage(ServerHelloMessage.class)
                         .containsExtension(ExtensionType.KEY_SHARE)) {
             KeyShareExtensionMessage ksExt =
@@ -237,8 +237,8 @@ public class KeyShare extends Tls13Test {
 
         ClientHelloMessage clientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         EllipticCurvesExtensionMessage ellipticCurvesExtension =
                 clientHello.getExtension(EllipticCurvesExtensionMessage.class);
         ellipticCurvesExtension.setSupportedGroups(Modifiable.insert(undefinedGroup, 0));
@@ -286,8 +286,8 @@ public class KeyShare extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        if (WorkflowTraceUtil.didReceiveMessage(
-                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace())) {
+        if (WorkflowTraceResultUtil.didReceiveMessage(
+                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO)) {
             assertTrue(
                     "Server sent a Server Hello that is not a Hello Retry Request",
                     state.getWorkflowTrace()
@@ -386,8 +386,8 @@ public class KeyShare extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        if (WorkflowTraceUtil.didReceiveMessage(
-                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace())) {
+        if (WorkflowTraceResultUtil.didReceiveMessage(
+                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO)) {
             assertTrue(
                     "Server sent a Server Hello that is not a Hello Retry Request",
                     state.getWorkflowTrace()

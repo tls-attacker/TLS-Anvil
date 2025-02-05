@@ -23,7 +23,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
 import de.rub.nds.tlstest.framework.Validator;
@@ -52,7 +52,7 @@ public class MiddleboxCompatibility extends Tls13Test {
         Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace
-                .getFirstSendMessage(ClientHelloMessage.class)
+                .getFirstSentMessage(ClientHelloMessage.class)
                 .setSessionId(
                         Modifiable.explicit(config.getDefaultClientTicketResumptionSessionId()));
         State state = runner.execute(workflowTrace, config);
@@ -60,10 +60,10 @@ public class MiddleboxCompatibility extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
         assertTrue(
                 "Did not receive a compatibility CCS",
-                WorkflowTraceUtil.didReceiveMessage(
-                        ProtocolMessageType.CHANGE_CIPHER_SPEC, state.getWorkflowTrace()));
+                WorkflowTraceResultUtil.didReceiveMessage(
+                        state.getWorkflowTrace(), ProtocolMessageType.CHANGE_CIPHER_SPEC));
         List<ProtocolMessage> receivedMessages =
-                WorkflowTraceUtil.getAllReceivedMessages(workflowTrace);
+                WorkflowTraceResultUtil.getAllReceivedMessages(workflowTrace);
         for (ProtocolMessage receivedMessage : receivedMessages) {
             if (receivedMessage instanceof ServerHelloMessage) {
                 assertTrue(
@@ -91,10 +91,10 @@ public class MiddleboxCompatibility extends Tls13Test {
 
         assertTrue(
                 "Did not receive a compatibility CCS",
-                WorkflowTraceUtil.didReceiveMessage(
-                        ProtocolMessageType.CHANGE_CIPHER_SPEC, state.getWorkflowTrace()));
+                WorkflowTraceResultUtil.didReceiveMessage(
+                        state.getWorkflowTrace(), ProtocolMessageType.CHANGE_CIPHER_SPEC));
         List<ProtocolMessage> receivedMessages =
-                WorkflowTraceUtil.getAllReceivedMessages(workflowTrace);
+                WorkflowTraceResultUtil.getAllReceivedMessages(workflowTrace);
         for (ProtocolMessage receivedMessage : receivedMessages) {
             if (receivedMessage instanceof ServerHelloMessage) {
                 assertTrue(

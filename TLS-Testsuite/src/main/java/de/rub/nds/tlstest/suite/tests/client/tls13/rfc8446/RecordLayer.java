@@ -23,7 +23,7 @@ import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
@@ -106,8 +106,8 @@ public class RecordLayer extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         SendAction sendServerHelloAction =
                 (SendAction)
-                        WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                HandshakeMessageType.SERVER_HELLO, trace);
+                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                                trace, HandshakeMessageType.SERVER_HELLO);
         AlertDescription selectedAlert =
                 parameterCombination.getParameter(AlertDerivation.class).getSelectedValue();
 

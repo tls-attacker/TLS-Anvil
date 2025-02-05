@@ -26,7 +26,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionM
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
@@ -74,10 +74,10 @@ public class HelloRetryRequest extends Tls13Test {
 
         ServerHelloMessage sHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         ClientHelloMessage cHello =
-                state.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
+                state.getWorkflowTrace().getFirstSentMessage(ClientHelloMessage.class);
         if (sHello != null) {
             assertTrue(
                     "Server did not send a HelloRetryRequest", sHello.isTls13HelloRetryRequest());
@@ -126,12 +126,12 @@ public class HelloRetryRequest extends Tls13Test {
 
         ServerHelloMessage helloRetryRequest =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         ServerHelloMessage actualServerHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         if (helloRetryRequest != null && actualServerHello != null) {
             assertTrue(
                     "Server selected an unproposed CipherSuite in HelloRetryRequest",
@@ -166,12 +166,12 @@ public class HelloRetryRequest extends Tls13Test {
 
         ServerHelloMessage helloRetryRequest =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         ServerHelloMessage actualServerHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         if (helloRetryRequest != null && actualServerHello != null) {
             assertTrue(
                     "Server selected an unproposed CipherSuite in HelloRetryRequest",
@@ -201,12 +201,12 @@ public class HelloRetryRequest extends Tls13Test {
 
         ServerHelloMessage helloRetryRequest =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         ServerHelloMessage actualServerHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         if (helloRetryRequest != null && actualServerHello != null) {
             assertTrue(
                     "Server did not retain the selected Protocol Version in Supported Versions Extension",
@@ -242,8 +242,8 @@ public class HelloRetryRequest extends Tls13Test {
                         WorkflowTraceType.HELLO, HandshakeMessageType.ENCRYPTED_EXTENSIONS);
         ClientHelloMessage initialHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         KeyShareExtensionMessage ksExt = initialHello.getExtension(KeyShareExtensionMessage.class);
         ksExt.setKeyShareListBytes(Modifiable.explicit(new byte[0]));
 
@@ -261,7 +261,7 @@ public class HelloRetryRequest extends Tls13Test {
         byte[] fixedRandom = runner.getPreparedConfig().getDefaultClientRandom();
         initialHello.setRandom(Modifiable.explicit(fixedRandom));
         secondHelloTrace
-                .getFirstSendMessage(ClientHelloMessage.class)
+                .getFirstSentMessage(ClientHelloMessage.class)
                 .setRandom(Modifiable.explicit(fixedRandom));
 
         // In middlebox compatibility mode, a CCS message is sent
@@ -288,7 +288,7 @@ public class HelloRetryRequest extends Tls13Test {
         // ServerHello but it must not be sent twice by the server
         assertFalse(
                 "Received more than one compatibility CCS from Server",
-                WorkflowTraceUtil.getAllReceivedMessages(
+                WorkflowTraceResultUtil.getAllReceivedMessagesOfType(
                                         executedTrace, ProtocolMessageType.CHANGE_CIPHER_SPEC)
                                 .size()
                         > 1);

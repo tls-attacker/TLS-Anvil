@@ -20,7 +20,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
@@ -162,8 +162,8 @@ public class TLSExtensionForECC extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         ECDHEServerKeyExchangeMessage serverKeyExchangeMessage =
                 (ECDHEServerKeyExchangeMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchangeMessage.setPublicKey(Modifiable.explicit(serializedPoint));
 
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));

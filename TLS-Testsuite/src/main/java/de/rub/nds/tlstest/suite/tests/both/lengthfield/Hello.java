@@ -20,7 +20,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.HelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -192,12 +192,12 @@ public class Hello extends TlsLengthfieldTest {
         HandshakeMessage helloMessage;
         if (isClientTest()) {
             helloMessage =
-                    WorkflowTraceUtil.getFirstSendMessage(
-                            HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                    WorkflowTraceResultUtil.getFirstSentMessage(
+                            workflowTrace, HandshakeMessageType.SERVER_HELLO);
         } else {
             helloMessage =
-                    WorkflowTraceUtil.getFirstSendMessage(
-                            HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                    WorkflowTraceResultUtil.getFirstSentMessage(
+                            workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         }
         return (HelloMessage) helloMessage;
     }
@@ -205,12 +205,12 @@ public class Hello extends TlsLengthfieldTest {
     private void separateServerHelloMessage(WorkflowTrace workflowTrace) {
         ServerHelloMessage serverHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         SendAction sendServerHelloMessages =
                 (SendAction)
-                        WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         sendServerHelloMessages.getSendMessages().remove(serverHello);
         sendServerHelloMessages.addActionOption(ActionOption.MAY_FAIL);
         workflowTrace.addTlsAction(

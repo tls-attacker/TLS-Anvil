@@ -19,7 +19,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -61,8 +61,8 @@ public class Finished extends TlsLengthfieldTest {
             WorkflowTrace workflowTrace, WorkflowRunner runner, AnvilTestCase testCase) {
         FinishedMessage finishedMessage =
                 (FinishedMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.FINISHED, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.FINISHED);
         finishedMessage.setLength(Modifiable.sub(1));
         if ((runner.getPreparedConfig().getHighestProtocolVersion() != ProtocolVersion.TLS13
                         && context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT)

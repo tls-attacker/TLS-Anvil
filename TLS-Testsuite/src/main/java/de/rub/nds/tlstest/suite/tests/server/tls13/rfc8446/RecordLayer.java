@@ -24,7 +24,7 @@ import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -77,8 +77,8 @@ public class RecordLayer extends Tls13Test {
 
         SendAction finished =
                 (SendAction)
-                        WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                HandshakeMessageType.FINISHED, trace);
+                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                                trace, HandshakeMessageType.FINISHED);
         finished.setRecords(record);
 
         State state = runner.execute(trace, c);
@@ -109,8 +109,8 @@ public class RecordLayer extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         SendAction sendFinished =
                 (SendAction)
-                        WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                HandshakeMessageType.FINISHED, trace);
+                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                                trace, HandshakeMessageType.FINISHED);
         AlertDescription selectedAlert =
                 parameterCombination.getParameter(AlertDerivation.class).getSelectedValue();
 

@@ -29,7 +29,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionM
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
@@ -449,19 +449,18 @@ public class WorkflowRunner {
         RunningModeType runningModeType = resolveRunningMode(testEndpointType);
         WorkflowTrace completeHandshake =
                 workflowFactory.createWorkflowTrace(WorkflowTraceType.HANDSHAKE, runningModeType);
-        List<ProtocolMessage> plannedMessages = WorkflowTraceUtil.getAllSendMessages(trace);
+        List<ProtocolMessage> plannedMessages = WorkflowTraceResultUtil.getAllSentMessages(trace);
         ProtocolMessage lastMessage = plannedMessages.get(plannedMessages.size() - 1);
         if (lastMessage.getProtocolMessageType() == ProtocolMessageType.HANDSHAKE) {
             HandshakeMessage lastHandshakeMessage = (HandshakeMessage) lastMessage;
             SendingAction lastSendingAction =
-                    (SendingAction)
-                            WorkflowTraceUtil.getLastSendingActionForMessage(
-                                    lastHandshakeMessage.getHandshakeMessageType(), trace);
+                    WorkflowTraceResultUtil.getLastActionThatSent(
+                            trace, lastHandshakeMessage.getHandshakeMessageType());
             SendingAction fullHandshakeEquivalentAction =
                     (SendingAction)
-                            WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                    lastHandshakeMessage.getHandshakeMessageType(),
-                                    completeHandshake);
+                            WorkflowTraceResultUtil.getFirstActionThatSent(
+                                    completeHandshake,
+                                    lastHandshakeMessage.getHandshakeMessageType());
             completeMessageFlight(
                     fullHandshakeEquivalentAction,
                     completeHandshake,
@@ -469,13 +468,12 @@ public class WorkflowRunner {
                     lastMessage);
         } else if (lastMessage.getProtocolMessageType() == ProtocolMessageType.CHANGE_CIPHER_SPEC) {
             SendingAction lastSendingAction =
-                    (SendingAction)
-                            WorkflowTraceUtil.getLastSendingActionForMessage(
-                                    ProtocolMessageType.CHANGE_CIPHER_SPEC, trace);
+                    WorkflowTraceResultUtil.getLastActionThatSent(
+                            trace, ProtocolMessageType.CHANGE_CIPHER_SPEC);
             SendingAction fullHandshakeEquivalentAction =
                     (SendingAction)
-                            WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                    ProtocolMessageType.CHANGE_CIPHER_SPEC, completeHandshake);
+                            WorkflowTraceResultUtil.getFirstActionThatSent(
+                                    completeHandshake, ProtocolMessageType.CHANGE_CIPHER_SPEC);
             completeMessageFlight(
                     fullHandshakeEquivalentAction,
                     completeHandshake,
@@ -561,7 +559,7 @@ public class WorkflowRunner {
             }
 
             // we never have to add anything if we do not even send a CH
-            return WorkflowTraceUtil.getLastSendMessage(HandshakeMessageType.CLIENT_HELLO, trace)
+            return WorkflowTraceResultUtil.getLastSentMessage(trace, HandshakeMessageType.CLIENT_HELLO)
                             != null
                     && (lastActionIsGenericReceive || isExpectingAlert);
         }
@@ -580,8 +578,8 @@ public class WorkflowRunner {
     public void insertTls12NewSessionTicket(WorkflowTrace trace) {
         ReceiveAction receiveChangeCipherSpec =
                 (ReceiveAction)
-                        WorkflowTraceUtil.getFirstReceivingActionForMessage(
-                                ProtocolMessageType.CHANGE_CIPHER_SPEC, trace);
+                        WorkflowTraceResultUtil.getFirstActionThatReceived(
+                                trace, ProtocolMessageType.CHANGE_CIPHER_SPEC);
 
         // not all WorkflowTraces reach a ChangeCipherSpec
         if (receiveChangeCipherSpec != null) {

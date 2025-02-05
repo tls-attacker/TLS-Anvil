@@ -23,7 +23,7 @@ import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.MessageAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -59,8 +59,8 @@ public class CertificateVerify extends Tls13Test {
     private boolean signatureValid(State state) {
         CertificateVerifyMessage certificateVerify =
                 (CertificateVerifyMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.CERTIFICATE_VERIFY, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.CERTIFICATE_VERIFY);
         SignatureAndHashAlgorithm selectedSignatureAndHashAlgo =
                 SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
                         certificateVerify.getSignatureHashAlgorithm().getValue());

@@ -28,7 +28,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareE
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -189,7 +189,7 @@ public class HelloRetryRequest extends Tls13Test {
 
         assertFalse(
                 "Client replied to second HelloRetryRequest with ClientHello",
-                WorkflowTraceUtil.getLastReceivedMessage(state.getWorkflowTrace())
+                WorkflowTraceResultUtil.getLastReceivedMessage(state.getWorkflowTrace())
                                 instanceof ClientHelloMessage
                         && state.getWorkflowTrace().getLastReceivingAction().getReceivedMessages()
                                 != null
@@ -197,7 +197,7 @@ public class HelloRetryRequest extends Tls13Test {
                                 .getLastReceivingAction()
                                 .getReceivedMessages()
                                 .contains(
-                                        WorkflowTraceUtil.getLastReceivedMessage(
+                                        WorkflowTraceResultUtil.getLastReceivedMessage(
                                                 state.getWorkflowTrace())));
         Validator.receivedFatalAlert(state, testCase);
         AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
@@ -237,8 +237,8 @@ public class HelloRetryRequest extends Tls13Test {
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
         ServerHelloMessage helloRetryRequest =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         helloRetryRequest.setSelectedCipherSuite(
                 Modifiable.explicit(helloRetryCipherSuite.getByteValue()));
 
@@ -394,12 +394,12 @@ public class HelloRetryRequest extends Tls13Test {
 
         ClientHelloMessage firstClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.CLIENT_HELLO, trace);
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                trace, HandshakeMessageType.CLIENT_HELLO);
         ClientHelloMessage retryClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.CLIENT_HELLO, trace);
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                trace, HandshakeMessageType.CLIENT_HELLO);
         assertTrue(
                 "Did not receive two Client Hello messages",
                 firstClientHello != null
@@ -571,13 +571,13 @@ public class HelloRetryRequest extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
         ClientHelloMessage secondClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         assertFalse(
                 "Did not receive two ClientHello messages",
                 secondClientHello
-                        == WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace));
+                        == WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO));
         assertTrue(
                 "Did not receive a Cookie Extension in updated ClientHello",
                 secondClientHello.containsExtension(ExtensionType.COOKIE));

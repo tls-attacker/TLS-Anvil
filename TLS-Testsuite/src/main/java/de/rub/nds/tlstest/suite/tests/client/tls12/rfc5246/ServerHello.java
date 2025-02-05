@@ -23,7 +23,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.ServerNamePair;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
@@ -87,7 +87,7 @@ public class ServerHello extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        ServerHelloMessage msg = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        ServerHelloMessage msg = workflowTrace.getFirstSentMessage(ServerHelloMessage.class);
         msg.addExtension(extensionMessage);
 
         State state = runner.execute(workflowTrace, c);
@@ -126,8 +126,8 @@ public class ServerHello extends Tls12Test {
 
         ServerHelloMessage serverHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         serverHello.setSelectedCompressionMethod(
                 Modifiable.explicit(selectedCompressionMethod.getValue()));
 

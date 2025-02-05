@@ -22,7 +22,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.ServerNameIndicati
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.ServerNamePair;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -78,7 +78,7 @@ public class Resumption extends Tls12Test {
                 runner.generateWorkflowTraceUntilLastMessage(
                         WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
 
-        ClientHelloMessage cHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage cHello = workflowTrace.getLastSentMessage(ClientHelloMessage.class);
         ServerNameIndicationExtensionMessage sni2 =
                 cHello.getExtension(ServerNameIndicationExtensionMessage.class);
 
@@ -99,7 +99,7 @@ public class Resumption extends Tls12Test {
         WorkflowTrace executedTrace = state.getWorkflowTrace();
         ServerHelloMessage sHello = executedTrace.getFirstReceivedMessage(ServerHelloMessage.class);
         ServerHelloMessage sHello2 = executedTrace.getLastReceivedMessage(ServerHelloMessage.class);
-        ClientHelloMessage cHello2 = executedTrace.getLastSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage cHello2 = executedTrace.getLastSentMessage(ClientHelloMessage.class);
         assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
 
         // only test if we can assume that the server accepted the SNI in
@@ -128,7 +128,7 @@ public class Resumption extends Tls12Test {
         WorkflowTrace trace = state.getWorkflowTrace();
         ServerHelloMessage sHello = trace.getFirstReceivedMessage(ServerHelloMessage.class);
         ServerHelloMessage sHello2 = trace.getLastReceivedMessage(ServerHelloMessage.class);
-        ClientHelloMessage cHello2 = trace.getLastSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage cHello2 = trace.getLastSentMessage(ClientHelloMessage.class);
         assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
 
         if (sHello2 != null
@@ -161,16 +161,16 @@ public class Resumption extends Tls12Test {
 
         SendAction finSend =
                 (SendAction)
-                        WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                HandshakeMessageType.FINISHED, workflowTrace);
-        finSend.getSendMessages().add(alert);
+                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                                workflowTrace, HandshakeMessageType.FINISHED);
+        finSend.getSentMessages().add(alert);
         workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         State state = runner.execute(workflowTrace, c);
 
         WorkflowTrace trace = state.getWorkflowTrace();
         ClientHelloMessage resumptionClientHello =
-                trace.getLastSendMessage(ClientHelloMessage.class);
+                trace.getLastSentMessage(ClientHelloMessage.class);
         ServerHelloMessage firstServerHello =
                 trace.getFirstReceivedMessage(ServerHelloMessage.class);
         ServerHelloMessage secondServerHello =
@@ -215,16 +215,16 @@ public class Resumption extends Tls12Test {
 
         FinishedMessage fin =
                 (FinishedMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.FINISHED, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                workflowTrace, HandshakeMessageType.FINISHED);
         fin.setVerifyData(Modifiable.xor(new byte[] {0x01}, 0));
         workflowTrace.addTlsAction(new ReceiveAction());
 
         State state = runner.execute(workflowTrace, c);
 
         WorkflowTrace trace = state.getWorkflowTrace();
-        ClientHelloMessage cHello = trace.getLastSendMessage(ClientHelloMessage.class);
-        if (WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.SERVER_HELLO, trace)
+        ClientHelloMessage cHello = trace.getLastSentMessage(ClientHelloMessage.class);
+        if (WorkflowTraceResultUtil.didReceiveMessage(trace, HandshakeMessageType.SERVER_HELLO)
                 && trace.getLastReceivedMessage(ServerHelloMessage.class)
                         != trace.getFirstReceivedMessage(ServerHelloMessage.class)) {
             ServerHelloMessage sHello = trace.getLastReceivedMessage(ServerHelloMessage.class);

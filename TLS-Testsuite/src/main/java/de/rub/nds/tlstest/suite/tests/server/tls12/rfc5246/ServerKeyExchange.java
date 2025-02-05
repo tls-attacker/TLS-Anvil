@@ -19,7 +19,7 @@ import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -60,16 +60,16 @@ public class ServerKeyExchange extends Tls12Test {
         WorkflowTrace executedTrace = state.getWorkflowTrace();
         ClientHelloMessage clientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CLIENT_HELLO, executedTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                executedTrace, HandshakeMessageType.CLIENT_HELLO);
         ServerHelloMessage serverHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, executedTrace);
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                executedTrace, HandshakeMessageType.SERVER_HELLO);
         ServerKeyExchangeMessage serverKeyExchange =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_KEY_EXCHANGE, executedTrace);
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                executedTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
 
         byte[] signedKeyExchangeParameters = getSignedDataFromKeyExchangeMessage(serverKeyExchange);
         byte[] completeSignedData =

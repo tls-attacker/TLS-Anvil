@@ -21,7 +21,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.DeactivateEncryptionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -316,7 +316,7 @@ public class StateMachine extends Tls12Test {
         State state = runner.execute(workflowTrace, config);
 
         WorkflowTrace executedTrace = state.getWorkflowTrace();
-        if (WorkflowTraceUtil.didReceiveMessage(ProtocolMessageType.HEARTBEAT, executedTrace)) {
+        if (WorkflowTraceResultUtil.didReceiveMessage(executedTrace, ProtocolMessageType.HEARTBEAT)) {
             return;
         } else if (executedTrace.executedAsPlanned() && !Validator.socketClosed(state)) {
             testCase.addAdditionalResultInfo("SUT chose to silently discard Heartbeat Request");

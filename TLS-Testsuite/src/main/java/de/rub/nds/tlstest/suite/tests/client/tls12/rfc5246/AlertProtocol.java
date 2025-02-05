@@ -24,7 +24,7 @@ import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -117,8 +117,8 @@ public class AlertProtocol extends Tls12Test {
 
         SendAction serverHelloAction =
                 (SendAction)
-                        WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         serverHelloAction.getSendMessages().add(0, alert);
 
         State state = runner.execute(workflowTrace, c);
@@ -147,8 +147,8 @@ public class AlertProtocol extends Tls12Test {
 
         SendAction serverHelloAction =
                 (SendAction)
-                        WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstActionThatSent(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         serverHelloAction
                 .getSendMessages()
                 .add(serverHelloAction.getSendMessages().size() - 1, alert);

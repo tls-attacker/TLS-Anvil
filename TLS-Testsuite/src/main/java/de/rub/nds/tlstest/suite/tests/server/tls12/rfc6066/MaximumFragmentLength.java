@@ -25,7 +25,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.MaxFragmentLengthE
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -102,8 +102,8 @@ public class MaximumFragmentLength extends Tls12Test {
                 MaxFragmentLength.getIntegerRepresentation(selectedMaxFragment);
 
         WorkflowTrace trace = state.getWorkflowTrace();
-        for (int j = 1; j < WorkflowTraceUtil.getAllReceivedRecords(trace).size(); j++) {
-            Record record = WorkflowTraceUtil.getAllReceivedRecords(trace).get(j);
+        for (int j = 1; j < WorkflowTraceResultUtil.getAllReceivedRecords(trace).size(); j++) {
+            Record record = WorkflowTraceResultUtil.getAllReceivedRecords(trace).get(j);
             assertTrue(
                     "Plaintextbytes of record exceeded limit",
                     record.getCleanProtocolMessageBytes().getValue().length

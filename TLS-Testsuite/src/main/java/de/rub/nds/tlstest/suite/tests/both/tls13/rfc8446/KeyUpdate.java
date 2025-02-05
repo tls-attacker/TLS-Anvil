@@ -24,7 +24,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.KeyUpdateMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -116,7 +116,7 @@ public class KeyUpdate extends Tls13Test {
         WorkflowTrace trace = state.getWorkflowTrace();
         assertTrue(
                 "Did not receive a KeyUpdate in response",
-                WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.KEY_UPDATE, trace));
+                WorkflowTraceResultUtil.didReceiveMessage(trace, HandshakeMessageType.KEY_UPDATE));
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
         assertNull("Received alert message", msg);
         assertFalse("Socket was closed", Validator.socketClosed(state));

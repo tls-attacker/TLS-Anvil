@@ -64,6 +64,7 @@ public class PreSharedKey extends Tls13Test {
         }
     }
 
+    @SuppressWarnings("unused")
     public ConditionEvaluationResult supportsMultipleHdkfHashesAndPsk() {
         Set<HKDFAlgorithm> hkdfAlgorithms = new HashSet<>();
         Set<CipherSuite> tls13CipherSuites =
@@ -82,6 +83,7 @@ public class PreSharedKey extends Tls13Test {
         return supportsPsk();
     }
 
+    @SuppressWarnings("unused")
     public ConditionEvaluationResult supportsPskOnlyHandshake() {
         if (context.getFeatureExtractionResult().getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK)
                 == TestResults.TRUE) {
@@ -91,6 +93,7 @@ public class PreSharedKey extends Tls13Test {
         }
     }
 
+    @SuppressWarnings("unused")
     public ConditionEvaluationResult supportsPskDheHandshake() {
         if (context.getFeatureExtractionResult()
                         .getResult(TlsAnalyzedProperty.SUPPORTS_TLS13_PSK_DHE)
@@ -219,7 +222,7 @@ public class PreSharedKey extends Tls13Test {
 
         ClientHelloMessage cHello =
                 (ClientHelloMessage)
-                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendAction(
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         PreSharedKeyExtensionMessage pskExt =
                 cHello.getExtension(PreSharedKeyExtensionMessage.class);
@@ -246,7 +249,7 @@ public class PreSharedKey extends Tls13Test {
 
         ClientHelloMessage cHello =
                 (ClientHelloMessage)
-                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendAction(
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         PreSharedKeyExtensionMessage pskExt =
                 cHello.getExtension(PreSharedKeyExtensionMessage.class);
@@ -323,7 +326,7 @@ public class PreSharedKey extends Tls13Test {
                         WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.FINISHED);
         ClientHelloMessage modifiedClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendAction(
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.CLIENT_HELLO);
 
         CipherSuite selectedCipher =

@@ -617,25 +617,23 @@ public class WorkflowRunner {
 
     public void allowOptionalTls13NewSessionTickets(WorkflowTrace trace) {
         boolean mayReceiveNewSessionTicketFromNow = false;
-        ReceiveAction lastReceive = null;
         for (TlsAction action : trace.getTlsActions()) {
             if (action instanceof ReceiveAction) {
                 ReceiveAction receiveAction = (ReceiveAction) action;
-                lastReceive = receiveAction;
-                if (receiveAction.getExpectedMessages().stream()
-                        .anyMatch(message -> message instanceof FinishedMessage)) {
-                    mayReceiveNewSessionTicketFromNow = true;
+                if (receiveAction.getExpectedMessages() != null) {
+                    if (receiveAction.getExpectedMessages().stream()
+                            .anyMatch(message -> message instanceof FinishedMessage)) {
+                        mayReceiveNewSessionTicketFromNow = true;
+                    }
+                    // set explicitly expected new session tickets as optional to
+                    // allow early NewSessionTickets sent with Fin
+                    receiveAction.getExpectedMessages().stream()
+                            .filter(message -> message instanceof NewSessionTicketMessage)
+                            .forEach(newSessionTicket -> newSessionTicket.setRequired(false));
                 }
-
-                // set explicitly expected new session tickets as optional to
-                // allow early NewSessionTickets sent with Fin
-                receiveAction.getExpectedMessages().stream()
-                        .filter(message -> message instanceof NewSessionTicketMessage)
-                        .forEach(newSessionTicket -> newSessionTicket.setRequired(false));
                 if (mayReceiveNewSessionTicketFromNow) {
-                    receiveAction
-                            .getActionOptions()
-                            .add(ActionOption.IGNORE_UNEXPECTED_NEW_SESSION_TICKETS);
+                    receiveAction.addActionOption(
+                            ActionOption.IGNORE_UNEXPECTED_NEW_SESSION_TICKETS);
                 }
             } else if (action instanceof ResetConnectionAction) {
                 mayReceiveNewSessionTicketFromNow = false;

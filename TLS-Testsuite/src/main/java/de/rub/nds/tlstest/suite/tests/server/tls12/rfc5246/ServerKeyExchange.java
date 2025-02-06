@@ -27,6 +27,8 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.util.SignatureValidation;
+import de.rub.nds.x509attacker.constants.X509PublicKeyType;
+import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
 
 /** */
@@ -114,5 +116,23 @@ public class ServerKeyExchange extends Tls12Test {
         } else {
             throw new AssertionError("Unsupported ServerKeyExchange type");
         }
+    }
+
+    public boolean isSupportedCipherSuite(CipherSuite cipherSuiteCandidate) {
+        return cipherSuiteCandidate.isRealCipherSuite()
+                && !cipherSuiteCandidate.isTls13()
+                && cipherSuiteCandidate.isEphemeral()
+                && (Arrays.stream(
+                                        AlgorithmResolver.getSuiteableLeafCertificateKeyType(
+                                                cipherSuiteCandidate))
+                                .anyMatch(kt -> kt == X509PublicKeyType.ECDH_ECDSA)
+                        || Arrays.stream(
+                                        AlgorithmResolver.getSuiteableLeafCertificateKeyType(
+                                                cipherSuiteCandidate))
+                                .anyMatch(kt -> kt == X509PublicKeyType.RSA)
+                        || Arrays.stream(
+                                        AlgorithmResolver.getSuiteableLeafCertificateKeyType(
+                                                cipherSuiteCandidate))
+                                .anyMatch(kt -> kt == X509PublicKeyType.DSA));
     }
 }

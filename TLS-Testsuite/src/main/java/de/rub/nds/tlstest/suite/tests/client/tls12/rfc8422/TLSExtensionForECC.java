@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8422;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -64,7 +64,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @Tag("adjusted")
     public void invalidPointFormat() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
-        assertNotNull(AssertMsgs.CLIENT_HELLO_NOT_RECEIVED, msg);
+        assertNotNull(msg, AssertMsgs.CLIENT_HELLO_NOT_RECEIVED);
         ECPointFormatExtensionMessage poinfmtExt =
                 msg.getExtension(ECPointFormatExtensionMessage.class);
 
@@ -89,11 +89,11 @@ public class TLSExtensionForECC extends Tls12Test {
                 }
             }
             assertTrue(
-                    "ECPointFormatExtension does not contain uncompressed format", contains_zero);
+                    contains_zero, "ECPointFormatExtension does not contain uncompressed format");
             if (rfc8422curves && !nonRfc8422curve) {
                 assertFalse(
-                        "ECPointFormatExtension contains compressed or invalid format",
-                        contains_other);
+                        contains_other,
+                        "ECPointFormatExtension contains compressed or invalid format");
             }
         }
     }
@@ -113,11 +113,11 @@ public class TLSExtensionForECC extends Tls12Test {
             }
         }
         assertTrue(
+                deprecatedFound.isEmpty(),
                 "Found deprecated group: "
                         + deprecatedFound.stream()
                                 .map(NamedGroup::name)
-                                .collect(Collectors.joining(",")),
-                deprecatedFound.isEmpty());
+                                .collect(Collectors.joining(",")));
     }
 
     private boolean isRfc8422Curve(NamedGroup group) {
@@ -236,9 +236,9 @@ public class TLSExtensionForECC extends Tls12Test {
                 state.getWorkflowTrace()
                         .getFirstReceivedMessage(ECDHClientKeyExchangeMessage.class);
         assertEquals(
-                "Client did not respect our Point Format",
                 0x04,
-                clientKeyExchange.getPublicKey().getValue()[0]);
+                clientKeyExchange.getPublicKey().getValue()[0],
+                "Client did not respect our Point Format");
     }
 
     @NonCombinatorialAnvilTest(id = "8422-jJBYYpiKBH")
@@ -247,8 +247,8 @@ public class TLSExtensionForECC extends Tls12Test {
     public void offersExtensionsWithoutCipher() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
         assertFalse(
-                "Client offered EC Point Formats without an ECC Cipher Suite",
-                clientHello.containsExtension(ExtensionType.EC_POINT_FORMATS));
+                clientHello.containsExtension(ExtensionType.EC_POINT_FORMATS),
+                "Client offered EC Point Formats without an ECC Cipher Suite");
         // testing for Elliptic Curves Extension is not sensible as the extension
         // is now called Named Groups Extension and also negotiates FFDHE groups
     }

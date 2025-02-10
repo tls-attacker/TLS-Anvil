@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
@@ -93,7 +93,7 @@ public class AlertProtocol extends Tls12Test {
             testCase.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
             return;
         }
-        assertTrue("Socket has not been closed", Validator.socketClosed(state));
+        assertTrue(Validator.socketClosed(state), "Socket has not been closed");
         Validator.receivedWarningAlert(state, testCase);
         Validator.testAlertDescription(state, testCase, AlertDescription.CLOSE_NOTIFY, message);
     }
@@ -123,8 +123,8 @@ public class AlertProtocol extends Tls12Test {
 
         State state = runner.execute(workflowTrace, c);
         assertTrue(
-                "The socket has not been closed for an alert with level fatal",
-                Validator.socketClosed(state));
+                Validator.socketClosed(state),
+                "The socket has not been closed for an alert with level fatal");
     }
 
     @AnvilTest(id = "5246-rcBco3YXw8")
@@ -155,7 +155,7 @@ public class AlertProtocol extends Tls12Test {
 
         State state = runner.execute(workflowTrace, c);
         assertTrue(
-                "The socket has not been closed for an alert with level fatal",
-                Validator.socketClosed(state));
+                Validator.socketClosed(state),
+                "The socket has not been closed for an alert with level fatal");
     }
 }

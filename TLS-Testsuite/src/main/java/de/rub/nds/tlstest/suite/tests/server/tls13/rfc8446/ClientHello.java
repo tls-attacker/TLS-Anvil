@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
@@ -145,10 +145,10 @@ public class ClientHello extends Tls13Test {
                                 workflowTrace, HandshakeMessageType.SERVER_HELLO);
         for (ExtensionMessage extension : serverHello.getExtensions()) {
             assertFalse(
-                    "Server negotiated the undefined Extension",
                     Arrays.equals(
                             extension.getExtensionType().getValue(),
-                            greaseHelperExtension.getType().getValue()));
+                            greaseHelperExtension.getType().getValue()),
+                    "Server negotiated the undefined Extension");
         }
     }
 

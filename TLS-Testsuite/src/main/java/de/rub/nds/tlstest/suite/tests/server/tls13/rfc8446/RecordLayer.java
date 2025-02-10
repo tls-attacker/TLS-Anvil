@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
@@ -189,9 +189,9 @@ public class RecordLayer extends Tls13Test {
                 for (Record record : receiveAction.getReceivedRecords()) {
                     if (record.getContentMessageType() != ProtocolMessageType.CHANGE_CIPHER_SPEC) {
                         assertArrayEquals(
-                                "Record used wrong protocol version",
                                 record.getProtocolVersion().getValue(),
-                                ProtocolVersion.TLS12.getValue());
+                                ProtocolVersion.TLS12.getValue(),
+                                "Record used wrong protocol version");
                     }
                 }
             }

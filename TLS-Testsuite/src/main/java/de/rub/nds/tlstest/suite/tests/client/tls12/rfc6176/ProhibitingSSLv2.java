@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc6176;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
@@ -48,7 +48,7 @@ public class ProhibitingSSLv2 extends Tls12Test {
         workflowTrace.addTlsActions(new ReceiveAction(new SSL2ClientHelloMessage()));
 
         State state = runner.execute(workflowTrace, c);
-        assertFalse("Client sent SSLv2 ClientHello", state.getWorkflowTrace().executedAsPlanned());
+        assertFalse(state.getWorkflowTrace().executedAsPlanned(), "Client sent SSLv2 ClientHello");
     }
 
     @AnvilTest(id = "6176-GVZT3xHaGE")
@@ -72,7 +72,7 @@ public class ProhibitingSSLv2 extends Tls12Test {
     public void testClientHelloProtocolVersion() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
         assertFalse(
-                "ClientHello protocol version is less than 0x0300",
-                msg.getProtocolVersion().getValue()[0] < 3);
+                msg.getProtocolVersion().getValue()[0] < 3,
+                "ClientHello protocol version is less than 0x0300");
     }
 }

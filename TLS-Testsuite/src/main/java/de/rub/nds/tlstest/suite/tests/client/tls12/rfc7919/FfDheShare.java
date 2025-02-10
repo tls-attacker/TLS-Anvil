@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7919;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -105,8 +104,8 @@ public class FfDheShare extends Tls12Test {
     public void listsCurvesAndFfdheCorrectly() {
         // we always test for duplicate extensions anyway
         assertFalse(
-                "Client offered EC Cipher Suites and FFDHE groups but no EC Named Groups",
-                context.getFeatureExtractionResult().getNamedGroups().isEmpty());
+                context.getFeatureExtractionResult().getNamedGroups().isEmpty(),
+                "Client offered EC Cipher Suites and FFDHE groups but no EC Named Groups");
     }
 
     @AnvilTest(id = "7919-ZZzQLMYM3L")
@@ -129,9 +128,9 @@ public class FfDheShare extends Tls12Test {
 
         Validator.executedAsPlanned(state, testCase);
         assertEquals(
-                "Invalid NamedGroup set in context",
                 ffdheGroup,
-                state.getTlsContext().getSelectedGroup());
+                state.getTlsContext().getSelectedGroup(),
+                "Invalid NamedGroup set in context");
     }
 
     @AnvilTest(id = "7919-64FAvRFA4A")

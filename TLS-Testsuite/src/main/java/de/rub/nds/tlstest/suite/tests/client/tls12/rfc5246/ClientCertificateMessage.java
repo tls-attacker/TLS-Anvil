@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
@@ -33,7 +33,7 @@ public class ClientCertificateMessage extends Tls12Test {
         State state = runner.execute(workflowTrace, c);
 
         assertNotNull(
-                "Client didn't send CertificateMessage",
-                state.getWorkflowTrace().getFirstReceivedMessage(CertificateMessage.class));
+                state.getWorkflowTrace().getFirstReceivedMessage(CertificateMessage.class),
+                "Client didn't send CertificateMessage");
     }
 }

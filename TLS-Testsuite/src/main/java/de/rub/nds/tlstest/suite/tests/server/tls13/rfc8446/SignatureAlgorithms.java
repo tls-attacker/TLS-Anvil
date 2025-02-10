@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
@@ -101,8 +100,8 @@ public class SignatureAlgorithms extends Tls13Test {
                 SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
                         certVerifyMsg.getSignatureHashAlgorithm().getValue());
         assertTrue(
-                "Invalid SignatureAndHashAlgorithm negotiated",
-                sigHashAlg.suitedForSigningTls13Messages());
+                sigHashAlg.suitedForSigningTls13Messages(),
+                "Invalid SignatureAndHashAlgorithm negotiated");
     }
 
     @AnvilTest(id = "8446-3WqNtgoV2Z")

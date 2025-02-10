@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -86,16 +86,16 @@ public class KeyUpdate extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
         KeyUpdateMessage receivedKeyUpdate =
                 state.getWorkflowTrace().getLastReceivedMessage(KeyUpdateMessage.class);
-        assertNotNull("Did not receive a KeyUpdate response", receivedKeyUpdate);
+        assertNotNull(receivedKeyUpdate, "Did not receive a KeyUpdate response");
         assertEquals(
-                "Peer did not set the correct KeyUpdate mode",
                 (byte) KeyUpdateRequest.UPDATE_NOT_REQUESTED.getValue(),
-                (byte) receivedKeyUpdate.getRequestMode().getValue());
+                (byte) receivedKeyUpdate.getRequestMode().getValue(),
+                "Peer did not set the correct KeyUpdate mode");
         for (Record record : workflowTrace.getLastReceivingAction().getReceivedRecords()) {
             if (record.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
                 assertTrue(
-                        "Invalid authentication tag for received KeyUpdateMessage",
-                        record.getComputations().getAuthenticationTagValid());
+                        record.getComputations().getAuthenticationTagValid(),
+                        "Invalid authentication tag for received KeyUpdateMessage");
             }
         }
     }
@@ -115,10 +115,10 @@ public class KeyUpdate extends Tls13Test {
         State state = runner.execute(workflowTrace, config);
         WorkflowTrace trace = state.getWorkflowTrace();
         assertTrue(
-                "Did not receive a KeyUpdate in response",
-                WorkflowTraceResultUtil.didReceiveMessage(trace, HandshakeMessageType.KEY_UPDATE));
+                WorkflowTraceResultUtil.didReceiveMessage(trace, HandshakeMessageType.KEY_UPDATE),
+                "Did not receive a KeyUpdate in response");
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        assertNull("Received alert message", msg);
-        assertFalse("Socket was closed", Validator.socketClosed(state));
+        assertNull(msg, "Received alert message");
+        assertFalse(Validator.socketClosed(state), "Socket was closed");
     }
 }

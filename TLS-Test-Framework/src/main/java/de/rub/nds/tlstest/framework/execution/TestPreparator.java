@@ -58,8 +58,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.platform.engine.TestSource;
@@ -89,7 +87,7 @@ public class TestPreparator {
      *
      * @param report the FeatureExtractionResult created through TLS-Scanner
      */
-    private void saveToCache(@Nonnull FeatureExtractionResult report) {
+    private void saveToCache(FeatureExtractionResult report) {
         String fileName;
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
             fileName = testConfig.getTestClientDelegate().getPort().toString();
@@ -124,7 +122,6 @@ public class TestPreparator {
      *
      * @return the FeatureExtractionResult or null, if not found
      */
-    @Nullable
     private FeatureExtractionResult loadFromCache() {
         String fileName;
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {

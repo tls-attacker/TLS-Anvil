@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -104,7 +104,7 @@ public class Resumption extends Tls12Test {
         ServerHelloMessage sHello = executedTrace.getFirstReceivedMessage(ServerHelloMessage.class);
         ServerHelloMessage sHello2 = executedTrace.getLastReceivedMessage(ServerHelloMessage.class);
         ClientHelloMessage cHello2 = executedTrace.getLastSentMessage(ClientHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
+        assertNotNull(sHello, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
 
         // only test if we can assume that the server accepted the SNI in
         // the initial handshake
@@ -113,9 +113,9 @@ public class Resumption extends Tls12Test {
                 && sHello2 != sHello) {
             // server hello of resumption MUST NOT not contain this extension
             assertTrue(
-                    "Server accepted resumption using different SNI",
                     !Arrays.equals(
-                            cHello2.getSessionId().getValue(), sHello2.getSessionId().getValue()));
+                            cHello2.getSessionId().getValue(), sHello2.getSessionId().getValue()),
+                    "Server accepted resumption using different SNI");
         }
     }
 
@@ -133,14 +133,14 @@ public class Resumption extends Tls12Test {
         ServerHelloMessage sHello = trace.getFirstReceivedMessage(ServerHelloMessage.class);
         ServerHelloMessage sHello2 = trace.getLastReceivedMessage(ServerHelloMessage.class);
         ClientHelloMessage cHello2 = trace.getLastSentMessage(ClientHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
+        assertNotNull(sHello, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
 
         if (sHello2 != null
                 && Arrays.equals(
                         cHello2.getSessionId().getValue(), sHello2.getSessionId().getValue())) {
             assertFalse(
-                    "Server included SNI extension in resumed session",
-                    sHello2.containsExtension(ExtensionType.SERVER_NAME_INDICATION));
+                    sHello2.containsExtension(ExtensionType.SERVER_NAME_INDICATION),
+                    "Server included SNI extension in resumed session");
         }
     }
 
@@ -186,21 +186,21 @@ public class Resumption extends Tls12Test {
         ChangeCipherSpecMessage secondCcs =
                 trace.getLastReceivedMessage(ChangeCipherSpecMessage.class);
         assertTrue(
-                "Did not receive both expected Server Hello messages",
                 firstServerHello != null
                         && secondServerHello != null
-                        && secondServerHello != firstServerHello);
+                        && secondServerHello != firstServerHello,
+                "Did not receive both expected Server Hello messages");
         if (resumptionClientHello.getSessionIdLength().getValue() > 0) {
             ServerHelloMessage sHello = trace.getLastReceivedMessage(ServerHelloMessage.class);
             assertTrue(
-                    "Server accepted resumption via SessionID after Fatal Alert",
                     !Arrays.equals(
                             resumptionClientHello.getSessionId().getValue(),
-                            sHello.getSessionId().getValue()));
+                            sHello.getSessionId().getValue()),
+                    "Server accepted resumption via SessionID after Fatal Alert");
         } else {
             assertTrue(
-                    "Server accepted resumption via Tickets after Fatal Alert",
-                    secondCcs == null || secondCcs == firstCcs);
+                    secondCcs == null || secondCcs == firstCcs,
+                    "Server accepted resumption via Tickets after Fatal Alert");
         }
     }
 
@@ -233,11 +233,11 @@ public class Resumption extends Tls12Test {
                         != trace.getFirstReceivedMessage(ServerHelloMessage.class)) {
             ServerHelloMessage sHello = trace.getLastReceivedMessage(ServerHelloMessage.class);
             assertTrue(
-                    "Server accepted resumption after invalid Finished",
                     !Arrays.equals(
                                     cHello.getSessionId().getValue(),
                                     sHello.getSessionId().getValue())
-                            && cHello.getSessionIdLength().getValue() > 0);
+                            && cHello.getSessionIdLength().getValue() > 0,
+                    "Server accepted resumption after invalid Finished");
         }
     }
 }

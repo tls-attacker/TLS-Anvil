@@ -54,6 +54,7 @@ public class ConfigurationOptionsConfig {
 
     private int maxRunningContainers; // default 16
     private int maxSimultaneousBuilds; // default 1
+
     /**
      * Defines how many containers should be shutdown simultaneously. When measuring coverage the
      * coverage data is collected at the shutdown. Therefore it is much more CPU expensive than a
@@ -66,6 +67,7 @@ public class ConfigurationOptionsConfig {
 
     /** The address the docker host is bound to (e.g. 127.0.0.1, or 0.0.0.0) */
     private String dockerHostBinding;
+
     /**
      * Thee address to access the host (may differ from dockerHostBinding when using docker with
      * WSL)

@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -68,11 +67,11 @@ public class KeyShare extends Tls13Test {
             List<NamedGroup> checkedGroups = new ArrayList<>();
             for (KeyShareEntry i : keyshares) {
                 int tmpIndex = namedGroups.indexOf(i.getGroupConfig());
-                assertTrue("Keyshare group not part of supported groups", tmpIndex > -1);
-                assertTrue("Keyshares are in the wrong order", tmpIndex > index);
+                assertTrue(tmpIndex > -1, "Keyshare group not part of supported groups");
+                assertTrue(tmpIndex > index, "Keyshares are in the wrong order");
                 assertFalse(
-                        "Two Keyshare entries for the same group found",
-                        checkedGroups.contains(i.getGroupConfig()));
+                        checkedGroups.contains(i.getGroupConfig()),
+                        "Two Keyshare entries for the same group found");
 
                 index = tmpIndex;
                 checkedGroups.add(i.getGroupConfig());
@@ -236,7 +235,7 @@ public class KeyShare extends Tls13Test {
                 break;
             }
         }
-        assertFalse("Deprecated or invalid group used for key share", foundDeprecated);
+        assertFalse(foundDeprecated, "Deprecated or invalid group used for key share");
     }
 
     @AnvilTest(id = "8446-QxfMDM9cBK")

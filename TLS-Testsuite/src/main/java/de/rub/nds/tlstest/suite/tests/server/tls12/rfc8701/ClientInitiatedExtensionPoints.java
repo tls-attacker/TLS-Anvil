@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc8701;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
@@ -64,9 +63,9 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
 
         Validator.executedAsPlanned(state, testCase);
         assertEquals(
-                "Server selected wrong ciphersuite",
                 selectedCipherSuite,
-                state.getTlsContext().getSelectedCipherSuite());
+                state.getTlsContext().getSelectedCipherSuite(),
+                "Server selected wrong ciphersuite");
     }
 
     @AnvilTest(id = "8701-7DCDj6NnBm")
@@ -99,8 +98,8 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
                 .forEach(
                         j -> {
                             assertFalse(
-                                    "Server negotiated GREASE extension",
-                                    j.name().startsWith("GREASE"));
+                                    j.name().startsWith("GREASE"),
+                                    "Server negotiated GREASE extension");
                         });
     }
 
@@ -153,10 +152,10 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
             return;
         }
         assertFalse(
-                "Server selected GREASE signature and hash algorithm",
                 SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
                                 skx.getSignatureAndHashAlgorithm().getValue())
-                        .isGrease());
+                        .isGrease(),
+                "Server selected GREASE signature and hash algorithm");
     }
 
     @AnvilTest(id = "8701-SCkMwRniGX")
@@ -197,11 +196,11 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
         }
 
         assertEquals(
-                "AlpnEntryExtension contains more or less than one protocol",
                 1,
-                aext.getAlpnEntryList().size());
+                aext.getAlpnEntryList().size(),
+                "AlpnEntryExtension contains more or less than one protocol");
         assertFalse(
-                "Server negotiated GREASE ALPN identifier",
-                aext.getAlpnEntryList().get(0).getAlpnEntryConfig().contains("GREASE"));
+                aext.getAlpnEntryList().get(0).getAlpnEntryConfig().contains("GREASE"),
+                "Server negotiated GREASE ALPN identifier");
     }
 }

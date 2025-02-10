@@ -7,8 +7,8 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.protocol.message.HelloMessage;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 public class SharedExtensionTests {
     public static void checkForDuplicateExtensions(HelloMessage helloMessage) {
-        assertNotNull("Hello was not received", helloMessage);
+        assertNotNull(helloMessage, "Hello was not received");
         // There MUST NOT be more than one extension of the
         // same type in a given extension block.
         Set<ExtensionType> uniqueList = new HashSet<>();
@@ -41,10 +41,10 @@ public class SharedExtensionTests {
                             });
         }
         assertTrue(
+                duplicated.isEmpty(),
                 "Server included multiple Extensions of the following types: "
                         + duplicated.parallelStream()
                                 .map(Enum::name)
-                                .collect(Collectors.joining(",")),
-                duplicated.isEmpty());
+                                .collect(Collectors.joining(",")));
     }
 }

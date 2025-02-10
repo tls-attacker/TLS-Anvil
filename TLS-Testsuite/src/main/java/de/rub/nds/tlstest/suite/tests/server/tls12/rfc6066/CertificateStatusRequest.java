@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc6066;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
@@ -45,7 +45,7 @@ public class CertificateStatusRequest extends Tls12Test {
 
         ServerHelloMessage message = trace.getFirstReceivedMessage(ServerHelloMessage.class);
         assertNull(
-                "CertificateStatusRequest found",
-                message.getExtension(CertificateStatusRequestExtensionMessage.class));
+                message.getExtension(CertificateStatusRequestExtensionMessage.class),
+                "CertificateStatusRequest found");
     }
 }

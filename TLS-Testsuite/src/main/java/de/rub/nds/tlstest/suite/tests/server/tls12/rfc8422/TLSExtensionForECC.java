@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc8422;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -124,14 +124,14 @@ public class TLSExtensionForECC extends Tls12Test {
 
         WorkflowTrace trace = state.getWorkflowTrace();
         ServerHelloMessage message = trace.getFirstReceivedMessage(ServerHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, message);
+        assertNotNull(message, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
         assertArrayEquals(
-                AssertMsgs.UNEXPECTED_CIPHER_SUITE,
                 parameterCombination
                         .getParameter(CipherSuiteDerivation.class)
                         .getSelectedValue()
                         .getByteValue(),
-                message.getSelectedCipherSuite().getValue());
+                message.getSelectedCipherSuite().getValue(),
+                AssertMsgs.UNEXPECTED_CIPHER_SUITE);
     }
 
     /*@AnvilTest for use in TLS.  Only three have\n" +
@@ -153,11 +153,11 @@ public class TLSExtensionForECC extends Tls12Test {
             }
         }
         assertTrue(
+                deprecatedFound.isEmpty(),
                 "Deprecated group(s) supported: "
                         + deprecatedFound.stream()
                                 .map(NamedGroup::name)
-                                .collect(Collectors.joining(",")),
-                deprecatedFound.isEmpty());
+                                .collect(Collectors.joining(",")));
     }
 
     @AnvilTest(id = "8422-PtimgKWxss")
@@ -284,9 +284,9 @@ public class TLSExtensionForECC extends Tls12Test {
         ECDHEServerKeyExchangeMessage serverKeyExchange =
                 workflowTrace.getFirstReceivedMessage(ECDHEServerKeyExchangeMessage.class);
         assertEquals(
-                "Server provided a non-empty signature field in Server Key Exchange message",
                 (long) 0,
-                (long) serverKeyExchange.getSignatureLength().getValue());
+                (long) serverKeyExchange.getSignatureLength().getValue(),
+                "Server provided a non-empty signature field in Server Key Exchange message");
     }
 
     public boolean isEcdheAnonCipherSuite(CipherSuite cipherSuite) {

@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8701;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
@@ -66,9 +65,9 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
 
         assertEquals(
-                "Server selected wrong ciphersuite",
                 c.getDefaultSelectedCipherSuite(),
-                state.getTlsContext().getSelectedCipherSuite());
+                state.getTlsContext().getSelectedCipherSuite(),
+                "Server selected wrong ciphersuite");
     }
 
     @AnvilTest(id = "8701-PErDdQZt7u")
@@ -104,8 +103,8 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
                 .forEach(
                         j -> {
                             assertFalse(
-                                    "Server negotiated GREASE extension",
-                                    j.name().startsWith("GREASE"));
+                                    j.name().startsWith("GREASE"),
+                                    "Server negotiated GREASE extension");
                         });
     }
 
@@ -152,8 +151,8 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
                 .forEach(
                         j -> {
                             assertFalse(
-                                    "Server negotiated GREASE named group",
-                                    NamedGroup.getNamedGroup(j.getGroup().getValue()).isGrease());
+                                    NamedGroup.getNamedGroup(j.getGroup().getValue()).isGrease(),
+                                    "Server negotiated GREASE named group");
                         });
     }
 
@@ -181,7 +180,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         SignatureAndHashAlgorithm selected =
                 SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
                         msg.getSignatureHashAlgorithm().getValue());
-        assertFalse("Server selected GREASE signature and hash algorithm", selected.isGrease());
+        assertFalse(selected.isGrease(), "Server selected GREASE signature and hash algorithm");
     }
 
     @AnvilTest(id = "8701-fe7Ev3bbiq")
@@ -222,11 +221,11 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         }
 
         assertEquals(
-                "AlpnEntryExtension contains more or less than one protocol",
                 1,
-                aext.getAlpnEntryList().size());
+                aext.getAlpnEntryList().size(),
+                "AlpnEntryExtension contains more or less than one protocol");
         assertFalse(
-                "Server negotiated GREASE ALPN Identifier",
-                ext.getAlpnEntryList().get(0).getAlpnEntryConfig().contains("GREASE"));
+                ext.getAlpnEntryList().get(0).getAlpnEntryConfig().contains("GREASE"),
+                "Server negotiated GREASE ALPN Identifier");
     }
 }

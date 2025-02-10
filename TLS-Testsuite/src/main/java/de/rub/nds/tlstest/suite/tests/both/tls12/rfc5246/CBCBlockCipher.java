@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -249,14 +249,14 @@ public class CBCBlockCipher extends Tls12Test {
             if (sawCCS && record.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
                 Record encryptedFin = record;
                 assertTrue(
-                        "Finished record MAC invalid - is the SQN correct?",
-                        encryptedFin.getComputations().getMacValid());
+                        encryptedFin.getComputations().getMacValid(),
+                        "Finished record MAC invalid - is the SQN correct?");
             } else if (sawCCS
                     && record.getContentMessageType() == ProtocolMessageType.APPLICATION_DATA) {
                 Record encryptedFin = record;
                 assertTrue(
-                        "App Data record MAC invalid",
-                        encryptedFin.getComputations().getMacValid());
+                        encryptedFin.getComputations().getMacValid(),
+                        "App Data record MAC invalid");
             }
         }
     }

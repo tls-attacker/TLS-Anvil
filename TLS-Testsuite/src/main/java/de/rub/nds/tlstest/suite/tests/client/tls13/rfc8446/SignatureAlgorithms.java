@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -97,11 +97,11 @@ public class SignatureAlgorithms extends Tls13Test {
                             });
 
             assertTrue(
+                    deprecatedOffered.isEmpty(),
                     "Client offered deprecated algorithms: "
                             + deprecatedOffered.stream()
                                     .map(Object::toString)
-                                    .collect(Collectors.joining(",")),
-                    deprecatedOffered.isEmpty());
+                                    .collect(Collectors.joining(",")));
         }
     }
 }

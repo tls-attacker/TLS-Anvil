@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
@@ -161,9 +161,9 @@ public class SupportedVersions extends Tls13Test {
 
         Validator.executedAsPlanned(state, testCase);
         assertEquals(
-                "Wrong TLS Version selected",
                 ProtocolVersion.TLS13,
-                state.getTlsContext().getSelectedProtocolVersion());
+                state.getTlsContext().getSelectedProtocolVersion(),
+                "Wrong TLS Version selected");
     }
 
     @AnvilTest(id = "8446-LoyBdjVUeE")
@@ -199,12 +199,12 @@ public class SupportedVersions extends Tls13Test {
         WorkflowTrace trace = state.getWorkflowTrace();
         ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
         assertArrayEquals(
-                "Invalid ProtocolVersion",
                 new byte[] {0x03, 0x03},
-                msg.getProtocolVersion().getValue());
+                msg.getProtocolVersion().getValue(),
+                "Invalid ProtocolVersion");
         assertNull(
-                "Received supported_versions extension",
-                msg.getExtension(SupportedVersionsExtensionMessage.class));
+                msg.getExtension(SupportedVersionsExtensionMessage.class),
+                "Received supported_versions extension");
     }
 
     @AnvilTest(id = "8446-n5pojEqeaS")
@@ -221,16 +221,16 @@ public class SupportedVersions extends Tls13Test {
         SupportedVersionsExtensionMessage supportedVersions =
                 serverHello.getExtension(SupportedVersionsExtensionMessage.class);
 
-        assertNotNull("No SupportedVersions extension received in ServerHello", supportedVersions);
+        assertNotNull(supportedVersions, "No SupportedVersions extension received in ServerHello");
         assertArrayEquals(
-                "legacy_version must be 0x0303",
                 ProtocolVersion.TLS12.getValue(),
-                serverHello.getProtocolVersion().getValue());
+                serverHello.getProtocolVersion().getValue(),
+                "legacy_version must be 0x0303");
         assertTrue(
-                "SupportedVersions extension does not contain 0x0304",
                 ProtocolVersion.getProtocolVersions(
                                 supportedVersions.getSupportedVersions().getValue())
-                        .contains(ProtocolVersion.TLS13));
+                        .contains(ProtocolVersion.TLS13),
+                "SupportedVersions extension does not contain 0x0304");
     }
 
     @AnvilTest(id = "8446-2NRWKXH1nX")

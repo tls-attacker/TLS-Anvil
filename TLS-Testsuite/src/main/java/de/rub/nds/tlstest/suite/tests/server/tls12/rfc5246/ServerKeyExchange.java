@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
@@ -48,8 +48,8 @@ public class ServerKeyExchange extends Tls12Test {
         State state = runner.execute(workflowTrace, config);
         Validator.executedAsPlanned(state, testCase);
         assertTrue(
-                "Server Key Exchange Message contained an invalid signature",
-                signatureValid(state));
+                signatureValid(state),
+                "Server Key Exchange Message contained an invalid signature");
     }
 
     private Boolean signatureValid(State state) {

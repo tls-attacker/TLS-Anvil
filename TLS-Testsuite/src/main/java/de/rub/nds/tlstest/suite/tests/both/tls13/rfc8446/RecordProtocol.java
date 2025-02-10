@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -284,14 +284,14 @@ public class RecordProtocol extends Tls13Test {
         AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
         testCase.addAdditionalResultInfo("Evaluated with timeout " + reducedTimeout);
         if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta() > 0) {
-            assertNull("Received alert message", msg);
-            assertFalse("Socket was closed", Validator.socketClosed(state));
+            assertNull(msg, "Received alert message");
+            assertFalse(Validator.socketClosed(state), "Socket was closed");
         } else {
             if (msg != null) {
                 assertEquals(
-                        "SUT sent an alert that was not a Close Notify",
                         AlertDescription.CLOSE_NOTIFY.getValue(),
-                        (byte) msg.getDescription().getValue());
+                        (byte) msg.getDescription().getValue(),
+                        "SUT sent an alert that was not a Close Notify");
             }
         }
     }
@@ -360,8 +360,8 @@ public class RecordProtocol extends Tls13Test {
         for (ReceivingAction receiving : executedTrace.getReceivingActions()) {
             for (Record record : receiving.getReceivedRecords()) {
                 assertFalse(
-                        "Peer sent a record with Protocol Version below 0x03 00",
-                        record.getProtocolVersion().getValue()[0] < 0x03);
+                        record.getProtocolVersion().getValue()[0] < 0x03,
+                        "Peer sent a record with Protocol Version below 0x03 00");
             }
         }
     }

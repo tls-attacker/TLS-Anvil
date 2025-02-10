@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8701;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
@@ -62,7 +62,7 @@ public class ServerInitiatedExtensionPoints extends Tls12Test {
                 == TestResults.TRUE) {
             // In TLS 1.3, alerts are not mandatory - at this point no version
             // has been negotiated
-            assertTrue("Socket has not been closed", Validator.socketClosed(state));
+            assertTrue(Validator.socketClosed(state), "Socket has not been closed");
         } else {
             Validator.receivedFatalAlert(state, testCase);
         }

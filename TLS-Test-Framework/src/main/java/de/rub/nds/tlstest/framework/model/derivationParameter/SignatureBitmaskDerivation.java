@@ -202,7 +202,6 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         switch (signatureAlgorithm) {
             case RSA_PKCS1:
             case RSA_SSA_PSS:
-            case RSA_PSS_RSAE:
                 return pkByteSize;
             case DSA:
                 // signature size is (#bits of Q) / 4

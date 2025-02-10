@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;

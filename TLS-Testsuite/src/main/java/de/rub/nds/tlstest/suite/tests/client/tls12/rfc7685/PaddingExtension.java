@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7685;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
@@ -35,12 +34,12 @@ public class PaddingExtension extends Tls12Test {
     @MethodCondition(method = "offeredExtension")
     public void paddingWithNonZero() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
-        assertNotNull(AssertMsgs.CLIENT_HELLO_NOT_RECEIVED, msg);
+        assertNotNull(msg, AssertMsgs.CLIENT_HELLO_NOT_RECEIVED);
 
         PaddingExtensionMessage paddingExt = msg.getExtension(PaddingExtensionMessage.class);
 
         byte[] receivedPaddingExt = paddingExt.getPaddingBytes().getValue();
         byte[] expected = new byte[receivedPaddingExt.length];
-        assertArrayEquals("Padding extension padding bytes not zero", expected, receivedPaddingExt);
+        assertArrayEquals(expected, receivedPaddingExt, "Padding extension padding bytes not zero");
     }
 }

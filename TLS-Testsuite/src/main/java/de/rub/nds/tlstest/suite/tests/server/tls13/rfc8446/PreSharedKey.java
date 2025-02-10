@@ -12,7 +12,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.IncludeParameter;
@@ -174,8 +174,8 @@ public class PreSharedKey extends Tls13Test {
                                 workflowTrace, HandshakeMessageType.SERVER_HELLO);
         if (secondServerHello.containsExtension(ExtensionType.PRE_SHARED_KEY)) {
             assertFalse(
-                    "Server ignored Key Exchange Mode and sent a Key Share Extension",
-                    secondServerHello.containsExtension(ExtensionType.KEY_SHARE));
+                    secondServerHello.containsExtension(ExtensionType.KEY_SHARE),
+                    "Server ignored Key Exchange Mode and sent a Key Share Extension");
         }
     }
 
@@ -202,8 +202,8 @@ public class PreSharedKey extends Tls13Test {
                                 workflowTrace, HandshakeMessageType.SERVER_HELLO);
         if (secondServerHello.containsExtension(ExtensionType.PRE_SHARED_KEY)) {
             assertTrue(
-                    "Server ignored Key Exchange Mode and did not send a Key Share Extension",
-                    secondServerHello.containsExtension(ExtensionType.KEY_SHARE));
+                    secondServerHello.containsExtension(ExtensionType.KEY_SHARE),
+                    "Server ignored Key Exchange Mode and did not send a Key Share Extension");
         }
     }
 
@@ -298,20 +298,20 @@ public class PreSharedKey extends Tls13Test {
                         WorkflowTraceResultUtil.getLastReceivedMessage(
                                 trace, HandshakeMessageType.SERVER_HELLO);
         assertTrue(
-                "PSK Handshake failed - Server did not select as PSK",
-                pskServerHello.containsExtension(ExtensionType.PRE_SHARED_KEY));
+                pskServerHello.containsExtension(ExtensionType.PRE_SHARED_KEY),
+                "PSK Handshake failed - Server did not select as PSK");
         int selectedIdentityIndex =
                 pskServerHello
                         .getExtension(PreSharedKeyExtensionMessage.class)
                         .getSelectedIdentity()
                         .getValue();
         assertTrue(
+                selectedIdentityIndex >= 0 && selectedIdentityIndex < offeredPSKs,
                 "Server set an invalid selected PSK index ("
                         + selectedIdentityIndex
                         + " of "
                         + offeredPSKs
-                        + " )",
-                selectedIdentityIndex >= 0 && selectedIdentityIndex < offeredPSKs);
+                        + " )");
     }
 
     @AnvilTest(id = "8446-Yo68xBhELu")
@@ -348,12 +348,12 @@ public class PreSharedKey extends Tls13Test {
 
         ServerHelloMessage lastHello =
                 state.getWorkflowTrace().getLastReceivedMessage(ServerHelloMessage.class);
-        assertNotNull("Received no ServerHello", lastHello);
+        assertNotNull(lastHello, "Received no ServerHello");
         // the server might abort before sending the 2nd server hello but this
         // check should always succeed
         assertFalse(
-                "Server accepted the PSK of a different HKDF Hash",
-                lastHello.containsExtension(ExtensionType.PRE_SHARED_KEY));
+                lastHello.containsExtension(ExtensionType.PRE_SHARED_KEY),
+                "Server accepted the PSK of a different HKDF Hash");
     }
 
     @AnvilTest(id = "8446-mwDQtBNg4o")

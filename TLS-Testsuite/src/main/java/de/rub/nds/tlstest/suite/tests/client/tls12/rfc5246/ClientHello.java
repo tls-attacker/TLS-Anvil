@@ -8,8 +8,8 @@
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
 import static de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests.checkForDuplicateExtensions;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
@@ -41,7 +41,7 @@ public class ClientHello extends Tls12Test {
                 containsZero = true;
             }
         }
-        assertTrue("ClientHello does not contain compression method null", containsZero);
+        assertTrue(containsZero, "ClientHello does not contain compression method null");
     }
 
     @NonCombinatorialAnvilTest(id = "5246-iAJbTqtHyt")
@@ -55,7 +55,7 @@ public class ClientHello extends Tls12Test {
                 break;
             }
         }
-        assertFalse("ClientHello contained compression method other than Null", containsOther);
+        assertFalse(containsOther, "ClientHello contained compression method other than Null");
     }
 
     public ConditionEvaluationResult sentSignatureAndHashAlgorithmsExtension() {
@@ -102,8 +102,7 @@ public class ClientHello extends Tls12Test {
                         break;
                     case RSA:
                         if (providedSignatureAlgorithm(SignatureAlgorithm.RSA_PKCS1)
-                                || providedSignatureAlgorithm(SignatureAlgorithm.RSA_SSA_PSS)
-                                || providedSignatureAlgorithm(SignatureAlgorithm.RSA_PSS_RSAE)) {
+                                || providedSignatureAlgorithm(SignatureAlgorithm.RSA_SSA_PSS)) {
                             foundMatch = true;
                         }
                         break;
@@ -121,11 +120,11 @@ public class ClientHello extends Tls12Test {
         }
         proposedCipherSuites.removeAll(coveredCipherSuites);
         assertTrue(
+                proposedCipherSuites.isEmpty(),
                 "Client did not provide a SignatureAlgorithm for all cipher suites "
                         + proposedCipherSuites.parallelStream()
                                 .map(Enum::name)
-                                .collect(Collectors.joining(",")),
-                proposedCipherSuites.isEmpty());
+                                .collect(Collectors.joining(",")));
     }
 
     @NonCombinatorialAnvilTest(id = "5246-booCra12We")
@@ -145,11 +144,11 @@ public class ClientHello extends Tls12Test {
                             .filter(algo -> algo.getSignatureAlgorithm() == null)
                             .collect(Collectors.toList());
             assertTrue(
+                    anonAlgorithms.isEmpty(),
                     "Client offered anonymous signature algorithms:"
                             + anonAlgorithms.parallelStream()
                                     .map(Enum::name)
-                                    .collect(Collectors.joining(",")),
-                    anonAlgorithms.isEmpty());
+                                    .collect(Collectors.joining(",")));
         }
     }
 

@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
@@ -36,8 +36,8 @@ public class CipherSuites extends Tls12Test {
         }
 
         assertEquals(
-                "Deprecated Ciphersuites supported: " + String.join(", ", badSuites),
                 0,
-                badSuites.size());
+                badSuites.size(),
+                "Deprecated Ciphersuites supported: " + String.join(", ", badSuites));
     }
 }

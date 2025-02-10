@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7685;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
@@ -71,8 +71,8 @@ public class PaddingExtension extends Tls12Test {
                 state.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
         if (serverHello.getExtensions() != null) {
             assertFalse(
-                    "Server responded with Padding Extension",
-                    serverHello.containsExtension(ExtensionType.PADDING));
+                    serverHello.containsExtension(ExtensionType.PADDING),
+                    "Server responded with Padding Extension");
         }
     }
 }

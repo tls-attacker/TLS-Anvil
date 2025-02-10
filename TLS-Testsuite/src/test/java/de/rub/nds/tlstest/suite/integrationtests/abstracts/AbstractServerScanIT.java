@@ -13,7 +13,7 @@ import de.rub.nds.tls.subject.docker.DockerTlsManagerFactory;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Assume;
+import org.opentest4j.TestAbortedException;
 
 public abstract class AbstractServerScanIT extends AbstractScanIT {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -74,8 +74,7 @@ public abstract class AbstractServerScanIT extends AbstractScanIT {
             return dockerInstance;
         } catch (InterruptedException e) {
             LOGGER.error(String.format("Error while build or launching Docker container: %s", e));
-            Assume.assumeNoException(e);
-            return null;
+            throw new TestAbortedException();
         }
     }
 }

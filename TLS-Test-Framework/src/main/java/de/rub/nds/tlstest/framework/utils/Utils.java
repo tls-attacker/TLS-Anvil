@@ -19,15 +19,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class Utils {
 
-    /**
-     * @param extensionContext
-     * @return Return the extension context that belongs to an {@link
-     *     de.rub.nds.tlstest.framework.execution.AnnotatedStateContainer}. This is either a {@link
-     *     org.junit.jupiter.engine.descriptor.TestTemplateExtensionContext} extension context, in
-     *     case of handshakes are performed, or a {@link
-     *     org.junit.jupiter.engine.descriptor.MethodExtensionContext} in case no handshakes are
-     *     performed.
-     */
     public static ExtensionContext getTemplateContainerExtensionContext(
             ExtensionContext extensionContext) {
         if (!extensionContextIsBasedOnCombinatorialTesting(extensionContext)) {

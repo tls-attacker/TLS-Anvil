@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
@@ -47,7 +47,7 @@ public class CertificateVerify extends Tls13Test {
 
         Validator.executedAsPlanned(state, testCase);
         assertTrue(
-                "Certificate Verify Message contained an invalid signature", signatureValid(state));
+                signatureValid(state), "Certificate Verify Message contained an invalid signature");
     }
 
     private boolean signatureValid(State state) {

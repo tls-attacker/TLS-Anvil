@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
@@ -81,15 +80,15 @@ public class HelloRetryRequest extends Tls13Test {
                 state.getWorkflowTrace().getFirstSentMessage(ClientHelloMessage.class);
         if (sHello != null) {
             assertTrue(
-                    "Server did not send a HelloRetryRequest", sHello.isTls13HelloRetryRequest());
+                    sHello.isTls13HelloRetryRequest(), "Server did not send a HelloRetryRequest");
             assertTrue(
-                    "Server selected an unproposed CipherSuite",
                     Arrays.equals(
                             selectedCipher.getByteValue(),
-                            sHello.getSelectedCipherSuite().getValue()));
+                            sHello.getSelectedCipherSuite().getValue()),
+                    "Server selected an unproposed CipherSuite");
             assertTrue(
-                    "Server did not include a SupportedVersions Extension",
-                    sHello.containsExtension(ExtensionType.SUPPORTED_VERSIONS));
+                    sHello.containsExtension(ExtensionType.SUPPORTED_VERSIONS),
+                    "Server did not include a SupportedVersions Extension");
             SharedExtensionTests.checkForDuplicateExtensions(sHello);
             ServerHello.checkForForbiddenExtensions(sHello);
             ServerHello.checkForUnproposedExtensions(sHello, cHello);
@@ -97,15 +96,15 @@ public class HelloRetryRequest extends Tls13Test {
                     sHello.getExtension(KeyShareExtensionMessage.class);
             if (ksExtension != null) {
                 assertTrue(
-                        "Server did not include exactly one NamedGroup in KeyShare Extension",
-                        ksExtension.getKeyShareList().size() == 1);
+                        ksExtension.getKeyShareList().size() == 1,
+                        "Server did not include exactly one NamedGroup in KeyShare Extension");
                 assertTrue(
-                        "Server included a public key in HelloRetryRequest",
-                        ksExtension.getKeyShareList().get(0).getPublicKey() == null);
+                        ksExtension.getKeyShareList().get(0).getPublicKey() == null,
+                        "Server included a public key in HelloRetryRequest");
                 assertTrue(
-                        "Server selected an unproposed NamedGroup",
                         c.getDefaultClientNamedGroups()
-                                .contains(ksExtension.getKeyShareList().get(0).getGroupConfig()));
+                                .contains(ksExtension.getKeyShareList().get(0).getGroupConfig()),
+                        "Server selected an unproposed NamedGroup");
             }
         }
     }
@@ -135,19 +134,17 @@ public class HelloRetryRequest extends Tls13Test {
                                 state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         if (helloRetryRequest != null && actualServerHello != null) {
             assertTrue(
-                    "Server selected an unproposed CipherSuite in HelloRetryRequest",
                     context.getFeatureExtractionResult()
                             .getSupportedTls13CipherSuites()
                             .contains(
                                     CipherSuite.getCipherSuite(
-                                            helloRetryRequest
-                                                    .getSelectedCipherSuite()
-                                                    .getValue())));
+                                            helloRetryRequest.getSelectedCipherSuite().getValue())),
+                    "Server selected an unproposed CipherSuite in HelloRetryRequest");
             assertTrue(
-                    "Server selected a different CipherSuite in ServerHello than in HelloRetryRequest",
                     Arrays.equals(
                             helloRetryRequest.getSelectedCipherSuite().getValue(),
-                            actualServerHello.getSelectedCipherSuite().getValue()));
+                            actualServerHello.getSelectedCipherSuite().getValue()),
+                    "Server selected a different CipherSuite in ServerHello than in HelloRetryRequest");
         }
     }
 
@@ -175,15 +172,15 @@ public class HelloRetryRequest extends Tls13Test {
                                 state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         if (helloRetryRequest != null && actualServerHello != null) {
             assertTrue(
-                    "Server selected an unproposed CipherSuite in HelloRetryRequest",
                     Arrays.equals(
                             helloRetryRequest.getSelectedCipherSuite().getValue(),
-                            selectedCipherSuite.getByteValue()));
+                            selectedCipherSuite.getByteValue()),
+                    "Server selected an unproposed CipherSuite in HelloRetryRequest");
             assertTrue(
-                    "Server selected a different CipherSuite in ServerHello than in HelloRetryRequest",
                     Arrays.equals(
                             helloRetryRequest.getSelectedCipherSuite().getValue(),
-                            actualServerHello.getSelectedCipherSuite().getValue()));
+                            actualServerHello.getSelectedCipherSuite().getValue()),
+                    "Server selected a different CipherSuite in ServerHello than in HelloRetryRequest");
         }
     }
 
@@ -210,7 +207,6 @@ public class HelloRetryRequest extends Tls13Test {
                                 state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         if (helloRetryRequest != null && actualServerHello != null) {
             assertTrue(
-                    "Server did not retain the selected Protocol Version in Supported Versions Extension",
                     Arrays.equals(
                             helloRetryRequest
                                     .getExtension(SupportedVersionsExtensionMessage.class)
@@ -219,7 +215,8 @@ public class HelloRetryRequest extends Tls13Test {
                             actualServerHello
                                     .getExtension(SupportedVersionsExtensionMessage.class)
                                     .getSupportedVersions()
-                                    .getValue()));
+                                    .getValue()),
+                    "Server did not retain the selected Protocol Version in Supported Versions Extension");
         }
     }
 
@@ -231,10 +228,10 @@ public class HelloRetryRequest extends Tls13Test {
     */
     public void sentHelloRetryRequest() {
         assertTrue(
-                "No Hello Retry Request received by Scanner",
                 context.getFeatureExtractionResult()
                                 .getResult(TlsAnalyzedProperty.SENDS_HELLO_RETRY_REQUEST)
-                        == TestResults.TRUE);
+                        == TestResults.TRUE,
+                "No Hello Retry Request received by Scanner");
     }
 
     private WorkflowTrace getHelloRetryWorkflowTrace(WorkflowRunner runner) {
@@ -289,10 +286,10 @@ public class HelloRetryRequest extends Tls13Test {
         // new
         // ServerHello but it must not be sent twice by the server
         assertFalse(
-                "Received more than one compatibility CCS from Server",
                 WorkflowTraceResultUtil.getAllReceivedMessagesOfType(
                                         executedTrace, ProtocolMessageType.CHANGE_CIPHER_SPEC)
                                 .size()
-                        > 1);
+                        > 1,
+                "Received more than one compatibility CCS from Server");
     }
 }

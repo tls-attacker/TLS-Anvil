@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc6066;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
@@ -43,7 +43,7 @@ public class ServerNameIndication extends Tls12Test {
         List<SniType> nameTypes = new ArrayList<>();
         for (ServerNamePair i : snis) {
             SniType name = SniType.getNameType(i.getServerNameType().getValue());
-            assertFalse("More than one name of the same name_type", nameTypes.contains(name));
+            assertFalse(nameTypes.contains(name), "More than one name of the same name_type");
             nameTypes.add(name);
         }
     }

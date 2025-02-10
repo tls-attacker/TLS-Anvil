@@ -10,13 +10,13 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.SeedingMethodDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ConfigurationOptionsConfigTest {
     public static ConfigurationOptionsConfig createTestConfig() {

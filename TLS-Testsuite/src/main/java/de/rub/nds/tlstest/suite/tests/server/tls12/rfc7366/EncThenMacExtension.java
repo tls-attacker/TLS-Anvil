@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7366;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.tlsattacker.core.config.Config;
@@ -67,8 +66,8 @@ public class EncThenMacExtension extends Tls12Test {
 
         State state = runner.execute(trace, c);
         assertTrue(
-                "Encrypt then mac extension was not negotiated",
-                state.getTlsContext().isExtensionNegotiated(ExtensionType.ENCRYPT_THEN_MAC));
+                state.getTlsContext().isExtensionNegotiated(ExtensionType.ENCRYPT_THEN_MAC),
+                "Encrypt then mac extension was not negotiated");
     }
 
     @AnvilTest(id = "7366-HSEGiXELMF")
@@ -83,7 +82,7 @@ public class EncThenMacExtension extends Tls12Test {
 
         State state = runner.execute(trace, c);
         assertFalse(
-                "Encrypt then mac extension was negotiated, although the selected ciphersuite did not use a block cipher",
-                state.getTlsContext().isExtensionNegotiated(ExtensionType.ENCRYPT_THEN_MAC));
+                state.getTlsContext().isExtensionNegotiated(ExtensionType.ENCRYPT_THEN_MAC),
+                "Encrypt then mac extension was negotiated, although the selected ciphersuite did not use a block cipher");
     }
 }

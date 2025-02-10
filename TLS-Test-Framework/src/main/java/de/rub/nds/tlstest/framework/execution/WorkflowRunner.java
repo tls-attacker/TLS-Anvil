@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -272,7 +271,7 @@ public class WorkflowRunner {
      * @param type WorkflowTraceType that should be used for the generated workflowTrace
      * @return empty WorkflowTrace
      */
-    public WorkflowTrace generateWorkflowTrace(@Nonnull WorkflowTraceType type) {
+    public WorkflowTrace generateWorkflowTrace(WorkflowTraceType type) {
         RunningModeType runningMode = resolveRunningMode(context.getConfig().getTestEndpointMode());
         WorkflowTrace trace =
                 new WorkflowConfigurationFactory(preparedConfig)
@@ -287,7 +286,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+            WorkflowTraceType type, HandshakeMessageType handshakeMessageType) {
         this.untilHandshakeMessage = handshakeMessageType;
         this.untilProtocolMessage = null;
 
@@ -295,7 +294,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+            WorkflowTraceType type, ProtocolMessageType protocolMessageType) {
         this.untilHandshakeMessage = null;
         this.untilProtocolMessage = protocolMessageType;
 
@@ -303,7 +302,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilSendingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+            WorkflowTraceType type, HandshakeMessageType handshakeMessageType) {
         this.untilHandshakeMessage = handshakeMessageType;
         this.untilProtocolMessage = null;
         this.untilSendingMessage = true;
@@ -312,7 +311,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilSendingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+            WorkflowTraceType type, ProtocolMessageType protocolMessageType) {
         this.untilHandshakeMessage = null;
         this.untilProtocolMessage = protocolMessageType;
         this.untilSendingMessage = true;
@@ -321,7 +320,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilReceivingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+            WorkflowTraceType type, HandshakeMessageType handshakeMessageType) {
         this.untilHandshakeMessage = handshakeMessageType;
         this.untilProtocolMessage = null;
         this.untilSendingMessage = false;
@@ -330,7 +329,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilReceivingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+            WorkflowTraceType type, ProtocolMessageType protocolMessageType) {
         this.untilHandshakeMessage = null;
         this.untilProtocolMessage = protocolMessageType;
         this.untilSendingMessage = false;
@@ -339,7 +338,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilLastMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+            WorkflowTraceType type, HandshakeMessageType handshakeMessageType) {
         this.untilHandshakeMessage = handshakeMessageType;
         this.untilProtocolMessage = null;
         this.untilLast = true;
@@ -348,7 +347,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilLastMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+            WorkflowTraceType type, ProtocolMessageType protocolMessageType) {
         this.untilHandshakeMessage = null;
         this.untilProtocolMessage = protocolMessageType;
         this.untilLast = true;
@@ -357,7 +356,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilLastSendingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+            WorkflowTraceType type, HandshakeMessageType handshakeMessageType) {
         this.untilHandshakeMessage = handshakeMessageType;
         this.untilProtocolMessage = null;
         this.untilSendingMessage = true;
@@ -367,7 +366,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilLastSendingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+            WorkflowTraceType type, ProtocolMessageType protocolMessageType) {
         this.untilHandshakeMessage = null;
         this.untilProtocolMessage = protocolMessageType;
         this.untilSendingMessage = true;
@@ -377,7 +376,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilLastReceivingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+            WorkflowTraceType type, HandshakeMessageType handshakeMessageType) {
         this.untilHandshakeMessage = handshakeMessageType;
         this.untilProtocolMessage = null;
         this.untilSendingMessage = false;
@@ -387,7 +386,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilLastReceivingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+            WorkflowTraceType type, ProtocolMessageType protocolMessageType) {
         this.untilHandshakeMessage = null;
         this.untilProtocolMessage = protocolMessageType;
         this.untilSendingMessage = false;

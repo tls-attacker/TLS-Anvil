@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc6066;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
@@ -143,9 +143,9 @@ public class MaximumFragmentLength extends Tls12Test {
             if (receiveAction.getReceivedRecords() != null) {
                 for (Record receivedRecord : receiveAction.getReceivedRecords()) {
                     assertTrue(
-                            "Plaintextbytes of record exceeded limit",
                             receivedRecord.getCleanProtocolMessageBytes().getValue().length
-                                    <= maxPlaintextFragmentSize);
+                                    <= maxPlaintextFragmentSize,
+                            "Plaintextbytes of record exceeded limit");
                 }
             }
         }

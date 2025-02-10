@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.annotations.keyExchange;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.testhelper.ExtensionContextResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;

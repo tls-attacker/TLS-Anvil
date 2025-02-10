@@ -9,7 +9,7 @@ package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
 import static de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests.checkForDuplicateExtensions;
 import static de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446.ServerHello.checkForUnproposedExtensions;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
@@ -51,9 +51,9 @@ public class ServerHello extends Tls12Test {
         ClientHelloMessage clientHello = trace.getFirstSentMessage(ClientHelloMessage.class);
 
         assertFalse(
-                "ServerHello random equals ClienHello",
                 Arrays.equals(
-                        clientHello.getRandom().getValue(), serverHello.getRandom().getValue()));
+                        clientHello.getRandom().getValue(), serverHello.getRandom().getValue()),
+                "ServerHello random equals ClienHello");
     }
 
     @AnvilTest(id = "5246-yM4KkM8m6m")
@@ -72,10 +72,10 @@ public class ServerHello extends Tls12Test {
         if (workflowTrace.getFirstReceivedMessage(ServerHelloMessage.class).getExtensions()
                 != null) {
             assertFalse(
-                    "Server sent a Signature Algorithms Extension",
                     workflowTrace
                             .getFirstReceivedMessage(ServerHelloMessage.class)
-                            .containsExtension(ExtensionType.SIGNATURE_AND_HASH_ALGORITHMS));
+                            .containsExtension(ExtensionType.SIGNATURE_AND_HASH_ALGORITHMS),
+                    "Server sent a Signature Algorithms Extension");
         }
     }
 }

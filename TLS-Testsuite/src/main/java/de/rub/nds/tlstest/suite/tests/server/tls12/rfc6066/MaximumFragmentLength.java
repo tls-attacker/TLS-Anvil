@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc6066;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
@@ -90,8 +90,8 @@ public class MaximumFragmentLength extends Tls12Test {
         ServerHelloMessage serverHello =
                 state.getWorkflowTrace().getLastReceivedMessage(ServerHelloMessage.class);
         assertTrue(
-                "MaxFragmentLength has not been negotiated by the server",
-                serverHello.containsExtension(ExtensionType.MAX_FRAGMENT_LENGTH));
+                serverHello.containsExtension(ExtensionType.MAX_FRAGMENT_LENGTH),
+                "MaxFragmentLength has not been negotiated by the server");
         MaxFragmentLength selectedMaxFragment =
                 MaxFragmentLength.getMaxFragmentLength(
                         serverHello
@@ -104,9 +104,9 @@ public class MaximumFragmentLength extends Tls12Test {
         for (int j = 1; j < WorkflowTraceResultUtil.getAllReceivedRecords(trace).size(); j++) {
             Record record = WorkflowTraceResultUtil.getAllReceivedRecords(trace).get(j);
             assertTrue(
-                    "Plaintextbytes of record exceeded limit",
                     record.getCleanProtocolMessageBytes().getValue().length
-                            <= maxPlaintextFragmentSize);
+                            <= maxPlaintextFragmentSize,
+                    "Plaintextbytes of record exceeded limit");
         }
     }
 }

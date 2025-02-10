@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
@@ -62,17 +62,17 @@ public class MiddleboxCompatibility extends Tls13Test {
 
         Validator.executedAsPlanned(state, testCase);
         assertTrue(
-                "Did not receive a compatibility CCS",
                 WorkflowTraceResultUtil.didReceiveMessage(
-                        state.getWorkflowTrace(), ProtocolMessageType.CHANGE_CIPHER_SPEC));
+                        state.getWorkflowTrace(), ProtocolMessageType.CHANGE_CIPHER_SPEC),
+                "Did not receive a compatibility CCS");
         List<ProtocolMessage> receivedMessages =
                 WorkflowTraceResultUtil.getAllReceivedMessages(workflowTrace);
         for (ProtocolMessage receivedMessage : receivedMessages) {
             if (receivedMessage instanceof ServerHelloMessage) {
                 assertTrue(
-                        "Server did not send the compatibility CCS after the Server Hello",
                         receivedMessages.get(receivedMessages.indexOf(receivedMessage) + 1)
-                                instanceof ChangeCipherSpecMessage);
+                                instanceof ChangeCipherSpecMessage,
+                        "Server did not send the compatibility CCS after the Server Hello");
             }
         }
     }
@@ -94,17 +94,17 @@ public class MiddleboxCompatibility extends Tls13Test {
         State state = runner.execute(workflowTrace, config);
 
         assertTrue(
-                "Did not receive a compatibility CCS",
                 WorkflowTraceResultUtil.didReceiveMessage(
-                        state.getWorkflowTrace(), ProtocolMessageType.CHANGE_CIPHER_SPEC));
+                        state.getWorkflowTrace(), ProtocolMessageType.CHANGE_CIPHER_SPEC),
+                "Did not receive a compatibility CCS");
         List<ProtocolMessage> receivedMessages =
                 WorkflowTraceResultUtil.getAllReceivedMessages(workflowTrace);
         for (ProtocolMessage receivedMessage : receivedMessages) {
             if (receivedMessage instanceof ServerHelloMessage) {
                 assertTrue(
-                        "Server did not send the compatibility CCS after the Hello Retry Request",
                         receivedMessages.get(receivedMessages.indexOf(receivedMessage) + 1)
-                                instanceof ChangeCipherSpecMessage);
+                                instanceof ChangeCipherSpecMessage,
+                        "Server did not send the compatibility CCS after the Hello Retry Request");
             }
         }
     }

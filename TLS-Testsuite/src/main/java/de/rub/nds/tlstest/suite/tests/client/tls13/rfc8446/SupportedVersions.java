@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -131,13 +130,13 @@ public class SupportedVersions extends Tls13Test {
         SupportedVersionsExtensionMessage ext =
                 context.getReceivedClientHelloMessage()
                         .getExtension(SupportedVersionsExtensionMessage.class);
-        assertNotNull("CH Does not contain supported_versions extension", ext);
+        assertNotNull(ext, "CH Does not contain supported_versions extension");
 
         List<ProtocolVersion> versions =
                 ProtocolVersion.getProtocolVersions(ext.getSupportedVersions().getValue());
         assertTrue(
-                "supported_versions does not contain TLS 1.3",
-                versions.contains(ProtocolVersion.TLS13));
+                versions.contains(ProtocolVersion.TLS13),
+                "supported_versions does not contain TLS 1.3");
     }
 
     public List<DerivationParameter> getUnsupportedProtocolVersions(DerivationScope scope) {

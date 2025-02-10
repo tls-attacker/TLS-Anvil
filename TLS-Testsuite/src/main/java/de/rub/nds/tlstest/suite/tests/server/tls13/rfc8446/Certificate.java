@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
@@ -36,7 +36,7 @@ public class Certificate extends Tls13Test {
         CertificateMessage cert =
                 state.getWorkflowTrace().getFirstReceivedMessage(CertificateMessage.class);
         assertTrue(
-                "Server's certificate list was emtpy",
-                cert.getCertificatesListLength().getValue() > 0);
+                cert.getCertificatesListLength().getValue() > 0,
+                "Server's certificate list was emtpy");
     }
 }

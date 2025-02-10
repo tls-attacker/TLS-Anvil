@@ -1,5 +1,7 @@
 package de.rub.nds.tlstest.framework.execution;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -13,7 +15,6 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -41,7 +42,7 @@ public class WorkflowRunnerTest {
             WorkflowTrace trace, Config config, TestEndpointType runningModeType) {
         WorkflowTrace initialTrace = WorkflowTrace.copy(trace);
         WorkflowRunner.adaptForDtls(trace, config, runningModeType);
-        Assert.assertEquals(initialTrace, trace);
+        assertEquals(initialTrace, trace);
     }
 
     @ParameterizedTest
@@ -56,9 +57,9 @@ public class WorkflowRunnerTest {
         List<ProtocolMessage> addedMessages =
                 removeTrailingFlightMessages(trace, messageToBeAdded.size());
         // ensure only expected messages have been added
-        Assert.assertEquals(messageToBeAdded, addedMessages);
+        assertEquals(messageToBeAdded, addedMessages);
         // ensure WorkflowTrace is identical when added messages have been removed again
-        Assert.assertEquals(initialTrace, trace);
+        assertEquals(initialTrace, trace);
     }
 
     public static Stream<Arguments> provideIncompleteFlightWorkflowTraces() {

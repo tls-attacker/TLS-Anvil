@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7568;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
@@ -23,9 +23,9 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
     public void sendClientHelloVersion0300() {
         ClientHelloMessage clientHelloMessage = context.getReceivedClientHelloMessage();
         assertFalse(
-                "ClientHello contains protocol version 0300",
                 Arrays.equals(
                         ProtocolVersion.SSL3.getValue(),
-                        clientHelloMessage.getProtocolVersion().getValue()));
+                        clientHelloMessage.getProtocolVersion().getValue()),
+                "ClientHello contains protocol version 0300");
     }
 }

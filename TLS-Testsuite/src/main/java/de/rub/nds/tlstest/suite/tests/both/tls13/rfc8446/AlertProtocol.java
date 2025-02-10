@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
@@ -127,7 +126,7 @@ public class AlertProtocol extends Tls13Test {
 
         AlertMessage receivedAlert =
                 state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        assertNotNull("No alert has been received", receivedAlert);
+        assertNotNull(receivedAlert, "No alert has been received");
         Validator.testAlertDescription(
                 state, testCase, AlertDescription.CLOSE_NOTIFY, receivedAlert);
     }
@@ -144,8 +143,8 @@ public class AlertProtocol extends Tls13Test {
         State state = runner.execute(trace, config);
 
         assertTrue(
-                "The socket has not been closed for an unknown alert with level fatal",
-                Validator.socketClosed(state));
+                Validator.socketClosed(state),
+                "The socket has not been closed for an unknown alert with level fatal");
     }
 
     private void peformUnknownWarningAlertTest(
@@ -160,8 +159,8 @@ public class AlertProtocol extends Tls13Test {
         State state = runner.execute(trace, config);
 
         assertTrue(
-                "The socket has not been closed for an unknown alert with level warning",
-                Validator.socketClosed(state));
+                Validator.socketClosed(state),
+                "The socket has not been closed for an unknown alert with level warning");
     }
 
     public boolean isMeantToBeFatalLevel(AlertDescription alert) {
@@ -194,8 +193,8 @@ public class AlertProtocol extends Tls13Test {
         State state = runner.execute(trace, config);
 
         assertTrue(
-                "The socket has not been closed for a fatal alert with level warning",
-                Validator.socketClosed(state));
+                Validator.socketClosed(state),
+                "The socket has not been closed for a fatal alert with level warning");
     }
 
     private void catchOptionalPostHandshakeMessage(WorkflowTrace trace) {

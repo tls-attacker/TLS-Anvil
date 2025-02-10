@@ -10,7 +10,6 @@ package de.rub.nds.tlstest.framework.constants;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.KeyExchangeAlgorithm;
-import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,7 +47,6 @@ public enum KeyExchangeType {
         return false;
     }
 
-    @Nonnull
     public static KeyExchangeType forCipherSuite(CipherSuite i) {
         try {
             KeyExchangeAlgorithm alg = AlgorithmResolver.getKeyExchangeAlgorithm(i);

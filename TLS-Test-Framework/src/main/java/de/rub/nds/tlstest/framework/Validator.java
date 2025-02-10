@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
@@ -101,13 +101,13 @@ public class Validator {
         if (TestContext.getInstance().getConfig().isUseDTLS()) return;
         if (!socketClosed) {
             // must fail
-            assertFalse("Socket still open after fatal alert", receivedAlert && alertIsFatal);
+            assertFalse(receivedAlert && alertIsFatal, "Socket still open after fatal alert");
             assertFalse(
-                    "Socket still open and only sent warning alert",
-                    receivedAlert && !alertIsFatal);
+                    receivedAlert && !alertIsFatal,
+                    "Socket still open and only sent warning alert");
             assertFalse(
-                    "Expected a fatal alert but no messages have been received and socket is still open",
-                    lastMessagesReceived.isEmpty());
+                    lastMessagesReceived.isEmpty(),
+                    "Expected a fatal alert but no messages have been received and socket is still open");
 
             fail(
                     "Expected a fatal alert but received "
@@ -115,9 +115,9 @@ public class Validator {
                             + " and socket is still open.");
         } else {
             assertFalse(
+                    lastActionFailed && !lastMessagesReceived.isEmpty(),
                     "Socket was closed but unexpected messages have been received. Received: "
-                            + messageString,
-                    lastActionFailed && !lastMessagesReceived.isEmpty());
+                            + messageString);
 
             if (!receivedAlert) {
                 if (mayOmitDueToTls13(state)) {
@@ -209,7 +209,7 @@ public class Validator {
 
     public static void executedAsPlanned(State state, AnvilTestCase testCase) {
         checkForUnknownMessage(state, testCase);
-        assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, state.getWorkflowTrace().executedAsPlanned());
+        assertTrue(state.getWorkflowTrace().executedAsPlanned(), AssertMsgs.WORKFLOW_NOT_EXECUTED);
     }
 
     public static void receivedWarningAlert(State state, AnvilTestCase testCase) {
@@ -218,11 +218,11 @@ public class Validator {
         smartExecutedAsPlanned(state, testCase);
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        assertNotNull(AssertMsgs.NO_WARNING_ALERT, msg);
+        assertNotNull(msg, AssertMsgs.NO_WARNING_ALERT);
         assertEquals(
-                AssertMsgs.NO_WARNING_ALERT,
                 AlertLevel.WARNING.getValue(),
-                msg.getLevel().getValue().byteValue());
+                msg.getLevel().getValue().byteValue(),
+                AssertMsgs.NO_WARNING_ALERT);
     }
 
     public static void testAlertDescription(

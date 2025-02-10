@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
@@ -95,19 +95,19 @@ public class Fragmentation extends Tls12Test {
         State state = runner.execute(workflowTrace, c);
 
         WorkflowTrace trace = state.getWorkflowTrace();
-        assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, trace.executedAsPlanned());
+        assertTrue(trace.executedAsPlanned(), AssertMsgs.WORKFLOW_NOT_EXECUTED);
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
         testCase.addAdditionalResultInfo("Evaluated with timeout " + reducedTimeout);
         if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta() > 0) {
-            assertNull("Received alert message", msg);
-            assertFalse("Socket was closed", Validator.socketClosed(state));
+            assertNull(msg, "Received alert message");
+            assertFalse(Validator.socketClosed(state), "Socket was closed");
         } else {
             if (msg != null) {
                 assertEquals(
-                        "SUT sent an alert that was not a Close Notify",
                         AlertDescription.CLOSE_NOTIFY.getValue(),
-                        (byte) msg.getDescription().getValue());
+                        (byte) msg.getDescription().getValue(),
+                        "SUT sent an alert that was not a Close Notify");
             }
         }
     }
@@ -216,16 +216,16 @@ public class Fragmentation extends Tls12Test {
     public void recordFragmentationSupported() {
         if (context.getConfig().isUseDTLS()) {
             assertTrue(
-                    "DTLS record fragmentation support has not been detected",
                     context.getFeatureExtractionResult()
                                     .getResult(TlsAnalyzedProperty.SUPPORTS_DTLS_FRAGMENTATION)
-                            == TestResults.TRUE);
+                            == TestResults.TRUE,
+                    "DTLS record fragmentation support has not been detected");
         } else {
             assertTrue(
-                    "Record fragmentation support has not been detected",
                     context.getFeatureExtractionResult()
                                     .getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION)
-                            == TestResults.TRUE);
+                            == TestResults.TRUE,
+                    "Record fragmentation support has not been detected");
         }
     }
 }

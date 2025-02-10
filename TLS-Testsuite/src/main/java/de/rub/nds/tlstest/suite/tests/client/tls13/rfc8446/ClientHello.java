@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
@@ -28,8 +28,8 @@ public class ClientHello extends Tls13Test {
         byte[] version = clientHello.getProtocolVersion().getValue();
         SupportedVersionsExtensionMessage ext =
                 clientHello.getExtension(SupportedVersionsExtensionMessage.class);
-        assertArrayEquals("Invalid legacy_version", ProtocolVersion.TLS12.getValue(), version);
-        assertNotNull("Does not contain supported_versions extension", ext);
+        assertArrayEquals(ProtocolVersion.TLS12.getValue(), version, "Invalid legacy_version");
+        assertNotNull(ext, "Does not contain supported_versions extension");
     }
 
     @NonCombinatorialAnvilTest(id = "8446-eMuKxJmUfq")
@@ -57,16 +57,16 @@ public class ClientHello extends Tls13Test {
     }
 
     private static void checkForIllegalExtensions(ClientHelloMessage clientHello) {
-        assertNotNull("No ClientHello was received", clientHello);
+        assertNotNull(clientHello, "No ClientHello was received");
         // Clients MUST NOT use
         // cookies in their initial ClientHello in subsequent connections
         assertFalse(
-                "Client sent a Cookie Extension in initial ClientHello",
-                clientHello.containsExtension(ExtensionType.COOKIE));
+                clientHello.containsExtension(ExtensionType.COOKIE),
+                "Client sent a Cookie Extension in initial ClientHello");
         // Implementations MUST NOT use the Truncated HMAC extension
         assertFalse(
-                "Client sent a Truncated HMAC Extension",
-                clientHello.containsExtension(ExtensionType.TRUNCATED_HMAC));
+                clientHello.containsExtension(ExtensionType.TRUNCATED_HMAC),
+                "Client sent a Truncated HMAC Extension");
     }
 
     @NonCombinatorialAnvilTest(id = "8446-Q2RbRWjAdJ")
@@ -76,7 +76,7 @@ public class ClientHello extends Tls13Test {
         int sessionIdLength = clientHello.getSessionIdLength().getValue();
         if (sessionIdLength > 0) {
             assertEquals(
-                    "Session ID was set by client but is not a 32-byte value", 32, sessionIdLength);
+                    32, sessionIdLength, "Session ID was set by client but is not a 32-byte value");
         }
     }
 }

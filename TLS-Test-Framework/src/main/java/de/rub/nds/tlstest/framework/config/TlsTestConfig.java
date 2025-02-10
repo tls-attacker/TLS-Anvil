@@ -45,8 +45,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -120,7 +118,6 @@ public class TlsTestConfig extends TLSDelegateConfig {
      *
      * @return arguments parsed from the COMMAND environment variable
      */
-    @Nullable
     private String[] argsFromEnvironment() {
         String clientEnv = System.getenv("COMMAND_CLIENT");
         String serverEnv = System.getenv("COMMAND_SERVER");
@@ -146,7 +143,7 @@ public class TlsTestConfig extends TLSDelegateConfig {
         }
     }
 
-    public void parse(@Nullable String[] args) {
+    public void parse(String[] args) {
         if (isParsedArgs()) return;
         anvilTestConfig = new AnvilTestConfig();
 
@@ -538,7 +535,7 @@ public class TlsTestConfig extends TLSDelegateConfig {
         this.testEndpointMode = testEndpointMode;
     }
 
-    private void setTestEndpointMode(@Nonnull String testEndpointMode) {
+    private void setTestEndpointMode(String testEndpointMode) {
         if (testEndpointMode.toLowerCase().equals(TestEndpointType.CLIENT.toString())) {
             this.testEndpointMode = TestEndpointType.CLIENT;
         } else if (testEndpointMode.toLowerCase().equals(TestEndpointType.SERVER.toString())) {

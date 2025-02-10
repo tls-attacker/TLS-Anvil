@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
@@ -86,9 +86,9 @@ public class KeyShare extends Tls13Test {
         ServerHelloMessage shm = trace.getFirstReceivedMessage(ServerHelloMessage.class);
         if (alert != null && shm == null) {
             assertEquals(
-                    "No fatal alert received",
                     AlertLevel.FATAL.getValue(),
-                    alert.getLevel().getValue().byteValue());
+                    alert.getLevel().getValue().byteValue(),
+                    "No fatal alert received");
             Validator.testAlertDescription(
                     state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
             testCase.addAdditionalResultInfo("Received alert");
@@ -96,8 +96,8 @@ public class KeyShare extends Tls13Test {
         }
 
         assertTrue(
-                AssertMsgs.WORKFLOW_NOT_EXECUTED + ", server likely selected the wrong key share",
-                state.getWorkflowTrace().executedAsPlanned());
+                state.getWorkflowTrace().executedAsPlanned(),
+                AssertMsgs.WORKFLOW_NOT_EXECUTED + ", server likely selected the wrong key share");
     }
 
     @AnvilTest(id = "8446-R2rb1WZoQo")
@@ -133,34 +133,34 @@ public class KeyShare extends Tls13Test {
 
         ServerHelloMessage serverHello =
                 state.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
-        assertTrue("No ServerHello has been received", serverHello != null);
+        assertTrue(serverHello != null, "No ServerHello has been received");
         KeyShareExtensionMessage keyshare =
                 serverHello.getExtension(KeyShareExtensionMessage.class);
         if (serverHello.isTls13HelloRetryRequest()) {
             testCase.addAdditionalResultInfo("Server enforced own preferred group");
             assertTrue(
-                    "Server requested an unproposed group in HelloRetryRequest",
                     c.getDefaultClientNamedGroups()
                             .contains(
                                     keyshare.getKeyShareList().stream()
                                             .map(KeyShareEntry::getGroupConfig)
                                             .collect(Collectors.toList())
-                                            .get(0)));
+                                            .get(0)),
+                    "Server requested an unproposed group in HelloRetryRequest");
         } else {
             Validator.executedAsPlanned(state, testCase);
             assertTrue(
-                    "Server selected group for which no Key Share was sent outside of HelloRetryRequest",
                     c.getDefaultClientKeyShareNamedGroups()
                             .contains(
                                     keyshare.getKeyShareList().stream()
                                             .map(KeyShareEntry::getGroupConfig)
                                             .collect(Collectors.toList())
-                                            .get(0)));
+                                            .get(0)),
+                    "Server selected group for which no Key Share was sent outside of HelloRetryRequest");
         }
         assertEquals(
-                "Server offered more than one keyshare entry",
                 1,
-                keyshare.getKeyShareList().size());
+                keyshare.getKeyShareList().size(),
+                "Server offered more than one keyshare entry");
     }
 
     public List<DerivationParameter<Config, NamedGroup>> getLegacyGroups(DerivationScope scope) {
@@ -207,20 +207,20 @@ public class KeyShare extends Tls13Test {
                     trace.getFirstReceivedMessage(ServerHelloMessage.class)
                             .getExtension(KeyShareExtensionMessage.class);
             assertFalse(
-                    "Server accepted a deprecated group",
                     groups.contains(
                             ksExt.getKeyShareList().stream()
                                     .map(KeyShareEntry::getGroupConfig)
                                     .collect(Collectors.toList())
-                                    .get(0)));
+                                    .get(0)),
+                    "Server accepted a deprecated group");
             // other groups may not be used - even in HelloRetryRequest
             assertTrue(
-                    "Server selected an unproposed group",
                     groups.contains(
                             ksExt.getKeyShareList().stream()
                                     .map(KeyShareEntry::getGroupConfig)
                                     .collect(Collectors.toList())
-                                    .get(0)));
+                                    .get(0)),
+                    "Server selected an unproposed group");
         }
     }
 
@@ -291,10 +291,10 @@ public class KeyShare extends Tls13Test {
         if (WorkflowTraceResultUtil.didReceiveMessage(
                 state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO)) {
             assertTrue(
-                    "Server sent a Server Hello that is not a Hello Retry Request",
                     state.getWorkflowTrace()
                             .getLastReceivedMessage(ServerHelloMessage.class)
-                            .isTls13HelloRetryRequest());
+                            .isTls13HelloRetryRequest(),
+                    "Server sent a Server Hello that is not a Hello Retry Request");
         } else {
             Validator.receivedFatalAlert(state, testCase);
         }
@@ -393,10 +393,10 @@ public class KeyShare extends Tls13Test {
         if (WorkflowTraceResultUtil.didReceiveMessage(
                 state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO)) {
             assertTrue(
-                    "Server sent a Server Hello that is not a Hello Retry Request",
                     state.getWorkflowTrace()
                             .getLastReceivedMessage(ServerHelloMessage.class)
-                            .isTls13HelloRetryRequest());
+                            .isTls13HelloRetryRequest(),
+                    "Server sent a Server Hello that is not a Hello Retry Request");
         } else {
             Validator.receivedFatalAlert(state, testCase);
         }

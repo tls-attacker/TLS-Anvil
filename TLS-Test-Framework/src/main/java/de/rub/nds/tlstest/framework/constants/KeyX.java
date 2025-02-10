@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -119,7 +118,6 @@ public class KeyX implements KeyExchange {
         setSupportedKxs(filteredA);
     }
 
-    @Nonnull
     public static KeyExchange resolveKexAnnotation(ExtensionContext context) {
         Method testMethod = context.getRequiredTestMethod();
         Class<?> testClass = context.getRequiredTestClass();

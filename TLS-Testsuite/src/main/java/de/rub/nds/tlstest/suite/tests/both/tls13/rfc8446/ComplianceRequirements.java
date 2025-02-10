@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -20,19 +20,19 @@ public class ComplianceRequirements extends Tls13Test {
     @Tag("new")
     public void supportsAes128GcmSha256() {
         assertTrue(
-                "Peer does not support TLS_AES_128_GCM_SHA256 ",
                 context.getFeatureExtractionResult()
                         .getSupportedTls13CipherSuites()
-                        .contains(CipherSuite.TLS_AES_128_GCM_SHA256));
+                        .contains(CipherSuite.TLS_AES_128_GCM_SHA256),
+                "Peer does not support TLS_AES_128_GCM_SHA256 ");
     }
 
     @NonCombinatorialAnvilTest(id = "8446-xhexdB876E")
     @Tag("new")
     public void supportsSecp256r1() {
         assertTrue(
-                "Peer does not support secp256r1",
                 context.getFeatureExtractionResult()
                         .getTls13Groups()
-                        .contains(NamedGroup.SECP256R1));
+                        .contains(NamedGroup.SECP256R1),
+                "Peer does not support secp256r1");
     }
 }

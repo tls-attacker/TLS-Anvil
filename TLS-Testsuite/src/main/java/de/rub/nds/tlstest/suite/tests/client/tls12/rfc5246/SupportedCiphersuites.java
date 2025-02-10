@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
@@ -36,12 +36,12 @@ public class SupportedCiphersuites extends Tls12Test {
         advertised.forEach(supported::remove);
 
         assertEquals(
+                0,
+                supported.size(),
                 "Client supports more cipher suites than advertised. "
                         + supported.parallelStream()
                                 .map(Enum::name)
-                                .collect(Collectors.joining(",")),
-                0,
-                supported.size());
+                                .collect(Collectors.joining(",")));
     }
 
     @NonCombinatorialAnvilTest(id = "5246-DZsWLPbTuc")
@@ -68,11 +68,11 @@ public class SupportedCiphersuites extends Tls12Test {
                         .collect(Collectors.toList());
 
         assertEquals(
+                0,
+                advertised.size(),
                 "Client supports less ciphersuites than advertised. "
                         + advertised.parallelStream()
                                 .map(Enum::name)
-                                .collect(Collectors.joining(",")),
-                0,
-                advertised.size());
+                                .collect(Collectors.joining(",")));
     }
 }

@@ -28,6 +28,16 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <!-- scope: test -->
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-api</artifactId>
+            <version>${deps.docker-java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
         <dependency>
             <groupId>de.rub.nds</groupId>
             <artifactId>anvil-core</artifactId>
@@ -55,6 +65,10 @@
         <dependency>
             <groupId>de.rub.nds.tls.attacker</groupId>
             <artifactId>transport</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds.tls.dockerlib</groupId>
+            <artifactId>tls-docker-library</artifactId>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls.scanner</groupId>
@@ -87,23 +101,6 @@
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
-        </dependency>
-        <!-- scope: test -->
-        <dependency>
-            <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java-api</artifactId>
-            <version>${deps.docker-java.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>de.rub.nds.tls.dockerlib</groupId>
-            <artifactId>tls-docker-library</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

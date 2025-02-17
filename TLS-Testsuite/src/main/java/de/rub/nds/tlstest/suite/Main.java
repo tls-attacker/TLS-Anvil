@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.anvilcore.execution.TestRunner;
 import de.rub.nds.anvilcore.worker.WorkerClient;
+import de.rub.nds.tlsattacker.core.util.ProviderUtil;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.extractor.TestCaseExtractor;
@@ -26,6 +27,7 @@ public class Main {
 
     static {
         System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+        ProviderUtil.addBouncyCastleProvider();
     }
 
     /**

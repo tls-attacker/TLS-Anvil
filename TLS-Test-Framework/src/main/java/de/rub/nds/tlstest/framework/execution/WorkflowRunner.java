@@ -702,7 +702,7 @@ public class WorkflowRunner {
                 } else if (action instanceof SendAction
                         && preparedConfig.getHighestProtocolVersion() != ProtocolVersion.TLS13) {
                     SendAction sendAction = (SendAction) action;
-                    if (sendAction.getSentMessages().stream()
+                    if (sendAction.getConfiguredMessages().stream()
                             .anyMatch(message -> message instanceof FinishedMessage)) {
                         mayReceiveApplicationDataFromNow = true;
                     }

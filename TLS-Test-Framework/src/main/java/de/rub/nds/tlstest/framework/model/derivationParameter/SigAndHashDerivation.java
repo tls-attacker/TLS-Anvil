@@ -194,7 +194,7 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                         CertificateDerivation certificateDerivation) -> {
                                     if (sigAndHashDerivation.getSelectedValue() != null) {
                                         X509CertificateConfig certConfig =
-                                                certificateDerivation.getSelectedValue();
+                                                certificateDerivation.getLeafConfig();
                                         HashAlgorithm hashAlgo =
                                                 sigAndHashDerivation
                                                         .getSelectedValue()
@@ -328,9 +328,9 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                                 sigAndHashDerivation
                                                         .getSelectedValue()
                                                         .getSignatureAlgorithm();
-                                        switch (certificateDerivation
-                                                .getSelectedValue()
-                                                .getPublicKeyType()) {
+                                        X509CertificateConfig config =
+                                                certificateDerivation.getLeafConfig();
+                                        switch (config.getPublicKeyType()) {
                                             case ECDH_ONLY:
                                             case ECDH_ECDSA:
                                                 if (sigAlg != SignatureAlgorithm.ECDSA) {
@@ -360,6 +360,10 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                                     return false;
                                                 }
                                                 break;
+                                            default:
+                                                throw new RuntimeException(
+                                                        "Encountered unsupported certificate public key type "
+                                                                + config.getPublicKeyType());
                                         }
                                     }
                                     return true;
@@ -389,7 +393,7 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                                         .getSelectedValue()
                                                         .getHashAlgorithm();
                                         X509CertificateConfig selectCertConfig =
-                                                certificateDerivation.getSelectedValue();
+                                                certificateDerivation.getLeafConfig();
 
                                         if (sigAlg.name().contains("PSS")) {
                                             if (selectCertConfig.getRsaModulus().bitLength()
@@ -430,7 +434,7 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                                         .getSelectedValue()
                                                         .getHashAlgorithm();
                                         X509CertificateConfig selectedCertConfig =
-                                                certificateDerivation.getSelectedValue();
+                                                certificateDerivation.getLeafConfig();
 
                                         return selectedCertConfig.getRsaModulus().bitLength()
                                                         >= 1024

@@ -24,6 +24,7 @@ import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.helper.CertificateConfigChainValue;
 import de.rub.nds.tlstest.framework.utils.X509CertificateConfigContainer;
 import de.rub.nds.x509attacker.config.X509CertificateConfig;
 import de.rub.nds.x509attacker.constants.X509PublicKeyType;
@@ -32,7 +33,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /** Selects CertificateKeyPairs for the IPM */
-public class CertificateDerivation extends TlsDerivationParameter<X509CertificateConfig> {
+public class CertificateDerivation extends TlsDerivationParameter<CertificateConfigChainValue> {
 
     private final int MIN_RSA_SIG_KEY_LEN;
     private final int MIN_RSA_KEY_LEN;
@@ -40,7 +41,7 @@ public class CertificateDerivation extends TlsDerivationParameter<X509Certificat
     private final boolean ALLOW_DSS = true;
 
     public CertificateDerivation() {
-        super(TlsParameterType.CERTIFICATE, X509CertificateConfig.class);
+        super(TlsParameterType.CERTIFICATE, CertificateConfigChainValue.class);
         if (TestContext.getInstance()
                         .getFeatureExtractionResult()
                         .getResult(TlsAnalyzedProperty.ENFORCES_SERVER_CERT_MIN_KEY_SIZE_RSA_SIG)
@@ -90,16 +91,18 @@ public class CertificateDerivation extends TlsDerivationParameter<X509Certificat
         }
     }
 
-    public CertificateDerivation(X509CertificateConfig certChainConfig) {
+    public CertificateDerivation(CertificateConfigChainValue certChainConfig) {
         this();
         setSelectedValue(certChainConfig);
     }
 
-    public List<DerivationParameter<Config, X509CertificateConfig>> getApplicableCertificateConfigs(
-            TestContext context, DerivationScope scope, boolean allowUnsupportedPkGroups) {
-        // TODO: Make X509CertificateConfigContainer return certificate chain configs rather than
-        // certificate configs
-        return X509CertificateConfigContainer.getInstance().getCertConfigs().stream()
+    public List<DerivationParameter<Config, CertificateConfigChainValue>>
+            getApplicableCertificateConfigs(
+                    TestContext context, DerivationScope scope, boolean allowUnsupportedPkGroups) {
+
+        List<CertificateConfigChainValue> certConfigs =
+                X509CertificateConfigContainer.getCertificateChainConfigs();
+        return certConfigs.stream()
                 .filter(
                         certChainConfig ->
                                 certMatchesAnySupportedCipherSuite(certChainConfig, scope))
@@ -111,31 +114,35 @@ public class CertificateDerivation extends TlsDerivationParameter<X509Certificat
                                 filterEcdsaPublicKeyGroups(
                                         certChainConfig, context, allowUnsupportedPkGroups))
                 .filter(certChainConfig -> filterTls13Groups(certChainConfig, scope))
-                // TODO: Make X509CertificateConfigContainer return certificate chain configs rather
-                // than certificate configs
                 .map(CertificateDerivation::new)
                 .collect(Collectors.toList());
     }
 
-    private boolean filterRsaKeySize(X509CertificateConfig config) {
+    private boolean filterRsaKeySize(List<X509CertificateConfig> configs) {
+        X509CertificateConfig config = configs.get(X509CertificateConfigContainer.LEAF_CERT_INDEX);
         return config.getPublicKeyType() != X509PublicKeyType.RSA
                 || (config.getRsaModulus().bitLength() >= MIN_RSA_KEY_LEN
                         && config.getRsaModulus().bitLength() >= MIN_RSA_SIG_KEY_LEN);
     }
 
-    private boolean filterDssSignedCerts(X509CertificateConfig config) {
+    private boolean filterDssSignedCerts(List<X509CertificateConfig> configs) {
+        X509CertificateConfig config = configs.get(X509CertificateConfigContainer.LEAF_CERT_INDEX);
         return config.getDefaultSignatureAlgorithm().getSignatureAlgorithm()
                         != SignatureAlgorithm.DSA
                 || ALLOW_DSS;
     }
 
-    private boolean filterDssKeySize(X509CertificateConfig config) {
+    private boolean filterDssKeySize(List<X509CertificateConfig> configs) {
+        X509CertificateConfig config = configs.get(X509CertificateConfigContainer.LEAF_CERT_INDEX);
         return config.getPublicKeyType() != X509PublicKeyType.DSA
                 || config.getDsaPrimeQ().bitLength() >= MIN_DSS_KEY_LEN;
     }
 
     private boolean filterEcdsaPublicKeyGroups(
-            X509CertificateConfig config, TestContext context, boolean allowUnsupportedPkGroups) {
+            List<X509CertificateConfig> configs,
+            TestContext context,
+            boolean allowUnsupportedPkGroups) {
+        X509CertificateConfig config = configs.get(X509CertificateConfigContainer.LEAF_CERT_INDEX);
         return !config.getPublicKeyType().isEc()
                 || context.getFeatureExtractionResult()
                         .getNamedGroups()
@@ -145,7 +152,8 @@ public class CertificateDerivation extends TlsDerivationParameter<X509Certificat
                 || allowUnsupportedPkGroups;
     }
 
-    private boolean filterTls13Groups(X509CertificateConfig config, DerivationScope scope) {
+    private boolean filterTls13Groups(List<X509CertificateConfig> configs, DerivationScope scope) {
+        X509CertificateConfig config = configs.get(X509CertificateConfigContainer.LEAF_CERT_INDEX);
         if (!TlsParameterIdentifierProvider.isTls13Test(scope)) {
             return true;
         }
@@ -175,8 +183,9 @@ public class CertificateDerivation extends TlsDerivationParameter<X509Certificat
     }
 
     private boolean certMatchesAnySupportedCipherSuite(
-            X509CertificateConfig config, DerivationScope scope) {
+            List<X509CertificateConfig> configs, DerivationScope scope) {
         Set<CipherSuite> cipherSuites;
+        X509CertificateConfig config = configs.get(X509CertificateConfigContainer.LEAF_CERT_INDEX);
         if (!TlsParameterIdentifierProvider.isTls13Test(scope)) {
             cipherSuites = TestContext.getInstance().getFeatureExtractionResult().getCipherSuites();
             return cipherSuites.stream()
@@ -198,7 +207,7 @@ public class CertificateDerivation extends TlsDerivationParameter<X509Certificat
     @Override
     public void applyToConfig(Config config, DerivationScope derivationScope) {
         config.setAutoAdjustCertificate(false);
-        config.setCertificateChainConfig(List.of(getSelectedValue()));
+        config.setCertificateChainConfig((List<X509CertificateConfig>) getSelectedValue());
     }
 
     @Override
@@ -223,7 +232,12 @@ public class CertificateDerivation extends TlsDerivationParameter<X509Certificat
                                 (CertificateDerivation certificateDerivation,
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {
                                     X509CertificateConfig selectedCertConfig =
-                                            certificateDerivation.getSelectedValue();
+                                            (X509CertificateConfig)
+                                                    certificateDerivation
+                                                            .getSelectedValue()
+                                                            .get(
+                                                                    X509CertificateConfigContainer
+                                                                            .LEAF_CERT_INDEX);
                                     CipherSuite selectedCipherSuite =
                                             cipherSuiteDerivation.getSelectedValue();
 
@@ -239,23 +253,33 @@ public class CertificateDerivation extends TlsDerivationParameter<X509Certificat
 
     @Override
     public String toString() {
-        X509CertificateConfig certConfig = getSelectedValue();
+        X509CertificateConfig certConfig =
+                (X509CertificateConfig)
+                        getSelectedValue().get(X509CertificateConfigContainer.LEAF_CERT_INDEX);
         StringJoiner joiner = new StringJoiner(",");
         joiner.add("Public Key Type: " + certConfig.getPublicKeyType().name());
+        if (certConfig.getPublicKeyType().isEc()) {
+            joiner.add("Named Curve: " + certConfig.getDefaultSubjectNamedCurve().name());
+        }
         joiner.add(
                 "Certificate Signature Type: " + certConfig.getDefaultSignatureAlgorithm().name());
         return joiner.toString();
     }
 
     @Override
-    public List<DerivationParameter<Config, X509CertificateConfig>> getParameterValues(
+    public List<DerivationParameter<Config, CertificateConfigChainValue>> getParameterValues(
             DerivationScope derivationScope) {
         return getApplicableCertificateConfigs(context, derivationScope, false);
     }
 
     @Override
-    protected TlsDerivationParameter<X509CertificateConfig> generateValue(
-            X509CertificateConfig selectedValue) {
+    protected TlsDerivationParameter<CertificateConfigChainValue> generateValue(
+            CertificateConfigChainValue selectedValue) {
         return new CertificateDerivation(selectedValue);
+    }
+
+    public X509CertificateConfig getLeafConfig() {
+        return (X509CertificateConfig)
+                getSelectedValue().get(X509CertificateConfigContainer.LEAF_CERT_INDEX);
     }
 }

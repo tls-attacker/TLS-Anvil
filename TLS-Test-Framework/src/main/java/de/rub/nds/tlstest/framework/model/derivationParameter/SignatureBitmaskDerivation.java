@@ -267,7 +267,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
                                     int selectedBitmaskBytePosition =
                                             signatureBitmaskDerivation.getSelectedValue();
                                     X509CertificateConfig certConfig =
-                                            certificateDerivation.getSelectedValue();
+                                            certificateDerivation.getLeafConfig();
                                     SignatureAndHashAlgorithm selectedSigHashAlgorithm =
                                             sigAndHashDerivation.getSelectedValue();
 

@@ -18,15 +18,15 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class X509CertificateConfigContainer {
-    private static X509CertificateConfigContainer instance = null;
+public class X509CertificateChainProvider {
+    private static X509CertificateChainProvider instance = null;
     private static final Logger LOGGER = LogManager.getLogger();
     private ArrayList<X509CertificateConfig> certConfigs;
     public static final String RESOURCE_CERT_CONFIG_FOLDER = "/serverCertConfigs";
 
-    public static X509CertificateConfigContainer getInstance() {
+    public static X509CertificateChainProvider getInstance() {
         if (instance == null) {
-            instance = new X509CertificateConfigContainer();
+            instance = new X509CertificateChainProvider();
         }
         return instance;
     }

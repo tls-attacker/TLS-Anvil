@@ -19,7 +19,7 @@ import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
-import de.rub.nds.tlstest.framework.utils.X509CertificateConfigContainer;
+import de.rub.nds.tlstest.framework.utils.X509CertificateChainProvider;
 import de.rub.nds.x509attacker.config.X509CertificateConfig;
 import de.rub.nds.x509attacker.constants.X509PublicKeyType;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
@@ -117,7 +117,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
 
     private static int getMaxPublicKeySizeForType(X509PublicKeyType requiredPublicKeyType) {
         List<X509CertificateConfig> certConfigs =
-                X509CertificateConfigContainer.getInstance().getCertConfigs();
+                X509CertificateChainProvider.getInstance().getCertConfigs();
         int pkSize = 0;
         for (X509CertificateConfig certConfig : certConfigs) {
             if (certConfig.getPublicKeyType() != requiredPublicKeyType) {

@@ -15,12 +15,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class X509CertificateChainProvider {
     private static X509CertificateChainProvider instance = null;
-    private static final Logger LOGGER = LogManager.getLogger();
     private ArrayList<X509CertificateConfig> certConfigs;
     public static final String RESOURCE_CERT_CONFIG_FOLDER = "/serverCertConfigs";
 
@@ -64,7 +61,6 @@ public class X509CertificateChainProvider {
 
     public static List<X509CertificateConfig> getRsaLeafConfigs() {
         List<X509CertificateConfig> certConfigs = new ArrayList<>();
-        // PSS, RSAE, and PSS_RSAE
         List<X509PublicKeyType> leafKeyTypes =
                 List.of(
                         X509PublicKeyType.RSASSA_PSS,
@@ -106,9 +102,8 @@ public class X509CertificateChainProvider {
     public static List<CertificateConfigChainValue> getCertificateChainConfigs() {
         List<List<X509CertificateConfig>> certChainConfigs = new ArrayList<>();
         certChainConfigs.addAll(getRsaSignedChainConfigs());
-        // X509-Attacker does not support ECDSA signed certs yet
-        // certChainConfigs.addAll(getEcdsaSignedChainConfigs());
-
+        certChainConfigs.addAll(getEcdsaSignedChainConfigs());
+        certChainConfigs.addAll(getDsaSignedChainConfigs());
         return CertificateConfigChainValue.fromCertificateConfigs(certChainConfigs);
     }
 
@@ -117,6 +112,7 @@ public class X509CertificateChainProvider {
         List<X509CertificateConfig> leafConfigs = getAllLeafConfigs();
         for (X509CertificateConfig leafConfig : leafConfigs) {
             X509CertificateConfig rsaSigningCert = new X509CertificateConfig();
+            rsaSigningCert.setSubject(rsaSigningCert.getDefaultIssuer());
             rsaSigningCert.setPublicKeyType(X509PublicKeyType.RSA);
             leafConfig.setSignatureAlgorithm(X509SignatureAlgorithm.SHA256_WITH_RSA_ENCRYPTION);
             List<X509CertificateConfig> chainConfig = new ArrayList<>();
@@ -142,11 +138,31 @@ public class X509CertificateChainProvider {
             X509CertificateConfig ecdsaSigningCert = new X509CertificateConfig();
             ecdsaSigningCert.setDefaultSubjectNamedCurve(X509NamedCurve.SECP256R1);
             ecdsaSigningCert.setPublicKeyType(X509PublicKeyType.ECDH_ECDSA);
+            ecdsaSigningCert.setDefaultIssuerPublicKeyType(X509PublicKeyType.ECDH_ECDSA);
             ecdsaSigningCert.setSignatureAlgorithm(X509SignatureAlgorithm.ECDSA_WITH_SHA256);
+            ecdsaSigningCert.setSubject(ecdsaSigningCert.getDefaultIssuer());
             leafConfig.setSignatureAlgorithm(X509SignatureAlgorithm.ECDSA_WITH_SHA256);
             List<X509CertificateConfig> chainConfig = new ArrayList<>();
             chainConfig.add(leafConfig);
             chainConfig.add(ecdsaSigningCert);
+            certChainConfigs.add(chainConfig);
+        }
+        return certChainConfigs;
+    }
+
+    public static List<List<X509CertificateConfig>> getDsaSignedChainConfigs() {
+        List<List<X509CertificateConfig>> certChainConfigs = new ArrayList<>();
+        List<X509CertificateConfig> leafConfigs = getAllLeafConfigs();
+        for (X509CertificateConfig leafConfig : leafConfigs) {
+            X509CertificateConfig dsaSignedCert = new X509CertificateConfig();
+            dsaSignedCert.setPublicKeyType(X509PublicKeyType.DSA);
+            dsaSignedCert.setDefaultIssuerPublicKeyType(X509PublicKeyType.DSA);
+            dsaSignedCert.setSignatureAlgorithm(X509SignatureAlgorithm.DSA_WITH_SHA256);
+            dsaSignedCert.setSubject(dsaSignedCert.getDefaultIssuer());
+            leafConfig.setSignatureAlgorithm(X509SignatureAlgorithm.DSA_WITH_SHA256);
+            List<X509CertificateConfig> chainConfig = new ArrayList<>();
+            chainConfig.add(leafConfig);
+            chainConfig.add(dsaSignedCert);
             certChainConfigs.add(chainConfig);
         }
         return certChainConfigs;
@@ -161,7 +177,6 @@ public class X509CertificateChainProvider {
             DhPublicKey dhPublicKey =
                     KeyGenerator.generateDhPublicKey(dhLeaf.getDhPrivateKey(), parameters);
             dhLeaf.setPublicKeyType(X509PublicKeyType.DH);
-            dhLeaf.setDhGenerator(RSA_PUBLIC_KEY);
             dhLeaf.setDhPublicKey(dhPublicKey.getPublicKey());
             dhLeaf.setDhModulus(dhPublicKey.getModulus());
             dhLeaf.setDhGenerator(dhPublicKey.getGenerator());

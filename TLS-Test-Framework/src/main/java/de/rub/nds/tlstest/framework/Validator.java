@@ -491,7 +491,7 @@ public class Validator {
         return false;
     }
 
-    private static AlertMessage tryToDecryptRecordWithHandshakeSecrets(
+    public static AlertMessage tryToDecryptRecordWithHandshakeSecrets(
             TlsContext context, Record record) {
         try {
             KeySet keySet =

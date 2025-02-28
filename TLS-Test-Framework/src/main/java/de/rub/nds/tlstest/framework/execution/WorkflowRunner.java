@@ -51,6 +51,7 @@ import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
@@ -549,6 +550,7 @@ public class WorkflowRunner {
             if (!lastActionIsGenericReceive) {
                 isExpectingAlert =
                         lastAction instanceof ReceivingAction
+                                && ((ReceiveAction) lastAction).getExpectedMessages() != null
                                 && ((ReceiveAction) lastAction)
                                         .getExpectedMessages().stream()
                                                 .anyMatch(
@@ -645,6 +647,9 @@ public class WorkflowRunner {
         for (ReceivingAction receiving : trace.getReceivingActions()) {
             if (receiving instanceof ReceiveAction) {
                 ReceiveAction receiveAction = (ReceiveAction) receiving;
+                if (receiveAction.getExpectedMessages() == null) {
+                    continue;
+                }
                 if (receiveAction.getExpectedMessages().stream()
                         .anyMatch(
                                 message ->
@@ -679,6 +684,9 @@ public class WorkflowRunner {
             for (TlsAction action : trace.getTlsActions()) {
                 if (action instanceof ReceiveAction) {
                     ReceiveAction receiveAction = (ReceiveAction) action;
+                    if (receiveAction.getExpectedMessages() == null) {
+                        receiveAction.setExpectedMessages(new LinkedList<>());
+                    }
                     if (receiveAction.getExpectedMessages().stream()
                                     .anyMatch(message -> message instanceof FinishedMessage)
                             && preparedConfig.getHighestProtocolVersion()

@@ -211,13 +211,13 @@ public class PreSharedKey extends Tls13Test {
     @IncludeParameter("PRF_BITMASK")
     @MethodCondition(method = "supportsPsk")
     public void invalidBinder(AnvilTestCase testCase, WorkflowRunner runner) {
-        Config c = getPreparedConfig(runner);
-        setupPskConfig(c);
-        c.setLimitPsksToOne(true);
+        Config config = getPreparedConfig(runner);
+        setupPskConfig(config);
+        config.setLimitPsksToOne(true);
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         byte[] modificationBitmask = parameterCombination.buildBitmask();
 
         ClientHelloMessage cHello =
@@ -229,9 +229,8 @@ public class PreSharedKey extends Tls13Test {
         pskExt.setBinderListBytes(
                 Modifiable.xor(modificationBitmask, ExtensionByteLength.PSK_BINDER_LENGTH));
 
-        State state = runner.execute(workflowTrace, c);
+        State state = runner.execute(workflowTrace, config);
 
-        WorkflowTrace trace = state.getWorkflowTrace();
         Validator.receivedFatalAlert(state, testCase, false);
     }
 
@@ -245,7 +244,7 @@ public class PreSharedKey extends Tls13Test {
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_TLS13_PSK, HandshakeMessageType.SERVER_HELLO);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         ClientHelloMessage cHello =
                 (ClientHelloMessage)

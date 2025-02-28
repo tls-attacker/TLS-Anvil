@@ -88,7 +88,7 @@ public class EarlyData extends Tls13Test {
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         State state = runner.execute(workflowTrace, c);
 
@@ -123,7 +123,7 @@ public class EarlyData extends Tls13Test {
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         ClientHelloMessage secondHello =
                 (ClientHelloMessage)
@@ -157,7 +157,7 @@ public class EarlyData extends Tls13Test {
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         ClientHelloMessage secondHello =
                 (ClientHelloMessage)
@@ -200,7 +200,7 @@ public class EarlyData extends Tls13Test {
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         SendAction cHello = (SendAction) workflowTrace.getLastSendingAction();
         cHello.getConfiguredMessages()
@@ -259,7 +259,7 @@ public class EarlyData extends Tls13Test {
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         SendAction cHello = (SendAction) workflowTrace.getLastSendingAction();
         cHello.getConfiguredMessages()

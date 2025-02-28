@@ -1,5 +1,8 @@
 package de.rub.nds.tlstest.framework;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -10,10 +13,6 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.Context;
 import de.rub.nds.tlsattacker.core.state.State;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,8 +33,8 @@ public class ValidatorTest {
         encryptedRecord.setCompleteRecordBytes(
                 ArrayConverter.hexStringToByteArray(
                         "1703030013a183a1b12be718f06b1aba21d8fc66449310f1"));
-        encryptedRecord.setProtocolMessageBytes(ArrayConverter.hexStringToByteArray(
-            "a183a1b12be718f06b1aba21d8fc66449310f1"));
+        encryptedRecord.setProtocolMessageBytes(
+                ArrayConverter.hexStringToByteArray("a183a1b12be718f06b1aba21d8fc66449310f1"));
         encryptedRecord.setProtocolVersion(ProtocolVersion.TLS12.getValue());
         encryptedRecord.setLength(19);
         encryptedRecord.setContentType(ProtocolMessageType.APPLICATION_DATA.getValue());

@@ -222,7 +222,7 @@ public class Resumption extends Tls12Test {
                         WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
                                 workflowTrace, HandshakeMessageType.FINISHED);
         fin.setVerifyData(Modifiable.xor(new byte[] {0x01}, 0));
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         State state = runner.execute(workflowTrace, c);
 

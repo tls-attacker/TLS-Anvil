@@ -19,6 +19,7 @@ import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.helper.CertificateConfigChainValue;
 import de.rub.nds.tlstest.framework.utils.X509CertificateChainProvider;
 import de.rub.nds.x509attacker.config.X509CertificateConfig;
 import de.rub.nds.x509attacker.constants.X509PublicKeyType;
@@ -64,7 +65,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         Set<Integer> listedValues = new HashSet<>();
         listedValues.add(0);
 
-        List<DerivationParameter<Config, X509CertificateConfig>> applicableCertificates =
+        List<DerivationParameter<Config, CertificateConfigChainValue>> applicableCertificates =
                 TlsParameterType.CERTIFICATE
                         .getInstance(ParameterScope.NO_SCOPE)
                         .getConstrainedParameterValues(scope);
@@ -221,7 +222,10 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         }
     }
 
-    public static Integer computeSignatureSizeForCertConfig(X509CertificateConfig certConfig) {
+    public static Integer computeSignatureSizeForCertConfig(
+            CertificateConfigChainValue certConfigs) {
+        X509CertificateConfig certConfig =
+                certConfigs.get(X509CertificateChainProvider.LEAF_CERT_INDEX);
         switch (certConfig.getPublicKeyType()) {
             case RSA:
                 return computeEstimatedSignatureSize(

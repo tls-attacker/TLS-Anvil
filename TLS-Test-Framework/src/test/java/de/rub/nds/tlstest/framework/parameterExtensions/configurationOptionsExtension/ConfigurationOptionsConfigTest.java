@@ -12,6 +12,9 @@ package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExt
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import de.rub.nds.anvilcore.context.AnvilContext;
+import de.rub.nds.anvilcore.context.AnvilTestConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.SeedingMethodDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.*;
 import java.io.ByteArrayInputStream;
@@ -68,6 +71,10 @@ public class ConfigurationOptionsConfigTest {
 
     @Test
     public void testOpenSSLOptionsConfig() {
+        AnvilTestConfig testConfig = new AnvilTestConfig();
+        testConfig.setParallelTestCases(1);
+        testConfig.setParallelTests(1);
+        AnvilContext.createInstance(testConfig, "", new TlsParameterIdentifierProvider());
         ConfigurationOptionsConfig config = createTestConfig();
 
         assertEquals("OPENSSL", config.getTlsLibraryName());

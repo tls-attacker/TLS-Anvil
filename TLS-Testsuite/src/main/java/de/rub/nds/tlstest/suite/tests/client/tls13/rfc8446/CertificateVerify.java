@@ -81,9 +81,7 @@ public class CertificateVerify extends Tls13Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        ((CertificateVerifyMessage)
-                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
-                                workflowTrace, HandshakeMessageType.CERTIFICATE_VERIFY))
+        getCertVerify(workflowTrace)
                 .setSignatureHashAlgorithm(
                         Modifiable.explicit(selectedLegacySigHash.getByteValue()));
 
@@ -128,10 +126,7 @@ public class CertificateVerify extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        CertificateVerifyMessage msg =
-                ((CertificateVerifyMessage)
-                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
-                                workflowTrace, HandshakeMessageType.CERTIFICATE_VERIFY));
+        CertificateVerifyMessage msg = getCertVerify(workflowTrace);
         msg.setSignature(Modifiable.xor(bitmask, 0));
 
         State state = runner.execute(workflowTrace, c);
@@ -190,10 +185,7 @@ public class CertificateVerify extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        ((CertificateVerifyMessage)
-                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
-                                trace, HandshakeMessageType.CERTIFICATE_VERIFY))
-                .setSignature(Modifiable.explicit(new byte[] {}));
+        getCertVerify(trace).setSignature(Modifiable.explicit(new byte[] {}));
 
         State state = runner.execute(trace, c);
 
@@ -209,10 +201,7 @@ public class CertificateVerify extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        ((CertificateVerifyMessage)
-                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
-                                trace, HandshakeMessageType.CERTIFICATE_VERIFY))
-                .setSignatureHashAlgorithm(Modifiable.explicit(new byte[] {}));
+        getCertVerify(trace).setSignatureHashAlgorithm(Modifiable.explicit(new byte[] {}));
 
         State state = runner.execute(trace, c);
         Validator.receivedFatalAlert(state, testCase);
@@ -225,16 +214,18 @@ public class CertificateVerify extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        ((CertificateVerifyMessage)
-                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
-                                trace, HandshakeMessageType.CERTIFICATE_VERIFY))
-                .setSignatureHashAlgorithm(Modifiable.explicit(new byte[] {}));
-        ((CertificateVerifyMessage)
-                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
-                                trace, HandshakeMessageType.CERTIFICATE_VERIFY))
-                .setSignature(Modifiable.explicit(new byte[] {}));
+        CertificateVerifyMessage certVerify = getCertVerify(trace);
+        certVerify.setSignatureHashAlgorithm(Modifiable.explicit(new byte[] {}));
+        certVerify.setSignature(Modifiable.explicit(new byte[] {}));
 
         State state = runner.execute(trace, c);
         Validator.receivedFatalAlert(state, testCase);
+    }
+
+    private CertificateVerifyMessage getCertVerify(WorkflowTrace trace) {
+        return (CertificateVerifyMessage)
+                WorkflowTraceConfigurationUtil.getStaticConfiguredSendMessages(
+                                trace, HandshakeMessageType.CERTIFICATE_VERIFY)
+                        .get(0);
     }
 }

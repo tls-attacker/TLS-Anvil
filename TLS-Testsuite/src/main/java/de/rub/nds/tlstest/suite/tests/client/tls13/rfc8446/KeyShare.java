@@ -46,6 +46,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 
 @ClientTest
@@ -88,7 +89,10 @@ public class KeyShare extends Tls13Test {
         Config c = getPreparedConfig(runner);
 
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
-        List<NamedGroup> groups = context.getFeatureExtractionResult().getNamedGroups();
+        List<NamedGroup> groups =
+                context.getFeatureExtractionResult().getNamedGroups().stream()
+                        .filter(NamedGroup::isEcGroup)
+                        .collect(Collectors.toList());
         KeyShareExtensionMessage keyshare = chm.getExtension(KeyShareExtensionMessage.class);
 
         for (KeyShareEntry i : keyshare.getKeyShareList()) {

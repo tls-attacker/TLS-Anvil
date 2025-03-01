@@ -24,7 +24,12 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
+import de.rub.nds.tlstest.framework.model.derivationParameter.helper.CertificateConfigChainValue;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import de.rub.nds.tlstest.framework.utils.X509CertificateChainProvider;
+import de.rub.nds.x509attacker.config.X509CertificateConfig;
+import de.rub.nds.x509attacker.constants.X509NamedCurve;
+import de.rub.nds.x509attacker.constants.X509PublicKeyType;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
@@ -103,5 +108,37 @@ public class SignatureAlgorithms extends Tls13Test {
                                     .map(Object::toString)
                                     .collect(Collectors.joining(",")));
         }
+    }
+
+    public boolean isTls13SigHash(SignatureAndHashAlgorithm algorithmPair) {
+        return algorithmPair != null && algorithmPair.suitedForSigningTls13Messages();
+    }
+
+    public boolean isEcdsaCipherSuite(CipherSuite cipherSuite) {
+        return AlgorithmResolver.getRequiredSignatureAlgorithm(cipherSuite)
+                == SignatureAlgorithm.ECDSA;
+    }
+
+    public boolean isApplicableEcdsaCert(CertificateConfigChainValue certChain) {
+        X509CertificateConfig leafConfig =
+                certChain.get(X509CertificateChainProvider.LEAF_CERT_INDEX);
+        X509PublicKeyType pkType = leafConfig.getPublicKeyType();
+        X509NamedCurve curve = leafConfig.getDefaultSubjectNamedCurve();
+        return (pkType == X509PublicKeyType.ECDH_ECDSA || pkType == X509PublicKeyType.ECDH_ONLY)
+                && (curve == X509NamedCurve.SECP256R1
+                        || curve == X509NamedCurve.SECP384R1
+                        || curve == X509NamedCurve.SECP521R1);
+    }
+
+    public boolean isRsaSignatureCipherSuite(CipherSuite cipherSuite) {
+        return cipherSuite.isEphemeral()
+                && cipherSuite.getKeyExchangeAlgorithm() != null
+                && AlgorithmResolver.getRequiredSignatureAlgorithm(cipherSuite)
+                        == SignatureAlgorithm.RSA_PKCS1;
+    }
+
+    public boolean isRsaPssAlgorithm(SignatureAndHashAlgorithm algorithmPair) {
+        return algorithmPair != null
+                && algorithmPair.getSignatureAlgorithm().name().contains("PSS");
     }
 }

@@ -279,10 +279,10 @@ public class WorkflowRunner {
                         .createWorkflowTrace(type, runningMode);
         if (this.untilHandshakeMessage != null)
             WorkflowTraceMutator.truncateAt(
-                    trace, this.untilHandshakeMessage, this.untilSendingMessage, untilLast);
+                    trace, untilHandshakeMessage, (this.untilSendingMessage != null && this.untilSendingMessage == true), untilLast);
         if (this.untilProtocolMessage != null)
             WorkflowTraceMutator.truncateAt(
-                    trace, this.untilProtocolMessage, this.untilSendingMessage, untilLast);
+                    trace, this.untilProtocolMessage, (this.untilSendingMessage != null && this.untilSendingMessage == true), untilLast);
         return trace;
     }
 

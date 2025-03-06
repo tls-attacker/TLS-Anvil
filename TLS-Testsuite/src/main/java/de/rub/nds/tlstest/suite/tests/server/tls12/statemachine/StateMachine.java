@@ -17,6 +17,7 @@ import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
+import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
@@ -34,9 +35,12 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.tests.server.both.statemachine.SharedStateMachineTest;
+
+import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.xbill.DNS.DNSKEYRecord.Protocol;
 
 /**
  * Contains tests for known state machine (bugs) presented in "Protocol State Fuzzing of TLS
@@ -138,7 +142,6 @@ public class StateMachine extends Tls12Test {
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, config);
         Validator.receivedFatalAlert(state, testCase);
-        ;
     }
 
     // Figure 4: path 0, 1, 3, 2
@@ -151,14 +154,13 @@ public class StateMachine extends Tls12Test {
                         WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         WorkflowConfigurationFactory workflowFactory = new WorkflowConfigurationFactory(config);
 
-        SendAction sendActionSecondClientKeyExchange = new SendAction();
-        workflowFactory.addClientKeyExchangeMessage(
-                sendActionSecondClientKeyExchange.getConfiguredMessages());
+        List<ProtocolMessage> messages = new LinkedList<>();
+        workflowFactory.addClientKeyExchangeMessage(messages);
+        SendAction sendActionSecondClientKeyExchange = new SendAction(messages);
         workflowTrace.addTlsAction(sendActionSecondClientKeyExchange);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, config);
         Validator.receivedFatalAlert(state, testCase);
-        ;
     }
 
     // Figure 4: path 0, 1, 3, 5, 2
@@ -192,9 +194,9 @@ public class StateMachine extends Tls12Test {
         WorkflowConfigurationFactory workflowFactory = new WorkflowConfigurationFactory(config);
 
         workflowTrace.addTlsAction(new DeactivateEncryptionAction());
-        SendAction sendActionSecondKeyExchange = new SendAction();
-        workflowFactory.addClientKeyExchangeMessage(
-                sendActionSecondKeyExchange.getConfiguredMessages());
+        List<ProtocolMessage> messages = new LinkedList<>();
+        workflowFactory.addClientKeyExchangeMessage(messages);
+        SendAction sendActionSecondKeyExchange = new SendAction(messages);
         workflowTrace.addTlsAction(sendActionSecondKeyExchange);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, config);
@@ -236,7 +238,6 @@ public class StateMachine extends Tls12Test {
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, config);
         Validator.receivedFatalAlert(state, testCase);
-        ;
     }
 
     // Figure 7: path 0,3 (with content in Application Message)
@@ -309,7 +310,6 @@ public class StateMachine extends Tls12Test {
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, config);
         Validator.receivedFatalAlert(state, testCase);
-        ;
     }
 
     private void genericHeartbeatStateTest(

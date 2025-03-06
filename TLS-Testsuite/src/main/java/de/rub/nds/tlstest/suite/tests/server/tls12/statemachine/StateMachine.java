@@ -35,12 +35,10 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.tests.server.both.statemachine.SharedStateMachineTest;
-
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
-import org.xbill.DNS.DNSKEYRecord.Protocol;
 
 /**
  * Contains tests for known state machine (bugs) presented in "Protocol State Fuzzing of TLS

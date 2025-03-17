@@ -130,7 +130,10 @@ public class FfDheShare extends Tls12Test {
         assertEquals(
                 ffdheGroup,
                 state.getTlsContext().getSelectedGroup(),
-                "Invalid NamedGroup set in context");
+                "Invalid NamedGroup set in context, expected "
+                        + ffdheGroup
+                        + " but was "
+                        + state.getTlsContext().getSelectedGroup());
     }
 
     @AnvilTest(id = "7919-64FAvRFA4A")

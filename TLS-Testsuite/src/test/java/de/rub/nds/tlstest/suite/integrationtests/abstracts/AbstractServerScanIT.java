@@ -3,6 +3,7 @@ package de.rub.nds.tlstest.suite.integrationtests.abstracts;
 import com.github.dockerjava.api.command.InspectContainerCmd;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.api.model.Ports;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.tls.subject.ConnectionRole;
 import de.rub.nds.tls.subject.TlsImplementationType;
@@ -64,12 +65,16 @@ public abstract class AbstractServerScanIT extends AbstractScanIT {
                     DockerClientManager.getDockerClient()
                             .inspectContainerCmd(this.dockerInstance.getId())) {
                 InspectContainerResponse response = cmd.exec();
-                this.serverPort =
-                        response.getNetworkSettings().getPorts().getBindings().keySet().stream()
-                                .findFirst()
-                                .get()
-                                .getPort();
-                this.serverName = response.getNetworkSettings().getIpAddress();
+                Ports.Binding serverPortBinding = response.getNetworkSettings()
+                        .getPorts()
+                        .getBindings()
+                        .values().stream()
+                        .findFirst()
+                        .orElseThrow(IllegalArgumentException::new)[0];
+                this.serverPort = Integer.parseInt(serverPortBinding.getHostPortSpec());
+                this.serverName = serverPortBinding.getHostIp().equals("0.0.0.0")
+                        ? "127.0.0.1"
+                        : serverPortBinding.getHostIp();
             }
             return dockerInstance;
         } catch (InterruptedException e) {

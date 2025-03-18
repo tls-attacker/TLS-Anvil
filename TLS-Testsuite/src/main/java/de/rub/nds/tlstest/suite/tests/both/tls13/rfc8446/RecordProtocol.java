@@ -33,6 +33,7 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.AdditionalPaddingLengthDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ProtocolMessageTypeDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import de.rub.nds.tlstest.suite.util.SharedModifiedRecords;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
 
@@ -258,13 +259,7 @@ public class RecordProtocol extends Tls13Test {
     @ModelFromScope(modelType = "CERTIFICATE")
     public void sendZeroLengthApplicationRecord(AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);
-        ApplicationMessage appMsg = new ApplicationMessage();
-
-        Record r = new Record();
-        r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
-        r.setMaxRecordLengthConfig(0);
-        SendAction sendAction = new SendAction(appMsg);
-        sendAction.setConfiguredRecords(List.of(r));
+        SendAction sendAction = SharedModifiedRecords.getZeroLengthRecordAction();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();

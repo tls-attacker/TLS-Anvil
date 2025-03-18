@@ -39,6 +39,7 @@ import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import de.rub.nds.tlstest.suite.util.SharedModifiedRecords;
 import java.util.List;
 import org.junit.jupiter.api.Tag;
 
@@ -71,14 +72,7 @@ public class Fragmentation extends Tls12Test {
     @AnvilTest(id = "5246-swjhCGVQMb")
     public void sendZeroLengthApplicationRecord(AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);
-
-        ApplicationMessage appMsg = new ApplicationMessage();
-
-        Record r = new Record();
-        r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
-        r.setMaxRecordLengthConfig(0);
-        SendAction sendAction = new SendAction(appMsg);
-        sendAction.setConfiguredRecords(List.of(r, new Record()));
+        SendAction sendAction = SharedModifiedRecords.getZeroLengthRecordAction();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();

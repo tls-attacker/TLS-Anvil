@@ -78,7 +78,7 @@ public class Fragmentation extends Tls12Test {
         r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
         r.setMaxRecordLengthConfig(0);
         SendAction sendAction = new SendAction(appMsg);
-        sendAction.setConfiguredRecords(List.of(r));
+        sendAction.setConfiguredRecords(List.of(r, new Record()));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();

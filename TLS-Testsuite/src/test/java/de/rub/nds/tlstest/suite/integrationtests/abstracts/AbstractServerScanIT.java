@@ -65,16 +65,15 @@ public abstract class AbstractServerScanIT extends AbstractScanIT {
                     DockerClientManager.getDockerClient()
                             .inspectContainerCmd(this.dockerInstance.getId())) {
                 InspectContainerResponse response = cmd.exec();
-                Ports.Binding serverPortBinding = response.getNetworkSettings()
-                        .getPorts()
-                        .getBindings()
-                        .values().stream()
-                        .findFirst()
-                        .orElseThrow(IllegalArgumentException::new)[0];
+                Ports.Binding serverPortBinding =
+                        response.getNetworkSettings().getPorts().getBindings().values().stream()
+                                .findFirst()
+                                .orElseThrow(IllegalArgumentException::new)[0];
                 this.serverPort = Integer.parseInt(serverPortBinding.getHostPortSpec());
-                this.serverName = serverPortBinding.getHostIp().equals("0.0.0.0")
-                        ? "127.0.0.1"
-                        : serverPortBinding.getHostIp();
+                this.serverName =
+                        serverPortBinding.getHostIp().equals("0.0.0.0")
+                                ? "127.0.0.1"
+                                : serverPortBinding.getHostIp();
             }
             return dockerInstance;
         } catch (InterruptedException e) {

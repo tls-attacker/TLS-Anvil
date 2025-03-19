@@ -28,7 +28,6 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
-import de.rub.nds.x509attacker.constants.X509SignatureAlgorithm;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -105,9 +104,6 @@ public class CertificateVerify extends Tls13Test {
         Config c = getPreparedConfig(runner);
         c.setAutoAdjustSignatureAndHashAlgorithm(false);
         c.setDefaultSelectedSignatureAndHashAlgorithm(SignatureAndHashAlgorithm.ECDSA_SHA1);
-        c.getCertificateChainConfig()
-                .get(0)
-                .setSignatureAlgorithm(X509SignatureAlgorithm.ECDSA_WITH_SHA1);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));

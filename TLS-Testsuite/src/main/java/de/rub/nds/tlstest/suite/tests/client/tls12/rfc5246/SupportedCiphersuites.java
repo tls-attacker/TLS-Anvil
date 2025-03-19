@@ -45,7 +45,7 @@ public class SupportedCiphersuites extends Tls12Test {
     }
 
     @NonCombinatorialAnvilTest(id = "5246-DZsWLPbTuc")
-    @Tag("ciphersuites")
+    @Tag("mergeRegression")
     public void supportsLessCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
 

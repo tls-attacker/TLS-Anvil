@@ -50,6 +50,7 @@ public class SupportedCiphersuites extends Tls13Test {
         List<CipherSuite> advertised =
                 CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue()).stream()
                         .filter(CipherSuite::isTls13)
+                        .filter(CipherSuite::isRealCipherSuite)
                         .collect(Collectors.toList());
         List<CipherSuite> supported =
                 new ArrayList<>(

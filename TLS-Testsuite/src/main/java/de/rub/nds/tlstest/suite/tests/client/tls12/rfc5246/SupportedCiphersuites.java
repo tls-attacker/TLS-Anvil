@@ -45,14 +45,13 @@ public class SupportedCiphersuites extends Tls12Test {
     }
 
     @NonCombinatorialAnvilTest(id = "5246-DZsWLPbTuc")
-    @Tag("mergeRegression")
     public void supportsLessCiphersuitesThanAdvertised() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
 
         List<CipherSuite> advertised =
-                CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue());
-        advertised.remove(CipherSuite.TLS_FALLBACK_SCSV);
-        advertised.remove(CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV);
+                CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue()).stream()
+                        .filter(CipherSuite::isRealCipherSuite)
+                        .collect(Collectors.toList());
 
         List<CipherSuite> supported =
                 new ArrayList<>(context.getFeatureExtractionResult().getCipherSuites());

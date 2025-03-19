@@ -126,6 +126,7 @@ public class CBCBlockCipher extends Tls12Test {
                 State state = runner.execute(workflowTrace, c);
 
                 WorkflowTrace trace = state.getWorkflowTrace();
+                Validator.executedAsPlanned(state, testCase);
                 Validator.receivedFatalAlert(state, testCase);
 
                 AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);

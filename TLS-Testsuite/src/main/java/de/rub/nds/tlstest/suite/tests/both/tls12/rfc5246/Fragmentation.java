@@ -200,7 +200,7 @@ public class Fragmentation extends Tls12Test {
                 new ReceiveAction(new AlertMessage()));
 
         State state = runner.execute(workflowTrace, c);
-
+        Validator.executedAsPlanned(state, testCase);
         Validator.receivedFatalAlert(state, testCase);
         AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
         Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW, alert);

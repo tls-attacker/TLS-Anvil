@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
@@ -26,7 +26,8 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -130,8 +131,8 @@ public class ClientHello extends Tls13Test {
 
         ClientHelloMessage clientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         clientHello.addExtension(greaseHelperExtension);
 
         State state = runner.execute(workflowTrace, config);
@@ -140,14 +141,14 @@ public class ClientHello extends Tls13Test {
 
         ServerHelloMessage serverHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         for (ExtensionMessage extension : serverHello.getExtensions()) {
             assertFalse(
-                    "Server negotiated the undefined Extension",
                     Arrays.equals(
                             extension.getExtensionType().getValue(),
-                            greaseHelperExtension.getType().getValue()));
+                            greaseHelperExtension.getType().getValue()),
+                    "Server negotiated the undefined Extension");
         }
     }
 

@@ -6,120 +6,178 @@
         <artifactId>tls-anvil</artifactId>
         <version>1.2.10-SNAPSHOT</version>
     </parent>
-    <groupId>de.rub.nds.tls.anvil</groupId>
+
     <artifactId>tls-testsuite</artifactId>
     <packaging>jar</packaging>
     <name>TLS-Testsuite</name>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>tls-test-framework</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <!-- scope: test -->
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-api</artifactId>
+            <version>${deps.docker-java.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds</groupId>
+            <artifactId>anvil-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds</groupId>
+            <artifactId>modifiable-variable</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds</groupId>
+            <artifactId>protocol-attacker</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds</groupId>
+            <artifactId>scanner-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds</groupId>
+            <artifactId>x509-attacker</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds.tls.attacker</groupId>
+            <artifactId>tls-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds.tls.attacker</groupId>
+            <artifactId>transport</artifactId>
+        </dependency>
+        <dependency>
             <groupId>de.rub.nds.tls.dockerlib</groupId>
             <artifactId>tls-docker-library</artifactId>
         </dependency>
         <dependency>
+            <groupId>de.rub.nds.tls.scanner</groupId>
+            <artifactId>tls-scanner-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.rub.nds.tls.scanner</groupId>
+            <artifactId>tls-server-scanner</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>junit-jupiter-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+        </dependency>
     </dependencies>
+
     <build>
         <finalName>TLS-Anvil</finalName>
         <plugins>
+            <!--################## clean lifecycle plugins ##################-->
             <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>${project.packaging}</type>
-                                    <destFileName>${project.build.finalName}.${project.packaging}</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>${project.parent.basedir}/apps</outputDirectory>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <outputDirectory>${project.parent.basedir}/apps/lib</outputDirectory>
-                            <!--Ensures only runnable dependencies are included-->
-                            <includeScope>compile</includeScope>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
             </plugin>
+            <!--################# default lifecycle plugins #################-->
+            <!-- Copy project resources to output directory -->
             <plugin>
-                <!-- Build an executable JAR -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+            <!-- Compile source files -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <!-- Execute unit tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <!-- Build jar file -->
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.6</version>
                 <configuration>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                             <mainClass>de.rub.nds.tlstest.suite.Main</mainClass>
+                            <useUniqueVersions>false</useUniqueVersions>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
+            <!-- Compile javadoc -->
             <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>3.0</version>
-                <configuration>
-                    <header>${basedir}/license_header_plain.txt</header>
-                    <strictCheck>true</strictCheck>
-                    <includes>
-                        <include>src/**/*.java</include>
-                    </includes>
-                    <properties>
-                        <year>${project.inceptionYear}</year>
-                        <owner>Ruhr University Bochum</owner>
-                    </properties>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
             </plugin>
+            <!-- Pack source files to jar archive -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <!-- Copy artifacts to apps folder -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+            </plugin>
+            <!-- Execute integration tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.19.1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
-                <configuration>
-                    <argLine>-Dfile.encoding=${project.build.sourceEncoding}</argLine>
-                    <systemPropertyVariables>
-                        <java.util.logging.manager>org.apache.logging.log4j.jul.LogManager</java.util.logging.manager>
-                    </systemPropertyVariables>
-                </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <!-- Record test coverage with JaCoCo -->
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

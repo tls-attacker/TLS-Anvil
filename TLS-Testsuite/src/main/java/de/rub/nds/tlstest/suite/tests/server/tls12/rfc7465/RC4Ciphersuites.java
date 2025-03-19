@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7465;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
@@ -82,9 +82,9 @@ public class RC4Ciphersuites extends Tls12Test {
 
         ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
         assertArrayEquals(
-                AssertMsgs.UNEXPECTED_CIPHER_SUITE,
                 selectedCipherSuite.getByteValue(),
-                msg.getSelectedCipherSuite().getValue());
+                msg.getSelectedCipherSuite().getValue(),
+                AssertMsgs.UNEXPECTED_CIPHER_SUITE);
     }
 
     @AnvilTest(id = "7465-YNsMZJY6pa")

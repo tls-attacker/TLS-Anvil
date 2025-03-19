@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
@@ -15,17 +15,17 @@ import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.protocol.constants.HashAlgorithm;
+import de.rub.nds.protocol.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.constants.HashAlgorithm;
-import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -130,8 +130,8 @@ public class SignatureAlgorithms extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         ClientHelloMessage clientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         SignatureAndHashAlgorithmsExtensionMessage algorithmsExtension =
                 clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
         algorithmsExtension.setSignatureAndHashAlgorithms(
@@ -170,8 +170,8 @@ public class SignatureAlgorithms extends Tls12Test {
         }
         ClientHelloMessage clientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         clientHello
                 .getExtension(SignatureAndHashAlgorithmsExtensionMessage.class)
                 .setSignatureAndHashAlgorithms(Modifiable.explicit(explicitAlgorithms));

@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
@@ -27,12 +27,13 @@ import de.rub.nds.tlsattacker.core.protocol.message.UnknownMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipher;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipherFactory;
+import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeyDerivator;
 import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySet;
-import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySetGenerator;
 import de.rub.nds.tlsattacker.core.record.crypto.RecordDecryptor;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.MessageAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -100,13 +101,13 @@ public class Validator {
         if (TestContext.getInstance().getConfig().isUseDTLS()) return;
         if (!socketClosed) {
             // must fail
-            assertFalse("Socket still open after fatal alert", receivedAlert && alertIsFatal);
+            assertFalse(receivedAlert && alertIsFatal, "Socket still open after fatal alert");
             assertFalse(
-                    "Socket still open and only sent warning alert",
-                    receivedAlert && !alertIsFatal);
+                    receivedAlert && !alertIsFatal,
+                    "Socket still open and only sent warning alert");
             assertFalse(
-                    "Expected a fatal alert but no messages have been received and socket is still open",
-                    lastMessagesReceived.isEmpty());
+                    lastMessagesReceived.isEmpty(),
+                    "Expected a fatal alert but no messages have been received and socket is still open");
 
             fail(
                     "Expected a fatal alert but received "
@@ -114,9 +115,9 @@ public class Validator {
                             + " and socket is still open.");
         } else {
             assertFalse(
+                    lastActionFailed && !lastMessagesReceived.isEmpty(),
                     "Socket was closed but unexpected messages have been received. Received: "
-                            + messageString,
-                    lastActionFailed && !lastMessagesReceived.isEmpty());
+                            + messageString);
 
             if (!receivedAlert) {
                 if (mayOmitDueToTls13(state)) {
@@ -161,8 +162,8 @@ public class Validator {
         } else {
             ReceivingAction alertReceivingAction =
                     (ReceivingAction)
-                            WorkflowTraceUtil.getFirstReceivingActionForMessage(
-                                    ProtocolMessageType.ALERT, trace);
+                            WorkflowTraceConfigurationUtil.getFirstStaticConfiguredReceiveAction(
+                                    trace, ProtocolMessageType.ALERT);
             ReceivingAction receiveToExtractFrom;
             if (alertReceivingAction != null && lastReceive != alertReceivingAction) {
                 throw new RuntimeException(
@@ -181,7 +182,8 @@ public class Validator {
 
     public static void checkReceivedMultipleAlerts(AnvilTestCase testCase, WorkflowTrace trace) {
         List<ProtocolMessage> receivedAlerts =
-                WorkflowTraceUtil.getAllReceivedMessages(trace, ProtocolMessageType.ALERT);
+                WorkflowTraceResultUtil.getAllReceivedMessagesOfType(
+                        trace, ProtocolMessageType.ALERT);
         if (receivedAlerts.size() > 1) {
             testCase.addAdditionalResultInfo(
                     "Received multiple Alerts while waiting for Fatal Alert ("
@@ -195,7 +197,7 @@ public class Validator {
     public static void checkForUnknownMessage(State state, AnvilTestCase testCase) {
         if (state.getWorkflowTrace().getFirstReceivedMessage(UnknownMessage.class) != null) {
             testCase.addAdditionalResultInfo("Found unknown message");
-        } else if (WorkflowTraceUtil.hasUnreadBytes(state.getWorkflowTrace())) {
+        } else if (WorkflowTraceResultUtil.hasUnreadBytes(state.getWorkflowTrace())) {
             testCase.addAdditionalResultInfo(
                     "Found unread bytes in layer, this may be a parsing error");
         }
@@ -207,7 +209,7 @@ public class Validator {
 
     public static void executedAsPlanned(State state, AnvilTestCase testCase) {
         checkForUnknownMessage(state, testCase);
-        assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, state.getWorkflowTrace().executedAsPlanned());
+        assertTrue(state.getWorkflowTrace().executedAsPlanned(), AssertMsgs.WORKFLOW_NOT_EXECUTED);
     }
 
     public static void receivedWarningAlert(State state, AnvilTestCase testCase) {
@@ -216,11 +218,11 @@ public class Validator {
         smartExecutedAsPlanned(state, testCase);
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        assertNotNull(AssertMsgs.NO_WARNING_ALERT, msg);
+        assertNotNull(msg, AssertMsgs.NO_WARNING_ALERT);
         assertEquals(
-                AssertMsgs.NO_WARNING_ALERT,
                 AlertLevel.WARNING.getValue(),
-                msg.getLevel().getValue().byteValue());
+                msg.getLevel().getValue().byteValue(),
+                AssertMsgs.NO_WARNING_ALERT);
     }
 
     public static void testAlertDescription(
@@ -235,8 +237,8 @@ public class Validator {
             return;
         }
 
-        if (WorkflowTraceUtil.getLastReceivedMessage(
-                        ProtocolMessageType.ALERT, state.getWorkflowTrace())
+        if (WorkflowTraceResultUtil.getLastReceivedMessage(
+                        state.getWorkflowTrace(), ProtocolMessageType.ALERT)
                 != msg) {
             testCase.addAdditionalResultInfo(
                     "Received multiple Alerts - description of first Alert was tested");
@@ -489,11 +491,11 @@ public class Validator {
         return false;
     }
 
-    private static AlertMessage tryToDecryptRecordWithHandshakeSecrets(
+    public static AlertMessage tryToDecryptRecordWithHandshakeSecrets(
             TlsContext context, Record record) {
         try {
             KeySet keySet =
-                    KeySetGenerator.generateKeySet(
+                    KeyDerivator.generateKeySet(
                             context,
                             ProtocolVersion.TLS13,
                             Tls13KeySetType.HANDSHAKE_TRAFFIC_SECRETS);
@@ -503,7 +505,7 @@ public class Validator {
             if (record.getContentMessageType() == ProtocolMessageType.ALERT) {
                 AlertMessage alert = new AlertMessage();
                 alert.getParser(
-                                context,
+                                context.getContext(),
                                 new ByteArrayInputStream(
                                         record.getCleanProtocolMessageBytes().getValue()))
                         .parse(alert);
@@ -517,15 +519,15 @@ public class Validator {
 
     private static boolean traceFailedBeforeAlertAction(WorkflowTrace workflowTrace) {
         TlsAction alertReceivingAction =
-                WorkflowTraceUtil.getFirstReceivingActionForMessage(
-                        ProtocolMessageType.ALERT, workflowTrace);
+                WorkflowTraceResultUtil.getFirstActionThatReceived(
+                        workflowTrace, ProtocolMessageType.ALERT);
         TlsAction lastReceiveAction = (TlsAction) workflowTrace.getLastReceivingAction();
         if (alertReceivingAction == null
                 && lastReceiveAction != null
                 && lastReceiveAction instanceof GenericReceiveAction) {
             alertReceivingAction = lastReceiveAction;
         }
-        TlsAction firstFailed = WorkflowTraceUtil.getFirstFailedAction(workflowTrace);
+        TlsAction firstFailed = WorkflowTraceResultUtil.getFirstFailedAction(workflowTrace);
         return firstFailed != alertReceivingAction
                 && workflowTrace.getTlsActions().indexOf(firstFailed)
                         < workflowTrace.getTlsActions().indexOf(alertReceivingAction);

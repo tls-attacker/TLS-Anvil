@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
@@ -39,6 +39,8 @@ import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import de.rub.nds.tlstest.suite.util.SharedModifiedRecords;
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 
 public class Fragmentation extends Tls12Test {
@@ -53,7 +55,7 @@ public class Fragmentation extends Tls12Test {
         r.setContentMessageType(ProtocolMessageType.CHANGE_CIPHER_SPEC);
         r.setMaxRecordLengthConfig(0);
         SendAction sendAction = new SendAction(new ChangeCipherSpecMessage());
-        sendAction.setRecords(r);
+        sendAction.setConfiguredRecords(List.of(r));
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(
@@ -70,14 +72,7 @@ public class Fragmentation extends Tls12Test {
     @AnvilTest(id = "5246-swjhCGVQMb")
     public void sendZeroLengthApplicationRecord(AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);
-
-        ApplicationMessage appMsg = new ApplicationMessage();
-
-        Record r = new Record();
-        r.setContentMessageType(ProtocolMessageType.APPLICATION_DATA);
-        r.setMaxRecordLengthConfig(0);
-        SendAction sendAction = new SendAction(appMsg);
-        sendAction.setRecords(r);
+        SendAction sendAction = SharedModifiedRecords.getZeroLengthRecordAction();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         int baseTimeout = context.getConfig().getAnvilTestConfig().getConnectionTimeout();
@@ -94,19 +89,19 @@ public class Fragmentation extends Tls12Test {
         State state = runner.execute(workflowTrace, c);
 
         WorkflowTrace trace = state.getWorkflowTrace();
-        assertTrue(AssertMsgs.WORKFLOW_NOT_EXECUTED, trace.executedAsPlanned());
+        assertTrue(trace.executedAsPlanned(), AssertMsgs.WORKFLOW_NOT_EXECUTED);
 
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
         testCase.addAdditionalResultInfo("Evaluated with timeout " + reducedTimeout);
         if (context.getFeatureExtractionResult().getClosedAfterAppDataDelta() > 0) {
-            assertNull("Received alert message", msg);
-            assertFalse("Socket was closed", Validator.socketClosed(state));
+            assertNull(msg, "Received alert message");
+            assertFalse(Validator.socketClosed(state), "Socket was closed");
         } else {
             if (msg != null) {
                 assertEquals(
-                        "SUT sent an alert that was not a Close Notify",
                         AlertDescription.CLOSE_NOTIFY.getValue(),
-                        (byte) msg.getDescription().getValue());
+                        (byte) msg.getDescription().getValue(),
+                        "SUT sent an alert that was not a Close Notify");
             }
         }
     }
@@ -124,7 +119,7 @@ public class Fragmentation extends Tls12Test {
         r.setMaxRecordLengthConfig(0);
         r.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
         SendAction sendAction = new SendAction(appMsg);
-        sendAction.setRecords(r);
+        sendAction.setConfiguredRecords(List.of(r));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
@@ -143,7 +138,7 @@ public class Fragmentation extends Tls12Test {
         r.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
         r.setMaxRecordLengthConfig(0);
         SendAction fin = new SendAction(new FinishedMessage());
-        fin.setRecords(r);
+        fin.setConfiguredRecords(List.of(r));
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(
@@ -168,7 +163,7 @@ public class Fragmentation extends Tls12Test {
                 Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 1]));
         // add dummy Application Message
         SendAction sendOverflow = new SendAction(new ApplicationMessage());
-        sendOverflow.setRecords(overflowRecord);
+        sendOverflow.setConfiguredRecords(List.of(overflowRecord));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
@@ -195,7 +190,7 @@ public class Fragmentation extends Tls12Test {
                 Modifiable.explicit(new byte[(int) (Math.pow(2, 14)) + 2049]));
         // add dummy Application Message
         SendAction sendOverflow = new SendAction(new ApplicationMessage());
-        sendOverflow.setRecords(overflowRecord);
+        sendOverflow.setConfiguredRecords(List.of(overflowRecord));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(
@@ -205,7 +200,7 @@ public class Fragmentation extends Tls12Test {
                 new ReceiveAction(new AlertMessage()));
 
         State state = runner.execute(workflowTrace, c);
-
+        Validator.executedAsPlanned(state, testCase);
         Validator.receivedFatalAlert(state, testCase);
         AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
         Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW, alert);
@@ -215,16 +210,16 @@ public class Fragmentation extends Tls12Test {
     public void recordFragmentationSupported() {
         if (context.getConfig().isUseDTLS()) {
             assertTrue(
-                    "DTLS record fragmentation support has not been detected",
                     context.getFeatureExtractionResult()
                                     .getResult(TlsAnalyzedProperty.SUPPORTS_DTLS_FRAGMENTATION)
-                            == TestResults.TRUE);
+                            == TestResults.TRUE,
+                    "DTLS record fragmentation support has not been detected");
         } else {
             assertTrue(
-                    "Record fragmentation support has not been detected",
                     context.getFeatureExtractionResult()
                                     .getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION)
-                            == TestResults.TRUE);
+                            == TestResults.TRUE,
+                    "Record fragmentation support has not been detected");
         }
     }
 }

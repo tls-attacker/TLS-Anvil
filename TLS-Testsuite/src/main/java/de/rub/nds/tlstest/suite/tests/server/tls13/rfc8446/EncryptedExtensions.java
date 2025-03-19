@@ -12,8 +12,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
@@ -52,14 +51,14 @@ public class EncryptedExtensions extends Tls13Test {
         WorkflowTrace trace = state.getWorkflowTrace();
         EncryptedExtensionsMessage encExt =
                 trace.getFirstReceivedMessage(EncryptedExtensionsMessage.class);
-        assertNotNull(AssertMsgs.ENCRYPTED_EXTENSIONS_NOT_RECEIVED, encExt);
+        assertNotNull(encExt, AssertMsgs.ENCRYPTED_EXTENSIONS_NOT_RECEIVED);
 
         for (ExtensionMessage ext : encExt.getExtensions()) {
             assertTrue(
-                    "EncryptedExtensions contained a forbidden extension: "
-                            + ExtensionType.getExtensionType(ext.getExtensionType().getValue()),
                     ExtensionType.allowedInEncryptedExtensions(
-                            ExtensionType.getExtensionType(ext.getExtensionType().getValue())));
+                            ExtensionType.getExtensionType(ext.getExtensionType().getValue())),
+                    "EncryptedExtensions contained a forbidden extension: "
+                            + ExtensionType.getExtensionType(ext.getExtensionType().getValue()));
         }
     }
 }

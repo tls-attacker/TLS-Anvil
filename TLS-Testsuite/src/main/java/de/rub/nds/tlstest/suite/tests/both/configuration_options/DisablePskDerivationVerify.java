@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.configuration_options;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
@@ -104,9 +104,9 @@ public class DisablePskDerivationVerify extends Tls12Test {
                 }
             }
             assertEquals(
-                    "Unexpectedly supported features: " + nonDisabledProperties.toString(),
                     0,
-                    nonDisabledProperties.size());
+                    nonDisabledProperties.size(),
+                    "Unexpectedly supported features: " + nonDisabledProperties.toString());
         }
     }
 }

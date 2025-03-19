@@ -10,71 +10,75 @@
 
 package de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
+import de.rub.nds.anvilcore.context.AnvilContext;
+import de.rub.nds.anvilcore.context.AnvilTestConfig;
+import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionDerivationParameter.SeedingMethodDerivation;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.configurationOptionsConfig.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ConfigurationOptionsConfigTest {
     public static ConfigurationOptionsConfig createTestConfig() {
         String testFileContent =
-                "<config>\n"
-                        + "    <tlsLibraryName>OPENSSL</tlsLibraryName>\n"
-                        + "    <tlsVersionName>1.1.1.i</tlsVersionName>\n"
-                        + "    <buildManager>OpenSSLBuildManager</buildManager>\n"
-                        + "    <dockerConfig>\n"
-                        + "        <dockerHostBinding>127.0.0.41</dockerHostBinding>\n"
-                        + "        <dockerHostName>127.0.0.42</dockerHostName>\n"
-                        + "        <portRange>4433-5433</portRange>\n"
-                        + "        <dockerClientDestinationHost>172.26.103.178</dockerClientDestinationHost>\n"
-                        + "    </dockerConfig>\n"
-                        + "    <disableSiteReportConsoleLog>false</disableSiteReportConsoleLog>\n"
-                        + "   <maxSimultaneousBuilds>3</maxSimultaneousBuilds>\n"
-                        + "    <maxRunningContainers>42</maxRunningContainers>\n"
-                        + "\n"
-                        + "    <optionsToTest>\n"
-                        + "        <optionEntry>\n"
-                        + "            <derivationType>ConfigOptionDerivationType.DisablePsk</derivationType>\n"
-                        + "            <enabled>true</enabled>\n"
-                        + "            <valueTranslation type=\"Flag\">\n"
-                        + "                <true>no-psk</true>\n"
-                        + "                <false></false>\n"
-                        + "            </valueTranslation>\n"
-                        + "        </optionEntry>\n"
-                        + "\n"
-                        + "        <optionEntry>\n"
-                        + "            <derivationType>ConfigOptionDerivationType.SeedingMethod</derivationType>\n"
-                        + "            <valueTranslation type=\"SingleValueOption\">\n"
-                        + "                <identifier>--with-rand-seed</identifier>\n"
-                        + "                <value key=\"OsEntropySource\">os</value>\n"
-                        + "                <value key=\"GetRandom\">getrandom</value>\n"
-                        + "                <value key=\"DevRandom\">devrandom</value>\n"
-                        + "                <value key=\"EntropyGeneratingDaemon\">egd</value>\n"
-                        + "                <value key=\"CpuCommand\">rdcpu</value>\n"
-                        + "                <value key=\"None\">none</value>\n"
-                        + "\n"
-                        + "            </valueTranslation>\n"
-                        + "        </optionEntry>\n"
-                        + "\n"
-                        + "    </optionsToTest>\n"
-                        + "</config>";
+                """
+                    <config>
+                       <tlsLibraryName>OPENSSL</tlsLibraryName>
+                       <tlsVersionName>1.1.1.i</tlsVersionName>
+                       <buildManager>OpenSSLBuildManager</buildManager>
+                       <dockerConfig>
+                           <dockerHostBinding>127.0.0.41</dockerHostBinding>
+                           <dockerHostName>127.0.0.42</dockerHostName>
+                           <portRange>4433-5433</portRange>
+                           <dockerClientDestinationHost>172.26.103.178</dockerClientDestinationHost>
+                       </dockerConfig>
+                       <disableSiteReportConsoleLog>false</disableSiteReportConsoleLog>
+                       <maxSimultaneousBuilds>3</maxSimultaneousBuilds>
+                       <maxRunningContainers>42</maxRunningContainers>
+                       <configOptionsIpmStrength>2</configOptionsIpmStrength>
+                       <optionsToTest>
+                           <optionEntry>
+                               <derivationType>ConfigOptionParameter:DISABLE_PSK</derivationType>
+                               <enabled>true</enabled>
+                               <valueTranslation type="Flag">
+                                   <true>no-psk</true>"
+                                   <false></false>
+                               </valueTranslation>
+                           </optionEntry>
+                           <optionEntry>
+                               <derivationType>ConfigOptionParameter:SEEDING_METHOD</derivationType>"
+                               <valueTranslation type="SingleValueOption">
+                                   <identifier>--with-rand-seed</identifier>
+                                   <value key="OS_ENTROPY_SOURCE">os</value>
+                                   <value key="GET_RANDOM">getrandom</value>
+                                   <value key="DEV_RANDOM">devrandom</value>
+                                   <value key="ENTROPY_GENERATING_DAEMON">egd</value>
+                                   <value key="CPU_COMMAND">rdcpu</value>
+                                   <value key="NONE">none</value>
+                               </valueTranslation>
+                           </optionEntry>
+                       </optionsToTest>
+                    </config>
+                """;
 
         InputStream is = new ByteArrayInputStream(testFileContent.getBytes());
 
-        ConfigurationOptionsConfig config = new ConfigurationOptionsConfig(is);
-
-        return config;
+        return new ConfigurationOptionsConfig(is);
     }
 
     @Test
     public void testOpenSSLOptionsConfig() {
+        AnvilTestConfig testConfig = new AnvilTestConfig();
+        testConfig.setParallelTestCases(1);
+        testConfig.setParallelTests(1);
+        AnvilContext.createInstance(testConfig, "", new TlsParameterIdentifierProvider());
         ConfigurationOptionsConfig config = createTestConfig();
 
-        assertEquals("OpenSSL", config.getTlsLibraryName());
-        assertEquals("OpenSSL_1_1_1", config.getTlsVersionName());
+        assertEquals("OPENSSL", config.getTlsLibraryName());
+        assertEquals("1.1.1.i", config.getTlsVersionName());
         assertNotNull(config.getBuildManager());
 
         // Check docker stuff
@@ -90,7 +94,7 @@ public class ConfigurationOptionsConfigTest {
             ConfigOptionValueTranslation translation =
                     config.getOptionsToTranslationMap().get(ConfigOptionParameterType.DISABLE_PSK);
             assertNotNull(translation);
-            assertTrue(translation instanceof FlagTranslation);
+            assertInstanceOf(FlagTranslation.class, translation);
             FlagTranslation flagTranslation = (FlagTranslation) translation;
             assertEquals("no-psk", flagTranslation.getDataIfSet());
             assertEquals("", flagTranslation.getDataIfNotSet());
@@ -102,7 +106,7 @@ public class ConfigurationOptionsConfigTest {
                     config.getOptionsToTranslationMap()
                             .get(ConfigOptionParameterType.SEEDING_METHOD);
             assertNotNull(translation);
-            assertTrue(translation instanceof SingleValueOptionTranslation);
+            assertInstanceOf(SingleValueOptionTranslation.class, translation);
             SingleValueOptionTranslation singleTranslation =
                     (SingleValueOptionTranslation) translation;
             assertEquals("--with-rand-seed", singleTranslation.getIdentifier());

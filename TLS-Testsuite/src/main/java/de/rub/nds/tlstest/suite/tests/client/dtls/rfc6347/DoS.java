@@ -1,6 +1,6 @@
 package de.rub.nds.tlstest.suite.tests.client.dtls.rfc6347;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
@@ -10,13 +10,12 @@ import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Dtls12Test;
 import java.util.Arrays;
-import org.junit.Assert;
 
 @ClientTest
 public class DoS extends Dtls12Test {
@@ -40,28 +39,28 @@ public class DoS extends Dtls12Test {
 
         ClientHelloMessage firstClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.CLIENT_HELLO, trace);
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                trace, HandshakeMessageType.CLIENT_HELLO);
         HelloVerifyRequestMessage helloVerifyRequest =
                 (HelloVerifyRequestMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.HELLO_VERIFY_REQUEST, trace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                trace, HandshakeMessageType.HELLO_VERIFY_REQUEST);
         ClientHelloMessage secondClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.CLIENT_HELLO, trace);
-        assertTrue("Did not receive first Client Hello messages", firstClientHello != null);
-        assertTrue("Did not receive second Client Hello messages", secondClientHello != null);
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                trace, HandshakeMessageType.CLIENT_HELLO);
+        assertTrue(firstClientHello != null, "Did not receive first Client Hello messages");
+        assertTrue(secondClientHello != null, "Did not receive second Client Hello messages");
 
         assertTrue(
-                "Did not receive first Client Hello messages without cookie",
-                firstClientHello.getCookieLength().getValue() == 0);
+                firstClientHello.getCookieLength().getValue() == 0,
+                "Did not receive first Client Hello messages without cookie");
 
         testIfClientHelloFieldsAreEqualWithoutCookie(firstClientHello, secondClientHello);
 
         assertTrue(
-                "Did not recive the cookie from the hello verify request message in the second client hello message.",
-                helloVerifyRequest.getCookie().equals(secondClientHello.getCookie()));
+                helloVerifyRequest.getCookie().equals(secondClientHello.getCookie()),
+                "Did not recive the cookie from the hello verify request message in the second client hello message.");
     }
 
     /**
@@ -75,28 +74,28 @@ public class DoS extends Dtls12Test {
     private void testIfClientHelloFieldsAreEqualWithoutCookie(
             ClientHelloMessage firstClientHello, ClientHelloMessage retryClientHello) {
         assertTrue(
-                "Offered CipherSuites are not identical",
                 Arrays.equals(
                         firstClientHello.getCipherSuites().getValue(),
-                        retryClientHello.getCipherSuites().getValue()));
-        Assert.assertArrayEquals(
-                "Offered CompressionLists are not identical",
+                        retryClientHello.getCipherSuites().getValue()),
+                "Offered CipherSuites are not identical");
+        assertArrayEquals(
                 firstClientHello.getCompressions().getValue(),
-                retryClientHello.getCompressions().getValue());
+                retryClientHello.getCompressions().getValue(),
+                "Offered CompressionLists are not identical");
         assertTrue(
-                "Selected ClientRandoms are not identical",
                 Arrays.equals(
                         firstClientHello.getRandom().getValue(),
-                        retryClientHello.getRandom().getValue()));
+                        retryClientHello.getRandom().getValue()),
+                "Selected ClientRandoms are not identical");
         assertTrue(
-                "Selected ProtocolVersions are not identical",
                 Arrays.equals(
                         firstClientHello.getProtocolVersion().getValue(),
-                        retryClientHello.getProtocolVersion().getValue()));
+                        retryClientHello.getProtocolVersion().getValue()),
+                "Selected ProtocolVersions are not identical");
         assertTrue(
-                "Offered SessionIDs are not identical",
                 Arrays.equals(
                         firstClientHello.getSessionId().getValue(),
-                        retryClientHello.getSessionId().getValue()));
+                        retryClientHello.getSessionId().getValue()),
+                "Offered SessionIDs are not identical");
     }
 }

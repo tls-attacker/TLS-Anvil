@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
@@ -19,7 +19,7 @@ import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
@@ -27,12 +27,8 @@ import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.util.SignatureValidation;
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SignatureException;
-import java.security.spec.InvalidKeySpecException;
+import de.rub.nds.x509attacker.constants.X509PublicKeyType;
+import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
 
 /** */
@@ -52,24 +48,24 @@ public class ServerKeyExchange extends Tls12Test {
         State state = runner.execute(workflowTrace, config);
         Validator.executedAsPlanned(state, testCase);
         assertTrue(
-                "Server Key Exchange Message contained an invalid signature",
-                signatureValid(state));
+                signatureValid(state),
+                "Server Key Exchange Message contained an invalid signature");
     }
 
     private Boolean signatureValid(State state) {
         WorkflowTrace executedTrace = state.getWorkflowTrace();
         ClientHelloMessage clientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CLIENT_HELLO, executedTrace);
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                executedTrace, HandshakeMessageType.CLIENT_HELLO);
         ServerHelloMessage serverHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, executedTrace);
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                executedTrace, HandshakeMessageType.SERVER_HELLO);
         ServerKeyExchangeMessage serverKeyExchange =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_KEY_EXCHANGE, executedTrace);
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                executedTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
 
         byte[] signedKeyExchangeParameters = getSignedDataFromKeyExchangeMessage(serverKeyExchange);
         byte[] completeSignedData =
@@ -83,17 +79,8 @@ public class ServerKeyExchange extends Tls12Test {
                 SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
                         serverKeyExchange.getSignatureAndHashAlgorithm().getValue());
 
-        try {
-            return SignatureValidation.validationSuccessful(
-                    selectedSignatureAndHashAlgo, state, completeSignedData, givenSignature);
-        } catch (SignatureException
-                | InvalidKeyException
-                | InvalidKeySpecException
-                | IOException
-                | InvalidAlgorithmParameterException
-                | NoSuchAlgorithmException ex) {
-            throw new AssertionError("Was unable to process signature for validation: " + ex);
-        }
+        return SignatureValidation.validationSuccessful(
+                selectedSignatureAndHashAlgo, state, completeSignedData, givenSignature);
     }
 
     private byte[] getSignedDataFromKeyExchangeMessage(ServerKeyExchangeMessage serverKeyExchange) {
@@ -133,13 +120,19 @@ public class ServerKeyExchange extends Tls12Test {
 
     public boolean isSupportedCipherSuite(CipherSuite cipherSuiteCandidate) {
         return cipherSuiteCandidate.isRealCipherSuite()
-                && !cipherSuiteCandidate.isTLS13()
+                && !cipherSuiteCandidate.isTls13()
                 && cipherSuiteCandidate.isEphemeral()
-                && (AlgorithmResolver.getCertificateKeyType(cipherSuiteCandidate)
-                                == CertificateKeyType.ECDSA
-                        || AlgorithmResolver.getCertificateKeyType(cipherSuiteCandidate)
-                                == CertificateKeyType.RSA
-                        || AlgorithmResolver.getCertificateKeyType(cipherSuiteCandidate)
-                                == CertificateKeyType.DSS);
+                && (Arrays.stream(
+                                        AlgorithmResolver.getSuiteableLeafCertificateKeyType(
+                                                cipherSuiteCandidate))
+                                .anyMatch(kt -> kt == X509PublicKeyType.ECDH_ECDSA)
+                        || Arrays.stream(
+                                        AlgorithmResolver.getSuiteableLeafCertificateKeyType(
+                                                cipherSuiteCandidate))
+                                .anyMatch(kt -> kt == X509PublicKeyType.RSA)
+                        || Arrays.stream(
+                                        AlgorithmResolver.getSuiteableLeafCertificateKeyType(
+                                                cipherSuiteCandidate))
+                                .anyMatch(kt -> kt == X509PublicKeyType.DSA));
     }
 }

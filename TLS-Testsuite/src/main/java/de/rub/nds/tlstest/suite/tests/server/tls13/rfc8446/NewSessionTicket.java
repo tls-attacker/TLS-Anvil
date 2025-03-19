@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
@@ -58,19 +57,19 @@ public class NewSessionTicket extends Tls13Test {
             NewSessionTicketMessage firstTicket =
                     workflowTrace.getFirstReceivedMessage(NewSessionTicketMessage.class);
             assertTrue(
+                    firstTicket.getTicketLifetimeHint().getValue() <= 604800,
                     "Ticket lifetime of "
                             + firstTicket.getTicketLifetimeHint().getValue()
-                            + " exceeds maximum of 604800",
-                    firstTicket.getTicketLifetimeHint().getValue() <= 604800);
+                            + " exceeds maximum of 604800");
             if (workflowTrace.getLastReceivedMessage(NewSessionTicketMessage.class)
                     != firstTicket) {
                 NewSessionTicketMessage secondTicket =
                         workflowTrace.getLastReceivedMessage(NewSessionTicketMessage.class);
                 assertFalse(
-                        "Found two tickets with identical ticket age add value",
                         Arrays.equals(
                                 firstTicket.getTicket().getTicketAgeAdd().getValue(),
-                                secondTicket.getTicket().getTicketAgeAdd().getValue()));
+                                secondTicket.getTicket().getTicketAgeAdd().getValue()),
+                        "Found two tickets with identical ticket age add value");
             }
         }
     }

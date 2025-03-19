@@ -7,7 +7,8 @@
  */
 package de.rub.nds.tlstest.framework.constants;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.rub.nds.anvilcore.teststate.TestResult;
 import org.junit.jupiter.api.Test;

@@ -15,15 +15,13 @@ import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.ExtensionType;
-import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -53,7 +51,9 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
         workflowTrace.addTlsActions(new SendAction(new NewSessionTicketMessage()));
 
         NewSessionTicketMessage msg =
-                workflowTrace.getFirstSendMessage(NewSessionTicketMessage.class);
+                ((NewSessionTicketMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.NEW_SESSION_TICKET));
         msg.addExtension(new GreaseExtensionMessage(selectedGreaseExt, 25));
 
         State state = runner.execute(workflowTrace, c);
@@ -80,7 +80,10 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                         .getParameter(GreaseProtocolVersionDerivation.class)
                         .getSelectedValue();
 
-        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        ServerHelloMessage sh =
+                ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO));
         SupportedVersionsExtensionMessage ext =
                 sh.getExtension(SupportedVersionsExtensionMessage.class);
         ext.setSupportedVersions(Modifiable.explicit(selectedGreaseVersion.getValue()));
@@ -110,7 +113,10 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                         .getParameter(GreaseCipherSuiteDerivation.class)
                         .getSelectedValue();
 
-        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        ServerHelloMessage sh =
+                ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO));
         sh.setSelectedCipherSuite(Modifiable.explicit(selectedGreaseCipherSuite.getByteValue()));
 
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
@@ -137,7 +143,10 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                         .getParameter(GreaseExtensionDerivation.class)
                         .getSelectedValue();
 
-        ServerHelloMessage sh = workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+        ServerHelloMessage sh =
+                ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO));
         sh.addExtension(new GreaseExtensionMessage(selectedGreaseExt, 25));
 
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
@@ -158,7 +167,9 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                         .getSelectedValue();
 
         EncryptedExtensionsMessage sh =
-                workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
+                ((EncryptedExtensionsMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS));
         sh.addExtension(new GreaseExtensionMessage(selectedGreaseExt, 25));
 
         State state = runner.execute(workflowTrace, c);
@@ -176,7 +187,9 @@ public class ServerInitiatedExtensionPoints extends Tls13Test {
                 parameterCombination.getParameter(GreaseSigHashDerivation.class).getSelectedValue();
 
         CertificateVerifyMessage sh =
-                workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class);
+                ((CertificateVerifyMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CERTIFICATE_VERIFY));
         sh.setSignatureHashAlgorithm(Modifiable.explicit(selectedGreaseSigHash.getByteValue()));
 
         State state = runner.execute(workflowTrace, c);

@@ -18,6 +18,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -39,8 +40,9 @@ public class Finished extends Tls13Test {
                 new SendAction(new FinishedMessage()), new ReceiveAction(new AlertMessage()));
 
         byte[] modificationBitmask = parameterCombination.buildBitmask();
-        workflowTrace
-                .getFirstSendMessage(FinishedMessage.class)
+        ((FinishedMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.FINISHED))
                 .setVerifyData(Modifiable.xor(modificationBitmask, 0));
 
         State state = runner.execute(workflowTrace, config);

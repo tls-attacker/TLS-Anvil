@@ -8,19 +8,20 @@
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
 import static de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests.checkForDuplicateExtensions;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
+import de.rub.nds.protocol.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import de.rub.nds.x509attacker.constants.X509PublicKeyType;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,7 +41,7 @@ public class ClientHello extends Tls12Test {
                 containsZero = true;
             }
         }
-        assertTrue("ClientHello does not contain compression method null", containsZero);
+        assertTrue(containsZero, "ClientHello does not contain compression method null");
     }
 
     @NonCombinatorialAnvilTest(id = "5246-iAJbTqtHyt")
@@ -54,7 +55,7 @@ public class ClientHello extends Tls12Test {
                 break;
             }
         }
-        assertFalse("ClientHello contained compression method other than Null", containsOther);
+        assertFalse(containsOther, "ClientHello contained compression method other than Null");
     }
 
     public ConditionEvaluationResult sentSignatureAndHashAlgorithmsExtension() {
@@ -76,40 +77,42 @@ public class ClientHello extends Tls12Test {
                 proposedCipherSuites.stream()
                         .filter(
                                 cipherSuite ->
-                                        !cipherSuite.isTLS13() && cipherSuite.isRealCipherSuite())
+                                        !cipherSuite.isTls13() && cipherSuite.isRealCipherSuite())
                         .collect(Collectors.toList());
         List<CipherSuite> coveredCipherSuites = new LinkedList<>();
         for (CipherSuite cipherSuite : proposedCipherSuites) {
             boolean foundMatch = false;
-            switch (AlgorithmResolver.getCertificateKeyType(cipherSuite)) {
-                case DH:
-                case DSS:
-                    if (providedSignatureAlgorithm(SignatureAlgorithm.DSA)) {
+            for (X509PublicKeyType keyType :
+                    AlgorithmResolver.getSuiteableLeafCertificateKeyType(cipherSuite)) {
+                switch (keyType) {
+                    case DH:
+                    case DSA:
+                        if (providedSignatureAlgorithm(SignatureAlgorithm.DSA)) {
+                            foundMatch = true;
+                        }
+                        break;
+                    case ECDH_ONLY:
+                    case ECDH_ECDSA:
+                    case ECMQV:
+                        if (providedSignatureAlgorithm(SignatureAlgorithm.ECDSA)
+                                || providedSignatureAlgorithm(SignatureAlgorithm.ED25519)
+                                || providedSignatureAlgorithm(SignatureAlgorithm.ED448)) {
+                            foundMatch = true;
+                        }
+                        break;
+                    case RSA:
+                        if (providedSignatureAlgorithm(SignatureAlgorithm.RSA_PKCS1)
+                                || providedSignatureAlgorithm(SignatureAlgorithm.RSA_SSA_PSS)) {
+                            foundMatch = true;
+                        }
+                        break;
+                    case GOST_R3411_2001:
+                    case GOST_R3411_2012:
+                        // the peer does not have to add algorithms for these
+                        // explicitly
                         foundMatch = true;
-                    }
-                    break;
-                case ECDH:
-                case ECDSA:
-                case ECNRA:
-                    if (providedSignatureAlgorithm(SignatureAlgorithm.ECDSA)
-                            || providedSignatureAlgorithm(SignatureAlgorithm.ED25519)
-                            || providedSignatureAlgorithm(SignatureAlgorithm.ED448)) {
-                        foundMatch = true;
-                    }
-                    break;
-                case RSA:
-                    if (providedSignatureAlgorithm(SignatureAlgorithm.RSA)
-                            || providedSignatureAlgorithm(SignatureAlgorithm.RSA_PSS_PSS)
-                            || providedSignatureAlgorithm(SignatureAlgorithm.RSA_PSS_RSAE)) {
-                        foundMatch = true;
-                    }
-                    break;
-                case GOST01:
-                case GOST12:
-                    // the peer does not have to add algorithms for these
-                    // explicitly
-                    foundMatch = true;
-                    break;
+                        break;
+                }
             }
             if (foundMatch) {
                 coveredCipherSuites.add(cipherSuite);
@@ -117,11 +120,11 @@ public class ClientHello extends Tls12Test {
         }
         proposedCipherSuites.removeAll(coveredCipherSuites);
         assertTrue(
+                proposedCipherSuites.isEmpty(),
                 "Client did not provide a SignatureAlgorithm for all cipher suites "
                         + proposedCipherSuites.parallelStream()
                                 .map(Enum::name)
-                                .collect(Collectors.joining(",")),
-                proposedCipherSuites.isEmpty());
+                                .collect(Collectors.joining(",")));
     }
 
     @NonCombinatorialAnvilTest(id = "5246-booCra12We")
@@ -138,18 +141,14 @@ public class ClientHello extends Tls12Test {
                             sigHashExtension.getSignatureAndHashAlgorithms().getValue());
             List<SignatureAndHashAlgorithm> anonAlgorithms =
                     algorithmPairs.stream()
-                            .filter(
-                                    algo -> {
-                                        return algo.getSignatureAlgorithm()
-                                                == SignatureAlgorithm.ANONYMOUS;
-                                    })
+                            .filter(algo -> algo.getSignatureAlgorithm() == null)
                             .collect(Collectors.toList());
             assertTrue(
+                    anonAlgorithms.isEmpty(),
                     "Client offered anonymous signature algorithms:"
                             + anonAlgorithms.parallelStream()
                                     .map(Enum::name)
-                                    .collect(Collectors.joining(",")),
-                    anonAlgorithms.isEmpty());
+                                    .collect(Collectors.joining(",")));
         }
     }
 

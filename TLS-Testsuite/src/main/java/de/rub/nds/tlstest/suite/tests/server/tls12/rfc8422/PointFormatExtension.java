@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc8422;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
@@ -65,7 +65,7 @@ public class PointFormatExtension extends Tls12Test {
         Validator.executedAsPlanned(state, testCase);
 
         ServerHelloMessage message = trace.getFirstReceivedMessage(ServerHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, message);
+        assertNotNull(message, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
 
         ECPointFormatExtensionMessage ext =
                 message.getExtension(ECPointFormatExtensionMessage.class);
@@ -82,11 +82,11 @@ public class PointFormatExtension extends Tls12Test {
                 }
             }
 
-            assertTrue("ECPointFormatExtension does not contain uncompressed format", containsZero);
+            assertTrue(containsZero, "ECPointFormatExtension does not contain uncompressed format");
             if (choseRfc8422Curve(state.getTlsContext())) {
                 assertFalse(
-                        "ECPointFormatExtension contains compressed / invalid format",
-                        containsOther);
+                        containsOther,
+                        "ECPointFormatExtension contains compressed / invalid format");
             }
         }
     }

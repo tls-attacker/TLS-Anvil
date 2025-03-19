@@ -58,17 +58,17 @@ public class ShareOutOfBoundsDerivation
             BigInteger pubShare;
             switch (getSelectedValue()) {
                 case SHARE_IS_ZERO:
-                    config.setDefaultServerDhPrivateKey(BigInteger.ZERO);
-                    config.setDefaultServerDhPublicKey(BigInteger.ZERO);
+                    config.setDefaultServerEphemeralDhPrivateKey(BigInteger.ZERO);
+                    config.setDefaultServerEphemeralDhPublicKey(BigInteger.ZERO);
                     break;
                 case SHARE_IS_ONE:
-                    config.setDefaultServerDhPrivateKey(BigInteger.ZERO);
-                    config.setDefaultServerDhPublicKey(BigInteger.ONE);
+                    config.setDefaultServerEphemeralDhPrivateKey(BigInteger.ZERO);
+                    config.setDefaultServerEphemeralDhPublicKey(BigInteger.ONE);
                     break;
                 case SHARE_PLUS_P:
-                    pubShare = config.getDefaultServerDhPublicKey();
-                    pubShare = pubShare.add(config.getDefaultServerDhModulus());
-                    config.setDefaultServerDhPublicKey(pubShare);
+                    pubShare = config.getDefaultServerEphemeralDhPublicKey();
+                    pubShare = pubShare.add(config.getDefaultServerEphemeralDhModulus());
+                    config.setDefaultServerEphemeralDhPublicKey(pubShare);
                     break;
             }
         }

@@ -1,6 +1,6 @@
 package de.rub.nds.tlstest.suite.integrationtests.abstracts;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.dockerjava.api.command.InspectContainerCmd;
 import com.github.dockerjava.api.command.InspectContainerResponse;
@@ -18,7 +18,7 @@ import java.net.ServerSocket;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Assume;
+import org.opentest4j.TestAbortedException;
 
 public abstract class AbstractClientScanIT extends AbstractScanIT {
 
@@ -81,8 +81,7 @@ public abstract class AbstractClientScanIT extends AbstractScanIT {
             return dockerInstance;
         } catch (InterruptedException e) {
             LOGGER.error(String.format("Error while build or launching Docker container: %s", e));
-            Assume.assumeNoException(e);
-            return null;
+            throw new TestAbortedException();
         }
     }
 

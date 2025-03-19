@@ -18,6 +18,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
@@ -33,7 +34,8 @@ public class Certificate extends Tls13Test {
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        trace.getFirstSendMessage(CertificateMessage.class)
+        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                        trace, HandshakeMessageType.CERTIFICATE)
                 .setCompleteResultingMessage(
                         Modifiable.explicit(
                                 new byte[] {HandshakeMessageType.CERTIFICATE.getValue(), 0, 0, 0}));
@@ -51,7 +53,9 @@ public class Certificate extends Tls13Test {
 
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        trace.getFirstSendMessage(CertificateMessage.class)
+        ((CertificateMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                trace, HandshakeMessageType.CERTIFICATE))
                 .setCertificatesListBytes(Modifiable.explicit(new byte[] {}));
 
         State state = runner.execute(trace, config);

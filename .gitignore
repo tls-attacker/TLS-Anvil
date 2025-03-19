@@ -1,8 +1,29 @@
-.DS_Store
+resources/*.pem
+test.sh
+
+# (build) artifacts
+apps/
+target/
+
+# Eclipse
+**/.classpath
+**/.project
+**/.settings/
+.project
+
+# Netbeans
+nbproject/
+nbactions.xml.project
+nbactions.xml
+
+# IntelliJ
+.idea/
 *.iml
-.idea
-*.log
-_containerResult.json
-summary.json
-dump.pcap
-/TLS-Test-Framework/nbproject/
+
+# Maven
+**/pom.xml.*
+**/release.properties
+**/.flattened-pom.xml
+
+# VS Code
+.factorypath

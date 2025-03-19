@@ -14,6 +14,7 @@ import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.MaxFragmentLength;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
@@ -22,6 +23,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.PaddingExtensionMe
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
@@ -59,7 +61,9 @@ public class EncryptedExtensions extends Tls13Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         EncryptedExtensionsMessage ee =
-                workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
+                ((EncryptedExtensionsMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS));
         ee.addExtension(new SupportedVersionsExtensionMessage());
 
         State state = runner.execute(workflowTrace, c);
@@ -76,7 +80,9 @@ public class EncryptedExtensions extends Tls13Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         EncryptedExtensionsMessage ee =
-                workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
+                ((EncryptedExtensionsMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS));
         ee.addExtension(new PaddingExtensionMessage());
 
         State state = runner.execute(workflowTrace, c);
@@ -95,7 +101,9 @@ public class EncryptedExtensions extends Tls13Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         EncryptedExtensionsMessage encExt =
-                workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
+                ((EncryptedExtensionsMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS));
         MaxFragmentLengthExtensionMessage malMaxFrag = new MaxFragmentLengthExtensionMessage();
         malMaxFrag.setMaxFragmentLength(Modifiable.explicit(new byte[] {5}));
         encExt.addExtension(malMaxFrag);
@@ -122,7 +130,9 @@ public class EncryptedExtensions extends Tls13Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         EncryptedExtensionsMessage encExt =
-                workflowTrace.getFirstSendMessage(EncryptedExtensionsMessage.class);
+                ((EncryptedExtensionsMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS));
         MaxFragmentLengthExtensionMessage malMaxFrag = new MaxFragmentLengthExtensionMessage();
         malMaxFrag.setMaxFragmentLength(Modifiable.explicit(new byte[] {unreqLen.getValue()}));
         encExt.addExtension(malMaxFrag);

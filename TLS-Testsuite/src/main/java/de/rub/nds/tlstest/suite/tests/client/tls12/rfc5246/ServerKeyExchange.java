@@ -14,15 +14,13 @@ import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterScope;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
-import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
-import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
@@ -35,12 +33,17 @@ import de.rub.nds.tlstest.framework.model.derivationParameter.CertificateDerivat
 import de.rub.nds.tlstest.framework.model.derivationParameter.CipherSuiteDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
+import de.rub.nds.tlstest.framework.model.derivationParameter.helper.CertificateConfigChainValue;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import de.rub.nds.tlstest.framework.utils.X509CertificateChainProvider;
+import de.rub.nds.x509attacker.config.X509CertificateConfig;
+import de.rub.nds.x509attacker.constants.X509PublicKeyType;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+import org.junit.jupiter.api.Tag;
 
 @ClientTest
+@Tag("SKE")
 public class ServerKeyExchange extends Tls12Test {
 
     @AnvilTest(id = "5246-zqCFt52rqY")
@@ -58,8 +61,8 @@ public class ServerKeyExchange extends Tls12Test {
                         WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CLIENT_KEY_EXCHANGE);
         ServerKeyExchangeMessage serverKeyExchangeMsg =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchangeMsg.setSignature(Modifiable.xor(bitmask, 0));
 
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
@@ -76,10 +79,35 @@ public class ServerKeyExchange extends Tls12Test {
         Validator.receivedFatalAlert(state, testCase);
     }
 
+    public boolean isStaticEcdhCipherSuite(CipherSuite cipherSuite) {
+        return cipherSuite.getKeyExchangeAlgorithm().isKeyExchangeEcdh()
+                && !cipherSuite.isEphemeral();
+    }
+
+    public List<DerivationParameter> getEcdhCertsForUnproposedGroups(DerivationScope scope) {
+        List<DerivationParameter> parameterValues = new LinkedList<>();
+        CertificateDerivation certificateDerivation = new CertificateDerivation();
+        List<DerivationParameter<Config, CertificateConfigChainValue>> certChains =
+                certificateDerivation.getApplicableCertificateConfigs(context, scope, true);
+        for (DerivationParameter<Config, CertificateConfigChainValue> certChain : certChains) {
+            X509CertificateConfig leafConfig =
+                    certChain.getSelectedValue().get(X509CertificateChainProvider.LEAF_CERT_INDEX);
+            if (leafConfig.getPublicKeyType() == X509PublicKeyType.ECDH_ECDSA
+                    && !context.getFeatureExtractionResult()
+                            .getNamedGroups()
+                            .contains(
+                                    NamedGroup.convertFromX509NamedCurve(
+                                            leafConfig.getDefaultSubjectNamedCurve()))) {
+                parameterValues.add(certChain);
+            }
+        }
+        return parameterValues;
+    }
+
     public List<DerivationParameter> getUnproposedNamedGroups(DerivationScope scope) {
         List<DerivationParameter> parameterValues = new LinkedList<>();
         NamedGroup.getImplemented().stream()
-                .filter(group -> group.isCurve())
+                .filter(group -> group.isEcGroup())
                 .filter(
                         curve ->
                                 !context.getFeatureExtractionResult()
@@ -91,22 +119,31 @@ public class ServerKeyExchange extends Tls12Test {
         return parameterValues;
     }
 
-    public List<DerivationParameter<Config, CertificateKeyPair>>
+    public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(
+            DerivationScope scope) {
+        List<DerivationParameter> unsupportedAlgorithms = new LinkedList<>();
+        ClientFeatureExtractionResult extractionResult =
+                (ClientFeatureExtractionResult) context.getFeatureExtractionResult();
+        SignatureAndHashAlgorithm.getImplemented().stream()
+                .filter(
+                        algorithm ->
+                                !extractionResult
+                                        .getAdvertisedSignatureAndHashAlgorithms()
+                                        .contains(algorithm))
+                .filter(algorithm -> algorithm.getSignatureAlgorithm() != null)
+                .forEach(
+                        algorithm ->
+                                unsupportedAlgorithms.add(new SigAndHashDerivation(algorithm)));
+        return unsupportedAlgorithms;
+    }
+
+    public List<DerivationParameter<Config, CertificateConfigChainValue>>
             getCertsIncludingUnsupportedPkGroups(DerivationScope scope) {
         CertificateDerivation certDerivation =
                 (CertificateDerivation)
                         TlsParameterType.CERTIFICATE.getInstance(ParameterScope.NO_SCOPE);
-        List<DerivationParameter<Config, CertificateKeyPair>> parameterList =
-                certDerivation.getApplicableCertificates(context, scope, true);
-        // TLS Attacker can currently not use CURVE_SM2 for signature
-        // filter as temporary fix until x509 attacker gets implemented which should fix it
-        parameterList =
-                parameterList.stream()
-                        .filter(
-                                p ->
-                                        p.getSelectedValue().getSignatureGroup()
-                                                != NamedGroup.CURVE_SM2)
-                        .collect(Collectors.toList());
+        List<DerivationParameter<Config, CertificateConfigChainValue>> parameterList =
+                certDerivation.getApplicableCertificateConfigs(context, scope, true);
         return parameterList;
     }
 
@@ -128,28 +165,6 @@ public class ServerKeyExchange extends Tls12Test {
 
         State state = runner.execute(workflowTrace, c);
         Validator.receivedFatalAlert(state, testCase);
-    }
-
-    public boolean isStaticEcdhCipherSuite(CipherSuite cipherSuite) {
-        return AlgorithmResolver.getKeyExchangeAlgorithm(cipherSuite).isKeyExchangeEcdh()
-                && !cipherSuite.isEphemeral();
-    }
-
-    public List<DerivationParameter> getEcdhCertsForUnproposedGroups(DerivationScope scope) {
-        List<DerivationParameter> parameterValues = new LinkedList<>();
-        CertificateByteChooser.getInstance().getCertificateKeyPairList().stream()
-                .filter(
-                        certKeyPair -> {
-                            return (certKeyPair.getCertPublicKeyType() == CertificateKeyType.ECDH
-                                            || certKeyPair.getCertPublicKeyType()
-                                                    == CertificateKeyType.ECDSA)
-                                    && !context.getFeatureExtractionResult()
-                                            .getNamedGroups()
-                                            .contains(certKeyPair.getPublicKeyGroup());
-                        })
-                .forEach(
-                        certKeyPair -> parameterValues.add(new CertificateDerivation(certKeyPair)));
-        return parameterValues;
     }
 
     @AnvilTest(id = "5246-cNKtuNg3Lc")
@@ -189,8 +204,8 @@ public class ServerKeyExchange extends Tls12Test {
 
         ServerKeyExchangeMessage serverKeyExchange =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchange.setSignature(Modifiable.explicit(new byte[0]));
 
         State state = runner.execute(workflowTrace, c);
@@ -229,34 +244,14 @@ public class ServerKeyExchange extends Tls12Test {
                 SignatureAndHashAlgorithm.valueOf("ANONYMOUS_" + digestName);
         ServerKeyExchangeMessage serverKeyExchange =
                 (ServerKeyExchangeMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchange.setSignatureAndHashAlgorithm(
                 Modifiable.explicit(matchingAnon.getByteValue()));
         serverKeyExchange.setSignature(Modifiable.explicit(new byte[0]));
 
         State state = runner.execute(workflowTrace, c);
         Validator.receivedFatalAlert(state, testCase);
-    }
-
-    public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(
-            DerivationScope scope) {
-        List<DerivationParameter> unsupportedAlgorithms = new LinkedList<>();
-        ClientFeatureExtractionResult extractionResult =
-                (ClientFeatureExtractionResult) context.getFeatureExtractionResult();
-        SignatureAndHashAlgorithm.getImplemented().stream()
-                .filter(
-                        algorithm ->
-                                !extractionResult
-                                        .getAdvertisedSignatureAndHashAlgorithms()
-                                        .contains(algorithm))
-                .filter(
-                        algorithm ->
-                                algorithm.getSignatureAlgorithm() != SignatureAlgorithm.ANONYMOUS)
-                .forEach(
-                        algorithm ->
-                                unsupportedAlgorithms.add(new SigAndHashDerivation(algorithm)));
-        return unsupportedAlgorithms;
     }
 
     @AnvilTest(id = "5246-1Bsg5xe2cv")

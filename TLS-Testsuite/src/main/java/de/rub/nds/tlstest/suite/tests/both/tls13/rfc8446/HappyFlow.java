@@ -16,7 +16,7 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -36,13 +36,13 @@ public class HappyFlow extends Tls13Test {
         State state = runner.execute(workflowTrace, c);
 
         boolean receivedAlert =
-                WorkflowTraceUtil.didReceiveMessage(
-                        ProtocolMessageType.ALERT, state.getWorkflowTrace());
+                WorkflowTraceResultUtil.didReceiveMessage(
+                        state.getWorkflowTrace(), ProtocolMessageType.ALERT);
         if (receivedAlert) {
             AlertMessage alert =
                     (AlertMessage)
-                            WorkflowTraceUtil.getFirstReceivedMessage(
-                                    ProtocolMessageType.ALERT, state.getWorkflowTrace());
+                            WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                    state.getWorkflowTrace(), ProtocolMessageType.ALERT);
             LOGGER.error(
                     "Received Alert "
                             + AlertDescription.getAlertDescription(

@@ -1,6 +1,6 @@
 package de.rub.nds.tlstest.framework;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import de.rub.nds.tlsscanner.clientscanner.report.ClientReport;
 import de.rub.nds.tlstest.framework.exceptions.FeatureExtractionFailedException;

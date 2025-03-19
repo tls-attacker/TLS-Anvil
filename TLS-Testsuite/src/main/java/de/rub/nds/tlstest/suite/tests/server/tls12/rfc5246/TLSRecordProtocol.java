@@ -27,6 +27,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.List;
 
 @ServerTest
 public class TLSRecordProtocol extends Tls12Test {
@@ -40,7 +41,7 @@ public class TLSRecordProtocol extends Tls12Test {
         record.setContentType(Modifiable.explicit((byte) 0xFF));
 
         SendAction sendHelloWithWrongRecordContentType = new SendAction(new ClientHelloMessage(c));
-        sendHelloWithWrongRecordContentType.setRecords(record);
+        sendHelloWithWrongRecordContentType.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
@@ -63,7 +64,7 @@ public class TLSRecordProtocol extends Tls12Test {
 
         SendAction sendActionWithBadRecord =
                 new SendAction(new ChangeCipherSpecMessage(), new FinishedMessage());
-        sendActionWithBadRecord.setRecords(record);
+        sendActionWithBadRecord.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(

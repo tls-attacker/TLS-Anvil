@@ -13,12 +13,14 @@ import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.protocol.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
@@ -40,10 +42,10 @@ public class CertificateVerify extends Tls13Test {
                         .getAdvertisedSignatureAndHashAlgorithms();
         algos =
                 algos.stream()
-                        .filter(i -> i.getSignatureAlgorithm() == SignatureAlgorithm.RSA)
+                        .filter(i -> i.getSignatureAlgorithm() == SignatureAlgorithm.RSA_PKCS1)
                         .collect(Collectors.toList());
 
-        if (algos.size() > 0) {
+        if (!algos.isEmpty()) {
             return ConditionEvaluationResult.enabled("");
         }
         return ConditionEvaluationResult.disabled(
@@ -57,7 +59,7 @@ public class CertificateVerify extends Tls13Test {
         for (SignatureAndHashAlgorithm algo :
                 ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
                         .getAdvertisedSignatureAndHashAlgorithms()) {
-            if (algo.getSignatureAlgorithm() == SignatureAlgorithm.RSA) {
+            if (algo.getSignatureAlgorithm() == SignatureAlgorithm.RSA_PKCS1) {
                 parameterValues.add(new SigAndHashDerivation(algo));
             }
         }
@@ -73,15 +75,14 @@ public class CertificateVerify extends Tls13Test {
     @MethodCondition(method = "supportsLegacyRSASHAlgorithms")
     public void selectLegacyRSASignatureAlgorithm(AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);
-        SignatureAndHashAlgorithm selsectedLegacySigHash =
+        SignatureAndHashAlgorithm selectedLegacySigHash =
                 parameterCombination.getParameter(SigAndHashDerivation.class).getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        workflowTrace
-                .getFirstSendMessage(CertificateVerifyMessage.class)
+        getCertVerify(workflowTrace)
                 .setSignatureHashAlgorithm(
-                        Modifiable.explicit(selsectedLegacySigHash.getByteValue()));
+                        Modifiable.explicit(selectedLegacySigHash.getByteValue()));
 
         State state = runner.execute(workflowTrace, c);
         Validator.receivedFatalAlert(state, testCase);
@@ -103,7 +104,6 @@ public class CertificateVerify extends Tls13Test {
         Config c = getPreparedConfig(runner);
         c.setAutoAdjustSignatureAndHashAlgorithm(false);
         c.setDefaultSelectedSignatureAndHashAlgorithm(SignatureAndHashAlgorithm.ECDSA_SHA1);
-        c.setPreferredCertificateSignatureType(CertificateKeyType.ECDSA);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
@@ -122,8 +122,7 @@ public class CertificateVerify extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        CertificateVerifyMessage msg =
-                workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class);
+        CertificateVerifyMessage msg = getCertVerify(workflowTrace);
         msg.setSignature(Modifiable.xor(bitmask, 0));
 
         State state = runner.execute(workflowTrace, c);
@@ -151,9 +150,7 @@ public class CertificateVerify extends Tls13Test {
                                                 context.getFeatureExtractionResult())
                                         .getAdvertisedSignatureAndHashAlgorithms()
                                         .contains(algorithm))
-                .filter(
-                        algorithm ->
-                                algorithm.getSignatureAlgorithm() != SignatureAlgorithm.ANONYMOUS)
+                .filter(algorithm -> algorithm.getSignatureAlgorithm() != null)
                 .forEach(
                         algorithm ->
                                 unsupportedAlgorithms.add(new SigAndHashDerivation(algorithm)));
@@ -184,8 +181,7 @@ public class CertificateVerify extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        trace.getFirstSendMessage(CertificateVerifyMessage.class)
-                .setSignature(Modifiable.explicit(new byte[] {}));
+        getCertVerify(trace).setSignature(Modifiable.explicit(new byte[] {}));
 
         State state = runner.execute(trace, c);
 
@@ -201,8 +197,7 @@ public class CertificateVerify extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        trace.getFirstSendMessage(CertificateVerifyMessage.class)
-                .setSignatureHashAlgorithm(Modifiable.explicit(new byte[] {}));
+        getCertVerify(trace).setSignatureHashAlgorithm(Modifiable.explicit(new byte[] {}));
 
         State state = runner.execute(trace, c);
         Validator.receivedFatalAlert(state, testCase);
@@ -215,12 +210,18 @@ public class CertificateVerify extends Tls13Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         trace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
-        trace.getFirstSendMessage(CertificateVerifyMessage.class)
-                .setSignatureHashAlgorithm(Modifiable.explicit(new byte[] {}));
-        trace.getFirstSendMessage(CertificateVerifyMessage.class)
-                .setSignature(Modifiable.explicit(new byte[] {}));
+        CertificateVerifyMessage certVerify = getCertVerify(trace);
+        certVerify.setSignatureHashAlgorithm(Modifiable.explicit(new byte[] {}));
+        certVerify.setSignature(Modifiable.explicit(new byte[] {}));
 
         State state = runner.execute(trace, c);
         Validator.receivedFatalAlert(state, testCase);
+    }
+
+    private CertificateVerifyMessage getCertVerify(WorkflowTrace trace) {
+        return (CertificateVerifyMessage)
+                WorkflowTraceConfigurationUtil.getStaticConfiguredSendMessages(
+                                trace, HandshakeMessageType.CERTIFICATE_VERIFY)
+                        .get(0);
     }
 }

@@ -19,6 +19,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
@@ -52,7 +53,9 @@ public class CertificateVerify extends Tls12Test {
                 new ReceiveAction(new AlertMessage()));
 
         CertificateVerifyMessage msg =
-                workflowTrace.getFirstSendMessage(CertificateVerifyMessage.class);
+                (CertificateVerifyMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CERTIFICATE_VERIFY);
         msg.setSignature(Modifiable.xor(new byte[] {0x01}, 0));
 
         State state = runner.execute(workflowTrace, c);

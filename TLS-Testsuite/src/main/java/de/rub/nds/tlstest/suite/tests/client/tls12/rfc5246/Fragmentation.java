@@ -19,7 +19,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -28,6 +28,7 @@ import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.List;
 
 @ClientTest
 public class Fragmentation extends Tls12Test {
@@ -47,9 +48,9 @@ public class Fragmentation extends Tls12Test {
 
         SendAction action =
                 (SendAction)
-                        WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
-        action.setRecords(r);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
+        action.setConfiguredRecords(List.of(r));
 
         State state = runner.execute(workflowTrace, c);
         Validator.receivedFatalAlert(state, testCase);

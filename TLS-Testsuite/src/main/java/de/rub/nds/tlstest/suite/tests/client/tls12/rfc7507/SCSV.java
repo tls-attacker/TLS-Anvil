@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7507;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
@@ -27,7 +27,7 @@ public class SCSV extends Tls12Test {
         List<CipherSuite> advertised =
                 CipherSuite.getCipherSuites(clientHello.getCipherSuites().getValue());
         assertFalse(
-                "Client included TLS_FALLBACK_SCSV in its first ClientHello",
-                advertised.contains(CipherSuite.TLS_FALLBACK_SCSV));
+                advertised.contains(CipherSuite.TLS_FALLBACK_SCSV),
+                "Client included TLS_FALLBACK_SCSV in its first ClientHello");
     }
 }

@@ -17,7 +17,7 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
 import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
@@ -80,8 +80,8 @@ public class Certificate extends TlsLengthfieldTest {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls13(runner);
         CertificateMessage certificateMessage =
                 (CertificateMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CERTIFICATE, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CERTIFICATE);
         certificateMessage.setRequestContextLength(Modifiable.add(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
         validateLengthTest(state, testCase);
@@ -91,8 +91,8 @@ public class Certificate extends TlsLengthfieldTest {
             WorkflowTrace workflowTrace, WorkflowRunner runner, AnvilTestCase testCase) {
         CertificateMessage certificateMessage =
                 (CertificateMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CERTIFICATE, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CERTIFICATE);
         certificateMessage.setLength(Modifiable.sub(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
         validateLengthTest(state, testCase);
@@ -102,8 +102,8 @@ public class Certificate extends TlsLengthfieldTest {
             WorkflowTrace workflowTrace, WorkflowRunner runner, AnvilTestCase testCase) {
         CertificateMessage certificateMessage =
                 (CertificateMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CERTIFICATE, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CERTIFICATE);
         certificateMessage.setCertificatesListLength(Modifiable.sub(1));
         State state = runner.execute(workflowTrace, runner.getPreparedConfig());
         validateLengthTest(state, testCase);

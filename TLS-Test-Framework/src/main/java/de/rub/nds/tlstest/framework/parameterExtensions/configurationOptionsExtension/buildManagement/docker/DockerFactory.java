@@ -64,16 +64,7 @@ public class DockerFactory {
         this.failedBuildDockerTags = new HashSet<>();
     }
 
-    /**
-     * Builds a TLS library with the specified cliOptions as build flags
-     *
-     * @param cliOptions - The list of cliOptions to compile the tls library
-     * @param dockerTag - The docker tag the image should have (should be derived from the
-     *     cliOptions and the version)
-     * @param libraryVersionName - The version of the tls library (e.g. the respective git branch
-     *     tag)
-     * @param resultsCollector - The result collector to log build and container information
-     */
+    /** Builds a TLS library with the specified cliOptions as build flags */
     public boolean buildTlsLibraryDockerImage(
             TlsImplementationType tlsLibrary,
             String version,
@@ -303,10 +294,6 @@ public class DockerFactory {
     /**
      * Creates a docker container and returns the container id of the created container.
      *
-     * @param dockerImageTag - the tag of the docker image to create the build from
-     * @param entrypoint - the entrypoint to use
-     * @param portBindings - the port bindings
-     * @param volumeBindings - the volume bindings
      * @return the container id
      */
     public synchronized String createDockerContainer(

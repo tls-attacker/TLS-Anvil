@@ -47,7 +47,9 @@ public class PRFBitmaskDerivation extends TlsDerivationParameter<Integer> {
             for (CipherSuite cipherSuite :
                     context.getFeatureExtractionResult().getSupportedTls13CipherSuites()) {
                 int hkdfSize =
-                        AlgorithmResolver.getHKDFAlgorithm(cipherSuite).getMacAlgorithm().getSize();
+                        AlgorithmResolver.getHKDFAlgorithm(cipherSuite)
+                                .getMacAlgorithm()
+                                .getMacLength();
                 if (hkdfSize > maxHkdfSize) {
                     maxHkdfSize = hkdfSize;
                 }
@@ -91,7 +93,7 @@ public class PRFBitmaskDerivation extends TlsDerivationParameter<Integer> {
 
                                     return AlgorithmResolver.getHKDFAlgorithm(selectedCipherSuite)
                                                     .getMacAlgorithm()
-                                                    .getSize()
+                                                    .getMacLength()
                                             > selectedBitmaskBytePosition;
                                 }));
     }

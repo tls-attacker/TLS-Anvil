@@ -12,23 +12,24 @@ import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.model.parameter.ParameterIdentifier;
 import de.rub.nds.anvilcore.model.parameter.ParameterScope;
-import de.rub.nds.tlsattacker.core.certificate.CertificateByteChooser;
-import de.rub.nds.tlsattacker.core.certificate.CertificateKeyPair;
+import de.rub.nds.protocol.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.CertificateKeyType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlsattacker.core.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
-import de.rub.nds.tlsattacker.core.crypto.keys.CustomDSAPrivateKey;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsDerivationParameter;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
+import de.rub.nds.tlstest.framework.model.derivationParameter.helper.CertificateConfigChainValue;
+import de.rub.nds.tlstest.framework.utils.X509CertificateChainProvider;
+import de.rub.nds.x509attacker.config.X509CertificateConfig;
+import de.rub.nds.x509attacker.constants.X509PublicKeyType;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.NotImplementedException;
 
 /** Provides a modification bitmask for ServerKeyExchange and CertificateVerify signatures. */
 public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> {
@@ -64,16 +65,14 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         Set<Integer> listedValues = new HashSet<>();
         listedValues.add(0);
 
-        List<DerivationParameter<Config, CertificateKeyPair>> applicableCertificates =
+        List<DerivationParameter<Config, CertificateConfigChainValue>> applicableCertificates =
                 TlsParameterType.CERTIFICATE
                         .getInstance(ParameterScope.NO_SCOPE)
                         .getConstrainedParameterValues(scope);
         applicableCertificates.forEach(
                 selectableCert ->
                         listedValues.add(
-                                computeSignatureSizeForCertKeyPair(
-                                                (CertificateKeyPair)
-                                                        selectableCert.getSelectedValue())
+                                computeSignatureSizeForCertConfig(selectableCert.getSelectedValue())
                                         - 1));
 
         List<DerivationParameter<Config, Integer>> parameterValues = new LinkedList<>();
@@ -117,27 +116,42 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         return maxSignatureLength;
     }
 
-    private static int getMaxPublicKeySizeForType(CertificateKeyType requiredPublicKeyType) {
-        List<CertificateKeyPair> certificateKeyPairs =
-                CertificateByteChooser.getInstance().getCertificateKeyPairList();
+    private static int getMaxPublicKeySizeForType(X509PublicKeyType requiredPublicKeyType) {
+        List<X509CertificateConfig> certConfigs =
+                X509CertificateChainProvider.getInstance().getCertConfigs();
         int pkSize = 0;
-        for (CertificateKeyPair certKeyPair : certificateKeyPairs) {
-            if (requiredPublicKeyType != CertificateKeyType.DSS
-                    && certKeyPair.getCertPublicKeyType() == requiredPublicKeyType
-                    && certKeyPair.getPublicKey().keySize() > pkSize) {
-                pkSize = certKeyPair.getPublicKey().keySize();
-            } else if (requiredPublicKeyType == CertificateKeyType.DSS
-                    && certKeyPair.getCertPublicKeyType() == requiredPublicKeyType
-                    && ((CustomDSAPrivateKey) certKeyPair.getPrivateKey())
-                                    .getParams()
-                                    .getQ()
-                                    .bitLength()
-                            > pkSize) {
-                pkSize =
-                        ((CustomDSAPrivateKey) certKeyPair.getPrivateKey())
-                                .getParams()
-                                .getQ()
-                                .bitLength();
+        for (X509CertificateConfig certConfig : certConfigs) {
+            if (certConfig.getPublicKeyType() != requiredPublicKeyType) {
+                continue;
+            }
+            switch (requiredPublicKeyType) {
+                case RSA:
+                    pkSize = Math.max(pkSize, certConfig.getRsaModulus().bitLength());
+                    break;
+                case DH:
+                    pkSize = Math.max(pkSize, certConfig.getDhModulus().bitLength());
+                    break;
+                case ECDH_ECDSA:
+                case ECDH_ONLY:
+                case ECMQV:
+                case ED25519:
+                case ED448:
+                case GOST_R3411_2001:
+                case GOST_R3411_94:
+                case GOST_R3411_2012:
+                case X25519:
+                case X448:
+                    pkSize =
+                            Math.max(
+                                    pkSize,
+                                    certConfig.getDefaultSubjectNamedCurve().getBitLength());
+                    break;
+                case DSA:
+                    pkSize = Math.max(pkSize, certConfig.getDsaPrimeQ().bitLength());
+                    break;
+                default:
+                    throw new NotImplementedException(
+                            requiredPublicKeyType.name() + " not implemented");
             }
         }
         return pkSize;
@@ -148,16 +162,18 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         List<NamedGroup> supportedNamedGroups =
                 context.getFeatureExtractionResult().getNamedGroups().stream()
                         .filter(group -> NamedGroup.getImplemented().contains(group))
+                        .filter(NamedGroup::isEcGroup)
                         .collect(Collectors.toList());
         NamedGroup biggestNamedGroup = null;
         for (NamedGroup group : supportedNamedGroups) {
             if (biggestNamedGroup == null
-                    || biggestNamedGroup.getCoordinateSizeInBit()
-                            < group.getCoordinateSizeInBit()) {
+                    || biggestNamedGroup.convertToX509().getBitLength()
+                            < group.convertToX509().getBitLength()) {
                 biggestNamedGroup = group;
             }
         }
-        return biggestNamedGroup.getCoordinateSizeInBit();
+        assert biggestNamedGroup != null;
+        return biggestNamedGroup.convertToX509().getBitLength();
     }
 
     @Override
@@ -168,12 +184,12 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         SignatureAlgorithm signatureAlgorithm = signatureHashAlgorithm.getSignatureAlgorithm();
         if (signatureAlgorithm.name().contains("RSA")) {
             return computeEstimatedSignatureSize(
-                    signatureAlgorithm, getMaxPublicKeySizeForType(CertificateKeyType.RSA));
+                    signatureAlgorithm, getMaxPublicKeySizeForType(X509PublicKeyType.RSA));
         } else if (signatureAlgorithm == SignatureAlgorithm.ECDSA) {
             return computeEstimatedSignatureSize(signatureAlgorithm, getMaxNamedGroupSize());
         } else if (signatureAlgorithm == SignatureAlgorithm.DSA) {
             return computeEstimatedSignatureSize(
-                    signatureAlgorithm, getMaxPublicKeySizeForType(CertificateKeyType.DSS));
+                    signatureAlgorithm, getMaxPublicKeySizeForType(X509PublicKeyType.DSA));
         } else {
             throw new RuntimeException(
                     "Can not compute maximum signature size for SignatureAlgorithm "
@@ -185,9 +201,8 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
             SignatureAlgorithm signatureAlgorithm, int pkSize) {
         int pkByteSize = (int) Math.ceil((double) pkSize / 8);
         switch (signatureAlgorithm) {
-            case RSA:
-            case RSA_PSS_PSS:
-            case RSA_PSS_RSAE:
+            case RSA_PKCS1:
+            case RSA_SSA_PSS:
                 return pkByteSize;
             case DSA:
                 // signature size is (#bits of Q) / 4
@@ -207,26 +222,26 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         }
     }
 
-    public static Integer computeSignatureSizeForCertKeyPair(CertificateKeyPair certKeyPair) {
-        switch (certKeyPair.getCertPublicKeyType()) {
+    public static Integer computeSignatureSizeForCertConfig(
+            CertificateConfigChainValue certConfigs) {
+        X509CertificateConfig certConfig =
+                certConfigs.get(X509CertificateChainProvider.LEAF_CERT_INDEX);
+        switch (certConfig.getPublicKeyType()) {
             case RSA:
                 return computeEstimatedSignatureSize(
-                        SignatureAlgorithm.RSA, certKeyPair.getPublicKey().keySize());
-            case ECDH:
-            case ECDSA:
+                        SignatureAlgorithm.RSA_PKCS1, certConfig.getRsaModulus().bitLength());
+            case ECDH_ONLY:
+            case ECDH_ECDSA:
                 return computeEstimatedSignatureSize(
-                        SignatureAlgorithm.ECDSA, certKeyPair.getPublicKey().keySize());
-            case DSS:
+                        SignatureAlgorithm.ECDSA,
+                        certConfig.getDefaultSubjectNamedCurve().getBitLength());
+            case DSA:
                 return computeEstimatedSignatureSize(
-                        SignatureAlgorithm.DSA,
-                        ((CustomDSAPrivateKey) certKeyPair.getPrivateKey())
-                                .getParams()
-                                .getQ()
-                                .bitLength());
+                        SignatureAlgorithm.DSA, certConfig.getDsaPrimeQ().bitLength());
             default:
                 throw new RuntimeException(
                         "Can not compute signature size for CertPublicKeyType "
-                                + certKeyPair.getCertPublicKeyType());
+                                + certConfig.getPublicKeyType());
         }
     }
 
@@ -255,8 +270,8 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
                                         SigAndHashDerivation sigAndHashDerivation) -> {
                                     int selectedBitmaskBytePosition =
                                             signatureBitmaskDerivation.getSelectedValue();
-                                    CertificateKeyPair selectedCertKeyPair =
-                                            certificateDerivation.getSelectedValue();
+                                    X509CertificateConfig certConfig =
+                                            certificateDerivation.getLeafConfig();
                                     SignatureAndHashAlgorithm selectedSigHashAlgorithm =
                                             sigAndHashDerivation.getSelectedValue();
 
@@ -265,17 +280,40 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
                                     }
 
                                     int certificateKeySize;
-                                    if (selectedCertKeyPair.getCertPublicKeyType()
-                                            == CertificateKeyType.DSS) {
-                                        certificateKeySize =
-                                                ((CustomDSAPrivateKey)
-                                                                selectedCertKeyPair.getPrivateKey())
-                                                        .getParams()
-                                                        .getQ()
-                                                        .bitLength();
-                                    } else {
-                                        certificateKeySize =
-                                                selectedCertKeyPair.getPublicKey().keySize();
+                                    switch (certConfig.getPublicKeyType()) {
+                                        case RSA:
+                                        case RSASSA_PSS:
+                                        case RSAES_OAEP:
+                                            certificateKeySize =
+                                                    certConfig.getRsaModulus().bitLength();
+                                            break;
+                                        case ECDH_ECDSA:
+                                        case ECDH_ONLY:
+                                        case ECMQV:
+                                        case ED25519:
+                                        case ED448:
+                                        case GOST_R3411_2001:
+                                        case GOST_R3411_94:
+                                        case GOST_R3411_2012:
+                                        case X25519:
+                                        case X448:
+                                            certificateKeySize =
+                                                    certConfig
+                                                            .getDefaultSubjectNamedCurve()
+                                                            .getBitLength();
+                                            break;
+                                        case DH:
+                                            certificateKeySize =
+                                                    certConfig.getDhModulus().bitLength();
+                                            break;
+                                        case DSA:
+                                            certificateKeySize =
+                                                    certConfig.getDsaPrimeQ().bitLength();
+                                            break;
+                                        default:
+                                            throw new NotImplementedException(
+                                                    certConfig.getPublicKeyType().name()
+                                                            + " not implemented");
                                     }
                                     SignatureAlgorithm sigAlg =
                                             selectedSigHashAlgorithm.getSignatureAlgorithm();

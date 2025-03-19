@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
@@ -16,10 +16,12 @@ import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.NewSessionTicketMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
@@ -46,14 +48,16 @@ public class NewSessionTicket extends Tls13Test {
         unknownExtension.setExtensionType(Modifiable.explicit(new byte[] {0x44, 0x23}));
 
         NewSessionTicketMessage msg =
-                workflowTrace.getFirstSendMessage(NewSessionTicketMessage.class);
+                ((NewSessionTicketMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.NEW_SESSION_TICKET));
         msg.addExtension(unknownExtension);
 
         State state = runner.execute(workflowTrace, c);
 
         Validator.executedAsPlanned(state, testCase);
         assertFalse(
-                "The connection was closed upon receiving the NewSessionTicket message",
-                Validator.socketClosed(state));
+                Validator.socketClosed(state),
+                "The connection was closed upon receiving the NewSessionTicket message");
     }
 }

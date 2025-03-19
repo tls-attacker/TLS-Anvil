@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -28,7 +28,8 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.keyshare.KeyShareE
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -188,8 +189,7 @@ public class HelloRetryRequest extends Tls13Test {
         State state = runner.execute(workflowTrace, c);
 
         assertFalse(
-                "Client replied to second HelloRetryRequest with ClientHello",
-                WorkflowTraceUtil.getLastReceivedMessage(state.getWorkflowTrace())
+                WorkflowTraceResultUtil.getLastReceivedMessage(state.getWorkflowTrace())
                                 instanceof ClientHelloMessage
                         && state.getWorkflowTrace().getLastReceivingAction().getReceivedMessages()
                                 != null
@@ -197,8 +197,9 @@ public class HelloRetryRequest extends Tls13Test {
                                 .getLastReceivingAction()
                                 .getReceivedMessages()
                                 .contains(
-                                        WorkflowTraceUtil.getLastReceivedMessage(
-                                                state.getWorkflowTrace())));
+                                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                                state.getWorkflowTrace())),
+                "Client replied to second HelloRetryRequest with ClientHello");
         Validator.receivedFatalAlert(state, testCase);
         AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
         Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, alert);
@@ -237,8 +238,8 @@ public class HelloRetryRequest extends Tls13Test {
         runner.insertHelloRetryRequest(workflowTrace, selectedGroup);
         ServerHelloMessage helloRetryRequest =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         helloRetryRequest.setSelectedCipherSuite(
                 Modifiable.explicit(helloRetryCipherSuite.getByteValue()));
 
@@ -394,17 +395,17 @@ public class HelloRetryRequest extends Tls13Test {
 
         ClientHelloMessage firstClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.CLIENT_HELLO, trace);
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                trace, HandshakeMessageType.CLIENT_HELLO);
         ClientHelloMessage retryClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.CLIENT_HELLO, trace);
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                trace, HandshakeMessageType.CLIENT_HELLO);
         assertTrue(
-                "Did not receive two Client Hello messages",
                 firstClientHello != null
                         && retryClientHello != null
-                        && firstClientHello != retryClientHello);
+                        && firstClientHello != retryClientHello,
+                "Did not receive two Client Hello messages");
         testIfKeyShareWasUpdated(retryClientHello);
         testIfRecordVersionWasAdjusted(executedTrace);
         testIfExtensionsAreEqual(firstClientHello, retryClientHello);
@@ -416,9 +417,9 @@ public class HelloRetryRequest extends Tls13Test {
         for (Record record : receiveSecondHello.getReceivedRecords()) {
             if (record.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
                 assertArrayEquals(
-                        "Record Version was not adjusted after Hello Retry Request",
                         ((Record) record).getProtocolVersion().getValue(),
-                        ProtocolVersion.TLS12.getValue());
+                        ProtocolVersion.TLS12.getValue(),
+                        "Record Version was not adjusted after Hello Retry Request");
             }
         }
     }
@@ -426,16 +427,16 @@ public class HelloRetryRequest extends Tls13Test {
     private void testIfKeyShareWasUpdated(ClientHelloMessage retryClientHello) {
         KeyShareExtensionMessage keyShareExtension =
                 retryClientHello.getExtension(KeyShareExtensionMessage.class);
-        assertNotNull("No Key Share Extension provided in second ClientHello", keyShareExtension);
+        assertNotNull(keyShareExtension, "No Key Share Extension provided in second ClientHello");
         List<KeyShareEntry> keyShareEntries = keyShareExtension.getKeyShareList();
         assertEquals(
-                "Updated ClientHello did not contain exactly one key share",
                 keyShareEntries.size(),
-                1);
+                1,
+                "Updated ClientHello did not contain exactly one key share");
         assertEquals(
-                "Updated ClientHello offered a different group then demanded by server",
                 keyShareEntries.get(0).getGroupConfig(),
-                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue());
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue(),
+                "Updated ClientHello offered a different group then demanded by server");
     }
 
     private void testIfExtensionsAreEqual(
@@ -459,14 +460,13 @@ public class HelloRetryRequest extends Tls13Test {
         for (ExtensionMessage extension : firstClientHello.getExtensions()) {
 
             assertTrue(
-                    "Extensions List not equal - second Client Hello did not contain "
-                            + extension.getExtensionTypeConstant(),
                     retryClientHello.containsExtension(extension.getExtensionTypeConstant())
                             || extension.getExtensionTypeConstant() == ExtensionType.PADDING
                             || extension.getExtensionTypeConstant() == ExtensionType.EARLY_DATA
                             || extension.getExtensionTypeConstant() == ExtensionType.COOKIE
-                            || extension.getExtensionTypeConstant()
-                                    == ExtensionType.PRE_SHARED_KEY);
+                            || extension.getExtensionTypeConstant() == ExtensionType.PRE_SHARED_KEY,
+                    "Extensions List not equal - second Client Hello did not contain "
+                            + extension.getExtensionTypeConstant());
 
             if (extension.getExtensionTypeConstant() != ExtensionType.KEY_SHARE
                     && extension.getExtensionTypeConstant() != ExtensionType.PADDING
@@ -474,15 +474,15 @@ public class HelloRetryRequest extends Tls13Test {
                     && extension.getExtensionTypeConstant() != ExtensionType.EARLY_DATA
                     && extension.getExtensionTypeConstant() != ExtensionType.COOKIE) {
                 assertTrue(
-                        "Extension "
-                                + extension.getExtensionTypeConstant()
-                                + " is not identical to second Client Hello",
                         Arrays.equals(
                                 extension.getExtensionBytes().getValue(),
                                 retryClientHello
                                         .getExtension(extension.getClass())
                                         .getExtensionBytes()
-                                        .getValue()));
+                                        .getValue()),
+                        "Extension "
+                                + extension.getExtensionTypeConstant()
+                                + " is not identical to second Client Hello");
             }
             extensionsInSecondHello.remove(extension.getExtensionTypeConstant());
         }
@@ -494,41 +494,41 @@ public class HelloRetryRequest extends Tls13Test {
             extensionsInSecondHello.remove(ExtensionType.KEY_SHARE);
         }
         assertTrue(
+                extensionsInSecondHello.isEmpty(),
                 "Second Client Hello contained additional Extensions: "
                         + extensionsInSecondHello.stream()
                                 .map(ExtensionType::toString)
-                                .collect(Collectors.joining(",")),
-                extensionsInSecondHello.isEmpty());
+                                .collect(Collectors.joining(",")));
     }
 
     private void testIfClientHelloFieldsAreEqual(
             ClientHelloMessage firstClientHello, ClientHelloMessage retryClientHello) {
         assertTrue(
-                "Offered CipherSuites are not identical",
                 Arrays.equals(
                         firstClientHello.getCipherSuites().getValue(),
-                        retryClientHello.getCipherSuites().getValue()));
+                        retryClientHello.getCipherSuites().getValue()),
+                "Offered CipherSuites are not identical");
         assertTrue(
-                "Offered CompressionList lengths are not identical",
                 firstClientHello
                         .getCompressionLength()
                         .getValue()
-                        .equals(retryClientHello.getCompressionLength().getValue()));
+                        .equals(retryClientHello.getCompressionLength().getValue()),
+                "Offered CompressionList lengths are not identical");
         assertTrue(
-                "Selected ClientRandoms are not identical",
                 Arrays.equals(
                         firstClientHello.getRandom().getValue(),
-                        retryClientHello.getRandom().getValue()));
+                        retryClientHello.getRandom().getValue()),
+                "Selected ClientRandoms are not identical");
         assertTrue(
-                "Selected ProtocolVersions are not identical",
                 Arrays.equals(
                         firstClientHello.getProtocolVersion().getValue(),
-                        retryClientHello.getProtocolVersion().getValue()));
+                        retryClientHello.getProtocolVersion().getValue()),
+                "Selected ProtocolVersions are not identical");
         assertTrue(
-                "TLS 1.3 compatibility SessionIDs are not identical",
                 Arrays.equals(
                         firstClientHello.getSessionId().getValue(),
-                        retryClientHello.getSessionId().getValue()));
+                        retryClientHello.getSessionId().getValue()),
+                "TLS 1.3 compatibility SessionIDs are not identical");
     }
 
     public List<DerivationParameter> getTls12CipherSuites(DerivationScope scope) {
@@ -571,21 +571,21 @@ public class HelloRetryRequest extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
         ClientHelloMessage secondClientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         assertFalse(
-                "Did not receive two ClientHello messages",
                 secondClientHello
-                        == WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace));
+                        == WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO),
+                "Did not receive two ClientHello messages");
         assertTrue(
-                "Did not receive a Cookie Extension in updated ClientHello",
-                secondClientHello.containsExtension(ExtensionType.COOKIE));
+                secondClientHello.containsExtension(ExtensionType.COOKIE),
+                "Did not receive a Cookie Extension in updated ClientHello");
         byte[] receivedCookie =
                 secondClientHello.getExtension(CookieExtensionMessage.class).getCookie().getValue();
         assertArrayEquals(
-                "Client sent a wrong cookie value",
                 receivedCookie,
-                config.getDefaultExtensionCookie());
+                config.getDefaultExtensionCookie(),
+                "Client sent a wrong cookie value");
     }
 }

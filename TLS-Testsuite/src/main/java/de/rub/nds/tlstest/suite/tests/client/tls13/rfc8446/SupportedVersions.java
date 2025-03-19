@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -25,6 +24,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -74,8 +74,9 @@ public class SupportedVersions extends Tls13Test {
                         .getSelectedValue();
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace
-                .getFirstSendMessage(ServerHelloMessage.class)
+        ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO))
                 .setProtocolVersion(Modifiable.explicit(chosenInvalidVersion));
 
         State state = runner.execute(workflowTrace, c);
@@ -92,8 +93,9 @@ public class SupportedVersions extends Tls13Test {
         c.setEnforceSettings(true);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        workflowTrace
-                .getFirstSendMessage(ServerHelloMessage.class)
+        ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO))
                 .getExtension(SupportedVersionsExtensionMessage.class)
                 .setSupportedVersions(Modifiable.explicit(new byte[] {0x03, 0x03}));
 
@@ -110,8 +112,9 @@ public class SupportedVersions extends Tls13Test {
         c.setEnforceSettings(true);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
-        workflowTrace
-                .getFirstSendMessage(ServerHelloMessage.class)
+        ((ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO))
                 .getExtension(SupportedVersionsExtensionMessage.class)
                 .setSupportedVersions(Modifiable.explicit(new byte[] {0x03, 0x03}));
 
@@ -127,13 +130,13 @@ public class SupportedVersions extends Tls13Test {
         SupportedVersionsExtensionMessage ext =
                 context.getReceivedClientHelloMessage()
                         .getExtension(SupportedVersionsExtensionMessage.class);
-        assertNotNull("CH Does not contain supported_versions extension", ext);
+        assertNotNull(ext, "CH Does not contain supported_versions extension");
 
         List<ProtocolVersion> versions =
                 ProtocolVersion.getProtocolVersions(ext.getSupportedVersions().getValue());
         assertTrue(
-                "supported_versions does not contain TLS 1.3",
-                versions.contains(ProtocolVersion.TLS13));
+                versions.contains(ProtocolVersion.TLS13),
+                "supported_versions does not contain TLS 1.3");
     }
 
     public List<DerivationParameter> getUnsupportedProtocolVersions(DerivationScope scope) {

@@ -19,7 +19,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.task.StateExecutionTask;
 import de.rub.nds.tlsattacker.transport.TransportHandler;
@@ -58,8 +58,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.platform.engine.TestSource;
@@ -89,7 +87,7 @@ public class TestPreparator {
      *
      * @param report the FeatureExtractionResult created through TLS-Scanner
      */
-    private void saveToCache(@Nonnull FeatureExtractionResult report) {
+    private void saveToCache(FeatureExtractionResult report) {
         String fileName;
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
             fileName = testConfig.getTestClientDelegate().getPort().toString();
@@ -124,7 +122,6 @@ public class TestPreparator {
      *
      * @return the FeatureExtractionResult or null, if not found
      */
-    @Nullable
     private FeatureExtractionResult loadFromCache() {
         String fileName;
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
@@ -468,7 +465,6 @@ public class TestPreparator {
      * Catches a ClientHello to perform non-combinatorial client tests. We assume that the client
      * always sends the same ClientHello (except for configuration option tests)
      *
-     * @param testConfig
      * @param executor
      * @return
      */
@@ -489,8 +485,8 @@ public class TestPreparator {
         executor.bulkExecuteTasks(catchHelloTask);
 
         return (ClientHelloMessage)
-                WorkflowTraceUtil.getFirstReceivedMessage(
-                        HandshakeMessageType.CLIENT_HELLO, catchHelloWorkflowTrace);
+                WorkflowTraceResultUtil.getFirstReceivedMessage(
+                        catchHelloWorkflowTrace, HandshakeMessageType.CLIENT_HELLO);
     }
 
     /**
@@ -512,7 +508,7 @@ public class TestPreparator {
         }
 
         ParallelExecutor executor =
-                new ParallelExecutor(testConfig.getAnvilTestConfig().getParallelTestCases(), 1);
+                ParallelExecutor.create(testConfig.getAnvilTestConfig().getParallelTestCases(), 1);
         executor.setTimeoutAction(testConfig.getTimeoutActionScript());
         executor.armTimeoutAction(20000);
         testContext.setStateExecutor(executor);
@@ -613,40 +609,34 @@ public class TestPreparator {
      */
     public static Function<State, Integer> getSocketManagementCallback() {
         return (State state) -> {
-            try {
-                TransportHandler transportHandler;
-                TestContext context = TestContext.getInstance();
-                TestClientDelegate testClientDelegate = context.getConfig().getTestClientDelegate();
-                if (context.getConfig().isUseDTLS()) {
-                    transportHandler =
-                            new ServerUdpTransportHandler(
-                                    context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                                    context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                                    testClientDelegate.getPort());
+            TransportHandler transportHandler;
+            TestContext context = TestContext.getInstance();
+            TestClientDelegate testClientDelegate = context.getConfig().getTestClientDelegate();
+            if (context.getConfig().isUseDTLS()) {
+                transportHandler =
+                        new ServerUdpTransportHandler(
+                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                testClientDelegate.getPort());
+            } else {
+                ServerSocket socket;
+                if (testClientDelegate instanceof TestCOMultiClientDelegate) {
+                    socket =
+                            ((TestCOMultiClientDelegate)
+                                            TestContext.getInstance()
+                                                    .getConfig()
+                                                    .getTestClientDelegate())
+                                    .getServerSocket(state.getConfig());
                 } else {
-                    ServerSocket socket;
-                    if (testClientDelegate instanceof TestCOMultiClientDelegate) {
-                        socket =
-                                ((TestCOMultiClientDelegate)
-                                                TestContext.getInstance()
-                                                        .getConfig()
-                                                        .getTestClientDelegate())
-                                        .getServerSocket(state.getConfig());
-                    } else {
-                        socket = testClientDelegate.getServerSocket();
-                    }
-                    transportHandler =
-                            new ServerTcpTransportHandler(
-                                    context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                                    context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
-                                    socket);
+                    socket = testClientDelegate.getServerSocket();
                 }
-                state.getTlsContext().setTransportHandler(transportHandler);
-                return 0;
-            } catch (IOException ex) {
-                LOGGER.error("Failed to set server socket", ex);
-                return 1;
+                transportHandler =
+                        new ServerTcpTransportHandler(
+                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                context.getConfig().getAnvilTestConfig().getConnectionTimeout(),
+                                socket);
             }
+            state.getTlsContext().setTransportHandler(transportHandler);
+            return 0;
         };
     }
 

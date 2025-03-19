@@ -72,8 +72,14 @@ public abstract class FeatureExtractionResult implements Serializable {
         getSupportedNamedGroups().addAll(siteReport.getSupportedNamedGroups());
         getSupportedTls13Groups().addAll(siteReport.getSupportedTls13Groups());
 
-        setClosedAfterAppDataDelta(siteReport.getClosedAfterAppDataDelta());
-        setClosedAfterFinishedDelta(siteReport.getClosedAfterFinishedDelta());
+        setClosedAfterAppDataDelta(
+                siteReport
+                        .getLongResult(TlsAnalyzedProperty.CLOSED_AFTER_APP_DATA_DELTA)
+                        .getValue());
+        setClosedAfterFinishedDelta(
+                siteReport
+                        .getLongResult(TlsAnalyzedProperty.CLOSED_AFTER_FINISHED_DELTA)
+                        .getValue());
     }
 
     public List<NamedGroup> getNamedGroups() {
@@ -109,7 +115,7 @@ public abstract class FeatureExtractionResult implements Serializable {
                         (a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.name(), b.name()));
         set.addAll(
                 getSupportedCipherSuites().stream()
-                        .filter(i -> !i.isTLS13())
+                        .filter(i -> !i.isTls13())
                         .collect(Collectors.toSet()));
         return set;
     }
@@ -121,7 +127,7 @@ public abstract class FeatureExtractionResult implements Serializable {
                         (a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.name(), b.name()));
         set.addAll(
                 getSupportedCipherSuites().stream()
-                        .filter(CipherSuite::isTLS13)
+                        .filter(CipherSuite::isTls13)
                         .collect(Collectors.toSet()));
         return set;
     }

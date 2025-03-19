@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.tls12.rfc5246;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -22,7 +22,7 @@ import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -30,6 +30,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.*;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 
 public class CBCBlockCipher extends Tls12Test {
@@ -46,7 +47,7 @@ public class CBCBlockCipher extends Tls12Test {
             CipherSuite cipherSuite,
             ProtocolVersion targetVersion) {
         int blockSize = AlgorithmResolver.getCipher(cipherSuite).getBlocksize();
-        int macSize = AlgorithmResolver.getMacAlgorithm(targetVersion, cipherSuite).getSize();
+        int macSize = AlgorithmResolver.getMacAlgorithm(targetVersion, cipherSuite).getMacLength();
         if (isEncryptThenMac) {
             return blockSize - (applicationMessageContentLength % blockSize);
         } else {
@@ -116,7 +117,7 @@ public class CBCBlockCipher extends Tls12Test {
                         Modifiable.explicit(c.getDefaultApplicationMessageData().getBytes()));
 
                 SendAction sendAction = new SendAction(appData);
-                sendAction.setRecords(record);
+                sendAction.setConfiguredRecords(List.of(record));
 
                 WorkflowTrace workflowTrace =
                         runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
@@ -125,6 +126,7 @@ public class CBCBlockCipher extends Tls12Test {
                 State state = runner.execute(workflowTrace, c);
 
                 WorkflowTrace trace = state.getWorkflowTrace();
+                Validator.executedAsPlanned(state, testCase);
                 Validator.receivedFatalAlert(state, testCase);
 
                 AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
@@ -169,7 +171,7 @@ public class CBCBlockCipher extends Tls12Test {
         appData.setData(Modifiable.explicit("test".getBytes()));
 
         SendAction sendAction = new SendAction(appData);
-        sendAction.setRecords(record);
+        sendAction.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
@@ -213,7 +215,7 @@ public class CBCBlockCipher extends Tls12Test {
         appData.setData(Modifiable.explicit("test".getBytes()));
 
         SendAction sendAction = new SendAction(appData);
-        sendAction.setRecords(record);
+        sendAction.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
@@ -240,21 +242,22 @@ public class CBCBlockCipher extends Tls12Test {
 
         Validator.executedAsPlanned(state, testCase);
         boolean sawCCS = false;
-        for (Record record : WorkflowTraceUtil.getAllReceivedRecords(state.getWorkflowTrace())) {
+        for (Record record :
+                WorkflowTraceResultUtil.getAllReceivedRecords(state.getWorkflowTrace())) {
             if (record.getContentMessageType() == ProtocolMessageType.CHANGE_CIPHER_SPEC) {
                 sawCCS = true;
             }
             if (sawCCS && record.getContentMessageType() == ProtocolMessageType.HANDSHAKE) {
                 Record encryptedFin = record;
                 assertTrue(
-                        "Finished record MAC invalid - is the SQN correct?",
-                        encryptedFin.getComputations().getMacValid());
+                        encryptedFin.getComputations().getMacValid(),
+                        "Finished record MAC invalid - is the SQN correct?");
             } else if (sawCCS
                     && record.getContentMessageType() == ProtocolMessageType.APPLICATION_DATA) {
                 Record encryptedFin = record;
                 assertTrue(
-                        "App Data record MAC invalid",
-                        encryptedFin.getComputations().getMacValid());
+                        encryptedFin.getComputations().getMacValid(),
+                        "App Data record MAC invalid");
             }
         }
     }

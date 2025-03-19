@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc6066;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
@@ -18,6 +18,7 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.MaxFragmentLength;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
@@ -26,6 +27,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.MaxFragmentLengthE
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -67,7 +69,9 @@ public class MaximumFragmentLength extends Tls12Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         ServerHelloMessage serverHello =
-                workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+                (ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         serverHello
                 .getExtension(MaxFragmentLengthExtensionMessage.class)
                 .setMaxFragmentLength(Modifiable.explicit(new byte[] {5}));
@@ -96,7 +100,9 @@ public class MaximumFragmentLength extends Tls12Test {
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
         ServerHelloMessage serverHello =
-                workflowTrace.getFirstSendMessage(ServerHelloMessage.class);
+                (ServerHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         serverHello
                 .getExtension(MaxFragmentLengthExtensionMessage.class)
                 .setMaxFragmentLength(Modifiable.explicit(new byte[] {unreqLen.getValue()}));
@@ -122,15 +128,14 @@ public class MaximumFragmentLength extends Tls12Test {
 
         Validator.executedAsPlanned(state, testCase);
         ClientHelloMessage clientHello =
-                state.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
+                state.getWorkflowTrace().getFirstSentMessage(ClientHelloMessage.class);
         MaxFragmentLength selectedMaxFragment =
                 MaxFragmentLength.getMaxFragmentLength(
                         clientHello
                                 .getExtension(MaxFragmentLengthExtensionMessage.class)
                                 .getMaxFragmentLength()
                                 .getValue()[0]);
-        int maxPlaintextFragmentSize =
-                MaxFragmentLength.getIntegerRepresentation(selectedMaxFragment);
+        int maxPlaintextFragmentSize = selectedMaxFragment.getReceiveLimit();
 
         WorkflowTrace trace = state.getWorkflowTrace();
         for (int j = 1; j < trace.getReceivingActions().size(); j++) {
@@ -138,9 +143,9 @@ public class MaximumFragmentLength extends Tls12Test {
             if (receiveAction.getReceivedRecords() != null) {
                 for (Record receivedRecord : receiveAction.getReceivedRecords()) {
                     assertTrue(
-                            "Plaintextbytes of record exceeded limit",
                             receivedRecord.getCleanProtocolMessageBytes().getValue().length
-                                    <= maxPlaintextFragmentSize);
+                                    <= maxPlaintextFragmentSize,
+                            "Plaintextbytes of record exceeded limit");
                 }
             }
         }

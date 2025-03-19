@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.framework.testClasses;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
@@ -19,7 +19,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.HandshakeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.Validator;
@@ -58,8 +58,8 @@ public class TlsLengthfieldTest extends TlsBaseTest {
     public void validateLengthTest(State state, AnvilTestCase testCase) {
         Validator.checkForUnknownMessage(state, testCase);
         assertFalse(
-                "Workflow could be executed as planned for " + parameterCombination.toString(),
-                state.getWorkflowTrace().executedAsPlanned());
+                state.getWorkflowTrace().executedAsPlanned(),
+                "Workflow could be executed as planned for " + parameterCombination.toString());
         if (!state.getTlsContext().isReceivedTransportHandlerException()) {
             Validator.receivedFatalAlert(state, testCase, false);
         }
@@ -115,8 +115,8 @@ public class TlsLengthfieldTest extends TlsBaseTest {
             Class<? extends ExtensionMessage> clazz, WorkflowTrace workflowTrace) {
         EncryptedExtensionsMessage encryptedExtensionsMessage =
                 (EncryptedExtensionsMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.ENCRYPTED_EXTENSIONS, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.ENCRYPTED_EXTENSIONS);
         return (T) encryptedExtensionsMessage.getExtension(clazz);
     }
 
@@ -125,12 +125,14 @@ public class TlsLengthfieldTest extends TlsBaseTest {
         HandshakeMessage requiredHelloMessage;
         if (isClientTest()) {
             requiredHelloMessage =
-                    WorkflowTraceUtil.getFirstSendMessage(
-                            HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                    (HandshakeMessage)
+                            WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                    workflowTrace, HandshakeMessageType.SERVER_HELLO);
         } else {
             requiredHelloMessage =
-                    WorkflowTraceUtil.getFirstSendMessage(
-                            HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                    (HandshakeMessage)
+                            WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                    workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         }
         return (T) requiredHelloMessage.getExtension(clazz);
     }

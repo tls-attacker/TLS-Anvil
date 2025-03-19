@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.both.configuration_options;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
@@ -109,8 +109,8 @@ public class EnableCompressionDerivationVerify extends Tls12Test {
                     .filter(compression -> compression != CompressionMethod.NULL)
                     .forEach(supportedNonNullCompressionMethods::add);
             assertTrue(
-                    "No compression method was enabled using the EnableCompressionDerivation.",
-                    supportedNonNullCompressionMethods.size() > 0);
+                    supportedNonNullCompressionMethods.size() > 0,
+                    "No compression method was enabled using the EnableCompressionDerivation.");
         }
     }
 }

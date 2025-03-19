@@ -23,7 +23,6 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.TLSDelegateConfig;
 import de.rub.nds.tlsattacker.core.config.delegate.Delegate;
 import de.rub.nds.tlsattacker.core.config.delegate.GeneralDelegate;
-import de.rub.nds.tlsattacker.core.constants.ChooserType;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
@@ -46,8 +45,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -121,7 +118,6 @@ public class TlsTestConfig extends TLSDelegateConfig {
      *
      * @return arguments parsed from the COMMAND environment variable
      */
-    @Nullable
     private String[] argsFromEnvironment() {
         String clientEnv = System.getenv("COMMAND_CLIENT");
         String serverEnv = System.getenv("COMMAND_SERVER");
@@ -147,7 +143,7 @@ public class TlsTestConfig extends TLSDelegateConfig {
         }
     }
 
-    public void parse(@Nullable String[] args) {
+    public void parse(String[] args) {
         if (isParsedArgs()) return;
         anvilTestConfig = new AnvilTestConfig();
 
@@ -420,7 +416,6 @@ public class TlsTestConfig extends TLSDelegateConfig {
                 throw new RuntimeException("Invalid testEndpointMode");
         }
         config.setAddRenegotiationInfoExtension(checkRenegotiationInfoOffer());
-        config.setChooserType(ChooserType.SMART_RECORD_SIZE);
 
         // Server test -> TLS-Attacker acts as Client
         config.getDefaultClientConnection().setTimeout(getAnvilTestConfig().getConnectionTimeout());
@@ -515,7 +510,7 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
         config.setDefaultServerSupportedCipherSuites(
                 CipherSuite.getImplemented().stream()
-                        .filter(CipherSuite::isTLS13)
+                        .filter(CipherSuite::isTls13)
                         .collect(Collectors.toList()));
         config.setDefaultClientSupportedCipherSuites(
                 config.getDefaultServerSupportedCipherSuites());
@@ -540,7 +535,7 @@ public class TlsTestConfig extends TLSDelegateConfig {
         this.testEndpointMode = testEndpointMode;
     }
 
-    private void setTestEndpointMode(@Nonnull String testEndpointMode) {
+    private void setTestEndpointMode(String testEndpointMode) {
         if (testEndpointMode.toLowerCase().equals(TestEndpointType.CLIENT.toString())) {
             this.testEndpointMode = TestEndpointType.CLIENT;
         } else if (testEndpointMode.toLowerCase().equals(TestEndpointType.SERVER.toString())) {

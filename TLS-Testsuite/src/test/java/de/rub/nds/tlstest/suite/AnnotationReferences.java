@@ -1,7 +1,7 @@
 package de.rub.nds.tlstest.suite;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.junit.extension.MethodConditionExtension;
@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 
@@ -35,14 +35,14 @@ public class AnnotationReferences {
             identifiers.forEach(
                     identifier ->
                             assertTrue(
+                                    knownIdentifierStrings.contains(identifier),
                                     "Found unknown ParameterIdentifier '"
                                             + identifier
                                             + "' for test "
                                             + method.getName()
                                             + " known values are "
                                             + knownIdentifierStrings.stream()
-                                                    .collect(Collectors.joining(",")),
-                                    knownIdentifierStrings.contains(identifier)));
+                                                    .collect(Collectors.joining(","))));
         }
     }
 

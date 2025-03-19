@@ -7,20 +7,23 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc8422;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
+import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
+import de.rub.nds.protocol.constants.NamedEllipticCurveParameters;
+import de.rub.nds.protocol.constants.PointFormat;
+import de.rub.nds.protocol.crypto.ec.*;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
-import de.rub.nds.tlsattacker.core.crypto.ec.*;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
@@ -61,7 +64,7 @@ public class TLSExtensionForECC extends Tls12Test {
     @Tag("adjusted")
     public void invalidPointFormat() {
         ClientHelloMessage msg = context.getReceivedClientHelloMessage();
-        assertNotNull(AssertMsgs.CLIENT_HELLO_NOT_RECEIVED, msg);
+        assertNotNull(msg, AssertMsgs.CLIENT_HELLO_NOT_RECEIVED);
         ECPointFormatExtensionMessage poinfmtExt =
                 msg.getExtension(ECPointFormatExtensionMessage.class);
 
@@ -86,11 +89,11 @@ public class TLSExtensionForECC extends Tls12Test {
                 }
             }
             assertTrue(
-                    "ECPointFormatExtension does not contain uncompressed format", contains_zero);
+                    contains_zero, "ECPointFormatExtension does not contain uncompressed format");
             if (rfc8422curves && !nonRfc8422curve) {
                 assertFalse(
-                        "ECPointFormatExtension contains compressed or invalid format",
-                        contains_other);
+                        contains_other,
+                        "ECPointFormatExtension contains compressed or invalid format");
             }
         }
     }
@@ -100,19 +103,21 @@ public class TLSExtensionForECC extends Tls12Test {
     public void offeredDeprecatedGroup() {
         boolean deprecated = false;
         List<NamedGroup> deprecatedFound = new LinkedList<>();
+        int secp256r1IntVal = ArrayConverter.bytesToInt(NamedGroup.SECP256R1.getValue());
         for (NamedGroup group : context.getFeatureExtractionResult().getNamedGroups()) {
-            if (group.getIntValue() < NamedGroup.SECP256R1.getIntValue()
+            int groupIntVal = ArrayConverter.bytesToInt(group.getValue());
+            if (groupIntVal < secp256r1IntVal
                     || group == NamedGroup.EXPLICIT_CHAR2
                     || group == NamedGroup.EXPLICIT_PRIME) {
                 deprecatedFound.add(group);
             }
         }
         assertTrue(
+                deprecatedFound.isEmpty(),
                 "Found deprecated group: "
                         + deprecatedFound.stream()
                                 .map(NamedGroup::name)
-                                .collect(Collectors.joining(",")),
-                deprecatedFound.isEmpty());
+                                .collect(Collectors.joining(",")));
     }
 
     private boolean isRfc8422Curve(NamedGroup group) {
@@ -128,9 +133,10 @@ public class TLSExtensionForECC extends Tls12Test {
 
     public boolean isSecpCurve(NamedGroup group) {
         if (group != null
-                && group.isCurve()
+                && group.isEcGroup()
                 && !group.isGost()
-                && !(CurveFactory.getCurve(group) instanceof RFC7748Curve)) {
+                && !(((NamedEllipticCurveParameters) group.getGroupParameters()).getGroup()
+                        instanceof RFC7748Curve)) {
             return true;
         }
         return false;
@@ -147,7 +153,7 @@ public class TLSExtensionForECC extends Tls12Test {
 
         NamedGroup selectedGroup =
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
-        EllipticCurve curve = CurveFactory.getCurve(selectedGroup);
+        EllipticCurve curve = (EllipticCurve) selectedGroup.getGroupParameters().getGroup();
         InvalidCurvePoint invalidCurvePoint = InvalidCurvePoint.smallOrder(selectedGroup);
         Point serializablePoint =
                 new Point(
@@ -157,13 +163,15 @@ public class TLSExtensionForECC extends Tls12Test {
                                 invalidCurvePoint.getPublicPointBaseY(), curve.getModulus()));
         byte[] serializedPoint =
                 PointFormatter.formatToByteArray(
-                        selectedGroup, serializablePoint, ECPointFormat.UNCOMPRESSED);
+                        selectedGroup.getGroupParameters(),
+                        serializablePoint,
+                        PointFormat.UNCOMPRESSED);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         ECDHEServerKeyExchangeMessage serverKeyExchangeMessage =
                 (ECDHEServerKeyExchangeMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         serverKeyExchangeMessage.setPublicKey(Modifiable.explicit(serializedPoint));
 
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
@@ -188,7 +196,7 @@ public class TLSExtensionForECC extends Tls12Test {
                 parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
 
         TwistedCurvePoint groupSpecificPoint = TwistedCurvePoint.smallOrder(selectedGroup);
-        RFC7748Curve curve = (RFC7748Curve) CurveFactory.getCurve(selectedGroup);
+        RFC7748Curve curve = (RFC7748Curve) selectedGroup.getGroupParameters().getGroup();
         Point invalidPoint =
                 new Point(
                         new FieldElementFp(
@@ -228,9 +236,9 @@ public class TLSExtensionForECC extends Tls12Test {
                 state.getWorkflowTrace()
                         .getFirstReceivedMessage(ECDHClientKeyExchangeMessage.class);
         assertEquals(
-                "Client did not respect our Point Format",
                 0x04,
-                clientKeyExchange.getPublicKey().getValue()[0]);
+                clientKeyExchange.getPublicKey().getValue()[0],
+                "Client did not respect our Point Format");
     }
 
     @NonCombinatorialAnvilTest(id = "8422-jJBYYpiKBH")
@@ -239,8 +247,8 @@ public class TLSExtensionForECC extends Tls12Test {
     public void offersExtensionsWithoutCipher() {
         ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
         assertFalse(
-                "Client offered EC Point Formats without an ECC Cipher Suite",
-                clientHello.containsExtension(ExtensionType.EC_POINT_FORMATS));
+                clientHello.containsExtension(ExtensionType.EC_POINT_FORMATS),
+                "Client offered EC Point Formats without an ECC Cipher Suite");
         // testing for Elliptic Curves Extension is not sensible as the extension
         // is now called Named Groups Extension and also negotiates FFDHE groups
     }

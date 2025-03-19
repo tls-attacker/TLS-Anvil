@@ -28,14 +28,13 @@ import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ResetConnectionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
-import de.rub.nds.tlsattacker.core.workflow.action.SendingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.WorkflowExecutorType;
@@ -52,9 +51,9 @@ import de.rub.nds.tlstest.framework.anvil.TlsParameterCombination;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nonnull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -241,7 +240,8 @@ public class WorkflowRunner {
 
     public void prepareClientTask(StateExecutionTask task) throws RuntimeException {
         if (context.getConfig().isUseDTLS()) {
-            task.setBeforeReexecutionCallback(this::reexecutionCallback);
+            // TODO: Close UDP socket if still open before reexecution
+            // task.setBeforeReexecutionCallback(this::reexecutionCallback);
         }
     }
 
@@ -272,22 +272,28 @@ public class WorkflowRunner {
      * @param type WorkflowTraceType that should be used for the generated workflowTrace
      * @return empty WorkflowTrace
      */
-    public WorkflowTrace generateWorkflowTrace(@Nonnull WorkflowTraceType type) {
+    public WorkflowTrace generateWorkflowTrace(WorkflowTraceType type) {
         RunningModeType runningMode = resolveRunningMode(context.getConfig().getTestEndpointMode());
         WorkflowTrace trace =
                 new WorkflowConfigurationFactory(preparedConfig)
                         .createWorkflowTrace(type, runningMode);
         if (this.untilHandshakeMessage != null)
             WorkflowTraceMutator.truncateAt(
-                    trace, this.untilHandshakeMessage, this.untilSendingMessage, untilLast);
+                    trace,
+                    untilHandshakeMessage,
+                    (this.untilSendingMessage != null && this.untilSendingMessage == true),
+                    untilLast);
         if (this.untilProtocolMessage != null)
             WorkflowTraceMutator.truncateAt(
-                    trace, this.untilProtocolMessage, this.untilSendingMessage, untilLast);
+                    trace,
+                    this.untilProtocolMessage,
+                    (this.untilSendingMessage != null && this.untilSendingMessage == true),
+                    untilLast);
         return trace;
     }
 
     public WorkflowTrace generateWorkflowTraceUntilMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+            WorkflowTraceType type, HandshakeMessageType handshakeMessageType) {
         this.untilHandshakeMessage = handshakeMessageType;
         this.untilProtocolMessage = null;
 
@@ -295,7 +301,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+            WorkflowTraceType type, ProtocolMessageType protocolMessageType) {
         this.untilHandshakeMessage = null;
         this.untilProtocolMessage = protocolMessageType;
 
@@ -303,7 +309,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilSendingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+            WorkflowTraceType type, HandshakeMessageType handshakeMessageType) {
         this.untilHandshakeMessage = handshakeMessageType;
         this.untilProtocolMessage = null;
         this.untilSendingMessage = true;
@@ -312,7 +318,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilSendingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+            WorkflowTraceType type, ProtocolMessageType protocolMessageType) {
         this.untilHandshakeMessage = null;
         this.untilProtocolMessage = protocolMessageType;
         this.untilSendingMessage = true;
@@ -321,7 +327,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilReceivingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+            WorkflowTraceType type, HandshakeMessageType handshakeMessageType) {
         this.untilHandshakeMessage = handshakeMessageType;
         this.untilProtocolMessage = null;
         this.untilSendingMessage = false;
@@ -330,7 +336,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilReceivingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+            WorkflowTraceType type, ProtocolMessageType protocolMessageType) {
         this.untilHandshakeMessage = null;
         this.untilProtocolMessage = protocolMessageType;
         this.untilSendingMessage = false;
@@ -339,7 +345,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilLastMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+            WorkflowTraceType type, HandshakeMessageType handshakeMessageType) {
         this.untilHandshakeMessage = handshakeMessageType;
         this.untilProtocolMessage = null;
         this.untilLast = true;
@@ -348,7 +354,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilLastMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+            WorkflowTraceType type, ProtocolMessageType protocolMessageType) {
         this.untilHandshakeMessage = null;
         this.untilProtocolMessage = protocolMessageType;
         this.untilLast = true;
@@ -357,7 +363,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilLastSendingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+            WorkflowTraceType type, HandshakeMessageType handshakeMessageType) {
         this.untilHandshakeMessage = handshakeMessageType;
         this.untilProtocolMessage = null;
         this.untilSendingMessage = true;
@@ -367,7 +373,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilLastSendingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+            WorkflowTraceType type, ProtocolMessageType protocolMessageType) {
         this.untilHandshakeMessage = null;
         this.untilProtocolMessage = protocolMessageType;
         this.untilSendingMessage = true;
@@ -377,7 +383,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilLastReceivingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull HandshakeMessageType handshakeMessageType) {
+            WorkflowTraceType type, HandshakeMessageType handshakeMessageType) {
         this.untilHandshakeMessage = handshakeMessageType;
         this.untilProtocolMessage = null;
         this.untilSendingMessage = false;
@@ -387,7 +393,7 @@ public class WorkflowRunner {
     }
 
     public WorkflowTrace generateWorkflowTraceUntilLastReceivingMessage(
-            @Nonnull WorkflowTraceType type, @Nonnull ProtocolMessageType protocolMessageType) {
+            WorkflowTraceType type, ProtocolMessageType protocolMessageType) {
         this.untilHandshakeMessage = null;
         this.untilProtocolMessage = protocolMessageType;
         this.untilSendingMessage = false;
@@ -449,38 +455,33 @@ public class WorkflowRunner {
         RunningModeType runningModeType = resolveRunningMode(testEndpointType);
         WorkflowTrace completeHandshake =
                 workflowFactory.createWorkflowTrace(WorkflowTraceType.HANDSHAKE, runningModeType);
-        List<ProtocolMessage> plannedMessages = WorkflowTraceUtil.getAllSendMessages(trace);
+        List<ProtocolMessage> plannedMessages =
+                WorkflowTraceConfigurationUtil.getAllStaticConfiguredSendMessages(trace);
         ProtocolMessage lastMessage = plannedMessages.get(plannedMessages.size() - 1);
         if (lastMessage.getProtocolMessageType() == ProtocolMessageType.HANDSHAKE) {
             HandshakeMessage lastHandshakeMessage = (HandshakeMessage) lastMessage;
-            SendingAction lastSendingAction =
-                    (SendingAction)
-                            WorkflowTraceUtil.getLastSendingActionForMessage(
-                                    lastHandshakeMessage.getHandshakeMessageType(), trace);
-            SendingAction fullHandshakeEquivalentAction =
-                    (SendingAction)
-                            WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                    lastHandshakeMessage.getHandshakeMessageType(),
-                                    completeHandshake);
+            SendAction lastSendAction =
+                    (SendAction)
+                            WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendAction(
+                                    trace, lastHandshakeMessage.getHandshakeMessageType());
+            SendAction fullHandshakeEquivalentAction =
+                    (SendAction)
+                            WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
+                                    completeHandshake,
+                                    lastHandshakeMessage.getHandshakeMessageType());
             completeMessageFlight(
-                    fullHandshakeEquivalentAction,
-                    completeHandshake,
-                    lastSendingAction,
-                    lastMessage);
+                    fullHandshakeEquivalentAction, completeHandshake, lastSendAction, lastMessage);
         } else if (lastMessage.getProtocolMessageType() == ProtocolMessageType.CHANGE_CIPHER_SPEC) {
-            SendingAction lastSendingAction =
-                    (SendingAction)
-                            WorkflowTraceUtil.getLastSendingActionForMessage(
-                                    ProtocolMessageType.CHANGE_CIPHER_SPEC, trace);
-            SendingAction fullHandshakeEquivalentAction =
-                    (SendingAction)
-                            WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                    ProtocolMessageType.CHANGE_CIPHER_SPEC, completeHandshake);
+            SendAction lastSendAction =
+                    (SendAction)
+                            WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendAction(
+                                    trace, ProtocolMessageType.CHANGE_CIPHER_SPEC);
+            SendAction fullHandshakeEquivalentAction =
+                    (SendAction)
+                            WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendAction(
+                                    completeHandshake, ProtocolMessageType.CHANGE_CIPHER_SPEC);
             completeMessageFlight(
-                    fullHandshakeEquivalentAction,
-                    completeHandshake,
-                    lastSendingAction,
-                    lastMessage);
+                    fullHandshakeEquivalentAction, completeHandshake, lastSendAction, lastMessage);
         } else {
             // this trace either manipulates a non-handshake message or places the message
             // outside of a valid flow
@@ -493,39 +494,39 @@ public class WorkflowRunner {
     }
 
     private static void completeMessageFlight(
-            SendingAction fullHandshakeEquivalentAction,
+            SendAction fullHandshakeEquivalentAction,
             WorkflowTrace completeHandshake,
-            SendingAction firstSendingAction,
+            SendAction firstSendAction,
             ProtocolMessage lastHandshakeMessage)
             throws IllegalArgumentException {
         if (fullHandshakeEquivalentAction != null) {
             int fullHandshakeEquivalentActionIndex =
                     completeHandshake.getTlsActions().indexOf(fullHandshakeEquivalentAction);
             // add subsequent messages from the equivalent send action
-            firstSendingAction
-                    .getSendMessages()
+            firstSendAction
+                    .getConfiguredMessages()
                     .addAll(
                             fullHandshakeEquivalentAction
-                                    .getSendMessages()
+                                    .getConfiguredMessages()
                                     .subList(
                                             fullHandshakeEquivalentAction
-                                                            .getSendMessages()
+                                                            .getConfiguredMessages()
                                                             .indexOf(lastHandshakeMessage)
                                                     + 1,
                                             fullHandshakeEquivalentAction
-                                                    .getSendMessages()
+                                                    .getConfiguredMessages()
                                                     .size()));
             // also add message from all send actions that are immediately after another send action
             // (only applies when we spilt into multiple send actions)
             for (int i = fullHandshakeEquivalentActionIndex + 1;
                     i < completeHandshake.getTlsActions().size();
                     i++) {
-                if (completeHandshake.getTlsActions().get(i) instanceof SendingAction) {
-                    firstSendingAction
-                            .getSendMessages()
+                if (completeHandshake.getTlsActions().get(i) instanceof SendAction) {
+                    firstSendAction
+                            .getConfiguredMessages()
                             .addAll(
-                                    ((SendingAction) completeHandshake.getTlsActions().get(i))
-                                            .getSendMessages());
+                                    ((SendAction) completeHandshake.getTlsActions().get(i))
+                                            .getConfiguredMessages());
                 } else {
                     break;
                 }
@@ -555,13 +556,19 @@ public class WorkflowRunner {
             if (!lastActionIsGenericReceive) {
                 isExpectingAlert =
                         lastAction instanceof ReceivingAction
+                                && ((ReceiveAction) lastAction).getExpectedMessages() != null
                                 && ((ReceiveAction) lastAction)
-                                        .getGoingToReceiveProtocolMessageTypes()
-                                        .contains(ProtocolMessageType.ALERT);
+                                        .getExpectedMessages().stream()
+                                                .anyMatch(
+                                                        message ->
+                                                                message.getProtocolMessageType()
+                                                                        == ProtocolMessageType
+                                                                                .ALERT);
             }
 
             // we never have to add anything if we do not even send a CH
-            return WorkflowTraceUtil.getLastSendMessage(HandshakeMessageType.CLIENT_HELLO, trace)
+            return WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
+                                    trace, HandshakeMessageType.CLIENT_HELLO)
                             != null
                     && (lastActionIsGenericReceive || isExpectingAlert);
         }
@@ -580,8 +587,8 @@ public class WorkflowRunner {
     public void insertTls12NewSessionTicket(WorkflowTrace trace) {
         ReceiveAction receiveChangeCipherSpec =
                 (ReceiveAction)
-                        WorkflowTraceUtil.getFirstReceivingActionForMessage(
-                                ProtocolMessageType.CHANGE_CIPHER_SPEC, trace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredReceiveAction(
+                                trace, ProtocolMessageType.CHANGE_CIPHER_SPEC);
 
         // not all WorkflowTraces reach a ChangeCipherSpec
         if (receiveChangeCipherSpec != null) {
@@ -617,25 +624,23 @@ public class WorkflowRunner {
 
     public void allowOptionalTls13NewSessionTickets(WorkflowTrace trace) {
         boolean mayReceiveNewSessionTicketFromNow = false;
-        ReceiveAction lastReceive = null;
         for (TlsAction action : trace.getTlsActions()) {
             if (action instanceof ReceiveAction) {
                 ReceiveAction receiveAction = (ReceiveAction) action;
-                lastReceive = receiveAction;
-                if (receiveAction.getExpectedMessages().stream()
-                        .anyMatch(message -> message instanceof FinishedMessage)) {
-                    mayReceiveNewSessionTicketFromNow = true;
+                if (receiveAction.getExpectedMessages() != null) {
+                    if (receiveAction.getExpectedMessages().stream()
+                            .anyMatch(message -> message instanceof FinishedMessage)) {
+                        mayReceiveNewSessionTicketFromNow = true;
+                    }
+                    // set explicitly expected new session tickets as optional to
+                    // allow early NewSessionTickets sent with Fin
+                    receiveAction.getExpectedMessages().stream()
+                            .filter(message -> message instanceof NewSessionTicketMessage)
+                            .forEach(newSessionTicket -> newSessionTicket.setRequired(false));
                 }
-
-                // set explicitly expected new session tickets as optional to
-                // allow early NewSessionTickets sent with Fin
-                receiveAction.getExpectedMessages().stream()
-                        .filter(message -> message instanceof NewSessionTicketMessage)
-                        .forEach(newSessionTicket -> newSessionTicket.setRequired(false));
                 if (mayReceiveNewSessionTicketFromNow) {
-                    receiveAction
-                            .getActionOptions()
-                            .add(ActionOption.IGNORE_UNEXPECTED_NEW_SESSION_TICKETS);
+                    receiveAction.addActionOption(
+                            ActionOption.IGNORE_UNEXPECTED_NEW_SESSION_TICKETS);
                 }
             } else if (action instanceof ResetConnectionAction) {
                 mayReceiveNewSessionTicketFromNow = false;
@@ -648,9 +653,14 @@ public class WorkflowRunner {
         for (ReceivingAction receiving : trace.getReceivingActions()) {
             if (receiving instanceof ReceiveAction) {
                 ReceiveAction receiveAction = (ReceiveAction) receiving;
-                if (receiveAction
-                        .getGoingToReceiveProtocolMessageTypes()
-                        .contains(ProtocolMessageType.CHANGE_CIPHER_SPEC)) {
+                if (receiveAction.getExpectedMessages() == null) {
+                    continue;
+                }
+                if (receiveAction.getExpectedMessages().stream()
+                        .anyMatch(
+                                message ->
+                                        message.getProtocolMessageType()
+                                                == ProtocolMessageType.CHANGE_CIPHER_SPEC)) {
                     ccsAlreadyExpected = true;
                 }
             }
@@ -662,8 +672,11 @@ public class WorkflowRunner {
                 && trace.getLastReceivingAction() instanceof ReceiveAction
                 && !ccsAlreadyExpected
                 && ((ReceiveAction) trace.getLastReceivingAction())
-                        .getGoingToReceiveProtocolMessageTypes()
-                        .contains(ProtocolMessageType.ALERT)) {
+                        .getExpectedMessages().stream()
+                                .anyMatch(
+                                        message ->
+                                                message.getProtocolMessageType()
+                                                        == ProtocolMessageType.ALERT)) {
             ReceiveAction lastReceive = (ReceiveAction) trace.getLastReceivingAction();
             ChangeCipherSpecMessage optionalCcs = new ChangeCipherSpecMessage();
             optionalCcs.setRequired(false);
@@ -677,6 +690,9 @@ public class WorkflowRunner {
             for (TlsAction action : trace.getTlsActions()) {
                 if (action instanceof ReceiveAction) {
                     ReceiveAction receiveAction = (ReceiveAction) action;
+                    if (receiveAction.getExpectedMessages() == null) {
+                        receiveAction.setExpectedMessages(new LinkedList<>());
+                    }
                     if (receiveAction.getExpectedMessages().stream()
                                     .anyMatch(message -> message instanceof FinishedMessage)
                             && preparedConfig.getHighestProtocolVersion()
@@ -700,7 +716,7 @@ public class WorkflowRunner {
                 } else if (action instanceof SendAction
                         && preparedConfig.getHighestProtocolVersion() != ProtocolVersion.TLS13) {
                     SendAction sendAction = (SendAction) action;
-                    if (sendAction.getSendMessages().stream()
+                    if (sendAction.getConfiguredMessages().stream()
                             .anyMatch(message -> message instanceof FinishedMessage)) {
                         mayReceiveApplicationDataFromNow = true;
                     }

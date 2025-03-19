@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7568;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
@@ -117,7 +116,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
         ClientHelloMessage clientHelloMessage = new ClientHelloMessage(config);
 
         SendAction sendAction = new SendAction(clientHelloMessage);
-        sendAction.setRecords(record);
+        sendAction.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(
@@ -129,11 +128,11 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
         Validator.executedAsPlanned(state, testCase);
 
         ServerHelloMessage shm = trace.getFirstReceivedMessage(ServerHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, shm);
+        assertNotNull(shm, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
 
         assertArrayEquals(
-                "Invalid TLS version negotiated",
                 new byte[] {0x03, 0x03},
-                shm.getProtocolVersion().getValue());
+                shm.getProtocolVersion().getValue(),
+                "Invalid TLS version negotiated");
     }
 }

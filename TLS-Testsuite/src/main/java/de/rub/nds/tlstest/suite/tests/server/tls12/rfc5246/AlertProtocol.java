@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
@@ -75,7 +75,7 @@ public class AlertProtocol extends Tls12Test {
             testCase.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
             return;
         }
-        assertTrue("Socket has not been closed", Validator.socketClosed(state));
+        assertTrue(Validator.socketClosed(state), "Socket has not been closed");
         Validator.receivedWarningAlert(state, testCase);
         Validator.testAlertDescription(state, testCase, AlertDescription.CLOSE_NOTIFY, message);
     }

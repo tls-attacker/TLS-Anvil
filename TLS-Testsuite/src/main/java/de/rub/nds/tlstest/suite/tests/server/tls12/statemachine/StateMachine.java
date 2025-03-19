@@ -17,11 +17,12 @@ import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
+import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.DeactivateEncryptionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.GenericReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
@@ -34,6 +35,8 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.tests.server.both.statemachine.SharedStateMachineTest;
+import java.util.LinkedList;
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
@@ -92,7 +95,9 @@ public class StateMachine extends Tls12Test {
         SendAction sendActionclientSecondMessageBatch =
                 (SendAction)
                         workflowTrace.getTlsActions().get(workflowTrace.getTlsActions().size() - 1);
-        sendActionclientSecondMessageBatch.getMessages().add(new ClientHelloMessage(config));
+        sendActionclientSecondMessageBatch
+                .getConfiguredMessages()
+                .add(new ClientHelloMessage(config));
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, config);
         Validator.receivedFatalAlert(state, testCase);
@@ -131,11 +136,10 @@ public class StateMachine extends Tls12Test {
                 (SendAction)
                         workflowTrace.getTlsActions().get(workflowTrace.getTlsActions().size() - 1);
         workflowFactory.addClientKeyExchangeMessage(
-                sendActionclientSecondMessageBatch.getMessages());
+                sendActionclientSecondMessageBatch.getConfiguredMessages());
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, config);
         Validator.receivedFatalAlert(state, testCase);
-        ;
     }
 
     // Figure 4: path 0, 1, 3, 2
@@ -148,14 +152,13 @@ public class StateMachine extends Tls12Test {
                         WorkflowTraceType.HANDSHAKE, ProtocolMessageType.CHANGE_CIPHER_SPEC);
         WorkflowConfigurationFactory workflowFactory = new WorkflowConfigurationFactory(config);
 
-        SendAction sendActionSecondClientKeyExchange = new SendAction();
-        workflowFactory.addClientKeyExchangeMessage(
-                sendActionSecondClientKeyExchange.getMessages());
+        List<ProtocolMessage> messages = new LinkedList<>();
+        workflowFactory.addClientKeyExchangeMessage(messages);
+        SendAction sendActionSecondClientKeyExchange = new SendAction(messages);
         workflowTrace.addTlsAction(sendActionSecondClientKeyExchange);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, config);
         Validator.receivedFatalAlert(state, testCase);
-        ;
     }
 
     // Figure 4: path 0, 1, 3, 5, 2
@@ -172,7 +175,7 @@ public class StateMachine extends Tls12Test {
                 (SendAction)
                         workflowTrace.getTlsActions().get(workflowTrace.getTlsActions().size() - 1);
         workflowFactory.addClientKeyExchangeMessage(
-                sendActionclientSecondMessageBatch.getMessages());
+                sendActionclientSecondMessageBatch.getConfiguredMessages());
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, config);
         Validator.receivedFatalAlert(state, testCase);
@@ -189,8 +192,9 @@ public class StateMachine extends Tls12Test {
         WorkflowConfigurationFactory workflowFactory = new WorkflowConfigurationFactory(config);
 
         workflowTrace.addTlsAction(new DeactivateEncryptionAction());
-        SendAction sendActionSecondKeyExchange = new SendAction();
-        workflowFactory.addClientKeyExchangeMessage(sendActionSecondKeyExchange.getMessages());
+        List<ProtocolMessage> messages = new LinkedList<>();
+        workflowFactory.addClientKeyExchangeMessage(messages);
+        SendAction sendActionSecondKeyExchange = new SendAction(messages);
         workflowTrace.addTlsAction(sendActionSecondKeyExchange);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, config);
@@ -226,13 +230,12 @@ public class StateMachine extends Tls12Test {
         record.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
         ApplicationMessage emptyApplicationMessage = new ApplicationMessage();
         SendAction sendActionApplicationData = new SendAction(emptyApplicationMessage);
-        sendActionApplicationData.setRecords(record);
+        sendActionApplicationData.setConfiguredRecords(List.of(record));
 
         workflowTrace.addTlsAction(sendActionApplicationData);
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, config);
         Validator.receivedFatalAlert(state, testCase);
-        ;
     }
 
     // Figure 7: path 0,3 (with content in Application Message)
@@ -297,13 +300,14 @@ public class StateMachine extends Tls12Test {
         SendAction sendActionclientSecondMessageBatch =
                 (SendAction)
                         workflowTrace.getTlsActions().get(workflowTrace.getTlsActions().size() - 1);
-        sendActionclientSecondMessageBatch.getMessages().add(0, new ChangeCipherSpecMessage());
-        sendActionclientSecondMessageBatch.getMessages().add(new FinishedMessage());
+        sendActionclientSecondMessageBatch
+                .getConfiguredMessages()
+                .add(0, new ChangeCipherSpecMessage());
+        sendActionclientSecondMessageBatch.getConfiguredMessages().add(new FinishedMessage());
 
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, config);
         Validator.receivedFatalAlert(state, testCase);
-        ;
     }
 
     private void genericHeartbeatStateTest(
@@ -316,7 +320,8 @@ public class StateMachine extends Tls12Test {
         State state = runner.execute(workflowTrace, config);
 
         WorkflowTrace executedTrace = state.getWorkflowTrace();
-        if (WorkflowTraceUtil.didReceiveMessage(ProtocolMessageType.HEARTBEAT, executedTrace)) {
+        if (WorkflowTraceResultUtil.didReceiveMessage(
+                executedTrace, ProtocolMessageType.HEARTBEAT)) {
             return;
         } else if (executedTrace.executedAsPlanned() && !Validator.socketClosed(state)) {
             testCase.addAdditionalResultInfo("SUT chose to silently discard Heartbeat Request");

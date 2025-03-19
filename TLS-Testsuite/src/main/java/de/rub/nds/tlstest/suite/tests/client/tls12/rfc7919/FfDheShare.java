@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7919;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -27,7 +26,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.DHEServerKeyExchangeMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
@@ -76,9 +75,9 @@ public class FfDheShare extends Tls12Test {
                 new ReceiveAction(new AlertMessage()));
         DHEServerKeyExchangeMessage SKE =
                 (DHEServerKeyExchangeMessage)
-                        WorkflowTraceUtil.getLastSendMessage(
-                                HandshakeMessageType.SERVER_KEY_EXCHANGE, workflowTrace);
-        byte[] publicShare = c.getDefaultServerDhPublicKey().toByteArray();
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
+        byte[] publicShare = c.getDefaultServerEphemeralDhPublicKey().toByteArray();
         SKE.setPublicKey(publicShare);
         SKE.getPublicKey().setModification(new ByteArrayExplicitValueModification(publicShare));
 
@@ -105,8 +104,8 @@ public class FfDheShare extends Tls12Test {
     public void listsCurvesAndFfdheCorrectly() {
         // we always test for duplicate extensions anyway
         assertFalse(
-                "Client offered EC Cipher Suites and FFDHE groups but no EC Named Groups",
-                context.getFeatureExtractionResult().getNamedGroups().isEmpty());
+                context.getFeatureExtractionResult().getNamedGroups().isEmpty(),
+                "Client offered EC Cipher Suites and FFDHE groups but no EC Named Groups");
     }
 
     @AnvilTest(id = "7919-ZZzQLMYM3L")
@@ -129,9 +128,12 @@ public class FfDheShare extends Tls12Test {
 
         Validator.executedAsPlanned(state, testCase);
         assertEquals(
-                "Invalid NamedGroup set in context",
                 ffdheGroup,
-                state.getTlsContext().getSelectedGroup());
+                state.getTlsContext().getSelectedGroup(),
+                "Invalid NamedGroup set in context, expected "
+                        + ffdheGroup
+                        + " but was "
+                        + state.getTlsContext().getSelectedGroup());
     }
 
     @AnvilTest(id = "7919-64FAvRFA4A")
@@ -149,8 +151,8 @@ public class FfDheShare extends Tls12Test {
         BigInteger generator = new BigInteger("2", 16);
 
         config.setDefaultServerNamedGroups(new LinkedList<>());
-        config.setDefaultServerDhGenerator(generator);
-        config.setDefaultServerDhModulus(unsafeSafePrime);
+        config.setDefaultServerEphemeralDhGenerator(generator);
+        config.setDefaultServerEphemeralDhModulus(unsafeSafePrime);
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(

@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc8422;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
@@ -59,11 +59,11 @@ public class RespectClientExtensions extends Tls12Test {
     @NonCombinatorialAnvilTest(id = "8422-xyn7SDVFRX")
     public void respectsChosenCurveForCertificates() {
         assertTrue(
-                "The server does not respect the client's supported curves when selecting the certificate",
                 TestContext.getInstance()
                                 .getFeatureExtractionResult()
                                 .getResult(TlsAnalyzedProperty.IGNORES_ECDSA_GROUP_DISPARITY)
-                        != TestResults.TRUE);
+                        != TestResults.TRUE,
+                "The server does not respect the client's supported curves when selecting the certificate");
     }
 
     private void constructTest(WorkflowRunner runner, Config config, AnvilTestCase testCase) {
@@ -79,15 +79,15 @@ public class RespectClientExtensions extends Tls12Test {
         WorkflowTrace trace = state.getWorkflowTrace();
         ECDHEServerKeyExchangeMessage message =
                 trace.getFirstReceivedMessage(ECDHEServerKeyExchangeMessage.class);
-        assertNotNull(AssertMsgs.SERVER_KEY_EXCHANGE_NOT_RECEIVED, message);
+        assertNotNull(message, AssertMsgs.SERVER_KEY_EXCHANGE_NOT_RECEIVED);
 
-        ClientHelloMessage sentChm = trace.getFirstSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage sentChm = workflowTrace.getFirstSentMessage(ClientHelloMessage.class);
         byte[] allSentCurves =
                 sentChm.getExtension(EllipticCurvesExtensionMessage.class)
                         .getSupportedGroups()
                         .getValue();
         byte[] sentEllipticCurve = Arrays.copyOfRange(allSentCurves, 0, 2);
         byte[] receivedEllipticCurve = message.getNamedGroup().getValue();
-        assertArrayEquals("Unexpected named group", sentEllipticCurve, receivedEllipticCurve);
+        assertArrayEquals(sentEllipticCurve, receivedEllipticCurve, "Unexpected named group");
     }
 }

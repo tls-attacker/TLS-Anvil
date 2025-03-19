@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
@@ -23,11 +23,12 @@ import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.record.RecordCryptoComputations;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipher;
 import de.rub.nds.tlsattacker.core.record.cipher.RecordCipherFactory;
+import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeyDerivator;
 import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySet;
-import de.rub.nds.tlsattacker.core.record.cipher.cryptohelper.KeySetGenerator;
 import de.rub.nds.tlsattacker.core.record.crypto.RecordDecryptor;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -87,7 +88,7 @@ public class EarlyData extends Tls13Test {
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         State state = runner.execute(workflowTrace, c);
 
@@ -122,9 +123,12 @@ public class EarlyData extends Tls13Test {
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
-        ClientHelloMessage secondHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage secondHello =
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         CipherSuite otherCipherSuite =
                 getOtherSupportedCiphersuite(c.getDefaultSelectedCipherSuite());
         secondHello.setCipherSuites(Modifiable.explicit(otherCipherSuite.getByteValue()));
@@ -153,9 +157,12 @@ public class EarlyData extends Tls13Test {
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
-        ClientHelloMessage secondHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage secondHello =
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         secondHello.setProtocolVersion(Modifiable.explicit(ProtocolVersion.TLS11.getValue()));
 
         State state = runner.execute(workflowTrace, c);
@@ -193,11 +200,13 @@ public class EarlyData extends Tls13Test {
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         SendAction cHello = (SendAction) workflowTrace.getLastSendingAction();
-        cHello.getSendMessages()
-                .remove(workflowTrace.getFirstSendMessage(ApplicationMessage.class));
+        cHello.getConfiguredMessages()
+                .remove(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, ProtocolMessageType.APPLICATION_DATA));
 
         Record helloRecord = new Record();
         Record ccsCompatibilityRecord = new Record();
@@ -207,13 +216,15 @@ public class EarlyData extends Tls13Test {
 
         ApplicationMessage earlyData = new ApplicationMessage();
         earlyData.setData(Modifiable.explicit(c.getDefaultApplicationMessageData().getBytes()));
-        cHello.getSendMessages().add(earlyData);
+        cHello.getConfiguredMessages().add(earlyData);
 
-        workflowTrace.getLastSendingAction().getSendRecords().add(helloRecord);
+        ((SendAction) workflowTrace.getLastSendingAction()).getConfiguredRecords().add(helloRecord);
         if (c.getTls13BackwardsCompatibilityMode()) {
-            workflowTrace.getLastSendingAction().getSendRecords().add(ccsCompatibilityRecord);
+            ((SendAction) workflowTrace.getLastSendingAction())
+                    .getConfiguredRecords()
+                    .add(ccsCompatibilityRecord);
         }
-        workflowTrace.getLastSendingAction().getSendRecords().add(earlyRecord);
+        ((SendAction) workflowTrace.getLastSendingAction()).getConfiguredRecords().add(earlyRecord);
 
         State state = runner.execute(workflowTrace, c);
 
@@ -248,11 +259,13 @@ public class EarlyData extends Tls13Test {
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastReceivingMessage(
                         WorkflowTraceType.FULL_ZERO_RTT, HandshakeMessageType.SERVER_HELLO);
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         SendAction cHello = (SendAction) workflowTrace.getLastSendingAction();
-        cHello.getSendMessages()
-                .remove(workflowTrace.getFirstSendMessage(ApplicationMessage.class));
+        cHello.getConfiguredMessages()
+                .remove(
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, ProtocolMessageType.APPLICATION_DATA));
 
         Record helloRecord = new Record();
         Record ccsCompatibilityRecord = new Record();
@@ -262,13 +275,15 @@ public class EarlyData extends Tls13Test {
 
         ApplicationMessage earlyData = new ApplicationMessage();
         earlyData.setData(Modifiable.explicit("test".getBytes()));
-        cHello.getSendMessages().add(earlyData);
+        cHello.getConfiguredMessages().add(earlyData);
 
-        workflowTrace.getLastSendingAction().getSendRecords().add(helloRecord);
+        ((SendAction) workflowTrace.getLastSendingAction()).getConfiguredRecords().add(helloRecord);
         if (c.getTls13BackwardsCompatibilityMode()) {
-            workflowTrace.getLastSendingAction().getSendRecords().add(ccsCompatibilityRecord);
+            ((SendAction) workflowTrace.getLastSendingAction())
+                    .getConfiguredRecords()
+                    .add(ccsCompatibilityRecord);
         }
-        workflowTrace.getLastSendingAction().getSendRecords().add(earlyRecord);
+        ((SendAction) workflowTrace.getLastSendingAction()).getConfiguredRecords().add(earlyRecord);
 
         State state = runner.execute(workflowTrace, c);
 
@@ -291,7 +306,7 @@ public class EarlyData extends Tls13Test {
     private AlertMessage tryToDecryptWithAppSecrets(TlsContext context, Record record) {
         try {
             KeySet keySet =
-                    KeySetGenerator.generateKeySet(
+                    KeyDerivator.generateKeySet(
                             context,
                             ProtocolVersion.TLS13,
                             Tls13KeySetType.APPLICATION_TRAFFIC_SECRETS);
@@ -300,7 +315,7 @@ public class EarlyData extends Tls13Test {
             dec.decrypt(record);
             AlertMessage alert = new AlertMessage();
             alert.getParser(
-                            context,
+                            context.getContext(),
                             new ByteArrayInputStream(
                                     record.getCleanProtocolMessageBytes().getValue()))
                     .parse(alert);

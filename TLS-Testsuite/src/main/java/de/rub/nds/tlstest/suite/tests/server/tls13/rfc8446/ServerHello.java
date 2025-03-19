@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
@@ -19,14 +19,13 @@ import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
-import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloDoneMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -84,11 +83,11 @@ public class ServerHello extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
 
         ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
+        assertNotNull(msg, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
         assertArrayEquals(
-                "Invalid legacy version",
                 new byte[] {0x03, 0x03},
-                msg.getProtocolVersion().getValue());
+                msg.getProtocolVersion().getValue(),
+                "Invalid legacy version");
     }
 
     @AnvilTest(id = "8446-p17y8QGnbD")
@@ -108,12 +107,12 @@ public class ServerHello extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
 
         ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
+        assertNotNull(msg, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
         byte[] random = msg.getRandom().getValue();
         assertArrayEquals(
-                "Invalid random",
                 new byte[] {0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x01},
-                Arrays.copyOfRange(random, random.length - 8, random.length));
+                Arrays.copyOfRange(random, random.length - 8, random.length),
+                "Invalid random");
     }
 
     @AnvilTest(id = "8446-CyEBbGYnB5")
@@ -135,12 +134,12 @@ public class ServerHello extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
 
         ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
+        assertNotNull(msg, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
         byte[] random = msg.getRandom().getValue();
         assertArrayEquals(
-                "Invalid random",
                 new byte[] {0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x00},
-                Arrays.copyOfRange(random, random.length - 8, random.length));
+                Arrays.copyOfRange(random, random.length - 8, random.length),
+                "Invalid random");
     }
 
     @AnvilTest(id = "8446-h8ESe4vrN3")
@@ -162,12 +161,12 @@ public class ServerHello extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
 
         ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
+        assertNotNull(msg, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
         byte[] random = msg.getRandom().getValue();
         assertArrayEquals(
-                "Invalid random",
                 new byte[] {0x44, 0x4F, 0x57, 0x4E, 0x47, 0x52, 0x44, 0x00},
-                Arrays.copyOfRange(random, random.length - 8, random.length));
+                Arrays.copyOfRange(random, random.length - 8, random.length),
+                "Invalid random");
     }
 
     public boolean isTls10CipherSuite(CipherSuite cipherSuite) {
@@ -199,8 +198,8 @@ public class ServerHello extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
 
         ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
-        assertArrayEquals("Session ID not echoed", sessionId, msg.getSessionId().getValue());
+        assertNotNull(msg, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
+        assertArrayEquals(sessionId, msg.getSessionId().getValue(), "Session ID not echoed");
     }
 
     @AnvilTest(id = "8446-aDiNwQZBTY")
@@ -224,8 +223,8 @@ public class ServerHello extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
 
         ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, msg);
-        assertArrayEquals("Session ID not echoed", sessionId, msg.getSessionId().getValue());
+        assertNotNull(msg, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
+        assertArrayEquals(sessionId, msg.getSessionId().getValue(), "Session ID not echoed");
     }
 
     @AnvilTest(id = "8446-S1VjZrpD1J")
@@ -236,16 +235,16 @@ public class ServerHello extends Tls13Test {
         State state = runner.execute(workflowTrace, c);
 
         assertNotNull(
-                "No ServerHello has been sent",
-                state.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class));
+                state.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class),
+                "No ServerHello has been sent");
         assertEquals(
-                "invalid compression method",
                 0,
                 state.getWorkflowTrace()
                         .getFirstReceivedMessage(ServerHelloMessage.class)
                         .getSelectedCompressionMethod()
                         .getValue()
-                        .byteValue());
+                        .byteValue(),
+                "invalid compression method");
     }
 
     @AnvilTest(id = "8446-sm3XxXFjbr")
@@ -259,7 +258,9 @@ public class ServerHello extends Tls13Test {
         ServerHelloMessage serverHello =
                 state.getWorkflowTrace().getFirstReceivedMessage(ServerHelloMessage.class);
         ClientHelloMessage clientHello =
-                state.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
+                (ClientHelloMessage)
+                        WorkflowTraceResultUtil.getFirstSentMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.CLIENT_HELLO);
         checkForForbiddenExtensions(serverHello);
         checkForUnproposedExtensions(serverHello, clientHello);
         SharedExtensionTests.checkForDuplicateExtensions(serverHello);
@@ -267,8 +268,8 @@ public class ServerHello extends Tls13Test {
 
     public static void checkForUnproposedExtensions(
             ServerHelloMessage serverHello, ClientHelloMessage clientHello) {
-        assertNotNull("ServerHello was not received", serverHello);
-        assertNotNull("ClientHello was not provided", clientHello);
+        assertNotNull(serverHello, "ServerHello was not received");
+        assertNotNull(clientHello, "ClientHello was not provided");
         // MUST NOT contain any extensions that were not first
         // offered by the client in its ClientHello, with the
         // exception of optionally the "cookie"
@@ -285,38 +286,38 @@ public class ServerHello extends Tls13Test {
                 }
             }
             assertTrue(
+                    illegalExtensions.isEmpty(),
                     "Server negotiated the following unproposed extensions: "
                             + illegalExtensions.parallelStream()
                                     .map(Enum::name)
-                                    .collect(Collectors.joining(",")),
-                    illegalExtensions.isEmpty());
+                                    .collect(Collectors.joining(",")));
         }
     }
 
     public static void checkForForbiddenExtensions(ServerHelloMessage serverHello) {
-        assertNotNull("ServerHello was not received", serverHello);
+        assertNotNull(serverHello, "ServerHello was not received");
         if (serverHello.getExtensions() != null) {
             // The server MUST NOT send a "psk_key_exchange_modes" extension.
             assertFalse(
-                    "Server sent a PSK Key Exchange Modes Extension",
-                    serverHello.containsExtension(ExtensionType.PSK_KEY_EXCHANGE_MODES));
+                    serverHello.containsExtension(ExtensionType.PSK_KEY_EXCHANGE_MODES),
+                    "Server sent a PSK Key Exchange Modes Extension");
             // Servers MUST NOT send a post-handshake CertificateRequest to clients
             // which do not offer this extension.  Servers MUST NOT send this
             // extension.
             assertFalse(
-                    "Server sent a Post Handshake Auth Extension",
-                    serverHello.containsExtension(ExtensionType.POST_HANDSHAKE_AUTH));
+                    serverHello.containsExtension(ExtensionType.POST_HANDSHAKE_AUTH),
+                    "Server sent a Post Handshake Auth Extension");
             // The "oid_filters" extension allows servers to provide a set of
             // OID/value pairs which it would like the client's certificate to
             // match.  This extension, if provided by the server, MUST only be sent
             // in the CertificateRequest message.
             assertFalse(
-                    "Server sent an OID Filter Extension in Server Hello",
-                    serverHello.containsExtension(ExtensionType.OID_FILTERS));
+                    serverHello.containsExtension(ExtensionType.OID_FILTERS),
+                    "Server sent an OID Filter Extension in Server Hello");
             // Implementations MUST NOT use the Truncated HMAC extension
             assertFalse(
-                    "Server sent a Truncated HMAC Extension",
-                    serverHello.containsExtension(ExtensionType.TRUNCATED_HMAC));
+                    serverHello.containsExtension(ExtensionType.TRUNCATED_HMAC),
+                    "Server sent a Truncated HMAC Extension");
         }
     }
 

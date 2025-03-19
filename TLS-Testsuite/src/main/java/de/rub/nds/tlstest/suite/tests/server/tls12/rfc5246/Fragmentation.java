@@ -28,6 +28,7 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.EnforcedSenderRestriction;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
+import java.util.List;
 
 @ServerTest
 public class Fragmentation extends Tls12Test {
@@ -45,7 +46,7 @@ public class Fragmentation extends Tls12Test {
         ClientHelloMessage cHello = new ClientHelloMessage(c);
         cHello.setProtocolVersion(ProtocolVersion.TLS12.getValue());
         SendAction sendAction = new SendAction(cHello);
-        sendAction.setRecords(r);
+        sendAction.setConfiguredRecords(List.of(r));
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(sendAction, new ReceiveAction(new AlertMessage()));
@@ -70,7 +71,7 @@ public class Fragmentation extends Tls12Test {
         r.setContentMessageType(ProtocolMessageType.ALERT);
         r.setMaxRecordLengthConfig(0);
         SendAction sendAction = new SendAction(alertMsg);
-        sendAction.setRecords(r);
+        sendAction.setConfiguredRecords(List.of(r));
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(

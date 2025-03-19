@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ClientTest;
@@ -24,7 +24,7 @@ import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -55,7 +55,7 @@ public class AlertProtocol extends Tls12Test {
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(
                         WorkflowTraceType.HELLO, HandshakeMessageType.SERVER_HELLO_DONE);
-        workflowTrace.getLastSendingAction().getSendMessages().add(alert);
+        ((SendAction) workflowTrace.getLastSendingAction()).getConfiguredMessages().add(alert);
 
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
@@ -75,7 +75,7 @@ public class AlertProtocol extends Tls12Test {
         alert.setDescription(Modifiable.explicit(AlertDescription.CLOSE_NOTIFY.getValue()));
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
-        workflowTrace.getLastSendingAction().getSendMessages().add(alert);
+        ((SendAction) workflowTrace.getLastSendingAction()).getConfiguredMessages().add(alert);
 
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));
 
@@ -93,7 +93,7 @@ public class AlertProtocol extends Tls12Test {
             testCase.setTestResult(TestResult.CONCEPTUALLY_SUCCEEDED);
             return;
         }
-        assertTrue("Socket has not been closed", Validator.socketClosed(state));
+        assertTrue(Validator.socketClosed(state), "Socket has not been closed");
         Validator.receivedWarningAlert(state, testCase);
         Validator.testAlertDescription(state, testCase, AlertDescription.CLOSE_NOTIFY, message);
     }
@@ -117,14 +117,14 @@ public class AlertProtocol extends Tls12Test {
 
         SendAction serverHelloAction =
                 (SendAction)
-                        WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
-        serverHelloAction.getSendMessages().add(0, alert);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
+        serverHelloAction.getConfiguredMessages().add(0, alert);
 
         State state = runner.execute(workflowTrace, c);
         assertTrue(
-                "The socket has not been closed for an alert with level fatal",
-                Validator.socketClosed(state));
+                Validator.socketClosed(state),
+                "The socket has not been closed for an alert with level fatal");
     }
 
     @AnvilTest(id = "5246-rcBco3YXw8")
@@ -147,15 +147,15 @@ public class AlertProtocol extends Tls12Test {
 
         SendAction serverHelloAction =
                 (SendAction)
-                        WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         serverHelloAction
-                .getSendMessages()
-                .add(serverHelloAction.getSendMessages().size() - 1, alert);
+                .getConfiguredMessages()
+                .add(serverHelloAction.getConfiguredMessages().size() - 1, alert);
 
         State state = runner.execute(workflowTrace, c);
         assertTrue(
-                "The socket has not been closed for an alert with level fatal",
-                Validator.socketClosed(state));
+                Validator.socketClosed(state),
+                "The socket has not been closed for an alert with level fatal");
     }
 }

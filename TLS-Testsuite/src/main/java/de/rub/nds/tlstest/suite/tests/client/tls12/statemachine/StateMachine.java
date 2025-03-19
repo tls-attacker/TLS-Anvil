@@ -18,7 +18,7 @@ import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.protocol.message.*;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ActivateEncryptionAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
@@ -51,9 +51,9 @@ public class StateMachine extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         SendAction sendActionServerHelloBatch =
                 (SendAction)
-                        WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                HandshakeMessageType.CERTIFICATE, workflowTrace);
-        sendActionServerHelloBatch.getMessages().remove(1);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
+                                workflowTrace, HandshakeMessageType.CERTIFICATE);
+        sendActionServerHelloBatch.getConfiguredMessages().remove(1);
 
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 

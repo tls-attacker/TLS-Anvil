@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc7919;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -27,6 +27,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.computations.DHClientComputa
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
@@ -85,12 +86,12 @@ public class FfDheShare extends Tls12Test {
                 parameterCombination.getParameter(ShareOutOfBoundsDerivation.class);
         switch (share.getSelectedValue()) {
             case SHARE_IS_ZERO:
-                c.setDefaultClientDhPrivateKey(BigInteger.ZERO);
-                c.setDefaultClientDhPublicKey(BigInteger.ZERO);
+                c.setDefaultClientEphemeralDhPrivateKey(BigInteger.ZERO);
+                c.setDefaultClientEphemeralDhPublicKey(BigInteger.ZERO);
                 break;
             case SHARE_IS_ONE:
-                c.setDefaultClientDhPrivateKey(BigInteger.ZERO);
-                c.setDefaultClientDhPublicKey(BigInteger.ONE);
+                c.setDefaultClientEphemeralDhPrivateKey(BigInteger.ZERO);
+                c.setDefaultClientEphemeralDhPublicKey(BigInteger.ONE);
                 break;
             case SHARE_PLUS_P:
                 // multiply modulus by 2^64
@@ -150,7 +151,9 @@ public class FfDheShare extends Tls12Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         ClientHelloMessage clientHello =
-                workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         // make FFDHE group most preferred
         clientHello
                 .getExtension(EllipticCurvesExtensionMessage.class)
@@ -160,9 +163,9 @@ public class FfDheShare extends Tls12Test {
 
         Validator.executedAsPlanned(state, testCase);
         assertNotEquals(
-                "Server negotiated DHE cipher suite",
                 parameterCombination.getParameter(CipherSuiteDerivation.class).getSelectedValue(),
-                state.getTlsContext().getSelectedCipherSuite());
+                state.getTlsContext().getSelectedCipherSuite(),
+                "Server negotiated DHE cipher suite");
     }
 
     @AnvilTest(id = "7919-5qMeS9hJ7K")
@@ -208,9 +211,9 @@ public class FfDheShare extends Tls12Test {
         State state = runner.execute(workflowTrace, config);
         Validator.executedAsPlanned(state, testCase);
         assertEquals(
-                "Server did not respect the offered group",
                 ffdheGroup,
-                state.getTlsContext().getSelectedGroup());
+                state.getTlsContext().getSelectedGroup(),
+                "Server did not respect the offered group");
     }
 
     @AnvilTest(id = "7919-stXkxYBEVU")
@@ -222,7 +225,9 @@ public class FfDheShare extends Tls12Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
         ClientHelloMessage clientHello =
-                workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         byte[] ffdheGroupBytes = new byte[0];
         for (NamedGroup group : NamedGroup.getImplemented()) {
             if (group.isDhGroup()) {
@@ -238,10 +243,10 @@ public class FfDheShare extends Tls12Test {
 
         Validator.executedAsPlanned(state, testCase);
         assertFalse(
-                "Server selected an FFDHE cipher suite",
                 AlgorithmResolver.getKeyExchangeAlgorithm(
                                 state.getTlsContext().getSelectedCipherSuite())
-                        .isKeyExchangeDh());
+                        .isKeyExchangeDh(),
+                "Server selected an FFDHE cipher suite");
     }
 
     public List<DerivationParameter<Config, NamedGroup>> getSupportedFfdheNamedGroups(

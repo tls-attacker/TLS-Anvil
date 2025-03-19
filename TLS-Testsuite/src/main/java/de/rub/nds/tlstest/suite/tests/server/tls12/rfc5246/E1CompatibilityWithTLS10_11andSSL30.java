@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
@@ -64,9 +64,9 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
         ServerHelloMessage msg = trace.getFirstReceivedMessage(ServerHelloMessage.class);
         assertArrayEquals(
-                "Invalid ProtocolVersion negotiated",
                 ProtocolVersion.TLS12.getValue(),
-                msg.getProtocolVersion().getValue());
+                msg.getProtocolVersion().getValue(),
+                "Invalid ProtocolVersion negotiated");
     }
 
     public ConditionEvaluationResult doesSupportLegacyVersions() {
@@ -98,7 +98,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         Record record = new Record();
         record.setProtocolVersion(Modifiable.explicit(version.getValue()));
         SendAction cha = new SendAction(new ClientHelloMessage(c));
-        cha.setRecords(record);
+        cha.setConfiguredRecords(List.of(record));
 
         WorkflowTrace trace = new WorkflowTrace();
         trace.addTlsActions(cha, new ReceiveAction(new AlertMessage()));
@@ -119,7 +119,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
         Record record = new Record();
         record.setProtocolVersion(Modifiable.explicit(new byte[] {0x03, 0x05}));
         SendAction sendAction = new SendAction(new ClientHelloMessage(c));
-        sendAction.setRecords(record);
+        sendAction.setConfiguredRecords(List.of(record));
 
         WorkflowTrace workflowTrace = new WorkflowTrace();
         workflowTrace.addTlsActions(

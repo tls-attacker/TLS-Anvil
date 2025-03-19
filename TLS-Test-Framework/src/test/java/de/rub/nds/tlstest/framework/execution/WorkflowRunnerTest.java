@@ -1,5 +1,7 @@
 package de.rub.nds.tlstest.framework.execution;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
@@ -7,13 +9,12 @@ import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.RunningModeType;
 import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.action.SendingAction;
+import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowConfigurationFactory;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -27,7 +28,7 @@ public class WorkflowRunnerTest {
     public WorkflowRunnerTest() {}
 
     @BeforeAll
-    private static void setupClass() {
+    public static void setupClass() {
         sharedConfig = new Config();
         sharedConfig.setDefaultSelectedCipherSuite(
                 CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256);
@@ -41,7 +42,7 @@ public class WorkflowRunnerTest {
             WorkflowTrace trace, Config config, TestEndpointType runningModeType) {
         WorkflowTrace initialTrace = WorkflowTrace.copy(trace);
         WorkflowRunner.adaptForDtls(trace, config, runningModeType);
-        Assert.assertEquals(initialTrace, trace);
+        assertEquals(initialTrace, trace);
     }
 
     @ParameterizedTest
@@ -56,9 +57,9 @@ public class WorkflowRunnerTest {
         List<ProtocolMessage> addedMessages =
                 removeTrailingFlightMessages(trace, messageToBeAdded.size());
         // ensure only expected messages have been added
-        Assert.assertEquals(messageToBeAdded, addedMessages);
+        assertEquals(messageToBeAdded, addedMessages);
         // ensure WorkflowTrace is identical when added messages have been removed again
-        Assert.assertEquals(initialTrace, trace);
+        assertEquals(initialTrace, trace);
     }
 
     public static Stream<Arguments> provideIncompleteFlightWorkflowTraces() {
@@ -80,9 +81,12 @@ public class WorkflowRunnerTest {
             WorkflowTrace workflowTrace,
             TestEndpointType endpointType,
             List<Arguments> testArguments) {
-        SendingAction messageFlight =
-                workflowTrace.getSendingActions().get(workflowTrace.getSendingActions().size() - 1);
-        for (int i = 1; i < messageFlight.getSendMessages().size(); i++) {
+        SendAction messageFlight =
+                (SendAction)
+                        workflowTrace
+                                .getSendingActions()
+                                .get(workflowTrace.getSendingActions().size() - 1);
+        for (int i = 1; i < messageFlight.getConfiguredMessages().size(); i++) {
             WorkflowTrace modifiedTrace = WorkflowTrace.copy(workflowTrace);
             List<ProtocolMessage> removedMessages = removeTrailingFlightMessages(modifiedTrace, i);
             testArguments.add(
@@ -94,18 +98,24 @@ public class WorkflowRunnerTest {
         WorkflowTrace firstMessageSkippedIntentionally =
                 workflowFactory.createWorkflowTrace(
                         WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER);
-        firstMessageSkippedIntentionally
-                .getSendingActions()
-                .get(firstMessageSkippedIntentionally.getSendingActions().size() - 1)
-                .getSendMessages()
+        ((SendAction)
+                        firstMessageSkippedIntentionally
+                                .getSendingActions()
+                                .get(
+                                        firstMessageSkippedIntentionally.getSendingActions().size()
+                                                - 1))
+                .getConfiguredMessages()
                 .remove(0);
         WorkflowTrace secondMessageSkippedIntentionally =
                 workflowFactory.createWorkflowTrace(
                         WorkflowTraceType.HANDSHAKE, RunningModeType.SERVER);
-        secondMessageSkippedIntentionally
-                .getSendingActions()
-                .get(secondMessageSkippedIntentionally.getSendingActions().size() - 1)
-                .getSendMessages()
+        ((SendAction)
+                        secondMessageSkippedIntentionally
+                                .getSendingActions()
+                                .get(
+                                        secondMessageSkippedIntentionally.getSendingActions().size()
+                                                - 1))
+                .getConfiguredMessages()
                 .remove(0);
 
         return Stream.of(
@@ -133,10 +143,11 @@ public class WorkflowRunnerTest {
     private static List<ProtocolMessage> removeTrailingFlightMessages(
             WorkflowTrace modifiedTrace, int messagesToRemove) {
         List<ProtocolMessage> baseList =
-                modifiedTrace
-                        .getSendingActions()
-                        .get(modifiedTrace.getSendingActions().size() - 1)
-                        .getSendMessages();
+                ((SendAction)
+                                modifiedTrace
+                                        .getSendingActions()
+                                        .get(modifiedTrace.getSendingActions().size() - 1))
+                        .getConfiguredMessages();
         List<ProtocolMessage> removedMessages = new LinkedList<>();
         for (int i = 0; i < messagesToRemove; i++) {
             removedMessages.add(baseList.remove(baseList.size() - 1));

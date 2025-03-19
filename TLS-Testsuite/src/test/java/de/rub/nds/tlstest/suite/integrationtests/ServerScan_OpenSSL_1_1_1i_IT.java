@@ -15,7 +15,7 @@ public class ServerScan_OpenSSL_1_1_1i_IT extends AbstractServerScanIT {
     @Override
     protected void setUpAnvilTestConfig(AnvilTestConfig anvilTestConfig) {
         anvilTestConfig.setParallelTestCases(1);
-        anvilTestConfig.setParallelTests(null);
+        anvilTestConfig.setParallelTests(1);
         anvilTestConfig.setStrength(1);
         anvilTestConfig.setConnectionTimeout(200);
     }

@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.model.DerivationScope;
@@ -25,7 +24,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SignatureAndHashAlgorithmsExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -101,8 +100,8 @@ public class SignatureAlgorithms extends Tls13Test {
                 SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
                         certVerifyMsg.getSignatureHashAlgorithm().getValue());
         assertTrue(
-                "Invalid SignatureAndHashAlgorithm negotiated",
-                sigHashAlg.suitedForSigningTls13Messages());
+                sigHashAlg.suitedForSigningTls13Messages(),
+                "Invalid SignatureAndHashAlgorithm negotiated");
     }
 
     @AnvilTest(id = "8446-3WqNtgoV2Z")
@@ -130,8 +129,8 @@ public class SignatureAlgorithms extends Tls13Test {
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         ClientHelloMessage clientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         SignatureAndHashAlgorithmsExtensionMessage algorithmsExtension =
                 clientHello.getExtension(SignatureAndHashAlgorithmsExtensionMessage.class);
         algorithmsExtension.setSignatureAndHashAlgorithms(

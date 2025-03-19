@@ -24,6 +24,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import java.util.List;
 
 /** Statemachine tests used both for TLS 1.3 clients and servers. */
 public class ClientServerStateMachine extends Tls13Test {
@@ -37,7 +38,7 @@ public class ClientServerStateMachine extends Tls13Test {
         r.setProtocolMessageBytes(Modifiable.explicit(new byte[0]));
         r.setMaxRecordLengthConfig(0);
         SendAction fin = new SendAction(new FinishedMessage());
-        fin.setRecords(r);
+        fin.setConfiguredRecords(List.of(r));
 
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilSendingMessage(

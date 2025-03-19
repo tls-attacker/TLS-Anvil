@@ -7,8 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
@@ -26,7 +25,8 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionM
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
@@ -74,21 +74,21 @@ public class HelloRetryRequest extends Tls13Test {
 
         ServerHelloMessage sHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         ClientHelloMessage cHello =
-                state.getWorkflowTrace().getFirstSendMessage(ClientHelloMessage.class);
+                state.getWorkflowTrace().getFirstSentMessage(ClientHelloMessage.class);
         if (sHello != null) {
             assertTrue(
-                    "Server did not send a HelloRetryRequest", sHello.isTls13HelloRetryRequest());
+                    sHello.isTls13HelloRetryRequest(), "Server did not send a HelloRetryRequest");
             assertTrue(
-                    "Server selected an unproposed CipherSuite",
                     Arrays.equals(
                             selectedCipher.getByteValue(),
-                            sHello.getSelectedCipherSuite().getValue()));
+                            sHello.getSelectedCipherSuite().getValue()),
+                    "Server selected an unproposed CipherSuite");
             assertTrue(
-                    "Server did not include a SupportedVersions Extension",
-                    sHello.containsExtension(ExtensionType.SUPPORTED_VERSIONS));
+                    sHello.containsExtension(ExtensionType.SUPPORTED_VERSIONS),
+                    "Server did not include a SupportedVersions Extension");
             SharedExtensionTests.checkForDuplicateExtensions(sHello);
             ServerHello.checkForForbiddenExtensions(sHello);
             ServerHello.checkForUnproposedExtensions(sHello, cHello);
@@ -96,15 +96,15 @@ public class HelloRetryRequest extends Tls13Test {
                     sHello.getExtension(KeyShareExtensionMessage.class);
             if (ksExtension != null) {
                 assertTrue(
-                        "Server did not include exactly one NamedGroup in KeyShare Extension",
-                        ksExtension.getKeyShareList().size() == 1);
+                        ksExtension.getKeyShareList().size() == 1,
+                        "Server did not include exactly one NamedGroup in KeyShare Extension");
                 assertTrue(
-                        "Server included a public key in HelloRetryRequest",
-                        ksExtension.getKeyShareList().get(0).getPublicKey() == null);
+                        ksExtension.getKeyShareList().get(0).getPublicKey() == null,
+                        "Server included a public key in HelloRetryRequest");
                 assertTrue(
-                        "Server selected an unproposed NamedGroup",
                         c.getDefaultClientNamedGroups()
-                                .contains(ksExtension.getKeyShareList().get(0).getGroupConfig()));
+                                .contains(ksExtension.getKeyShareList().get(0).getGroupConfig()),
+                        "Server selected an unproposed NamedGroup");
             }
         }
     }
@@ -126,27 +126,25 @@ public class HelloRetryRequest extends Tls13Test {
 
         ServerHelloMessage helloRetryRequest =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         ServerHelloMessage actualServerHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         if (helloRetryRequest != null && actualServerHello != null) {
             assertTrue(
-                    "Server selected an unproposed CipherSuite in HelloRetryRequest",
                     context.getFeatureExtractionResult()
                             .getSupportedTls13CipherSuites()
                             .contains(
                                     CipherSuite.getCipherSuite(
-                                            helloRetryRequest
-                                                    .getSelectedCipherSuite()
-                                                    .getValue())));
+                                            helloRetryRequest.getSelectedCipherSuite().getValue())),
+                    "Server selected an unproposed CipherSuite in HelloRetryRequest");
             assertTrue(
-                    "Server selected a different CipherSuite in ServerHello than in HelloRetryRequest",
                     Arrays.equals(
                             helloRetryRequest.getSelectedCipherSuite().getValue(),
-                            actualServerHello.getSelectedCipherSuite().getValue()));
+                            actualServerHello.getSelectedCipherSuite().getValue()),
+                    "Server selected a different CipherSuite in ServerHello than in HelloRetryRequest");
         }
     }
 
@@ -166,23 +164,23 @@ public class HelloRetryRequest extends Tls13Test {
 
         ServerHelloMessage helloRetryRequest =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         ServerHelloMessage actualServerHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         if (helloRetryRequest != null && actualServerHello != null) {
             assertTrue(
-                    "Server selected an unproposed CipherSuite in HelloRetryRequest",
                     Arrays.equals(
                             helloRetryRequest.getSelectedCipherSuite().getValue(),
-                            selectedCipherSuite.getByteValue()));
+                            selectedCipherSuite.getByteValue()),
+                    "Server selected an unproposed CipherSuite in HelloRetryRequest");
             assertTrue(
-                    "Server selected a different CipherSuite in ServerHello than in HelloRetryRequest",
                     Arrays.equals(
                             helloRetryRequest.getSelectedCipherSuite().getValue(),
-                            actualServerHello.getSelectedCipherSuite().getValue()));
+                            actualServerHello.getSelectedCipherSuite().getValue()),
+                    "Server selected a different CipherSuite in ServerHello than in HelloRetryRequest");
         }
     }
 
@@ -201,15 +199,14 @@ public class HelloRetryRequest extends Tls13Test {
 
         ServerHelloMessage helloRetryRequest =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         ServerHelloMessage actualServerHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getLastReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, state.getWorkflowTrace());
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.SERVER_HELLO);
         if (helloRetryRequest != null && actualServerHello != null) {
             assertTrue(
-                    "Server did not retain the selected Protocol Version in Supported Versions Extension",
                     Arrays.equals(
                             helloRetryRequest
                                     .getExtension(SupportedVersionsExtensionMessage.class)
@@ -218,7 +215,8 @@ public class HelloRetryRequest extends Tls13Test {
                             actualServerHello
                                     .getExtension(SupportedVersionsExtensionMessage.class)
                                     .getSupportedVersions()
-                                    .getValue()));
+                                    .getValue()),
+                    "Server did not retain the selected Protocol Version in Supported Versions Extension");
         }
     }
 
@@ -230,10 +228,10 @@ public class HelloRetryRequest extends Tls13Test {
     */
     public void sentHelloRetryRequest() {
         assertTrue(
-                "No Hello Retry Request received by Scanner",
                 context.getFeatureExtractionResult()
                                 .getResult(TlsAnalyzedProperty.SENDS_HELLO_RETRY_REQUEST)
-                        == TestResults.TRUE);
+                        == TestResults.TRUE,
+                "No Hello Retry Request received by Scanner");
     }
 
     private WorkflowTrace getHelloRetryWorkflowTrace(WorkflowRunner runner) {
@@ -242,8 +240,8 @@ public class HelloRetryRequest extends Tls13Test {
                         WorkflowTraceType.HELLO, HandshakeMessageType.ENCRYPTED_EXTENSIONS);
         ClientHelloMessage initialHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         KeyShareExtensionMessage ksExt = initialHello.getExtension(KeyShareExtensionMessage.class);
         ksExt.setKeyShareListBytes(Modifiable.explicit(new byte[0]));
 
@@ -260,8 +258,9 @@ public class HelloRetryRequest extends Tls13Test {
         // after an HRR must retain the random value from before
         byte[] fixedRandom = runner.getPreparedConfig().getDefaultClientRandom();
         initialHello.setRandom(Modifiable.explicit(fixedRandom));
-        secondHelloTrace
-                .getFirstSendMessage(ClientHelloMessage.class)
+        ((ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                secondHelloTrace, HandshakeMessageType.CLIENT_HELLO))
                 .setRandom(Modifiable.explicit(fixedRandom));
 
         // In middlebox compatibility mode, a CCS message is sent
@@ -287,10 +286,10 @@ public class HelloRetryRequest extends Tls13Test {
         // new
         // ServerHello but it must not be sent twice by the server
         assertFalse(
-                "Received more than one compatibility CCS from Server",
-                WorkflowTraceUtil.getAllReceivedMessages(
+                WorkflowTraceResultUtil.getAllReceivedMessagesOfType(
                                         executedTrace, ProtocolMessageType.CHANGE_CIPHER_SPEC)
                                 .size()
-                        > 1);
+                        > 1,
+                "Received more than one compatibility CCS from Server");
     }
 }

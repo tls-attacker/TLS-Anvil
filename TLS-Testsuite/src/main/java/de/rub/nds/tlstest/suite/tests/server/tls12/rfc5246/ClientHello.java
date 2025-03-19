@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ExcludeParameter;
@@ -26,7 +26,8 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.GreaseExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -87,8 +88,8 @@ public class ClientHello extends Tls12Test {
 
         ClientHelloMessage clientHello =
                 (ClientHelloMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.CLIENT_HELLO, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         clientHello.addExtension(greaseHelperExtension);
 
         State state = runner.execute(workflowTrace, config);
@@ -96,15 +97,15 @@ public class ClientHello extends Tls12Test {
         Validator.executedAsPlanned(state, testCase);
         ServerHelloMessage serverHello =
                 (ServerHelloMessage)
-                        WorkflowTraceUtil.getFirstReceivedMessage(
-                                HandshakeMessageType.SERVER_HELLO, workflowTrace);
+                        WorkflowTraceResultUtil.getFirstReceivedMessage(
+                                workflowTrace, HandshakeMessageType.SERVER_HELLO);
         if (serverHello.getExtensions() != null) {
             for (ExtensionMessage extension : serverHello.getExtensions()) {
                 assertFalse(
-                        "Server negotiated the undefined Extension",
                         Arrays.equals(
                                 extension.getExtensionType().getValue(),
-                                greaseHelperExtension.getType().getValue()));
+                                greaseHelperExtension.getType().getValue()),
+                        "Server negotiated the undefined Extension");
             }
         }
     }
@@ -164,7 +165,9 @@ public class ClientHello extends Tls12Test {
         Config config = getPreparedConfig(runner);
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
         ClientHelloMessage clientHello =
-                workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         clientHello.setExtensionBytes(Modifiable.explicit(new byte[0]));
         State state = runner.execute(workflowTrace, config);
         Validator.executedAsPlanned(state, testCase);

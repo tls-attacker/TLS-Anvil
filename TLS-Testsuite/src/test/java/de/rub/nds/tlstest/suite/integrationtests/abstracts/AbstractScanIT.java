@@ -1,5 +1,7 @@
 package de.rub.nds.tlstest.suite.integrationtests.abstracts;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,10 +31,9 @@ import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.opentest4j.TestAbortedException;
 
 public abstract class AbstractScanIT {
     protected static final Logger LOGGER = LogManager.getLogger();
@@ -69,7 +70,7 @@ public abstract class AbstractScanIT {
         }
     }
 
-    @After
+    @AfterEach
     public void afterTest() {
         dockerInstance.stop();
         dockerInstance.remove();
@@ -86,7 +87,7 @@ public abstract class AbstractScanIT {
             cmd.exec();
         } catch (Exception e) {
             LOGGER.error(String.format("Error while loading list of Docker containers: %s", e));
-            Assume.assumeNoException(e);
+            throw new TestAbortedException();
         }
         return DockerTlsManagerFactory.getAllImages();
     }
@@ -136,7 +137,7 @@ public abstract class AbstractScanIT {
             additionalConfig = mapper.writeValueAsString(testContext.getConfig());
         } catch (JsonProcessingException e) {
             LOGGER.error(String.format("Error while parsing TlsTestConfig: %s", e));
-            Assume.assumeNoException(e);
+            throw new TestAbortedException();
         }
         TestRunner testRunner =
                 new TestRunner(
@@ -161,7 +162,7 @@ public abstract class AbstractScanIT {
         } catch (IOException e) {
             LOGGER.error(
                     String.format("Error while parsing file %s: %s", expectedResultsFileName, e));
-            Assume.assumeNoException(e);
+            throw new TestAbortedException();
         }
 
         Map<TestResult, Set<String>> results = AnvilContext.getInstance().getResultsTestRuns();
@@ -208,7 +209,7 @@ public abstract class AbstractScanIT {
         }
         if (fail) {
             System.err.print(builder);
-            Assert.fail("Test results do not match with expected results.");
+            fail("Test results do not match with expected results.");
         }
     }
 
@@ -221,7 +222,7 @@ public abstract class AbstractScanIT {
         try {
             mapper.writeValue(f, results);
         } catch (IOException e) {
-            Assume.assumeNoException(e);
+            throw new TestAbortedException();
         }
     }
 }

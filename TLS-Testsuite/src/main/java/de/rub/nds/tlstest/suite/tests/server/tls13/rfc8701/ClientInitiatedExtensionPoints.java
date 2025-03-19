@@ -7,18 +7,14 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8701;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.CipherSuite;
-import de.rub.nds.tlsattacker.core.constants.ExtensionType;
-import de.rub.nds.tlsattacker.core.constants.NamedGroup;
-import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
+import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
@@ -30,6 +26,7 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.KeyShareExtensionM
 import de.rub.nds.tlsattacker.core.protocol.message.extension.alpn.AlpnEntry;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -68,9 +65,9 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
 
         assertEquals(
-                "Server selected wrong ciphersuite",
                 c.getDefaultSelectedCipherSuite(),
-                state.getTlsContext().getSelectedCipherSuite());
+                state.getTlsContext().getSelectedCipherSuite(),
+                "Server selected wrong ciphersuite");
     }
 
     @AnvilTest(id = "8701-PErDdQZt7u")
@@ -89,7 +86,10 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
 
-        ClientHelloMessage ch = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage ch =
+                ((ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO));
         ch.addExtension(new GreaseExtensionMessage(selectedGrease, 25));
 
         State state = runner.execute(workflowTrace, c);
@@ -103,8 +103,8 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
                 .forEach(
                         j -> {
                             assertFalse(
-                                    "Server negotiated GREASE extension",
-                                    j.name().startsWith("GREASE"));
+                                    j.name().startsWith("GREASE"),
+                                    "Server negotiated GREASE extension");
                         });
     }
 
@@ -128,12 +128,14 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         byte[] completeGreaseKeyShareEntry =
                 ArrayConverter.concatenate(selectedGrease.getValue(), greaseLength, greaseKeyShare);
 
-        workflowTrace
-                .getFirstSendMessage(ClientHelloMessage.class)
+        ((ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO))
                 .getExtension(EllipticCurvesExtensionMessage.class)
                 .setSupportedGroups(Modifiable.insert(selectedGrease.getValue(), 0));
-        workflowTrace
-                .getFirstSendMessage(ClientHelloMessage.class)
+        ((ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO))
                 .getExtension(KeyShareExtensionMessage.class)
                 .setKeyShareListBytes(Modifiable.insert(completeGreaseKeyShareEntry, 0));
 
@@ -149,8 +151,8 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
                 .forEach(
                         j -> {
                             assertFalse(
-                                    "Server negotiated GREASE named group",
-                                    NamedGroup.getNamedGroup(j.getGroup().getValue()).isGrease());
+                                    NamedGroup.getNamedGroup(j.getGroup().getValue()).isGrease(),
+                                    "Server negotiated GREASE named group");
                         });
     }
 
@@ -178,7 +180,7 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         SignatureAndHashAlgorithm selected =
                 SignatureAndHashAlgorithm.getSignatureAndHashAlgorithm(
                         msg.getSignatureHashAlgorithm().getValue());
-        assertFalse("Server selected GREASE signature and hash algorithm", selected.isGrease());
+        assertFalse(selected.isGrease(), "Server selected GREASE signature and hash algorithm");
     }
 
     @AnvilTest(id = "8701-fe7Ev3bbiq")
@@ -200,7 +202,10 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
             alpnEntries.add(new AlpnEntry(i.name()));
         }
 
-        ClientHelloMessage msg = workflowTrace.getFirstSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage msg =
+                ((ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO));
         AlpnExtensionMessage ext = msg.getExtension(AlpnExtensionMessage.class);
         ext.setAlpnEntryList(alpnEntries);
 
@@ -216,11 +221,11 @@ public class ClientInitiatedExtensionPoints extends Tls13Test {
         }
 
         assertEquals(
-                "AlpnEntryExtension contains more or less than one protocol",
                 1,
-                aext.getAlpnEntryList().size());
+                aext.getAlpnEntryList().size(),
+                "AlpnEntryExtension contains more or less than one protocol");
         assertFalse(
-                "Server negotiated GREASE ALPN Identifier",
-                ext.getAlpnEntryList().get(0).getAlpnEntryConfig().contains("GREASE"));
+                ext.getAlpnEntryList().get(0).getAlpnEntryConfig().contains("GREASE"),
+                "Server negotiated GREASE ALPN Identifier");
     }
 }

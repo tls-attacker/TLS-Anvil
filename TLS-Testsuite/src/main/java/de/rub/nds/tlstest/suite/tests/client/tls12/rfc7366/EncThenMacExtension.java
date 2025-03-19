@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc7366;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
@@ -66,7 +66,7 @@ public class EncThenMacExtension extends Tls12Test {
         WorkflowTrace trace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
 
         State state = runner.execute(trace, c);
-        assertFalse("Workflow executed as expected", state.getWorkflowTrace().executedAsPlanned());
+        assertFalse(state.getWorkflowTrace().executedAsPlanned(), "Workflow executed as expected");
         Validator.receivedFatalAlert(state, testCase, false);
     }
 

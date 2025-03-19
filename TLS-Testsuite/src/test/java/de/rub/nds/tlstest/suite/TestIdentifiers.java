@@ -15,7 +15,7 @@
  */
 package de.rub.nds.tlstest.suite;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 
@@ -57,35 +57,35 @@ public class TestIdentifiers {
         }
         for (String registeredId : registeredIds) {
             assertTrue(
+                    processedIds.contains(registeredId),
                     "TestId '"
                             + registeredId
-                            + "' is registered in metadata but not referenced by any test",
-                    processedIds.contains(registeredId));
+                            + "' is registered in metadata but not referenced by any test");
         }
     }
 
     private void checkId(
             String testId, Method method, Set<String> registeredIds, List<String> processedIds) {
         assertNotNull(
+                testId,
                 "Test method "
                         + method.getDeclaringClass()
                         + "."
                         + method
-                        + " has a TestId of null.",
-                testId);
+                        + " has a TestId of null.");
         assertFalse(
+                testId.isEmpty(),
                 "Test method "
                         + method.getDeclaringClass()
                         + "."
                         + method
-                        + " has an empty TestId.",
-                testId.isEmpty());
+                        + " has an empty TestId.");
         assertTrue(
-                "TestId '" + testId + "' is not registered in metadata file.",
-                registeredIds.contains(testId));
+                registeredIds.contains(testId),
+                "TestId '" + testId + "' is not registered in metadata file.");
         assertFalse(
-                "TestId '" + testId + "' appears twice in test suite.",
-                processedIds.contains(testId));
+                processedIds.contains(testId),
+                "TestId '" + testId + "' appears twice in test suite.");
         processedIds.add(testId);
     }
 }

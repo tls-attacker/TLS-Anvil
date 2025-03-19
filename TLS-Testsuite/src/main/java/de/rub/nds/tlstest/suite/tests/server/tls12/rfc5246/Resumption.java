@@ -7,7 +7,7 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls12.rfc5246;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.modifiablevariable.util.Modifiable;
@@ -22,7 +22,8 @@ import de.rub.nds.tlsattacker.core.protocol.message.extension.ServerNameIndicati
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.ServerNamePair;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -78,7 +79,10 @@ public class Resumption extends Tls12Test {
                 runner.generateWorkflowTraceUntilLastMessage(
                         WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);
 
-        ClientHelloMessage cHello = workflowTrace.getLastSendMessage(ClientHelloMessage.class);
+        ClientHelloMessage cHello =
+                (ClientHelloMessage)
+                        WorkflowTraceConfigurationUtil.getLastStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.CLIENT_HELLO);
         ServerNameIndicationExtensionMessage sni2 =
                 cHello.getExtension(ServerNameIndicationExtensionMessage.class);
 
@@ -99,8 +103,8 @@ public class Resumption extends Tls12Test {
         WorkflowTrace executedTrace = state.getWorkflowTrace();
         ServerHelloMessage sHello = executedTrace.getFirstReceivedMessage(ServerHelloMessage.class);
         ServerHelloMessage sHello2 = executedTrace.getLastReceivedMessage(ServerHelloMessage.class);
-        ClientHelloMessage cHello2 = executedTrace.getLastSendMessage(ClientHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
+        ClientHelloMessage cHello2 = executedTrace.getLastSentMessage(ClientHelloMessage.class);
+        assertNotNull(sHello, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
 
         // only test if we can assume that the server accepted the SNI in
         // the initial handshake
@@ -109,9 +113,9 @@ public class Resumption extends Tls12Test {
                 && sHello2 != sHello) {
             // server hello of resumption MUST NOT not contain this extension
             assertTrue(
-                    "Server accepted resumption using different SNI",
                     !Arrays.equals(
-                            cHello2.getSessionId().getValue(), sHello2.getSessionId().getValue()));
+                            cHello2.getSessionId().getValue(), sHello2.getSessionId().getValue()),
+                    "Server accepted resumption using different SNI");
         }
     }
 
@@ -128,15 +132,15 @@ public class Resumption extends Tls12Test {
         WorkflowTrace trace = state.getWorkflowTrace();
         ServerHelloMessage sHello = trace.getFirstReceivedMessage(ServerHelloMessage.class);
         ServerHelloMessage sHello2 = trace.getLastReceivedMessage(ServerHelloMessage.class);
-        ClientHelloMessage cHello2 = trace.getLastSendMessage(ClientHelloMessage.class);
-        assertNotNull(AssertMsgs.SERVER_HELLO_NOT_RECEIVED, sHello);
+        ClientHelloMessage cHello2 = trace.getLastSentMessage(ClientHelloMessage.class);
+        assertNotNull(sHello, AssertMsgs.SERVER_HELLO_NOT_RECEIVED);
 
         if (sHello2 != null
                 && Arrays.equals(
                         cHello2.getSessionId().getValue(), sHello2.getSessionId().getValue())) {
             assertFalse(
-                    "Server included SNI extension in resumed session",
-                    sHello2.containsExtension(ExtensionType.SERVER_NAME_INDICATION));
+                    sHello2.containsExtension(ExtensionType.SERVER_NAME_INDICATION),
+                    "Server included SNI extension in resumed session");
         }
     }
 
@@ -161,16 +165,16 @@ public class Resumption extends Tls12Test {
 
         SendAction finSend =
                 (SendAction)
-                        WorkflowTraceUtil.getFirstSendingActionForMessage(
-                                HandshakeMessageType.FINISHED, workflowTrace);
-        finSend.getSendMessages().add(alert);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendAction(
+                                workflowTrace, HandshakeMessageType.FINISHED);
+        finSend.getConfiguredMessages().add(alert);
         workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         State state = runner.execute(workflowTrace, c);
 
         WorkflowTrace trace = state.getWorkflowTrace();
         ClientHelloMessage resumptionClientHello =
-                trace.getLastSendMessage(ClientHelloMessage.class);
+                trace.getLastSentMessage(ClientHelloMessage.class);
         ServerHelloMessage firstServerHello =
                 trace.getFirstReceivedMessage(ServerHelloMessage.class);
         ServerHelloMessage secondServerHello =
@@ -182,21 +186,21 @@ public class Resumption extends Tls12Test {
         ChangeCipherSpecMessage secondCcs =
                 trace.getLastReceivedMessage(ChangeCipherSpecMessage.class);
         assertTrue(
-                "Did not receive both expected Server Hello messages",
                 firstServerHello != null
                         && secondServerHello != null
-                        && secondServerHello != firstServerHello);
+                        && secondServerHello != firstServerHello,
+                "Did not receive both expected Server Hello messages");
         if (resumptionClientHello.getSessionIdLength().getValue() > 0) {
             ServerHelloMessage sHello = trace.getLastReceivedMessage(ServerHelloMessage.class);
             assertTrue(
-                    "Server accepted resumption via SessionID after Fatal Alert",
                     !Arrays.equals(
                             resumptionClientHello.getSessionId().getValue(),
-                            sHello.getSessionId().getValue()));
+                            sHello.getSessionId().getValue()),
+                    "Server accepted resumption via SessionID after Fatal Alert");
         } else {
             assertTrue(
-                    "Server accepted resumption via Tickets after Fatal Alert",
-                    secondCcs == null || secondCcs == firstCcs);
+                    secondCcs == null || secondCcs == firstCcs,
+                    "Server accepted resumption via Tickets after Fatal Alert");
         }
     }
 
@@ -215,25 +219,25 @@ public class Resumption extends Tls12Test {
 
         FinishedMessage fin =
                 (FinishedMessage)
-                        WorkflowTraceUtil.getFirstSendMessage(
-                                HandshakeMessageType.FINISHED, workflowTrace);
+                        WorkflowTraceConfigurationUtil.getFirstStaticConfiguredSendMessage(
+                                workflowTrace, HandshakeMessageType.FINISHED);
         fin.setVerifyData(Modifiable.xor(new byte[] {0x01}, 0));
-        workflowTrace.addTlsAction(new ReceiveAction());
+        workflowTrace.addTlsAction(new ReceiveAction(new ServerHelloMessage()));
 
         State state = runner.execute(workflowTrace, c);
 
         WorkflowTrace trace = state.getWorkflowTrace();
-        ClientHelloMessage cHello = trace.getLastSendMessage(ClientHelloMessage.class);
-        if (WorkflowTraceUtil.didReceiveMessage(HandshakeMessageType.SERVER_HELLO, trace)
+        ClientHelloMessage cHello = trace.getLastSentMessage(ClientHelloMessage.class);
+        if (WorkflowTraceResultUtil.didReceiveMessage(trace, HandshakeMessageType.SERVER_HELLO)
                 && trace.getLastReceivedMessage(ServerHelloMessage.class)
                         != trace.getFirstReceivedMessage(ServerHelloMessage.class)) {
             ServerHelloMessage sHello = trace.getLastReceivedMessage(ServerHelloMessage.class);
             assertTrue(
-                    "Server accepted resumption after invalid Finished",
                     !Arrays.equals(
                                     cHello.getSessionId().getValue(),
                                     sHello.getSessionId().getValue())
-                            && cHello.getSessionIdLength().getValue() > 0);
+                            && cHello.getSessionIdLength().getValue() > 0,
+                    "Server accepted resumption after invalid Finished");
         }
     }
 }

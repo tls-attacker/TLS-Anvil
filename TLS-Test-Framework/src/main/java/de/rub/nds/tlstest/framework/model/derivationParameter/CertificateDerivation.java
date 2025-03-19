@@ -260,6 +260,8 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateCon
         joiner.add("Public Key Type: " + certConfig.getPublicKeyType().name());
         if (certConfig.getPublicKeyType().isEc()) {
             joiner.add("Named Curve: " + certConfig.getDefaultSubjectNamedCurve().name());
+        } else if (certConfig.getPublicKeyType().name().contains("RSA")) {
+            joiner.add("RSA Modulus: " + certConfig.getRsaModulus().bitLength());
         }
         joiner.add(
                 "Certificate Signature Type: " + certConfig.getDefaultSignatureAlgorithm().name());

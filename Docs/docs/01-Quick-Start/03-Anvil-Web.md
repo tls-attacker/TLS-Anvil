@@ -1,7 +1,7 @@
 import CodeBlock from '@theme/CodeBlock';
 import Definition from '@site/src/components/Definition';
 
-# Result Analysis
+# Viewing Results
 
 TLS-Anvil stores the test results in multiple `json` files. In addition the network traffic is captured during the execution. Since analyzing those files by hand is tedious, we created a small web application to get the job done.
 
@@ -14,11 +14,20 @@ The result analyzer application is also shipped as docker container. Since a dat
 First we start the web application.
 
 ```bash
-docker-compose pull
-docker-compose up -d
+docker compose pull
+docker compose up -d
 ```
 
 The application should be available at [http://localhost:5001](http://localhost:5001).
+
+:::info
+
+A more detailed explanation of what you can do with Anvil Web is available under [Result Analysis](../Result-Analysis).
+Below, you can find a short description of the core principles.  
+
+:::
+
+## Basic Principles
 
 ### Importing the results
 

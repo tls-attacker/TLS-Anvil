@@ -79,7 +79,7 @@ public class FfDheShare extends Tls12Test {
                                 workflowTrace, HandshakeMessageType.SERVER_KEY_EXCHANGE);
         byte[] publicShare = c.getDefaultServerEphemeralDhPublicKey().toByteArray();
         SKE.setPublicKey(publicShare);
-        SKE.getPublicKey().setModification(new ByteArrayExplicitValueModification(publicShare));
+        SKE.getPublicKey().addModification(new ByteArrayExplicitValueModification(publicShare));
 
         State state = runner.execute(workflowTrace, c);
 

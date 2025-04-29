@@ -3,7 +3,7 @@
 This site demonstrates how to test the OpenSSL client provided by the TLS-Docker-Library.
 Testing the client in the most simple form roughly takes around 15 minutes. However, this duration can increase to several depending on the strength parameter that that basically defines how often a single test case triggered with different parameters.
 
-### Preperations
+### Preparations
 
 Similar to the server test we first create a dedicated docker network that is used by the TLS-Anvil and OpenSSL client container to communicate with each other.
 

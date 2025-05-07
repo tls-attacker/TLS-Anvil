@@ -7,6 +7,7 @@
  */
 package de.rub.nds.tlstest.framework;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.rub.nds.scanner.core.probe.AnalyzedProperty;
 import de.rub.nds.scanner.core.probe.result.CollectionResult;
 import de.rub.nds.scanner.core.probe.result.TestResult;
@@ -37,6 +38,7 @@ public abstract class FeatureExtractionResult implements Serializable {
     private Set<NamedGroup> supportedTls13Groups = new HashSet<>();
 
     private Map<AnalyzedProperty, TestResult> resultMap;
+    @JsonIgnore private String testReport;
 
     private long closedAfterAppDataDelta = ConnectionClosingUtils.NO_RESULT;
     private long closedAfterFinishedDelta = ConnectionClosingUtils.NO_RESULT;
@@ -208,6 +210,14 @@ public abstract class FeatureExtractionResult implements Serializable {
 
     public Set<NamedGroup> getSupportedTls13Groups() {
         return supportedTls13Groups;
+    }
+
+    public String getTestReport() {
+        return testReport;
+    }
+
+    public void setTestReport(String testReport) {
+        this.testReport = testReport;
     }
 
     protected static void checkCrucialCollections(

@@ -1,16 +1,20 @@
 package de.rub.nds.tlstest.framework;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import de.rub.nds.scanner.core.config.ScannerDetail;
 import de.rub.nds.scanner.core.guideline.GuidelineReport;
 import de.rub.nds.scanner.core.probe.result.NotApplicableResult;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
+import de.rub.nds.tlsscanner.core.report.DefaultPrintingScheme;
 import de.rub.nds.tlsscanner.serverscanner.probe.namedgroup.NamedGroupWitness;
 import de.rub.nds.tlsscanner.serverscanner.report.ServerReport;
+import de.rub.nds.tlsscanner.serverscanner.report.ServerReportPrinter;
 import java.util.*;
 
 public class ServerFeatureExtractionResult extends FeatureExtractionResult {
@@ -22,7 +26,7 @@ public class ServerFeatureExtractionResult extends FeatureExtractionResult {
     private String configProfileIdentifier = "";
     private String configProfileIdentifierTls13 = "";
 
-    private List<JsonNode> guidelineChecks = new ArrayList<>();
+    @JsonIgnore private List<JsonNode> guidelineChecks = new ArrayList<>();
 
     public ServerFeatureExtractionResult(String host, int port) {
         super(host, 4433);
@@ -56,6 +60,13 @@ public class ServerFeatureExtractionResult extends FeatureExtractionResult {
         extractionResult.getNegotiableExtensions().addAll(serverReport.getSupportedExtensions());
 
         extractionResult.setGuidelineChecks(getGuidelines(serverReport.getGuidelineReports()));
+        extractionResult.setTestReport(
+                new ServerReportPrinter(
+                                serverReport,
+                                ScannerDetail.NORMAL,
+                                DefaultPrintingScheme.getDefaultPrintingScheme(),
+                                true)
+                        .getFullReport());
 
         return extractionResult;
     }

@@ -531,6 +531,16 @@ public class TestPreparator {
                         .saveExtraFileToPath(
                                 featureExtractionResult.getGuidelineChecks(), "guidelines");
             } else throw new RuntimeException("Invalid TestEndpointMode");
+
+            try {
+                Files.writeString(
+                        Path.of(
+                                testConfig.getAnvilTestConfig().getOutputFolder(),
+                                "tls-scanner.txt"),
+                        testContext.getFeatureExtractionResult().getTestReport());
+            } catch (IOException | NullPointerException e) {
+                LOGGER.error("Could not create scan report: ", e);
+            }
         }
 
         if (testContext.getFeatureExtractionResult() == null) {

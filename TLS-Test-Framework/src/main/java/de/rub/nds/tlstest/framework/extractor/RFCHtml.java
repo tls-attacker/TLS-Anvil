@@ -7,7 +7,6 @@
  */
 package de.rub.nds.tlstest.framework.extractor;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -247,7 +246,8 @@ public class RFCHtml {
         String html = getHtml();
         Path target = Paths.get(folder, String.format("%d.html", rfcNumber));
         try {
-            new File(target.toString()).createNewFile();
+            Files.createDirectories(Paths.get(folder));
+            target.toFile().createNewFile();
             Files.writeString(target, html, StandardOpenOption.WRITE);
         } catch (Exception e) {
             LOGGER.error("error while writing file", e);

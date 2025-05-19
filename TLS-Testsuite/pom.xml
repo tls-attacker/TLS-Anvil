@@ -41,42 +41,52 @@
         <dependency>
             <groupId>de.rub.nds</groupId>
             <artifactId>anvil-core</artifactId>
+            <version>${toolkit.common.anvilcore.version}</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds</groupId>
             <artifactId>modifiable-variable</artifactId>
+            <version>${toolkit.common.modifiableVariable.version}</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds</groupId>
             <artifactId>protocol-attacker</artifactId>
+            <version>${toolkit.common.protocolattacker.version}</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds</groupId>
             <artifactId>scanner-core</artifactId>
+            <version>${toolkit.common.scannercore.version}</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds</groupId>
             <artifactId>x509-attacker</artifactId>
+            <version>${toolkit.common.x509attacker.version}</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls.attacker</groupId>
             <artifactId>tls-core</artifactId>
+            <version>${toolkit.tls.attacker.version}</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls.attacker</groupId>
             <artifactId>transport</artifactId>
+            <version>${toolkit.tls.attacker.version}</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls.dockerlib</groupId>
             <artifactId>tls-docker-library</artifactId>
+            <version>${toolkit.tls.dockerlib.version}</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls.scanner</groupId>
             <artifactId>tls-scanner-core</artifactId>
+            <version>${toolkit.tls.scanner.version}</version>
         </dependency>
         <dependency>
             <groupId>de.rub.nds.tls.scanner</groupId>
             <artifactId>tls-server-scanner</artifactId>
+            <version>${toolkit.tls.scanner.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

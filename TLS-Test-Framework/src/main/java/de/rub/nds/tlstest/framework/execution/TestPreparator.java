@@ -533,6 +533,7 @@ public class TestPreparator {
             } else throw new RuntimeException("Invalid TestEndpointMode");
 
             try {
+                Files.createDirectories(Path.of(testConfig.getAnvilTestConfig().getOutputFolder()));
                 Files.writeString(
                         Path.of(
                                 testConfig.getAnvilTestConfig().getOutputFolder(),

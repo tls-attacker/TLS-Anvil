@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunktls_anvil_docs=self.webpackChunktls_anvil_docs||[]).push([[472],{5513:e=>{e.exports=JSON.parse('{"title":"Recent posts","items":[{"title":"Hello World \ud83d\ude80 \ud83c\udf89","permalink":"/blog/hello-world","unlisted":false,"date":"2022-07-21T00:00:00.000Z"}]}')}}]);

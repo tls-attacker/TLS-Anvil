@@ -75,32 +75,31 @@ As an alternative to passing specific  parameters via the command line, we can d
 Example config file ```myConfig.json```:
 ```
 {
-  "anvilTestConfig" : {
-    "tags" : [ ],
-    "testPackage" : null,
-    "ignoreCache" : true,
-    "outputFolder" : "/path_to_outputFolder",
-    "parallelTestCases" : 1,
-    "parallelTests" : null,
-    "restartServerAfter" : 0,
-    "timeoutActionCommand" : [ ],
-    "identifier" : null,
-    "strength" : 1,
-    "connectionTimeout" : 300,
-    "prettyPrintJSON" : false,
-    "networkInterface" : "any",
-    "disableTcpDump" : false,
-    "endpointMode" : null,
-  },
-
-  "serverConfig" : {
-    "host" : "openssl-server:8443",
-
-    "sniHostname" : null,
-    "doNotSendSNIExtension" : true
-  },
-  "exportTraces" : false
-}
+    "anvilTestConfig" : {
+      "tags" : [ ],
+      "testPackage" : null,
+      "ignoreCache" : true,
+      "outputFolder" : "/path_to_outputFolder",
+      "parallelTestCases" : 1,
+      "parallelTests" : null,
+      "restartServerAfter" : 0,
+      "timeoutActionCommand" : [ ],
+      "identifier" : null,
+      "strength" : 1,
+      "connectionTimeout" : 300,
+      "prettyPrintJSON" : false,
+      "networkInterface" : "any",
+      "disableTcpDump" : false,
+      "endpointMode" : null
+    },
+    "serverConfig" : {
+      "host" : "openssl-server:8443",
+  
+      "sniHostname" : null,
+      "doNotSendSNIExtension" : true
+    },
+    "exportTraces" : false
+  } 
 ```
 We can use the config file by invokeing TLS-Anvil with the ```-tlsAnvilConfig``` parameter: 
 ```
@@ -110,8 +109,15 @@ docker run \
     --name tls-anvil \
     --network tls-anvil \
     -v $(pwd):/output/ \
+    -v /path_to_folder_containing_myConfig_json_file/:/anvil_configs \
     ghcr.io/tls-attacker/tlsanvil:latest \
-    -tlsAnvilConfig myConfig.json
+    -parallelTestCases 1 \
+    -connectionTimeout 200 \
+    -strength 1 \
+    -identifier openssl-server \
+    -tlsAnvilConfig /anvil_configs/myConfig.json \
+    server \
+    -connect openssl-server:8443        
 ```
 
 ### Profiles
@@ -132,6 +138,7 @@ Example file happyFlow.json:
 * Line 4-6: List of specific test IDs to run (HappyFlow for TLS 1.2 and TLS 1.3 in this example)
 
 To use the profile, run TLS-Anvil with the ```profiles``` and ```profileFolder``` parameters.
+
 ```
 docker run \
     --rm \
@@ -139,13 +146,14 @@ docker run \
     --name tls-anvil \
     --network tls-anvil \
     -v $(pwd):/output/ \
+    -v /path_to_folder_containing_hapyflow_json_file/:/profiles \
     ghcr.io/tls-attacker/tlsanvil:latest \
     -parallelTestCases 1 \
     -connectionTimeout 200 \
     -strength 1 \
     -identifier openssl-server \
+    -profileFolder /profiles \
+    -profiles happyFlow \
     server \
-    -connect openssl-server:8443 \
-    -profiles "hapyflow \
-    -profileFolder path_to_folder_containing_hapyflow_json_file
+    -connect openssl-server:8443
 ```

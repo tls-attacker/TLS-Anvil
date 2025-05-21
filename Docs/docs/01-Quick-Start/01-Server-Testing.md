@@ -71,7 +71,7 @@ docker run \
 
 ### Config Files
 
-As an alternative to passing specific  parameters via the command line, we can define a config file using json.
+As an alternative to passing specific  parameters via the command line, we can define a config file using the JSON format.
 Example config file ```myConfig.json```:
 ```
 {
@@ -101,7 +101,7 @@ Example config file ```myConfig.json```:
     "exportTraces" : false
   } 
 ```
-We can use the config file by invokeing TLS-Anvil with the ```-tlsAnvilConfig``` parameter: 
+We can use the config file by invokeing TLS-Anvil with the ```-tlsAnvilConfig``` parameter.
 ```
 docker run \
     --rm \
@@ -115,7 +115,7 @@ docker run \
 ```
 
 ### Profiles
-To run specific tests, you can define custom profiles in JSON format.
+To run specific tests, we can define custom profiles in JSON format.
 Example file happyFlow.json:
 ```
 {

@@ -69,3 +69,47 @@ docker run \
 * Line 12: We want to test a server
 * Line 13: Determines the details how TLS-Anvil should connect to the server
 
+### Config Files
+
+As an alternative to passing specific  parameters via the command line, we can define a config file using json.
+Example config file ```myConfig.json```:
+```
+{
+  "anvilTestConfig" : {
+    "tags" : [ ],
+    "testPackage" : null,
+    "ignoreCache" : true,
+    "outputFolder" : "/path_to_outputFolder",
+    "parallelTestCases" : 1,
+    "parallelTests" : null,
+    "restartServerAfter" : 0,
+    "timeoutActionCommand" : [ ],
+    "identifier" : null,
+    "strength" : 1,
+    "connectionTimeout" : 300,
+    "prettyPrintJSON" : false,
+    "networkInterface" : "any",
+    "disableTcpDump" : false,
+    "endpointMode" : null,
+  },
+
+  "serverConfig" : {
+    "host" : "openssl-server:8443",
+
+    "sniHostname" : null,
+    "doNotSendSNIExtension" : true
+  },
+  "exportTraces" : false
+}
+```
+We can use the config file by invokeing TLS-Anvil with the ```-tlsAnvilConfig``` parameter: 
+```
+docker run \
+    --rm \
+    -it \
+    --name tls-anvil \
+    --network tls-anvil \
+    -v $(pwd):/output/ \
+    ghcr.io/tls-attacker/tlsanvil:latest \
+    -tlsAnvilConfig myConfig.json
+```

@@ -111,13 +111,7 @@ docker run \
     -v $(pwd):/output/ \
     -v /path_to_folder_containing_myConfig_json_file/:/anvil_configs \
     ghcr.io/tls-attacker/tlsanvil:latest \
-    -parallelTestCases 1 \
-    -connectionTimeout 200 \
-    -strength 1 \
-    -identifier openssl-server \
-    -tlsAnvilConfig /anvil_configs/myConfig.json \
-    server \
-    -connect openssl-server:8443        
+    -tlsAnvilConfig /anvil_configs/myConfig.json        
 ```
 
 ### Profiles

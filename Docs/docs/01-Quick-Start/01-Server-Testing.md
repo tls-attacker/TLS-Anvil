@@ -113,3 +113,39 @@ docker run \
     ghcr.io/tls-attacker/tlsanvil:latest \
     -tlsAnvilConfig myConfig.json
 ```
+
+### Profiles
+To run specific tests, you can define custom profiles in JSON format.
+Example file happyFlow.json:
+```
+{
+ "name" : "happyFlow",
+ "profiles" : [],
+ "testIds" : [
+   "5246-jsdAL1vDy5",
+   "8446-jVohiUKi4u"
+ ]
+}
+```
+* Line 2: Name of the profile
+* Line 3: An array referencing other profiles. All tests defined in  these other profiles will be included in testruns of the current profile. (Empty in this example)
+* Line 4-6: List of specific test IDs to run (HappyFlow for TLS 1.2 and TLS 1.3 in this example)
+
+To use the profile, run TLS-Anvil with the ```profiles``` and ```profileFolder``` parameters.
+```
+docker run \
+    --rm \
+    -it \
+    --name tls-anvil \
+    --network tls-anvil \
+    -v $(pwd):/output/ \
+    ghcr.io/tls-attacker/tlsanvil:latest \
+    -parallelTestCases 1 \
+    -connectionTimeout 200 \
+    -strength 1 \
+    -identifier openssl-server \
+    server \
+    -connect openssl-server:8443 \
+    -profiles "hapyflow \
+    -profileFolder path_to_folder_containing_hapyflow_json_file
+```

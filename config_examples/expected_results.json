@@ -1,0 +1,9 @@
+{
+  "PARTIALLY_FAILED" : [ "XLF-4iPUuT51YH", "XLF-PkwVF7pRQa" ],
+  "DISABLED" : [ "XLF-CSQn3dUG9L", "XLF-Ax6kVTgheY" ],
+  "CONCEPTUALLY_SUCCEEDED" : [ "XLF-tSjRqK81S8", "XLF-ujMXSAMmVF" ],
+  "STRICTLY_SUCCEEDED" : [ "XLF-ia3wstdqYe", "XLF-uQXeugeUkb" ],
+  "NOT_SPECIFIED" : [ "XLF-eqZYAdwNye", "XLF-7iivb12njd" ],
+  "TEST_SUITE_ERROR" : [ "XLF-anjpbghN69", "XLF-CALCiXbvRo" ],
+  "FULLY_FAILED" : [ "XLF-SA1CoksBgE", "XLF-NFYNXBgXk8" ]
+}

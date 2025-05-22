@@ -61,4 +61,3 @@ docker run \
 * Lines 2-5: Docker related command flags
 * Line 6: Specifies the OpenSSL client image from the TLS-Docker-Library
 * Line 7: This is passed to the OpenSSL `s_client` binary, which is started each time a HTTP-GET request is sent to `:8090/trigger`.
-

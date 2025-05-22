@@ -68,4 +68,3 @@ docker run \
 * Line 10: Defines the strength, i.e. the `t` for t-way combinatorial testing
 * Line 12: We want to test a server
 * Line 13: Determines the details how TLS-Anvil should connect to the server
-

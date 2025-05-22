@@ -9,6 +9,7 @@ package de.rub.nds.tlstest.framework.config.delegates;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.config.delegate.ClientDelegate;
 import org.bouncycastle.util.IPAddress;
@@ -16,6 +17,7 @@ import org.bouncycastle.util.IPAddress;
 @Parameters(
         commandDescription =
                 "Test a server implementation, thus start TLS-Attacker in client mode.")
+@JsonIgnoreProperties({"extractedHost", "extractedPort"})
 public class TestServerDelegate extends ClientDelegate {
 
     @Parameter(

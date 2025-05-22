@@ -1,0 +1,26 @@
+{
+  "anvilTestConfig" : {
+    "expectedResults" : "expected_results.json",
+    "profiles" : [ ],
+    "profileFolder" : "./profiles",
+    "tags" : [ ],
+    "ignoreCache" : false,
+    "outputFolder" : "",
+    "parallelTestCases" : 5,
+    "parallelTests" : 7,
+    "restartServerAfter" : 0,
+    "timeoutActionCommand" : [ ],
+    "identifier" : "example_server_test",
+    "strength" : 2,
+    "connectionTimeout" : 1500,
+    "prettyPrintJSON" : false,
+    "networkInterface" : "any",
+    "disableTcpDump" : false,
+    "doZip" : false
+  },
+  "serverConfig" : {
+    "host" : "localhost:8443",
+    "doNotSendSNIExtension" : false
+  },
+  "exportTraces" : false
+}

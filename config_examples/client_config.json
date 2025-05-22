@@ -1,0 +1,24 @@
+{
+  "anvilTestConfig" : {
+    "profiles" : [ ],
+    "profileFolder" : "C:\\Users\\Conrad\\NoCloud\\TLS-Anvil-Development\\TLS-Test-Framework",
+    "tags" : [ ],
+    "ignoreCache" : false,
+    "outputFolder" : "",
+    "parallelTestCases" : 5,
+    "restartServerAfter" : 0,
+    "timeoutActionCommand" : [ ],
+    "identifier" : "example_client_test",
+    "strength" : 2,
+    "connectionTimeout" : 1500,
+    "prettyPrintJSON" : false,
+    "networkInterface" : "any",
+    "disableTcpDump" : false,
+    "doZip" : false,
+    "generalPcapFilter" : ""
+  },
+  "clientConfig" : {
+    "triggerScriptCommand" : [ "curl", "localhost:8090/trigger" ]
+  },
+  "exportTraces" : false
+}

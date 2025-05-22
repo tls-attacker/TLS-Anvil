@@ -172,9 +172,10 @@ public class TlsTestConfig extends TLSDelegateConfig {
             argParser.usage();
             System.exit(0);
         } else if (tlsAnvilConfig != null) {
+            // -tlsAnvilConfig used, parse args from file
             ObjectMapper objectMapper = new ObjectMapper();
             TlsTestConfig tlsTestConfig;
-            Map<?, ?> raw = null;
+            Map<?, ?> raw;
             try {
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                 tlsTestConfig =
@@ -203,34 +204,35 @@ public class TlsTestConfig extends TLSDelegateConfig {
                 this.parsedCommand = ConfigDelegates.CLIENT;
                 this.testClientDelegate = tlsTestConfig.getTestClientDelegate();
             } else {
-                LOGGER.error("Config must contain either client or server section.");
+                LOGGER.error(
+                        "Error: Config must contain either clientConfig or serverConfig section!");
+                System.exit(1);
             }
             this.getAnvilTestConfig().setEndpointMode(this.getTestEndpointMode());
-            this.getGeneralDelegate()
-                    .setKeylogfile(
-                            Path.of(getAnvilTestConfig().getOutputFolder(), "keyfile.log")
-                                    .toString());
-            this.parsedArgs = true;
-            return;
+
         } else if (argParser.getParsedCommand() == null) {
             argParser.usage();
-            throw new ParameterException("You have to use the client or server command");
+            LOGGER.error("Error: You have to use the client or server command!");
+            System.exit(1);
         } else if (argParser.getParsedCommand().equals(ConfigDelegates.EXTRACT_TESTS.getCommand())
                 || argParser.getParsedCommand().equals(ConfigDelegates.WORKER.getCommand())) {
             return;
         } else {
-
+            // server or client command
             this.setTestEndpointMode(argParser.getParsedCommand());
             this.getAnvilTestConfig().setEndpointMode(this.getTestEndpointMode());
+        }
 
-            if (getAnvilTestConfig().getIdentifier() == null) {
-                if (argParser.getParsedCommand().equals(ConfigDelegates.SERVER.getCommand())) {
-                    getAnvilTestConfig().setIdentifier(testServerDelegate.getHost());
-                } else {
-                    getAnvilTestConfig().setIdentifier(testClientDelegate.getPort().toString());
-                }
+        // set default values for testing
+
+        if (getAnvilTestConfig().getIdentifier() == null) {
+            if (argParser.getParsedCommand().equals(ConfigDelegates.SERVER.getCommand())) {
+                getAnvilTestConfig().setIdentifier(testServerDelegate.getHost());
+            } else {
+                getAnvilTestConfig().setIdentifier(testClientDelegate.getPort().toString());
             }
         }
+
         if (getAnvilTestConfig().getOutputFolder().isEmpty()) {
             getAnvilTestConfig()
                     .setOutputFolder(

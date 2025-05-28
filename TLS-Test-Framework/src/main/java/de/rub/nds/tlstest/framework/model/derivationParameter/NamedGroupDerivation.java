@@ -114,8 +114,9 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
             condConstraints.add(getMustNotBeNullForECDHConstraint());
             condConstraints.add(getMustBeNullForNonECDHConstraint());
             condConstraints.add(getMustBeNullForStaticECDH());
+            condConstraints.add(getMustNotBeFFNamedGroupsForECDHE());
         }
-        condConstraints.add(getMustNotBeFFNamedGroupsForECDHE());
+
         return condConstraints;
     }
 

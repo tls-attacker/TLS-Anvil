@@ -23,10 +23,7 @@ import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.model.TlsParameterType;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
@@ -49,11 +46,15 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
                 || TlsParameterIdentifierProvider.getKeyExchangeRequirements(derivationScope)
                         .supports(KeyExchangeType.ECDH)) {
             groupList = context.getFeatureExtractionResult().getNamedGroups();
+            // groupList.addAll(context.getFeatureExtractionResult().getFfdheNamedGroups());
+            // groupList.addAll(context.getFeatureExtractionResult().getTls13FfdheNamedGroups());
             parameterValues.add(new NamedGroupDerivation(null));
         } else if (TlsParameterIdentifierProvider.isTls13Test(derivationScope)
                 && context.getConfig().getTestEndpointMode() == TestEndpointType.CLIENT) {
             groupList = context.getFeatureExtractionResult().getTls13Groups();
         }
+
+        List<NamedGroup> imp = NamedGroup.getImplemented();
         groupList =
                 groupList.stream()
                         .filter(group -> NamedGroup.getImplemented().contains(group))
@@ -114,7 +115,7 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
             condConstraints.add(getMustBeNullForNonECDHConstraint());
             condConstraints.add(getMustBeNullForStaticECDH());
         }
-
+        condConstraints.add(getMustNotBeFFNamedGroupsForECDHE());
         return condConstraints;
     }
 
@@ -145,6 +146,7 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
     }
 
     private ConditionalConstraint getMustBeNullForNonECDHConstraint() {
+        // FFDHE
         Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
         requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
         return new ConditionalConstraint(
@@ -160,6 +162,33 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
                                     CipherSuite selectedCipherSuite =
                                             cipherSuiteDerivation.getSelectedValue();
 
+                                    NamedGroup[] FFNamedGroups = {
+                                        NamedGroup.FFDHE2048,
+                                        NamedGroup.FFDHE3072,
+                                        NamedGroup.FFDHE4096,
+                                        NamedGroup.FFDHE6144,
+                                        NamedGroup.FFDHE8192
+                                    };
+
+                                    if (selectedNamedGroup == null) {
+                                        return true;
+                                    } else {
+                                        boolean isFFNamedGroups =
+                                                Arrays.stream(FFNamedGroups)
+                                                        .anyMatch(selectedNamedGroup::equals);
+
+                                        return AlgorithmResolver.getKeyExchangeAlgorithm(
+                                                                selectedCipherSuite)
+                                                        .isKeyExchangeEcdh()
+                                                || isFFNamedGroups;
+                                    }
+                                    /*
+                                    if(!AlgorithmResolver.getKeyExchangeAlgorithm(
+                                                    selectedCipherSuite)
+                                            .isKeyExchangeEcdh() && isFFNamedGroups){
+                                        return true;
+                                    }
+
                                     if (selectedNamedGroup != null
                                             && !AlgorithmResolver.getKeyExchangeAlgorithm(
                                                             selectedCipherSuite)
@@ -167,6 +196,8 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
                                         return false;
                                     }
                                     return true;
+
+                                     */
                                 }));
     }
 
@@ -185,7 +216,6 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
                                             namedGroupDerivation.getSelectedValue();
                                     CipherSuite selectedCipherSuite =
                                             cipherSuiteDerivation.getSelectedValue();
-
                                     if (selectedNamedGroup != null
                                             && AlgorithmResolver.getKeyExchangeAlgorithm(
                                                             selectedCipherSuite)
@@ -194,6 +224,59 @@ public class NamedGroupDerivation extends TlsDerivationParameter<NamedGroup> {
                                         return false;
                                     }
                                     return true;
+                                }));
+    }
+
+    private ConditionalConstraint getMustNotBeFFNamedGroupsForECDHE() {
+        Set<ParameterIdentifier> requiredDerivations = new HashSet<>();
+        requiredDerivations.add(new ParameterIdentifier(TlsParameterType.CIPHER_SUITE));
+        return new ConditionalConstraint(
+                requiredDerivations,
+                ConstraintBuilder.constrain(
+                                getParameterIdentifier().name(),
+                                TlsParameterType.CIPHER_SUITE.name())
+                        .by(
+                                (NamedGroupDerivation namedGroupDerivation,
+                                        CipherSuiteDerivation cipherSuiteDerivation) -> {
+                                    NamedGroup selectedNamedGroup =
+                                            namedGroupDerivation.getSelectedValue();
+                                    CipherSuite selectedCipherSuite =
+                                            cipherSuiteDerivation.getSelectedValue();
+
+                                    if (selectedNamedGroup == null) {
+                                        return true;
+                                    }
+                                    boolean isFFNamedGroups;
+                                    boolean isECDHEcipher;
+                                    NamedGroup[] FFNamedGroups = {
+                                        NamedGroup.FFDHE2048,
+                                        NamedGroup.FFDHE3072,
+                                        NamedGroup.FFDHE4096,
+                                        NamedGroup.FFDHE6144,
+                                        NamedGroup.FFDHE8192
+                                    };
+                                    isFFNamedGroups =
+                                            Arrays.stream(FFNamedGroups)
+                                                    .anyMatch(selectedNamedGroup::equals);
+
+                                    isECDHEcipher =
+                                            AlgorithmResolver.getKeyExchangeAlgorithm(
+                                                            selectedCipherSuite)
+                                                    .isKeyExchangeEcdh();
+
+                                    /*
+                                    if (selectedNamedGroup != null
+                                            && AlgorithmResolver.getKeyExchangeAlgorithm(
+                                                    selectedCipherSuite)
+                                            .isKeyExchangeEcdh()
+                                            && !selectedCipherSuite.isEphemeral()) {
+                                        return false;
+                                    }
+                                    return true;
+
+                                     */
+                                    // return !isFFNamedGroups;
+                                    return !(isFFNamedGroups && isECDHEcipher);
                                 }));
     }
 

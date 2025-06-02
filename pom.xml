@@ -4,12 +4,12 @@
     <parent>
         <groupId>de.rub.nds</groupId>
         <artifactId>protocol-toolkit-bom</artifactId>
-        <version>5.1.13</version>
+        <version>6.0.1</version>
     </parent>
 
     <groupId>de.rub.nds.tls.anvil</groupId>
     <artifactId>tls-anvil</artifactId>
-    <version>1.2.10-SNAPSHOT</version>
+    <version>1.3.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>TLS-Anvil</name>
 
@@ -21,7 +21,7 @@
     <scm>
         <connection>scm:git:https://github.com/tls-attacker/TLS-Anvil.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/tls-attacker/TLS-Anvil-Development.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.3.0</tag>
         <url>https://github.com/tls-attacker/TLS-Anvil</url>
     </scm>
 
@@ -35,6 +35,16 @@
         <skipTests>false</skipTests>
         <skip.surefire.tests>${skipTests}</skip.surefire.tests>
         <skip.failsafe.tests>${skipTests}</skip.failsafe.tests>
+        <!-- Set versions for submodules -->
+        <toolkit.common.modifiableVariable.version>5.1.2</toolkit.common.modifiableVariable.version>
+        <toolkit.common.coffee4j.anvil.version>2.0.1</toolkit.common.coffee4j.anvil.version>
+        <toolkit.tls.attacker.version>7.1.1</toolkit.tls.attacker.version>
+        <toolkit.tls.scanner.version>7.1.1</toolkit.tls.scanner.version>
+        <toolkit.common.scannercore.version>6.1.1</toolkit.common.scannercore.version>
+        <toolkit.common.anvilcore.version>2.0.5</toolkit.common.anvilcore.version>
+        <toolkit.common.protocolattacker.version>2.0.3</toolkit.common.protocolattacker.version>
+        <toolkit.common.x509attacker.version>4.2.1</toolkit.common.x509attacker.version>
+        <toolkit.tls.dockerlib.version>3.1.1</toolkit.tls.dockerlib.version>
     </properties>
     <dependencyManagement>
         <dependencies>

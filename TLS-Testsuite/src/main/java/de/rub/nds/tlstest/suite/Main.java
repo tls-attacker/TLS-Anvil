@@ -126,7 +126,7 @@ public class Main {
                     .getConfigurationOptionsBuildManager()
                     .onShutdown();
         }
-        System.exit(0);
+        System.exit(runner.isCheckPassed() || !runner.isCheckExecuted() ? 0 : 1);
     }
 
     /**

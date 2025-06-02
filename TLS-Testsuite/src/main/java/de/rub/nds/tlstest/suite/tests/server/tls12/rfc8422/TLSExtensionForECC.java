@@ -16,7 +16,6 @@ import de.rub.nds.modifiablevariable.util.ArrayConverter;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.protocol.constants.PointFormat;
 import de.rub.nds.protocol.crypto.ec.*;
-import de.rub.nds.protocol.crypto.ffdh.FfdhGroup;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.*;

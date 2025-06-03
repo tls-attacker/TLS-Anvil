@@ -324,10 +324,10 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                 (SigAndHashDerivation sigAndHashDerivation,
                                         CertificateDerivation certificateDerivation) -> {
                                     if (sigAndHashDerivation.getSelectedValue() != null) {
+                                        SignatureAndHashAlgorithm signatureAndHashAlgorithm =
+                                                sigAndHashDerivation.getSelectedValue();
                                         SignatureAlgorithm sigAlg =
-                                                sigAndHashDerivation
-                                                        .getSelectedValue()
-                                                        .getSignatureAlgorithm();
+                                                signatureAndHashAlgorithm.getSignatureAlgorithm();
                                         X509CertificateConfig config =
                                                 certificateDerivation.getLeafConfig();
                                         switch (config.getPublicKeyType()) {
@@ -337,8 +337,18 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                                     return false;
                                                 }
                                                 break;
+                                            case RSASSA_PSS:
+                                                if (!signatureAndHashAlgorithm
+                                                        .name()
+                                                        .startsWith("RSA_PSS_PSS")) {
+                                                    return false;
+                                                }
+                                                break;
                                             case RSA:
-                                                if (!sigAlg.toString().contains("RSA")) {
+                                                if (sigAlg != SignatureAlgorithm.RSA_PKCS1
+                                                        && !signatureAndHashAlgorithm
+                                                                .name()
+                                                                .startsWith("RSA_PSS_RSAE")) {
                                                     return false;
                                                 }
                                                 break;

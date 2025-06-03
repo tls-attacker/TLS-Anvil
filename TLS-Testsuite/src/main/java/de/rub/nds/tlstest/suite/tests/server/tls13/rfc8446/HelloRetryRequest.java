@@ -80,7 +80,8 @@ public class HelloRetryRequest extends Tls13Test {
                 state.getWorkflowTrace().getFirstSentMessage(ClientHelloMessage.class);
         if (sHello != null) {
             assertTrue(
-                    sHello.isTls13HelloRetryRequest(), "Server did not send a HelloRetryRequest");
+                    sHello.hasTls13HelloRetryRequestRandom(),
+                    "Server did not send a HelloRetryRequest");
             assertTrue(
                     Arrays.equals(
                             selectedCipher.getByteValue(),

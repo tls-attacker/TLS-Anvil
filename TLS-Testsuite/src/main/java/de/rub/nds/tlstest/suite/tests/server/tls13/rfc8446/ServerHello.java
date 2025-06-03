@@ -281,7 +281,7 @@ public class ServerHello extends Tls13Test {
                             .toArray(ExtensionType[]::new)) {
                 if (!clientHello.containsExtension(extension)
                         && (extension != ExtensionType.COOKIE
-                                || !serverHello.isTls13HelloRetryRequest())) {
+                                || !serverHello.hasTls13HelloRetryRequestRandom())) {
                     illegalExtensions.add(extension);
                 }
             }

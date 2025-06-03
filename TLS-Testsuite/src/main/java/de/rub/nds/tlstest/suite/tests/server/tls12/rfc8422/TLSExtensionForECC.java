@@ -303,6 +303,7 @@ public class TLSExtensionForECC extends Tls12Test {
         if (group != null
                 && group.isCurve()
                 && !group.isGost()
+                && !group.isDhGroup()
                 && !(group.getGroupParameters().getGroup() instanceof RFC7748Curve)) {
             return true;
         }

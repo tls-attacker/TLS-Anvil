@@ -403,11 +403,11 @@ public class KeyShare extends Tls13Test {
     }
 
     public boolean isXCurve(NamedGroup group) {
-        return group.name().contains("ECDH_X");
+        return group != null && group.name().contains("ECDH_X");
     }
 
     public boolean isSecpCurve(NamedGroup group) {
         // we also include deprecated secp groups here if supported by peer
-        return group.isCurve() && group.name().contains("SECP");
+        return group != null && group.isCurve() && group.name().contains("SECP");
     }
 }

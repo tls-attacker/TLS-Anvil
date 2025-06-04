@@ -44,7 +44,7 @@
         <toolkit.common.anvilcore.version>2.0.5</toolkit.common.anvilcore.version>
         <toolkit.common.protocolattacker.version>2.0.3</toolkit.common.protocolattacker.version>
         <toolkit.common.x509attacker.version>4.2.1</toolkit.common.x509attacker.version>
-        <toolkit.tls.dockerlib.version>3.1.1</toolkit.tls.dockerlib.version>
+        <toolkit.tls.dockerlib.version>3.1.2</toolkit.tls.dockerlib.version>
     </properties>
     <dependencyManagement>
         <dependencies>

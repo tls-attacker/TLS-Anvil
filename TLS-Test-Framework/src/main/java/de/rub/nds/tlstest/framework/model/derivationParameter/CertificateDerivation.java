@@ -120,7 +120,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateCon
 
     private boolean filterRsaKeySize(List<X509CertificateConfig> configs) {
         X509CertificateConfig config = configs.get(X509CertificateChainProvider.LEAF_CERT_INDEX);
-        return config.getPublicKeyType() != X509PublicKeyType.RSA
+        return !config.getPublicKeyType().name().contains("RSA")
                 || (config.getRsaModulus().bitLength() >= MIN_RSA_KEY_LEN
                         && config.getRsaModulus().bitLength() >= MIN_RSA_SIG_KEY_LEN);
     }

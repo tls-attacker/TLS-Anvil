@@ -125,6 +125,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
                 continue;
             }
             switch (requiredPublicKeyType) {
+                case RSASSA_PSS:
                 case RSA:
                     pkSize = Math.max(pkSize, certConfig.getRsaModulus().bitLength());
                     break;
@@ -227,6 +228,9 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         X509CertificateConfig certConfig =
                 certConfigs.get(X509CertificateChainProvider.LEAF_CERT_INDEX);
         switch (certConfig.getPublicKeyType()) {
+            case RSASSA_PSS:
+                return computeEstimatedSignatureSize(
+                        SignatureAlgorithm.RSA_SSA_PSS, certConfig.getRsaModulus().bitLength());
             case RSA:
                 return computeEstimatedSignatureSize(
                         SignatureAlgorithm.RSA_PKCS1, certConfig.getRsaModulus().bitLength());

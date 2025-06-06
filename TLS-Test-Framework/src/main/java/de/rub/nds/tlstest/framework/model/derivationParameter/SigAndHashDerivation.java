@@ -239,6 +239,7 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                         for (X509PublicKeyType requiredCertKeyType :
                                                 requiredCertKeyTypes) {
                                             switch (requiredCertKeyType) {
+                                                case RSASSA_PSS:
                                                 case RSA:
                                                     if (sigAndHashDerivation.getSelectedValue()
                                                             != SignatureAndHashAlgorithm.RSA_SHA1) {

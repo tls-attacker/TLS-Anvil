@@ -120,7 +120,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateCon
 
     private boolean filterRsaKeySize(List<X509CertificateConfig> configs) {
         X509CertificateConfig config = configs.get(X509CertificateChainProvider.LEAF_CERT_INDEX);
-        return config.getPublicKeyType() != X509PublicKeyType.RSA
+        return !config.getPublicKeyType().name().contains("RSA")
                 || (config.getRsaModulus().bitLength() >= MIN_RSA_KEY_LEN
                         && config.getRsaModulus().bitLength() >= MIN_RSA_SIG_KEY_LEN);
     }
@@ -186,16 +186,17 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateCon
             List<X509CertificateConfig> configs, DerivationScope scope) {
         Set<CipherSuite> cipherSuites;
         X509CertificateConfig config = configs.get(X509CertificateChainProvider.LEAF_CERT_INDEX);
-        if (!TlsParameterIdentifierProvider.isTls13Test(scope)) {
+        if (!TlsParameterIdentifierProvider.isTls13Test(scope)) { // TLS 1.2
             cipherSuites = TestContext.getInstance().getFeatureExtractionResult().getCipherSuites();
             return cipherSuites.stream()
                     .map(AlgorithmResolver::getSuiteableLeafCertificateKeyType)
                     .flatMap(Arrays::stream)
                     .anyMatch(kt -> Objects.equals(kt, config.getPublicKeyType()));
-        } else {
+        } else { // TLS 1.3
             switch (config.getPublicKeyType()) {
                 case ECDH_ONLY:
                 case ECDH_ECDSA:
+                case RSASSA_PSS:
                 case RSA:
                     return true;
                 default:

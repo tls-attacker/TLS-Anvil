@@ -136,7 +136,7 @@ public class KeyShare extends Tls13Test {
         assertTrue(serverHello != null, "No ServerHello has been received");
         KeyShareExtensionMessage keyshare =
                 serverHello.getExtension(KeyShareExtensionMessage.class);
-        if (serverHello.isTls13HelloRetryRequest()) {
+        if (serverHello.hasTls13HelloRetryRequestRandom()) {
             testCase.addAdditionalResultInfo("Server enforced own preferred group");
             assertTrue(
                     c.getDefaultClientNamedGroups()
@@ -293,7 +293,7 @@ public class KeyShare extends Tls13Test {
             assertTrue(
                     state.getWorkflowTrace()
                             .getLastReceivedMessage(ServerHelloMessage.class)
-                            .isTls13HelloRetryRequest(),
+                            .hasTls13HelloRetryRequestRandom(),
                     "Server sent a Server Hello that is not a Hello Retry Request");
         } else {
             Validator.receivedFatalAlert(state, testCase);
@@ -395,7 +395,7 @@ public class KeyShare extends Tls13Test {
             assertTrue(
                     state.getWorkflowTrace()
                             .getLastReceivedMessage(ServerHelloMessage.class)
-                            .isTls13HelloRetryRequest(),
+                            .hasTls13HelloRetryRequestRandom(),
                     "Server sent a Server Hello that is not a Hello Retry Request");
         } else {
             Validator.receivedFatalAlert(state, testCase);

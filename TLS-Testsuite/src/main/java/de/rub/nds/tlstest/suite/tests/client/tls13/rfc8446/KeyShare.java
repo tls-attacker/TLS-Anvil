@@ -232,14 +232,20 @@ public class KeyShare extends Tls13Test {
     public void offeredDeprecatedGroups() {
         ClientHelloMessage chm = context.getReceivedClientHelloMessage();
         boolean foundDeprecated = false;
+        StringBuilder deprecatedGroups = new StringBuilder();
         for (KeyShareEntry ks :
                 chm.getExtension(KeyShareExtensionMessage.class).getKeyShareList()) {
             if (ks.getGroupConfig() != null && !ks.getGroupConfig().isTls13()) {
                 foundDeprecated = true;
-                break;
+                if (!deprecatedGroups.isEmpty()) {
+                    deprecatedGroups.append(", ");
+                }
+                deprecatedGroups.append(ks.getGroupConfig().name());
             }
         }
-        assertFalse(foundDeprecated, "Deprecated or invalid group used for key share");
+        assertFalse(
+                foundDeprecated,
+                "Deprecated or invalid group used for key share: " + deprecatedGroups);
     }
 
     @AnvilTest(id = "8446-QxfMDM9cBK")

@@ -251,6 +251,13 @@ public class TlsTestConfig extends TLSDelegateConfig {
             outputFolder.toFile().mkdirs();
             getAnvilTestConfig().setOutputFolder(outputFolder.toString());
 
+            // use client trigger script as timeout script, if no other is set
+            if (anvilTestConfig.getTimeoutActionCommand().isEmpty()
+                    && testEndpointMode == TestEndpointType.CLIENT) {
+                anvilTestConfig.setTimeoutActionCommand(
+                        testClientDelegate.getTriggerScriptCommand());
+            }
+
             if (!anvilTestConfig.getTimeoutActionCommand().isEmpty()) {
                 timeoutActionScript =
                         () -> {

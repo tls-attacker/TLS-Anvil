@@ -518,7 +518,7 @@ public class TlsTestConfig extends TLSDelegateConfig {
                 config.getDefaultServerSupportedCipherSuites());
         config.setDefaultSelectedCipherSuite(CipherSuite.TLS_AES_128_GCM_SHA256);
         config.setDefaultClientNamedGroups(
-                Arrays.stream(NamedGroup.values())
+                NamedGroup.getImplemented().stream()
                         .filter(NamedGroup::isTls13)
                         .collect(Collectors.toList()));
         config.setDefaultServerNamedGroups(config.getDefaultClientNamedGroups());

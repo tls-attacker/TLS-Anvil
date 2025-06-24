@@ -262,8 +262,10 @@ public class HelloRetryRequest extends Tls13Test {
         runner.setAutoHelloRetryRequest(false);
         NamedGroup actualHelloGroup =
                 ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
-                        .getClientHelloNamedGroups()
-                        .get(0);
+                        .getClientHelloNamedGroups().stream()
+                                .filter(ng -> NamedGroup.getImplemented().contains(ng))
+                                .findFirst()
+                                .get();
         config.setDefaultServerNamedGroups(actualHelloGroup);
         config.setDefaultSelectedNamedGroup(actualHelloGroup);
 

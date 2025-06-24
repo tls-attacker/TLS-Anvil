@@ -189,7 +189,10 @@ public class KeyX implements KeyExchange {
         ServerKeyExchangeMessage serverKeyExchangeMessage = cipherSuiteSkeCache.get(cipherSuite);
 
         boolean compatible = false;
-        for (KeyExchangeType type : this.supported()) {
+        if (alg.isPsk() && !Arrays.asList(this.supportedKxs).contains(KeyExchangeType.PSK)) {
+            return false;
+        }
+        for (KeyExchangeType type : this.supportedKxs) {
             switch (type) {
                 case RSA:
                     compatible |= alg.isKeyExchangeRsa() && !this.requiresServerKeyExchMsg;
@@ -208,13 +211,11 @@ public class KeyX implements KeyExchange {
                                     && (!this.requiresServerKeyExchMsg
                                             || serverKeyExchangeMessage != null);
                     break;
-                case ALL12:
+                case PSK:
                     compatible |=
-                            AlgorithmResolver.getKeyExchangeAlgorithm(cipherSuite) != null
+                            alg.isPsk()
                                     && (!this.requiresServerKeyExchMsg
                                             || serverKeyExchangeMessage != null);
-                    break;
-                case NOT_SPECIFIED:
                     break;
             }
         }

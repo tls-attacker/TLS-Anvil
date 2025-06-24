@@ -143,6 +143,11 @@ public class CBCBlockCipher extends Tls12Test {
                 }
             }
         }
+        // set result info null, if still empty
+        if (testCase.getAdditionalResultInformation() != null
+                && testCase.getAdditionalResultInformation().isEmpty()) {
+            testCase.setAdditionalResultInformation(null);
+        }
     }
 
     @AnvilTest(id = "5246-VC1baM1Mn1")

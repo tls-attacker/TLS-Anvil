@@ -430,9 +430,12 @@ public class WorkflowRunner {
         if (!autoHelloRetryRequest
                 || context.getConfig().getTestEndpointMode() == TestEndpointType.SERVER
                 || preparedConfig.getHighestProtocolVersion() != ProtocolVersion.TLS13
-                || !context.getFeatureExtractionResult()
-                        .getNamedGroups()
-                        .contains(preparedConfig.getDefaultSelectedNamedGroup())
+                || (!context.getFeatureExtractionResult()
+                                .getNamedGroups()
+                                .contains(preparedConfig.getDefaultSelectedNamedGroup())
+                        && !context.getFeatureExtractionResult()
+                                .getTls13Groups()
+                                .contains(preparedConfig.getDefaultSelectedNamedGroup()))
                 || ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
                         .getClientHelloKeyShareGroups()
                         .contains(preparedConfig.getDefaultSelectedNamedGroup())) {

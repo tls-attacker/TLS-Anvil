@@ -260,17 +260,19 @@ public class HelloRetryRequest extends Tls13Test {
     public void namedGroupDisparity(AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = getPreparedConfig(runner);
         runner.setAutoHelloRetryRequest(false);
+
+        NamedGroup hrrNamedGroup =
+                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         NamedGroup actualHelloGroup =
                 ((ClientFeatureExtractionResult) context.getFeatureExtractionResult())
                         .getClientHelloNamedGroups().stream()
                                 .filter(ng -> NamedGroup.getImplemented().contains(ng))
+                                .filter(ng -> ng != hrrNamedGroup)
                                 .findFirst()
                                 .get();
         config.setDefaultServerNamedGroups(actualHelloGroup);
         config.setDefaultSelectedNamedGroup(actualHelloGroup);
 
-        NamedGroup hrrNamedGroup =
-                parameterCombination.getParameter(NamedGroupDerivation.class).getSelectedValue();
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.SHORT_HELLO);
         runner.insertHelloRetryRequest(workflowTrace, hrrNamedGroup);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));

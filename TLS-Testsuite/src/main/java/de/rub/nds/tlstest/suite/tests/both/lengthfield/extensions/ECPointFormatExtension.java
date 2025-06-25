@@ -8,11 +8,13 @@
 package de.rub.nds.tlstest.suite.tests.both.lengthfield.extensions;
 
 import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ECPointFormatExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
@@ -30,8 +32,13 @@ import org.junit.jupiter.api.Tag;
 @KeyExchange(supported = KeyExchangeType.ECDH)
 public class ECPointFormatExtension extends TlsLengthfieldTest {
 
+    public boolean namedGroupNotNull(NamedGroup namedGroup) {
+        return namedGroup != null;
+    }
+
     @AnvilTest(id = "XLF-mgWov7XYiw")
     @ModelFromScope(modelType = "LENGTHFIELD")
+    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "namedGroupNotNull")
     public void pointFormatExtensionLength(WorkflowRunner runner, AnvilTestCase testCase) {
         Config config = context.getConfig().createConfig();
         genericExtensionLengthTest(runner, testCase, config, ECPointFormatExtensionMessage.class);
@@ -39,6 +46,7 @@ public class ECPointFormatExtension extends TlsLengthfieldTest {
 
     @AnvilTest(id = "XLF-XdYDypM7gN")
     @ModelFromScope(modelType = "LENGTHFIELD")
+    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "namedGroupNotNull")
     public void pointFormatExtensionFormatsLength(WorkflowRunner runner, AnvilTestCase testCase) {
         WorkflowTrace workflowTrace = setupLengthFieldTestTls12(runner);
         ECPointFormatExtensionMessage pointFormatExtension =

@@ -41,7 +41,7 @@
         <toolkit.tls.attacker.version>7.1.1</toolkit.tls.attacker.version>
         <toolkit.tls.scanner.version>7.1.1</toolkit.tls.scanner.version>
         <toolkit.common.scannercore.version>6.1.1</toolkit.common.scannercore.version>
-        <toolkit.common.anvilcore.version>2.0.5</toolkit.common.anvilcore.version>
+        <toolkit.common.anvilcore.version>2.0.6</toolkit.common.anvilcore.version>
         <toolkit.common.protocolattacker.version>2.0.3</toolkit.common.protocolattacker.version>
         <toolkit.common.x509attacker.version>4.2.1</toolkit.common.x509attacker.version>
         <toolkit.tls.dockerlib.version>3.1.1</toolkit.tls.dockerlib.version>

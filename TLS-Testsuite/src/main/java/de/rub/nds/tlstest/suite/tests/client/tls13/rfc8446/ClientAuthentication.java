@@ -12,14 +12,17 @@ import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
-import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.HandshakeMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
-import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
+import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceResultUtil;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 
 @ClientTest
@@ -31,14 +34,26 @@ public class ClientAuthentication extends Tls13Test {
         Config c = getPreparedConfig(runner);
         c.setClientAuthentication(true);
 
-        WorkflowTrace workflowTrace =
-                runner.generateWorkflowTraceUntilReceivingMessage(
-                        WorkflowTraceType.HANDSHAKE, HandshakeMessageType.CERTIFICATE_VERIFY);
-        ((ReceiveAction)
-                        workflowTrace.getTlsActions().get(workflowTrace.getTlsActions().size() - 1))
-                .getExpectedMessages()
-                .add(new FinishedMessage());
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HANDSHAKE);
+
+        HandshakeMessage certificateVerify =
+                WorkflowTraceConfigurationUtil.getLastStaticConfiguredReceiveMessage(
+                        workflowTrace, HandshakeMessageType.CERTIFICATE_VERIFY);
+        certificateVerify.setRequired(false);
+
         State state = runner.execute(workflowTrace, c);
         Validator.executedAsPlanned(state, testCase);
+
+        CertificateMessage certificateMessage =
+                (CertificateMessage)
+                        WorkflowTraceResultUtil.getLastReceivedMessage(
+                                state.getWorkflowTrace(), HandshakeMessageType.CERTIFICATE);
+
+        if (certificateMessage.getCertificatesListLength().getValue() == 0) {
+            Assertions.assertFalse(
+                    WorkflowTraceResultUtil.didReceiveMessage(
+                            state.getWorkflowTrace(), HandshakeMessageType.CERTIFICATE_VERIFY),
+                    "Received CertificateVerify message even though an empty certificate was provided.");
+        }
     }
 }

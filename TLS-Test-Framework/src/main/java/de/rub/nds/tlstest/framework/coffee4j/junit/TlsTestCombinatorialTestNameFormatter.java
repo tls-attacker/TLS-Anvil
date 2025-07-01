@@ -23,7 +23,8 @@ import org.junit.platform.commons.util.StringUtils;
  * {@link Combination}
  *
  * <p>This class is more a less a copy of {@link
- * org.junit.jupiter.params.ParameterizedTestNameFormatter} from the junit-jupiter-params project.
+ * org.junit.jupiter.params.ParameterizedInvocationNameFormatter} from the junit-jupiter-params
+ * project.
  */
 public class TlsTestCombinatorialTestNameFormatter extends CombinatorialTestNameFormatter {
 

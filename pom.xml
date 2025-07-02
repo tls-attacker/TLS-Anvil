@@ -36,7 +36,7 @@
         <skip.surefire.tests>${skipTests}</skip.surefire.tests>
         <skip.failsafe.tests>${skipTests}</skip.failsafe.tests>
         <!-- Set versions for submodules -->
-        <toolkit.common.modifiableVariable.version>5.1.2</toolkit.common.modifiableVariable.version>
+        <toolkit.common.modifiableVariable.version>5.3.0</toolkit.common.modifiableVariable.version>
         <toolkit.common.coffee4j.anvil.version>2.0.1</toolkit.common.coffee4j.anvil.version>
         <toolkit.tls.attacker.version>7.2.3</toolkit.tls.attacker.version>
         <toolkit.tls.scanner.version>7.1.2</toolkit.tls.scanner.version>

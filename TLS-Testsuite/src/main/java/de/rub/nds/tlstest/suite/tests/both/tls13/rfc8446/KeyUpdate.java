@@ -118,7 +118,10 @@ public class KeyUpdate extends Tls13Test {
                 WorkflowTraceResultUtil.didReceiveMessage(trace, HandshakeMessageType.KEY_UPDATE),
                 "Did not receive a KeyUpdate in response");
         AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        assertNull(msg, "Received alert message");
-        assertFalse(Validator.socketClosed(state), "Socket was closed");
+        if (msg == null
+                || msg.getDescription().getValue() != AlertDescription.CLOSE_NOTIFY.getValue()) {
+            assertNull(msg, "Received alert message that was not a close notify.");
+            assertFalse(Validator.socketClosed(state), "Socket was closed");
+        }
     }
 }

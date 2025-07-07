@@ -231,10 +231,8 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                         CipherSuiteDerivation cipherSuiteDerivation) -> {
                                     if (sigAndHashDerivation.getSelectedValue() != null) {
                                         X509PublicKeyType[] requiredCertKeyTypes =
-                                                AlgorithmResolver
-                                                        .getSuiteableLeafCertificateKeyType(
-                                                                cipherSuiteDerivation
-                                                                        .getSelectedValue());
+                                                AlgorithmResolver.getSuitableLeafCertificateKeyType(
+                                                        cipherSuiteDerivation.getSelectedValue());
 
                                         for (X509PublicKeyType requiredCertKeyType :
                                                 requiredCertKeyTypes) {
@@ -407,13 +405,15 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                                 certificateDerivation.getLeafConfig();
 
                                         if (sigAlg.name().contains("PSS")) {
-                                            if (selectCertConfig.getRsaModulus().bitLength()
+                                            if (selectCertConfig
+                                                            .getDefaultSubjectRsaModulus()
+                                                            .bitLength()
                                                     < 1024) {
                                                 return false;
                                             } else
                                                 return hashAlgo != HashAlgorithm.SHA512
                                                         || selectCertConfig
-                                                                        .getRsaModulus()
+                                                                        .getDefaultSubjectRsaModulus()
                                                                         .bitLength()
                                                                 >= 2048;
                                         }
@@ -447,7 +447,9 @@ public class SigAndHashDerivation extends TlsDerivationParameter<SignatureAndHas
                                         X509CertificateConfig selectedCertConfig =
                                                 certificateDerivation.getLeafConfig();
 
-                                        return selectedCertConfig.getRsaModulus().bitLength()
+                                        return selectedCertConfig
+                                                                .getDefaultSubjectRsaModulus()
+                                                                .bitLength()
                                                         >= 1024
                                                 || !sigAlg.name().contains("RSA")
                                                 || !isSHAHashLongerThan256Bits(hashAlgo);

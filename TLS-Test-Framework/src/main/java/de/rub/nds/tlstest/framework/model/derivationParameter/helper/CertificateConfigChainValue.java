@@ -45,7 +45,7 @@ public class CertificateConfigChainValue extends LinkedList<X509CertificateConfi
             case DSA:
                 break;
             default: // RSA
-                leafRes.put("keySize", leaf.getRsaModulus().bitLength());
+                leafRes.put("keySize", leaf.getDefaultSubjectRsaModulus().bitLength());
         }
         res.put("LEAF", leafRes);
         return res;

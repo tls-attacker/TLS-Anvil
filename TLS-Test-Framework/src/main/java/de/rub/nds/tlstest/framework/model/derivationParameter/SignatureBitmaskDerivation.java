@@ -127,7 +127,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
             switch (requiredPublicKeyType) {
                 case RSASSA_PSS:
                 case RSA:
-                    pkSize = Math.max(pkSize, certConfig.getRsaModulus().bitLength());
+                    pkSize = Math.max(pkSize, certConfig.getDefaultSubjectRsaModulus().bitLength());
                     break;
                 case DH:
                     pkSize = Math.max(pkSize, certConfig.getDhModulus().bitLength());
@@ -148,7 +148,7 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
                                     certConfig.getDefaultSubjectNamedCurve().getBitLength());
                     break;
                 case DSA:
-                    pkSize = Math.max(pkSize, certConfig.getDsaPrimeQ().bitLength());
+                    pkSize = Math.max(pkSize, certConfig.getDefaultSubjectDsaPrimeQ().bitLength());
                     break;
                 default:
                     throw new NotImplementedException(
@@ -230,10 +230,12 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
         switch (certConfig.getPublicKeyType()) {
             case RSASSA_PSS:
                 return computeEstimatedSignatureSize(
-                        SignatureAlgorithm.RSA_SSA_PSS, certConfig.getRsaModulus().bitLength());
+                        SignatureAlgorithm.RSA_SSA_PSS,
+                        certConfig.getDefaultSubjectRsaModulus().bitLength());
             case RSA:
                 return computeEstimatedSignatureSize(
-                        SignatureAlgorithm.RSA_PKCS1, certConfig.getRsaModulus().bitLength());
+                        SignatureAlgorithm.RSA_PKCS1,
+                        certConfig.getDefaultSubjectRsaModulus().bitLength());
             case ECDH_ONLY:
             case ECDH_ECDSA:
                 return computeEstimatedSignatureSize(
@@ -241,7 +243,8 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
                         certConfig.getDefaultSubjectNamedCurve().getBitLength());
             case DSA:
                 return computeEstimatedSignatureSize(
-                        SignatureAlgorithm.DSA, certConfig.getDsaPrimeQ().bitLength());
+                        SignatureAlgorithm.DSA,
+                        certConfig.getDefaultSubjectDsaPrimeQ().bitLength());
             default:
                 throw new RuntimeException(
                         "Can not compute signature size for CertPublicKeyType "
@@ -289,7 +292,9 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
                                         case RSASSA_PSS:
                                         case RSAES_OAEP:
                                             certificateKeySize =
-                                                    certConfig.getRsaModulus().bitLength();
+                                                    certConfig
+                                                            .getDefaultSubjectRsaModulus()
+                                                            .bitLength();
                                             break;
                                         case ECDH_ECDSA:
                                         case ECDH_ONLY:
@@ -312,7 +317,9 @@ public class SignatureBitmaskDerivation extends TlsDerivationParameter<Integer> 
                                             break;
                                         case DSA:
                                             certificateKeySize =
-                                                    certConfig.getDsaPrimeQ().bitLength();
+                                                    certConfig
+                                                            .getDefaultSubjectDsaPrimeQ()
+                                                            .bitLength();
                                             break;
                                         default:
                                             throw new NotImplementedException(

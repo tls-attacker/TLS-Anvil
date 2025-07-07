@@ -284,7 +284,7 @@ public class TestPreparator {
                         testContext.getStateExecutor(),
                         testConfig.getAnvilTestConfig().getConnectionTimeout(),
                         testConfig.isUseDTLS(),
-                        testConfig.createConfig().isAddServerNameIndicationExtension());
+                        testConfig.getTestServerDelegate().isDoNotSendSNIExtension());
 
         ServerReport serverReport = scanner.scan();
         serverReport.putResult(TlsAnalyzedProperty.HTTPS_HEADER, TestResults.ERROR_DURING_TEST);
@@ -313,13 +313,11 @@ public class TestPreparator {
             ParallelExecutor executor,
             int timeout,
             boolean dtls,
-            boolean addSni) {
+            boolean doNotSendSNI) {
         ServerScannerConfig scannerConfig =
                 new ServerScannerConfig(generalDelegate, testServerDelegate);
         scannerConfig.setTimeout(timeout);
-        Config config = scannerConfig.createConfig();
-        config.setAddServerNameIndicationExtension(addSni);
-        config.getDefaultClientConnection().setConnectionTimeout(0);
+        scannerConfig.setDoNotSendSNIExtension(doNotSendSNI);
         if (dtls) {
             scannerConfig.getDtlsDelegate().setDTLS(true);
         }

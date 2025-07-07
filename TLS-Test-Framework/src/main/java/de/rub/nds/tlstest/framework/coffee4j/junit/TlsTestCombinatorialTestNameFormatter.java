@@ -22,8 +22,8 @@ import org.junit.platform.commons.util.StringUtils;
  * -{PARAMETER_NAME}: the value of the {@link Parameter} with the given name in the currently tested
  * {@link Combination}
  *
- * <p>This class is more a less a copy of
- * <i>org.junit.jupiter.params.ParameterizedTestNameFormatter</i> from the junit-jupiter-params
+ * <p>This class is more a less a copy of {@link
+ * org.junit.jupiter.params.ParameterizedInvocationNameFormatter} from the junit-jupiter-params
  * project.
  */
 public class TlsTestCombinatorialTestNameFormatter extends CombinatorialTestNameFormatter {

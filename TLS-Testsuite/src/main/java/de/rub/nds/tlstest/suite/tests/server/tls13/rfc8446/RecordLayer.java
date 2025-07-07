@@ -136,6 +136,8 @@ public class RecordLayer extends Tls13Test {
     @AnvilTest(id = "8446-UCLQ6PhSyy")
     @IncludeParameter("PROTOCOL_VERSION")
     @ExplicitValues(affectedIdentifiers = "PROTOCOL_VERSION", methods = "getRecordProtocolVersions")
+    @ExcludeParameter("RECORD_LENGTH")
+    @ExcludeParameter("MAX_FRAGMENT_LENGTH")
     @Tag("new")
     public void ignoresInitialRecordVersion(AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = getPreparedConfig(runner);

@@ -445,6 +445,7 @@ public class TestPreparator {
         probes.add(TlsProbeType.EC_POINT_FORMAT);
         probes.add(TlsProbeType.SERVER_CERTIFICATE_MINIMUM_KEY_SIZE);
         probes.add(TlsProbeType.CONNECTION_CLOSING_DELTA);
+        probes.add(TlsProbeType.RECORD_FRAGMENTATION);
         probes.add(TlsProbeType.APPLICATION_MESSAGE);
         clientScannerConfig.getServerDelegate().setPort(port);
         clientScannerConfig.setTimeout(timeout);

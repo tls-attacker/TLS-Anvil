@@ -52,10 +52,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -90,7 +87,14 @@ public class TestPreparator {
     private void saveToCache(FeatureExtractionResult report) {
         String fileName;
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
-            fileName = testConfig.getTestClientDelegate().getPort().toString();
+            fileName =
+                    "client_"
+                            + HexFormat.of()
+                                    .toHexDigits(
+                                            testConfig
+                                                    .getTestClientDelegate()
+                                                    .getTriggerScriptCommand()
+                                                    .hashCode());
         } else {
             fileName =
                     testConfig.getTestServerDelegate().getExtractedHost()
@@ -125,7 +129,14 @@ public class TestPreparator {
     private FeatureExtractionResult loadFromCache() {
         String fileName;
         if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
-            fileName = testConfig.getTestClientDelegate().getPort().toString();
+            fileName =
+                    "client_"
+                            + HexFormat.of()
+                                    .toHexDigits(
+                                            testConfig
+                                                    .getTestClientDelegate()
+                                                    .getTriggerScriptCommand()
+                                                    .hashCode());
         } else {
             fileName =
                     testConfig.getTestServerDelegate().getExtractedHost()

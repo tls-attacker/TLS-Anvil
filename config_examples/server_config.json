@@ -6,8 +6,7 @@
     "tags" : [ ],
     "ignoreCache" : false,
     "outputFolder" : "",
-    "parallelTestCases" : 5,
-    "parallelTests" : 7,
+    "parallelTests" : 4,
     "restartServerAfter" : 0,
     "timeoutActionCommand" : [ ],
     "identifier" : "example_server_test",
@@ -22,5 +21,6 @@
     "host" : "localhost:8443",
     "doNotSendSNIExtension" : false
   },
-  "exportTraces" : false
+  "exportTraces" : false,
+  "parallelHandshakes" : 3
 }

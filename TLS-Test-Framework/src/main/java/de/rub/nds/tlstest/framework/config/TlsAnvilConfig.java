@@ -54,7 +54,7 @@ import org.apache.logging.log4j.Logger;
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE,
         creatorVisibility = JsonAutoDetect.Visibility.NONE)
-public class TlsTestConfig extends TLSDelegateConfig {
+public class TlsAnvilConfig extends TLSDelegateConfig {
 
     @JsonProperty private AnvilTestConfig anvilTestConfig;
     private static final Logger LOGGER = LogManager.getLogger();
@@ -99,11 +99,17 @@ public class TlsTestConfig extends TLSDelegateConfig {
                     "Defines the path of the configuration option config file to enable configuration option tests.")
     private String configOptionsConfigFile = "";
 
+    @JsonProperty("parallelHandshakes")
+    @Parameter(
+            names = "-parallelHandshakes",
+            description = "How many handshakes should be executed in parallel?")
+    private int parallelHandshakes = 3;
+
     // we might want to turn these into CLI parameters in the future
     private boolean expectTls13Alerts = false;
     private boolean enforceSenderRestrictions = false;
 
-    public TlsTestConfig() {
+    public TlsAnvilConfig() {
         super(new GeneralDelegate());
         this.testServerDelegate = new TestServerDelegate();
         this.testClientDelegate = new TestClientDelegate();
@@ -174,35 +180,35 @@ public class TlsTestConfig extends TLSDelegateConfig {
         } else if (tlsAnvilConfig != null) {
             // -tlsAnvilConfig used, parse args from file
             ObjectMapper objectMapper = new ObjectMapper();
-            TlsTestConfig tlsTestConfig;
+            TlsAnvilConfig tlsAnvilConfig;
             Map<?, ?> raw;
             try {
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-                tlsTestConfig =
-                        objectMapper.readValue(new File(tlsAnvilConfig), TlsTestConfig.class);
+                tlsAnvilConfig =
+                        objectMapper.readValue(new File(this.tlsAnvilConfig), TlsAnvilConfig.class);
 
-                raw = objectMapper.readValue(new File(tlsAnvilConfig), Map.class);
-                if (raw.get("clientConfig") == null) tlsTestConfig.setTestClientDelegate(null);
-                if (raw.get("serverConfig") == null) tlsTestConfig.setTestServerDelegate(null);
+                raw = objectMapper.readValue(new File(this.tlsAnvilConfig), Map.class);
+                if (raw.get("clientConfig") == null) tlsAnvilConfig.setTestClientDelegate(null);
+                if (raw.get("serverConfig") == null) tlsAnvilConfig.setTestServerDelegate(null);
 
             } catch (IOException e) {
                 LOGGER.error("Error while parsing config file.", e);
                 System.exit(1);
                 return;
             }
-            this.setExportTraces(tlsTestConfig.isExportTraces());
-            this.anvilTestConfig = tlsTestConfig.getAnvilTestConfig();
+            this.setExportTraces(tlsAnvilConfig.isExportTraces());
+            this.anvilTestConfig = tlsAnvilConfig.getAnvilTestConfig();
 
-            TestClientDelegate testClientDelegate = tlsTestConfig.getTestClientDelegate();
-            TestServerDelegate testServerDelegate = tlsTestConfig.getTestServerDelegate();
+            TestClientDelegate testClientDelegate = tlsAnvilConfig.getTestClientDelegate();
+            TestServerDelegate testServerDelegate = tlsAnvilConfig.getTestServerDelegate();
             if (testClientDelegate == null && testServerDelegate != null) {
                 this.testEndpointMode = TestEndpointType.SERVER;
                 this.parsedCommand = ConfigDelegates.SERVER;
-                this.testServerDelegate = tlsTestConfig.getTestServerDelegate();
+                this.testServerDelegate = tlsAnvilConfig.getTestServerDelegate();
             } else if (testClientDelegate != null && testServerDelegate == null) {
                 this.testEndpointMode = TestEndpointType.CLIENT;
                 this.parsedCommand = ConfigDelegates.CLIENT;
-                this.testClientDelegate = tlsTestConfig.getTestClientDelegate();
+                this.testClientDelegate = tlsAnvilConfig.getTestClientDelegate();
             } else {
                 LOGGER.error(
                         "Error: Config must contain either clientConfig or serverConfig section!");
@@ -310,7 +316,7 @@ public class TlsTestConfig extends TLSDelegateConfig {
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         try {
-            TlsTestConfig newConfig = mapper.readValue(additionalConfig, this.getClass());
+            TlsAnvilConfig newConfig = mapper.readValue(additionalConfig, this.getClass());
             this.testClientDelegate = newConfig.testClientDelegate;
             this.testServerDelegate = newConfig.testServerDelegate;
             if (this.testServerDelegate != null
@@ -648,5 +654,13 @@ public class TlsTestConfig extends TLSDelegateConfig {
 
     public void setConfigOptionsConfigFile(String configOptionsConfigFile) {
         this.configOptionsConfigFile = configOptionsConfigFile;
+    }
+
+    public int getParallelHandshakes() {
+        return parallelHandshakes;
+    }
+
+    public void setParallelHandshakes(int parallelHandshakes) {
+        this.parallelHandshakes = parallelHandshakes;
     }
 }

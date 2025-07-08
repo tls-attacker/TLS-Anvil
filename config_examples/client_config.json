@@ -5,7 +5,7 @@
     "tags" : [ ],
     "ignoreCache" : false,
     "outputFolder" : "",
-    "parallelTestCases" : 5,
+    "parallelTests" : 4,
     "restartServerAfter" : 0,
     "timeoutActionCommand" : [ ],
     "identifier" : "example_client_test",
@@ -20,5 +20,6 @@
   "clientConfig" : {
     "triggerScriptCommand" : [ "curl", "localhost:8090/trigger" ]
   },
-  "exportTraces" : false
+  "exportTraces" : false,
+  "parallelHandshakes" : 3
 }

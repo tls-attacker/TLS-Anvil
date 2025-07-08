@@ -30,7 +30,7 @@ docker run \
     -v $(pwd):/output/ \
     -v ./profiles/:/profiles/ \
     ghcr.io/tls-attacker/tlsanvil:latest \
-    -parallelTestCases 1 \
+    -parallelHandshakes 1 \
     -connectionTimeout 200 \
     -strength 1 \
     -identifier openssl-server \

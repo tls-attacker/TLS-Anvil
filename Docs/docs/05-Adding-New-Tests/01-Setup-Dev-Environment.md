@@ -51,14 +51,14 @@ The recommended way is to edit the JUnit 5 template of IDEA.
 Simple example:
 
 ```
--networkInterface lo0 -parallelTestCases 1 -strength 1 server -connect localhost:8443 -doNotSendSNIExtension
+-networkInterface lo0 -parallelHandshakes 1 -strength 1 server -connect localhost:8443 -doNotSendSNIExtension
 ```
 
 * Use `COMMAND_CLIENT` to specify CLI options for testing a client  
   Simple example:
 
 ```
--networkInterface lo0 -parallelTestCases 1 -strength 1 client -port 8443 -triggerScript [path to script]
+-networkInterface lo0 -parallelHandshakes 1 -strength 1 client -port 8443 -triggerScript [path to script]
 ```
 
 When the environment variables are configured, it is possible to run a client or server test by clicking the green play buttons next to a function. The specified variables are used by TLS-Anvil to setup the test backend accordingly.

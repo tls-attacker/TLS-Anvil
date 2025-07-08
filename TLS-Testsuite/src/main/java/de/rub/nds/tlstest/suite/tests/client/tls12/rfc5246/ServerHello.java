@@ -7,17 +7,15 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls12.rfc5246;
 
-import de.rub.nds.anvilcore.annotation.AnvilTest;
-import de.rub.nds.anvilcore.annotation.ClientTest;
-import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
-import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.*;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
+import de.rub.nds.anvilcore.model.DerivationScope;
+import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.*;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
-import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.*;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.sni.ServerNamePair;
@@ -30,48 +28,70 @@ import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.CompressionMethodDerivation;
+import de.rub.nds.tlstest.framework.model.derivationParameter.ExtensionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 @ClientTest
 public class ServerHello extends Tls12Test {
 
+    public List<DerivationParameter<Config, ExtensionType>> getUnrequestedExtensions(
+            DerivationScope scope) {
+        List<DerivationParameter<Config, ExtensionType>> parameterValues = new LinkedList<>();
+        List<ExtensionType> extensions = new LinkedList<>();
+        extensions.add(ExtensionType.ENCRYPT_THEN_MAC);
+        extensions.add(ExtensionType.SERVER_NAME_INDICATION);
+        extensions.add(ExtensionType.RENEGOTIATION_INFO);
+        extensions.add(ExtensionType.PADDING);
+
+        List<ExtensionType> clientExtensions =
+                context.getReceivedClientHelloMessage().getExtensions().stream()
+                        .map(i -> ExtensionType.getExtensionType(i.getExtensionType().getValue()))
+                        .toList();
+        extensions.removeAll(clientExtensions);
+        if (extensions.isEmpty()) {
+            extensions.add(ExtensionType.GREASE_00);
+        }
+        for (ExtensionType unrequestedType : extensions) {
+            parameterValues.add(new ExtensionDerivation(unrequestedType));
+        }
+        return parameterValues;
+    }
+
     @AnvilTest(id = "5246-YnrTYxwh4n")
     @ModelFromScope(modelType = "CERTIFICATE")
+    @IncludeParameter("EXTENSION")
+    @ManualConfig(identifiers = "EXTENSION")
+    @ExplicitValues(affectedIdentifiers = "EXTENSION", methods = "getUnrequestedExtensions")
     public void sendAdditionalExtension(AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);
         c.setAddRenegotiationInfoExtension(false);
 
-        ClientHelloMessage clientHello = context.getReceivedClientHelloMessage();
-
-        List<ExtensionMessage> receivedExtensions = clientHello.getExtensions();
-        List<ExtensionType> types = new ArrayList<>();
+        ExtensionType type =
+                parameterCombination.getParameter(ExtensionDerivation.class).getSelectedValue();
         ExtensionMessage extensionMessage;
 
-        for (ExtensionMessage i : receivedExtensions) {
-            types.add(ExtensionType.getExtensionType(i.getExtensionType().getValue()));
-        }
-
-        if (!types.contains(ExtensionType.ENCRYPT_THEN_MAC)) {
+        if (type == ExtensionType.ENCRYPT_THEN_MAC) {
             extensionMessage = new EncryptThenMacExtensionMessage();
-        } else if (!types.contains(ExtensionType.SERVER_NAME_INDICATION)) {
+        } else if (type == ExtensionType.SERVER_NAME_INDICATION) {
             ServerNameIndicationExtensionMessage sni = new ServerNameIndicationExtensionMessage();
             ServerNamePair sniPair =
                     new ServerNamePair(SniType.HOST_NAME.getValue(), "localhost".getBytes());
             sni.setServerNameList(
-                    new ArrayList<ServerNamePair>() {
+                    new ArrayList<>() {
                         {
                             add(sniPair);
                         }
                     });
 
             extensionMessage = sni;
-        } else if (!types.contains(ExtensionType.RENEGOTIATION_INFO)) {
+        } else if (type == ExtensionType.RENEGOTIATION_INFO) {
             RenegotiationInfoExtensionMessage rie = new RenegotiationInfoExtensionMessage();
             rie.setRenegotiationInfo(Modifiable.explicit("abc".getBytes()));
             extensionMessage = rie;
-        } else if (!types.contains(ExtensionType.PADDING)) {
+        } else if (type == ExtensionType.PADDING) {
             PaddingExtensionMessage pem = new PaddingExtensionMessage();
             pem.setPaddingBytes(Modifiable.explicit(new byte[10]));
             extensionMessage = pem;

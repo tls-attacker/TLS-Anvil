@@ -23,7 +23,7 @@ public class SerializeExpectedResultsIT {
         MetadataFetcher metadataFetcher = new MetadataFetcher();
         Iterator<String> allTestIds = metadataFetcher.getAllTestIds().stream().sorted().iterator();
         Map<TestResult, Set<String>> resultSetMap = new HashMap<>();
-        for (TestResult testResult : TestResult.values()) {
+        for (TestResult testResult : Arrays.stream(TestResult.values()).sorted().toList()) {
             resultSetMap.put(testResult, Set.of(allTestIds.next(), allTestIds.next()));
         }
         anvilConfig.setExpectedResultsMap(resultSetMap);

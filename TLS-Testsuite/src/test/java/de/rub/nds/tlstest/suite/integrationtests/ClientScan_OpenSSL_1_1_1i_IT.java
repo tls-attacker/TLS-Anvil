@@ -13,13 +13,13 @@ public class ClientScan_OpenSSL_1_1_1i_IT extends AbstractClientScanIT {
 
     @Override
     protected void setUpAnvilTestConfig(AnvilTestConfig anvilTestConfig) {
-        anvilTestConfig.setParallelTests(1);
+        anvilTestConfig.setParallelTests(2);
         anvilTestConfig.setStrength(1);
         anvilTestConfig.setConnectionTimeout(200);
     }
 
     @Override
     protected void setUpTlsTestConfig(TlsAnvilConfig tlsConfig) {
-        tlsConfig.setParallelHandshakes(1);
+        tlsConfig.setParallelHandshakes(3);
     }
 }

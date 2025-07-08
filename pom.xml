@@ -177,6 +177,7 @@
                             <include>**/*.java</include>
                         </includes>
                         <skipITs>${skip.failsafe.tests}</skipITs>
+                        <forkCount>3</forkCount>
                     </configuration>
                     <executions>
                         <execution>

@@ -53,11 +53,6 @@
         </dependency>
         <dependency>
             <groupId>de.rub.nds</groupId>
-            <artifactId>scanner-core</artifactId>
-            <version>${toolkit.common.scannercore.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>de.rub.nds</groupId>
             <artifactId>x509-attacker</artifactId>
             <version>${toolkit.common.x509attacker.version}</version>
         </dependency>

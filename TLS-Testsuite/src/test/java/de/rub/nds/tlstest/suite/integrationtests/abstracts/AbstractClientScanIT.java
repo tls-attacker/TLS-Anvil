@@ -10,12 +10,12 @@ import de.rub.nds.tls.subject.ConnectionRole;
 import de.rub.nds.tls.subject.TlsImplementationType;
 import de.rub.nds.tls.subject.constants.TransportType;
 import de.rub.nds.tls.subject.docker.DockerClientManager;
+import de.rub.nds.tls.subject.docker.DockerTlsClientInstance;
 import de.rub.nds.tls.subject.docker.DockerTlsInstance;
 import de.rub.nds.tls.subject.docker.DockerTlsManagerFactory;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.opentest4j.TestAbortedException;
@@ -25,7 +25,6 @@ public abstract class AbstractClientScanIT extends AbstractScanIT {
     private static final Logger LOGGER = LogManager.getLogger();
     protected String clientHostname;
     protected Integer clientTriggerPort;
-    protected String serverHostname;
     protected Integer serverPort;
     protected TestClientDelegate testClientDelegate = new TestClientDelegate();
 
@@ -33,7 +32,6 @@ public abstract class AbstractClientScanIT extends AbstractScanIT {
         super(tlsImplementationType, ConnectionRole.CLIENT, version);
         clientTriggerPort = 8090;
         serverPort = findPort();
-        serverHostname = "172.17.0.1";
     }
 
     private Integer findPort() {
@@ -67,7 +65,11 @@ public abstract class AbstractClientScanIT extends AbstractScanIT {
         try {
             dockerInstance =
                     clientInstanceBuilder
-                            .ip(serverHostname)
+                            .hostConfigHook(
+                                    (hostConfig ->
+                                            hostConfig.withExtraHosts(
+                                                    "host.docker.internal:host-gateway")))
+                            .ip("host.docker.internal")
                             .port(serverPort)
                             .connectOnStartup(true)
                             .build();
@@ -96,13 +98,10 @@ public abstract class AbstractClientScanIT extends AbstractScanIT {
 
     protected void setUpClientDelegate(TestClientDelegate testClientDelegate) {
         testClientDelegate.setPort(serverPort);
-        testClientDelegate.setTriggerScriptCommand(
-                List.of(
-                        new String[] {
-                            "curl",
-                            "--connect-timeout",
-                            "4",
-                            clientHostname + ":" + clientTriggerPort + "/trigger"
-                        }));
+        testClientDelegate.setTriggerScript(
+                state -> {
+                    ((DockerTlsClientInstance) dockerInstance).connect();
+                    return 0;
+                });
     }
 }

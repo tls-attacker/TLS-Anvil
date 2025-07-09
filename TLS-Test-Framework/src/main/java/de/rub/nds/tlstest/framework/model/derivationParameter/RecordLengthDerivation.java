@@ -9,6 +9,7 @@ package de.rub.nds.tlstest.framework.model.derivationParameter;
 
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
+import de.rub.nds.scanner.core.probe.result.IntegerResult;
 import de.rub.nds.scanner.core.probe.result.TestResults;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsscanner.core.constants.TlsAnalyzedProperty;
@@ -36,9 +37,20 @@ public class RecordLengthDerivation extends TlsDerivationParameter<Integer> {
         if (context.getFeatureExtractionResult()
                         .getResult(TlsAnalyzedProperty.SUPPORTS_RECORD_FRAGMENTATION)
                 == TestResults.TRUE) {
-            parameterValues.add(new RecordLengthDerivation(50));
-            parameterValues.add(new RecordLengthDerivation(111));
-            parameterValues.add(new RecordLengthDerivation(1));
+            int minRecordLength =
+                    ((IntegerResult)
+                                    context.getFeatureExtractionResult()
+                                            .getResult(TlsAnalyzedProperty.MIN_RECORD_LENGTH))
+                            .getValue();
+            if (minRecordLength <= 50) {
+                parameterValues.add(new RecordLengthDerivation(50));
+            }
+            if (minRecordLength <= 111) {
+                parameterValues.add(new RecordLengthDerivation(111));
+            }
+            if (minRecordLength <= 1) {
+                parameterValues.add(new RecordLengthDerivation(1));
+            }
         }
         parameterValues.add(new RecordLengthDerivation(16384));
         return parameterValues;

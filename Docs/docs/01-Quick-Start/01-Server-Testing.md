@@ -52,7 +52,7 @@ docker run \
     --network tls-anvil \
     -v $(pwd):/output/ \
     ghcr.io/tls-attacker/tlsanvil:latest \
-    -parallelTestCases 1 \
+    -parallelHandshakes 1 \
     -connectionTimeout 200 \
     -strength 1 \
     -identifier openssl-server \

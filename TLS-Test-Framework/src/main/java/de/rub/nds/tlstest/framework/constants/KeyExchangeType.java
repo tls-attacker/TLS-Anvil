@@ -17,6 +17,7 @@ public enum KeyExchangeType {
     RSA,
     DH,
     ECDH,
+    PSK,
     ALL12,
     ALL13,
     NOT_SPECIFIED;

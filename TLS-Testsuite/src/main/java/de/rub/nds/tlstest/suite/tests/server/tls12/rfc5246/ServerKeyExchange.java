@@ -123,16 +123,12 @@ public class ServerKeyExchange extends Tls12Test {
                 && !cipherSuiteCandidate.isTls13()
                 && cipherSuiteCandidate.isEphemeral()
                 && (Arrays.stream(
-                                        AlgorithmResolver.getSuiteableLeafCertificateKeyType(
-                                                cipherSuiteCandidate))
-                                .anyMatch(kt -> kt == X509PublicKeyType.ECDH_ECDSA)
-                        || Arrays.stream(
-                                        AlgorithmResolver.getSuiteableLeafCertificateKeyType(
-                                                cipherSuiteCandidate))
-                                .anyMatch(kt -> kt == X509PublicKeyType.RSA)
-                        || Arrays.stream(
-                                        AlgorithmResolver.getSuiteableLeafCertificateKeyType(
-                                                cipherSuiteCandidate))
-                                .anyMatch(kt -> kt == X509PublicKeyType.DSA));
+                                AlgorithmResolver.getSuitableLeafCertificateKeyType(
+                                        cipherSuiteCandidate))
+                        .anyMatch(
+                                kt ->
+                                        kt == X509PublicKeyType.ECDH_ECDSA
+                                                || kt == X509PublicKeyType.RSA
+                                                || kt == X509PublicKeyType.DSA));
     }
 }

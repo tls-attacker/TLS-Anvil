@@ -148,7 +148,7 @@ public class ClientInitiatedExtensionPoints extends Tls12Test {
 
         ServerKeyExchangeMessage skx =
                 state.getWorkflowTrace().getFirstReceivedMessage(ServerKeyExchangeMessage.class);
-        if (skx == null) {
+        if (skx == null || skx.getSignatureAndHashAlgorithm() == null) {
             return;
         }
         assertFalse(

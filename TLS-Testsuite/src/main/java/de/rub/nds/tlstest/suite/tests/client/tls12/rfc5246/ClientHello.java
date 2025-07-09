@@ -83,7 +83,7 @@ public class ClientHello extends Tls12Test {
         for (CipherSuite cipherSuite : proposedCipherSuites) {
             boolean foundMatch = false;
             for (X509PublicKeyType keyType :
-                    AlgorithmResolver.getSuiteableLeafCertificateKeyType(cipherSuite)) {
+                    AlgorithmResolver.getSuitableLeafCertificateKeyType(cipherSuite)) {
                 switch (keyType) {
                     case DH:
                     case DSA:

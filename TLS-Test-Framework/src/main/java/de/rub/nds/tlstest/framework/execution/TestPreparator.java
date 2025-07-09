@@ -36,7 +36,7 @@ import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.FeatureExtractionResult;
 import de.rub.nds.tlstest.framework.ServerFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.TestContext;
-import de.rub.nds.tlstest.framework.config.TlsTestConfig;
+import de.rub.nds.tlstest.framework.config.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import de.rub.nds.tlstest.framework.junitExtensions.TlsVersionCondition;
@@ -52,10 +52,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -71,13 +68,13 @@ import org.junit.platform.launcher.*;
 public class TestPreparator {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private final TlsTestConfig testConfig;
+    private final TlsAnvilConfig tlsAnvilConfig;
     private final TestContext testContext;
 
     private boolean targetIsReady = false;
 
-    public TestPreparator(TlsTestConfig testConfig, TestContext testContext) {
-        this.testConfig = testConfig;
+    public TestPreparator(TlsAnvilConfig tlsAnvilConfig, TestContext testContext) {
+        this.tlsAnvilConfig = tlsAnvilConfig;
         this.testContext = testContext;
     }
 
@@ -89,13 +86,20 @@ public class TestPreparator {
      */
     private void saveToCache(FeatureExtractionResult report) {
         String fileName;
-        if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
-            fileName = testConfig.getTestClientDelegate().getPort().toString();
+        if (tlsAnvilConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
+            fileName =
+                    "client_"
+                            + HexFormat.of()
+                                    .toHexDigits(
+                                            tlsAnvilConfig
+                                                    .getTestClientDelegate()
+                                                    .getTriggerScriptCommand()
+                                                    .hashCode());
         } else {
             fileName =
-                    testConfig.getTestServerDelegate().getExtractedHost()
+                    tlsAnvilConfig.getTestServerDelegate().getExtractedHost()
                             + "_"
-                            + testConfig.getTestServerDelegate().getExtractedPort();
+                            + tlsAnvilConfig.getTestServerDelegate().getExtractedPort();
         }
 
         try {
@@ -124,17 +128,24 @@ public class TestPreparator {
      */
     private FeatureExtractionResult loadFromCache() {
         String fileName;
-        if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
-            fileName = testConfig.getTestClientDelegate().getPort().toString();
+        if (tlsAnvilConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
+            fileName =
+                    "client_"
+                            + HexFormat.of()
+                                    .toHexDigits(
+                                            tlsAnvilConfig
+                                                    .getTestClientDelegate()
+                                                    .getTriggerScriptCommand()
+                                                    .hashCode());
         } else {
             fileName =
-                    testConfig.getTestServerDelegate().getExtractedHost()
+                    tlsAnvilConfig.getTestServerDelegate().getExtractedHost()
                             + "_"
-                            + testConfig.getTestServerDelegate().getExtractedPort();
+                            + tlsAnvilConfig.getTestServerDelegate().getExtractedPort();
         }
         fileName = fileName + ".ser";
         File cachedFile = new File(Paths.get("cache", fileName).toString());
-        if (cachedFile.exists() && !testConfig.getAnvilTestConfig().isIgnoreCache()) {
+        if (cachedFile.exists() && !tlsAnvilConfig.getAnvilTestConfig().isIgnoreCache()) {
             try {
                 FileInputStream fis = new FileInputStream(cachedFile);
                 ObjectInputStream ois = new ObjectInputStream(fis);
@@ -145,7 +156,7 @@ public class TestPreparator {
             } catch (Exception e) {
                 LOGGER.error("Failed to load cached ScanReport {}", fileName, e);
             }
-        } else if (cachedFile.exists() && testConfig.getAnvilTestConfig().isIgnoreCache()) {
+        } else if (cachedFile.exists() && tlsAnvilConfig.getAnvilTestConfig().isIgnoreCache()) {
             LOGGER.info("Ignoring cached ScanReport as configurated");
         } else {
             LOGGER.info("No matching ScanReport has been cached yet");
@@ -166,7 +177,7 @@ public class TestPreparator {
                                     LOGGER.info("Waiting for the client to get ready...");
                                     try {
                                         State state = new State();
-                                        testConfig
+                                        tlsAnvilConfig
                                                 .getTestClientDelegate()
                                                 .executeTriggerScript(state);
                                     } catch (Exception ignored) {
@@ -179,13 +190,13 @@ public class TestPreparator {
                                 }
                             })
                     .start();
-            if (!testConfig.isUseDTLS()) {
-                Socket socket = testConfig.getTestClientDelegate().getServerSocket().accept();
+            if (!tlsAnvilConfig.isUseDTLS()) {
+                Socket socket = tlsAnvilConfig.getTestClientDelegate().getServerSocket().accept();
                 targetIsReady = true;
                 socket.close();
             } else {
                 DatagramSocket socket =
-                        new DatagramSocket(testConfig.getTestClientDelegate().getPort());
+                        new DatagramSocket(tlsAnvilConfig.getTestClientDelegate().getPort());
 
                 byte[] buf = new byte[256];
 
@@ -216,14 +227,14 @@ public class TestPreparator {
      * until success.
      */
     private void waitForServer() {
-        OutboundConnection connection = testConfig.createConfig().getDefaultClientConnection();
+        OutboundConnection connection = tlsAnvilConfig.createConfig().getDefaultClientConnection();
 
         try {
             Socket conTest = null;
             DatagramSocket conTestDtls = null;
             while (!targetIsReady && !testContext.isAborted()) {
                 try {
-                    if (testConfig.isUseDTLS()) {
+                    if (tlsAnvilConfig.isUseDTLS()) {
                         String connectionEndpoint;
                         if (connection.getIp() != null) {
                             connectionEndpoint = connection.getIp();
@@ -251,7 +262,7 @@ public class TestPreparator {
                 }
             }
 
-            if (testConfig.isUseDTLS()) {
+            if (tlsAnvilConfig.isUseDTLS()) {
                 if (conTestDtls != null) conTestDtls.close();
             } else {
                 if (conTest != null) conTest.close();
@@ -279,18 +290,18 @@ public class TestPreparator {
 
         TlsServerScanner scanner =
                 getServerScanner(
-                        testConfig.getGeneralDelegate(),
-                        testConfig.getTestServerDelegate(),
+                        tlsAnvilConfig.getGeneralDelegate(),
+                        tlsAnvilConfig.getTestServerDelegate(),
                         testContext.getStateExecutor(),
-                        testConfig.getAnvilTestConfig().getConnectionTimeout(),
-                        testConfig.isUseDTLS(),
-                        testConfig.createConfig().isAddServerNameIndicationExtension());
+                        tlsAnvilConfig.getAnvilTestConfig().getConnectionTimeout(),
+                        tlsAnvilConfig.isUseDTLS(),
+                        tlsAnvilConfig.getTestServerDelegate().isDoNotSendSNIExtension());
 
         ServerReport serverReport = scanner.scan();
         serverReport.putResult(TlsAnalyzedProperty.HTTPS_HEADER, TestResults.ERROR_DURING_TEST);
         FeatureExtractionResult report =
                 ServerFeatureExtractionResult.fromServerScanReport(serverReport);
-        if (!testConfig.getAnvilTestConfig().isIgnoreCache()) {
+        if (!tlsAnvilConfig.getAnvilTestConfig().isIgnoreCache()) {
             saveToCache(report);
         }
 
@@ -313,13 +324,11 @@ public class TestPreparator {
             ParallelExecutor executor,
             int timeout,
             boolean dtls,
-            boolean addSni) {
+            boolean doNotSendSNI) {
         ServerScannerConfig scannerConfig =
                 new ServerScannerConfig(generalDelegate, testServerDelegate);
         scannerConfig.setTimeout(timeout);
-        Config config = scannerConfig.createConfig();
-        config.setAddServerNameIndicationExtension(addSni);
-        config.getDefaultClientConnection().setConnectionTimeout(0);
+        scannerConfig.setDoNotSendSNIExtension(doNotSendSNI);
         if (dtls) {
             scannerConfig.getDtlsDelegate().setDTLS(true);
         }
@@ -374,22 +383,22 @@ public class TestPreparator {
         // ParallelExecutor handles the trigger script for the entire execution
         TlsClientScanner clientScanner =
                 getClientScanner(
-                        testConfig.getDelegate(TestClientDelegate.class).getPort(),
+                        tlsAnvilConfig.getDelegate(TestClientDelegate.class).getPort(),
                         preparedExecutor,
-                        testConfig.getAnvilTestConfig().getConnectionTimeout(),
+                        tlsAnvilConfig.getAnvilTestConfig().getConnectionTimeout(),
                         null,
-                        testConfig.isUseDTLS());
+                        tlsAnvilConfig.isUseDTLS());
 
         String identifier =
-                testConfig.getAnvilTestConfig().getIdentifier() == null
+                tlsAnvilConfig.getAnvilTestConfig().getIdentifier() == null
                         ? "client"
-                        : testConfig.getAnvilTestConfig().getIdentifier();
+                        : tlsAnvilConfig.getAnvilTestConfig().getIdentifier();
         ClientFeatureExtractionResult extractionResult =
                 ClientFeatureExtractionResult.fromClientScanReport(
                         clientScanner.scan(), identifier);
 
         extractionResult.setReceivedClientHello(clientHello);
-        if (!testConfig.getAnvilTestConfig().isIgnoreCache()) {
+        if (!tlsAnvilConfig.getAnvilTestConfig().isIgnoreCache()) {
             saveToCache(extractionResult);
         }
         testContext.setReceivedClientHelloMessage(clientHello);
@@ -407,9 +416,9 @@ public class TestPreparator {
         preparedExecutor.setDefaultBeforeTransportPreInitCallback(getSocketManagementCallback());
         // Ensure we always trigger the client
         preparedExecutor.setDefaultBeforeTransportInitCallback(
-                testConfig.getTestClientDelegate().getTriggerScript());
+                tlsAnvilConfig.getTestClientDelegate().getTriggerScript());
 
-        if (testConfig.isUseDTLS()) {
+        if (tlsAnvilConfig.isUseDTLS()) {
             // todo: set reexecution callback for dtls in parallel executor once it is updated
         }
     }
@@ -447,6 +456,7 @@ public class TestPreparator {
         probes.add(TlsProbeType.EC_POINT_FORMAT);
         probes.add(TlsProbeType.SERVER_CERTIFICATE_MINIMUM_KEY_SIZE);
         probes.add(TlsProbeType.CONNECTION_CLOSING_DELTA);
+        probes.add(TlsProbeType.RECORD_FRAGMENTATION);
         probes.add(TlsProbeType.APPLICATION_MESSAGE);
         clientScannerConfig.getServerDelegate().setPort(port);
         clientScannerConfig.setTimeout(timeout);
@@ -470,13 +480,13 @@ public class TestPreparator {
      */
     private ClientHelloMessage catchClientHello(ParallelExecutor executor) {
         LOGGER.info("Attempting to receive a Client Hello");
-        return catchClientHello(executor, testConfig.getTestClientDelegate().getPort());
+        return catchClientHello(executor, tlsAnvilConfig.getTestClientDelegate().getPort());
     }
 
     public static ClientHelloMessage catchClientHello(ParallelExecutor executor, int port) {
 
-        TlsTestConfig testConfig = TestContext.getInstance().getConfig();
-        Config config = testConfig.createConfig();
+        TlsAnvilConfig tlsAnvilConfig = TestContext.getInstance().getConfig();
+        Config config = tlsAnvilConfig.createConfig();
         config.setDefaultServerConnection(new InboundConnection(port));
         WorkflowTrace catchHelloWorkflowTrace = new WorkflowTrace();
         catchHelloWorkflowTrace.addTlsAction(new ReceiveAction(new ClientHelloMessage()));
@@ -496,33 +506,34 @@ public class TestPreparator {
      * @return returns true if preparation was successful, false if the test cannot be started
      */
     public boolean prepareTestExecution() {
-        if (!testConfig.isParsedArgs()) {
+        if (!tlsAnvilConfig.isParsedArgs()) {
             return false;
         }
-        if (testConfig.getTestEndpointMode() == TestEndpointType.CLIENT
-                && testConfig.isUseDTLS()
-                && testConfig.getAnvilTestConfig().getParallelTestCases() > 1) {
+        // no parallel execution for DTLS
+        if (tlsAnvilConfig.getTestEndpointMode() == TestEndpointType.CLIENT
+                && tlsAnvilConfig.isUseDTLS()
+                && tlsAnvilConfig.getParallelHandshakes() > 1) {
             LOGGER.warn(
                     "Restricting parallel test cases to 1 as TLS-Attacker does not support parallel UDP connections");
-            testConfig.getAnvilTestConfig().setParallelTestCases(1);
+            tlsAnvilConfig.setParallelHandshakes(1);
         }
 
         ParallelExecutor executor =
-                ParallelExecutor.create(testConfig.getAnvilTestConfig().getParallelTestCases(), 1);
-        executor.setTimeoutAction(testConfig.getTimeoutActionScript());
+                ParallelExecutor.create(tlsAnvilConfig.getParallelHandshakes(), 1);
+        executor.setTimeoutAction(tlsAnvilConfig.getTimeoutActionScript());
         executor.armTimeoutAction(20000);
         testContext.setStateExecutor(executor);
 
         LOGGER.info("Starting preparation phase");
-        String configurationOptionsConfigFile = testConfig.getConfigOptionsConfigFile();
+        String configurationOptionsConfigFile = tlsAnvilConfig.getConfigOptionsConfigFile();
         if (!configurationOptionsConfigFile.isEmpty()) {
             LOGGER.info("Preparing configuration options environment");
             ConfigurationOptionsExtension.getInstance().load(configurationOptionsConfigFile);
         } else {
-            this.testConfig.createConfig();
-            if (this.testConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
+            this.tlsAnvilConfig.createConfig();
+            if (this.tlsAnvilConfig.getTestEndpointMode() == TestEndpointType.CLIENT) {
                 clientTestPreparation();
-            } else if (this.testConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
+            } else if (this.tlsAnvilConfig.getTestEndpointMode() == TestEndpointType.SERVER) {
                 serverTestPreparation();
                 ServerFeatureExtractionResult featureExtractionResult =
                         (ServerFeatureExtractionResult) testContext.getFeatureExtractionResult();
@@ -533,10 +544,11 @@ public class TestPreparator {
             } else throw new RuntimeException("Invalid TestEndpointMode");
 
             try {
-                Files.createDirectories(Path.of(testConfig.getAnvilTestConfig().getOutputFolder()));
+                Files.createDirectories(
+                        Path.of(tlsAnvilConfig.getAnvilTestConfig().getOutputFolder()));
                 Files.writeString(
                         Path.of(
-                                testConfig.getAnvilTestConfig().getOutputFolder(),
+                                tlsAnvilConfig.getAnvilTestConfig().getOutputFolder(),
                                 "tls-scanner.txt"),
                         testContext.getFeatureExtractionResult().getTestReport());
             } catch (IOException | NullPointerException e) {

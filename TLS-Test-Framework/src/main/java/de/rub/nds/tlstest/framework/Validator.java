@@ -18,7 +18,9 @@ import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.Tls13KeySetType;
+import de.rub.nds.tlsattacker.core.layer.constant.ImplementedLayers;
 import de.rub.nds.tlsattacker.core.layer.context.TlsContext;
+import de.rub.nds.tlsattacker.core.layer.data.DataContainer;
 import de.rub.nds.tlsattacker.core.protocol.ProtocolMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ApplicationMessage;
@@ -41,15 +43,13 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.TlsAction;
+import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.transport.socket.SocketState;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.model.derivationParameter.TcpFragmentationDerivation;
 import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -209,7 +209,42 @@ public class Validator {
 
     public static void executedAsPlanned(State state, AnvilTestCase testCase) {
         checkForUnknownMessage(state, testCase);
-        assertTrue(state.getWorkflowTrace().executedAsPlanned(), AssertMsgs.WORKFLOW_NOT_EXECUTED);
+        assertTrue(
+                executedAsPlannedWithDetails(state.getWorkflowTrace(), testCase),
+                AssertMsgs.WORKFLOW_NOT_EXECUTED);
+    }
+
+    private static boolean executedAsPlannedWithDetails(
+            WorkflowTrace workflowTrace, AnvilTestCase testCase) {
+        for (TlsAction action : workflowTrace.getTlsActions()) {
+            if (!action.executedAsPlanned()
+                    && (action.getActionOptions() == null
+                            || !action.getActionOptions().contains(ActionOption.MAY_FAIL))) {
+                String actionString;
+                if (action instanceof ReceiveAction) {
+                    // custom slim ReceiveAction printing
+                    StringJoiner joiner = new StringJoiner(", ");
+                    for (ProtocolMessage message : ((ReceiveAction) action).getExpectedMessages()) {
+                        joiner.add(message.toCompactString());
+                    }
+                    actionString = "ReceiveAction: | Expected: " + joiner;
+                    joiner = new StringJoiner(", ");
+                    for (DataContainer container :
+                            ((ReceiveAction) action)
+                                    .getLayerStackProcessingResult()
+                                    .getResultForLayer(ImplementedLayers.MESSAGE)
+                                    .getUsedContainers()) {
+                        joiner.add(container.toCompactString());
+                    }
+                    actionString += "| Actual: " + joiner + " |";
+                } else {
+                    actionString = action.toString();
+                }
+                testCase.addAdditionalResultInfo("Failed " + actionString.replaceAll("\\R", " | "));
+                return false;
+            }
+        }
+        return true;
     }
 
     public static void receivedWarningAlert(State state, AnvilTestCase testCase) {

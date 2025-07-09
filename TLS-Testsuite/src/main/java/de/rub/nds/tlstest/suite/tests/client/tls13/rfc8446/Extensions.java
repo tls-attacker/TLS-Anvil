@@ -34,8 +34,6 @@ import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.ExtensionDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -71,13 +69,6 @@ public class Extensions extends Tls13Test {
         Config c = getPreparedConfig(runner);
         ExtensionType selectedExtension =
                 parameterCombination.getParameter(ExtensionDerivation.class).getSelectedValue();
-
-        List<ExtensionType> extensions = new ArrayList<>(Arrays.asList(ExtensionType.values()));
-        List<ExtensionType> clientExtensions =
-                context.getReceivedClientHelloMessage().getExtensions().stream()
-                        .map(i -> ExtensionType.getExtensionType(i.getExtensionType().getValue()))
-                        .collect(Collectors.toList());
-        extensions.removeAll(clientExtensions);
 
         WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
         workflowTrace.addTlsActions(new ReceiveAction(new AlertMessage()));

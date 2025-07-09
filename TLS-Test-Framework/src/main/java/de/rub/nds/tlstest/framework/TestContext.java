@@ -11,7 +11,7 @@ import de.rub.nds.anvilcore.context.AnvilTestConfig;
 import de.rub.nds.anvilcore.execution.AnvilListener;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.workflow.ParallelExecutor;
-import de.rub.nds.tlstest.framework.config.TlsTestConfig;
+import de.rub.nds.tlstest.framework.config.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.execution.TestPreparator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +23,7 @@ import org.junit.platform.launcher.TestPlan;
  */
 public class TestContext implements AnvilListener {
     private static final Logger LOGGER = LogManager.getLogger();
-    private TlsTestConfig config;
+    private TlsAnvilConfig config;
 
     private static TestContext instance = null;
     private ParallelExecutor stateExecutor;
@@ -43,14 +43,14 @@ public class TestContext implements AnvilListener {
 
     private TestContext() {
         super();
-        this.config = new TlsTestConfig();
+        this.config = new TlsAnvilConfig();
     }
 
-    public synchronized TlsTestConfig getConfig() {
+    public synchronized TlsAnvilConfig getConfig() {
         return config;
     }
 
-    public synchronized void setConfig(TlsTestConfig config) {
+    public synchronized void setConfig(TlsAnvilConfig config) {
         this.config = config;
     }
 

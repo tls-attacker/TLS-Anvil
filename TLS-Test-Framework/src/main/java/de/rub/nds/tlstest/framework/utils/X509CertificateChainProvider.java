@@ -70,9 +70,10 @@ public class X509CertificateChainProvider {
             for (BigInteger modulus : RSA_MODULUS_PRIVATE_KEY_MAP.keySet()) {
                 X509CertificateConfig rsaLeaf = new X509CertificateConfig();
                 rsaLeaf.setPublicKeyType(keyType);
-                rsaLeaf.setRsaModulus(modulus);
-                rsaLeaf.setRsaPublicKey(RSA_PUBLIC_KEY);
-                rsaLeaf.setRsaPrivateKey(RSA_MODULUS_PRIVATE_KEY_MAP.get(modulus));
+                rsaLeaf.setDefaultSubjectRsaModulus(modulus);
+                rsaLeaf.setDefaultSubjectRsaPublicKey(RSA_PUBLIC_KEY);
+                rsaLeaf.setDefaultSubjectRsaPrivateExponent(
+                        RSA_MODULUS_PRIVATE_KEY_MAP.get(modulus));
                 certConfigs.add(rsaLeaf);
             }
         }
@@ -90,9 +91,10 @@ public class X509CertificateChainProvider {
             X509CertificateConfig ecLeaf = new X509CertificateConfig();
             ecLeaf.setPublicKeyType(X509PublicKeyType.ECDH_ECDSA);
             ecLeaf.setDefaultSubjectNamedCurve(group.convertToX509());
-            ecLeaf.setEcPublicKey(
+            ecLeaf.setDefaultSubjectEcPublicKey(
                     KeyGenerator.generateEcdsaPublicKey(
-                                    ecLeaf.getEcPrivateKey(), group.convertToX509().getParameters())
+                                    ecLeaf.getDefaultSubjectEcPrivateKey(),
+                                    group.convertToX509().getParameters())
                             .getPublicPoint());
             certConfigs.add(ecLeaf);
         }
@@ -175,9 +177,10 @@ public class X509CertificateChainProvider {
             X509CertificateConfig dhLeaf = new X509CertificateConfig();
             FfdhGroupParameters parameters = (FfdhGroupParameters) group.getGroupParameters();
             DhPublicKey dhPublicKey =
-                    KeyGenerator.generateDhPublicKey(dhLeaf.getDhPrivateKey(), parameters);
+                    KeyGenerator.generateDhPublicKey(
+                            dhLeaf.getDefaultSubjectDhPrivateKey(), parameters);
             dhLeaf.setPublicKeyType(X509PublicKeyType.DH);
-            dhLeaf.setDhPublicKey(dhPublicKey.getPublicKey());
+            dhLeaf.setDefaultSubjectDhPublicKey(dhPublicKey.getPublicKey());
             dhLeaf.setDhModulus(dhPublicKey.getModulus());
             dhLeaf.setDhGenerator(dhPublicKey.getGenerator());
         }

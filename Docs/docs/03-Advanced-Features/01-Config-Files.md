@@ -12,7 +12,6 @@ Example config file `myConfig.json` for a server scan:
     "profiles" : [ "example_profile" ],
     "profileFolder" : "./profiles",
     "ignoreCache" : false,
-    "parallelTestCases" : 5,
     "parallelTests" : 7,
     "strength" : 2,
     "connectionTimeout" : 200,
@@ -23,7 +22,8 @@ Example config file `myConfig.json` for a server scan:
     "host" : "localhost:8443",
     "doNotSendSNIExtension" : false
   },
-  "exportTraces" : false
+  "exportTraces" : false,
+  "parallelHandshakes" : 5
 }
 ```
 All possible config options can be seen in the folder [config_examples](https://github.com/tls-attacker/TLS-Anvil/tree/main/config_examples).

@@ -21,7 +21,7 @@ import de.rub.nds.tls.subject.docker.DockerTlsManagerFactory;
 import de.rub.nds.tls.subject.docker.build.DockerBuilder;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
-import de.rub.nds.tlstest.framework.config.TlsTestConfig;
+import de.rub.nds.tlstest.framework.config.TlsAnvilConfig;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +39,7 @@ public abstract class AbstractScanIT {
     protected static final Logger LOGGER = LogManager.getLogger();
 
     protected AnvilTestConfig anvilTestConfig = new AnvilTestConfig();
-    protected TlsTestConfig tlsConfig = new TlsTestConfig();
+    protected TlsAnvilConfig tlsConfig = new TlsAnvilConfig();
     protected TestContext testContext = TestContext.getInstance();
     protected DockerTlsInstance dockerInstance;
 
@@ -127,7 +127,7 @@ public abstract class AbstractScanIT {
 
     protected abstract void setUpAnvilTestConfig(AnvilTestConfig anvilTestConfig);
 
-    protected abstract void setUpTlsTestConfig(TlsTestConfig tlsConfig);
+    protected abstract void setUpTlsTestConfig(TlsAnvilConfig tlsConfig);
 
     private TestRunner setUpTestRunner() {
         testContext.setConfig(tlsConfig);

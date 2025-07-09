@@ -19,14 +19,14 @@ public class SerializeExpectedResultsIT {
     @Tag(TestCategories.INTEGRATION_TEST)
     public void serializeTlsTestConfigServer() {
 
-        AnvilTestConfig testConfig = new AnvilTestConfig();
+        AnvilTestConfig anvilConfig = new AnvilTestConfig();
         MetadataFetcher metadataFetcher = new MetadataFetcher();
-        Iterator<String> allTestIds = metadataFetcher.getAllTestIds().iterator();
+        Iterator<String> allTestIds = metadataFetcher.getAllTestIds().stream().sorted().iterator();
         Map<TestResult, Set<String>> resultSetMap = new HashMap<>();
-        for (TestResult testResult : TestResult.values()) {
+        for (TestResult testResult : Arrays.stream(TestResult.values()).sorted().toList()) {
             resultSetMap.put(testResult, Set.of(allTestIds.next(), allTestIds.next()));
         }
-        testConfig.setExpectedResultsMap(resultSetMap);
+        anvilConfig.setExpectedResultsMap(resultSetMap);
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
@@ -35,7 +35,7 @@ public class SerializeExpectedResultsIT {
                     .writerWithDefaultPrettyPrinter()
                     .writeValue(
                             new File("../config_examples/expected_results.json"),
-                            testConfig.getExpectedResultsMap());
+                            anvilConfig.getExpectedResultsMap());
 
         } catch (IOException e) {
             Assertions.fail("Error during serialization of expected results.", e);

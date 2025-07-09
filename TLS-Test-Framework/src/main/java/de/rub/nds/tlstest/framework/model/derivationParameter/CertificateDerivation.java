@@ -121,8 +121,8 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateCon
     private boolean filterRsaKeySize(List<X509CertificateConfig> configs) {
         X509CertificateConfig config = configs.get(X509CertificateChainProvider.LEAF_CERT_INDEX);
         return !config.getPublicKeyType().name().contains("RSA")
-                || (config.getRsaModulus().bitLength() >= MIN_RSA_KEY_LEN
-                        && config.getRsaModulus().bitLength() >= MIN_RSA_SIG_KEY_LEN);
+                || (config.getDefaultSubjectRsaModulus().bitLength() >= MIN_RSA_KEY_LEN
+                        && config.getDefaultIssuerRsaModulus().bitLength() >= MIN_RSA_SIG_KEY_LEN);
     }
 
     private boolean filterDssSignedCerts(List<X509CertificateConfig> configs) {
@@ -135,7 +135,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateCon
     private boolean filterDssKeySize(List<X509CertificateConfig> configs) {
         X509CertificateConfig config = configs.get(X509CertificateChainProvider.LEAF_CERT_INDEX);
         return config.getPublicKeyType() != X509PublicKeyType.DSA
-                || config.getDsaPrimeQ().bitLength() >= MIN_DSS_KEY_LEN;
+                || config.getDefaultSubjectDsaGenerator().bitLength() >= MIN_DSS_KEY_LEN;
     }
 
     private boolean filterEcdsaPublicKeyGroups(
@@ -189,7 +189,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateCon
         if (!TlsParameterIdentifierProvider.isTls13Test(scope)) { // TLS 1.2
             cipherSuites = TestContext.getInstance().getFeatureExtractionResult().getCipherSuites();
             return cipherSuites.stream()
-                    .map(AlgorithmResolver::getSuiteableLeafCertificateKeyType)
+                    .map(AlgorithmResolver::getSuitableLeafCertificateKeyType)
                     .flatMap(Arrays::stream)
                     .anyMatch(kt -> Objects.equals(kt, config.getPublicKeyType()));
         } else { // TLS 1.3
@@ -243,7 +243,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateCon
                                             cipherSuiteDerivation.getSelectedValue();
 
                                     X509PublicKeyType[] requiredCertKeyTypes =
-                                            AlgorithmResolver.getSuiteableLeafCertificateKeyType(
+                                            AlgorithmResolver.getSuitableLeafCertificateKeyType(
                                                     selectedCipherSuite);
                                     X509PublicKeyType actualCertKeyType =
                                             selectedCertConfig.getPublicKeyType();
@@ -262,7 +262,7 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateCon
         if (certConfig.getPublicKeyType().isEc()) {
             joiner.add("Named Curve: " + certConfig.getDefaultSubjectNamedCurve().name());
         } else if (certConfig.getPublicKeyType().name().contains("RSA")) {
-            joiner.add("RSA Modulus: " + certConfig.getRsaModulus().bitLength());
+            joiner.add("RSA Modulus: " + certConfig.getDefaultSubjectRsaModulus().bitLength());
         }
         joiner.add(
                 "Certificate Signature Type: " + certConfig.getDefaultSignatureAlgorithm().name());

@@ -71,10 +71,9 @@ public class ConfigurationOptionsConfigTest {
 
     @Test
     public void testOpenSSLOptionsConfig() {
-        AnvilTestConfig testConfig = new AnvilTestConfig();
-        testConfig.setParallelTestCases(1);
-        testConfig.setParallelTests(1);
-        AnvilContext.createInstance(testConfig, "", new TlsParameterIdentifierProvider());
+        AnvilTestConfig anvilConfig = new AnvilTestConfig();
+        anvilConfig.setParallelTests(1);
+        AnvilContext.createInstance(anvilConfig, "", new TlsParameterIdentifierProvider());
         ConfigurationOptionsConfig config = createTestConfig();
 
         assertEquals("OPENSSL", config.getTlsLibraryName());

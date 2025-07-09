@@ -153,6 +153,7 @@ public class Resumption extends Tls12Test {
             methods = "recordLengthAllowsModification")
     public void rejectResumptionAfterFatalPostHandshake(WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);
+        c.getDefaultClientConnection().setTimeout(2000);
         WorkflowTrace workflowTrace =
                 runner.generateWorkflowTraceUntilLastMessage(
                         WorkflowTraceType.FULL_RESUMPTION, HandshakeMessageType.SERVER_HELLO);

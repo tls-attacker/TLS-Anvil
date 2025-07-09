@@ -41,6 +41,7 @@ import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls12Test;
 import de.rub.nds.tlstest.suite.util.SharedModifiedRecords;
 import java.util.List;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 
 public class Fragmentation extends Tls12Test {
@@ -200,9 +201,10 @@ public class Fragmentation extends Tls12Test {
                 new ReceiveAction(new AlertMessage()));
 
         State state = runner.execute(workflowTrace, c);
-        Validator.executedAsPlanned(state, testCase);
+
         Validator.receivedFatalAlert(state, testCase);
         AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
+        Assertions.assertNotNull(alert, "No alert has been sent.");
         Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW, alert);
     }
 

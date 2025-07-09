@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rub.nds.anvilcore.constants.TestEndpointType;
 import de.rub.nds.anvilcore.context.AnvilTestConfig;
 import de.rub.nds.tlsattacker.util.tests.TestCategories;
-import de.rub.nds.tlstest.framework.config.TlsTestConfig;
+import de.rub.nds.tlstest.framework.config.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.config.delegates.TestClientDelegate;
 import de.rub.nds.tlstest.framework.config.delegates.TestServerDelegate;
 import java.io.File;
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-public class SerializeTlsTestConfigIT {
+public class SerializeTlsAnvilConfigIT {
 
     private static AnvilTestConfig anvilTestConfig;
 
@@ -24,7 +24,6 @@ public class SerializeTlsTestConfigIT {
     public static void generateAnvilTestConfig() {
         anvilTestConfig = new AnvilTestConfig();
         anvilTestConfig.setExpectedResults("expected_results.json");
-        anvilTestConfig.setParallelTests((int) (anvilTestConfig.getParallelTestCases() * 1.5));
         anvilTestConfig.setProfileFolder("./profiles");
         anvilTestConfig.setGeneralPcapFilter(null);
     }
@@ -32,14 +31,15 @@ public class SerializeTlsTestConfigIT {
     @Test
     @Tag(TestCategories.INTEGRATION_TEST)
     public void serializeTlsTestConfigServer() {
-        TlsTestConfig testConfig = new TlsTestConfig();
+        TlsAnvilConfig anvilConfig = new TlsAnvilConfig();
         anvilTestConfig.setIdentifier("example_server_test");
-        testConfig.setAnvilTestConfig(anvilTestConfig);
+        anvilTestConfig.setParallelTests((int) (anvilConfig.getParallelHandshakes() * 1.5));
+        anvilConfig.setAnvilTestConfig(anvilTestConfig);
         TestServerDelegate testServerDelegate = new TestServerDelegate();
         testServerDelegate.setHost("localhost:8443");
-        testConfig.setTestServerDelegate(testServerDelegate);
-        testConfig.setTestClientDelegate(null);
-        testConfig.setTestEndpointMode(TestEndpointType.SERVER);
+        anvilConfig.setTestServerDelegate(testServerDelegate);
+        anvilConfig.setTestClientDelegate(null);
+        anvilConfig.setTestEndpointMode(TestEndpointType.SERVER);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -47,7 +47,7 @@ public class SerializeTlsTestConfigIT {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             objectMapper
                     .writerWithDefaultPrettyPrinter()
-                    .writeValue(new File("../config_examples/server_config.json"), testConfig);
+                    .writeValue(new File("../config_examples/server_config.json"), anvilConfig);
 
         } catch (IOException e) {
             Assertions.fail("Error during serialization of server config file.", e);
@@ -57,15 +57,16 @@ public class SerializeTlsTestConfigIT {
     @Test
     @Tag(TestCategories.INTEGRATION_TEST)
     public void serializeTlsTestConfigClient() {
-        TlsTestConfig testConfig = new TlsTestConfig();
+        TlsAnvilConfig tlsAnvilConfig = new TlsAnvilConfig();
         AnvilTestConfig anvilTestConfig = new AnvilTestConfig();
         anvilTestConfig.setIdentifier("example_client_test");
-        testConfig.setAnvilTestConfig(anvilTestConfig);
+        anvilTestConfig.setParallelTests((int) (tlsAnvilConfig.getParallelHandshakes() * 1.5));
+        tlsAnvilConfig.setAnvilTestConfig(anvilTestConfig);
         TestClientDelegate clientConfig = new TestClientDelegate();
         clientConfig.setTriggerScriptCommand(List.of("curl", "localhost:8090/trigger"));
-        testConfig.setTestClientDelegate(clientConfig);
-        testConfig.setTestServerDelegate(null);
-        testConfig.setTestEndpointMode(TestEndpointType.CLIENT);
+        tlsAnvilConfig.setTestClientDelegate(clientConfig);
+        tlsAnvilConfig.setTestServerDelegate(null);
+        tlsAnvilConfig.setTestEndpointMode(TestEndpointType.CLIENT);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -73,7 +74,7 @@ public class SerializeTlsTestConfigIT {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             objectMapper
                     .writerWithDefaultPrettyPrinter()
-                    .writeValue(new File("../config_examples/client_config.json"), testConfig);
+                    .writeValue(new File("../config_examples/client_config.json"), tlsAnvilConfig);
 
         } catch (IOException e) {
             Assertions.fail("Error during serialization of client config file.", e);

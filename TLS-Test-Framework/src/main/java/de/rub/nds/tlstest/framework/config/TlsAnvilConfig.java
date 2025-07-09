@@ -88,7 +88,7 @@ public class TlsAnvilConfig extends TLSDelegateConfig {
             names = "-tlsAnvilConfig",
             description =
                     "Path to a TLS-Anvil config file. Can be used instead of command-line-arguments.")
-    private String tlsAnvilConfig;
+    private String tlsAnvilConfigFile;
 
     @Parameter(names = "-dtls", description = "Set DTLS as default for the test-suite.")
     private boolean useDTLS = false;
@@ -177,7 +177,7 @@ public class TlsAnvilConfig extends TLSDelegateConfig {
         if (getGeneralDelegate().isHelp()) {
             argParser.usage();
             System.exit(0);
-        } else if (tlsAnvilConfig != null) {
+        } else if (tlsAnvilConfigFile != null) {
             // -tlsAnvilConfig used, parse args from file
             ObjectMapper objectMapper = new ObjectMapper();
             TlsAnvilConfig tlsAnvilConfig;
@@ -185,9 +185,10 @@ public class TlsAnvilConfig extends TLSDelegateConfig {
             try {
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
                 tlsAnvilConfig =
-                        objectMapper.readValue(new File(this.tlsAnvilConfig), TlsAnvilConfig.class);
+                        objectMapper.readValue(
+                                new File(this.tlsAnvilConfigFile), TlsAnvilConfig.class);
 
-                raw = objectMapper.readValue(new File(this.tlsAnvilConfig), Map.class);
+                raw = objectMapper.readValue(new File(this.tlsAnvilConfigFile), Map.class);
                 if (raw.get("clientConfig") == null) tlsAnvilConfig.setTestClientDelegate(null);
                 if (raw.get("serverConfig") == null) tlsAnvilConfig.setTestServerDelegate(null);
 
@@ -197,6 +198,7 @@ public class TlsAnvilConfig extends TLSDelegateConfig {
                 return;
             }
             this.setExportTraces(tlsAnvilConfig.isExportTraces());
+            this.setParallelHandshakes(tlsAnvilConfig.getParallelHandshakes());
             this.anvilTestConfig = tlsAnvilConfig.getAnvilTestConfig();
 
             TestClientDelegate testClientDelegate = tlsAnvilConfig.getTestClientDelegate();
@@ -229,29 +231,41 @@ public class TlsAnvilConfig extends TLSDelegateConfig {
             this.getAnvilTestConfig().setEndpointMode(this.getTestEndpointMode());
         }
 
-        // set default values for testing
+        adjustConfig();
 
+        parsedArgs = true;
+    }
+
+    private void adjustConfig() {
+
+        // set default identifier if not set
         if (getAnvilTestConfig().getIdentifier() == null) {
             if (argParser.getParsedCommand().equals(ConfigDelegates.SERVER.getCommand())) {
                 getAnvilTestConfig().setIdentifier(testServerDelegate.getHost());
             } else {
-                getAnvilTestConfig().setIdentifier(testClientDelegate.getPort().toString());
+                getAnvilTestConfig()
+                        .setIdentifier("client_ " + testClientDelegate.getPort().toString());
             }
         }
-
+        // restrict parallelization
+        restrictParallelization();
+        // output folder if not set
         if (getAnvilTestConfig().getOutputFolder().isEmpty()) {
             getAnvilTestConfig()
                     .setOutputFolder(
                             Paths.get(
                                             System.getProperty("user.dir"),
-                                            "TestSuiteResults_"
+                                            "Results_"
+                                                    + getAnvilTestConfig().getIdentifier()
+                                                    + "_"
                                                     + Utils.DateToISO8601UTC(new Date()))
                                     .toString());
         }
-
+        // set pcap filter correctly
         getAnvilTestConfig().setGeneralPcapFilter(resolvePcapFilter());
 
         try {
+            // create parent directories if not present
             Path outputFolder = Paths.get(getAnvilTestConfig().getOutputFolder());
             outputFolder = outputFolder.toAbsolutePath();
             outputFolder.toFile().mkdirs();
@@ -263,7 +277,6 @@ public class TlsAnvilConfig extends TLSDelegateConfig {
                 anvilTestConfig.setTimeoutActionCommand(
                         testClientDelegate.getTriggerScriptCommand());
             }
-
             if (!anvilTestConfig.getTimeoutActionCommand().isEmpty()) {
                 timeoutActionScript =
                         () -> {
@@ -277,7 +290,7 @@ public class TlsAnvilConfig extends TLSDelegateConfig {
                             return p.exitValue();
                         };
             }
-
+            // set default keylog file if not set
             if (this.getGeneralDelegate().getKeylogfile() == null) {
                 this.getGeneralDelegate()
                         .setKeylogfile(
@@ -291,7 +304,6 @@ public class TlsAnvilConfig extends TLSDelegateConfig {
         if (isUseDTLS()) {
             testClientDelegate.setUseUDP(true);
         }
-        parsedArgs = true;
     }
 
     private String resolvePcapFilter() {
@@ -324,6 +336,8 @@ public class TlsAnvilConfig extends TLSDelegateConfig {
                     && this.testServerDelegate.getSniHostname().isEmpty()) {
                 this.testServerDelegate.setSniHostname(null);
             }
+            this.setParallelHandshakes(newConfig.getParallelHandshakes());
+            adjustConfig();
             this.parsedArgs = true;
         } catch (JsonProcessingException e) {
             LOGGER.error("Error applying TLS test config", e);
@@ -662,5 +676,14 @@ public class TlsAnvilConfig extends TLSDelegateConfig {
 
     public void setParallelHandshakes(int parallelHandshakes) {
         this.parallelHandshakes = parallelHandshakes;
+    }
+
+    public void restrictParallelization() {
+        // restrict parallelization to number of processors
+        parallelHandshakes =
+                Math.min(parallelHandshakes, Runtime.getRuntime().availableProcessors());
+        if (anvilTestConfig.getParallelTests() == null) {
+            anvilTestConfig.setParallelTests((int) Math.ceil(parallelHandshakes * 1.5));
+        }
     }
 }

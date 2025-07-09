@@ -15,7 +15,6 @@ import de.rub.nds.anvilcore.worker.WorkerClient;
 import de.rub.nds.tlsattacker.core.util.ProviderUtil;
 import de.rub.nds.tlstest.framework.TestContext;
 import de.rub.nds.tlstest.framework.anvil.TlsParameterIdentifierProvider;
-import de.rub.nds.tlstest.framework.config.TlsAnvilConfig;
 import de.rub.nds.tlstest.framework.extractor.TestCaseExtractor;
 import de.rub.nds.tlstest.framework.parameterExtensions.configurationOptionsExtension.ConfigurationOptionsDerivationManager;
 import org.apache.logging.log4j.LogManager;
@@ -113,8 +112,6 @@ public class Main {
         ObjectMapper mapper = new ObjectMapper();
         String additionalConfig = mapper.writeValueAsString(testContext.getConfig());
 
-        restrictParallelization(testContext.getConfig());
-
         TestRunner runner =
                 new TestRunner(
                         testContext.getConfig().getAnvilTestConfig(),
@@ -131,20 +128,6 @@ public class Main {
                     .onShutdown();
         }
         System.exit(runner.isCheckPassed() || !runner.isCheckExecuted() ? 0 : 1);
-    }
-
-    private static void restrictParallelization(TlsAnvilConfig tlsAnvilConfig) {
-        // restrict parallelization to number of processors
-        tlsAnvilConfig.setParallelHandshakes(
-                Math.min(
-                        tlsAnvilConfig.getParallelHandshakes(),
-                        Runtime.getRuntime().availableProcessors()));
-        if (tlsAnvilConfig.getAnvilTestConfig().getParallelTests() == null) {
-            tlsAnvilConfig
-                    .getAnvilTestConfig()
-                    .setParallelTests(
-                            (int) Math.ceil(tlsAnvilConfig.getParallelHandshakes() * 1.5));
-        }
     }
 
     /**

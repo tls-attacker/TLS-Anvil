@@ -509,18 +509,6 @@ public class TestPreparator {
         if (!tlsAnvilConfig.isParsedArgs()) {
             return false;
         }
-
-        // restrict parallelization to number of processors
-        tlsAnvilConfig.setParallelHandshakes(
-                Math.min(
-                        tlsAnvilConfig.getParallelHandshakes(),
-                        Runtime.getRuntime().availableProcessors()));
-        if (tlsAnvilConfig.getAnvilTestConfig().getParallelTests() == null) {
-            tlsAnvilConfig
-                    .getAnvilTestConfig()
-                    .setParallelTests(
-                            (int) Math.ceil(tlsAnvilConfig.getParallelHandshakes() * 1.5));
-        }
         // no parallel execution for DTLS
         if (tlsAnvilConfig.getTestEndpointMode() == TestEndpointType.CLIENT
                 && tlsAnvilConfig.isUseDTLS()

@@ -7,7 +7,7 @@ The plugin can be found here: [TLS-Anvil-Jenkins](https://github.com/tls-attacke
 ## Version
 
 The plugin follows TLS-Anvil versions, with the main version of TLS-Anvil in the plugin version name.
-E.g. version *v1.3.1-R1* uses TLS-Anvil *1.3.1*.
+E.g. version *v1.4.0-R1* uses TLS-Anvil *1.4.0*.
 
 ## Install
 

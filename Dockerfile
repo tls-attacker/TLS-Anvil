@@ -1,4 +1,4 @@
-FROM maven:3.9.9-eclipse-temurin-21-jammy as build-tlsanvil
+FROM maven:3.9.9-eclipse-temurin-21-jammy AS build-tlsanvil
 COPY ./TLS-Test-Framework /src/TLS-Test-Framework/
 COPY ./TLS-Testsuite /src/TLS-Testsuite/
 COPY ./pom.xml /src/

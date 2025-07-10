@@ -80,5 +80,5 @@ docker run \
 * Line 14: Determines the details how TLS-Anvil should connect to the server
 
 ### What now?
-After the testsuite finished you should see a folder named `TestSuiteResults_...` which contains all the results.
+After the testsuite finished you should see a folder named `Results_...` which contains all the results.
 To analyze them, go to [Viewing Results](Anvil-Web).

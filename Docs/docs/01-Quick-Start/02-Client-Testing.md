@@ -77,5 +77,5 @@ docker run \
 * Line 7: This is passed to the OpenSSL `s_client` binary, which is started each time a HTTP-GET request is sent to `:8090/trigger`.
 
 ### What now?
-After the testsuite finished you should see a folder named `TestSuiteResults_...` which contains all the results.
+After the testsuite finished you should see a folder named `Results_...` which contains all the results.
 To analyze them, go to the next page.

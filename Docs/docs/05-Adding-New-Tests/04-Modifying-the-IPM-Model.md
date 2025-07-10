@@ -3,17 +3,17 @@ import Definition from "@site/src/components/Definition"
 
 # Modifying the IPM
 
-As described before, TLS-Anvil defines 4 common IPMs. Sometimes different parameters and/or parameter values should be part of the IPM. Therefore, the Anvil-Core-Framework provides several test template annotations that allow to modify a selected base IPM. Those are explained in the following.
+As described earlier, TLS-Anvil defines four common IPMs. Occasionally, different parameters and/or parameter values need to be included in the IPM. To support this, the Anvil-Core-Framework provides several test template annotations that allow modification of a selected base IPM. These annotations are explained below.
 
 ## Modifying Parameters
 
 ### `IncludeParameter`
 
-Takes a string corresponding to the enum value of `TlsParameterType` for the parameter that should be added to the base IPM. The values for the parameter are derived automatically from the features that the <Definition id="SUT"/> supports as well as the general constraints.
+Accepts a string corresponding to the enum value of `TlsParameterType` for the parameter to be added to the base IPM. The values for the parameter are automatically derived from the features supported by the <Definition id="SUT"/> as well as general constraints.
 
 ### `ExcludeParameter`
 
-Takes a string corresponding to the enum value of `TlsParameterType` for the parameter that should be removed from the base IPM.
+Accepts a string corresponding to the enum value of `TlsParameterType` for the parameter to be removed from the base IPM.
 
 ## Modifying Parameter Values
 
@@ -27,9 +27,9 @@ public @interface DynamicValueConstraints {
 }
 ```
 
-Each method of the `methods` array is called with the chosen parameter value of the parameter defined at the same index of the `affectedIdentifiers` array. When no `clazz` is specified, the method is called using reflection on the same class as the test template.
+Each method listed in the `methods` array is invoked with the chosen parameter value of the parameter defined at the corresponding index of the `affectedIdentifiers` array. If no `clazz` is specified, the method is called via reflection on the same class as the test template.
 
-The method should return a `boolean` value. If the return value is `true`, the combination of parameter values is considered as valid test input. Otherwise the test input is skipped.
+The method should return a `boolean` value. If the return value is `true`, the combination of parameter values is considered valid test input; otherwise, the test input is skipped.
 
 ### `ValueConstraint`
 
@@ -40,9 +40,9 @@ public @interface ValueConstraints {
 }
 ```
 
-Some parameter values are based on TLS-Attacker enums, e.g. <JavaClass path="TLS-Test-Framework/src/main/java/de/rub/nds/tlstest/framework/model/derivationParameter/CipherSuiteDerivation.java" />. Those enums in TLS-Attacker already include methods that return a `boolean` value to check if the enum value fullfills certain parameters.
+Some parameter values are based on TLS-Attacker enums, e.g., <JavaClass path="TLS-Test-Framework/src/main/java/de/rub/nds/tlstest/framework/model/derivationParameter/CipherSuiteDerivation.java" />. These enums already include methods that return a `boolean` indicating whether the enum value fulfills certain criteria.
 
-The method specified in the `method` field is called by using reflection on the selected enum corresponding to the identifier. If the return value is `true`, the combination of parameter values is considered as valid test input. Otherwise the test input is skipped.
+The method specified in the `method` field is called via reflection on the selected enum corresponding to the `identifier`. If the method returns `true`, the parameter combination is considered valid test input; otherwise, the test input is skipped.
 
 ### `ExplicitValues`
 
@@ -54,9 +54,9 @@ public @interface ExplicitValues {
 }
 ```
 
-Sometimes explicit values should be considered as parameter value, independent from the features that the <Definition id="SUT"/> supports. Those values are assigned to a parameter using this annotation.
+In some cases, explicit values should be considered as parameter values regardless of the features supported by the <Definition id="SUT"/>. This annotation assigns such explicit values to parameters.
 
-The methods specified in the `methods` array are called by using reflection on `clazz` (test template class by default). The return value of the method should be `List<DerivationParameter>`.
+The methods specified in the `methods` array are invoked via reflection on `clazz` (the test template class by default). Each method should return a `List<DerivationParameter>`.
 
 ### `ExplicitModelingConstraints`
 
@@ -68,4 +68,4 @@ public @interface ExplicitModelingConstraints {
 }
 ```
 
-This annotation replaces default constraints for a parameter with explicitly defined constraints. Each method of the `methods` array should return a list of <JavaClass path="TLS-Test-Framework/src/main/java/de/rub/nds/tlstest/framework/model/constraint/ConditionalConstraint.java" /> that should be applied to the given parameter at the correspondending index off the `affectedIdentifiers` array.
+This annotation replaces the default constraints for parameters with explicitly defined constraints. Each method in the `methods` array should return a list of <JavaClass path="TLS-Test-Framework/src/main/java/de/rub/nds/tlstest/framework/model/constraint/ConditionalConstraint.java" /> instances to be applied to the parameter at the corresponding index of the `affectedIdentifiers` array.

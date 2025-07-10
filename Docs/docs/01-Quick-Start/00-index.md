@@ -1,26 +1,25 @@
 # Quick Start
 
-The quick start guide is showing you how to use TLS-Anvil to test a TLS server or client.
-This is basically a two step process.
+This quick start guide demonstrates how to use **TLS-Anvil** to test a TLS server or client.  
+The process involves two main steps.
 
-First TLS-Anvil is executed to perform the tests against the OpenSSL example server and client.
-We will use OpenSSL as an example implementation here.
-TLS-Anvil as well as the OpenSSL server/client will run inside a Docker container.
-The OpenSSL server/client images are provided by the TLS-Docker-Library project which we released alongside TLS-Anvil.
-So see how you can test against other implementations that are inside the TLS-Docker-Library see [Using the TLS-Docker-Library](/docs/Docker-Library).
+First, TLS-Anvil is executed to run tests against an example TLS server and client based on OpenSSL.  
+Both TLS-Anvil and the OpenSSL server/client run inside Docker containers.
 
-The second step is to analyze the results.
-Those are going to be imported into a web application that visualizes the results for each test case.
-The application is also able to inspect every connection between TLS-Anvil and the tested target at TCP message level.
+The OpenSSL server/client images are provided by the **TLS-Docker-Library** project, which was released alongside TLS-Anvil.  
+To learn how to test against other implementations available in the TLS-Docker-Library, refer to [Using the TLS-Docker-Library](/docs/Docker-Library).
+
+The second step is analyzing the test results.  
+These results are imported into a web application that visualizes the outcomes of each test case.  
+The application also allows inspection of every connection between TLS-Anvil and the target implementation at the TCP message level.
 
 ### Requirements
 
 - Docker
-- Python *(optional, for using TLS-Docker-Library to test other implementations)*
+- Python *(optional — required only if using TLS-Docker-Library to test other implementations)*
 
 ### GitHub Repositories
 
-- [TLS-Anvil](https://github.com/tls-attacker/tls-anvil) (Testsuite)
-- [TLS-Docker-Library](https://github.com/tls-attacker/tls-docker-library) *(optional, images of TLS implementations)*
-- [Anvil-Web](https://github.com/tls-attacker/anvil-web) *(optional, for a graphical user interface and to analyze reports)*
-
+- [TLS-Anvil](https://github.com/tls-attacker/tls-anvil) — Test suite
+- [TLS-Docker-Library](https://github.com/tls-attacker/tls-docker-library) *(optional — Docker images of various TLS implementations)*
+- [Anvil-Web](https://github.com/tls-attacker/anvil-web) *(optional — graphical user interface for analyzing test reports)*

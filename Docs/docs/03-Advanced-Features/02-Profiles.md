@@ -1,27 +1,40 @@
 # Profiles
-TLS-Anvil has the option to restrict the tests being run using profiles.
-To select only specific tests to run, you can define custom profiles in JSON format.
-The profile has to have a name, can contain a reference to sub profiles and a list of test ids.
-The test ids can be found in the [metadata.json](https://github.com/tls-attacker/TLS-Anvil/blob/main/TLS-Testsuite/src/main/resources/metadata.json) file
 
-Example file `happyFlow.json`:
-``` json showLineNumbers
+TLS-Anvil supports test selection through **profiles**, which allow you to restrict and organize the tests to be executed.
+
+Profiles are defined in **JSON format** and specify:
+- A **profile name**
+- Optional **references to sub-profiles**
+- A list of **test IDs** to include in the test run
+
+Test IDs can be found in the [`metadata.json`](https://github.com/tls-attacker/TLS-Anvil/blob/main/TLS-Testsuite/src/main/resources/metadata.json) file.
+
+---
+
+## Example Profile: `happyFlow.json`
+
+```json showLineNumbers title="happyFlow.json"
 {
- "name" : "happyFlow",
- "profiles" : [],
- "testIds" : [
-   "5246-jsdAL1vDy5",
-   "8446-jVohiUKi4u"
- ]
+  "name": "happyFlow",
+  "profiles": [],
+  "testIds": [
+    "5246-jsdAL1vDy5",
+    "8446-jVohiUKi4u"
+  ]
 }
 ```
-* Line 2: Name of the profile
-* Line 3: An array referencing other profiles. All tests defined in  these other profiles will be included in testruns of the current profile. (Empty in this example)
-* Line 4-6: List of specific test IDs to run (HappyFlow for TLS 1.2 and TLS 1.3 in this example)
 
-To use the profile, run TLS-Anvil with the `profiles` and `profileFolder` parameters. You can omit the *.json* extension.
+* Line 2:  The name of the profile
+* Line 3: A list of referenced sub-profiles (empty in this example) |
+* Line 4-6: The test IDs to execute (representing tests for TLS 1.2 and TLS 1.3 happy paths) |
 
-``` bash showLineNumbers
+---
+
+## Using a Profile with TLS-Anvil
+
+To use a profile, pass the `-profiles` and `-profileFolder` parameters. The `.json` extension is optional.
+
+```bash showLineNumbers title="Run with Profile"
 docker run \
     --rm \
     -it \
@@ -39,3 +52,12 @@ docker run \
     server \
     -connect openssl-server:8443
 ```
+
+This command:
+- Mounts the `profiles` directory
+- Selects the `happyFlow` profile
+- Connects to the target TLS server at `openssl-server:8443`
+
+---
+
+You can chain multiple profiles or build complex configurations by referencing other profiles inside the `profiles` array. This supports modular and scalable test setups.

@@ -1,66 +1,84 @@
 # Using the TLS-Docker-Library
 
-The [TLS-Docker-Library](https://github.com/tls-attacker/Tls-docker-library) is a set of Dockerfiles and scripts for building and running many different TLS implementations.
-It can be used to test example server and client implementations of various TLS libraries.
+The [TLS-Docker-Library](https://github.com/tls-attacker/Tls-docker-library) is a collection of Dockerfiles and scripts for building and running various TLS implementations.  
+It can be used to test example server and client implementations of multiple TLS libraries.
 
-You can follow the README file of the repository to learn, how to build the docker containers yourself.
+Refer to the repository's README file to learn how to build the Docker containers yourself.
 
-In short, you need to
- - run `./setup.sh` to generate the base images and certificates
- - go to `cd src/main/resources/images`
- - run `python3 build.py -l image-name:version` with the name of the implementation as well as the version you would like to build
-   - if you would like to build the newest version use `:latest`
+In brief, the steps are:
+- Run `./setup.sh` to generate the base images and certificates.
+- Navigate to `src/main/resources/images`.
+- Run `python3 build.py -l image-name:version` specifying the implementation name and version you want to build.
+   - To build the latest version, use the `:latest` tag.
 
-## Testing Built Library Containers using TLS-Anvil
-Once you built an image of a library you'd like to test, we have to create and start the container and then connect it to TLS-Anvil.
+## Testing Built Library Containers Using TLS-Anvil
 
-This procedure differs between server and client images.
+After building an image of the desired library, you need to create and start the container, then connect it to TLS-Anvil.
 
-To see how to create and run a container of your desired implementation, go to the subfolder of that implementation where you will find a readme file with more infos.
+The process differs for server and client images.
+
+To learn how to create and run a container for a specific implementation, go to that implementation’s subfolder, where you will find a README with detailed instructions.
 
 ### Server Images
-Server images almost always just start a binary server example implementation of that library in a loop.
 
-The arguments you pass to the docker container after the image name will get passed to the server executable. E.g. the image `openssl-server:1.1.1i` has the entrypoint `openssl s_server`. Any arguments that you pass after `docker run openssl-server:1.1.1i ...` are passed to the openssl executable.
+Server images typically launch a binary server example of the library in a loop.
 
-Many of the server implementations need certificates. Many certificates were created when you ran `./setup.sh`. Those are stored in the docker volume `cert-data` and can be used with any image.
+Arguments passed to the Docker container after the image name are forwarded to the server executable. For example, the image `openssl-server:1.1.1i` uses the entrypoint `openssl s_server`. Any arguments you pass after `docker run openssl-server:1.1.1i ...` are passed to the `openssl` executable.
 
-E.g. to start an OpenSSL server with an RSA certificate we can use:
+Many server implementations require certificates, which are generated when you run `./setup.sh`. These certificates are stored in the Docker volume `cert-data` and can be used with any image.
 
-`docker run -v cert-data:/certs/ openssl-server:1.1.1i -port 8443 -cert /certs/rsa2048cert.pem -key /certs/rsa2048key.pem`
+For example, to start an OpenSSL server with an RSA certificate:
 
-The `-v` option bind the `cert-data` volume to the container at the location `/certs/`.
+```
+docker run -v cert-data:/certs/ openssl-server:1.1.1i -port 8443 -cert /certs/rsa2048cert.pem -key /certs/rsa2048key.pem
+```
 
-The server is now listening on port 8443, but since it is a container, the port is only accessible from inside the container. To be able to connect to it we have to:
- - add the server container and TLS-Anvil container to the same docker network (like in our [example](/docs/Quick-Start/Server-Testing))
- - expose the port using `-p 8443:8443` or
- - add the docker container to the host network using `--network host`
+The `-v` option binds the `cert-data` volume to the container at `/certs/`.
 
-If you added it to a network, the server will be reachable with its container name (can be changed by using `--name ...`), or via the other options, it should be reachable via `localhost:8443`.
-This is, what you will need to input in the `-connect ...` parameter of TLS-Anvil.
+The server will listen on port 8443 inside the container. Since the container’s ports are isolated, to connect externally you must:
+
+- Add both the server container and TLS-Anvil container to the same Docker network (see our [example](/docs/Quick-Start/Server-Testing))
+- Or expose the port with `-p 8443:8443`
+- Or add the container to the host network using `--network host`
+
+If using a Docker network, the server will be reachable via its container name (which you can set with `--name ...`). Otherwise, if you expose the port or use the host network, it will be reachable via `localhost:8443`.  
+This address is what you should use in TLS-Anvil’s `-connect ...` parameter.
 
 ### Client Images
-Client images implement a small web server that listens on port 8090. Command line arguments that you pass behind the image name also get passed directly to the client executable. But the client executable is not running in a loop, but rather only started when a GET request is sent to the `/trigger` endpoint of the webserver.
 
-E.g. to start the OpenSSL client, we can run `docker run openssl-client:1.1.1i -connect localhost:8443` and the `-connect ...` part is directly passed to `openssl s_client`.
+Client images run a small web server that listens on port 8090. Command-line arguments passed after the image name are forwarded to the client executable. However, unlike server images, the client executable runs only when a GET request is sent to the `/trigger` endpoint of the web server.
 
-You have to make sure, that TLS-Anvil can reach the webserver (port 8090) of the client image, and the client can reach TLS-Anvil to connect to. This can be done by either:
- - adding the client container and TLS-Anvil container to the same docker network (like in our [example](/docs/Quick-Start/Client-Testing))
-   - the client can then connect to TLS-Anvil using its container name
+For example, to start the OpenSSL client:
+
+```
+docker run openssl-client:1.1.1i -connect localhost:8443
+```
+
+The `-connect ...` argument is passed directly to `openssl s_client`.
+
+You must ensure TLS-Anvil can access the client’s web server (port 8090), and the client can reach TLS-Anvil to connect. This can be done by:
+
+- Adding the client and TLS-Anvil containers to the same Docker network (see our [example](/docs/Quick-Start/Client-Testing))
+   - The client can connect to TLS-Anvil using its container name
    - TLS-Anvil can connect to the client using its container name
- - exposing port the port 8090 on the client using `-p 8090:8090` and exposing the server listening port on the TLS-Anvil container if also run via docker
-   - the client can then connect to TLS-Anvil using the ip `172.17.0.1` or `host.docker.internal`
-   - TLS-Anvil can reach the container using `172.17.0.1` or `host.docker.internal` if also run in a container or `localhost` if run in the host
- - adding the client (and TLS-Anvil) to the host network using `--network host`
-   - the client can then connect to TLS-Anvil using `localhost`
-   - TLS-Anvil can also connect to the client using `localhost`
+- Exposing port 8090 on the client with `-p 8090:8090` and exposing the server listening port on the TLS-Anvil container (if also run in Docker)
+   - The client can connect to TLS-Anvil using the IP `172.17.0.1` or `host.docker.internal`
+   - TLS-Anvil can reach the client container using `172.17.0.1` or `host.docker.internal` (if in a container), or `localhost` (if run on the host)
+- Adding the client (and TLS-Anvil) to the host network using `--network host`
+   - The client can connect to TLS-Anvil using `localhost`
+   - TLS-Anvil can connect to the client using `localhost`
 
-TLS-Anvil uses a *trigger script* in the client testing mode. The script is called every time it wants the client to connect to it. Using the TLS-Docker-Library images you almost always want to use `curl` in the trigger script to connect to the `/trigger` endpoint of the client.
+In client testing mode, TLS-Anvil uses a *trigger script* that it calls whenever it wants the client to connect.  
+When using TLS-Docker-Library images, the trigger script typically uses `curl` to access the client’s `/trigger` endpoint.
 
-An example would be `docker run --network host -v $(pwd):/output/  ghcr.io/tls-attacker/tlsanvil:latest client -port 8443 -triggerScript curl localhost:8090/trigger`.
+For example:
+
+```
+docker run --network host -v $(pwd):/output/ ghcr.io/tls-attacker/tlsanvil:latest client -port 8443 -triggerScript curl localhost:8090/trigger
+```
 
 :::info
 
-You could also execute a binary of a client implementation directly in the `-triggerScript` parameter.
+You can also execute a client implementation binary directly in the `-triggerScript` parameter.
 
 :::

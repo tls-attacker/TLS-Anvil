@@ -1,45 +1,45 @@
 # TLS-Anvil Jenkins Plugin
 
-TLS-Anvil provides a Jenkins plugin for easy integration in CI pipelines.
+TLS-Anvil offers a Jenkins plugin for seamless integration into CI pipelines.
 
-The plugin can be found here: [TLS-Anvil-Jenkins](https://github.com/tls-attacker/TLS-Anvil-Jenkins/)
+The plugin repository is available here: [TLS-Anvil-Jenkins](https://github.com/tls-attacker/TLS-Anvil-Jenkins/)
 
 ## Version
 
-The plugin follows TLS-Anvil versions, with the main version of TLS-Anvil in the plugin version name.
-E.g. version *v1.4.0-R1* uses TLS-Anvil *1.4.0*.
+The plugin version corresponds to the TLS-Anvil version it supports.  
+For example, version *v1.4.0-R1* uses TLS-Anvil *1.4.0*.
 
-## Install
+## Installation
 
 :::info
 
-The Jenkins plugin is not distributed through the official Jenkins store for now. You have to manually install it.
+The Jenkins plugin is currently not distributed through the official Jenkins plugin store. It must be installed manually.
 
 :::
 
 **Prerequisites**
 
-- Make sure you have the [Docker Commons Plugin](https://plugins.jenkins.io/docker-commons/) installed and set up for use with docker.
+- Ensure the [Docker Commons Plugin](https://plugins.jenkins.io/docker-commons/) is installed and configured for Docker usage.
 
-1. Download the newest release version `.hpi` file from the [Releases Site](https://github.com/tls-attacker/TLS-Anvil-Jenkins/releases)
-2. Open your Jenkins instance. 
-3. Navigate to Manage Jenkins > Manage Plugins. 
-4. Go to the Advanced tab. 
-5. Under the Upload Plugin section, click on Choose File and select the downloaded HPI file. 
-6. Click on Upload to install the plugin. 
+1. Download the latest release `.hpi` file from the [Releases page](https://github.com/tls-attacker/TLS-Anvil-Jenkins/releases).
+2. Open your Jenkins instance.
+3. Navigate to **Manage Jenkins > Manage Plugins**.
+4. Select the **Advanced** tab.
+5. Under the **Upload Plugin** section, click **Choose File** and select the downloaded `.hpi` file.
+6. Click **Upload** to install the plugin.
 7. Restart Jenkins if prompted.
 
 ## Usage
 
-The plugin provides a custom build step that you can include in your build pipeline. Usually one would put that build step after the successful build in the *integration testing phase*. 
+The plugin adds a custom build step to your pipeline. Typically, this step is added after a successful build during the *integration testing phase*.
 
-The plugin requires an executable example server or client implementation, that can be started.
+It requires an executable example server or client implementation that can be started.
 
-Consult the plugins [README](https://github.com/tls-attacker/TLS-Anvil-Jenkins) page for detailed instructions.
+For detailed instructions, refer to the plugin’s [README](https://github.com/tls-attacker/TLS-Anvil-Jenkins).
 
 :::tip
 
-It is recommended to use the `expectedResults` feature, as described [here](/docs/Advanced-Features/Expected-Results).
-Only use expected results maps, that you manually reviewed before.
+We recommend using the `expectedResults` feature, as explained [here](/docs/Advanced-Features/Expected-Results).  
+Only use expected results maps that have been manually reviewed.
 
 :::

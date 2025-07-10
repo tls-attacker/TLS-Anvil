@@ -1,36 +1,47 @@
 # Compare with Expected Results
 
-TLS-Anvil has the option to compare its test results with a set of expected results.
-To do this, you will need an expected results file in JSON format.
+TLS-Anvil supports verifying test outcomes by comparing them against a set of **expected results**. This is especially useful in **CI/CD pipelines** to detect regressions or unexpected behavior changes.
 
-Example `expected.json`:
-``` json showLineNumbers
+---
+
+## Expected Results Format
+
+The expected results must be defined in a **JSON file** mapping test IDs to expected outcomes.
+
+```json showLineNumbers title="expected.json"
 {
-  "STRICTLY_SUCCEEDED" : [ 
+  "STRICTLY_SUCCEEDED": [ 
     "XLF-ia3wstdqYe",
     "XLF-uQXeugeUkb"
   ],
-  "CONCEPTUALLY_SUCCEEDED" : [ 
+  "CONCEPTUALLY_SUCCEEDED": [ 
     "XLF-tSjRqK81S8", 
     "XLF-ujMXSAMmVF" 
   ],
-  "FULLY_FAILED" : [
+  "FULLY_FAILED": [
     "XLF-SA1CoksBgE",
     "XLF-NFYNXBgXk8"
   ],
-  "PARTIALLY_FAILED" : [
+  "PARTIALLY_FAILED": [
     "XLF-4iPUuT51YH",
     "XLF-PkwVF7pRQa"
-  ]
-  "DISABLED" : [
+  ],
+  "DISABLED": [
     "XLF-CSQn3dUG9L",
     "XLF-Ax6kVTgheY"
   ]
 }
 ```
 
-You can then start TLS-Anvil with the `-expectedResults` flag as follows:
-``` bash showLineNumbers
+> ⚠️ Make sure your JSON is valid (e.g. commas between entries). The above format groups test IDs by expected result category.
+
+---
+
+## Running with Expected Results
+
+You can pass the expected results file using the `-expectedResults` parameter:
+
+```bash showLineNumbers title="Run with Expected Results"
 docker run \
     --rm \
     -it \
@@ -39,19 +50,35 @@ docker run \
     -v $(pwd):/output/ \
     -v ./expected.json:/expected.json \
     ghcr.io/tls-attacker/tlsanvil:latest \
-    -expectedResults /expected.json
+    -expectedResults /expected.json \
     server \
-    -connect localhost:8443        
+    -connect localhost:8443
 ```
 
-TLS-Anvil will run all configured tests and at the end, it will compare
-the actual results with the expected results from the file.
-Tests that are not explicitly defined in the file, but have an actual
-result of *STRICTLY_SUCCEEDED*, *CONCEPTUALLY_SUCCEEDED* or *DISABLED*
-will not throw an error. All other deviations are printed out and will cause the
-process to exit with exit code 1.
-This is especially useful for CI testing.
+---
 
-After running a test, a `result_map.json` is generated in the output folder.
-This file can be used as an input for expected results.
-This can be useful for comparing results to the previous run.
+## Behavior and Exit Codes
+
+- TLS-Anvil runs all configured tests and compares the actual results to those in the expected results file.
+- **Accepted deviations**:
+    - Tests *not listed* in the file that result in `STRICTLY_SUCCEEDED`, `CONCEPTUALLY_SUCCEEDED`, or `DISABLED` are **ignored** (do not trigger errors).
+- **Failing deviations**:
+    - Any other mismatch causes TLS-Anvil to:
+        - Print a detailed difference report
+        - Exit with **code `1`**
+
+This behavior is designed for integration with automated testing environments.
+
+---
+
+## Auto-Generating Expected Results
+
+After a test run, TLS-Anvil produces a file:
+
+```bash
+/output/result_map.json
+```
+
+This file contains the actual result mapping of all executed tests and can be reused as an **input for future expected results**. This enables automated tracking of test regressions between runs.
+
+---

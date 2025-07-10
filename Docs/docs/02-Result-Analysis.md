@@ -1,105 +1,151 @@
 # TLS-Anvil Result Analysis
 
-*Analyzing Servers and Clients using Anvil Web*
+*Analyzing Servers and Clients Using Anvil Web*
 
 ## Introduction
 
-This documentation describes how to analyze TLS-Anvil scan reports using Anvil Web.
+This guide explains how to analyze TLS-Anvil scan reports using the **Anvil Web** interface.
 
-**Importing Reports into Anvil Web**  
-If the scan was created and executed from the Anvil Web interface using a connected worker, it will be available immediately in the report overview. If the scan was created using the command line tool, it must first be imported.
+### Importing Reports into Anvil Web
 
-* Either a ZIP archive has already been created (by starting TLS-Anvil using the \-zip flag), if not, the output folder must be packed into a ZIP archive. The archive should look like this:  
-  *\> report.zip*  
-  ![](/img/result-analysis/report-file-structure.png)
-* Upload the ZIP file under Tests → Upload Test  
-  ![](/img/result-analysis/report-list.png)
+If a scan was created and executed via the Anvil Web interface using a connected worker, the results will appear automatically in the report overview.  
+If the scan was executed using the command-line tool, it must be imported manually.
 
-After importing the test report, it can be opened and analyzed. Click on “Details” to go to the Report Overview.
+1. Ensure a ZIP archive of the test output exists:
+    - If TLS-Anvil was started using the `-zip` flag, the archive will be created automatically.
+    - Otherwise, manually compress the output directory into a ZIP archive.
+    - The archive should resemble:  
+      `report.zip`  
+      ![](/img/result-analysis/report-file-structure.png)
+2. Upload the ZIP archive under **Tests → Upload Test**.  
+   ![](/img/result-analysis/report-list.png)
 
-**Report Overview**  
+Once imported, the test report can be opened and analyzed. Click **Details** to view the report overview.
+
+---
+
+### Report Overview
+
 **![](/img/result-analysis/report-overview.png)**  
-The report overview shows a rough overview of the test results.
+The Report Overview provides a high-level summary of the scan results.
 
-* **Test started**: At what time the test was carried out.
-* **Test Cases**: How many handshakes were performed \- this depends on the selected test strength and any active filters.
-* **Elapsed Time**: How long the test took.
-* **Scores**: Gives a rough overview of how many tests from which categories were successful (see below for more on the categories).
-* **Test bar**: *red* \- tests with errors, *green* \- successful tests, *gray* \- tests not performed (e.g. because the feature to be tested is not supported or the test was disabled manually)
+- **Test Started**: Timestamp of when the test began.
+- **Test Cases**: Number of handshakes performed (dependent on test strength and active filters).
+- **Elapsed Time**: Total duration of the test.
+- **Scores**: Summary of test outcomes grouped by category.
+- **Test Bar Colors**:
+    - 🔴 Red: Tests with errors
+    - 🟢 Green: Successful tests
+    - ⚪ Gray: Skipped or unsupported tests
 * **Guidelines**: There are various guidelines that stipulate which configuration TLS servers should have. Among others, the BSI prescribes how to secure a TLS server in its technical guideline TR-02102-2. The American NIST has a similar guideline. Tests are carried out here against these guidelines. This has nothing to do with actual errors in the implementation, as in the test runs below, but with the configuration of the server. The guideline check is performed by TLS-Scanner and is only additionally integrated here.
+---
 
 ## Report Analysis
 
-Below are the actual TLS-Anvil test results, broken down by test run. These are grouped into RFCs and can be restricted using various filters. Most test runs are based on an RFC citation. RFCs specify how TLS software must behave in order to comply with the standard. TLS is defined by many such RFCs. The RFC for TLS version 1.3, for example, is RFC 8446 and can be found here [https://www.rfc-editor.org/rfc/rfc8446](https://www.rfc-editor.org/rfc/rfc8446)
+Below you'll find a breakdown of test results grouped by test run and RFC.
 
-Each test has a randomly generated name according to the scheme \[RFC number\]-\[Random letters\].
+Most tests map directly to RFCs, which define expected TLS behavior.  
+For example, [RFC 8446](https://www.rfc-editor.org/rfc/rfc8446) defines TLS 1.3.
 
-**Filters**  
+Each test is uniquely named using the format: `[RFC number]-[Random letters]`.
+
+### Filters
 **![](/img/result-analysis/filters.png)**  
-Each test has different properties, such as name, tags, categories and test result. All these properties can be filtered:
+You can filter tests based on the following properties:
 
-* **Name:** The name contains the RFC number and is otherwise random. It can be filtered using the free text search.
-* **Tags:** Tags appear in gray after the name and provide additional information about the test, e.g. whether it is a TLS 1.2 (*tls12*) or TLS 1.3 test (*tls13*). Whether it is a server (*server*) or client test (*client*) or both (*both*). Tags can be filtered using the free text search.
-* **Categories:** Tests are grouped into different categories. A test can belong to several categories at the same time. The categories indicate approximately what the test does and what relevance this test has.
-    * **MessageStructure** → A test that checks whether the structure of messages is correct.
-    * **Handshake** → A test that checks the structure of the handshake.
-    * **Alert** → A test that checks for correctly sent alert messages.
-    * **Security** → A test that checks security-relevant specifications. Failure to pass may indicate vulnerability to an attack.
-    * **Interoperability** → A test in which failure to pass could mean that the tested software may not be compatible with other TLS libraries.
-    * **Crypto** → A test that tests cryptographic functions. Failure to pass could lead to a loss of cryptographic security guarantees.
-    * **RecordLayer** → Tests the RecordLayer of TLS.
-    * **DeprecatedFeature** → Tests which use features that should no longer be supported.
-    * **Certificate** → Tests that affect the certificate sent.
-    * **CVE** → Tests that check for known, old vulnerabilities.
-* **Test result:** The test result indicates how the respective test was completed.
-    * Successful
-        * *Strictly Succeeded* → Test passed.
-        * *Conceptually Succeeded* → Test passed, but the connection was closed without notice.
-    * Failed
-        * *Fully Failed* → The test failed under every parameter combination. The tested software does not adhere to the RFC specification. The effects depend on the test.
-        * *Partially Failed* → The test failed for certain parameter combinations (e.g. the test only fails when a certain cipher suite is selected). This indicates that there is probably an implementation error.
-    * Error during execution (mainly relevant for developers of TLS-Anvil or if the TLS library still has compatibility problems)
-        * *Parser Error*
-        * *Not Specified*
-        * *Incomplete*
-        * *Test Suite Error*
-    * *Disabled* → the test was not executed because the function to be tested is not supported or it was manually disabled.
+- **Name**: Includes the RFC number. Supports full-text search.
+- **Tags**: Metadata such as:
+    - Protocol version: `tls12`, `tls13`
+    - Target: `server`, `client`, `both`
+- **Categories**:
+    - `MessageStructure` – Verifies the structure of TLS messages.
+    - `Handshake` – Analyzes handshake protocol behavior.
+    - `Alert` – Evaluates the use of alert messages.
+    - `Security` – Tests security-related requirements. Failures may indicate vulnerabilities.
+    - `Interoperability` – Failures could indicate compatibility issues with other implementations.
+    - `Crypto` – Evaluates cryptographic correctness.
+    - `RecordLayer` – Verifies the TLS Record Layer.
+    - `DeprecatedFeature` – Detects the use of outdated features.
+    - `Certificate` – Assesses certificate-related behaviors.
+    - `CVE` – Identifies known vulnerabilities.
 
-**Debugging a Library**
+- **Test Result**:
+    - **Successful**
+        - *Strictly Succeeded*: Fully passed.
+        - *Conceptually Succeeded*: Passed, but the connection was closed unexpectedly.
+    - **Failed**
+        - *Fully Failed*: All parameter combinations failed.
+        - *Partially Failed*: Some parameter combinations failed.
+    - **Execution Error** (useful for developers)
+        - *Parser Error*
+        - *Not Specified*
+        - *Incomplete*
+        - *Test Suite Error*
+    - **Disabled**: The test was skipped due to unsupported features or manual exclusion.
 
-* **Step 1:** Filter by Failed. To do this, you can click on the red part of the test bar or manually select the test results “Fully Failed” and “Partially Failed”.
-* **Step 2:** Click on all red tests one by one and evaluate what the problem is (see below).  
-  ![](/img/result-analysis/testrun-list.png)
-* **Step 3:** When a test has been fully evaluated, the tick to the left of the test can be selected. This hides the test and moves it to the “Hidden” drop-down menu. Hidden tests can be shown again by pressing the “Reset Hidden” button (all) or by removing the tick.
+---
 
-## Testrun Evaluation
+## Debugging a Library
 
-**Testrun Overview**  
-![](/img/result-analysis/testrun-overview.png)  
-If you click on an individual test run, you will see an overview at the top that shows the test name, the respective RFC and the quote that is being evaluated, as well as information on the test result.
+1. **Filter by Failed Tests**  
+   Click the red portion of the test bar or manually select "Fully Failed" and "Partially Failed".
 
-* **RFC**: This shows which RFC is responsible for the test. The specification is displayed in the form of an RFC quote, as well as the chapter of the RFC in which it can be found.
-* **Result**: Shows the test result. On the right-hand side you can also see how many handshakes were sent (here 21\) and how many of them passed the test (here 0). *Fully Failed* always means that 0 were successful. *Partially Failed* means that more than 0 but not all were successful. If all handshakes were successful, the result is *Strictly Succeeded* or *Conceptually Succeeded*.
-* **Failure Inducing Combinations**: These are only relevant for Partially Failed tests and indicate which parameter is probably responsible for the error. This may help with troubleshooting.
-* **Failed Reason**: The reason why the handshakes failed. Unfortunately, this is usually not directly understandable at present. “The workflow could not be executed as planned” means, for example, that a specific message was expected but another one was received. It is easier to understand the reason for the error if you take a closer look at the individual handshakes.
+2. **Review Each Failed Test**  
+   Click each failed test to analyze the issue.  
+   ![](/img/result-analysis/testrun-list.png)
 
-**List of Handshakes (Test Cases)**  
-The individual handshakes are listed below. These are called test cases. Test runs are usually carried out several times with different parameter combinations. Such an execution is a handshake and can be displayed in the list at the bottom. The list is sorted according to the test result and the respective parameters used. There are rarely test runs that do not require a handshake; in these cases, the list is not displayed.
+3. **Hide Completed Tests**  
+   Once evaluated, mark the test using the checkbox to the left.  
+   This hides it and moves it to the **Hidden** dropdown.  
+   You can reveal hidden tests using:
+    - **Reset Hidden** (to show all)
+    - Removing the checkmark individually
+
+---
+
+## Test Run Evaluation
+
+### Testrun Overview
+![](/img/result-analysis/testrun-overview.png)
+
+Clicking a specific test run reveals:
+
+- **RFC**: The RFC governing the test, including a direct quote and section reference.
+- **Result**: Outcome of the test, along with the number of handshakes sent and passed.
+    - *Fully Failed* = 0 successful
+    - *Partially Failed* = Some but not all successful
+    - *Strictly/Conceptually Succeeded* = All successful
+- **Failure-Inducing Combinations**: Lists which parameter values likely triggered the failure.
+- **Failed Reason**: A textual explanation of the failure (may be vague—review handshakes for clarity).
+
+---
+
+### Handshake/Test Case List
 
 ![](/img/result-analysis/testcase-list.png)
 
-If the test is *Fully Failed*, any handshake can be used here for evaluation.
+Each test run typically includes several test cases with different parameters. These handshakes are shown in a sortable table.
 
-For *partially failed* tests, it is interesting to see under which conditions the test failed. It can be helpful to sort the table according to certain parameters. A small arrow next to the respective table headings can be used for this purpose. If you click on the heading instead, the respective column is removed and appears at the top of the list under “Hidden Parameters”. This can be useful if you are sure that the respective parameter is not relevant for the test.
+- For **Fully Failed** tests, any handshake is valid for analysis.
+- For **Partially Failed**, sort the table by parameters to identify patterns.
+- Use the arrow next to column headers to sort.
+- Click the header to hide the column (it will appear under “Hidden Parameters” above the table).
 
-In the simplest case, the error is dependent on just one parameter. You can then sort by this and you should see that the result column is also sorted. If the result is dependent on a combination of different parameters, it can be difficult to recognize which of the parameters is responsible for a failed handshake. Here again, the “Failure Inducing Combinations” from above can be helpful.
+In simple cases, only one parameter affects the outcome. In complex cases, use the **Failure-Inducing Combinations** for guidance.
 
-**Detail View**  
-If you click on a handshake / test case, you can see all the details of the test procedure. The most interesting things here are the parameters used in each case, the additional information, which sometimes also includes the reason why the test failed, and the network traffic capture.  
-![](/img/result-analysis/testcase-details.png)  
-The following may be relevant here:
+---
 
-* **Result**: The result of the individual handshake.
-* **AdditionalResultInformation**: Useful information about the test. May contain more information about why it failed.
-* **Derivations**: The parameter combinations that were used.
-* **Network Traffic Capture**: Which messages were sent. TLS messages are marked in blue. The complete PCAP recording can be downloaded below and analyzed using tools such as Wireshark.
+### Detail View
+
+Clicking a handshake shows a detailed view.  
+![](/img/result-analysis/testcase-details.png)
+
+Key elements include:
+
+- **Result**: Final outcome of the handshake.
+- **Stacktrace**: The reason the test hase failed.
+- **AdditionalResultInformation**: May contain insights into failure causes.
+- **Derivations**: Specific parameters used in the test.
+- **Network Traffic Capture**: View the sequence of TLS messages.
+    - TLS messages are highlighted in blue.
+    - Download the full PCAP for analysis in tools like Wireshark.

@@ -1,70 +1,70 @@
 # Development Environment Setup
 
-First our repository needs to be cloned.
+First, clone our repository:
 
-```
+```bash
 git clone git://github.com/tls-attacker/TLS-Anvil
 ```
 
 ## Compile From Terminal
 
-TLS-Anvil depends on specific TLS-Attacker and TLS-Scanner as well as Anvil-Core as testing framework. Those are implemented as maven dependencies and should be fetched during build automatically.
+TLS-Anvil depends on specific versions of TLS-Attacker, TLS-Scanner, and Anvil-Core as its testing framework. These are managed as Maven dependencies and will be automatically fetched during the build process.
 
 ```bash
 mvn clean install -DskipTests
 ```
 
-TLS-Anvil can be started by executing the jar file.
+TLS-Anvil can be started by executing the JAR file:
 
 ```bash
-cd TLS-Testsuite/apps
-java -jar TLS-Testsuite.jar
+cd apps
+java -jar TLS-Anvil.jar
 ```
 
 ## Setup IDE
 
-TLS-Anvil was mainly developed in IntelliJ IDEA and Netbeans. Since IDEA offers a deeper JUnit integration, the following section explain a basic IDEA setup.
+TLS-Anvil was primarily developed using IntelliJ IDEA and NetBeans. Since IntelliJ IDEA offers more advanced JUnit integration, the following section describes a basic setup for IDEA.
 
-### IDEA
+### IntelliJ IDEA
 
-1. Open the TLS-Testsuite Project (`pom.xml`) in IntelliJ
-2. Open the `Project Structure` -> `Module` Menu.
-3. Add the `TLS-Test-Framework` (`TLS-Test-Framework/pom.xml`) as new Module
-4. If you want or need to modify TLS-Attacker and TLS-Scanner as well (separate git repositories):
-   1. Add `TLS-Attacker` (`TLS-Attacker/pom.xml`) as new Module
-   2. Add `TLS-Scanner` (`TLS-Scanner/pom.xml`) as new Module
+1. Open the TLS-Testsuite project by selecting the root `pom.xml` file in IntelliJ IDEA.
+2. If you intend to modify TLS-Attacker and TLS-Scanner as well (which are maintained in separate Git repositories):
+    1. Add `TLS-Attacker` (`TLS-Attacker/pom.xml`) as a new module.
+    2. Add `TLS-Scanner` (`TLS-Scanner/pom.xml`) as a new module.
 
-The project should compile now.
+At this point, the project should compile successfully.
 
-Since TLS-Anvil uses JUnit as testing framework, a single test can be executed using the IDE. For example, if you open a TLS-Anvil test template inside the `de.rub.nds.tlstest.suite.tests` package, a green play button is visible next to the test function.
+Since TLS-Anvil uses JUnit as its testing framework, individual tests can be executed directly from the IDE. For example, when opening a TLS-Anvil test template located in the `de.rub.nds.tlstest.suite.tests` package, a green play button will appear next to each test method.
 
 ![](/test_example.png)
 
-The example from the screenshot is a server test. Therefore, a TLS server needs to be running. However, this is not enough since TLS-Anvil needs to know how to connect to the server. Those option are configured by using the environment variables, that are equivalent to the regular TLS-Anvil CLI options.
+The example in the screenshot is a server test, so a TLS server must be running. Additionally, TLS-Anvil requires connection details to the server. These options are configured via environment variables, which correspond to the regular TLS-Anvil CLI options.
 
-The recommended way is to edit the JUnit 5 template of IDEA.
-1. Open the `Edit configurations` from the command pallette
-1. On the bottom left select `Edit configuration templates`
-1. Select `JUnit`
-1. Configure the environment variables
-* Use `COMMAND_SERVER` to specify CLI options for testing a server  
-Simple example:
+The recommended approach is to edit the JUnit 5 run configuration template in IntelliJ IDEA:
+
+1. Open `Edit Configurations` from the command palette.
+2. In the bottom left, select `Edit Configuration Templates`.
+3. Select the `JUnit` template.
+4. Configure the environment variables:
+    * Use `COMMAND_SERVER` to specify CLI options for testing a server.  
+      Example:
 
 ```
 -networkInterface lo0 -parallelHandshakes 1 -strength 1 server -connect localhost:8443 -doNotSendSNIExtension
 ```
 
-* Use `COMMAND_CLIENT` to specify CLI options for testing a client  
-  Simple example:
+    * Use `COMMAND_CLIENT` to specify CLI options for testing a client.  
+      Example:
 
 ```
 -networkInterface lo0 -parallelHandshakes 1 -strength 1 client -port 8443 -triggerScript [path to script]
 ```
 
-When the environment variables are configured, it is possible to run a client or server test by clicking the green play buttons next to a function. The specified variables are used by TLS-Anvil to setup the test backend accordingly.
+Once the environment variables are configured, you can run client or server tests by clicking the green play buttons next to the test methods. TLS-Anvil will use these variables to configure the test backend accordingly.
 
-### Netbeans or other
+### NetBeans or Other IDEs
 
-TLS-Anvil is based on Maven and can be compiled like any other Maven Java project. To only execute specific test templates during the development, the CLI of TLS-Anvil offers two options.
-* `-testPackage [package]` runs all tests inside a specific Java package.
-* `-tags [tag]` runs only test templates that are annotated with a specific tag. When you develop a new test case, annotate the test function temporarily with `@Tag("tag")` to be able to only run this specific test template.
+TLS-Anvil is a Maven-based project and can be built like any other Maven Java project. To execute specific test templates during development, the TLS-Anvil CLI provides two options:
+
+* `-testPackage [package]` — Runs all tests within the specified Java package.
+* `-tags [tag]` — Runs only test templates annotated with the specified tag. When developing a new test case, temporarily annotate the test method with `@Tag("tag")` to run only that specific test template.

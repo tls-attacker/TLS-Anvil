@@ -47,6 +47,12 @@ docker run \
 * Line 6: Specifies the Docker image from the TLS-Docker-Library
 * Lines 7-9: Flags passed to the OpenSSL `s_server` binary
 
+:::note
+
+Note, that if you are using a platform beyond linux/amd64 (e.g., on a **Macbook**), you might need to use the parameter `--platform linux/amd64` to correctly start the image.
+
+:::
+
 ### Starting TLS-Anvil
 
 Next, start TLS-Anvil. The current directory is mounted into the Docker container to store the results. We connect to the server using its Docker hostname `openssl-server`, which works because both containers are on the same Docker network.
@@ -77,6 +83,12 @@ docker run \
 * Line 11: Sets the strength parameter, i.e., the `t` value for t-way combinatorial testing
 * Line 13: Specifies that we want to test a server
 * Line 14: Details how TLS-Anvil should connect to the server
+
+:::tip
+
+If you want to connect to a server running on your host machine, and not in another container, you can either use the hostname `host.docker.internal` or set the docker network to `--network host` and use `localhost` as hostname.
+
+:::
 
 ### What Now?
 

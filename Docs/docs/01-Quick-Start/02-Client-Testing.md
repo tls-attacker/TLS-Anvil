@@ -49,6 +49,12 @@ docker run \
 * Line 14: Specifies the port TLS-Anvil listens on for client connections
 * Line 15: Provides a script that is executed before each handshake to trigger a new client connection. See explanation below.
 
+:::tip
+
+If you want the trigger script to execute on your host machine, we recommend to run the `TLS-Anvil.jar` executable directly on your host machine using Java 21 or newer. The jar files can be found under [Releases](https://github.com/tls-attacker/TLS-Anvil/releases).
+
+:::
+
 ### Starting the OpenSSL Client Container
 
 :::info
@@ -78,6 +84,12 @@ docker run \
 * Lines 2–5: Docker-related command flags
 * Line 6: Specifies the OpenSSL client image from the TLS-Docker-Library
 * Line 7: This argument is passed to the OpenSSL `s_client` binary, which is executed each time a `GET /trigger` request is sent to port 8090
+
+:::note
+
+Note, that if you are using a platform beyond linux/amd64 (e.g., on a **Macbook**), you might need to use the parameter `--platform linux/amd64` to correctly start the image.
+
+:::
 
 ### What Now?
 

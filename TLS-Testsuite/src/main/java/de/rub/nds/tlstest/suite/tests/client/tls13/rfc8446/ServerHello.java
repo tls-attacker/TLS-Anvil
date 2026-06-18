@@ -68,10 +68,7 @@ public class ServerHello extends Tls13Test {
                         == 0) {
             testCase.addAdditionalResultInfo("Client did not set SessionID");
         }
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "8446-2yeDE1Bso6")
@@ -143,9 +140,6 @@ public class ServerHello extends Tls13Test {
         State state = runner.execute(workflowTrace, c);
 
         WorkflowTrace trace = state.getWorkflowTrace();
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 }

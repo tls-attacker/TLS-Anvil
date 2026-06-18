@@ -125,13 +125,8 @@ public class CBCBlockCipher extends Tls12Test {
 
                 State state = runner.execute(workflowTrace, c);
 
-                WorkflowTrace trace = state.getWorkflowTrace();
                 Validator.executedAsPlanned(state, testCase);
-                Validator.receivedFatalAlert(state, testCase);
-
-                AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-                Validator.testAlertDescription(
-                        state, testCase, AlertDescription.BAD_RECORD_MAC, msg);
+                Validator.receivedFatalAlert(state, testCase, AlertDescription.BAD_RECORD_MAC);
 
                 if (testCase.getTestResult() == TestResult.FULLY_FAILED
                         || testCase.getTestResult() == TestResult.PARTIALLY_FAILED) {
@@ -227,11 +222,7 @@ public class CBCBlockCipher extends Tls12Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        WorkflowTrace trace = state.getWorkflowTrace();
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.BAD_RECORD_MAC);
     }
 
     @AnvilTest(id = "5246-BWb6uwVEte")

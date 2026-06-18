@@ -83,11 +83,7 @@ public class RecordLayer extends Tls13Test {
 
         State state = runner.execute(trace, c);
 
-        WorkflowTrace workflowtrace = state.getWorkflowTrace();
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage msg = workflowtrace.getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 
     public ConditionEvaluationResult supportsRecordFragmentation() {

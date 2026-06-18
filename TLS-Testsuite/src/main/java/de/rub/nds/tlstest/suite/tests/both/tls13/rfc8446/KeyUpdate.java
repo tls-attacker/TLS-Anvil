@@ -50,8 +50,7 @@ public class KeyUpdate extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 
     @AnvilTest(id = "8446-Dy4H1oQ8bc")
@@ -67,8 +66,7 @@ public class KeyUpdate extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "8446-J6tVdjJCzF")

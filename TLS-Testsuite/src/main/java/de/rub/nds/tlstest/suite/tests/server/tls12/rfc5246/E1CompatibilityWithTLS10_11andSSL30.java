@@ -105,10 +105,7 @@ public class E1CompatibilityWithTLS10_11andSSL30 extends Tls12Test {
 
         State state = runner.execute(trace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.PROTOCOL_VERSION, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.PROTOCOL_VERSION);
     }
 
     @AnvilTest(id = "5246-YLok6XJr7R")

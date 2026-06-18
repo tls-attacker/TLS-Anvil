@@ -42,9 +42,7 @@ public class Certificate extends Tls13Test {
 
         State state = runner.execute(trace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.DECODE_ERROR, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.DECODE_ERROR);
     }
 
     @AnvilTest(id = "8446-cM4fvnBMce")
@@ -60,8 +58,6 @@ public class Certificate extends Tls13Test {
 
         State state = runner.execute(trace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.DECODE_ERROR, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.DECODE_ERROR);
     }
 }

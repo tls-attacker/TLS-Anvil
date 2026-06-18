@@ -139,8 +139,7 @@ public class PreSharedKey extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     private WorkflowTrace getExtensionPositionModifiedTrace(WorkflowRunner runner, Config config) {
@@ -173,8 +172,7 @@ public class PreSharedKey extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "8446-Hq5yKcFcmQ")

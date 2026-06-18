@@ -51,11 +51,7 @@ public class AEADCiphers extends Tls12Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        WorkflowTrace trace = state.getWorkflowTrace();
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.BAD_RECORD_MAC);
     }
 
     public boolean recordLengthAllowsModification(Integer lengthCandidate) {
@@ -93,10 +89,6 @@ public class AEADCiphers extends Tls12Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        WorkflowTrace trace = state.getWorkflowTrace();
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.BAD_RECORD_MAC);
     }
 }

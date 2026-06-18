@@ -116,10 +116,7 @@ public class Extensions extends Tls13Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(
-                state, testCase, AlertDescription.UNSUPPORTED_EXTENSION, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.UNSUPPORTED_EXTENSION);
     }
 
     @AnvilTest(id = "8446-6dvAUhLdUW")

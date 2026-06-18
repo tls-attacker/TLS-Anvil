@@ -112,10 +112,7 @@ public class ClientHello extends Tls13Test {
 
         State state = runner.execute(trace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "8446-vtJcLUKtNv")
@@ -173,8 +170,7 @@ public class ClientHello extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        Validator.testAlertDescription(state, testCase, AlertDescription.MISSING_EXTENSION);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.MISSING_EXTENSION);
     }
 
     @AnvilTest(id = "8446-jEEunwNUJ3")

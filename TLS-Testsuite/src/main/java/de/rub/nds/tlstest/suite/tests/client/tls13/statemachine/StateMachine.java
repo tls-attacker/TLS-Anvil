@@ -187,9 +187,7 @@ public class StateMachine extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 
     @AnvilTest(id = "XSM-gN61eQrmNv")

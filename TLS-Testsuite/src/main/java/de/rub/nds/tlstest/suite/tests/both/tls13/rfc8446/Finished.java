@@ -47,8 +47,6 @@ public class Finished extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.DECRYPT_ERROR, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.DECRYPT_ERROR);
     }
 }

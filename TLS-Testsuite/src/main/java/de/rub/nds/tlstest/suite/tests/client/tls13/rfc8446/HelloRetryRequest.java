@@ -98,11 +98,10 @@ public class HelloRetryRequest extends Tls13Test {
         State state = runner.execute(workflowTrace, c);
 
         Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
         // illegal parameter is not mentioned in the quote above but is
         // mandatory
         // for the ServerHello case
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
+        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     public boolean isKeyShareInInitialHello(NamedGroup group) {
@@ -131,9 +130,7 @@ public class HelloRetryRequest extends Tls13Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     public boolean isNotKeyShareInInitialHello(NamedGroup group) {
@@ -200,9 +197,7 @@ public class HelloRetryRequest extends Tls13Test {
                                         WorkflowTraceResultUtil.getLastReceivedMessage(
                                                 state.getWorkflowTrace())),
                 "Client replied to second HelloRetryRequest with ClientHello");
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 
     private ConditionEvaluationResult supportsMultipleCipherSuites() {
@@ -245,9 +240,7 @@ public class HelloRetryRequest extends Tls13Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "8446-KLkH56oYzC")
@@ -279,9 +272,7 @@ public class HelloRetryRequest extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "8446-ncR52WSgGx")
@@ -310,9 +301,7 @@ public class HelloRetryRequest extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "8446-6X9hLRk9V4")

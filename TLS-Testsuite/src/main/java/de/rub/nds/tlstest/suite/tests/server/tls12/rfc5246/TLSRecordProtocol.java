@@ -49,9 +49,7 @@ public class TLSRecordProtocol extends Tls12Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 
     @AnvilTest(id = "5246-J3JUrjX6Xa")
@@ -73,8 +71,6 @@ public class TLSRecordProtocol extends Tls12Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 }

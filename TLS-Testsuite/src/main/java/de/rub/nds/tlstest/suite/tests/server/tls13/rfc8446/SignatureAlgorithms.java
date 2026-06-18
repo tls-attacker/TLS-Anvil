@@ -50,10 +50,7 @@ public class SignatureAlgorithms extends Tls13Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.MISSING_EXTENSION, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.MISSING_EXTENSION);
     }
 
     public List<DerivationParameter<Config, SignatureAndHashAlgorithm>> getLegacySigHashAlgoritms(

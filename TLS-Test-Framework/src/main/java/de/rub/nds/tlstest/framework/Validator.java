@@ -209,6 +209,12 @@ public class Validator {
         receivedFatalAlert(state, testCase, true);
     }
 
+    public static void receivedFatalAlert(
+            State state, AnvilTestCase testCase, AlertDescription... expectedDescriptions) {
+        receivedFatalAlert(state, testCase, true);
+        testAlertDescription(state, testCase, expectedDescriptions);
+    }
+
     public static void executedAsPlanned(State state, AnvilTestCase testCase) {
         checkForUnknownMessage(state, testCase);
         assertTrue(

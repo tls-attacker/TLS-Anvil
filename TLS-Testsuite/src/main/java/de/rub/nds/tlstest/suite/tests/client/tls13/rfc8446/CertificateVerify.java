@@ -134,10 +134,7 @@ public class CertificateVerify extends Tls13Test {
             testCase.addAdditionalResultInfo("Bitmask exceeded signature length");
             return;
         }
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage amsg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.DECRYPT_ERROR, amsg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.DECRYPT_ERROR);
     }
 
     public List<DerivationParameter> getUnproposedSignatureAndHashAlgorithms(
@@ -185,9 +182,7 @@ public class CertificateVerify extends Tls13Test {
 
         State state = runner.execute(trace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.DECRYPT_ERROR, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.DECRYPT_ERROR);
     }
 
     @AnvilTest(id = "8446-CZWhi6PJvQ")

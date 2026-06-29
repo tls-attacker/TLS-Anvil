@@ -57,9 +57,7 @@ public class RecordProtocol extends Tls13Test {
 
         State state = runner.execute(trace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 
     @AnvilTest(id = "8446-PN89HSERKp")
@@ -79,10 +77,7 @@ public class RecordProtocol extends Tls13Test {
         workflowTrace.addTlsActions(sendFinished, new ReceiveAction(new AlertMessage()));
 
         State state = runner.execute(workflowTrace, c);
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 
     @AnvilTest(id = "8446-GXAiyehrdF")
@@ -102,10 +97,7 @@ public class RecordProtocol extends Tls13Test {
         trace.addTlsActions(appData, new ReceiveAction(new AlertMessage()));
 
         State state = runner.execute(trace, c);
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.BAD_RECORD_MAC);
     }
 
     @AnvilTest(id = "8446-n1veCSRVjQ")
@@ -132,9 +124,7 @@ public class RecordProtocol extends Tls13Test {
                 new ReceiveAction(new AlertMessage()));
 
         State state = runner.execute(workflowTrace, c);
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.RECORD_OVERFLOW);
     }
 
     public boolean recordLengthAllowsModification(Integer lengthCandidate) {
@@ -165,9 +155,7 @@ public class RecordProtocol extends Tls13Test {
 
         State state = runner.execute(trace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.BAD_RECORD_MAC);
     }
 
     @AnvilTest(id = "8446-i9pq4Yt8pz")
@@ -224,9 +212,7 @@ public class RecordProtocol extends Tls13Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.RECORD_OVERFLOW);
     }
 
     @AnvilTest(id = "8446-aUT8tc8oYz")
@@ -308,8 +294,7 @@ public class RecordProtocol extends Tls13Test {
 
         State state = runner.execute(trace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 
     @AnvilTest(id = "8446-hKUhsUFCnx")
@@ -328,8 +313,7 @@ public class RecordProtocol extends Tls13Test {
 
         State state = runner.execute(trace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 
     @AnvilTest(id = "8446-V3SF3rXAAW")

@@ -123,9 +123,6 @@ public class StateMachine extends Tls13Test {
 
         State state = runner.execute(trace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-
-        AlertMessage alert = trace.getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.UNEXPECTED_MESSAGE, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.UNEXPECTED_MESSAGE);
     }
 }

@@ -78,10 +78,7 @@ public class MaximumFragmentLength extends Tls12Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        WorkflowTrace trace = state.getWorkflowTrace();
-        AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "6066-ossqki78mA")
@@ -109,10 +106,7 @@ public class MaximumFragmentLength extends Tls12Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        WorkflowTrace trace = state.getWorkflowTrace();
-        AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "6066-XXJU5VtxbB")

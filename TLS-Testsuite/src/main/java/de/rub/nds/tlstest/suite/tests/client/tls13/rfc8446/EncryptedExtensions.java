@@ -68,9 +68,7 @@ public class EncryptedExtensions extends Tls13Test {
         ee.addExtension(new SupportedVersionsExtensionMessage());
 
         State state = runner.execute(workflowTrace, c);
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "8446-U5uSdqYohP")
@@ -89,7 +87,6 @@ public class EncryptedExtensions extends Tls13Test {
         State state = runner.execute(workflowTrace, c);
 
         Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
         AlertDescription[] expectedAlerts;
         if (!context.getReceivedClientHelloMessage().containsExtension(ExtensionType.PADDING)) {
             // Section 4.2 of RFC 8446 mandates that an 'unsupported extension' alert is sent if the
@@ -103,7 +100,7 @@ public class EncryptedExtensions extends Tls13Test {
         } else {
             expectedAlerts = new AlertDescription[] {AlertDescription.ILLEGAL_PARAMETER};
         }
-        Validator.testAlertDescription(state, testCase, expectedAlerts, alert);
+        Validator.testAlertDescription(state, testCase, expectedAlerts);
     }
 
     @AnvilTest(id = "8446-34CYsV98Fs")
@@ -123,11 +120,7 @@ public class EncryptedExtensions extends Tls13Test {
         encExt.addExtension(malMaxFrag);
 
         State state = runner.execute(workflowTrace, c);
-        Validator.receivedFatalAlert(state, testCase);
-
-        WorkflowTrace trace = state.getWorkflowTrace();
-        AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "8446-XDu7chdPTM")
@@ -153,9 +146,6 @@ public class EncryptedExtensions extends Tls13Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        WorkflowTrace trace = state.getWorkflowTrace();
-        AlertMessage alert = trace.getLastReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 }

@@ -175,9 +175,7 @@ public class Fragmentation extends Tls12Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW, alert);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.RECORD_OVERFLOW);
     }
 
     @AnvilTest(id = "5246-6w2UjD5RGT")

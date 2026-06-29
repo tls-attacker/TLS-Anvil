@@ -85,8 +85,7 @@ public class SupportedVersions extends Tls13Test {
                 workflowTrace, HandshakeMessageType.FINISHED)) {
             // peers may consider the legacy version field exclusively for sanity checks and thus
             // reject our invalid version
-            Validator.receivedFatalAlert(state, testCase);
-            Validator.testAlertDescription(state, testCase, AlertDescription.PROTOCOL_VERSION);
+            Validator.receivedFatalAlert(state, testCase, AlertDescription.PROTOCOL_VERSION);
         } else {
             // if the peer ignored the invalid legacy version, ensure TLS 1.3 flow was followed
             Validator.executedAsPlanned(state, testCase);
@@ -111,9 +110,7 @@ public class SupportedVersions extends Tls13Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @AnvilTest(id = "8446-YDjQAqZ2LM")
@@ -130,9 +127,7 @@ public class SupportedVersions extends Tls13Test {
 
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage msg = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.ILLEGAL_PARAMETER, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
     @NonCombinatorialAnvilTest(id = "8446-o5uxfywWFS")
@@ -210,8 +205,7 @@ public class SupportedVersions extends Tls13Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        Validator.testAlertDescription(state, testCase, AlertDescription.PROTOCOL_VERSION);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.PROTOCOL_VERSION);
     }
 
     @AnvilTest(id = "8446-eNP4DYhWjk")

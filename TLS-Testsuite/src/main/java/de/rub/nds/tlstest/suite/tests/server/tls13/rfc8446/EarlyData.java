@@ -240,8 +240,7 @@ public class EarlyData extends Tls13Test {
         }
 
         Validator.receivedFatalAlert(state, testCase, false);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, alert);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC);
     }
 
     @AnvilTest(id = "8446-QSom3GGTZ1")
@@ -299,8 +298,7 @@ public class EarlyData extends Tls13Test {
         }
 
         Validator.receivedFatalAlert(state, testCase, false);
-        AlertMessage alert = state.getWorkflowTrace().getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC, alert);
+        Validator.testAlertDescription(state, testCase, AlertDescription.BAD_RECORD_MAC);
     }
 
     private AlertMessage tryToDecryptWithAppSecrets(TlsContext context, Record record) {

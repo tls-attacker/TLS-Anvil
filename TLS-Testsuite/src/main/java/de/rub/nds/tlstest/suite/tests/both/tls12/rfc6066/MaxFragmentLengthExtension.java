@@ -79,8 +79,7 @@ public class MaxFragmentLengthExtension extends Tls12Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        Validator.receivedFatalAlert(state, testCase);
-        Validator.testAlertDescription(state, testCase, AlertDescription.RECORD_OVERFLOW);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.RECORD_OVERFLOW);
     }
 
     private MaxFragmentLength getNegotiatedMaxFragmentLength(Config config) {

@@ -50,10 +50,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        WorkflowTrace trace = state.getWorkflowTrace();
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.PROTOCOL_VERSION, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.PROTOCOL_VERSION);
     }
 
     public List<DerivationParameter<Config, byte[]>> get03ProtocolVersions(DerivationScope scope) {
@@ -90,10 +87,7 @@ public class DoNotUseSSLVersion30 extends Tls12Test {
 
         State state = runner.execute(workflowTrace, config);
 
-        WorkflowTrace trace = state.getWorkflowTrace();
-        Validator.receivedFatalAlert(state, testCase);
-        AlertMessage msg = trace.getFirstReceivedMessage(AlertMessage.class);
-        Validator.testAlertDescription(state, testCase, AlertDescription.PROTOCOL_VERSION, msg);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.PROTOCOL_VERSION);
     }
 
     @AnvilTest(id = "7568-6CdJpT15w2")

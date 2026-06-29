@@ -117,8 +117,7 @@ public class SupportedVersions extends Tls13Test {
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
         State state = runner.execute(workflowTrace, c);
 
-        Validator.receivedFatalAlert(state, testCase);
-        Validator.testAlertDescription(state, testCase, AlertDescription.PROTOCOL_VERSION);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.PROTOCOL_VERSION);
     }
 
     public List<DerivationParameter<Config, byte[]>> getUnsupportedProtocolVersions(

@@ -187,8 +187,7 @@ public class FfDheShare extends Tls12Test {
         workflowTrace.addTlsAction(new ReceiveAction(new AlertMessage()));
 
         State state = runner.execute(workflowTrace, config);
-        Validator.receivedFatalAlert(state, testCase);
-        Validator.testAlertDescription(state, testCase, AlertDescription.INSUFFICIENT_SECURITY);
+        Validator.receivedFatalAlert(state, testCase, AlertDescription.INSUFFICIENT_SECURITY);
     }
 
     @AnvilTest(id = "7919-poUc9K3yfd")

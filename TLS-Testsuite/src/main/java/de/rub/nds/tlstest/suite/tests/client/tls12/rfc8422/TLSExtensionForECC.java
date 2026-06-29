@@ -142,12 +142,18 @@ public class TLSExtensionForECC extends Tls12Test {
         return false;
     }
 
+    public boolean isInvalidCurveApplicable(NamedGroup group) {
+        return isSecpCurve(group) && InvalidCurvePoint.smallOrder(group) != null;
+    }
+
     @AnvilTest(id = "8422-A5SiH3AcVB")
     @ModelFromScope(modelType = "CERTIFICATE")
     @KeyExchange(
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
-    @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
+    @DynamicValueConstraints(
+            affectedIdentifiers = "NAMED_GROUP",
+            methods = "isInvalidCurveApplicable")
     public void rejectsInvalidCurvePoints(AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);
 

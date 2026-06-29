@@ -199,8 +199,9 @@ public class TLSExtensionForECC extends Tls12Test {
             supported = {KeyExchangeType.ECDH},
             requiresServerKeyExchMsg = true)
     @DynamicValueConstraints(
+            clazz = de.rub.nds.tlstest.suite.tests.client.tls12.rfc8422.TLSExtensionForECC.class,
             affectedIdentifiers = "NAMED_GROUP",
-            methods = "isInvalidCurveApplicableNamedGroup")
+            methods = "isInvalidCurveApplicable")
     @Tag("new")
     public void rejectsInvalidCurvePoints(AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);
@@ -297,16 +298,5 @@ public class TLSExtensionForECC extends Tls12Test {
 
     public boolean isXCurve(NamedGroup group) {
         return group != null && group.name().contains("ECDH_X");
-    }
-
-    public boolean isInvalidCurveApplicableNamedGroup(NamedGroup group) {
-        if (group != null
-                && group.isCurve()
-                && !group.isGost()
-                && !group.isDhGroup()
-                && !(group.getGroupParameters().getGroup() instanceof RFC7748Curve)) {
-            return true;
-        }
-        return false;
     }
 }

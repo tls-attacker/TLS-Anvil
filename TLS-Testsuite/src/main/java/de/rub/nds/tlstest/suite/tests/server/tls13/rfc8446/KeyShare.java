@@ -37,6 +37,7 @@ import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.InvalidCurvePoint;
 import de.rub.nds.tlsscanner.serverscanner.probe.invalidcurve.point.TwistedCurvePoint;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.NamedGroupDerivation;
@@ -100,6 +101,7 @@ public class KeyShare extends Tls13Test {
                 AssertMsgs.WORKFLOW_NOT_EXECUTED + ", server likely selected the wrong key share");
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-R2rb1WZoQo")
     public void serverOnlyOffersOneKeyshare(AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);
@@ -115,6 +117,7 @@ public class KeyShare extends Tls13Test {
         performOneKeyshareTest(c, runner, testCase);
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-TKn1mNn5mY")
     @ExcludeParameter("NAMED_GROUP")
     public void serverOnlyOffersOneKeyshareAllGroupsAtOnce(
@@ -224,6 +227,7 @@ public class KeyShare extends Tls13Test {
         }
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-tCzswEB5Ua")
     public void includeUnknownGroup(AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = getPreparedConfig(runner);
@@ -252,6 +256,7 @@ public class KeyShare extends Tls13Test {
         Validator.executedAsPlanned(state, testCase);
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-Pew9n1pYvc")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isSecpCurve")
     @Tag("new")
@@ -357,6 +362,7 @@ public class KeyShare extends Tls13Test {
         return derivationParameters;
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-sa4RjSVVNr")
     @DynamicValueConstraints(affectedIdentifiers = "NAMED_GROUP", methods = "isXCurve")
     @Tag("new")

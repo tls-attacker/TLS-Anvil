@@ -4,7 +4,7 @@ TLS-Anvil is a test suite for the evaluation of RFC compliance of Transport Laye
 
 Have a look at our docs ([https://tls-anvil.com](https://tls-anvil.com)) to learn more about the project.
 
-The test suite contains around 408 client and server tests for (D)TLS 1.2 and TLS 1.3 based on the following RFCs:
+The test suite contains around 408 client and server tests for (D)TLS 1.2 and (D)TLS 1.3 based on the following RFCs:
 * RFC 4492 - Elliptic Curve Cryptography (ECC) Cipher Suites for Transport Layer Security (TLS)
 * RFC 5246 - The Transport Layer Security (TLS) Protocol Version 1.2
 * RFC 6066 - Transport Layer Security (TLS) Extensions: Extension Definitions

@@ -599,7 +599,11 @@ public class TestPreparator {
                 && !testContext
                         .getFeatureExtractionResult()
                         .getSupportedVersions()
-                        .contains(ProtocolVersion.DTLS12)) {
+                        .contains(ProtocolVersion.DTLS12)
+                && !testContext
+                        .getFeatureExtractionResult()
+                        .getSupportedVersions()
+                        .contains(ProtocolVersion.DTLS13)) {
             LOGGER.error("Target does not support any ProtocolVersion that the Testsuite supports");
         } else {
             startTestSuite = true;
@@ -732,24 +736,30 @@ public class TestPreparator {
         LOGGER.info("Scheduled test templates:");
         TestEndpointType executionEndpointType = testContext.getConfig().getTestEndpointMode();
         if (testContext.getConfig().isUseDTLS()) {
-            long clientDtls12 =
-                    testPlan.countTestIdentifiers(
-                            i ->
-                                    countTests(
-                                            i,
-                                            ProtocolVersion.DTLS12,
-                                            TestEndpointType.CLIENT,
-                                            executionEndpointType));
-            long serverDtls12 =
-                    testPlan.countTestIdentifiers(
-                            i ->
-                                    countTests(
-                                            i,
-                                            ProtocolVersion.DTLS12,
-                                            TestEndpointType.SERVER,
-                                            executionEndpointType));
-            LOGGER.info(
-                    "DTLS 1.2 tests: {} client tests, {} server tests", clientDtls12, serverDtls12);
+            for (ProtocolVersion dtlsVersion :
+                    new ProtocolVersion[] {ProtocolVersion.DTLS12, ProtocolVersion.DTLS13}) {
+                long clientDtls =
+                        testPlan.countTestIdentifiers(
+                                i ->
+                                        countTests(
+                                                i,
+                                                dtlsVersion,
+                                                TestEndpointType.CLIENT,
+                                                executionEndpointType));
+                long serverDtls =
+                        testPlan.countTestIdentifiers(
+                                i ->
+                                        countTests(
+                                                i,
+                                                dtlsVersion,
+                                                TestEndpointType.SERVER,
+                                                executionEndpointType));
+                LOGGER.info(
+                        "{} tests: {} client tests, {} server tests",
+                        dtlsVersion,
+                        clientDtls,
+                        serverDtls);
+            }
         } else {
             long clientTls12 =
                     testPlan.countTestIdentifiers(

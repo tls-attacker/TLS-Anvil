@@ -13,11 +13,13 @@ import de.rub.nds.anvilcore.annotation.AnvilTest;
 import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
@@ -25,6 +27,7 @@ import org.junit.jupiter.api.Tag;
 @ServerTest
 public class Certificate extends Tls13Test {
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-d9fcJKjSny")
     @Tag("new")
     public void certificateListIsNotEmpty(AnvilTestCase testCase, WorkflowRunner runner) {

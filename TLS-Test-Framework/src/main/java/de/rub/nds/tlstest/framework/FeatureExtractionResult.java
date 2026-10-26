@@ -65,7 +65,8 @@ public abstract class FeatureExtractionResult implements Serializable {
         for (VersionSuiteListPair versionSuiteListPair : siteReport.getVersionSuitePairs()) {
             if (versionSuiteListPair.getVersion() == ProtocolVersion.TLS12
                     || versionSuiteListPair.getVersion() == ProtocolVersion.TLS13
-                    || versionSuiteListPair.getVersion() == ProtocolVersion.DTLS12) {
+                    || versionSuiteListPair.getVersion() == ProtocolVersion.DTLS12
+                    || versionSuiteListPair.getVersion() == ProtocolVersion.DTLS13) {
                 getSupportedCipherSuites().addAll(versionSuiteListPair.getCipherSuiteList());
             }
         }

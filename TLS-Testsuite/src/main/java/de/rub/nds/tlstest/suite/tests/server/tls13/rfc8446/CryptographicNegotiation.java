@@ -18,6 +18,7 @@ import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.CipherSuite;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.EllipticCurvesExtensionMessage;
@@ -27,6 +28,7 @@ import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
@@ -34,6 +36,7 @@ import org.junit.jupiter.api.Tag;
 @ServerTest
 public class CryptographicNegotiation extends Tls13Test {
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-5fMfqyHu68")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
@@ -61,6 +64,7 @@ public class CryptographicNegotiation extends Tls13Test {
         validateResult(state, testCase, trace);
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-QxURSJAYJj")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),

@@ -25,9 +25,9 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 
 @ServerTest
+@TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
 public class Certificate extends Tls13Test {
 
-    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-d9fcJKjSny")
     @Tag("new")
     public void certificateListIsNotEmpty(AnvilTestCase testCase, WorkflowRunner runner) {

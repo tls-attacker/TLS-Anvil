@@ -28,9 +28,9 @@ import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 
+@TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
 public class Finished extends Tls13Test {
 
-    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-dZhHUctEjQ")
     @IncludeParameter("PRF_BITMASK")
     public void verifyFinishedMessageCorrect(AnvilTestCase testCase, WorkflowRunner runner) {

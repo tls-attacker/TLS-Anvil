@@ -32,6 +32,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 @ServerTest
+@TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
 public class EncryptedExtensions extends Tls13Test {
 
     public ConditionEvaluationResult sniActive() {
@@ -42,7 +43,6 @@ public class EncryptedExtensions extends Tls13Test {
         return ConditionEvaluationResult.disabled("SNI is disabled");
     }
 
-    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-ZkFrZYKzbi")
     public void includedInvalidExtensions(AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);

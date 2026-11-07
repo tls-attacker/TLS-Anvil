@@ -34,9 +34,9 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.Tag;
 
 @ServerTest
+@TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
 public class CryptographicNegotiation extends Tls13Test {
 
-    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-5fMfqyHu68")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_NAMED_GROUPS"),
@@ -64,7 +64,6 @@ public class CryptographicNegotiation extends Tls13Test {
         validateResult(state, testCase, trace);
     }
 
-    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-QxURSJAYJj")
     @ExcludeParameters({
         @ExcludeParameter("INCLUDE_GREASE_CIPHER_SUITES"),

@@ -27,9 +27,9 @@ import org.junit.jupiter.api.Tag;
 
 /** Runs a benign handshake with all default derivations to identify parameter-related bugs. */
 @Tag("happyflow13")
+@TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
 public class HappyFlow extends Tls13Test {
 
-    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-jVohiUKi4u")
     @ModelFromScope(modelType = "CERTIFICATE")
     public void happyFlow(AnvilTestCase testCase, WorkflowRunner runner) {

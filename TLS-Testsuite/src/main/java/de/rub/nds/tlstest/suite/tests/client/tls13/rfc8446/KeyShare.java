@@ -183,7 +183,7 @@ public class KeyShare extends Tls13Test {
     public boolean isSecpCurve(NamedGroup group) {
         // we also include deprecated secp groups here if supported by peer
         // we model null as 'no group'
-        return group != null && group.isCurve() && group.name().contains("SECP");
+        return group != null && group.isEcGroup() && group.name().contains("SECP");
     }
 
     @AnvilTest(id = "8446-h4RyAhoVZy")

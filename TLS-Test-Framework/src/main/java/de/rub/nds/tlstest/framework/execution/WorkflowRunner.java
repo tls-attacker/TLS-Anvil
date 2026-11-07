@@ -207,6 +207,13 @@ public class WorkflowRunner {
             allowOptionalClientCcs(trace);
         }
 
+        if (config.getHighestProtocolVersion().isDTLS13()) {
+            for (TlsAction action : trace.getTlsActions()) {
+                if (action instanceof ReceiveAction) {
+                    action.addActionOption(ActionOption.IGNORE_ACK_MESSAGES);
+                }
+            }
+        }
         allowOptionalClientApplicationMessage(trace);
     }
 
@@ -421,7 +428,7 @@ public class WorkflowRunner {
     public boolean shouldInsertHelloRetryRequest() {
         if (!autoHelloRetryRequest
                 || testContext.getConfig().getTestEndpointMode() == TestEndpointType.SERVER
-                || preparedConfig.getHighestProtocolVersion() != ProtocolVersion.TLS13
+                || !preparedConfig.getHighestProtocolVersion().is13()
                 || (!testContext
                                 .getFeatureExtractionResult()
                                 .getNamedGroups()
@@ -611,12 +618,14 @@ public class WorkflowRunner {
         trace.getTlsActions().add(0, new SendAction(helloRetryRequest));
         trace.getTlsActions().add(0, new ReceiveAction(failingClientHello));
 
-        ChangeCipherSpecMessage compatibilityCCS = new ChangeCipherSpecMessage();
-        compatibilityCCS.setRequired(false);
-        // OpenSSL sends  ChangeCipherSpec || ClientHello upon HelloRetry
-        ((ReceiveAction) trace.getTlsActions().get(2))
-                .getExpectedMessages()
-                .add(0, compatibilityCCS);
+        if (preparedConfig.getHighestProtocolVersion().isTLS13()) {
+            ChangeCipherSpecMessage compatibilityCCS = new ChangeCipherSpecMessage();
+            compatibilityCCS.setRequired(false);
+            // OpenSSL sends  ChangeCipherSpec || ClientHello upon HelloRetry
+            ((ReceiveAction) trace.getTlsActions().get(2))
+                    .getExpectedMessages()
+                    .add(0, compatibilityCCS);
+        }
     }
 
     public void allowOptionalTls13NewSessionTickets(WorkflowTrace trace) {
@@ -692,8 +701,7 @@ public class WorkflowRunner {
                     }
                     if (receiveAction.getExpectedMessages().stream()
                                     .anyMatch(message -> message instanceof FinishedMessage)
-                            && preparedConfig.getHighestProtocolVersion()
-                                    == ProtocolVersion.TLS13) {
+                            && preparedConfig.getHighestProtocolVersion().is13()) {
                         mayReceiveApplicationDataFromNow = true;
 
                         // only allow *after* Finished
@@ -711,7 +719,7 @@ public class WorkflowRunner {
                 } else if (action instanceof ResetConnectionAction) {
                     mayReceiveApplicationDataFromNow = false;
                 } else if (action instanceof SendAction
-                        && preparedConfig.getHighestProtocolVersion() != ProtocolVersion.TLS13) {
+                        && !preparedConfig.getHighestProtocolVersion().is13()) {
                     SendAction sendAction = (SendAction) action;
                     if (sendAction.getConfiguredMessages().stream()
                             .anyMatch(message -> message instanceof FinishedMessage)) {

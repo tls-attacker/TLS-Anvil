@@ -65,7 +65,8 @@ public abstract class FeatureExtractionResult implements Serializable {
         for (VersionSuiteListPair versionSuiteListPair : siteReport.getVersionSuitePairs()) {
             if (versionSuiteListPair.getVersion() == ProtocolVersion.TLS12
                     || versionSuiteListPair.getVersion() == ProtocolVersion.TLS13
-                    || versionSuiteListPair.getVersion() == ProtocolVersion.DTLS12) {
+                    || versionSuiteListPair.getVersion() == ProtocolVersion.DTLS12
+                    || versionSuiteListPair.getVersion() == ProtocolVersion.DTLS13) {
                 getSupportedCipherSuites().addAll(versionSuiteListPair.getCipherSuiteList());
             }
         }
@@ -87,14 +88,14 @@ public abstract class FeatureExtractionResult implements Serializable {
     public List<NamedGroup> getNamedGroups() {
         // We limit the tests to EC Named Groups for now
         return getSupportedNamedGroups().stream()
-                .filter(NamedGroup::isCurve)
+                .filter(NamedGroup::isEcGroup)
                 .collect(Collectors.toList());
     }
 
     public List<NamedGroup> getTls13Groups() {
         // We limit the tests to EC Named Groups for now
         return getSupportedTls13Groups().stream()
-                .filter(NamedGroup::isCurve)
+                .filter(NamedGroup::isEcGroup)
                 .collect(Collectors.toList());
     }
 

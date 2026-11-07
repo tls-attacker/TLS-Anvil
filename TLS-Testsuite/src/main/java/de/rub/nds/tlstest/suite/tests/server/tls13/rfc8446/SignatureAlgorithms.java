@@ -17,6 +17,7 @@ import de.rub.nds.modifiablevariable.util.Modifiable;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
@@ -29,6 +30,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
+import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.model.derivationParameter.SigAndHashDerivation;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
 @ServerTest
 public class SignatureAlgorithms extends Tls13Test {
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-kAJgkp7NBf")
     public void omitSignatureAlgorithmsExtension(AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);
@@ -117,6 +120,7 @@ public class SignatureAlgorithms extends Tls13Test {
         Validator.receivedFatalAlert(state, testCase);
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-5YCxveMdpt")
     public void includeUnknownSignatureAndHashAlgorithm(
             AnvilTestCase testCase, WorkflowRunner runner) {

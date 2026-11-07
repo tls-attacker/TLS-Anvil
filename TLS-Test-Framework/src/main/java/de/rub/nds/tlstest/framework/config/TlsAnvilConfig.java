@@ -528,6 +528,12 @@ public class TlsAnvilConfig extends TLSDelegateConfig {
         Config config = this.createConfig();
 
         config.setHighestProtocolVersion(ProtocolVersion.TLS13);
+        if (useDTLS) {
+            config.setHighestProtocolVersion(ProtocolVersion.DTLS13);
+            DtlsDelegate dtlsDelegate = new DtlsDelegate();
+            dtlsDelegate.setDTLS(true);
+            dtlsDelegate.applyDelegate(config);
+        }
         config.setAddEllipticCurveExtension(true);
         config.setAddECPointFormatExtension(true);
         config.setAddKeyShareExtension(true);

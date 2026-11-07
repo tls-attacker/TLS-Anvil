@@ -20,6 +20,7 @@ import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.CompressionMethod;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
@@ -34,6 +35,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
@@ -100,6 +102,7 @@ public class ClientHello extends Tls13Test {
         Validator.receivedFatalAlert(state, testCase);
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-qgJEM4UoBe")
     public void invalidCompression(AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = getPreparedConfig(runner);
@@ -115,6 +118,7 @@ public class ClientHello extends Tls13Test {
         Validator.receivedFatalAlert(state, testCase, AlertDescription.ILLEGAL_PARAMETER);
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-vtJcLUKtNv")
     public void includeUnknownExtension(AnvilTestCase testCase, WorkflowRunner runner) {
         Config config = getPreparedConfig(runner);
@@ -151,6 +155,7 @@ public class ClientHello extends Tls13Test {
 
     // there is an omitSignatureAlgorithms test in SignatureAlgorithms
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-GZpjQTKUD4")
     @ExcludeParameter("NAMED_GROUP")
     @Tag("new")
@@ -173,6 +178,7 @@ public class ClientHello extends Tls13Test {
         Validator.receivedFatalAlert(state, testCase, AlertDescription.MISSING_EXTENSION);
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-jEEunwNUJ3")
     @ExcludeParameter("NAMED_GROUP")
     @Tag("new")
@@ -183,6 +189,7 @@ public class ClientHello extends Tls13Test {
         performMissingExtensionTest(config, runner, testCase);
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-KQn4u3Xj4M")
     @Tag("new")
     public void omitSupportedGroups(AnvilTestCase testCase, WorkflowRunner runner) {

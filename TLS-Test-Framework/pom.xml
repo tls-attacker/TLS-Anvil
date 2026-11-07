@@ -4,7 +4,7 @@
     <parent>
         <groupId>de.rub.nds.tls.anvil</groupId>
         <artifactId>tls-anvil</artifactId>
-        <version>1.5.3</version>
+        <version>1.6.0</version>
     </parent>
     <artifactId>tls-test-framework</artifactId>
 

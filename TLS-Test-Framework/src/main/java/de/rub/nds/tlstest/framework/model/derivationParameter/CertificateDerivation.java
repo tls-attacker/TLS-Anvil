@@ -165,7 +165,8 @@ public class CertificateDerivation extends TlsDerivationParameter<CertificateCon
     @Override
     public void applyToConfig(Config config, DerivationScope derivationScope) {
         config.setAutoAdjustCertificate(false);
-        config.setCertificateChainConfig((List<X509CertificateConfig>) getSelectedValue());
+        config.setCertificateChainConfigs(
+                new LinkedList<>(List.of((List<X509CertificateConfig>) getSelectedValue())));
     }
 
     @Override

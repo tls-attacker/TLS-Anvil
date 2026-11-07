@@ -88,14 +88,14 @@ public abstract class FeatureExtractionResult implements Serializable {
     public List<NamedGroup> getNamedGroups() {
         // We limit the tests to EC Named Groups for now
         return getSupportedNamedGroups().stream()
-                .filter(NamedGroup::isCurve)
+                .filter(NamedGroup::isEcGroup)
                 .collect(Collectors.toList());
     }
 
     public List<NamedGroup> getTls13Groups() {
         // We limit the tests to EC Named Groups for now
         return getSupportedTls13Groups().stream()
-                .filter(NamedGroup::isCurve)
+                .filter(NamedGroup::isEcGroup)
                 .collect(Collectors.toList());
     }
 

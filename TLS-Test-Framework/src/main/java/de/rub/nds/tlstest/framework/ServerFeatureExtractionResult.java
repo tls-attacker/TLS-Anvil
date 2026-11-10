@@ -44,20 +44,28 @@ public class ServerFeatureExtractionResult extends FeatureExtractionResult {
         extractionResult.setSharedFieldsFromReport(serverReport);
 
         // move to shared fields when scanner is updated
-        extractionResult
-                .getSupportedCompressionMethods()
-                .addAll(serverReport.getSupportedCompressionMethods());
-
-        extractionResult.setNamedGroupWitnesses(serverReport.getSupportedNamedGroupsWitnesses());
-        extractionResult.setNamedGroupWitnessesTls13(
-                serverReport.getSupportedNamedGroupsWitnessesTls13());
-        extractionResult
-                .getSupportedSignatureAndHashAlgorithmsSke()
-                .addAll(serverReport.getSupportedSignatureAndHashAlgorithmsSke());
+        // The scanner leaves a property unset when its probe does not apply: a TLS 1.3-only
+        // server has no TLS 1.2 compression methods, ServerKeyExchange algorithms or
+        // TLS 1.2 group witnesses. Unset means none.
+        addAllIfPresent(
+                extractionResult.getSupportedCompressionMethods(),
+                serverReport.getSupportedCompressionMethods());
+        if (serverReport.getSupportedNamedGroupsWitnesses() != null) {
+            extractionResult.setNamedGroupWitnesses(
+                    serverReport.getSupportedNamedGroupsWitnesses());
+        }
+        if (serverReport.getSupportedNamedGroupsWitnessesTls13() != null) {
+            extractionResult.setNamedGroupWitnessesTls13(
+                    serverReport.getSupportedNamedGroupsWitnessesTls13());
+        }
+        addAllIfPresent(
+                extractionResult.getSupportedSignatureAndHashAlgorithmsSke(),
+                serverReport.getSupportedSignatureAndHashAlgorithmsSke());
         extractionResult.setConfigProfileIdentifier(serverReport.getConfigProfileIdentifier());
         extractionResult.setConfigProfileIdentifierTls13(
                 serverReport.getConfigProfileIdentifierTls13());
-        extractionResult.getNegotiableExtensions().addAll(serverReport.getSupportedExtensions());
+        addAllIfPresent(
+                extractionResult.getNegotiableExtensions(), serverReport.getSupportedExtensions());
 
         extractionResult.setGuidelineChecks(getGuidelines(serverReport.getGuidelineReports()));
         extractionResult.setTestReport(
@@ -69,6 +77,12 @@ public class ServerFeatureExtractionResult extends FeatureExtractionResult {
                         .getFullReport());
 
         return extractionResult;
+    }
+
+    private static <T> void addAllIfPresent(Collection<T> target, Collection<T> source) {
+        if (source != null) {
+            target.addAll(source);
+        }
     }
 
     private static List<JsonNode> getGuidelines(List<GuidelineReport> reports) {

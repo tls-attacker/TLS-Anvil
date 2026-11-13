@@ -7,9 +7,14 @@
  */
 package de.rub.nds.tlstest.suite.tests.server.tls13.rfc8446;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.rub.nds.anvilcore.annotation.*;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.ManualConfig;
+import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
@@ -35,6 +40,7 @@ import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.junit.jupiter.api.Tag;
 
 @ServerTest
 public class SignatureAlgorithms extends Tls13Test {
@@ -135,5 +141,53 @@ public class SignatureAlgorithms extends Tls13Test {
 
         State state = runner.execute(workflowTrace, c);
         Validator.executedAsPlanned(state, testCase);
+    }
+
+    @AnvilTest(id = "8446-0f06e5553f")
+    @Tag("rfc8446-coverage")
+    public void doesNotNegotiateObsoleteSignatureAlgorithms(
+            AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
+
+        // find all implemented algos that are obsolete in 1.3
+        List<SignatureAndHashAlgorithm> obsoleteSignatureAndHashAlgorithms =
+                SignatureAndHashAlgorithm.getImplemented().stream()
+                        .filter(
+                                de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446
+                                                .SignatureAlgorithms
+                                        ::obsoleteAlgo)
+                        .collect(Collectors.toList());
+
+        // only offer these to the server
+        config.setDefaultClientSupportedSignatureAndHashAlgorithms(
+                obsoleteSignatureAndHashAlgorithms);
+        testCase.addAdditionalResultInfo(
+                "Anvil ClientHello offered only obsolete signature algorithms: "
+                        + obsoleteSignatureAndHashAlgorithms.stream()
+                                .map(algo -> String.format("%s (0x%04X)", algo, algo.getValue()))
+                                .collect(Collectors.joining(",")));
+
+        WorkflowTrace workflowTrace = new WorkflowTrace();
+        workflowTrace.addTlsActions(
+                new SendAction(new ClientHelloMessage(config)),
+                new ReceiveAction(new AlertMessage()));
+        State state = runner.execute(workflowTrace, config);
+
+        String response =
+                Validator.getMessagesOfLastReceive(state).stream()
+                        .map(message -> message.toCompactString())
+                        .collect(Collectors.joining(","));
+        testCase.addAdditionalResultInfo(
+                "Server response to Anvil's obsolete-only signature algorithms offer: "
+                        + (response.isEmpty() ? "no TLS messages received" : response));
+
+        // expect that we don't complete the handshake
+        // RFC 8446 section 4.1.1: no common parameters requires handshake_failure
+        // or insufficient_security. The obsolete_RESERVED rule itself names no alert.
+        Validator.receivedFatalAlert(
+                state,
+                testCase,
+                AlertDescription.HANDSHAKE_FAILURE,
+                AlertDescription.INSUFFICIENT_SECURITY);
     }
 }

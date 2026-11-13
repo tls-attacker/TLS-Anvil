@@ -266,6 +266,49 @@ public class ServerHello extends Tls13Test {
         SharedExtensionTests.checkForDuplicateExtensions(serverHello);
     }
 
+    @AnvilTest(id = "8446-f9e720ac7f")
+    @Tag("rfc8446-coverage")
+    public void testOnlyCryptoOrProtocolExtensions(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.DYNAMIC_HELLO);
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+        ServerHelloMessage serverHello =
+                WorkflowTraceResultUtil.getAllReceivedMessages(state.getWorkflowTrace()).stream()
+                        .filter(ServerHelloMessage.class::isInstance)
+                        .map(ServerHelloMessage.class::cast)
+                        .filter(message -> !message.hasTls13HelloRetryRequestRandom())
+                        .findFirst()
+                        .orElse(null);
+        assertNotNull(serverHello, "No normal ServerHello was received");
+
+        /*
+        For context, the text continues:
+
+        All TLS 1.3 ServerHello messages MUST contain the "supported_versions" extension.
+        Current ServerHello messages additionally contain
+          either the "pre_shared_key" extension
+          or the "key_share" extension,
+          or both (when using a PSK with (EC)DHE key establishment).
+        Other extensions (see Section 4.2) are sent separately in the
+        EncryptedExtensions message.
+
+        (the statement about supported_versions is covered by 8446-n5pojEqeaS)
+        */
+        List<ExtensionType> allowedExtensions =
+                Arrays.asList(
+                        ExtensionType.SUPPORTED_VERSIONS,
+                        ExtensionType.PRE_SHARED_KEY,
+                        ExtensionType.KEY_SHARE);
+        for (ExtensionType extension :
+                serverHello.getExtensions().stream()
+                        .map(ExtensionMessage::getExtensionTypeConstant)
+                        .toArray(ExtensionType[]::new)) {
+            assertTrue(allowedExtensions.contains(extension));
+        }
+    }
+
     public static void checkForUnproposedExtensions(
             ServerHelloMessage serverHello, ClientHelloMessage clientHello) {
         assertNotNull(serverHello, "ServerHello was not received");

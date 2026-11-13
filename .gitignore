@@ -10,6 +10,8 @@ Results*/
 logs/
 report/
 cache/
+client-results/
+server-results/
 
 # Eclipse
 **/.classpath
@@ -32,4 +34,8 @@ nbactions.xml
 **/.flattened-pom.xml
 
 # VS Code
+.vscode
 .factorypath
+
+# Zed
+.zed

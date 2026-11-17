@@ -1,21 +1,16 @@
-@Library('jenkins-ci-library') _
+@Library('jenkins-ci-library@v2') _
 
 standardPipeline(
-        jdkTool: 'JDK 21',
-        mavenTool: 'Maven 3.9.9',
-        spotlessTimeout: 60,
-        buildTimeout: 120,
-        intTestTimeout: 1800,
-        codeAnalyseTimeout: 240,
-        uniTestTimeout: 180,
-
-        extraStages: {
-            gitHubRelease(
-                    nameApp: 'TLS-Anvil'
-            )
-            dockerBuild(
-                    nameApp: 'tlsanvil',
-                    dockerfile: 'Dockerfile_dev'
-            )
-        }
+    enableCentralRelease: true,
+    publicRepoUrl: "https://github.com/tls-attacker/TLS-Anvil.git",
+    extraStages: {
+        // legacy stages
+        //     gitHubRelease(
+        //             nameApp: 'tlsanvil'
+        //     )
+        releaseDocker.LEGACY_dockerBuild(
+            nameApp: 'tlsanvil',
+            dockerfile: 'Dockerfile_dev'
+        )
+    }
 )

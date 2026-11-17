@@ -152,7 +152,7 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
             derivationTypes.add(TlsParameterType.TCP_FRAGMENTATION);
         }
 
-        if (isTls13Test(derivationScope)) {
+        if (isTls13Test(derivationScope) && !testContext.getConfig().isUseDTLS()) {
             derivationTypes.add(TlsParameterType.INCLUDE_CHANGE_CIPHER_SPEC);
         }
 
@@ -234,7 +234,7 @@ public class TlsParameterIdentifierProvider extends ParameterIdentifierProvider 
                 derivationTypes.add(TlsParameterType.INCLUDE_EXTENDED_MASTER_SECRET_EXTENSION);
             }
         }
-        if (testContext.getConfig().isUseDTLS()) {
+        if (testContext.getConfig().isUseDTLS() && !isTls13Test(derivationScope)) {
             derivationTypes.add(TlsParameterType.COOKIE_EXCHANGE);
         }
         return derivationTypes;

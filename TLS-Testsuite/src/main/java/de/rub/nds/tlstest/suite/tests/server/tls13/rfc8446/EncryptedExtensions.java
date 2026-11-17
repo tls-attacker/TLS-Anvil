@@ -19,17 +19,20 @@ import de.rub.nds.anvilcore.annotation.ServerTest;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.tlsattacker.core.config.Config;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.ExtensionMessage;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
+import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
 
 @ServerTest
+@TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
 public class EncryptedExtensions extends Tls13Test {
 
     public ConditionEvaluationResult sniActive() {

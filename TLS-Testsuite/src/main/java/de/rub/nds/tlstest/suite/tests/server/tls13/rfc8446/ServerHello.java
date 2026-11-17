@@ -31,6 +31,7 @@ import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
 import de.rub.nds.tlstest.framework.Validator;
 import de.rub.nds.tlstest.framework.annotations.KeyExchange;
+import de.rub.nds.tlstest.framework.annotations.TlsVersion;
 import de.rub.nds.tlstest.framework.constants.AssertMsgs;
 import de.rub.nds.tlstest.framework.constants.KeyExchangeType;
 import de.rub.nds.tlstest.framework.execution.WorkflowRunner;
@@ -227,6 +228,7 @@ public class ServerHello extends Tls13Test {
         assertArrayEquals(sessionId, msg.getSessionId().getValue(), "Session ID not echoed");
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-S1VjZrpD1J")
     public void testCompressionValue(AnvilTestCase testCase, WorkflowRunner runner) {
         Config c = getPreparedConfig(runner);
@@ -247,6 +249,7 @@ public class ServerHello extends Tls13Test {
                 "invalid compression method");
     }
 
+    @TlsVersion(supported = {ProtocolVersion.TLS13, ProtocolVersion.DTLS13})
     @AnvilTest(id = "8446-sm3XxXFjbr")
     @Tag("new")
     public void testProvidedExtensions(AnvilTestCase testCase, WorkflowRunner runner) {

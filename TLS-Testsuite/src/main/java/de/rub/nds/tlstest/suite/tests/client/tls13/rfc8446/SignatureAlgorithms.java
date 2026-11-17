@@ -7,9 +7,14 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import de.rub.nds.anvilcore.annotation.*;
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
+import de.rub.nds.anvilcore.annotation.DynamicValueConstraints;
+import de.rub.nds.anvilcore.annotation.ExplicitModelingConstraints;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
+import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.anvilcore.coffee4j.model.ModelFromScope;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.constraint.ConditionalConstraint;
@@ -18,7 +23,10 @@ import de.rub.nds.anvilcore.teststate.AnvilTestCase;
 import de.rub.nds.protocol.constants.HashAlgorithm;
 import de.rub.nds.protocol.constants.SignatureAlgorithm;
 import de.rub.nds.tlsattacker.core.config.Config;
-import de.rub.nds.tlsattacker.core.constants.*;
+import de.rub.nds.tlsattacker.core.constants.AlgorithmResolver;
+import de.rub.nds.tlsattacker.core.constants.CipherSuite;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
+import de.rub.nds.tlsattacker.core.constants.SignatureAndHashAlgorithm;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -37,7 +45,10 @@ import de.rub.nds.x509attacker.config.X509CertificateConfig;
 import de.rub.nds.x509attacker.constants.X509NamedCurve;
 import de.rub.nds.x509attacker.constants.X509PublicKeyType;
 import de.rwth.swc.coffee4j.model.constraints.ConstraintBuilder;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.ConditionEvaluationResult;
@@ -166,6 +177,46 @@ public class SignatureAlgorithms extends Tls13Test {
                     "Client offered deprecated algorithms: "
                             + deprecatedOffered.stream()
                                     .map(Object::toString)
+                                    .collect(Collectors.joining(",")));
+        }
+    }
+
+    public static Boolean obsoleteAlgo(SignatureAndHashAlgorithm algo) {
+        // This should ideally be part of TLS-Attacker instead of living here
+        // Magic numbers from RFC 8446 B.3.1.3
+        List<List<Integer>> obsoleteRanges =
+                List.of(
+                        List.of(0x0000, 0x0200),
+                        List.of(0x0204, 0x0400),
+                        List.of(0x0404, 0x0500),
+                        List.of(0x0504, 0x0600),
+                        List.of(0x0604, 0x06FF));
+        int v = algo.getValue();
+        return obsoleteRanges.stream().anyMatch(range -> v >= range.get(0) && v <= range.get(1));
+    }
+
+    @NonCombinatorialAnvilTest(id = "8446-7981dabba5")
+    @Tag("rfc8446-coverage")
+    public void doesNotOfferObsoleteSignatureAlgorithms() {
+        // Counterpart: 8446-0f06e5553f
+        // Related: 8446-JKvCjP5mKE and 8446-KdkvUJX3HK
+
+        ClientFeatureExtractionResult extractionResult =
+                (ClientFeatureExtractionResult) context.getFeatureExtractionResult();
+        if (extractionResult.getAdvertisedSignatureAndHashAlgorithms() != null) {
+            List<SignatureAndHashAlgorithm> obsoleteAlgosOffered =
+                    extractionResult.getAdvertisedSignatureAndHashAlgorithms().stream()
+                            .filter(SignatureAlgorithms::obsoleteAlgo)
+                            .collect(Collectors.toList());
+
+            assertTrue(
+                    obsoleteAlgosOffered.isEmpty(),
+                    "Set of Deprecated, offered Algos wasn't empty: "
+                            + obsoleteAlgosOffered.stream()
+                                    .map(
+                                            algo ->
+                                                    String.format(
+                                                            "%s (0x%04X)", algo, algo.getValue()))
                                     .collect(Collectors.joining(",")));
         }
     }

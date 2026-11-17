@@ -3190,6 +3190,53 @@
       "clientSendsCertificateAndFinMessage"
     ]
   },
+  "8446-690f75da34": {
+    "description": "A client that receives a CertificateRequest message without having sent the \"post_handshake_auth\" extension MUST send an \"unexpected_message\" fatal alert.",
+    "severityLevels": {},
+    "rfc": {
+      "number": 8446,
+      "section": "4.6.2. Post-Handshake Authentication"
+    },
+    "tags": [
+      "client",
+      "tls13",
+      "rfc8446",
+      "ClientAuthentication"
+    ]
+  },
+  "8446-45303effa7": {
+    "description": "This field SHALL be zero length unless used for the post-handshake authentication exchanges described in Section 4.6.2.",
+    "severityLevels": {},
+    "rfc": {
+      "number": 8446,
+      "section": "4.3.2. Certificate Request"
+    },
+    "tags": [
+      "client",
+      "tls13",
+      "rfc8446",
+      "ClientAuthentication",
+      "CertificateRequest"
+    ]
+  },
+  "8446-ed8c230621": {
+    "description": "The \"signature_algorithms\" extension MUST be specified, and other extensions may optionally be included if defined for this message.",
+    "severityLevels": {
+      "Handshake": 60,
+      "Certificate": 40,
+      "Interoperability": 80
+    },
+    "rfc": {
+      "number": 8446,
+      "section": "4.3.2. Certificate Request"
+    },
+    "tags": [
+      "server",
+      "tls13",
+      "rfc8446",
+      "ClientAuthentication"
+    ]
+  },
   "8446-Agnoga6SCd": {
     "description": "In TLS 1.3, the client indicates its version preferences in the \"supported_versions\" extension (Section 4.2.1) and the legacy_version field MUST be set to 0x0303, which is the version number for TLS 1.2.  TLS 1.3 ClientHellos are identified as having a legacy_version of 0x0303 and a supported_versions extension present with 0x0304 as the highest version indicated therein.",
     "severityLevels": {
@@ -3864,6 +3911,7 @@
       "zeroLengthRecord_ServerHello"
     ]
   },
+
   "8446-2R6GNvoUEs": {
     "description": "Implementations MUST NOT send Handshake and Alert records that have a zero-length TLSInnerPlaintext.content; if such a message is received, the receiving implementation MUST terminate the connection with an \"unexpected_message\" alert.",
     "severityLevels": {
@@ -4068,6 +4116,82 @@
       "rfc8446",
       "SignatureAlgorithms",
       "noDeprecatedAlgorithmsOffered"
+    ]
+  },
+  "8446-0f06e5553f": {
+    "description": "Values within obsolete_RESERVED signature algorithm ranges MUST NOT be negotiated by TLS 1.3 implementations.",
+    "severityLevels": {
+      "Security": 60,
+      "Handshake": 60,
+      "Interoperability": 80
+    },
+    "rfc": {
+      "number": 8446,
+      "section": "4.2.3 Signature Algorithms"
+    },
+    "tags": [
+      "server",
+      "tls13",
+      "rfc8446",
+      "SignatureAlgorithms",
+      "serverAcceptsObsoleteAlgorithms"
+    ]
+  },
+  "8446-h8L9m2QvKx": {
+    "description": "Values within obsolete_RESERVED supported group ranges MUST NOT be negotiated by TLS 1.3 implementations.",
+    "severityLevels": {
+      "Security": 60,
+      "Handshake": 60,
+      "Interoperability": 80
+    },
+    "rfc": {
+      "number": 8446,
+      "section": "B.3.1.4 Supported Groups"
+    },
+    "tags": [
+      "server",
+      "tls13",
+      "rfc8446",
+      "SupportedGroups",
+      "serverAcceptsObsoleteGroups"
+    ]
+  },
+  "8446-7981dabba5": {
+    "description": "Values within \"obsolete_RESERVED\" signature algorithm ranges MUST NOT be offered by TLS 1.3 implementations.",
+    "severityLevels": {
+      "Security": 60,
+      "Handshake": 60,
+      "Interoperability": 80
+    },
+    "rfc": {
+      "number": 8446,
+      "section": "4.2.3 Signature Algorithms"
+    },
+    "tags": [
+      "client",
+      "tls13",
+      "rfc8446",
+      "SignatureAlgorithms",
+      "doesNotOfferObsoleteSignatureAlgorithms"
+    ]
+  },
+  "8446-b62d9f0a31": {
+    "description": "Values within \"obsolete_RESERVED\" supported group ranges MUST NOT be offered by TLS 1.3 implementations.",
+    "severityLevels": {
+      "Security": 60,
+      "Handshake": 60,
+      "Interoperability": 80
+    },
+    "rfc": {
+      "number": 8446,
+      "section": "B.3.1.4 Supported Groups"
+    },
+    "tags": [
+      "client",
+      "tls13",
+      "rfc8446",
+      "SupportedGroups",
+      "doesNotOfferObsoleteNamedGroups"
     ]
   },
   "8446-oysw9PbeiT": {
@@ -6203,6 +6327,60 @@
       "certificateListIsNotEmpty"
     ]
   },
+  "8446-a71f4c829b": {
+    "description": "Otherwise (in the case of server authentication), this field SHALL be zero length.",
+    "severityLevels": {
+      "Handshake": 60,
+      "Interoperability": 80
+    },
+    "rfc": {
+      "number": 8446,
+      "section": "4.4.2. Certificate"
+    },
+    "tags": [
+      "server",
+      "tls13",
+      "rfc8446",
+      "Certificate",
+      "serverCertificateRequestContextIsEmpty"
+    ]
+  },
+  "8446-b3d2e60f41": {
+    "description": "Extensions in the Certificate message from the server MUST correspond to ones from the ClientHello message.",
+    "severityLevels": {
+      "Handshake": 60,
+      "Interoperability": 80
+    },
+    "rfc": {
+      "number": 8446,
+      "section": "4.4.2. Certificate"
+    },
+    "tags": [
+      "server",
+      "tls13",
+      "rfc8446",
+      "Certificate",
+      "serverCertificateExtensionsWereOffered"
+    ]
+  },
+  "8446-a91f7c3e62": {
+    "description": "Extensions in the Certificate message from the client MUST correspond to extensions in the CertificateRequest message from the server.",
+    "severityLevels": {
+      "Handshake": 60,
+      "Interoperability": 80
+    },
+    "rfc": {
+      "number": 8446,
+      "section": "4.4.2. Certificate"
+    },
+    "tags": [
+      "client",
+      "tls13",
+      "rfc8446",
+      "Certificate",
+      "certificateEntryExtensionsWereRequested"
+    ]
+  },
   "8446-qfG8mSV78A": {
     "description": "Test if the Server sends Certificate Verify Messages with valid signatures",
     "severityLevels": {
@@ -6394,6 +6572,39 @@
       "omitSupportedGroups"
     ]
   },
+  "8446-2de9de9e4a": {
+    "description": "TLS 1.3 servers MUST NOT act upon its presence or information in it when processing ClientHello messages; in particular, they MUST NOT send the status_request_v2 extension in the EncryptedExtensions, CertificateRequest, or Certificate messages.",
+    "severityLevels": {},
+    "rfc": {
+      "number": 8446,
+      "section": "4.4.2.1.  OCSP Status and SCT Extension"
+    },
+    "tags": [
+      "server",
+      "tls13",
+      "rfc8446",
+      "ClientHello",
+      "OCSP"
+    ]
+  },
+  "8446-7cde05aa32": {
+    "description": "A server which receives an \"early_data\" extension MUST behave in one of three ways: - Ignore the extension and return a regular 1-RTT response. - Request that the client send another ClientHello by responding with a HelloRetryRequest. - Return its own \"early_data\" extension in EncryptedExtensions.",
+    "severityLevels": {
+      "Security": 60,
+      "Handshake": 60,
+      "Interoperability": 80
+    },
+    "rfc": {
+      "number": 8446,
+      "section": "4.2.10.  Early Data Indication"
+    },
+    "tags": [
+      "server",
+      "tls13",
+      "rfc8446",
+      "EarlyData"
+    ]
+  },
   "8446-Uqrk3dnMz7": {
     "description": "Note that TLS 1.3 servers might receive TLS 1.2 or prior ClientHellos which contain other compression methods and (if negotiating such a prior version) MUST follow the procedures for the appropriate prior version of TLS.",
     "severityLevels": {
@@ -6486,6 +6697,24 @@
       "rfc8446",
       "EarlyData",
       "selectedFirstIdentity"
+    ]
+  },
+  "8446-a55904e261": {
+    "description": "If the server does not send an \"early_data\" extension in EncryptedExtensions, then the client MUST NOT send an EndOfEarlyData message.",
+    "severityLevels": {
+      "Security": 60,
+      "Handshake": 60,
+      "Interoperability": 80
+    },
+    "rfc": {
+      "number": 8446,
+      "section": "4.5.  End of Early Data"
+    },
+    "tags": [
+      "server",
+      "tls13",
+      "rfc8446",
+      "EarlyData"
     ]
   },
   "8446-QX4UnMXsbP": {
@@ -6602,6 +6831,22 @@
       "rfc8446",
       "HelloRetryRequest",
       "helloRetryRequestValid"
+    ]
+  },
+  "8446-f9e720ac7f": {
+    "description": "The ServerHello MUST only include extensions which are required to establish the cryptographic context and negotiate the protocol version.",
+    "severityLevels": {
+      "Handshake": 60,
+      "Interoperability": 80
+    },
+    "rfc": {
+      "number": 8446,
+      "section": "4.1.3 Server Hello"
+    },
+    "tags": [
+      "server",
+      "tls13",
+      "rfc8446"
     ]
   },
   "8446-aVxixR6JLE": {
@@ -7161,6 +7406,25 @@
     },
     "tags": [
       "server",
+      "tls13",
+      "rfc8446",
+      "RecordLayer",
+      "checkRecordProtocolVersion"
+    ]
+  },
+  "8446-c3d9a1f07b": {
+    "description": "legacy_record_version:  MUST be set to 0x0303 for all records generated by a TLS 1.3 implementation other than an initial ClientHello (i.e., one not generated after a HelloRetryRequest), where it MAY also be 0x0301 for compatibility purposes.",
+    "severityLevels": {
+      "Handshake": 80,
+      "RecordLayer": 80,
+      "Interoperability": 80
+    },
+    "rfc": {
+      "number": 8446,
+      "section": "5.1. Record Layer"
+    },
+    "tags": [
+      "client",
       "tls13",
       "rfc8446",
       "RecordLayer",
@@ -7855,7 +8119,7 @@
   },
   "6347-tT9LA2Ba7T": {
     "description": "When responding to a HelloVerifyRequest, the client MUST use the same   parameter values (version, random, session_id, cipher_suites,   compression_method) as it did in the original ClientHello.",
-    "addToSecondRfcRef" : "4.2.1. Denial-of-Service Countermeasures -- The client MUST retransmit the ClientHello with the cookie added.",
+    "addToSecondRfcRef": "4.2.1. Denial-of-Service Countermeasures -- The client MUST retransmit the ClientHello with the cookie added.",
     "severityLevels": {
       "Handshake": 100,
       "Interoperability": 100
@@ -7946,8 +8210,7 @@
   },
   "XCO-B6aDKr3y8P": {
     "description": "Test if PSK Cipher Suites are disabled as expected for the configuration option",
-    "severityLevels": {
-    },
+    "severityLevels": {},
     "tags": [
       "server",
       "configurationoptions",
@@ -7956,8 +8219,7 @@
   },
   "XCO-s74Cw9S5dF": {
     "description": "Test if compression has been enabled as expected for the configuration option",
-    "severityLevels": {
-    },
+    "severityLevels": {},
     "tags": [
       "server",
       "configurationoptions",

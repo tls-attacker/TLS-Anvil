@@ -12,11 +12,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.NonCombinatorialAnvilTest;
 import de.rub.nds.tlsattacker.core.constants.ExtensionType;
+import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
 import de.rub.nds.tlsattacker.core.protocol.message.ClientHelloMessage;
 import de.rub.nds.tlsattacker.core.protocol.message.extension.SupportedVersionsExtensionMessage;
+import de.rub.nds.tlstest.framework.ClientFeatureExtractionResult;
 import de.rub.nds.tlstest.framework.testClasses.Tls13Test;
 import de.rub.nds.tlstest.suite.tests.both.tls13.rfc8446.SharedExtensionTests;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.Tag;
 
 @ClientTest
@@ -77,6 +81,46 @@ public class ClientHello extends Tls13Test {
         if (sessionIdLength > 0) {
             assertEquals(
                     32, sessionIdLength, "Session ID was set by client but is not a 32-byte value");
+        }
+    }
+
+    public static Boolean obsoleteGroup(NamedGroup group) {
+        // This should ideally be part of TLS-Attacker instead of living here
+        // Magic numbers from RFC 8446 B.3.1.4
+        List<int[]> obsoleteRanges =
+                List.of(
+                        new int[] {0x0001, 0x0016},
+                        new int[] {0x001A, 0x001C},
+                        new int[] {0xFF01, 0xFF02});
+        byte[] vBytes = group.getValue();
+        int v = ((vBytes[0] & 0xFF) << 8) | (vBytes[1] & 0xFF);
+        return obsoleteRanges.stream().anyMatch(range -> v >= range[0] && v <= range[1]);
+    }
+
+    @NonCombinatorialAnvilTest(id = "8446-b62d9f0a31")
+    @Tag("rfc8446-coverage")
+    public void doesNotOfferObsoleteNamedGroups() {
+        // Counterpart: 8446-h8L9m2QvKx
+        ClientFeatureExtractionResult extractionResult =
+                (ClientFeatureExtractionResult) context.getFeatureExtractionResult();
+        if (extractionResult.getClientHelloNamedGroups() != null) {
+            List<NamedGroup> obsoleteGroupsOffered =
+                    extractionResult.getClientHelloNamedGroups().stream()
+                            .filter(ClientHello::obsoleteGroup)
+                            .collect(Collectors.toList());
+
+            assertTrue(
+                    obsoleteGroupsOffered.isEmpty(),
+                    "Client offered deprecated groups: "
+                            + obsoleteGroupsOffered.stream()
+                                    .map(
+                                            group -> {
+                                                byte[] value = group.getValue();
+                                                return String.format(
+                                                        "%s (0x%02X%02X)",
+                                                        group, value[0], value[1]);
+                                            })
+                                    .collect(Collectors.joining(",")));
         }
     }
 }

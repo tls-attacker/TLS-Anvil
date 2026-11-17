@@ -16,8 +16,6 @@ Note that this octet string ("Z" in IEEE 1363 terminology) as output by FE2OSP (
 
 A client sending a ClientHello MUST support all parameters advertised in it.  Otherwise, the server may fail to interoperate by selecting one of those parameters.
 
-Values within "obsolete_RESERVED" ranges are used in previous versions of TLS and MUST NOT be offered or negotiated by TLS 1.3 implementations.
-
 The security of RC4 cipher suites is considered insufficient for the reasons cited in [RFC7465].  Implementations MUST NOT offer or negotiate RC4 cipher suites for any version of TLS for any reason.
 
 Old versions of TLS permitted the use of very low strength ciphers. Ciphers with a strength less than 112 bits MUST NOT be offered or negotiated for any version of TLS for any reason.

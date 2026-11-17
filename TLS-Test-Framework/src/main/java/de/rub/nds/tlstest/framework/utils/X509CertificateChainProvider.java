@@ -6,6 +6,7 @@ import de.rub.nds.protocol.crypto.key.KeyGenerator;
 import de.rub.nds.tlsattacker.core.constants.NamedGroup;
 import de.rub.nds.tlstest.framework.model.derivationParameter.helper.CertificateConfigChainValue;
 import de.rub.nds.x509attacker.config.X509CertificateConfig;
+import de.rub.nds.x509attacker.config.extension.BasicConstraintsConfig;
 import de.rub.nds.x509attacker.constants.X509NamedCurve;
 import de.rub.nds.x509attacker.constants.X509PublicKeyType;
 import de.rub.nds.x509attacker.constants.X509SignatureAlgorithm;
@@ -19,7 +20,6 @@ import java.util.Map;
 public class X509CertificateChainProvider {
     private static X509CertificateChainProvider instance = null;
     private ArrayList<X509CertificateConfig> certConfigs;
-    public static final String RESOURCE_CERT_CONFIG_FOLDER = "/serverCertConfigs";
 
     public static X509CertificateChainProvider getInstance() {
         if (instance == null) {
@@ -116,6 +116,7 @@ public class X509CertificateChainProvider {
             X509CertificateConfig rsaSigningCert = new X509CertificateConfig();
             rsaSigningCert.setSubject(rsaSigningCert.getDefaultIssuer());
             rsaSigningCert.setPublicKeyType(X509PublicKeyType.RSA);
+            addCaBasicConstraints(rsaSigningCert);
             leafConfig.setSignatureAlgorithm(X509SignatureAlgorithm.SHA256_WITH_RSA_ENCRYPTION);
             List<X509CertificateConfig> chainConfig = new ArrayList<>();
             chainConfig.add(leafConfig);
@@ -143,6 +144,7 @@ public class X509CertificateChainProvider {
             ecdsaSigningCert.setDefaultIssuerPublicKeyType(X509PublicKeyType.ECDH_ECDSA);
             ecdsaSigningCert.setSignatureAlgorithm(X509SignatureAlgorithm.ECDSA_WITH_SHA256);
             ecdsaSigningCert.setSubject(ecdsaSigningCert.getDefaultIssuer());
+            addCaBasicConstraints(ecdsaSigningCert);
             leafConfig.setSignatureAlgorithm(X509SignatureAlgorithm.ECDSA_WITH_SHA256);
             List<X509CertificateConfig> chainConfig = new ArrayList<>();
             chainConfig.add(leafConfig);
@@ -161,6 +163,7 @@ public class X509CertificateChainProvider {
             dsaSignedCert.setDefaultIssuerPublicKeyType(X509PublicKeyType.DSA);
             dsaSignedCert.setSignatureAlgorithm(X509SignatureAlgorithm.DSA_WITH_SHA256);
             dsaSignedCert.setSubject(dsaSignedCert.getDefaultIssuer());
+            addCaBasicConstraints(dsaSignedCert);
             leafConfig.setSignatureAlgorithm(X509SignatureAlgorithm.DSA_WITH_SHA256);
             List<X509CertificateConfig> chainConfig = new ArrayList<>();
             chainConfig.add(leafConfig);
@@ -168,6 +171,14 @@ public class X509CertificateChainProvider {
             certChainConfigs.add(chainConfig);
         }
         return certChainConfigs;
+    }
+
+    private static void addCaBasicConstraints(X509CertificateConfig rootConfig) {
+        BasicConstraintsConfig basicConstraints = new BasicConstraintsConfig();
+        basicConstraints.setPresent(true);
+        basicConstraints.setCritical(true);
+        basicConstraints.setCa(true);
+        rootConfig.addExtensions(basicConstraints);
     }
 
     public static List<X509CertificateConfig> getDhLeafConfigs() {

@@ -7,8 +7,17 @@
  */
 package de.rub.nds.tlstest.suite.tests.client.tls13.rfc8446;
 
-import de.rub.nds.anvilcore.annotation.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import de.rub.nds.anvilcore.annotation.AnvilTest;
+import de.rub.nds.anvilcore.annotation.ClientTest;
 import de.rub.nds.anvilcore.annotation.EnforcedSenderRestriction;
+import de.rub.nds.anvilcore.annotation.ExcludeParameter;
+import de.rub.nds.anvilcore.annotation.ExplicitValues;
+import de.rub.nds.anvilcore.annotation.IncludeParameter;
+import de.rub.nds.anvilcore.annotation.ManualConfig;
+import de.rub.nds.anvilcore.annotation.MethodCondition;
 import de.rub.nds.anvilcore.model.DerivationScope;
 import de.rub.nds.anvilcore.model.parameter.DerivationParameter;
 import de.rub.nds.anvilcore.teststate.AnvilTestCase;
@@ -19,13 +28,21 @@ import de.rub.nds.tlsattacker.core.constants.AlertDescription;
 import de.rub.nds.tlsattacker.core.constants.AlertLevel;
 import de.rub.nds.tlsattacker.core.constants.HandshakeMessageType;
 import de.rub.nds.tlsattacker.core.constants.ProtocolMessageType;
-import de.rub.nds.tlsattacker.core.protocol.message.*;
+import de.rub.nds.tlsattacker.core.constants.ProtocolVersion;
+import de.rub.nds.tlsattacker.core.protocol.message.AlertMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.CertificateMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.CertificateVerifyMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.EncryptedExtensionsMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.FinishedMessage;
+import de.rub.nds.tlsattacker.core.protocol.message.ServerHelloMessage;
 import de.rub.nds.tlsattacker.core.record.Record;
 import de.rub.nds.tlsattacker.core.state.State;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTrace;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceConfigurationUtil;
 import de.rub.nds.tlsattacker.core.workflow.WorkflowTraceMutator;
 import de.rub.nds.tlsattacker.core.workflow.action.ReceiveAction;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceiveTillAction;
+import de.rub.nds.tlsattacker.core.workflow.action.ReceivingAction;
 import de.rub.nds.tlsattacker.core.workflow.action.SendAction;
 import de.rub.nds.tlsattacker.core.workflow.action.executor.ActionOption;
 import de.rub.nds.tlsattacker.core.workflow.factory.WorkflowTraceType;
@@ -198,6 +215,42 @@ public class RecordLayer extends Tls13Test {
         }
         State state = runner.execute(trace, c);
         Validator.receivedFatalAlert(state, testCase);
+    }
+
+    @AnvilTest(id = "8446-c3d9a1f07b")
+    @Tag("rfc8446-coverage")
+    public void checkRecordProtocolVersion(AnvilTestCase testCase, WorkflowRunner runner) {
+        Config config = getPreparedConfig(runner);
+        WorkflowTrace workflowTrace = runner.generateWorkflowTrace(WorkflowTraceType.HELLO);
+        // Record versions can be checked as soon as the client finishes the handshake.
+        workflowTrace.addTlsAction(new ReceiveTillAction(new FinishedMessage()));
+
+        State state = runner.execute(workflowTrace, config);
+
+        Validator.executedAsPlanned(state, testCase);
+
+        boolean initialClientHelloSkipped = false;
+        int checkedRecords = 0;
+        for (ReceivingAction receiving : state.getWorkflowTrace().getReceivingActions()) {
+            if (receiving.getReceivedRecords() == null) {
+                continue;
+            }
+            for (Record record : receiving.getReceivedRecords()) {
+                // the very first record is the initial ClientHello, which is exempt
+                if (!initialClientHelloSkipped) {
+                    initialClientHelloSkipped = true;
+                    continue;
+                }
+                checkedRecords++;
+                assertArrayEquals(
+                        ProtocolVersion.TLS12.getValue(),
+                        record.getProtocolVersion().getValue(),
+                        "Client sent a "
+                                + record.getContentMessageType()
+                                + " record with an invalid legacy_record_version");
+            }
+        }
+        assertTrue(checkedRecords > 0, "No records besides the initial ClientHello were received");
     }
 
     @AnvilTest(id = "8446-VNQgpDNZVS")
